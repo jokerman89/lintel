@@ -5,7 +5,7 @@
 #   --frontmatter   validate skill + agent frontmatter
 #   --cli-matrix    per-skill/agent cli_support matrix (root skills/ + agents/)
 #   --layers        validate scaffolding structure
-#   --hooks         check hook activation state (symlinks)
+#   --hooks         inspect installed hook files and declared links (not execution)
 #   --upstream      check upstream-sources.yaml
 #   --counts        summary counts (skills/agents/hooks)
 #   --tier-stamps   check agent tier-stamping
@@ -169,29 +169,31 @@ cmd_layers() {
 # ===== Subcommand: --hooks ===================================================
 
 cmd_hooks() {
-  hdr "Hook activation state"
+  hdr "Hook files and declared links"
   local total=0
-  local activated=0
+  local linked=0
 
   if [ ! -d "$LINTEL_HOME/hooks" ]; then
     warn "$LINTEL_HOME/hooks/ not present — run install.sh first"
     return
   fi
 
-  for dir in "$LINTEL_HOME/hooks/"*/; do
+  local hook_root="$LINTEL_HOME/hooks/shared"
+  [ -d "$hook_root" ] || hook_root="$LINTEL_HOME/hooks"
+  for dir in "$hook_root/"*/; do
     [ -d "$dir" ] || continue
     name=$(basename "$dir")
     [ "$name" = "README.md" ] && continue
     total=$((total + 1))
     if [ -L "$HOME/.claude/hooks/${name}.sh" ]; then
-      ok "Activated: $name"
-      activated=$((activated + 1))
+      info "Declared link: $name (host registration and execution unverified)"
+      linked=$((linked + 1))
     else
-      info "Inert: $name (symlink ~/.claude/hooks/${name}.sh to activate)"
+      info "Installed file: $name (host registration and execution unverified)"
     fi
   done
   echo ""
-  ok "$activated / $total hooks activated"
+  info "$total hook directories; $linked declared links; live activation unverified"
 }
 
 # ===== Subcommand: --context-engine (NEW for v2) =============================

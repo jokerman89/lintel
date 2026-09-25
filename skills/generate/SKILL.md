@@ -22,7 +22,16 @@ You are the `generate` orchestrator skill — multi-format document generation e
 
 Orchestrates the v3.5 shared content pipeline + per-format builders to produce branded deliverables (PPTX deck, DOCX doc, HTML site, PDF, XLSX, Visio) from a single content brief.
 
-Reads operator brief → chains outline → write → design → qa → format-specific builders (`generate-ppt`, `generate-web`, `generate-word`, and ⚠ slots for `generate-pdf` / `generate-xlsx` / `generate-visio`) → writes artifacts to `~/.lintel/generate-runs/<run-id>/`.
+Reads operator brief → outline → full written content → design → format-specific
+builders → actual artifact QA. Retain all original sources and long-form content.
+Use an explicitly owned run directory, not an implicit personal draft/profile scan.
+
+The standalone `--brief` Word/PPT routes preserve content and use actual available
+native/library operations. The existing pipeline now has a read-only
+[input admission procedure](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission);
+that verifies original source/work/profile and document projections, not native
+artifact acceptance. A15.3.shared and the full format gates still need their
+joined outcomes; never fabricate a design-spec or report an unrun format ready.
 
 Designed for "write the script once, deliver to N formats without duplicate work." Per v3.5 doc-gen plan, replaces the prior pattern where operator invoked each `/li:generate-X` separately with different briefs.
 
@@ -49,20 +58,27 @@ brief="${1:-}"                          # required: brief text or path to brief.
 formats="${2:-ppt}"                     # comma-separated: ppt,web,word,pdf,xlsx,visio
 customer_share="${CUSTOMER_SHARE:-}"    # set by --customer-share flag
 run_id="$(date +%Y%m%d-%H%M%S)-${RANDOM}"
-run_dir="${HOME}/.lintel/generate-runs/${run_id}"
+run_dir="${GENERATE_RUN_DIR:?select an explicit owned output directory}"
 mkdir -p "${run_dir}"
 ```
 
-If brief is empty: surface available recent runs from `~/.lintel/generate-runs/` and exit `NEEDS_CONTEXT`.
+This is an illustrative shell binding, not an installed argument parser. Preserve
+the familiar skill flags and select the run path before execution. If the brief
+is empty, exit `NEEDS_CONTEXT`; do not scan personal recent-run directories.
 
 ### Step 2 — Preflight gates
 
 Per format in `--formats`:
-- Verify `~/.lintel/brand/<format>-templates/` exists OR `--use-defaults` flag present
-- Brand-staleness warn check (90-day rule) — surface warning, do not block
-- If `--customer-share`: run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) — block on any gate failure
+- Discover actual writer, reopen/edit and renderer operations for the requested format
+- Resolve only explicit or verified-profile template paths; `--use-defaults` cannot waive required brand policy
+- Apply actual configured freshness/voice/compliance requirements and their applicability
+- Declare required fidelity/format inspections using P05/P07 before observations; mandatory failure/error/unverified blocks the affected action
 
-If any format in list is a `⚠ template only` slot (pdf, xlsx, visio): surface that operator-AI must generate format-specific content per L-001 (no pre-curated content in repo). Proceed if operator confirms; offer to substitute with a curated format.
+Planned PDF/XLSX/Visio routes keep concrete activation gates: PDF writer/export plus
+page/text fidelity; XLSX writer plus actual recalculation, formula/cache integrity
+and reopen; Visio writer plus connector/label/rendered-editability checks. Missing
+adapters are not implemented by an operator confirming that content is generated
+fresh. Keep the affected output open and continue independent supported formats.
 
 ### Step 3 — Generate outline (shared)
 
@@ -78,6 +94,7 @@ Invoke `generate-write` sub-skill:
 - Input: `--outline ${run_dir}/outline.md`
 - Output: `${run_dir}/content.md` (plus `${run_dir}/speaker-notes.md` if `ppt` in formats)
 - Voice tier: the active pack's voice tier (default: `internal`); upgraded per pack if `--customer-share`
+- Retain multi-paragraph reasoning, tables, citations and material limitations; slide brevity is a separate presentation view with full detail in actual notes/appendix or delivered linked long-form content
 
 ### Step 5 — Generate design spec (shared)
 
@@ -85,26 +102,47 @@ Invoke `generate-design` sub-skill:
 - Input: `--content ${run_dir}/content.md --target-formats "${formats}" --palette "${palette}"`
 - Output: `${run_dir}/design-spec.json` (per-format layout-mappings)
 
+Keep the existing v1.0 document projections; do not shrink canonical content to
+fit a slot or invent a second design schema. Document-only inputs use P11
+compatibility plus format-owned reference checks under the external P05/P07/P08
+input context. Genuine mixed web/document input also needs full P11 `load_design`.
+An unresolved web binding cannot become a document-only success.
+
 ### Step 6 — Compliance gate (orchestrator-level if --customer-share)
 
 If `--customer-share`:
 - Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) on `${run_dir}/content.md`
-- Block on any gate failure or vocabulary-blocklist hits
-- Proceed on PASS
+- Evaluate actual mandatory/advisory controls and vocabulary tiers using P05
+- Proceed only when applicable mandatory controls have observed satisfactory outcomes; missing policy or evidence never becomes neutral success
 
 This is the orchestrator-level gate. Format-builders still apply their own brand/honest-limitations/provenance gates per format (see Anti-patterns for execution-order rule).
 
 ### Step 7 — Per-format build (chained)
 
 For each format in `--formats`:
+- Before a Word/PPT/PDF/XLSX consumer reads the run, call
+  `scripts/pipeline_inputs.py` with the selected format, explicit original
+  package/leaves, external **input** context and live profile configuration.
+  Select canonical sibling files, source evidence and every template/config
+  override. Preserve complete returned source and existing design projections;
+  the helper neither invokes a builder nor requires a future artifact's QA.
+- Read original prerequisites and actual acceptance evidence; source checkboxes
+  from the work reader cannot authorize execution. Selected upstream P09 data
+  retains its own request/context/profile, not the document's new QA inventory.
 - Invoke format-builder with `--from-pipeline ${run_dir}` flag:
   - `ppt` → `/li:generate-ppt --from-pipeline ${run_dir} --template ${template}`
   - `web` → `/li:generate-web --from-pipeline ${run_dir} --variant single-file`
   - `word` → `/li:generate-word --from-pipeline ${run_dir} --target ${target}`
-  - `pdf` / `xlsx` / `visio` → ⚠ slot path: operator-AI generates content at invocation per L-001
+  - `pdf` / `xlsx` → pass admitted full source to their existing standalone
+    production procedures; retain converter/print or formula/cache/reopen gates,
+    without inventing document layout projections
+  - `visio` → actual writer/editor seam still required; no image-as-VSDX substitution
 - Each format-builder writes its output to `${run_dir}/<format>/<artifact>.<ext>`
 
-Format-builders apply remaining 3 gates (brand, honest-limitations, provenance) per their own SKILL.md. Compliance is already gated at orchestrator level.
+Builders retain brand, honest-limitations and provenance categories with actual
+applicability, plus source-retention, editable-reopen and rendered inspection.
+Upstream controls are reusable only while their bound source/profile remains
+unchanged; they cannot cover a later lossy format conversion.
 
 ### Step 8 — Aggregate QA
 
@@ -112,11 +150,19 @@ Invoke `generate-qa` sub-skill on all produced artifacts:
 - Input: `--artifacts ${run_dir}/*/`
 - Output: `${run_dir}/qa-report.json`
 
-Surface qa-report summary to operator. Auto-fix applied where possible (recorded in report).
+Compare each saved artifact with the full source and inspect its actual available
+render/reopen layer. Auto-fixes must preserve meaning and invalidate affected
+pre-edit evidence. A missing renderer or dropped qualification cannot be averaged
+away by a score or an otherwise empty issue list.
+Prepare the final external P05 context after changed artifacts exist. Input
+admission is not final QA, and `qa-report.json` remains the existing presentation
+report rather than a replacement evidence envelope.
 
 ### Step 9 — Output + telemetry
 
-Print run directory + artifact paths. Append run-event to `.claude/runtime/state/00-state.md`:
+Print exact run/source/artifact/evidence paths and unfinished format gates.
+The existing completion event below is appropriate only for a genuinely completed
+run; a partial/unverified output must not emit successful completion telemetry:
 
 ```yaml
 event: generate_run_complete
@@ -130,45 +176,44 @@ ts: <iso-8601>
 
 ## Voice tier behavior
 
-- **Default `internal`** — content is operator-facing intermediate artifact. No customer-bound gate required.
+- **Default `internal`** — no invented customer voice rule; any applicable configured internal requirements still apply.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
 
 ## Status protocol
 
 - **DONE** — all formats produced + qa_pass=true + run_dir printed
-- **DONE_WITH_CONCERNS** — formats produced + qa_pass=false; surface qa-report
-- **BLOCKED** — preflight failed (missing template + no `--use-defaults`, pack compliance gate failed with `--customer-share`, slot-format invoked without confirmation)
+- **DONE_WITH_CONCERNS** — requested required checks complete, only advisory concerns remain
+- **BLOCKED** — required format/control unavailable, failed or unverified; retain and report independent completed preparation/artifacts
 - **NEEDS_CONTEXT** — brief missing or unparseable
 
 ## Pause-points
 
 - Brief is ambiguous: surface back to operator + offer 3 interpretations
 - Pack compliance gate fails + `--customer-share`: hard-block, surface the failing gate
-- Slot-format requested: confirm with operator that AI will generate content fresh (no pre-curated content per L-001)
+- Unavailable format operation: identify the precise activation requirement; do not substitute a different output format silently
 
 ## Integration
 
 **Reads:**
 - Operator brief (path or inline)
-- `~/.lintel/brand/<format>-templates/` per requested format
-- `~/.lintel/profile.yaml` (role context if active)
+- Explicit templates and current verified P07 profile context per requested format
 - `.claude/runtime/state/00-state.md` (telemetry)
 
 **Writes:**
-- `~/.lintel/generate-runs/<run-id>/` (outline.md, content.md, speaker-notes.md if PPT, design-spec.json, per-format artifacts, qa-report.json)
+- Selected owned run directory (original brief, outline.md, full content.md, speaker-notes.md if PPT, actual design-spec.json where released, per-format artifacts, qa-report.json and bound evidence)
 - `.claude/runtime/state/00-state.md` (run event)
 
 **Triggers (sub-skills):**
 - `/li:generate-outline`, `/li:generate-write`, `/li:generate-design`, `/li:generate-qa` (shared pipeline)
 - `/li:generate-ppt`, `/li:generate-web`, `/li:generate-word` (canonical format-builders)
-- `/li:generate-pdf`, `/li:generate-xlsx`, `/li:generate-visio` (⚠ slots — AI generates at invocation)
+- `/li:generate-pdf`, `/li:generate-xlsx`, `/li:generate-visio` (planned adapters with the specific writer/inspection gates above)
 
 **Compliance gates:**
 - The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) at orchestrator level if `--customer-share`
 
 ## Anti-patterns
 
-- **Pre-bake content into ⚠ slot SKILL.md files** — violates L-001. PDF/XLSX/Visio slots stay scaffolding; AI generates at invocation, content does not commit to repo.
+- **Confuse methods with customer content** — reusable format procedures belong in skills; real customer data does not. Planned adapters need working procedures and evidence, not an indefinite empty-slot promise.
 - **Bypass the compliance gate when `--customer-share` is set** — if the active pack defines gates, they are non-negotiable. A failing gate blocks.
 - **Run format-builders in parallel before content/design steps complete** — design-spec.json is a dependency. Builders fail loudly if missing.
 - **Re-render with different `--palette` without rebuilding design-spec** — palette is encoded in design-spec.json. Pull from cache only if palette match; rebuild design otherwise.
@@ -192,6 +237,8 @@ Step 6 (orchestrator):  pack compliance gates + vocab-blocklist ─── applie
 ```
 
 Compliance gate is single-source (orchestrator only). Brand/honest/provenance gates remain per-format (format-builder owns).
+This diagram shows category order, not a substitute for source-retention,
+editable-reopen and rendered-inspection evidence at Step 8.
 
 ## Vocabulary-blocklist ↔ customer-share-gate interaction (resolves PR #7 concern #4)
 
@@ -199,13 +246,15 @@ The vocabulary-blocklist enforcement chain is:
 
 1. **Operator passes `--customer-share` to /li:generate orchestrator**
 2. **Orchestrator propagates voice-tier:** sets the active pack's voice tier (`resolve_pack_field voice.default_tier`) on generate-write (Step 4)
-3. **generate-write applies the vocabulary-blocklist** from the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default) — blocklisted words are never emitted
-4. **generate-qa runs the compliance gate** (Step 6) via the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) — verifies blocklist compliance + any pack-defined match threshold
+3. **generate-write applies configured vocabulary tiers** without erasing factual qualifications, quotations or citations
+4. **The orchestrator evaluates applicable configured controls** (Step 6); generate-qa later verifies the actual converted artifact and its required inspections
 5. **compliance-gate aggregator** optionally invokes broader customer-share gates at end-of-pipeline — `/li:compliance-gate --scope customer-share` runs all the active pack's configured gates
 
-The customer-share flag is **load-bearing for the entire chain**. Without it: voice-tier defaults to internal, blocklist not enforced, compliance gate doesn't fire, compliance-gate aggregator not auto-invoked.
+The customer-share flag selects customer-facing applicability; it does not disable
+mandatory internal policy or source fidelity when absent. Neutral style advice
+does not become a hard vocabulary rule.
 
-Single source of truth: `--customer-share` on `/li:generate`. All downstream voice + compliance behavior derives from this flag and the active pack's configuration.
+Use the flag with the verified current profile, not instead of it.
 
 ## Deferred flags (YAGNI)
 
@@ -216,13 +265,13 @@ These flags appeared in earlier design-doc drafts but are **not implemented** as
 ## Failure recovery
 
 - **Sub-skill fails mid-chain**: stop, surface error, write partial run-state to `${run_dir}/RUN-STATE.md`. Operator can resume with `--resume ${run_id}`.
-- **Format-builder fails on one format but others pass**: produce qa-report flagging the failed format; complete-with-concerns status.
+- **One format fails**: preserve successful independent outputs and report the blocked requested format; do not claim the whole run complete.
 - **Pack compliance gate fails on `--customer-share`**: block, surface the failing gate, exit BLOCKED.
-- **Slot-format requested but operator-AI cannot generate fresh content**: substitute with closest curated format (PDF → PPTX-then-export), surface substitution to operator.
+- **Adapter/renderer unavailable**: report the exact remaining gate; alternatives require an explicit format choice and their own inspection.
 
 ## Recommended next steps after invocation
 
-- For one-format follow-up tweak: invoke specific format-builder solo with `--from-pipeline ${run_id}` flag.
+- For one-format follow-up after shared binding is available: use the format-builder's `--from-pipeline ${run_dir}` flag, preserving the full source.
 - For voice-tier upgrade (internal → customer-share): re-invoke `/li:generate --customer-share --from-pipeline ${run_id}`.
 - For multi-format-cohort comparison: invoke `/li:qa-only` on the aggregated qa-report.
 - For sharing externally: pipe `${run_dir}/web/index.html` via `/li:generate-web --customer-share` after the compliance gate passes.

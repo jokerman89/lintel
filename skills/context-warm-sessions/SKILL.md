@@ -26,19 +26,26 @@ You are the context-warm-sessions skill.
 ### Step 1 — Find context saves
 
 ```bash
-source_root="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}}"
+source_root="${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}"
 source "$source_root/bin/_context.sh"
 branch=$(_context_branch)
 N="${1:-3}"  # default last 3
 case "$N" in [1-5]) ;; *) echo 'Choose 1–5 sessions.' >&2; exit 1 ;; esac
 # Shared legacy checkpoints must belong to the selected repository. Filter
 # ownership before choosing the newest N, just as context-restore does.
-candidates=$(context_list "$branch" | sed -n "1,${N}p")
+candidates=$(context_list "$branch") || exit 1
+candidates=$(printf '%s\n' "$candidates" | sed -n "1,${N}p")
 ```
 
 ### Step 2 — Estimate tokens
 
-Per file, estimate. Aggregate.
+For each candidate call `context_checkpoint "$path"` with a quoted path to get the bounded
+size/digest manifest. It uses the same ownership reader as restore, even for legacy saves
+outside the repository. Empty interrupted reservations and foreign/unattributed saves are
+not candidates. Do not bypass the reader with a raw home-directory glob.
+
+Aggregate source-byte estimates only; active capacity/usage is unknown unless the current
+host reports it. Show actual paths, source root/ownership and any missing/changed candidate.
 
 ### Step 3 — Confirm load
 
@@ -57,9 +64,11 @@ Load all? (Y / select subset / cancel)
 
 ### Step 4 — Delegate to context-warm
 
-```bash
-/li:context-warm <selected-files>
-```
+Follow `/li:context-warm` admission and host-read steps for the selected checkpoint manifests.
+Use the validated `context_checkpoint` path for owned legacy sources; the general repo
+selector deliberately refuses out-of-root paths. Loading notes is not restoring source
+bytes or authority. Load referenced project files only through a bounded `context_select`
+preview, not automatically from every historical "Files touched" line.
 
 ### Step 5 — 00-state.md append
 
@@ -67,7 +76,7 @@ Load all? (Y / select subset / cancel)
 event: context_warm_sessions
 branch: <branch>
 sessions_loaded: <N>
-tokens_added: <approx>
+estimated_input_tokens: <source-byte estimate, not measured active usage>
 ```
 
 ## Integration

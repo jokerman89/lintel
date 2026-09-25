@@ -1,0 +1,8799 @@
+{
+  "baseline": "28061e434be455ca02f135b73244eaf4f73f3a69",
+  "files": [
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "group": ".claude-plugin",
+      "bytes": 667,
+      "lines": 22,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude-plugin/plugin.json",
+      "group": ".claude-plugin",
+      "bytes": 496,
+      "lines": 18,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/SUBAGENT-GUIDE.md",
+      "group": ".claude",
+      "bytes": 2571,
+      "lines": 71,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/decisions/0001-lintel-dogfoods-its-own-scaffolding.md",
+      "group": ".claude",
+      "bytes": 4505,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0002-session-digest-auto-load.md",
+      "group": ".claude",
+      "bytes": 4110,
+      "lines": 69,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0003-cycle-position-footer.md",
+      "group": ".claude",
+      "bytes": 4797,
+      "lines": 76,
+      "skill_refs": [
+        "cycle",
+        "resume"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0004-analyze-consistency-gate.md",
+      "group": ".claude",
+      "bytes": 3345,
+      "lines": 57,
+      "skill_refs": [
+        "analyze",
+        "plan-eng-review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0005-claude-home-layout.md",
+      "group": ".claude",
+      "bytes": 3912,
+      "lines": 58,
+      "skill_refs": [
+        "resume"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0006-memory-v2.md",
+      "group": ".claude",
+      "bytes": 2907,
+      "lines": 44,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0007-obsidian-patterns.md",
+      "group": ".claude",
+      "bytes": 2670,
+      "lines": 44,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0008-activation-contract.md",
+      "group": ".claude",
+      "bytes": 4317,
+      "lines": 60,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/decisions/0009-subtraction-release.md",
+      "group": ".claude",
+      "bytes": 3093,
+      "lines": 46,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0010-security-hardening.md",
+      "group": ".claude",
+      "bytes": 3935,
+      "lines": 56,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0011-gstack-de-heritage.md",
+      "group": ".claude",
+      "bytes": 2991,
+      "lines": 47,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0012-agent-memory-and-model.md",
+      "group": ".claude",
+      "bytes": 3238,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/decisions/0013-fail-closed-block-gates.md",
+      "group": ".claude",
+      "bytes": 3448,
+      "lines": 50,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0014-prompt-craft-v2.md",
+      "group": ".claude",
+      "bytes": 4146,
+      "lines": 57,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0015-design-dna-consume-uupm.md",
+      "group": ".claude",
+      "bytes": 4647,
+      "lines": 77,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0016-anthropic-default-design-profile.md",
+      "group": ".claude",
+      "bytes": 4381,
+      "lines": 71,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0017-design-parity-slides-tokens.md",
+      "group": ".claude",
+      "bytes": 5629,
+      "lines": 86,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0018-extension-pack-contract.md",
+      "group": ".claude",
+      "bytes": 5321,
+      "lines": 87,
+      "skill_refs": [
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0019-agents-md-primary.md",
+      "group": ".claude",
+      "bytes": 1623,
+      "lines": 27,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0020-lintel-state-mcp.md",
+      "group": ".claude",
+      "bytes": 1681,
+      "lines": 30,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0021-eval-harness.md",
+      "group": ".claude",
+      "bytes": 1738,
+      "lines": 30,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0022-self-healing-harness-continuity.md",
+      "group": ".claude",
+      "bytes": 6055,
+      "lines": 91,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0023-turn-start-continuity-inject.md",
+      "group": ".claude",
+      "bytes": 4990,
+      "lines": 73,
+      "skill_refs": [
+        "autoplan",
+        "cycle",
+        "doctor",
+        "fix",
+        "plan-and-build"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0024-copilot-native-adapter.md",
+      "group": ".claude",
+      "bytes": 2528,
+      "lines": 45,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0025-self-contained-session-protocol.md",
+      "group": ".claude",
+      "bytes": 3702,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/0026-hybrid-work-packages.md",
+      "group": ".claude",
+      "bytes": 2764,
+      "lines": 48,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/decisions/README.md",
+      "group": ".claude",
+      "bytes": 2460,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/decisions/TEMPLATE.md",
+      "group": ".claude",
+      "bytes": 1589,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/SHIP-GATE.md",
+      "group": ".claude",
+      "bytes": 5020,
+      "lines": 82,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-12-battletest-synthesis.md",
+      "group": ".claude",
+      "bytes": 8314,
+      "lines": 89,
+      "skill_refs": [
+        "cycle",
+        "hotfix"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-12-fable5-fit-audit.md",
+      "group": ".claude",
+      "bytes": 6465,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "group": ".claude",
+      "bytes": 15365,
+      "lines": 174,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md",
+      "group": ".claude",
+      "bytes": 8059,
+      "lines": 94,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md",
+      "group": ".claude",
+      "bytes": 14634,
+      "lines": 188,
+      "skill_refs": [
+        "catalog",
+        "define",
+        "dependency-audit",
+        "doctor",
+        "fix",
+        "hotfix",
+        "roles-list",
+        "ship",
+        "tdd-cycle",
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-copilot-runtime.md",
+      "group": ".claude",
+      "bytes": 7992,
+      "lines": 82,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-copilot-spec-review.md",
+      "group": ".claude",
+      "bytes": 6490,
+      "lines": 99,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-enterprise-value-completion.md",
+      "group": ".claude",
+      "bytes": 8921,
+      "lines": 102,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-enterprise-value-review.md",
+      "group": ".claude",
+      "bytes": 17359,
+      "lines": 200,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-public-surface.md",
+      "group": ".claude",
+      "bytes": 6222,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-release-readiness.md",
+      "group": ".claude",
+      "bytes": 8903,
+      "lines": 91,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-session-protocol-coverage.md",
+      "group": ".claude",
+      "bytes": 7771,
+      "lines": 73,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-08-workflow-contracts.md",
+      "group": ".claude",
+      "bytes": 5526,
+      "lines": 69,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+      "group": ".claude",
+      "bytes": 23378,
+      "lines": 168,
+      "skill_refs": [
+        "cycle",
+        "doctor",
+        "lessons-surface",
+        "maintenance"
+      ],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-five-lens-remediation-plan.md",
+      "group": ".claude",
+      "bytes": 12622,
+      "lines": 149,
+      "skill_refs": [
+        "lessons-surface"
+      ],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "group": ".claude",
+      "bytes": 36259,
+      "lines": 505,
+      "skill_refs": [
+        "brief-forge",
+        "context-restore",
+        "fix",
+        "migrations",
+        "pair-agent",
+        "plan-and-build",
+        "research",
+        "resume",
+        "review",
+        "review-and-ship",
+        "status"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+      "group": ".claude",
+      "bytes": 10797,
+      "lines": 71,
+      "skill_refs": [
+        "build",
+        "cycle",
+        "sense",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "group": ".claude",
+      "bytes": 13249,
+      "lines": 146,
+      "skill_refs": [
+        "audit",
+        "hooks-status",
+        "migrations",
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-REVIEW.md",
+      "group": ".claude",
+      "bytes": 7911,
+      "lines": 88,
+      "skill_refs": [
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-REVIEW.md",
+      "group": ".claude",
+      "bytes": 9775,
+      "lines": 111,
+      "skill_refs": [
+        "uniformity"
+      ],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-VOTE.md",
+      "group": ".claude",
+      "bytes": 10221,
+      "lines": 175,
+      "skill_refs": [
+        "hooks-status",
+        "migrations",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-audit-prompt.md",
+      "group": ".claude",
+      "bytes": 12509,
+      "lines": 156,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+      "group": ".claude",
+      "bytes": 20538,
+      "lines": 265,
+      "skill_refs": [],
+      "tool_terms": [
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X2-promise-verification.md",
+      "group": ".claude",
+      "bytes": 26991,
+      "lines": 237,
+      "skill_refs": [
+        "build",
+        "cycle",
+        "fix",
+        "hooks-status",
+        "sense",
+        "status"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+      "group": ".claude",
+      "bytes": 14616,
+      "lines": 109,
+      "skill_refs": [
+        "hooks-status",
+        "jobs",
+        "status"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "group": ".claude",
+      "bytes": 23165,
+      "lines": 181,
+      "skill_refs": [
+        "autoplan",
+        "build",
+        "cycle",
+        "fix",
+        "jobs",
+        "lessons",
+        "lessons-surface",
+        "provenance-track",
+        "sense",
+        "status"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X5-necessity.md",
+      "group": ".claude",
+      "bytes": 12499,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "group": ".claude",
+      "bytes": 52866,
+      "lines": 390,
+      "skill_refs": [
+        "context-restore",
+        "cycle",
+        "define",
+        "fix",
+        "investigate",
+        "lessons",
+        "lessons-surface",
+        "resume"
+      ],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "group": ".claude",
+      "bytes": 44293,
+      "lines": 738,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "group": ".claude",
+      "bytes": 58458,
+      "lines": 897,
+      "skill_refs": [
+        "context-warm"
+      ],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort4-agents.md",
+      "group": ".claude",
+      "bytes": 31693,
+      "lines": 560,
+      "skill_refs": [
+        "research"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort5-hooks.md",
+      "group": ".claude",
+      "bytes": 36688,
+      "lines": 463,
+      "skill_refs": [
+        "hooks-status",
+        "uniformity"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort6-eng-domains.md",
+      "group": ".claude",
+      "bytes": 20924,
+      "lines": 164,
+      "skill_refs": [
+        "da",
+        "dh",
+        "ta"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Task"
+      ]
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "group": ".claude",
+      "bytes": 32040,
+      "lines": 418,
+      "skill_refs": [
+        "rais-customer-voice-check",
+        "roles-list",
+        "workprofile-toggle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+      "group": ".claude",
+      "bytes": 23446,
+      "lines": 280,
+      "skill_refs": [
+        "build",
+        "provenance-track",
+        "sense",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/audits/uniformity-matrix.md",
+      "group": ".claude",
+      "bytes": 18489,
+      "lines": 308,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-05-29-phase-2-packs-envelope.md",
+      "group": ".claude",
+      "bytes": 228,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-05-29-phase-3-nav-forge-wiki.md",
+      "group": ".claude",
+      "bytes": 524,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-05-30-v4.1-ta-module.md",
+      "group": ".claude",
+      "bytes": 508,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-05-30-v4.2-da-module.md",
+      "group": ".claude",
+      "bytes": 508,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-05-31-v4.3-sc-module.md",
+      "group": ".claude",
+      "bytes": 508,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-02-v4.4-dh-module.md",
+      "group": ".claude",
+      "bytes": 508,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-02-v4.5-tq-module.md",
+      "group": ".claude",
+      "bytes": 508,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-02-v4.6-full-engineering-pass.md",
+      "group": ".claude",
+      "bytes": 532,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-09-compat-audit-2026-06-09-86872.md",
+      "group": ".claude",
+      "bytes": 588,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-12-compat-audit-2026-06-12-1399.md",
+      "group": ".claude",
+      "bytes": 4457,
+      "lines": 113,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-12-compat-audit-2026-06-12-420214.md",
+      "group": ".claude",
+      "bytes": 3398,
+      "lines": 92,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-13-compat-audit-2026-06-13-1374447.md",
+      "group": ".claude",
+      "bytes": 542,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-13-compat-audit-2026-06-13-985308.md",
+      "group": ".claude",
+      "bytes": 540,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-18-compat-audit-2026-06-18-2801678.md",
+      "group": ".claude",
+      "bytes": 795,
+      "lines": 34,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-09-08-copilot-enterprise-launch.md",
+      "group": ".claude",
+      "bytes": 6758,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-09-08-enterprise-value-completion.md",
+      "group": ".claude",
+      "bytes": 4241,
+      "lines": 74,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-09-08-enterprise-value-review.md",
+      "group": ".claude",
+      "bytes": 3791,
+      "lines": 73,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/BRAND-INTEGRATION.md",
+      "group": ".claude",
+      "bytes": 6350,
+      "lines": 177,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/CLI-SUPPORT-V2-SCHEMA.md",
+      "group": ".claude",
+      "bytes": 7056,
+      "lines": 228,
+      "skill_refs": [
+        "cli-fingerprint"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "WebFetch"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/CONTEXT-ENGINE.md",
+      "group": ".claude",
+      "bytes": 11416,
+      "lines": 261,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/LAYERS.md",
+      "group": ".claude",
+      "bytes": 7812,
+      "lines": 95,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/MIGRATION-TABLE-v2.md",
+      "group": ".claude",
+      "bytes": 12311,
+      "lines": 198,
+      "skill_refs": [
+        "cli-fingerprint",
+        "deprecation-status",
+        "eval"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/PLUGIN-FORMAT-RESEARCH.md",
+      "group": ".claude",
+      "bytes": 12559,
+      "lines": 307,
+      "skill_refs": [
+        "qa",
+        "small"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/T0-CALIBRATION-WORKFLOW.md",
+      "group": ".claude",
+      "bytes": 6089,
+      "lines": 137,
+      "skill_refs": [
+        "eval"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/TODOS-v2.md",
+      "group": ".claude",
+      "bytes": 10362,
+      "lines": 177,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/UPSTREAM-SIMILARITY.md",
+      "group": ".claude",
+      "bytes": 4803,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/claude-md-capability-and-memory-surfacing.md",
+      "group": ".claude",
+      "bytes": 8687,
+      "lines": 160,
+      "skill_refs": [
+        "catalog",
+        "context-warm",
+        "cycle",
+        "investigate",
+        "qa"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-feature-brief-forge.md",
+      "group": ".claude",
+      "bytes": 4361,
+      "lines": 60,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-feature-spine-packs-navigation.md",
+      "group": ".claude",
+      "bytes": 4333,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-oss-launch-design.md",
+      "group": ".claude",
+      "bytes": 18899,
+      "lines": 263,
+      "skill_refs": [
+        "cli-fingerprint",
+        "cycle",
+        "plan-eng-review",
+        "welcome"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md",
+      "group": ".claude",
+      "bytes": 20301,
+      "lines": 242,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v2-design.md",
+      "group": ".claude",
+      "bytes": 47959,
+      "lines": 716,
+      "skill_refs": [
+        "eval"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3-plan.md",
+      "group": ".claude",
+      "bytes": 43284,
+      "lines": 996,
+      "skill_refs": [
+        "doctor",
+        "eval",
+        "scaffold",
+        "scaffold-init"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-azure-toolbox-plan.md",
+      "group": ".claude",
+      "bytes": 19883,
+      "lines": 349,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "group": ".claude",
+      "bytes": 63851,
+      "lines": 1305,
+      "skill_refs": [
+        "adr-new",
+        "adr-scan",
+        "agt-tier-stamp",
+        "alternatives",
+        "analyze",
+        "az-",
+        "az-tldr",
+        "build",
+        "builder-profile-update",
+        "caip-audit",
+        "capture",
+        "cli-fingerprint",
+        "codebase-map",
+        "codex",
+        "cold-executor-handoff",
+        "command",
+        "context-budget",
+        "context-cool",
+        "context-dump",
+        "context-gather",
+        "context-restore",
+        "context-save",
+        "context-snapshot",
+        "context-warm",
+        "context-warm-adrs",
+        "context-warm-build",
+        "context-warm-customer",
+        "context-warm-from-url",
+        "context-warm-related",
+        "context-warm-sessions",
+        "context-warmup",
+        "continuous-checkpoint",
+        "cost-estimate",
+        "cross-artifact-analyze",
+        "cross-model-opinion",
+        "cross-section-analyze",
+        "cycle",
+        "define",
+        "demo-deliverable-gen",
+        "dependency-audit",
+        "dependency-graph",
+        "design-doc-write",
+        "detect-context-budget",
+        "detect-intent",
+        "detect-role",
+        "detect-state",
+        "detect-workprofile",
+        "discover",
+        "dispatch-implementer",
+        "doctor",
+        "eval",
+        "evolution-log-append",
+        "exec-brief",
+        "first-party-check",
+        "fix",
+        "fix-loop",
+        "forcing-questions",
+        "generate-ppt",
+        "generate-web",
+        "generate-word",
+        "investigate",
+        "landing-report",
+        "landscape-search",
+        "learn",
+        "lessons",
+        "lessons-promote",
+        "lessons-scan",
+        "office-hours",
+        "onebranch-validate",
+        "onecs-check",
+        "pair-agent",
+        "plan",
+        "plan-and-build",
+        "plan-checkpoint",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "plan-tune",
+        "premise-check",
+        "proposal-from-context",
+        "provenance-track",
+        "qa",
+        "rais-customer-voice-check",
+        "rais-transparency-note",
+        "related-agent-scan",
+        "related-design-scan",
+        "related-skill-scan",
+        "release-deploy-ev2",
+        "release-ev2",
+        "research",
+        "resume",
+        "retro",
+        "review",
+        "review-and-ship",
+        "review-code-quality",
+        "review-design-coverage",
+        "review-spec-compliance",
+        "role-activate",
+        "role-deactivate",
+        "role-debrief",
+        "role-deep-dive",
+        "role-frame",
+        "role-lens",
+        "role-new",
+        "role-rotate",
+        "role-update",
+        "roles-list",
+        "safe-deploy-ring",
+        "scaffold",
+        "sense",
+        "ship",
+        "spec-review",
+        "tasks-write",
+        "tdd-cycle",
+        "two-stage-review",
+        "use-git-worktrees",
+        "verification-before-completion"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Read",
+        "TodoWrite",
+        "WebFetch"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "group": ".claude",
+      "bytes": 24052,
+      "lines": 300,
+      "skill_refs": [
+        "doc-orchestrator",
+        "generate",
+        "generate-",
+        "generate-design",
+        "generate-outline",
+        "generate-ppt",
+        "generate-qa",
+        "generate-style-learn",
+        "generate-web",
+        "generate-word",
+        "generate-write",
+        "rais-customer-voice-check"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-alias-mechanism.md",
+      "group": ".claude",
+      "bytes": 9300,
+      "lines": 197,
+      "skill_refs": [
+        "doctor",
+        "new-invocation-name",
+        "new-name",
+        "old-invocation-name",
+        "old-name"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+      "group": ".claude",
+      "bytes": 25204,
+      "lines": 321,
+      "skill_refs": [
+        "catalog",
+        "compliance-gate",
+        "cycle",
+        "doctor",
+        "generate"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md",
+      "group": ".claude",
+      "bytes": 7856,
+      "lines": 181,
+      "skill_refs": [
+        "autoplan",
+        "cycle-equivalent"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md",
+      "group": ".claude",
+      "bytes": 7317,
+      "lines": 167,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md",
+      "group": ".claude",
+      "bytes": 11170,
+      "lines": 203,
+      "skill_refs": [
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-style-extract",
+        "generate-web",
+        "profile-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "group": ".claude",
+      "bytes": 47110,
+      "lines": 607,
+      "skill_refs": [
+        "compliance-gate",
+        "cycle",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-motion",
+        "frontend-shader",
+        "frontend-style-extract",
+        "frontend-typography",
+        "generate-app",
+        "generate-web",
+        "profile-switch",
+        "rais-customer-voice-check"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "group": ".claude",
+      "bytes": 68720,
+      "lines": 1110,
+      "skill_refs": [
+        "cycle",
+        "da",
+        "dh",
+        "envelope-replay",
+        "forge-stats",
+        "migrations",
+        "pack-export",
+        "pack-new",
+        "pack-switch",
+        "sc",
+        "status",
+        "ta",
+        "tq",
+        "v4-migrate"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md",
+      "group": ".claude",
+      "bytes": 12112,
+      "lines": 179,
+      "skill_refs": [
+        "resume"
+      ],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v5.4-design-dna-design.md",
+      "group": ".claude",
+      "bytes": 8026,
+      "lines": 127,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/design-archive/session-harness.md",
+      "group": ".claude",
+      "bytes": 8085,
+      "lines": 179,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-phase2-packs-envelope.md",
+      "group": ".claude",
+      "bytes": 7944,
+      "lines": 101,
+      "skill_refs": [
+        "pack-switch",
+        "v4-migrate"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-phase3-nav-forge-wiki.md",
+      "group": ".claude",
+      "bytes": 8414,
+      "lines": 113,
+      "skill_refs": [
+        "v4-migrate"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-spine-extraction-audit.md",
+      "group": ".claude",
+      "bytes": 4267,
+      "lines": 100,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-03-caip-pack-extraction.md",
+      "group": ".claude",
+      "bytes": 10454,
+      "lines": 196,
+      "skill_refs": [
+        "pack-list",
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-09-cycle-position-footer.md",
+      "group": ".claude",
+      "bytes": 3476,
+      "lines": 70,
+      "skill_refs": [
+        "code-review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-cycle-discipline.md",
+      "group": ".claude",
+      "bytes": 2747,
+      "lines": 52,
+      "skill_refs": [
+        "lessons-surface"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "group": ".claude",
+      "bytes": 2809,
+      "lines": 54,
+      "skill_refs": [
+        "context-budget",
+        "context-budgetwatch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-10-v4.12-analyze-gate.md",
+      "group": ".claude",
+      "bytes": 2567,
+      "lines": 50,
+      "skill_refs": [
+        "analyze"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-activation-contract.md",
+      "group": ".claude",
+      "bytes": 2256,
+      "lines": 57,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-battletest-remediation.md",
+      "group": ".claude",
+      "bytes": 2945,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-memory-v2.md",
+      "group": ".claude",
+      "bytes": 2454,
+      "lines": 62,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-obsidian-patterns.md",
+      "group": ".claude",
+      "bytes": 1574,
+      "lines": 49,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-subtraction-release.md",
+      "group": ".claude",
+      "bytes": 2769,
+      "lines": 65,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-v5-claude-home-layout.md",
+      "group": ".claude",
+      "bytes": 3258,
+      "lines": 79,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-13-cli-issues-craft.md",
+      "group": ".claude",
+      "bytes": 2488,
+      "lines": 57,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-13-design-dna.md",
+      "group": ".claude",
+      "bytes": 3605,
+      "lines": 76,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-13-design-parity-slides-tokens.md",
+      "group": ".claude",
+      "bytes": 3384,
+      "lines": 70,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-13-launch-readiness.md",
+      "group": ".claude",
+      "bytes": 4478,
+      "lines": 74,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-14-extension-pack-contract.md",
+      "group": ".claude",
+      "bytes": 3312,
+      "lines": 67,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-14-setup-hardening.md",
+      "group": ".claude",
+      "bytes": 3495,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-18-launch-readiness.md",
+      "group": ".claude",
+      "bytes": 5324,
+      "lines": 86,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-08-28-public-docs-surface.md",
+      "group": ".claude",
+      "bytes": 6580,
+      "lines": 133,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-09-08-copilot-native-adapter.md",
+      "group": ".claude",
+      "bytes": 1497,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-09-08-enterprise-value-review.md",
+      "group": ".claude",
+      "bytes": 3876,
+      "lines": 71,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/engineering/evolution/_TEMPLATE.md",
+      "group": ".claude",
+      "bytes": 1325,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/lintel-layout.yaml",
+      "group": ".claude",
+      "bytes": 131,
+      "lines": 3,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/memory/MEMORY.md",
+      "group": ".claude",
+      "bytes": 1594,
+      "lines": 18,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/memory/lessons.md",
+      "group": ".claude",
+      "bytes": 51784,
+      "lines": 659,
+      "skill_refs": [
+        "cycle",
+        "resume",
+        "ship",
+        "uniformity"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/memory/personas.md",
+      "group": ".claude",
+      "bytes": 1767,
+      "lines": 58,
+      "skill_refs": [
+        "sense"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/memory/working-state.md",
+      "group": ".claude",
+      "bytes": 31390,
+      "lines": 462,
+      "skill_refs": [
+        "cycle",
+        "jobs",
+        "status"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/plans/copilot-enterprise-launch/plan.md",
+      "group": ".claude",
+      "bytes": 6520,
+      "lines": 98,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/plans/copilot-enterprise-launch/prompt.md",
+      "group": ".claude",
+      "bytes": 2328,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/plans/copilot-enterprise-launch/review.md",
+      "group": ".claude",
+      "bytes": 6359,
+      "lines": 83,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/plans/copilot-enterprise-launch/spec.md",
+      "group": ".claude",
+      "bytes": 4514,
+      "lines": 56,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".claude/plans/copilot-enterprise-launch/work.json",
+      "group": ".claude",
+      "bytes": 332,
+      "lines": 9,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/enterprise-value-review/completion.md",
+      "group": ".claude",
+      "bytes": 2639,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/enterprise-value-review/plan.md",
+      "group": ".claude",
+      "bytes": 2907,
+      "lines": 39,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/enterprise-value-review/pr.md",
+      "group": ".claude",
+      "bytes": 2129,
+      "lines": 12,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/enterprise-value-review/prompt.md",
+      "group": ".claude",
+      "bytes": 2037,
+      "lines": 23,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".claude/plans/enterprise-value-review/spec.md",
+      "group": ".claude",
+      "bytes": 1689,
+      "lines": 18,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/s4l-extension-pack/todo.md",
+      "group": ".claude",
+      "bytes": 6773,
+      "lines": 105,
+      "skill_refs": [
+        "catalog",
+        "cycle",
+        "doctor",
+        "help",
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".claude/plans/todo.md",
+      "group": ".claude",
+      "bytes": 28903,
+      "lines": 357,
+      "skill_refs": [
+        "catalog",
+        "help",
+        "learn"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": ".claude/rules/README.md",
+      "group": ".claude",
+      "bytes": 593,
+      "lines": 16,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".codex-plugin/plugin.json",
+      "group": ".codex-plugin",
+      "bytes": 2004,
+      "lines": 38,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": ".cursor-plugin/plugin.json",
+      "group": ".cursor-plugin",
+      "bytes": 560,
+      "lines": 21,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".gitattributes",
+      "group": ".gitattributes",
+      "bytes": 323,
+      "lines": 10,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "group": ".github",
+      "bytes": 792,
+      "lines": 32,
+      "skill_refs": [
+        "pack-list"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "group": ".github",
+      "bytes": 818,
+      "lines": 24,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "group": ".github",
+      "bytes": 1368,
+      "lines": 32,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/agents/lintel-builder.agent.md",
+      "group": ".github",
+      "bytes": 595,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/agents/lintel-planner.agent.md",
+      "group": ".github",
+      "bytes": 588,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/agents/lintel-reviewer.agent.md",
+      "group": ".github",
+      "bytes": 601,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "group": ".github",
+      "bytes": 822,
+      "lines": 14,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/instructions/lintel-session.instructions.md",
+      "group": ".github",
+      "bytes": 626,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/lintel/manifest.json",
+      "group": ".github",
+      "bytes": 2110,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/plugin/hooks.json",
+      "group": ".github",
+      "bytes": 38,
+      "lines": 4,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/plugin/marketplace.json",
+      "group": ".github",
+      "bytes": 538,
+      "lines": 18,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/plugin/plugin.json",
+      "group": ".github",
+      "bytes": 578,
+      "lines": 13,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/skills/li-build/SKILL.md",
+      "group": ".github",
+      "bytes": 508,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-capture/SKILL.md",
+      "group": ".github",
+      "bytes": 496,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-cycle/SKILL.md",
+      "group": ".github",
+      "bytes": 518,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-define/SKILL.md",
+      "group": ".github",
+      "bytes": 511,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-discover/SKILL.md",
+      "group": ".github",
+      "bytes": 521,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-plan/SKILL.md",
+      "group": ".github",
+      "bytes": 511,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-resume/SKILL.md",
+      "group": ".github",
+      "bytes": 487,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-review/SKILL.md",
+      "group": ".github",
+      "bytes": 499,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-scope/SKILL.md",
+      "group": ".github",
+      "bytes": 492,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-sense/SKILL.md",
+      "group": ".github",
+      "bytes": 497,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-ship/SKILL.md",
+      "group": ".github",
+      "bytes": 501,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-spec-kit/SKILL.md",
+      "group": ".github",
+      "bytes": 530,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/skills/li-welcome/SKILL.md",
+      "group": ".github",
+      "bytes": 494,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": ".github/workflows/catalog.yml",
+      "group": ".github",
+      "bytes": 629,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "group": ".github",
+      "bytes": 3361,
+      "lines": 92,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": ".gitignore",
+      "group": ".gitignore",
+      "bytes": 2532,
+      "lines": 111,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": ".opencode/INSTALL.md",
+      "group": ".opencode",
+      "bytes": 1758,
+      "lines": 37,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "AGENT-INSTRUCTIONS.md",
+      "group": "AGENT-INSTRUCTIONS.md",
+      "bytes": 13386,
+      "lines": 273,
+      "skill_refs": [
+        "context-budget",
+        "context-cool",
+        "context-restore",
+        "context-save",
+        "context-warm",
+        "context-warm-adrs",
+        "context-warm-customer",
+        "context-warm-from-url",
+        "context-warm-related",
+        "context-warm-sessions",
+        "cycle",
+        "define",
+        "fix",
+        "plan-and-build",
+        "research",
+        "resume",
+        "review-and-ship",
+        "role",
+        "role-new",
+        "sense",
+        "welcome"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "WebFetch"
+      ]
+    },
+    {
+      "path": "AGENTS.md",
+      "group": "AGENTS.md",
+      "bytes": 14661,
+      "lines": 254,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "CHANGELOG.md",
+      "group": "CHANGELOG.md",
+      "bytes": 9045,
+      "lines": 132,
+      "skill_refs": [
+        "generate-pdf",
+        "generate-visio",
+        "generate-xlsx"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "CLAUDE.md",
+      "group": "CLAUDE.md",
+      "bytes": 22536,
+      "lines": 344,
+      "skill_refs": [
+        "adr-new",
+        "capture",
+        "catalog",
+        "context-save",
+        "context-warm",
+        "cycle",
+        "da",
+        "dh",
+        "investigate",
+        "office-hours",
+        "pack-list",
+        "pack-switch",
+        "plan-ceo-review",
+        "plan-eng-review",
+        "qa",
+        "resume",
+        "role",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "CODEOWNERS",
+      "group": "CODEOWNERS",
+      "bytes": 1982,
+      "lines": 50,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "group": "CODE_OF_CONDUCT.md",
+      "bytes": 2604,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "group": "CONTRIBUTING.md",
+      "bytes": 12216,
+      "lines": 215,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "GEMINI.md",
+      "group": "GEMINI.md",
+      "bytes": 3196,
+      "lines": 76,
+      "skill_refs": [
+        "code-freeze",
+        "code-unfreeze",
+        "compliance-gate",
+        "cycle",
+        "da",
+        "dh",
+        "generate-ppt",
+        "generate-web",
+        "generate-word",
+        "investigate",
+        "office-hours",
+        "plan-ceo-review",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "qa",
+        "sc",
+        "scaffold",
+        "scaffold-internal-tool",
+        "scaffold-mvp",
+        "ship",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "LICENSE",
+      "group": "LICENSE",
+      "bytes": 2018,
+      "lines": 43,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "README.md",
+      "group": "README.md",
+      "bytes": 8423,
+      "lines": 149,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "SECURITY.md",
+      "group": "SECURITY.md",
+      "bytes": 4940,
+      "lines": 84,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/communication/BlogPostDrafter.md",
+      "group": "agents",
+      "bytes": 5554,
+      "lines": 119,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/communication/EmailCustomerDrafter.md",
+      "group": "agents",
+      "bytes": 4839,
+      "lines": 113,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/communication/LinkedInPostDrafter.md",
+      "group": "agents",
+      "bytes": 4419,
+      "lines": 107,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/communication/SlideNarrationCritic.md",
+      "group": "agents",
+      "bytes": 5342,
+      "lines": 127,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/compliance/EUAIActReviewer.md",
+      "group": "agents",
+      "bytes": 6312,
+      "lines": 141,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/compliance/GDPRReviewer.md",
+      "group": "agents",
+      "bytes": 6140,
+      "lines": 146,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/compliance/SOC2Reviewer.md",
+      "group": "agents",
+      "bytes": 5436,
+      "lines": 128,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/customer/CustomerEmpathyCheck.md",
+      "group": "agents",
+      "bytes": 5129,
+      "lines": 99,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/customer/DemoNarrativeArc.md",
+      "group": "agents",
+      "bytes": 5703,
+      "lines": 109,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/customer/DemoNarratorJunior.md",
+      "group": "agents",
+      "bytes": 5130,
+      "lines": 124,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/customer/ExecutiveBriefingDrafter.md",
+      "group": "agents",
+      "bytes": 4387,
+      "lines": 98,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/customer/PostDemoFollowup.md",
+      "group": "agents",
+      "bytes": 6293,
+      "lines": 118,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/customer/ProposalDrafter.md",
+      "group": "agents",
+      "bytes": 5367,
+      "lines": 137,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/customer/RFPResponseDrafter.md",
+      "group": "agents",
+      "bytes": 5121,
+      "lines": 122,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/devops/DevOpsToolchain.md",
+      "group": "agents",
+      "bytes": 5714,
+      "lines": 117,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/devops/GHActionsReviewer.md",
+      "group": "agents",
+      "bytes": 4709,
+      "lines": 125,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/devops/K8sManifestReviewer.md",
+      "group": "agents",
+      "bytes": 5391,
+      "lines": 143,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/devops/PerformanceAnalyzer.md",
+      "group": "agents",
+      "bytes": 5130,
+      "lines": 105,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/devops/TerraformReviewer.md",
+      "group": "agents",
+      "bytes": 4849,
+      "lines": 133,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/doc-gen/PPTNarrativeArchitect.md",
+      "group": "agents",
+      "bytes": 5515,
+      "lines": 114,
+      "skill_refs": [
+        "design-html",
+        "generate-ppt"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/doc-gen/WebExperienceCritic.md",
+      "group": "agents",
+      "bytes": 6454,
+      "lines": 158,
+      "skill_refs": [
+        "design-review",
+        "generate-web"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/doc-gen/WordTechnicalEditor.md",
+      "group": "agents",
+      "bytes": 6781,
+      "lines": 139,
+      "skill_refs": [
+        "generate-word"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/ADRDrafter.md",
+      "group": "agents",
+      "bytes": 2893,
+      "lines": 82,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/APIDesigner.md",
+      "group": "agents",
+      "bytes": 4829,
+      "lines": 111,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/AccessibilityChecker.md",
+      "group": "agents",
+      "bytes": 3528,
+      "lines": 89,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/Architect.md",
+      "group": "agents",
+      "bytes": 4695,
+      "lines": 121,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/BackendArchitect.md",
+      "group": "agents",
+      "bytes": 3931,
+      "lines": 104,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/CapacityPlanner.md",
+      "group": "agents",
+      "bytes": 4736,
+      "lines": 119,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/ChangelogMaintainer.md",
+      "group": "agents",
+      "bytes": 2618,
+      "lines": 80,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/CodeReviewer.md",
+      "group": "agents",
+      "bytes": 4965,
+      "lines": 98,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/ContextBudgetAdvisor.md",
+      "group": "agents",
+      "bytes": 4007,
+      "lines": 108,
+      "skill_refs": [
+        "eval"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "agents/engineering/ContractTestArchitect.md",
+      "group": "agents",
+      "bytes": 4189,
+      "lines": 105,
+      "skill_refs": [
+        "tq"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/CostAnalyzer.md",
+      "group": "agents",
+      "bytes": 3583,
+      "lines": 121,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/DataPipelineDesigner.md",
+      "group": "agents",
+      "bytes": 3867,
+      "lines": 97,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/DatabaseDesigner.md",
+      "group": "agents",
+      "bytes": 5576,
+      "lines": 118,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/DebugForensics.md",
+      "group": "agents",
+      "bytes": 4883,
+      "lines": 99,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/DeploymentEngineer.md",
+      "group": "agents",
+      "bytes": 4586,
+      "lines": 120,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/DocWriter.md",
+      "group": "agents",
+      "bytes": 3096,
+      "lines": 88,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/Explorer.md",
+      "group": "agents",
+      "bytes": 3815,
+      "lines": 87,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/FrontendBuilder.md",
+      "group": "agents",
+      "bytes": 3406,
+      "lines": 90,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/LatencyAnalyzer.md",
+      "group": "agents",
+      "bytes": 3171,
+      "lines": 107,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/MigrationPlanner.md",
+      "group": "agents",
+      "bytes": 3966,
+      "lines": 87,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/Migrator.md",
+      "group": "agents",
+      "bytes": 2778,
+      "lines": 87,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/ObservabilityArchitect.md",
+      "group": "agents",
+      "bytes": 4034,
+      "lines": 120,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/PerfBudgetEnforcer.md",
+      "group": "agents",
+      "bytes": 4097,
+      "lines": 106,
+      "skill_refs": [
+        "tq"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/Planner.md",
+      "group": "agents",
+      "bytes": 4490,
+      "lines": 114,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/ReadOnly.md",
+      "group": "agents",
+      "bytes": 2582,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/Refactorer.md",
+      "group": "agents",
+      "bytes": 4318,
+      "lines": 91,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/RegressionDetective.md",
+      "group": "agents",
+      "bytes": 4947,
+      "lines": 122,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/ReleaseEngineer.md",
+      "group": "agents",
+      "bytes": 3126,
+      "lines": 80,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/ResearchSynthesizer.md",
+      "group": "agents",
+      "bytes": 3829,
+      "lines": 95,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/SanityChecker.md",
+      "group": "agents",
+      "bytes": 5030,
+      "lines": 101,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/SchemaArchitect.md",
+      "group": "agents",
+      "bytes": 3963,
+      "lines": 99,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/engineering/SystemArchitect.md",
+      "group": "agents",
+      "bytes": 5664,
+      "lines": 119,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/engineering/TestRunner.md",
+      "group": "agents",
+      "bytes": 4359,
+      "lines": 93,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/frontend/DesignSystemAuditor.md",
+      "group": "agents",
+      "bytes": 9347,
+      "lines": 195,
+      "skill_refs": [
+        "frontend-design",
+        "frontend-design-review"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/frontend/FrontendArchitect.md",
+      "group": "agents",
+      "bytes": 8747,
+      "lines": 156,
+      "skill_refs": [
+        "design-html",
+        "frontend-design",
+        "frontend-design-review",
+        "generate-app",
+        "generate-web"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/frontend/MotionDirector.md",
+      "group": "agents",
+      "bytes": 5979,
+      "lines": 117,
+      "skill_refs": [
+        "frontend-design",
+        "frontend-motion"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/frontend/ShaderEngineer.md",
+      "group": "agents",
+      "bytes": 6086,
+      "lines": 118,
+      "skill_refs": [
+        "frontend-design",
+        "frontend-shader"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/frontend/TypographyCurator.md",
+      "group": "agents",
+      "bytes": 7038,
+      "lines": 142,
+      "skill_refs": [
+        "frontend-typography"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/security/ComplianceOfficer.md",
+      "group": "agents",
+      "bytes": 4560,
+      "lines": 107,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/security/DependencyAuditor.md",
+      "group": "agents",
+      "bytes": 5100,
+      "lines": 116,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/security/JWTSecurityReviewer.md",
+      "group": "agents",
+      "bytes": 5044,
+      "lines": 134,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/security/OAuthFlowReviewer.md",
+      "group": "agents",
+      "bytes": 5312,
+      "lines": 132,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/security/PrivacyBoundaryAudit.md",
+      "group": "agents",
+      "bytes": 4174,
+      "lines": 97,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/security/SBOMAuditor.md",
+      "group": "agents",
+      "bytes": 3416,
+      "lines": 110,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/security/SecretsScanReviewer.md",
+      "group": "agents",
+      "bytes": 3665,
+      "lines": 106,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "agents/security/SecurityAuditor.md",
+      "group": "agents",
+      "bytes": 5084,
+      "lines": 99,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "agents/security/ThreatModelDrafter.md",
+      "group": "agents",
+      "bytes": 5055,
+      "lines": 117,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "bin/_aliases.sh",
+      "group": "bin",
+      "bytes": 4034,
+      "lines": 108,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/_audit.sh",
+      "group": "bin",
+      "bytes": 9099,
+      "lines": 228,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": "bin/_context.sh",
+      "group": "bin",
+      "bytes": 4594,
+      "lines": 120,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/_jobs.sh",
+      "group": "bin",
+      "bytes": 23590,
+      "lines": 641,
+      "skill_refs": [
+        "resume",
+        "status"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "bin/li-adr-new",
+      "group": "bin",
+      "bytes": 2775,
+      "lines": 89,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-catalog.py",
+      "group": "bin",
+      "bytes": 3266,
+      "lines": 80,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-compat-audit",
+      "group": "bin",
+      "bytes": 6181,
+      "lines": 200,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "bin/li-copilot",
+      "group": "bin",
+      "bytes": 451,
+      "lines": 12,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-copilot.py",
+      "group": "bin",
+      "bytes": 22917,
+      "lines": 416,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-doctor",
+      "group": "bin",
+      "bytes": 12835,
+      "lines": 309,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-envelope-replay",
+      "group": "bin",
+      "bytes": 6818,
+      "lines": 146,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-envelope-validate",
+      "group": "bin",
+      "bytes": 6059,
+      "lines": 163,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-instructions.py",
+      "group": "bin",
+      "bytes": 3134,
+      "lines": 80,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-lessons-promote",
+      "group": "bin",
+      "bytes": 4090,
+      "lines": 120,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-lessons-sync",
+      "group": "bin",
+      "bytes": 4567,
+      "lines": 137,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-migrate-claude-home",
+      "group": "bin",
+      "bytes": 8195,
+      "lines": 205,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-pack-scaffold",
+      "group": "bin",
+      "bytes": 7565,
+      "lines": 155,
+      "skill_refs": [
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-review-log",
+      "group": "bin",
+      "bytes": 4648,
+      "lines": 124,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "bin/li-review-read",
+      "group": "bin",
+      "bytes": 10388,
+      "lines": 217,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "bin/li-roles-sync",
+      "group": "bin",
+      "bytes": 4432,
+      "lines": 135,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-scaffold",
+      "group": "bin",
+      "bytes": 10443,
+      "lines": 280,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-uniformity",
+      "group": "bin",
+      "bytes": 12608,
+      "lines": 295,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-update",
+      "group": "bin",
+      "bytes": 3269,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-vault-init",
+      "group": "bin",
+      "bytes": 4446,
+      "lines": 130,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-wiki-gen",
+      "group": "bin",
+      "bytes": 17428,
+      "lines": 440,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "bin/li-work-artifacts.py",
+      "group": "bin",
+      "bytes": 2572,
+      "lines": 63,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "config/aliases.yaml",
+      "group": "config",
+      "bytes": 11886,
+      "lines": 315,
+      "skill_refs": [
+        "context-budget",
+        "context-warm",
+        "role",
+        "role-new",
+        "ta"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/GLOSSARY.md",
+      "group": "docs",
+      "bytes": 6438,
+      "lines": 33,
+      "skill_refs": [
+        "adr-new",
+        "cycle",
+        "full-engineering-pass",
+        "lessons-surface",
+        "pack-switch",
+        "plan",
+        "uniformity"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/README.md",
+      "group": "docs",
+      "bytes": 5820,
+      "lines": 111,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/adr/README.md",
+      "group": "docs",
+      "bytes": 138,
+      "lines": 1,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/architecture.md",
+      "group": "docs",
+      "bytes": 15831,
+      "lines": 272,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/compliance.md",
+      "group": "docs",
+      "bytes": 8849,
+      "lines": 140,
+      "skill_refs": [
+        "audit",
+        "hooks-status"
+      ],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "docs/concepts/agent-dispatch-rules.md",
+      "group": "docs",
+      "bytes": 4227,
+      "lines": 113,
+      "skill_refs": [
+        "build",
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/agent-memory.md",
+      "group": "docs",
+      "bytes": 2358,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/concepts/brief-forge.md",
+      "group": "docs",
+      "bytes": 10470,
+      "lines": 188,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/capture-vault-sink.md",
+      "group": "docs",
+      "bytes": 1851,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/da-module.md",
+      "group": "docs",
+      "bytes": 10561,
+      "lines": 218,
+      "skill_refs": [
+        "da",
+        "full-engineering-pass"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/dh-module.md",
+      "group": "docs",
+      "bytes": 10410,
+      "lines": 211,
+      "skill_refs": [
+        "dh",
+        "full-engineering-pass"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/engineering-modules.md",
+      "group": "docs",
+      "bytes": 12336,
+      "lines": 278,
+      "skill_refs": [
+        "adr-draft",
+        "api-review",
+        "full-engineering-pass",
+        "status",
+        "ta"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/concepts/envelope.md",
+      "group": "docs",
+      "bytes": 8669,
+      "lines": 143,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "docs/concepts/full-engineering-pass.md",
+      "group": "docs",
+      "bytes": 10574,
+      "lines": 199,
+      "skill_refs": [
+        "cycle",
+        "dh",
+        "full-engineering-pass",
+        "ship",
+        "ta"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/jobs-system.md",
+      "group": "docs",
+      "bytes": 13853,
+      "lines": 285,
+      "skill_refs": [
+        "cycle",
+        "jobs",
+        "plan",
+        "resume",
+        "sense",
+        "status"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/memory-v2.md",
+      "group": "docs",
+      "bytes": 3478,
+      "lines": 57,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/meta-infra-discipline.md",
+      "group": "docs",
+      "bytes": 12491,
+      "lines": 233,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/obsidian-integration.md",
+      "group": "docs",
+      "bytes": 2970,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/orientator.md",
+      "group": "docs",
+      "bytes": 10643,
+      "lines": 222,
+      "skill_refs": [
+        "cycle",
+        "resume",
+        "review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/pack-defaults.md",
+      "group": "docs",
+      "bytes": 6834,
+      "lines": 146,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/pack-inheritance.md",
+      "group": "docs",
+      "bytes": 8569,
+      "lines": 159,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/concepts/pack-resolver.md",
+      "group": "docs",
+      "bytes": 6776,
+      "lines": 129,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/planner-as-module.md",
+      "group": "docs",
+      "bytes": 9808,
+      "lines": 188,
+      "skill_refs": [
+        "cycle",
+        "cycle-azure-e2e",
+        "plan",
+        "safe-install",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/prompt-house-style.md",
+      "group": "docs",
+      "bytes": 5744,
+      "lines": 83,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/concepts/sc-module.md",
+      "group": "docs",
+      "bytes": 10831,
+      "lines": 219,
+      "skill_refs": [
+        "full-engineering-pass",
+        "sc"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/skill-protocol.md",
+      "group": "docs",
+      "bytes": 2864,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/ta-module.md",
+      "group": "docs",
+      "bytes": 11894,
+      "lines": 249,
+      "skill_refs": [
+        "adr-draft",
+        "full-engineering-pass",
+        "ta"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/tq-module.md",
+      "group": "docs",
+      "bytes": 10618,
+      "lines": 228,
+      "skill_refs": [
+        "full-engineering-pass",
+        "tq"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/concepts/uniformity-contract.md",
+      "group": "docs",
+      "bytes": 11554,
+      "lines": 218,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/concepts/wiki-generation.md",
+      "group": "docs",
+      "bytes": 2446,
+      "lines": 50,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/copilot.md",
+      "group": "docs",
+      "bytes": 9311,
+      "lines": 148,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "docs/enterprise-adoption.md",
+      "group": "docs",
+      "bytes": 7771,
+      "lines": 119,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/enterprise-profile-value.md",
+      "group": "docs",
+      "bytes": 5921,
+      "lines": 97,
+      "skill_refs": [],
+      "tool_terms": [
+        "Task"
+      ]
+    },
+    {
+      "path": "docs/faq.md",
+      "group": "docs",
+      "bytes": 7172,
+      "lines": 129,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/getting-started.md",
+      "group": "docs",
+      "bytes": 8727,
+      "lines": 162,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/migrations/_INDEX.md",
+      "group": "docs",
+      "bytes": 9229,
+      "lines": 63,
+      "skill_refs": [
+        "migrations",
+        "pack-switch"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/multi-cli.md",
+      "group": "docs",
+      "bytes": 7220,
+      "lines": 150,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/power-user.md",
+      "group": "docs",
+      "bytes": 16592,
+      "lines": 289,
+      "skill_refs": [
+        "audit",
+        "clean",
+        "code-freeze",
+        "code-unfreeze",
+        "context-budget",
+        "context-cool",
+        "context-restore",
+        "context-save",
+        "context-warm",
+        "context-warm-adrs",
+        "context-warm-customer",
+        "context-warm-from-url",
+        "context-warm-related",
+        "context-warm-sessions",
+        "cycle",
+        "hooks-status",
+        "jobs",
+        "learn",
+        "lessons-surface",
+        "perf-mode",
+        "resume",
+        "role",
+        "role-new",
+        "roles-list",
+        "status",
+        "usage-log"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "docs/precedence.md",
+      "group": "docs",
+      "bytes": 5496,
+      "lines": 107,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/showcase/README.md",
+      "group": "docs",
+      "bytes": 1551,
+      "lines": 36,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/showcase/lintel-the-harness.html",
+      "group": "docs",
+      "bytes": 4657,
+      "lines": 83,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/spec-kit.md",
+      "group": "docs",
+      "bytes": 6871,
+      "lines": 118,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "docs/the-cycle.md",
+      "group": "docs",
+      "bytes": 14678,
+      "lines": 334,
+      "skill_refs": [
+        "cycle",
+        "define",
+        "fix",
+        "plan-and-build",
+        "research",
+        "resume",
+        "review",
+        "review-and-ship",
+        "status"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "docs/wiki/README.md",
+      "group": "docs",
+      "bytes": 1970,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/wiki/agents.md",
+      "group": "docs",
+      "bytes": 4857,
+      "lines": 75,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/wiki/packs.md",
+      "group": "docs",
+      "bytes": 215,
+      "lines": 7,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/wiki/schemas.md",
+      "group": "docs",
+      "bytes": 587,
+      "lines": 21,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "docs/wiki/skills.md",
+      "group": "docs",
+      "bytes": 8720,
+      "lines": 132,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "gemini-extension.json",
+      "group": "gemini-extension.json",
+      "bytes": 202,
+      "lines": 6,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/claude-code/session-digest.settings.json",
+      "group": "hooks",
+      "bytes": 631,
+      "lines": 15,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/hooks.json",
+      "group": "hooks",
+      "bytes": 3209,
+      "lines": 88,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/README.md",
+      "group": "hooks",
+      "bytes": 5110,
+      "lines": 113,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/_input.sh",
+      "group": "hooks",
+      "bytes": 16204,
+      "lines": 309,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/_patterns.sh",
+      "group": "hooks",
+      "bytes": 3965,
+      "lines": 86,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/context-bloat-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1141,
+      "lines": 26,
+      "skill_refs": [
+        "context-budget"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/context-bloat-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2224,
+      "lines": 58,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/customer-data-block/HOOK.md",
+      "group": "hooks",
+      "bytes": 2128,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/customer-data-block/run.sh",
+      "group": "hooks",
+      "bytes": 4953,
+      "lines": 87,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/cycle-incomplete-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 2241,
+      "lines": 40,
+      "skill_refs": [
+        "capture"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/cycle-incomplete-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2218,
+      "lines": 42,
+      "skill_refs": [
+        "capture",
+        "context-save"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/cycle-position-inject/HOOK.md",
+      "group": "hooks",
+      "bytes": 3054,
+      "lines": 52,
+      "skill_refs": [
+        "autoplan",
+        "cycle",
+        "fix",
+        "plan-and-build"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/cycle-position-inject/run.sh",
+      "group": "hooks",
+      "bytes": 4786,
+      "lines": 82,
+      "skill_refs": [
+        "autoplan",
+        "cycle",
+        "fix",
+        "plan-and-build"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/da-migration-irreversible-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 2055,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/da-migration-irreversible-warn/run.sh",
+      "group": "hooks",
+      "bytes": 3137,
+      "lines": 78,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/da-retention-violation-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1843,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/da-retention-violation-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2756,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/da-schema-drift-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1784,
+      "lines": 38,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/da-schema-drift-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2100,
+      "lines": 52,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/dh-cost-budget-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1502,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/dh-cost-budget-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2772,
+      "lines": 72,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/dh-deploy-without-rollback-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1355,
+      "lines": 34,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/dh-deploy-without-rollback-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2961,
+      "lines": 70,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/dh-observability-gap-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1358,
+      "lines": 34,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/dh-observability-gap-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2555,
+      "lines": 59,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/frontend-design-surface/HOOK.md",
+      "group": "hooks",
+      "bytes": 3684,
+      "lines": 86,
+      "skill_refs": [
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-style-extract",
+        "profile-switch"
+      ],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/frontend-design-surface/run.sh",
+      "group": "hooks",
+      "bytes": 4468,
+      "lines": 115,
+      "skill_refs": [
+        "frontend-design"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/frozen-zone-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1414,
+      "lines": 35,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/frozen-zone-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2402,
+      "lines": 76,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/job-begin/HOOK.md",
+      "group": "hooks",
+      "bytes": 1748,
+      "lines": 37,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/job-begin/run.sh",
+      "group": "hooks",
+      "bytes": 1658,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/job-end/HOOK.md",
+      "group": "hooks",
+      "bytes": 1885,
+      "lines": 41,
+      "skill_refs": [
+        "jobs"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/job-end/run.sh",
+      "group": "hooks",
+      "bytes": 3201,
+      "lines": 92,
+      "skill_refs": [
+        "lessons-promote"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/job-stale-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1737,
+      "lines": 47,
+      "skill_refs": [
+        "cycle",
+        "jobs",
+        "resume",
+        "sense",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/job-stale-warn/run.sh",
+      "group": "hooks",
+      "bytes": 1845,
+      "lines": 55,
+      "skill_refs": [
+        "jobs"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/memory-budget-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1440,
+      "lines": 29,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/memory-budget-warn/run.sh",
+      "group": "hooks",
+      "bytes": 1780,
+      "lines": 42,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-customer-data-in-message/HOOK.md",
+      "group": "hooks",
+      "bytes": 1361,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-customer-data-in-message/run.sh",
+      "group": "hooks",
+      "bytes": 1576,
+      "lines": 37,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-customer-data-in-screenshot/HOOK.md",
+      "group": "hooks",
+      "bytes": 1080,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-customer-data-in-screenshot/run.sh",
+      "group": "hooks",
+      "bytes": 1747,
+      "lines": 39,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-direct-main-push/HOOK.md",
+      "group": "hooks",
+      "bytes": 1568,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-direct-main-push/run.sh",
+      "group": "hooks",
+      "bytes": 1300,
+      "lines": 36,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-merge-without-review/HOOK.md",
+      "group": "hooks",
+      "bytes": 827,
+      "lines": 22,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-merge-without-review/run.sh",
+      "group": "hooks",
+      "bytes": 2187,
+      "lines": 44,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-production-mutation-without-auth/HOOK.md",
+      "group": "hooks",
+      "bytes": 1264,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-production-mutation-without-auth/run.sh",
+      "group": "hooks",
+      "bytes": 1711,
+      "lines": 42,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/no-secrets-in-edit/HOOK.md",
+      "group": "hooks",
+      "bytes": 1383,
+      "lines": 32,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/no-secrets-in-edit/run.sh",
+      "group": "hooks",
+      "bytes": 1511,
+      "lines": 36,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/sc-auth-bypass-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1817,
+      "lines": 44,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/sc-auth-bypass-warn/run.sh",
+      "group": "hooks",
+      "bytes": 3772,
+      "lines": 77,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/sc-compliance-gap-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1888,
+      "lines": 41,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/sc-compliance-gap-warn/run.sh",
+      "group": "hooks",
+      "bytes": 3553,
+      "lines": 88,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/sc-threat-coverage-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1773,
+      "lines": 39,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/sc-threat-coverage-warn/run.sh",
+      "group": "hooks",
+      "bytes": 3332,
+      "lines": 89,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/secret-scan-block/HOOK.md",
+      "group": "hooks",
+      "bytes": 2187,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "hooks/shared/secret-scan-block/run.sh",
+      "group": "hooks",
+      "bytes": 5670,
+      "lines": 97,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/session-digest/HOOK.md",
+      "group": "hooks",
+      "bytes": 2705,
+      "lines": 62,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/session-digest/run.sh",
+      "group": "hooks",
+      "bytes": 8981,
+      "lines": 172,
+      "skill_refs": [
+        "resume",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/ta-arch-drift-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1729,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/ta-arch-drift-warn/run.sh",
+      "group": "hooks",
+      "bytes": 1912,
+      "lines": 49,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/ta-complexity-budget-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1863,
+      "lines": 41,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/ta-complexity-budget-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2973,
+      "lines": 71,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/ta-contract-collision-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1858,
+      "lines": 40,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/ta-contract-collision-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2348,
+      "lines": 57,
+      "skill_refs": [
+        "ta"
+      ],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/tq-contract-break-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1297,
+      "lines": 34,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/tq-contract-break-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2201,
+      "lines": 55,
+      "skill_refs": [
+        "tq"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "hooks/shared/tq-coverage-drop-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1282,
+      "lines": 34,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/tq-coverage-drop-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2515,
+      "lines": 52,
+      "skill_refs": [
+        "tq"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "hooks/shared/tq-perf-regression-warn/HOOK.md",
+      "group": "hooks",
+      "bytes": 1234,
+      "lines": 33,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "hooks/shared/tq-perf-regression-warn/run.sh",
+      "group": "hooks",
+      "bytes": 2383,
+      "lines": 55,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "install/install.ps1",
+      "group": "install",
+      "bytes": 14634,
+      "lines": 319,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "install/install.sh",
+      "group": "install",
+      "bytes": 15057,
+      "lines": 397,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "install/layer-config.yaml.example",
+      "group": "install",
+      "bytes": 3325,
+      "lines": 73,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "install/upstream-sources.yaml",
+      "group": "install",
+      "bytes": 7179,
+      "lines": 139,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "install/verify.sh",
+      "group": "install",
+      "bytes": 19206,
+      "lines": 558,
+      "skill_refs": [
+        "cli-fingerprint",
+        "doctor"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/auto-decide.sh",
+      "group": "lib",
+      "bytes": 1929,
+      "lines": 33,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/brief-forge-evaluators.sh",
+      "group": "lib",
+      "bytes": 8030,
+      "lines": 213,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/brief-forge.sh",
+      "group": "lib",
+      "bytes": 8579,
+      "lines": 224,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "lib/cli-tiers.sh",
+      "group": "lib",
+      "bytes": 4659,
+      "lines": 102,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/cli-tiers.yaml",
+      "group": "lib",
+      "bytes": 2777,
+      "lines": 75,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "lib/copilot-env.sh",
+      "group": "lib",
+      "bytes": 849,
+      "lines": 19,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/cycle-footer.sh",
+      "group": "lib",
+      "bytes": 11790,
+      "lines": 246,
+      "skill_refs": [
+        "capture",
+        "catalog",
+        "cycle",
+        "status"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/cycle-modes.sh",
+      "group": "lib",
+      "bytes": 1971,
+      "lines": 43,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/envelope-schema.yaml",
+      "group": "lib",
+      "bytes": 7531,
+      "lines": 150,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "lib/frontmatter.sh",
+      "group": "lib",
+      "bytes": 901,
+      "lines": 24,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/memory.sh",
+      "group": "lib",
+      "bytes": 5191,
+      "lines": 134,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/orientator-routing.sh",
+      "group": "lib",
+      "bytes": 7925,
+      "lines": 180,
+      "skill_refs": [
+        "cycle",
+        "resume",
+        "review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/pack-resolver.sh",
+      "group": "lib",
+      "bytes": 22275,
+      "lines": 537,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/pack-schema.yaml",
+      "group": "lib",
+      "bytes": 8384,
+      "lines": 165,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/paths.sh",
+      "group": "lib",
+      "bytes": 5872,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/scale-estimator.sh",
+      "group": "lib",
+      "bytes": 16700,
+      "lines": 310,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/state.sh",
+      "group": "lib",
+      "bytes": 4404,
+      "lines": 107,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/uniformity-coverage.sh",
+      "group": "lib",
+      "bytes": 4875,
+      "lines": 149,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "lib/wiki-gen.sh",
+      "group": "lib",
+      "bytes": 1758,
+      "lines": 57,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "packs/_default/pack.yaml",
+      "group": "packs",
+      "bytes": 7157,
+      "lines": 114,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md",
+      "group": "scaffolding",
+      "bytes": 2571,
+      "lines": 71,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/decisions/README.md",
+      "group": "scaffolding",
+      "bytes": 2469,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/decisions/TEMPLATE.md",
+      "group": "scaffolding",
+      "bytes": 1597,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/memory/lessons.md",
+      "group": "scaffolding",
+      "bytes": 809,
+      "lines": 25,
+      "skill_refs": [],
+      "tool_terms": [
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/memory/personas-example.md",
+      "group": "scaffolding",
+      "bytes": 3198,
+      "lines": 63,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/memory/personas.md",
+      "group": "scaffolding",
+      "bytes": 1431,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/memory/working-state.md",
+      "group": "scaffolding",
+      "bytes": 2031,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/.claude/plans/todo.md",
+      "group": "scaffolding",
+      "bytes": 481,
+      "lines": 23,
+      "skill_refs": [],
+      "tool_terms": [
+        "Task"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/AGENTS.md.template",
+      "group": "scaffolding",
+      "bytes": 12957,
+      "lines": 212,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/CLAUDE.md.template",
+      "group": "scaffolding",
+      "bytes": 15602,
+      "lines": 252,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/CORE-PRINCIPLES.md",
+      "group": "scaffolding",
+      "bytes": 3778,
+      "lines": 89,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/EVOLUTION-LOG.md",
+      "group": "scaffolding",
+      "bytes": 3594,
+      "lines": 67,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/EVOLUTION.md",
+      "group": "scaffolding",
+      "bytes": 3138,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/README.md",
+      "group": "scaffolding",
+      "bytes": 2306,
+      "lines": 29,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "scaffolding/01-foundation/SESSION-PROTOCOL.md",
+      "group": "scaffolding",
+      "bytes": 11324,
+      "lines": 178,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/TEMPLATE-agent.md",
+      "group": "scaffolding",
+      "bytes": 3746,
+      "lines": 81,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/TEMPLATE-skill.md",
+      "group": "scaffolding",
+      "bytes": 3015,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/templates/plan/plan.template.md",
+      "group": "scaffolding",
+      "bytes": 6526,
+      "lines": 138,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": [
+        "Task"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/templates/plan/prompt.template.md",
+      "group": "scaffolding",
+      "bytes": 1923,
+      "lines": 52,
+      "skill_refs": [
+        "cycle",
+        "qa",
+        "ship"
+      ],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "scaffolding/01-foundation/templates/plan/spec.template.md",
+      "group": "scaffolding",
+      "bytes": 1367,
+      "lines": 38,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/component-imports.json",
+      "group": "seeds",
+      "bytes": 2413,
+      "lines": 44,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/motion.json",
+      "group": "seeds",
+      "bytes": 4024,
+      "lines": 81,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/pattern.json",
+      "group": "seeds",
+      "bytes": 2569,
+      "lines": 55,
+      "skill_refs": [
+        "frontend-style-extract"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/shader-snippets/README.md",
+      "group": "seeds",
+      "bytes": 1745,
+      "lines": 48,
+      "skill_refs": [
+        "frontend-style-extract"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/shader-snippets/mesh-gradient.glsl",
+      "group": "seeds",
+      "bytes": 1438,
+      "lines": 47,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/shader-snippets/mesh-gradient.tsx",
+      "group": "seeds",
+      "bytes": 2344,
+      "lines": 77,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "seeds/brand/design-patterns/ultra-modern-lovable-style/typography.json",
+      "group": "seeds",
+      "bytes": 3242,
+      "lines": 85,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "shims/AGENTS.md",
+      "group": "shims",
+      "bytes": 1717,
+      "lines": 30,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "shims/CLAUDE.md",
+      "group": "shims",
+      "bytes": 1735,
+      "lines": 32,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "shims/copilot-instructions.md",
+      "group": "shims",
+      "bytes": 937,
+      "lines": 15,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "shims/copilot/COPILOT.md",
+      "group": "shims",
+      "bytes": 6315,
+      "lines": 103,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "TodoWrite",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/CATALOG.md",
+      "group": "skills",
+      "bytes": 20896,
+      "lines": 139,
+      "skill_refs": [
+        "adr-new",
+        "analyze",
+        "audit",
+        "autoplan",
+        "brief-forge",
+        "browse",
+        "build",
+        "capture",
+        "careful",
+        "catalog",
+        "clean",
+        "cli-fingerprint",
+        "code-freeze",
+        "code-review",
+        "code-unfreeze",
+        "codex",
+        "compliance-gate",
+        "context-budget",
+        "context-cool",
+        "context-restore",
+        "context-save",
+        "context-warm",
+        "context-warm-adrs",
+        "context-warm-customer",
+        "context-warm-from-url",
+        "context-warm-related",
+        "context-warm-sessions",
+        "cycle",
+        "da",
+        "define",
+        "design-consultation",
+        "design-dna",
+        "design-html",
+        "design-review",
+        "design-shotgun",
+        "devex-review",
+        "dh",
+        "discover",
+        "doctor",
+        "document-generate",
+        "eval",
+        "fix",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-motion",
+        "frontend-shader",
+        "frontend-style-extract",
+        "frontend-typography",
+        "full-engineering-pass",
+        "generate",
+        "generate-app",
+        "generate-design",
+        "generate-outline",
+        "generate-pdf",
+        "generate-ppt",
+        "generate-qa",
+        "generate-style-learn",
+        "generate-visio",
+        "generate-web",
+        "generate-word",
+        "generate-write",
+        "generate-xlsx",
+        "handoff-size-check",
+        "health",
+        "help",
+        "hooks-status",
+        "instruction-parity-check",
+        "investigate",
+        "jobs",
+        "landing-report",
+        "learn",
+        "lessons",
+        "lessons-promote",
+        "lessons-surface",
+        "maintenance",
+        "make-pdf",
+        "migrations",
+        "office-hours",
+        "open-managed-browser",
+        "orientator",
+        "pack-create",
+        "pack-list",
+        "pack-switch",
+        "pack-validate",
+        "pair-agent",
+        "perf-mode",
+        "perfbench",
+        "personas-rotate",
+        "plan",
+        "plan-and-build",
+        "plan-ceo-review",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "plan-tune",
+        "profile-switch",
+        "qa",
+        "qa-only",
+        "research",
+        "resume",
+        "retro",
+        "review",
+        "review-and-ship",
+        "role",
+        "role-new",
+        "roles-list",
+        "safe-install",
+        "sc",
+        "scaffold",
+        "scaffold-internal-tool",
+        "scaffold-mvp",
+        "scope",
+        "scrape",
+        "sense",
+        "setup-browser-cookies",
+        "ship",
+        "skill-router",
+        "skillify",
+        "spec-kit",
+        "status",
+        "ta",
+        "tq",
+        "uniformity",
+        "usage-log",
+        "v4-migrate",
+        "welcome"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/adr-new/SKILL.md",
+      "group": "skills",
+      "bytes": 3146,
+      "lines": 90,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/analyze/SKILL.md",
+      "group": "skills",
+      "bytes": 6134,
+      "lines": 112,
+      "skill_refs": [
+        "plan-eng-review"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/audit/SKILL.md",
+      "group": "skills",
+      "bytes": 6699,
+      "lines": 169,
+      "skill_refs": [
+        "audit",
+        "jobs",
+        "status"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/autoplan/SKILL.md",
+      "group": "skills",
+      "bytes": 6146,
+      "lines": 129,
+      "skill_refs": [
+        "autoplan",
+        "fix",
+        "office-hours",
+        "plan-ceo-review",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "review",
+        "ship"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/brief-forge/SKILL.md",
+      "group": "skills",
+      "bytes": 8947,
+      "lines": 242,
+      "skill_refs": [
+        "brief-forge"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/browse/SKILL.md",
+      "group": "skills",
+      "bytes": 5447,
+      "lines": 117,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/build/SKILL.md",
+      "group": "skills",
+      "bytes": 22699,
+      "lines": 407,
+      "skill_refs": [
+        "analyze",
+        "build",
+        "context-restore",
+        "cycle",
+        "investigate",
+        "lessons-surface",
+        "qa",
+        "review"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "TodoWrite",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/capture/SKILL.md",
+      "group": "skills",
+      "bytes": 23174,
+      "lines": 461,
+      "skill_refs": [
+        "adr-new",
+        "context-budget",
+        "cycle",
+        "handoff-size-check",
+        "learn",
+        "lessons-promote",
+        "plan",
+        "resume"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/careful/SKILL.md",
+      "group": "skills",
+      "bytes": 6174,
+      "lines": 124,
+      "skill_refs": [
+        "careful",
+        "investigate",
+        "ship"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/catalog/SKILL.md",
+      "group": "skills",
+      "bytes": 1694,
+      "lines": 40,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/clean/SKILL.md",
+      "group": "skills",
+      "bytes": 5775,
+      "lines": 153,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/cli-fingerprint/SKILL.md",
+      "group": "skills",
+      "bytes": 7407,
+      "lines": 182,
+      "skill_refs": [
+        "cli-fingerprint",
+        "welcome"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/code-freeze/SKILL.md",
+      "group": "skills",
+      "bytes": 4959,
+      "lines": 117,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/code-review/SKILL.md",
+      "group": "skills",
+      "bytes": 5186,
+      "lines": 135,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/code-unfreeze/SKILL.md",
+      "group": "skills",
+      "bytes": 3130,
+      "lines": 89,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/codex/SKILL.md",
+      "group": "skills",
+      "bytes": 5270,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/compliance-gate/SKILL.md",
+      "group": "skills",
+      "bytes": 7014,
+      "lines": 181,
+      "skill_refs": [
+        "compliance-gate",
+        "ship"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-budget/SKILL.md",
+      "group": "skills",
+      "bytes": 8187,
+      "lines": 190,
+      "skill_refs": [
+        "context-budgetwatch",
+        "context-cool",
+        "context-warm-"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-cool/SKILL.md",
+      "group": "skills",
+      "bytes": 3061,
+      "lines": 100,
+      "skill_refs": [
+        "context-restore",
+        "context-save",
+        "context-warm"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-restore/SKILL.md",
+      "group": "skills",
+      "bytes": 5836,
+      "lines": 131,
+      "skill_refs": [
+        "context-restore",
+        "resume"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/context-save/SKILL.md",
+      "group": "skills",
+      "bytes": 6449,
+      "lines": 159,
+      "skill_refs": [
+        "context-restore",
+        "resume"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "TodoWrite",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/context-warm-adrs/SKILL.md",
+      "group": "skills",
+      "bytes": 2147,
+      "lines": 88,
+      "skill_refs": [
+        "context-warm"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-warm-customer/SKILL.md",
+      "group": "skills",
+      "bytes": 3376,
+      "lines": 112,
+      "skill_refs": [
+        "context-warm"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-warm-from-url/SKILL.md",
+      "group": "skills",
+      "bytes": 2974,
+      "lines": 99,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "WebFetch"
+      ]
+    },
+    {
+      "path": "skills/context-warm-related/SKILL.md",
+      "group": "skills",
+      "bytes": 2770,
+      "lines": 95,
+      "skill_refs": [
+        "context-warm"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-warm-sessions/SKILL.md",
+      "group": "skills",
+      "bytes": 2121,
+      "lines": 80,
+      "skill_refs": [
+        "context-warm",
+        "resume"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/context-warm/SKILL.md",
+      "group": "skills",
+      "bytes": 4688,
+      "lines": 149,
+      "skill_refs": [
+        "context-cool",
+        "context-save"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/cycle/SKILL.md",
+      "group": "skills",
+      "bytes": 21848,
+      "lines": 447,
+      "skill_refs": [
+        "cycle",
+        "define",
+        "fix",
+        "plan",
+        "resume",
+        "review",
+        "scope",
+        "sense"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/da/SKILL.md",
+      "group": "skills",
+      "bytes": 16207,
+      "lines": 305,
+      "skill_refs": [
+        "brief-forge",
+        "cycle",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/define/SKILL.md",
+      "group": "skills",
+      "bytes": 17825,
+      "lines": 354,
+      "skill_refs": [
+        "cycle",
+        "define",
+        "office-hours",
+        "plan"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/design-consultation/SKILL.md",
+      "group": "skills",
+      "bytes": 6074,
+      "lines": 125,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/ATTRIBUTION.md",
+      "group": "skills",
+      "bytes": 2785,
+      "lines": 43,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/LICENSES/Apache-2.0-anthropic.txt",
+      "group": "skills",
+      "bytes": 11546,
+      "lines": 202,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/LICENSES/MIT-next-level-builder.txt",
+      "group": "skills",
+      "bytes": 1096,
+      "lines": 21,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/SKILL.md",
+      "group": "skills",
+      "bytes": 7994,
+      "lines": 119,
+      "skill_refs": [
+        "design-review",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-motion",
+        "frontend-style-extract",
+        "frontend-typography",
+        "generate-app",
+        "generate-web"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/app-interface.csv",
+      "group": "skills",
+      "bytes": 9773,
+      "lines": 31,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/charts.csv",
+      "group": "skills",
+      "bytes": 19391,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/colors.csv",
+      "group": "skills",
+      "bytes": 32432,
+      "lines": 162,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/icons.csv",
+      "group": "skills",
+      "bytes": 20742,
+      "lines": 106,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/landing.csv",
+      "group": "skills",
+      "bytes": 16720,
+      "lines": 35,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/products.csv",
+      "group": "skills",
+      "bytes": 58168,
+      "lines": 162,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/react-performance.csv",
+      "group": "skills",
+      "bytes": 14867,
+      "lines": 45,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-backgrounds.csv",
+      "group": "skills",
+      "bytes": 1049,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-charts.csv",
+      "group": "skills",
+      "bytes": 8657,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-color-logic.csv",
+      "group": "skills",
+      "bytes": 891,
+      "lines": 14,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-copy.csv",
+      "group": "skills",
+      "bytes": 6453,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-layout-logic.csv",
+      "group": "skills",
+      "bytes": 997,
+      "lines": 16,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-layouts.csv",
+      "group": "skills",
+      "bytes": 8786,
+      "lines": 26,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-strategies.csv",
+      "group": "skills",
+      "bytes": 8248,
+      "lines": 16,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/slides/slide-typography.csv",
+      "group": "skills",
+      "bytes": 750,
+      "lines": 15,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/angular.csv",
+      "group": "skills",
+      "bytes": 18320,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/stacks/astro.csv",
+      "group": "skills",
+      "bytes": 11922,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/flutter.csv",
+      "group": "skills",
+      "bytes": 10469,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/html-tailwind.csv",
+      "group": "skills",
+      "bytes": 11361,
+      "lines": 56,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/jetpack-compose.csv",
+      "group": "skills",
+      "bytes": 8248,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/laravel.csv",
+      "group": "skills",
+      "bytes": 18429,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/nextjs.csv",
+      "group": "skills",
+      "bytes": 12546,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/nuxt-ui.csv",
+      "group": "skills",
+      "bytes": 14061,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/nuxtjs.csv",
+      "group": "skills",
+      "bytes": 16598,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/react-native.csv",
+      "group": "skills",
+      "bytes": 10035,
+      "lines": 52,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/react.csv",
+      "group": "skills",
+      "bytes": 13016,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/shadcn.csv",
+      "group": "skills",
+      "bytes": 15982,
+      "lines": 61,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/svelte.csv",
+      "group": "skills",
+      "bytes": 11063,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/stacks/swiftui.csv",
+      "group": "skills",
+      "bytes": 10872,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": [
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/stacks/threejs.csv",
+      "group": "skills",
+      "bytes": 44841,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/stacks/vue.csv",
+      "group": "skills",
+      "bytes": 11056,
+      "lines": 50,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/styles.csv",
+      "group": "skills",
+      "bytes": 142690,
+      "lines": 85,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/typography.csv",
+      "group": "skills",
+      "bytes": 49741,
+      "lines": 74,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/data/ui-reasoning.csv",
+      "group": "skills",
+      "bytes": 53070,
+      "lines": 162,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/design-dna/data/ux-guidelines.csv",
+      "group": "skills",
+      "bytes": 18766,
+      "lines": 100,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-dna/profiles/anthropic-default.yaml",
+      "group": "skills",
+      "bytes": 6008,
+      "lines": 132,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/references/component-tokens.md",
+      "group": "skills",
+      "bytes": 5200,
+      "lines": 214,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/references/primitive-tokens.md",
+      "group": "skills",
+      "bytes": 4765,
+      "lines": 203,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/references/semantic-tokens.md",
+      "group": "skills",
+      "bytes": 4460,
+      "lines": 215,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/references/token-architecture.md",
+      "group": "skills",
+      "bytes": 5589,
+      "lines": 224,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/scripts/core.py",
+      "group": "skills",
+      "bytes": 16323,
+      "lines": 320,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/scripts/design_system.py",
+      "group": "skills",
+      "bytes": 48600,
+      "lines": 1155,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/scripts/emit_tokens.py",
+      "group": "skills",
+      "bytes": 7088,
+      "lines": 156,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/design-dna/scripts/search.py",
+      "group": "skills",
+      "bytes": 6713,
+      "lines": 134,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-dna/scripts/validate_design.py",
+      "group": "skills",
+      "bytes": 7066,
+      "lines": 162,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/design-html/SKILL.md",
+      "group": "skills",
+      "bytes": 5961,
+      "lines": 119,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/design-review/SKILL.md",
+      "group": "skills",
+      "bytes": 7505,
+      "lines": 145,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/design-shotgun/SKILL.md",
+      "group": "skills",
+      "bytes": 6389,
+      "lines": 143,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/devex-review/SKILL.md",
+      "group": "skills",
+      "bytes": 6284,
+      "lines": 140,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/dh/SKILL.md",
+      "group": "skills",
+      "bytes": 16290,
+      "lines": 289,
+      "skill_refs": [
+        "brief-forge",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/discover/SKILL.md",
+      "group": "skills",
+      "bytes": 11222,
+      "lines": 298,
+      "skill_refs": [
+        "brief-forge",
+        "context-warm",
+        "context-warm-adrs",
+        "cycle",
+        "lessons",
+        "plan",
+        "research",
+        "skillify"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/doctor/SKILL.md",
+      "group": "skills",
+      "bytes": 4495,
+      "lines": 116,
+      "skill_refs": [
+        "cli-fingerprint",
+        "doctor",
+        "instruction-parity-check"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/document-generate/SKILL.md",
+      "group": "skills",
+      "bytes": 6403,
+      "lines": 143,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/eval/SKILL.md",
+      "group": "skills",
+      "bytes": 6249,
+      "lines": 152,
+      "skill_refs": [
+        "eval"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/fix/SKILL.md",
+      "group": "skills",
+      "bytes": 2781,
+      "lines": 76,
+      "skill_refs": [
+        "capture",
+        "cycle",
+        "fix",
+        "investigate",
+        "lessons-promote"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/frontend-design-review/SKILL.md",
+      "group": "skills",
+      "bytes": 12031,
+      "lines": 290,
+      "skill_refs": [
+        "compliance-gate",
+        "context-save",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-typography"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/frontend-design/SKILL.md",
+      "group": "skills",
+      "bytes": 14425,
+      "lines": 288,
+      "skill_refs": [
+        "compliance-gate",
+        "cycle",
+        "design-dna",
+        "design-html",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-motion",
+        "frontend-shader",
+        "frontend-style-extract",
+        "frontend-typography",
+        "generate-app",
+        "generate-web"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/frontend-motion/SKILL.md",
+      "group": "skills",
+      "bytes": 9200,
+      "lines": 210,
+      "skill_refs": [
+        "compliance-gate",
+        "frontend-design"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/frontend-shader/SKILL.md",
+      "group": "skills",
+      "bytes": 8422,
+      "lines": 186,
+      "skill_refs": [
+        "compliance-gate",
+        "frontend-design"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/frontend-style-extract/SKILL.md",
+      "group": "skills",
+      "bytes": 11174,
+      "lines": 256,
+      "skill_refs": [
+        "compliance-gate",
+        "frontend-design",
+        "frontend-design-review",
+        "frontend-style-extract",
+        "generate-style-learn"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/frontend-typography/SKILL.md",
+      "group": "skills",
+      "bytes": 8863,
+      "lines": 202,
+      "skill_refs": [
+        "compliance-gate",
+        "frontend-design",
+        "generate-style-learn"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/full-engineering-pass/SKILL.md",
+      "group": "skills",
+      "bytes": 14585,
+      "lines": 367,
+      "skill_refs": [
+        "cycle",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-app/SKILL.md",
+      "group": "skills",
+      "bytes": 12194,
+      "lines": 273,
+      "skill_refs": [
+        "compliance-gate",
+        "frontend-design",
+        "frontend-design-review",
+        "generate-web"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-design/SKILL.md",
+      "group": "skills",
+      "bytes": 8911,
+      "lines": 207,
+      "skill_refs": [
+        "generate",
+        "generate-pdf",
+        "generate-ppt",
+        "generate-visio",
+        "generate-web",
+        "generate-word",
+        "generate-write",
+        "generate-xlsx"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-outline/SKILL.md",
+      "group": "skills",
+      "bytes": 7630,
+      "lines": 182,
+      "skill_refs": [
+        "generate",
+        "generate-design",
+        "generate-write"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-pdf/SKILL.md",
+      "group": "skills",
+      "bytes": 3707,
+      "lines": 65,
+      "skill_refs": [
+        "generate",
+        "generate-pdf",
+        "generate-qa"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-ppt/SKILL.md",
+      "group": "skills",
+      "bytes": 12137,
+      "lines": 244,
+      "skill_refs": [
+        "brief-forge",
+        "generate-web",
+        "make-pdf"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-qa/SKILL.md",
+      "group": "skills",
+      "bytes": 9666,
+      "lines": 218,
+      "skill_refs": [
+        "generate",
+        "generate-design",
+        "plan-design-review"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-style-learn/SKILL.md",
+      "group": "skills",
+      "bytes": 7687,
+      "lines": 229,
+      "skill_refs": [
+        "generate",
+        "generate-design",
+        "generate-style-learn"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-visio/SKILL.md",
+      "group": "skills",
+      "bytes": 5004,
+      "lines": 72,
+      "skill_refs": [
+        "generate",
+        "generate-ppt",
+        "generate-qa",
+        "generate-visio"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-web/SKILL.md",
+      "group": "skills",
+      "bytes": 10584,
+      "lines": 220,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-word/SKILL.md",
+      "group": "skills",
+      "bytes": 8141,
+      "lines": 184,
+      "skill_refs": [
+        "make-pdf"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-write/SKILL.md",
+      "group": "skills",
+      "bytes": 9672,
+      "lines": 216,
+      "skill_refs": [
+        "generate",
+        "generate-design",
+        "generate-outline"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate-xlsx/SKILL.md",
+      "group": "skills",
+      "bytes": 4073,
+      "lines": 68,
+      "skill_refs": [
+        "generate",
+        "generate-qa",
+        "generate-xlsx"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate/SKILL.md",
+      "group": "skills",
+      "bytes": 13111,
+      "lines": 228,
+      "skill_refs": [
+        "compliance-gate",
+        "generate",
+        "generate-",
+        "generate-design",
+        "generate-outline",
+        "generate-pdf",
+        "generate-ppt",
+        "generate-qa",
+        "generate-visio",
+        "generate-web",
+        "generate-word",
+        "generate-write",
+        "generate-xlsx",
+        "qa-only"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/generate/agent-mapping.yaml",
+      "group": "skills",
+      "bytes": 3681,
+      "lines": 93,
+      "skill_refs": [
+        "generate"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/handoff-size-check/SKILL.md",
+      "group": "skills",
+      "bytes": 6506,
+      "lines": 173,
+      "skill_refs": [
+        "context-budget",
+        "cycle",
+        "handoff-size-check",
+        "ship"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/health/SKILL.md",
+      "group": "skills",
+      "bytes": 6276,
+      "lines": 141,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/help/SKILL.md",
+      "group": "skills",
+      "bytes": 6385,
+      "lines": 156,
+      "skill_refs": [
+        "catalog",
+        "clean",
+        "compliance-gate",
+        "context-restore",
+        "context-save",
+        "doctor",
+        "eval",
+        "help",
+        "hooks-status",
+        "investigate",
+        "plan-ceo-review",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "qa",
+        "qa-only",
+        "review"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/hooks-status/SKILL.md",
+      "group": "skills",
+      "bytes": 4542,
+      "lines": 117,
+      "skill_refs": [
+        "doctor",
+        "hooks-status",
+        "maintenance",
+        "usage-log"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/instruction-parity-check/SKILL.md",
+      "group": "skills",
+      "bytes": 6743,
+      "lines": 192,
+      "skill_refs": [
+        "doctor",
+        "instruction-parity-check"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/investigate/SKILL.md",
+      "group": "skills",
+      "bytes": 5099,
+      "lines": 111,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/jobs/SKILL.md",
+      "group": "skills",
+      "bytes": 8468,
+      "lines": 207,
+      "skill_refs": [
+        "cycle",
+        "doctor",
+        "health",
+        "jobs",
+        "plan",
+        "resume",
+        "status"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/landing-report/SKILL.md",
+      "group": "skills",
+      "bytes": 6224,
+      "lines": 140,
+      "skill_refs": [
+        "eval"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/learn/SKILL.md",
+      "group": "skills",
+      "bytes": 6137,
+      "lines": 118,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/lessons-promote/SKILL.md",
+      "group": "skills",
+      "bytes": 2949,
+      "lines": 86,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/lessons-surface/SKILL.md",
+      "group": "skills",
+      "bytes": 5672,
+      "lines": 129,
+      "skill_refs": [
+        "capture",
+        "cycle",
+        "lessons-surface",
+        "plan",
+        "sense"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/lessons/SKILL.md",
+      "group": "skills",
+      "bytes": 2621,
+      "lines": 74,
+      "skill_refs": [
+        "learn"
+      ],
+      "tool_terms": [
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/maintenance/SKILL.md",
+      "group": "skills",
+      "bytes": 6595,
+      "lines": 165,
+      "skill_refs": [
+        "catalog",
+        "cycle",
+        "doctor",
+        "maintenance",
+        "usage-log"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/make-pdf/SKILL.md",
+      "group": "skills",
+      "bytes": 4626,
+      "lines": 104,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/migrations/SKILL.md",
+      "group": "skills",
+      "bytes": 3669,
+      "lines": 113,
+      "skill_refs": [
+        "catalog",
+        "migrations",
+        "sense",
+        "status"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/office-hours/SKILL.md",
+      "group": "skills",
+      "bytes": 5928,
+      "lines": 154,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/open-managed-browser/SKILL.md",
+      "group": "skills",
+      "bytes": 4175,
+      "lines": 109,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "skills/orientator/SKILL.md",
+      "group": "skills",
+      "bytes": 7559,
+      "lines": 185,
+      "skill_refs": [
+        "cycle",
+        "fix",
+        "orientator",
+        "resume",
+        "review"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/pack-create/SKILL.md",
+      "group": "skills",
+      "bytes": 5550,
+      "lines": 154,
+      "skill_refs": [
+        "cycle",
+        "pack-create",
+        "pack-list",
+        "pack-switch"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/pack-list/SKILL.md",
+      "group": "skills",
+      "bytes": 3602,
+      "lines": 120,
+      "skill_refs": [
+        "pack-create",
+        "pack-list",
+        "pack-switch",
+        "pack-validate",
+        "v4-migrate"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/pack-switch/SKILL.md",
+      "group": "skills",
+      "bytes": 5005,
+      "lines": 145,
+      "skill_refs": [
+        "pack-create",
+        "pack-list",
+        "pack-switch",
+        "v4-migrate"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/pack-validate/SKILL.md",
+      "group": "skills",
+      "bytes": 3537,
+      "lines": 81,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/pair-agent/SKILL.md",
+      "group": "skills",
+      "bytes": 6183,
+      "lines": 134,
+      "skill_refs": [
+        "catalog",
+        "codex",
+        "review",
+        "skillify"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/perf-mode/SKILL.md",
+      "group": "skills",
+      "bytes": 4782,
+      "lines": 128,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/perfbench/SKILL.md",
+      "group": "skills",
+      "bytes": 5672,
+      "lines": 124,
+      "skill_refs": [
+        "ship"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/personas-rotate/SKILL.md",
+      "group": "skills",
+      "bytes": 3458,
+      "lines": 81,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-and-build/SKILL.md",
+      "group": "skills",
+      "bytes": 3135,
+      "lines": 94,
+      "skill_refs": [
+        "cycle",
+        "define",
+        "fix",
+        "plan",
+        "resume",
+        "review-and-ship"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-ceo-review/SKILL.md",
+      "group": "skills",
+      "bytes": 4703,
+      "lines": 108,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-design-review/SKILL.md",
+      "group": "skills",
+      "bytes": 4982,
+      "lines": 117,
+      "skill_refs": [
+        "design-html",
+        "design-shotgun"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-devex-review/SKILL.md",
+      "group": "skills",
+      "bytes": 4922,
+      "lines": 114,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-eng-review/SKILL.md",
+      "group": "skills",
+      "bytes": 10266,
+      "lines": 177,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "ExitPlanMode",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/plan-tune/SKILL.md",
+      "group": "skills",
+      "bytes": 5800,
+      "lines": 141,
+      "skill_refs": [
+        "ship"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/plan/SKILL.md",
+      "group": "skills",
+      "bytes": 31399,
+      "lines": 562,
+      "skill_refs": [
+        "analyze",
+        "context-budget",
+        "cycle",
+        "define",
+        "design-html",
+        "design-review",
+        "discover",
+        "handoff-size-check",
+        "jobs",
+        "lessons-surface",
+        "plan",
+        "plan-design-review",
+        "plan-devex-review",
+        "plan-eng-review",
+        "plan-tune",
+        "resume",
+        "safe-install"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/profile-switch/SKILL.md",
+      "group": "skills",
+      "bytes": 5205,
+      "lines": 128,
+      "skill_refs": [
+        "doctor",
+        "profile-switch",
+        "safe-install"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/qa-only/SKILL.md",
+      "group": "skills",
+      "bytes": 3702,
+      "lines": 104,
+      "skill_refs": [
+        "ship"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/qa/SKILL.md",
+      "group": "skills",
+      "bytes": 4944,
+      "lines": 114,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/research/SKILL.md",
+      "group": "skills",
+      "bytes": 3080,
+      "lines": 94,
+      "skill_refs": [
+        "capture",
+        "cycle",
+        "define",
+        "discover",
+        "resume"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/resume/SKILL.md",
+      "group": "skills",
+      "bytes": 18685,
+      "lines": 401,
+      "skill_refs": [
+        "context-restore",
+        "context-save",
+        "cycle",
+        "jobs",
+        "resume",
+        "sense"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/retro/SKILL.md",
+      "group": "skills",
+      "bytes": 5423,
+      "lines": 124,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/review-and-ship/SKILL.md",
+      "group": "skills",
+      "bytes": 3119,
+      "lines": 91,
+      "skill_refs": [
+        "cycle",
+        "fix",
+        "plan-and-build",
+        "review",
+        "ship"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/review/SKILL.md",
+      "group": "skills",
+      "bytes": 14564,
+      "lines": 321,
+      "skill_refs": [
+        "cycle",
+        "docs-review",
+        "lessons-surface",
+        "review"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/role-new/SKILL.md",
+      "group": "skills",
+      "bytes": 7550,
+      "lines": 172,
+      "skill_refs": [
+        "role",
+        "role-new",
+        "roles-list"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/role/SKILL.md",
+      "group": "skills",
+      "bytes": 8777,
+      "lines": 104,
+      "skill_refs": [
+        "role",
+        "role-new",
+        "roles-list"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/roles-list/SKILL.md",
+      "group": "skills",
+      "bytes": 3228,
+      "lines": 107,
+      "skill_refs": [
+        "role",
+        "role-new"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/safe-install/SKILL.md",
+      "group": "skills",
+      "bytes": 5476,
+      "lines": 149,
+      "skill_refs": [
+        "safe-install"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/sc/SKILL.md",
+      "group": "skills",
+      "bytes": 16550,
+      "lines": 301,
+      "skill_refs": [
+        "brief-forge",
+        "cycle",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/scaffold-internal-tool/SKILL.md",
+      "group": "skills",
+      "bytes": 4824,
+      "lines": 128,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/scaffold-mvp/SKILL.md",
+      "group": "skills",
+      "bytes": 6590,
+      "lines": 153,
+      "skill_refs": [
+        "compliance-gate"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/scaffold/SKILL.md",
+      "group": "skills",
+      "bytes": 5325,
+      "lines": 126,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/scope/SKILL.md",
+      "group": "skills",
+      "bytes": 15318,
+      "lines": 273,
+      "skill_refs": [
+        "cycle",
+        "doctor",
+        "scope"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/scrape/SKILL.md",
+      "group": "skills",
+      "bytes": 5085,
+      "lines": 130,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/sense/SKILL.md",
+      "group": "skills",
+      "bytes": 20181,
+      "lines": 395,
+      "skill_refs": [
+        "cycle",
+        "define",
+        "discover",
+        "doctor",
+        "lessons",
+        "lessons-surface",
+        "match",
+        "plan",
+        "resume",
+        "review",
+        "role",
+        "scope",
+        "skill-router"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/setup-browser-cookies/SKILL.md",
+      "group": "skills",
+      "bytes": 5397,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/ship/SKILL.md",
+      "group": "skills",
+      "bytes": 16189,
+      "lines": 358,
+      "skill_refs": [
+        "brief-forge",
+        "cycle",
+        "generate-ppt",
+        "generate-web",
+        "generate-word",
+        "landing-report",
+        "qa",
+        "ship"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/skill-router/SKILL.md",
+      "group": "skills",
+      "bytes": 2779,
+      "lines": 85,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Task"
+      ]
+    },
+    {
+      "path": "skills/skillify/SKILL.md",
+      "group": "skills",
+      "bytes": 5048,
+      "lines": 119,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/spec-kit/SKILL.md",
+      "group": "skills",
+      "bytes": 5502,
+      "lines": 90,
+      "skill_refs": [
+        "build",
+        "plan",
+        "review"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/spec-kit/references/work-map.md",
+      "group": "skills",
+      "bytes": 2467,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "skills/status/SKILL.md",
+      "group": "skills",
+      "bytes": 3784,
+      "lines": 111,
+      "skill_refs": [
+        "cycle",
+        "jobs",
+        "plan",
+        "resume"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/ta/SKILL.md",
+      "group": "skills",
+      "bytes": 15183,
+      "lines": 305,
+      "skill_refs": [
+        "brief-forge",
+        "cycle",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/tq/SKILL.md",
+      "group": "skills",
+      "bytes": 16694,
+      "lines": 290,
+      "skill_refs": [
+        "brief-forge",
+        "da",
+        "dh",
+        "full-engineering-pass",
+        "sc",
+        "ta",
+        "tq"
+      ],
+      "tool_terms": [
+        "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/uniformity/SKILL.md",
+      "group": "skills",
+      "bytes": 4780,
+      "lines": 127,
+      "skill_refs": [
+        "audit",
+        "uniformity"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "skills/usage-log/SKILL.md",
+      "group": "skills",
+      "bytes": 5861,
+      "lines": 127,
+      "skill_refs": [
+        "catalog",
+        "hooks-status",
+        "maintenance",
+        "usage-log"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/v4-migrate/SKILL.md",
+      "group": "skills",
+      "bytes": 7189,
+      "lines": 190,
+      "skill_refs": [
+        "pack-list",
+        "pack-validate"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "skills/welcome/SKILL.md",
+      "group": "skills",
+      "bytes": 10282,
+      "lines": 202,
+      "skill_refs": [
+        "catalog",
+        "cli-fingerprint",
+        "cycle",
+        "doctor",
+        "fix",
+        "investigate",
+        "pack-list",
+        "pack-switch",
+        "qa",
+        "resume",
+        "review",
+        "welcome"
+      ],
+      "tool_terms": [
+        "Bash",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "path": "tasks/lessons.md",
+      "group": "tasks",
+      "bytes": 145,
+      "lines": 1,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tasks/memory.md",
+      "group": "tasks",
+      "bytes": 151,
+      "lines": 1,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tasks/personas.md",
+      "group": "tasks",
+      "bytes": 146,
+      "lines": 1,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tasks/todo.md",
+      "group": "tasks",
+      "bytes": 141,
+      "lines": 1,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "templates/obsidian/sessions.base",
+      "group": "templates",
+      "bytes": 558,
+      "lines": 24,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/README.md",
+      "group": "tests",
+      "bytes": 4189,
+      "lines": 71,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "tests/behavior/install-fail-closed.sh",
+      "group": "tests",
+      "bytes": 948,
+      "lines": 25,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/behavior/install-target-boundaries.sh",
+      "group": "tests",
+      "bytes": 2913,
+      "lines": 55,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "tests/conventions/bash-test-template.sh",
+      "group": "tests",
+      "bytes": 2956,
+      "lines": 99,
+      "skill_refs": [
+        "test-"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/e2e/harness-critical-path.sh",
+      "group": "tests",
+      "bytes": 5113,
+      "lines": 123,
+      "skill_refs": [
+        "review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/copilot-kit.py",
+      "group": "tests",
+      "bytes": 18497,
+      "lines": 326,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash",
+        "Read"
+      ]
+    },
+    {
+      "path": "tests/integration/copilot-kit.sh",
+      "group": "tests",
+      "bytes": 509,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/enterprise-pack-impact.sh",
+      "group": "tests",
+      "bytes": 5323,
+      "lines": 100,
+      "skill_refs": [
+        "cycle",
+        "review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/enterprise-workflow-snippets.sh",
+      "group": "tests",
+      "bytes": 10184,
+      "lines": 220,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "tests/integration/frontend-design-roundtrip.sh",
+      "group": "tests",
+      "bytes": 9757,
+      "lines": 245,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/no-merge-without-review.sh",
+      "group": "tests",
+      "bytes": 3123,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/pack-source-target-resolution.sh",
+      "group": "tests",
+      "bytes": 3088,
+      "lines": 73,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/security-controls-fire.sh",
+      "group": "tests",
+      "bytes": 6826,
+      "lines": 112,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/integration/session-leaves-traces.sh",
+      "group": "tests",
+      "bytes": 5011,
+      "lines": 92,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/runner/check-install.ps1",
+      "group": "tests",
+      "bytes": 4405,
+      "lines": 78,
+      "skill_refs": [],
+      "tool_terms": [
+        "Write"
+      ]
+    },
+    {
+      "path": "tests/runner/run-all.sh",
+      "group": "tests",
+      "bytes": 5600,
+      "lines": 154,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/runner/run-e2e.sh",
+      "group": "tests",
+      "bytes": 134,
+      "lines": 3,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/runner/run-unit.sh",
+      "group": "tests",
+      "bytes": 136,
+      "lines": 3,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/_README.md",
+      "group": "tests",
+      "bytes": 2540,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/adr-numbers-unique.sh",
+      "group": "tests",
+      "bytes": 2132,
+      "lines": 46,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/agents-categorized.sh",
+      "group": "tests",
+      "bytes": 1340,
+      "lines": 42,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/analyze-gate-wired.sh",
+      "group": "tests",
+      "bytes": 3139,
+      "lines": 74,
+      "skill_refs": [
+        "analyze"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/audit-writes-via-helper.sh",
+      "group": "tests",
+      "bytes": 6280,
+      "lines": 137,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/bin-scripts-executable.sh",
+      "group": "tests",
+      "bytes": 1574,
+      "lines": 39,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/brief-forge-evaluators-present.sh",
+      "group": "tests",
+      "bytes": 2240,
+      "lines": 69,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/brief-forge-handoffs-canonical.sh",
+      "group": "tests",
+      "bytes": 1702,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/build-workflow-contract.sh",
+      "group": "tests",
+      "bytes": 3048,
+      "lines": 91,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/catalog-regenerates-clean.sh",
+      "group": "tests",
+      "bytes": 1288,
+      "lines": 41,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/claude-home-paths.sh",
+      "group": "tests",
+      "bytes": 3610,
+      "lines": 83,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "tests/shape/cli-tiers-sync.sh",
+      "group": "tests",
+      "bytes": 1637,
+      "lines": 43,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/cycle-footer-present.sh",
+      "group": "tests",
+      "bytes": 2460,
+      "lines": 45,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/da-module-contract.sh",
+      "group": "tests",
+      "bytes": 4501,
+      "lines": 136,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/deprecated-aliases-resolve.sh",
+      "group": "tests",
+      "bytes": 2133,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/design-dna-corpus.sh",
+      "group": "tests",
+      "bytes": 4341,
+      "lines": 79,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/dh-module-contract.sh",
+      "group": "tests",
+      "bytes": 4049,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/discover-scans-all-agent-categories.sh",
+      "group": "tests",
+      "bytes": 1688,
+      "lines": 48,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/every-handoff-uses-envelope.sh",
+      "group": "tests",
+      "bytes": 2319,
+      "lines": 69,
+      "skill_refs": [
+        "brief"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/extension-pack-contract.sh",
+      "group": "tests",
+      "bytes": 7807,
+      "lines": 148,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/frontmatter-lint-all.sh",
+      "group": "tests",
+      "bytes": 3855,
+      "lines": 113,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/full-engineering-pass-contract.sh",
+      "group": "tests",
+      "bytes": 3548,
+      "lines": 101,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/handoff-cap-wired.sh",
+      "group": "tests",
+      "bytes": 6003,
+      "lines": 123,
+      "skill_refs": [
+        "handoff-size-check"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/hooks-registration-safe.sh",
+      "group": "tests",
+      "bytes": 4356,
+      "lines": 93,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/manifest-identity.sh",
+      "group": "tests",
+      "bytes": 4125,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/no-swedish.sh",
+      "group": "tests",
+      "bytes": 5103,
+      "lines": 91,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/orientator-decisions-audited.sh",
+      "group": "tests",
+      "bytes": 2202,
+      "lines": 64,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/pack-resolver-fallbacks.sh",
+      "group": "tests",
+      "bytes": 636,
+      "lines": 21,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/sc-module-contract.sh",
+      "group": "tests",
+      "bytes": 4078,
+      "lines": 131,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/schema-versioned-contracts.sh",
+      "group": "tests",
+      "bytes": 2024,
+      "lines": 52,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/scope-phase-present.sh",
+      "group": "tests",
+      "bytes": 4488,
+      "lines": 90,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/session-protocol-parity.sh",
+      "group": "tests",
+      "bytes": 414,
+      "lines": 11,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/skill-descriptions-trigger.sh",
+      "group": "tests",
+      "bytes": 3096,
+      "lines": 58,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/ta-module-contract.sh",
+      "group": "tests",
+      "bytes": 3589,
+      "lines": 111,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/tq-module-contract.sh",
+      "group": "tests",
+      "bytes": 3888,
+      "lines": 88,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/uniformity-coverage.sh",
+      "group": "tests",
+      "bytes": 9234,
+      "lines": 225,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/welcome-wiring.sh",
+      "group": "tests",
+      "bytes": 2346,
+      "lines": 38,
+      "skill_refs": [
+        "cli-fingerprint",
+        "cycle",
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/wiki-regenerates-clean.sh",
+      "group": "tests",
+      "bytes": 1800,
+      "lines": 56,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/shape/workflow-root-has-navigation.sh",
+      "group": "tests",
+      "bytes": 1808,
+      "lines": 51,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/agents-categorized.sh",
+      "group": "tests",
+      "bytes": 2440,
+      "lines": 84,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/aliases-resolve.sh",
+      "group": "tests",
+      "bytes": 5968,
+      "lines": 198,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/auto-decide.sh",
+      "group": "tests",
+      "bytes": 1443,
+      "lines": 25,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/brief-forge-evaluator-runs.sh",
+      "group": "tests",
+      "bytes": 5760,
+      "lines": 179,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/capture-vault-sink.sh",
+      "group": "tests",
+      "bytes": 3146,
+      "lines": 102,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/catalog-generator.sh",
+      "group": "tests",
+      "bytes": 1538,
+      "lines": 35,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cli-tiers.sh",
+      "group": "tests",
+      "bytes": 2830,
+      "lines": 48,
+      "skill_refs": [
+        "welcome"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/closeout-additions-present.sh",
+      "group": "tests",
+      "bytes": 2772,
+      "lines": 89,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cohort5-partial-skills-present.sh",
+      "group": "tests",
+      "bytes": 2328,
+      "lines": 72,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cohort6-fas3-skills-present.sh",
+      "group": "tests",
+      "bytes": 2656,
+      "lines": 90,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/compat-audit-ranges.sh",
+      "group": "tests",
+      "bytes": 2983,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/context-checkpoint-roundtrip.sh",
+      "group": "tests",
+      "bytes": 2597,
+      "lines": 59,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/context-repository-ownership.sh",
+      "group": "tests",
+      "bytes": 3493,
+      "lines": 65,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/context-warm-skills-present.sh",
+      "group": "tests",
+      "bytes": 2792,
+      "lines": 96,
+      "skill_refs": [
+        "context-warm"
+      ],
+      "tool_terms": [
+        "WebFetch"
+      ]
+    },
+    {
+      "path": "tests/unit/copilot-capabilities.sh",
+      "group": "tests",
+      "bytes": 703,
+      "lines": 14,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/customer-data-gate.sh",
+      "group": "tests",
+      "bytes": 2981,
+      "lines": 60,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cycle-continuity.sh",
+      "group": "tests",
+      "bytes": 5767,
+      "lines": 99,
+      "skill_refs": [
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cycle-footer.sh",
+      "group": "tests",
+      "bytes": 9957,
+      "lines": 147,
+      "skill_refs": [
+        "build",
+        "cycle"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/cycle-skills-present.sh",
+      "group": "tests",
+      "bytes": 2281,
+      "lines": 75,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/da-routing.sh",
+      "group": "tests",
+      "bytes": 5154,
+      "lines": 133,
+      "skill_refs": [
+        "da"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/design-dna-search.sh",
+      "group": "tests",
+      "bytes": 3419,
+      "lines": 63,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/design-locks-cohort3.sh",
+      "group": "tests",
+      "bytes": 2129,
+      "lines": 74,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/design-tokens-emit.sh",
+      "group": "tests",
+      "bytes": 3075,
+      "lines": 54,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/design-validator.sh",
+      "group": "tests",
+      "bytes": 4843,
+      "lines": 95,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/dh-routing.sh",
+      "group": "tests",
+      "bytes": 4866,
+      "lines": 111,
+      "skill_refs": [
+        "dh"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/enterprise-pack-resolution.sh",
+      "group": "tests",
+      "bytes": 7977,
+      "lines": 155,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/envelope-schema-validates.sh",
+      "group": "tests",
+      "bytes": 5701,
+      "lines": 217,
+      "skill_refs": [
+        "plan"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/frontend-design-surface-hook.sh",
+      "group": "tests",
+      "bytes": 6660,
+      "lines": 204,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/frontend-skills-present.sh",
+      "group": "tests",
+      "bytes": 7968,
+      "lines": 206,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/frontmatter-boundaries.sh",
+      "group": "tests",
+      "bytes": 1204,
+      "lines": 35,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/full-engineering-pass-dag.sh",
+      "group": "tests",
+      "bytes": 4368,
+      "lines": 136,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/generate-skills-present.sh",
+      "group": "tests",
+      "bytes": 5220,
+      "lines": 151,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/hook-gate-content.sh",
+      "group": "tests",
+      "bytes": 5345,
+      "lines": 101,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/hook-input-adapter.sh",
+      "group": "tests",
+      "bytes": 4011,
+      "lines": 62,
+      "skill_refs": [],
+      "tool_terms": [
+        "Bash"
+      ]
+    },
+    {
+      "path": "tests/unit/hook-patterns.sh",
+      "group": "tests",
+      "bytes": 4741,
+      "lines": 78,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/hook-push-history.sh",
+      "group": "tests",
+      "bytes": 12848,
+      "lines": 219,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/jobs-registry-concurrency.sh",
+      "group": "tests",
+      "bytes": 2873,
+      "lines": 68,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "tests/unit/jobs-steps.sh",
+      "group": "tests",
+      "bytes": 8840,
+      "lines": 209,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/jobs-system-present.sh",
+      "group": "tests",
+      "bytes": 5194,
+      "lines": 173,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/li-doctor-smoke.sh",
+      "group": "tests",
+      "bytes": 2546,
+      "lines": 53,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/memory-v2.sh",
+      "group": "tests",
+      "bytes": 5630,
+      "lines": 106,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/observation-spine-skills-present.sh",
+      "group": "tests",
+      "bytes": 3041,
+      "lines": 92,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/obsidian-patterns.sh",
+      "group": "tests",
+      "bytes": 3445,
+      "lines": 67,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/orientator-mechanical-routing.sh",
+      "group": "tests",
+      "bytes": 6054,
+      "lines": 112,
+      "skill_refs": [
+        "cycle",
+        "review"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/pack-inheritance-depth-3.sh",
+      "group": "tests",
+      "bytes": 6537,
+      "lines": 245,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/pack-resolver-fallbacks.sh",
+      "group": "tests",
+      "bytes": 9660,
+      "lines": 316,
+      "skill_refs": [],
+      "tool_terms": [
+        "Read"
+      ]
+    },
+    {
+      "path": "tests/unit/phase-a-naming-migration.sh",
+      "group": "tests",
+      "bytes": 4800,
+      "lines": 92,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/plugin-manifests-valid.sh",
+      "group": "tests",
+      "bytes": 3539,
+      "lines": 128,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/review-source-target.sh",
+      "group": "tests",
+      "bytes": 4134,
+      "lines": 76,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/sc-routing.sh",
+      "group": "tests",
+      "bytes": 5613,
+      "lines": 141,
+      "skill_refs": [
+        "sc"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/scale-calibration.sh",
+      "group": "tests",
+      "bytes": 7871,
+      "lines": 140,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/scale-estimator.sh",
+      "group": "tests",
+      "bytes": 5411,
+      "lines": 96,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/session-protocol-sync.sh",
+      "group": "tests",
+      "bytes": 3479,
+      "lines": 63,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/ta-routing.sh",
+      "group": "tests",
+      "bytes": 4446,
+      "lines": 118,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/test-runner-contract.sh",
+      "group": "tests",
+      "bytes": 1552,
+      "lines": 38,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/tq-routing.sh",
+      "group": "tests",
+      "bytes": 4196,
+      "lines": 103,
+      "skill_refs": [
+        "tq"
+      ],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/v37-closeout-additions-present.sh",
+      "group": "tests",
+      "bytes": 5103,
+      "lines": 132,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/wiki-gen-idempotency.sh",
+      "group": "tests",
+      "bytes": 1294,
+      "lines": 23,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/work-artifacts.sh",
+      "group": "tests",
+      "bytes": 2566,
+      "lines": 48,
+      "skill_refs": [],
+      "tool_terms": []
+    },
+    {
+      "path": "tests/unit/workflow-root-and-trio.sh",
+      "group": "tests",
+      "bytes": 3607,
+      "lines": 108,
+      "skill_refs": [],
+      "tool_terms": [
+        "AskUserQuestion"
+      ]
+    }
+  ]
+}

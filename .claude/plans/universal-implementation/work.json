@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/universal-implementation/spec.md",
+  "plan": ".claude/plans/universal-implementation/plan.md",
+  "tasks": ".claude/plans/universal-implementation/plan.md",
+  "prompt": ".claude/plans/universal-implementation/prompt.md"
+}

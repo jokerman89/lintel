@@ -1,146 +1,50 @@
-# Pack-defaults — the neutral skeleton every workflow can fall back to
+# Pack defaults: a validated neutral baseline
 
-**Last updated:** 2026-05-29 (v4.0 Phase 1)
-**Status:** Concept doc — referenced by `packs/_default/pack.yaml`, `lib/pack-resolver.sh`, `skills/cycle/SKILL.md` (meta-infra mode)
+**Last updated:** 2026-09-20
 
-> Lintel as scaffolding has no opinions about voice, compliance, brand, or roles — those belong to whoever uses it. The `_default` pack is the **explicit neutral skeleton** that says "these are the fields a pack can set, and here is the harmless value Lintel falls back to when nothing sets them." It is the contract for what a pack must declare to be a pack.
+`packs/_default/pack.yaml` is the company-neutral baseline. It lets a first-time
+operator use Lintel without a company pack, global configuration or private data.
+It is data that must load and validate, not a set of hardcoded emergency values.
 
-## The problem
+The current manifest supplies internal voice, advisory compliance, no company
+control hooks, no brand/corpus/role paths, the ordinary `cycle` workflow, disabled
+external capture and extension awareness, and generic handoff evaluator settings.
+The manifest is the field reference; this page does not maintain a competing copy.
+Control/extension declarations alone never prove execution or install hooks.
 
-Every workflow in Lintel reads "pack-shaped" inputs — voice tier, compliance hooks, persona corpus, role inventory, brand language, knowhow domains, lessons surface, opinions, navigation tuning, brief-forge handoffs. Before v4.0 those values were inlined wherever they were needed:
+## Two legitimate uses
 
-- A specific company voice baked into customer-facing skill copy.
-- Compliance gate names hardcoded into REVIEW.
-- A persona corpus assumed present, with skills referring to personas by name.
-- Navigation budget assumed by orientator.
+With no selected profile, the resolver loads valid `_default`. For another valid
+pack, it supplies only missing optional fields. Declaring a child block replaces
+the parent's whole block; neutral field defaults are not deep inheritance from
+that parent. Explicit null/false/empty/list values remain explicit.
 
-That meant Lintel-the-harness and one company's identity were tangled. Two consequences:
+A pack can also explicitly `extends: _default` when it wants ordinary inheritance.
+Every manifest still declares its own identity. See [inheritance](pack-inheritance.md).
 
-1. A second pack (e.g. Foo Corp) could not be added without forking Lintel.
-2. A first-time operator on a clean repo with no active pack would crash on missing values instead of getting a sane neutral fallback.
+## Failure is not first use
 
-## The model
+Repository `.claude/profile-requirements.json` or explicit `LINTEL_PROFILE_PACK`
+selection makes policy required before its manifest is read. Missing, malformed
+or incompatible required policy cannot become advisory success.
 
-```
-packs/
-├── _default/
-│   └── pack.yaml          ← neutral skeleton, lives in the harness, never edited per-customer
-├── <company>/
-│   └── pack.yaml          ← voice corpus + compliance gates + personas + brand
-└── <future-pack>/
-    └── pack.yaml
-```
+Only a legacy optional active-pack preference can fall back after a failed load,
+with `OPTIONAL_PROFILE_FALLBACK` and an explicit recorded fallback status. An invalid
+neutral baseline is an error, even when the requested pack is optional. Once bound,
+changed inputs block until explicit rebind/replan, rather than silently falling back.
+[ADR-0029](../../.claude/decisions/0029-required-profile-context.md) records this
+intentional change from the old emergency-success cache.
 
-The active pack is selected by `~/.lintel/active-pack` (a single-line file naming a packs/ directory). When no active pack is selected, `_default` is used.
+## Authoring and compatibility
 
-`_default/pack.yaml` carries every declarable field with a neutral or empty value. The harness assumes nothing beyond what `_default` declares.
+Create a separate named pack for team policy instead of editing the shipped neutral
+manifest. An explicitly configured local `_default` override still participates in
+normal source precedence and validation; its content is pinned like any other source.
+`lib/pack-schema.yaml` declares schema-1 and resolver feature contracts independently
+of public product versions. Historical `requires_lintel: ">=4.0.0"` is a legacy
+pack-v1 marker, not a demand for current public v4.
 
-## What `_default` declares
-
-```yaml
-schema_version: "4.0"
-requires_lintel: ">=4.0.0"
-
-voice:
-  tier_default: internal          # internal | mixed | custom | <pack-defined>
-  corpus: []                       # no brand corpus by default
-  gates_active: []                 # no voice gates unless pack opts in
-
-compliance:
-  hooks_active: []                 # no compliance gates unless pack opts in
-  audit_paths: []
-
-persona:
-  inventory: []                    # no personas by default
-  corpus_path: null
-
-roles:
-  active: []
-  inventory_path: null
-
-brand:
-  name: null
-  short: null
-  copy_tone: neutral
-
-knowhow:
-  domains: []
-  corpus_path: null
-
-lessons:
-  surface_on_sense: true           # generic mechanism, always on
-  paths: [".claude/memory/lessons.md"]
-
-opinions:
-  inventory: []
-
-navigation:
-  orientator_budget_tokens: 2000
-  escalation_threshold: medium      # low | medium | high
-
-brief_forge_handoffs:
-  budget_tokens: 5000
-  cold_path_bypass: true            # operator can skip Brief Forge with --no-handoff
-  types:
-    - operator_to_skill              # standard hand-off
-    - skill_to_skill                 # within-cycle propagation
-    - skill_to_agent                 # spawn-time brief
-    - cycle_to_cycle                 # resume context
-    - external_to_cycle              # cold ingestion (chat-import etc.)
-```
-
-Every field is declared even when empty. That is the contract: a pack overriding `_default` sees the full surface area it can opt into. A new pack author copies `_default/pack.yaml`, fills in what they want, and ships.
-
-## How resolution works
-
-`lib/pack-resolver.sh` is the only path through which scaffolding reads pack values. Workflows never `grep packs/ directly`. The resolver:
-
-1. Reads `~/.lintel/active-pack` (or returns `_default` if missing).
-2. Validates the pack file exists, parses, and declares required fields. On failure: warn + fall back to `_default`.
-3. Caches the resolved values per-session in `${LINTEL_HOME}/sessions/<session-id>-pack-cache.yaml`.
-4. Serves `resolve_pack_field <dotted.path>` calls from cache; falls back to `_default` if the active pack omits the path; falls back to a hardcoded resolver default if `_default` itself is malformed.
-
-Three layers of fallback (active → `_default` → hardcoded) means a missing or broken pack never crashes a workflow — it degrades.
-
-See [pack-resolver.md](pack-resolver.md) for the resolution machinery in detail.
-
-## What `_default` does not declare
-
-Anything that requires a value to function. If Lintel cannot proceed without a value, the resolver fails loud rather than guessing.
-
-Examples:
-- `voice.gates_active` is `[]` in `_default` because no voice gate is required to ship.
-- `compliance.hooks_active` is `[]` in `_default` because no compliance gate is required to ship.
-- `persona.inventory` is `[]` because persona-bound skills check inventory before referencing personas.
-
-A workflow that requires a value the resolver cannot produce (active pack didn't set it, `_default` didn't declare it) must surface the gap, not silently substitute.
-
-## Why this matters for meta-infra mode
-
-Changes to `_default/pack.yaml` ripple to every downstream cycle on every pack. That is why edits to `packs/_default/` automatically activate meta-infra mode (Gate M1 structure-impact, M2 compatibility audit). A field added to `_default` is a new contract surface; a field renamed in `_default` breaks every pack that referenced the old name.
-
-The structure-changes/<date>-<slug>.md entry for any `_default` edit must document:
-- What changed (field added/removed/renamed)
-- Backward-compat (will existing packs still resolve?)
-- Migration path (how should pack authors update?)
-- Forward-compat (does the new shape leave room?)
-
-## Integration points
-
-**Reads:**
-- `packs/_default/pack.yaml` — declared by the harness, never edited per-customer
-- `packs/<active>/pack.yaml` — declared per pack
-- `~/.lintel/active-pack` — single-line pack name
-
-**Writes:**
-- `${LINTEL_HOME}/sessions/<session-id>-pack-cache.yaml` — session-scoped cache
-
-**Triggers:**
-- Every workflow that needs pack-shaped input calls `resolve_pack_field` from `lib/pack-resolver.sh`
-
-## Anti-patterns
-
-- **Inlining pack values into workflows** — every reference goes through the resolver
-- **Editing `_default` per-customer** — `_default` is the harness contract; per-customer values live in a real pack
-- **Adding a field to `_default` without a structure-changes entry** — every `_default` edit is meta-infra mode
-- **Falling back silently when a required field is missing** — surface the gap, do not guess
+Frozen-zone changes need compatibility and shape evidence. The extension shape test,
+fallback/inheritance tests and Universal profile-context integration test cover the
+neutral and failure boundaries. Passing them does not certify a live company profile,
+host policy enforcement, client discovery or a renderer.

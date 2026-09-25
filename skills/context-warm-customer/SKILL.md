@@ -23,11 +23,18 @@ You are the context-warm-customer skill — customer-engagement repo loader.
 
 ## Workflow
 
-### Step 1 — Locate customer repo
+### Step 1 — Establish scope, then locate the authorized repo
+
+Confirm the requested customer/source boundary and data-handling authority before lookup.
+An engagement name is not permission to search a user's home. Reuse prior explicit
+authorization; missing authorization blocks reading regardless of advisory/hard pack mode.
 
 ```bash
-engagement="$1"  # e.g., "acme" or full path
-default_root="${LINTEL_CUSTOMER_ROOT:-~/Workspace}"
+engagement="${1:?Supply an authorized engagement name}"
+default_root="${LINTEL_CUSTOMER_ROOT:?Set the explicitly authorized customer root, or use --path}"
+case "$engagement" in ''|*[!A-Za-z0-9_-]*)
+  echo 'Use a simple engagement name or an explicitly selected --path.' >&2; exit 1 ;;
+esac
 
 customer_repo=""
 for candidate in \
@@ -45,7 +52,14 @@ fi
 
 ### Step 2 — Sensitivity check
 
-If the active pack's compliance mode is `hard` (`resolve_pack_field compliance.mode`): verify customer repo's `.gitignore` excludes customer-PII patterns. If patterns present in tracked files: warn + ask confirm.
+Read the active pack's actual requirements, including `resolve_pack_field compliance.mode`.
+Verify the proposed selection is authorized and excludes forbidden customer data. A detected
+forbidden pattern or an unavailable mandatory check blocks the affected read.
+
+`.gitignore` is not proof that tracked or untracked content is safe. Evaluate the actual
+selected files against current policy before sending them to any model/tool. An unresolved
+mandatory control blocks loading; a generic "continue" cannot bypass it. An explicit
+`--path` selects that single repository instead of the configured-name lookup above.
 
 ### Step 3 — Identify relevant files (limited scope)
 
@@ -56,6 +70,14 @@ Default load set:
 - `recent git log --oneline -20`
 
 Operator can override with `--scope <pattern>` flag.
+
+Use the trusted-source `_context.sh` reader with `LINTEL_REPO_ROOT` set to the approved
+customer path for this invocation. Pass each path/glob separately to `context_select`;
+never source executable helpers from that customer repository. This proves containment,
+link/reparse refusal, actual file sizes and bounded selection before the read.
+For ADRs use `--adr-status active --limit 10`, keeping unknown metadata visible. Preview
+the bounded infra candidates and choose at most 20 by reported size; do not hide omitted
+or unmatched patterns. The recent Git log is a separate explicitly scoped read.
 
 ### Step 4 — Estimate + confirm
 
@@ -74,9 +96,9 @@ Load all? (Y / select subset / cancel)
 
 ### Step 5 — Delegate to context-warm
 
-```bash
-/li:context-warm <selected-files>
-```
+Delegate the literal selected manifest paths to `/li:context-warm` in that same approved
+root. Source estimates do not assert host capacity. A missing/unreadable source stays
+incomplete; never silently expand to another customer repository.
 
 ### Step 6 — 00-state.md append + audit log
 
@@ -85,17 +107,27 @@ event: context_warm_customer
 engagement: <name>
 repo_path: <path>
 files_loaded: <N>
-tokens_added: <approx>
+estimated_input_tokens: <source-byte heuristic, not observed active usage>
 sensitivity_check: <result>
 ```
 
 Also append one traceability line via the unified writer:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log customer-repo-access context_warm engagement=<name> repo=<path> files_loaded=<N> sensitivity_check=<result>
+source "${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}/bin/_audit.sh"
+: "${caller_root:?Set the authorized caller audit root}"
+: "${approved_source_id:?Set a non-sensitive source identifier}"
+: "${files_loaded:?Set the actual successful read count}"
+: "${sensitivity_result:?Set the actual check outcome}"
+LINTEL_REPO_ROOT="$caller_root" audit_log customer-repo-access context_warm \
+  "source_id=$approved_source_id" "files_loaded=$files_loaded" "sensitivity_check=$sensitivity_result"
 # → .claude/runtime/audit/customer-repo-access.jsonl
 ```
+
+Use the caller's authorized audit location, not a write into a read-only customer source.
+Record minimal source identifiers and outcomes; do not copy customer content, credentials
+or private path details into public artifacts. Audit schema/host integration is separate
+from permission to read the selected sources.
 
 ## Pause-points
 

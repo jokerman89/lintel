@@ -72,7 +72,7 @@ done
 # ─── Scenario 5: 3 raise-help triggers ──────────────────────────────────
 echo ""
 echo "[5] Raise-help triggers"
-for trigger in high_severity_threat_without_mitigation compliance_evidence_gap_in_required_framework secret_with_no_rotation_path; do
+for trigger in high_severity_threat_without_mitigation required_policy_unresolved secret_without_authorized_response; do
   if grep -q "$trigger" "$SC"; then
     pass "raise-help: $trigger"
   else

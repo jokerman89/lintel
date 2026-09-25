@@ -31,22 +31,19 @@ Surfaces a table for selection.
 
 ## Workflow
 
-### Step 1 — Collect role files
+### Step 1 — Call the source-owned inventory
 
 ```bash
-roles=()
-# Pack-provided (resolve_pack_field roles.source — empty in _default)
-PACK_ROLES_DIR="$(resolve_pack_field roles.source)"
-if [ -n "$PACK_ROLES_DIR" ]; then
-  for f in "$PACK_ROLES_DIR"/*.md; do [ -f "$f" ] && roles+=("$f"); done
-fi
-# Public in home
-for f in "$LINTEL_HOME"/roles/*.md; do [ -f "$f" ] && roles+=("$f"); done
-# Private in home
-for f in "$LINTEL_HOME"/roles/private/*.md; do [ -f "$f" ] && roles+=("$f"); done
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" role-list
 ```
 
-### Step 2 — Parse frontmatter per role
+Follow [lifecycle paths](../../docs/lifecycle.md). Add `--include-private` only when
+the operator requested private metadata or approves it for this session. The helper
+reads bounded frontmatter only, resolves pack-relative paths through field provenance,
+preserves duplicate IDs as shadowed rows and never binds a profile or changes preferences.
+
+### Step 2 — Display metadata per role
 
 For each role file, extract:
 - `role_id`
@@ -81,13 +78,11 @@ To create new role: /li:role-new
 
 If cycle is mid-DEFINE for a customer-facing mode, surface a pack-provided role whose audience matches (if the active pack defines one): "Recommended for current phase: <role-id> (matches customer-facing audience)."
 
-### Step 5 — 00-state.md append (light, optional)
+### Step 5 — Preserve read-only behavior
 
-```yaml
-event: roles_listed
-ts: <timestamp>
-role_count: <N>
-```
+Do not write an event or a guessed active role to the work ledger. A null profile
+reference is an unbound read; malformed metadata/preferences or profile drift remain
+visible errors, not an empty or healthy inventory.
 
 ## Integration
 
@@ -98,7 +93,7 @@ role_count: <N>
 - `~/.lintel/profile.yaml` (active role)
 
 **Writes:**
-- Optional `.claude/runtime/state/00-state.md` event
+- stdout only; no preference, ledger or private synchronization mutation
 
 ## Anti-patterns
 

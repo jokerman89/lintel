@@ -14,11 +14,11 @@ You are the context-warm-adrs skill.
 
 - Pre-PLAN when wedge touches area with prior ADRs
 - DEFINE phase if operator suspects related prior decision
-- Cross-repo ADR scan (sometimes via `bin/li-lessons-sync`-style remote)
+- Explicitly authorized cross-repository ADR comparison, read-only; no implicit sync/remote
 
 ## When NOT to use
 
-- No ADR directory exists (skip silently)
+- No ADR directory exists (report missing architecture context rather than an empty verified set)
 - ADRs already loaded by SENSE (already in context)
 
 ## Workflow
@@ -26,18 +26,15 @@ You are the context-warm-adrs skill.
 ### Step 1 — Scan ADRs by topic match
 
 ```bash
-topic="$1"
-
-# Find ADRs with topic in title or body
-matched_adrs=$(grep -rli "$topic" .claude/decisions/*.md 2>/dev/null)
-
-# Per match, extract metadata
-for adr in $matched_adrs; do
-  num=$(basename "$adr" | sed 's/^\([0-9]*\)-.*/\1/')
-  title=$(grep '^# ' "$adr" | head -1 | sed 's/^# //')
-  status=$(grep -i '^status:' "$adr" | head -1)
-  ts=$(grep -i '^date:' "$adr" | head -1)
-done
+source "${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}/bin/_context.sh"
+topic="${1:?Supply a literal topic}"
+root=$(_context_repo_identity) || exit 1
+adrs=$(lintel_decisions_dir) || exit 1
+case "$adrs" in "$root"/*) relative="${adrs#"$root"/}" ;;
+  *) echo 'ADR directory is outside the selected repository.' >&2; exit 1 ;;
+esac
+context_select --glob "$relative/[0-9]*.md" --topic "$topic" \
+  --adr-status "${2:-active}" --limit 10
 ```
 
 ### Step 2 — Filter by status
@@ -46,6 +43,13 @@ Operator can flag:
 - `--accepted-only`: just Accepted ADRs
 - `--include-deprecated`: include Deprecated/Superseded
 - Default: Accepted + Proposed
+
+Map these skill flags to helper `--adr-status accepted`, `all` or `active`, respectively.
+The shared metadata reader recognizes YAML fields, `**Status:** Accepted (date)` and
+bullet-style `- **Status:** Accepted` / `- **Date:** ...`. Unknown/missing metadata stays
+visible as **unknown**, including under accepted-only: do not pretend it is accepted or
+silently discard a potentially binding decision. Inspect those candidates before relying
+on the filter. Superseded/deprecated sources remain explicitly recoverable with `all`.
 
 ### Step 3 — Surface candidate list
 
@@ -65,9 +69,9 @@ Load all? (Y / accepted only / select subset / cancel)
 
 ### Step 4 — Delegate to context-warm
 
-```bash
-/li:context-warm <selected-adrs>
-```
+Pass each selected manifest path as a separate literal `--path` to `/li:context-warm`.
+Show the exact root, matched paths, omitted count and metadata uncertainty. Missing
+files, an absent ADR directory or an unsupported status is not evidence of no constraints.
 
 ### Step 5 — 00-state.md append
 
@@ -75,7 +79,7 @@ Load all? (Y / accepted only / select subset / cancel)
 event: context_warm_adrs
 topic: <topic>
 adrs_loaded: <N>
-tokens_added: <approx>
+estimated_input_tokens: <source-byte heuristic; capacity unknown unless observed>
 ```
 
 ## Integration

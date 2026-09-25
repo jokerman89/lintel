@@ -15,7 +15,8 @@ echo "==========================================="
 
 command -v git >/dev/null 2>&1 || { echo "  SKIP: git unavailable"; exit 0; }
 
-TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1; trap 'rm -rf "$TMP"' EXIT
 # A sandbox repo with NO v5 layout marker → _context falls back to
 # $LINTEL_HOME/sessions/<branch>/ (lintel_sessions_dir's documented fallback).
 export LINTEL_HOME="$TMP/lintel-home"

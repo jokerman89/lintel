@@ -63,3 +63,66 @@ fi
 warm_output=$(cd "$b"; LINTEL_SOURCE_ROOT="$review_source" LINTEL_REPO_ROOT="$a" bash "$warm_script" 3)
 [ "$warm_output" = "$(printf 'shared\n%s\n%s' "$local_old" "$pa")" ]
 echo 'PASS: warm skill uses target branch, ownership filtering, and bounded selection'
+
+fixed_save() {
+  date() { printf '22000101-000000\n'; }
+  context_save_path collision
+}
+first=$(in_repo "$a" fixed_save)
+second=$(in_repo "$a" fixed_save)
+[ "$first" != "$second" ]
+[ -f "$first" ] && [ ! -s "$first" ]
+[ "$(in_repo "$a" context_latest)" = "$local_old" ]
+printf 'first completed checkpoint\n' > "$first"
+printf 'second completed checkpoint\n' > "$second"
+[ "$(in_repo "$a" context_latest)" = "$second" ]
+in_repo "$a" context_checkpoint "$second" >/dev/null
+echo 'PASS: same-time reservations do not clobber; empty interrupted saves stay undiscoverable'
+
+if in_repo "$a" context_checkpoint "$legacy" >/dev/null 2>&1; then
+  echo 'FAIL: foreign checkpoint was automatically admitted'; exit 1
+fi
+in_repo "$a" context_checkpoint --explicit "$legacy" >/dev/null
+if in_repo "$a" context_list '../escape' >/dev/null 2>&1; then
+  echo 'FAIL: branch traversal accepted'; exit 1
+fi
+if in_repo "$a" context_select --root "$b" --path 'private.md' >/dev/null 2>&1; then
+  echo 'FAIL: selection argument replaced the target scope'; exit 1
+fi
+echo 'PASS: explicit historical reads survive; branch traversal and implicit scope replacement fail'
+
+plain="$review_tmp/plain folder"
+unborn="$review_tmp/unborn"
+mkdir -p "$plain" "$unborn"
+git -C "$unborn" init -q
+git -C "$unborn" symbolic-ref HEAD refs/heads/not-yet-committed
+[ "$(in_repo "$plain" _context_branch)" = no-branch ]
+[ "$(in_repo "$plain" _context_repo_slug)" = 'plain folder' ]
+plain_save=$(in_repo "$plain" context_save_path notes)
+printf 'plain-directory checkpoint\n' > "$plain_save"
+[ "$(in_repo "$plain" context_latest)" = "$plain_save" ]
+[ "$(in_repo "$unborn" _context_branch)" = not-yet-committed ]
+unborn_save=$(in_repo "$unborn" context_save_path notes)
+printf 'unborn-branch checkpoint\n' > "$unborn_save"
+[ "$(in_repo "$unborn" context_latest)" = "$unborn_save" ]
+echo 'PASS: plain folders and unborn branches retain usable checkpoint paths'
+
+git -C "$a" checkout -q --detach HEAD
+[ "$(in_repo "$a" _context_branch)" = HEAD ]
+detached=$(in_repo "$a" context_save_path detached)
+case "$detached" in */HEAD/*-detached-context-save.md) ;; *)
+  echo 'FAIL: detached HEAD checkpoint has the wrong bucket'; exit 1 ;;
+esac
+printf 'detached checkpoint\n' > "$detached"
+[ "$(in_repo "$a" context_latest)" = "$detached" ]
+[ "$(in_repo "$a" context_list HEAD)" = "$detached" ]
+in_repo "$a" context_checkpoint "$detached" >/dev/null
+warm_output=$(cd "$b"; LINTEL_SOURCE_ROOT="$review_source" LINTEL_REPO_ROOT="$a" bash "$warm_script" 1)
+[ "$warm_output" = "$(printf 'HEAD\n%s' "$detached")" ]
+git -C "$a" checkout -q shared
+[ "$(in_repo "$a" context_latest)" = "$second" ]
+[ "$(in_repo "$a" context_list HEAD)" = "$detached" ]
+if in_repo "$a" context_list 'HEAD/../escape' >/dev/null 2>&1; then
+  echo 'FAIL: detached sentinel bypassed path validation'; exit 1
+fi
+echo 'PASS: detached HEAD save, discovery and warming preserve the historical HEAD bucket'

@@ -21,7 +21,10 @@ The first two lines are the whole game — they earn the click or the post dies 
 
 ## What this agent does
 
-Drafts LinkedIn posts in three lengths: short (≤150 words, hook-only), mid (300-600 words, story), long (1000+ words, POV piece). The active pack's voice tier (default: internal). Hashtag-light, no emoji-spam.
+Drafts short hooks, medium stories or longer POV material. First select the actual
+surface (feed post versus article/newsletter), verify its current character/media
+constraints and count the final payload including links/hashtags. A long article
+is not a valid feed post merely because it fits a word-count template.
 
 ## When to invoke
 
@@ -48,13 +51,14 @@ Drafts LinkedIn posts in three lengths: short (≤150 words, hook-only), mid (30
 
 ## Workflow
 
-1. **Pick length.**
+1. **Pick surface and length from the brief and current publishing constraints.**
    - Short (hook-only): an observation, a number, a question
    - Mid: a story with 1 specific moment + lesson
    - Long: a POV piece, structured with multiple paragraphs + maybe a list
-2. **Open with hook.** First 2 lines visible before "read more". Must earn the click.
+2. **Open with a concrete hook.** Preview truncation varies with surface/device;
+   do not promise that an exact two-line character budget will always be visible.
 3. **Voice:** the pack's voice tier. Specific. No-jargon. No corporate speak.
-4. **CTA:** Comment-question or DM-ask or link.
+4. **Close:** use a question/link/ask only when it serves the brief, not as mandatory engagement bait.
 5. **Hashtags:** Max 3-5, relevant. No #ai #future #innovation soup.
 6. **Voice gate via the active pack's compliance gates (none by default).**
 
@@ -84,7 +88,8 @@ Drafts LinkedIn posts in three lengths: short (≤150 words, hook-only), mid (30
 
 **Stats:**
 - Word count: <N>
-- First-2-lines char count: <N> (target ≤200 for visibility)
+- Total character count: <N> against the verified surface limit/source/date
+- Preview opening: <observed in actual composer, or unverified>; two lines are device-dependent
 - Hashtag count: <N>
 
 **Pre-publish checklist:**
@@ -96,9 +101,14 @@ Drafts LinkedIn posts in three lengths: short (≤150 words, hook-only), mid (30
 
 ## Edge cases / what to do when blocked
 
-- **Numbers we can't share** — use percentages or directional terms ("more than half...").
+- **Numbers not cleared for disclosure** — omit or obtain an approved alternative;
+  percentages/directional phrasing do not authorize disclosure.
 - **Customer mentions** — explicit consent or no name.
 - **Controversial topic** — surface to comms team first.
+
+If a supported POV cannot fit the feed limit without losing its caveats, return a
+short feed draft plus a separately labelled article outline. Do not silently truncate
+the claim or assert that the article was published.
 
 ## Voice tier behavior
 

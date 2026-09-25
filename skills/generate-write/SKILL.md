@@ -19,9 +19,14 @@ You are the `generate-write` skill — second stage of the v3.5 shared content p
 
 ## What this skill does
 
-Reads outline.md (frontmatter + section/slide list with key_messages + voice_techniques) → writes content.md with titles + bodies + bullets + voice-annotated blocks. If `ppt` in target_formats, also produces speaker-notes.md with 40-80-word note per slide.
+Reads outline.md and its source material, then writes format-neutral content.md
+with complete arguments, titles, bodies, bullets and voice-annotated blocks.
+If `ppt` is in target_formats, speaker-notes.md retains the full supporting content
+and an optional presenter talk track. Notes have no universal word quota.
 
-Applies the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default) — voice modes, ground rules, and vocabulary blocklist as defined by the pack. Per-slide/per-section voice technique is picked from outline's `voice_technique` field; rewritten if missing or inappropriate. With no pack corpus, falls back to neutral ground-rules-only mode.
+Applies the verified active pack's configured voice requirements. Missing mandatory
+policy or corpus is a blocker, not neutral fallback. With no configured corpus,
+use neutral clarity advice; null voice techniques are valid, not missing policy.
 
 Used by `generate` orchestrator as Step 4, or solo when operator wants to evolve an existing outline into content.
 
@@ -41,6 +46,8 @@ Used by `generate` orchestrator as Step 4, or solo when operator wants to evolve
 ## Inputs
 
 - Required `--outline <path>` — outline.md from generate-outline
+- Optional `--brief <path>` — explicit source brief when it is not already resolvable from the outline's source references
+- Optional `--language <language-tag|name>` — output language choice; preserve citations, quotations and identifiers
 - Optional `--voice-corpus <path>` — voice guide reference (default: the active pack's voice corpus, `resolve_pack_field voice.corpus`; none by default)
 - Optional `--vocabulary-blocklist <path>` — words to never emit (default: voice-corpus default, if any)
 - Optional `--voice-tier <tier>` — voice tier (default: the active pack's voice tier, `internal` by default; upgraded per pack when `--customer-share` upstream)
@@ -68,18 +75,17 @@ source_outline_hash: <sha256 of outline.md>
 <!-- type: title -->
 <!-- key_message: <inherited> -->
 
-**Title:** <slide/section title, max 8 words, no period>
+**Title:** <section title preserving the source meaning>
 
-**Subtitle:** <optional, max 12 words>
+**Subtitle:** <optional context>
 
 **Body:**
-<paragraph body — max 40 words per section. Or null if bullets used instead.>
+<complete multi-paragraph reasoning, including tables, citations, code and material limitations as needed>
 
 **Bullets:**
-- <bullet 1 — max 12 words>
-- <bullet 2 — max 12 words>
+- <complete source-backed point>
+- <another point with its qualifications and evidence>
 - ...
-<max 4 bullets>
 
 **Data-viz:** <optional spec for charts/diagrams: type + axes + data-source>
 
@@ -88,6 +94,10 @@ source_outline_hash: <sha256 of outline.md>
 ```
 
 Each section/slide is a markdown subsection with HTML-comment annotations (`<!-- voice: ... -->`, `<!-- type: ... -->`, `<!-- key_message: ... -->`). Comments are machine-parseable by `generate-design` for layout-mapping and by `generate-qa` for voice-validation. They are stripped from final format output.
+Keep field names, section IDs and anchors unchanged. Body and Bullets may coexist;
+neither substitutes for the other when both carry facts. Markdown tables, citations
+and subordinate headings remain inside the relevant section, without a new content
+schema. `content.md` is the full source, not a slide summary.
 
 ## Speaker-notes.md schema (only if PPT in target_formats)
 
@@ -99,7 +109,7 @@ language: <inherited>
 
 ## §1 — <slide title>
 
-<40-80 words of conversational speaker notes. Presenter-voice — first-person plural ("vi"), conversational tone, transition cues to next slide.>
+<complete supporting reasoning, citations, table/claim context and material limitations; optional talk track and transition cues in the chosen language and voice>
 
 ## §2 — <slide title>
 ...
@@ -109,59 +119,71 @@ language: <inherited>
 
 Read the active pack's voice corpus at session start (`resolve_pack_field voice.corpus`; none by default). Apply whatever modes, ground rules, and mode-selection guidance the corpus defines.
 
-With **no pack corpus** (the neutral default), fall back to generic ground rules:
+With **no configured pack corpus** (the neutral default), use advisory ground rules:
 1. Strive for clarity
-2. Be concise
+2. Remove repetition, not evidence or reasoning
 3. Limit jargon
 4. Find the focus
 5. Have a perspective
 
 A pack corpus may additionally define named voice modes (mapped per section via the outline's `voice_technique` field) and a per-slide-type mode-selection table. Honor those when present.
 
-## Vocabulary blocklist (hard enforcement)
+## Vocabulary requirements
 
-Read the blocklist from the active pack's voice corpus, if it defines one. When present, zero matches allowed in output — hard-block on commit attempt if blocklist words appear. The corpus defines its own tiers (hard-block words, replace-words, phrase-patterns). With no pack corpus, the only baseline blocklist is the generic AI-tell vocabulary (e.g. delve, robust, comprehensive, leverage, utilize, "in today's rapidly evolving landscape") to keep output from drifting into LLM-style prose.
+Read the explicit blocklist or the verified corpus's tiers and applicability.
+Enforce mandatory requirements; keep advisory substitutions advisory. Neutral mode
+does not invent a hard vocabulary blocklist or a commit hook. Preserve quotations,
+technical terms and source evidence. If a required wording rule conflicts with a
+faithful quotation, surface the conflict rather than silently altering its meaning.
+Record controls through the [existing P05/P07 procedure](references/fidelity-and-evidence.md).
 
 ## Writing constraints
 
 | Element | Constraint |
 |---------|-----------|
-| Slide title | Max 8 words. No sentence-case period. |
-| Bullet point | Max 12 words per bullet. Max 4 bullets per slide. |
-| Body paragraph | Max 40 words per section. |
-| Speaker notes | 40-80 words per slide. Conversational. |
-| Overall | No jargon unless audience is technical. |
+| Source title/body/bullets | Preserve the complete argument, scope, units and citations; no universal word or bullet cap. |
+| Tables/code | Retain cells, headers, units, labels and code semantics; split across pages/slides only with explicit continuation. |
+| Presentation view | Compose a short visible view separately; every omitted detail stays in actual notes, an appendix or a linked long-form artifact. |
+| Speaker notes | Retain detail plus any requested talk track; use the selected language and voice, not a fixed pronoun. |
+| Overall | Explain terms for the audience without erasing necessary technical precision or uncertainty. |
 
 ## Workflow
 
 ### Step 1 — Read outline.md + voice corpus
 
-Parse outline.md frontmatter + section list. Load the active pack's voice corpus + blocklist if one is configured.
+Parse the frontmatter and section list. Read the complete referenced brief, claim
+ledger, citations and tables before writing. If a reference cannot be loaded, report
+the exact missing source rather than expanding key messages into invented evidence.
+Load configured voice context through P07; do not scan a personal profile directory.
 
 ### Step 2 — Per section: generate title + body
 
 For each §N section:
-- Generate title (respect 8-word + no-period rule)
-- Decide body vs bullets (data-heavy → bullets, narrative → body)
-- Apply voice technique from outline's `voice_technique` field
+- Generate an informative title and retain all source-backed arguments
+- Use paragraphs, bullets, tables or a combination according to the material
+- Apply a configured voice technique, if applicable; null is valid in neutral mode
 - Emit content with HTML-comment annotations
+- Check every source claim, reasoning step, citation, table and material limitation against the written section
 
 ### Step 3 — Vocabulary blocklist enforcement
 
-After generation, scan content for any blocklist matches. If found:
-- Tier 1 (hard-block words): regenerate the affected sentence with replacement
-- Tier 2 (replace words): apply substitution table
-- Tier 3 (phrase patterns): regenerate the affected paragraph
-
-Repeat until zero matches.
+Apply only the actual tier semantics and scope. Rewrites must retain claim meaning,
+qualifiers and sources. After at most three unsuccessful attempts, preserve the
+draft and report the unresolved requirement; do not convert it into a passing score.
 
 ### Step 4 — Generate speaker-notes.md if PPT target
 
-For each slide: write 40-80 words of conversational presenter notes. First-person plural ("vi"). Include transition cue to next slide (last sentence).
+For each §N, preserve the complete supporting content in notes, with citations and
+material limitations adjacent to the claim they qualify. Add a concise talk track
+only if useful. The PPT builder must write these notes into the actual PPTX; a
+sidecar that never reaches the deck is not sufficient. If content spans slides,
+retain the source section ID and record its slide/appendix locations without
+renumbering the canonical sections.
 
 ### Step 5 — Write content.md (+ speaker-notes.md) + return paths
 
-Write to `--out-dir`. Surface summary (word count, voice-tier, blocklist-pass) to operator.
+Write to `--out-dir`. Verify source hashes, retained content and the actual configured
+control outcomes. Report word count descriptively, never as proof of completeness.
 
 ## Voice tier behavior
 
@@ -169,20 +191,21 @@ If upstream `--customer-share`: voice_tier in content frontmatter is set to the 
 
 ## Status protocol
 
-- **DONE** — content.md (+ speaker-notes.md if PPT) written, all constraints passed, zero blocklist matches
-- **DONE_WITH_CONCERNS** — written but some constraint borderline (e.g., 4-bullet limit exceeded once, flagged for review)
-- **BLOCKED** — outline.md missing, malformed, or unreadable
+- **DONE** — source retention verified and all applicable mandatory writing controls satisfied
+- **DONE_WITH_CONCERNS** — written with advisory style/pacing concerns only
+- **BLOCKED** — outline/source missing, malformed or unreadable, or an applicable mandatory writing control failed or remains unverified
 - **NEEDS_CONTEXT** — `--voice-tier` ambiguous for content (e.g., outline says customer-bound but flag is `internal`)
 
 ## Pause-points
 
-- Outline has missing `voice_technique` on > 30% of sections: re-invoke generate-outline with that requirement
+- Required source or configured voice policy is unavailable: stop only the affected action
 - Blocklist enforcement loops > 3 iterations on same section: surface to operator for manual rewrite
 
 ## Integration
 
 **Reads:**
 - `outline.md` (from generate-outline)
+- Original brief and its explicit evidence/source references
 - The active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default)
 - The active pack's vocabulary blocklist (from the same corpus, if defined)
 
@@ -197,16 +220,16 @@ If upstream `--customer-share`: voice_tier in content frontmatter is set to the 
 
 ## Anti-patterns
 
-- **Emit blocklist words "for natural language"** — blocklist is hard-rule, zero-tolerance. Rewrite instead.
+- **Erase evidence to satisfy style advice** — mandatory policy comes from actual configuration; neutral advice cannot replace fidelity.
 - **Skip HTML-comment annotations** — downstream (generate-design, generate-qa) depends on them. They strip in format output.
 - **Generate format-specific markup (e.g., `<slide>` tags)** — content.md is format-agnostic. Format-specific markup belongs to per-format builders.
-- **Mix English + Swedish without `--language` override** — language must be consistent throughout.
+- **Force a language or pronoun** — preserve the brief/explicit language and applicable policy, including intentional multilingual content.
 - **Pre-bake speaker-notes for non-PPT runs** — speaker-notes.md only when ppt in target_formats.
 
 ## Failure recovery
 
-- Blocklist loops > 3 times on same sentence: emit `<!-- voice-loop-fail -->` annotation, leave for operator review, continue with rest
-- Voice corpus file missing: fall back to ground-rules-only mode (modes + techniques skipped), flag in frontmatter
+- Unresolved mandatory wording rule: retain the draft with a failing/unverified control; continue independent sections without claiming completion
+- Configured corpus missing: report load failure; required policy remains blocked. An optional absence is an explicit concern, not a verified activation
 - Outline malformed: surface error with specific line ref, exit BLOCKED
 
 ## Recommended next steps after invocation

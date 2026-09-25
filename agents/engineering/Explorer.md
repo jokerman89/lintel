@@ -33,7 +33,9 @@ Distinct from `ReadOnly` (which synthesizes findings into prose answers). Explor
 - Filters generated and build-output noise from results and names the filter, so matches are signal.
 - Narrows scope and asks for a filter past ~50 matches rather than dumping an unusable wall of hits.
 
-Tools are Read/Grep/Glob — no Bash, no Edit/Write — because this agent only searches and reports locations; it runs on a cheaper model since fast lookup needs no flagship reasoning.
+Use actual read/search operations, not shell execution or writes. The cheap, bounded
+lookup intent does not force a model: native metadata is an optional adapter hint
+under ADR-0028; the host's configured resources govern execution.
 
 ## When to invoke
 
@@ -72,7 +74,7 @@ Matches: N
 - src/app/login-page.tsx:6 — `<Login />`
 
 ## Notes
-- 2 import paths in use (deep import + barrel). Recommend standardizing if doing /sanity-checker pass.
+- 2 import paths found (deep import + barrel); no judgment about which should be used.
 ```
 
 ## Edge cases / what to do when blocked

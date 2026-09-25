@@ -58,17 +58,29 @@ add "Pack: ${pack} · mode: ${mode} · role: ${role}${compliance}"
 # v5 layout (ADR-0005): knowledge lives in .claude/; legacy paths are the
 # pre-migration fallback (grace window to 2026-09-12).
 _first_existing() { for p in "$@"; do [ -e "$p" ] && { printf '%s' "$p"; return; }; done; }
-LESSONS_FILE=""; MEMORY_FILE=""; DECISIONS_DIR=""
+MEMORY_FILE=""; DECISIONS_DIR=""
 if [ -n "$REPO_ROOT" ]; then
-  LESSONS_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/lessons.md" "$REPO_ROOT/tasks/lessons.md")"
   MEMORY_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/working-state.md" "$REPO_ROOT/tasks/memory.md")"
   DECISIONS_DIR="$(_first_existing "$REPO_ROOT/.claude/decisions" "$REPO_ROOT/docs/adr")"
 fi
 
-# Recent lessons (last 3 ## L-NNN headers)
-if [ -n "$LESSONS_FILE" ]; then
-  les="$(grep -E '^## L-[0-9]' "$LESSONS_FILE" 2>/dev/null | tail -3 \
-        | sed -E 's/^## //; s/ — / /' | paste -sd '|' - | sed 's/|/ · /g')"
+# Recent lessons: the three active lessons with the highest numeric IDs, read
+# through the one awk grammar in lib/memory.sh from the resolved project store
+# (own tree first, ADR-0008). Its stderr diagnostics are not part of the envelope.
+_memory_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/memory.sh"
+[ -f "$_memory_lib" ] || _memory_lib="$LINTEL_HOME/lib/memory.sh"
+LESSONS_REL=""
+if [ -n "$REPO_ROOT" ] && [ -f "$_memory_lib" ]; then
+  lesson_view="$( (
+    cd "$REPO_ROOT" 2>/dev/null || exit 0
+    # shellcheck disable=SC1090
+    source "$_memory_lib" || exit 0
+    root="$(lintel_repo_root)"; file="$(lintel_lessons_file)" || exit 0
+    printf '%s\n' "${file#"$root"/}"
+    lessons_recent 3
+  ) 2>/dev/null )"
+  LESSONS_REL="$(printf '%s\n' "$lesson_view" | head -1)"
+  les="$(printf '%s\n' "$lesson_view" | sed '1d' | sed -E 's/ (—|-) / /' | paste -sd '|' - | sed 's/|/ · /g')"
   [ -n "$les" ] && add "Recent lessons: $les"
 fi
 
@@ -127,26 +139,23 @@ if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/docs/migrations" ]; then
 fi
 
 # Current cycle position (setup-hardening 2026-06-14) — re-inject "where you were in the
-# loop" so a fresh/resumed/compacted session never loses the thread. Reuses the ONE
-# canonical segment selector (state_cycle_segment) — a second ledger parser here is the
-# shared-schema violation cycle-footer.sh warns about; we only read scalar fields off it.
-_state_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/state.sh"
-[ -f "$_state_lib" ] || _state_lib="$LINTEL_HOME/lib/state.sh"
-if [ -n "$REPO_ROOT" ] && [ -f "$_state_lib" ]; then
+# loop" so a fresh/resumed/compacted session never loses the thread. The line is the
+# shared status-grounded render_cycle_footer (no second ledger parser here), so a
+# STARTING, INCOMPLETE, UNTRUSTED or BLOCKED phase is never shown as a completed position.
+_footer_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/cycle-footer.sh"
+[ -f "$_footer_lib" ] || _footer_lib="$LINTEL_HOME/lib/cycle-footer.sh"
+if [ -n "$REPO_ROOT" ] && [ -f "$_footer_lib" ]; then
   cyc="$( (
     cd "$REPO_ROOT" 2>/dev/null || exit 0
     # shellcheck disable=SC1090
-    source "$_state_lib" 2>/dev/null || exit 0
-    f="$(state_file 2>/dev/null)"; [ -f "$f" ] || exit 0
-    seg="$(state_cycle_segment "$f" 2>/dev/null)"; [ -n "$seg" ] || exit 0
-    printf '%s' "$seg" | grep -qE 'cycle_complete:[[:space:]]*true' && exit 0   # cycle closed → no line
-    ph="$(printf '%s\n' "$seg" | grep -E '^phase:' | grep -viE '^phase:[[:space:]]*CYCLE' | tail -1 | sed -E 's/^phase:[[:space:]]*//; s/[[:space:]]*$//')"
-    nx="$(printf '%s\n' "$seg" | grep -E '^next_recommended:' | tail -1 | sed -E 's/^next_recommended:[[:space:]]*//; s/[[:space:]]*$//')"
-    md="$(printf '%s\n' "$seg" | grep -E '^cycle_mode:' | tail -1 | sed -E 's/^cycle_mode:[[:space:]]*//; s/[[:space:]]*$//')"
-    if [ -z "$ph" ]; then printf 'starting → SENSE%s' "${md:+ · mode $md}"
-    else printf 'phase %s%s%s' "$ph" "${nx:+ · next $nx}" "${md:+ · mode $md}"; fi
+    source "$_footer_lib" || exit 0
+    command -v render_cycle_footer >/dev/null 2>&1 || exit 0
+    f="$(state_file)"; [ -f "$f" ] || exit 0
+    foot="$(render_cycle_footer)" || exit 0
+    case "$foot" in *"no active cycle"*|*"cycle position unresolved"*) exit 0 ;; esac
+    render_cycle_footer --compact | head -1 | sed 's/^> //'
   ) 2>/dev/null )"
-  [ -n "$cyc" ] && add "Current cycle: $cyc — /li:resume to continue, or /li:status"
+  [ -n "$cyc" ] && add "Current cycle: $cyc"
 fi
 
 # Nothing but the identity line and no repo context? Still worth emitting identity.
@@ -154,7 +163,7 @@ fi
 
 # Repo-relative paths in the header (readability)
 _rel() { printf '%s' "${1#"$REPO_ROOT"/}"; }
-digest="LINTEL SESSION DIGEST (auto-loaded · $(_rel "${LESSONS_FILE:-.claude/memory/lessons.md}"), $(_rel "${MEMORY_FILE:-.claude/memory/working-state.md}"), $(_rel "${DECISIONS_DIR:-.claude/decisions}") for detail)
+digest="LINTEL SESSION DIGEST (auto-loaded · ${LESSONS_REL:-.claude/memory/lessons.md}, $(_rel "${MEMORY_FILE:-.claude/memory/working-state.md}"), $(_rel "${DECISIONS_DIR:-.claude/decisions}") for detail)
 ${lines}"
 
 # ── audit (best-effort, via the unified writer — keeps stdout clean for the envelope) ──

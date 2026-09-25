@@ -1,0 +1,1964 @@
+{
+  "scope": {
+    "task": "Read-only audit of universal capabilities, practical skill quality, consolidation and inter-skill cooperation",
+    "assigned_skills": 80,
+    "full_skill_lines_read": 11688,
+    "review_basis": "All assigned canonical SKILL.md files read in full; canonical instructions, architecture, house style, skill protocol, CodeReviewer role, relevant accepted ADRs, selected complete helpers and tests read for contract validation.",
+    "evaluation_standard": "A useful skill changes outcomes through reusable judgment, correct host/tool behavior, concise delegation or concrete verified deliverables. Length, role names, gates and passing presence tests alone do not establish quality. Thin dispatchers can be strong; explicit staged scope is distinguished from broken claims.",
+    "severity_counts": {
+      "P1": 2,
+      "P2": 14,
+      "P3": 2
+    },
+    "quality_counts": {
+      "strong": 10,
+      "mixed": 42,
+      "weak": 25,
+      "staged": 3
+    },
+    "action_counts": {
+      "keep": 2,
+      "refine": 23,
+      "merge": 28,
+      "rebuild": 21,
+      "retire": 2,
+      "pack": 1,
+      "staged": 3
+    },
+    "note": "Action counts concern current entry-point ownership, not deletion of all knowledge: merge/retire recommendations preserve useful behavior and compatibility aliases where appropriate."
+  },
+  "baseline": {
+    "repository": "Lintel",
+    "worktree": "E:/Workspace/jokerman-session-setup/.claude/worktrees/universal-audit-20260920",
+    "commit": "28061e434be455ca02f135b73244eaf4f73f3a69",
+    "target": "main",
+    "audit_date": "2026-09-20",
+    "excluded": "Unmerged codex/swarming-work changes; all coverage and findings here refer to the main baseline."
+  },
+  "coverage": [
+    {
+      "name": "audit",
+      "path": "skills/audit/SKILL.md",
+      "lines_read": 169,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful read-only view of the canonical audit log; its large inline shell reader duplicates parsing and leaves filters, ordering, malformed events, and source/target resolution to the model. Keep a thin command over a tested JSONL reader.",
+      "evidence": [
+        {
+          "path": "skills/audit/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "browse",
+      "path": "skills/browse/SKILL.md",
+      "lines_read": 117,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "The desired inspect/click/screenshot deliverable is valuable, but it advertises a Lintel-managed Playwright Chromium service that is not installed by the inspected installers and excludes capable hosts by product name. Rebuild as a browser-capability adapter with verified operations and evidence.",
+      "evidence": [
+        {
+          "path": "skills/browse/SKILL.md",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "name": "catalog",
+      "path": "skills/catalog/SKILL.md",
+      "lines_read": 40,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "A good thin dispatcher: uses the actual deterministic catalog generator, scopes work to canonical source, describes drift checking, and does not invent a second catalog or automatic commit. Length is appropriate to its small responsibility.",
+      "evidence": [
+        {
+          "path": "skills/catalog/SKILL.md",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "name": "clean",
+      "path": "skills/clean/SKILL.md",
+      "lines_read": 153,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Honest explanation that chat history cannot be deleted is useful, as is checkpoint-and-restart guidance. Merge into context management; duplicate watcher configuration disagrees with context-budget and adds a second policy surface.",
+      "evidence": [
+        {
+          "path": "skills/clean/SKILL.md",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "name": "cli-fingerprint",
+      "path": "skills/cli-fingerprint/SKILL.md",
+      "lines_read": 182,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Host detection is treated as a prose algorithm and cache without a dependable executable contract; a sample returns a host string through shell return. Replace guessed product capabilities with host-declared metadata plus actual available tools, separating installed, callable, and authorized.",
+      "evidence": [
+        {
+          "path": "skills/cli-fingerprint/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "codex",
+      "path": "skills/codex/SKILL.md",
+      "lines_read": 112,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "An independent second opinion is a worthwhile capability, but hardcoded example CLI flags, assumed JSON output, token cap, and tool availability make the advertised invocation unreliable. Implement a checked provider adapter or use native delegation and structured evidence.",
+      "evidence": [
+        {
+          "path": "skills/codex/SKILL.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "context-budget",
+      "path": "skills/context-budget/SKILL.md",
+      "lines_read": 190,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Hardcodes a 1M window and very large mode envelopes, excludes synthetic briefs from the cap, and consumes optional/manual counters as though they measured the current context. Replace with host-reported usage when available and clearly labeled estimates/admission limits otherwise.",
+      "evidence": [
+        {
+          "path": "skills/context-budget/SKILL.md",
+          "line": 85
+        }
+      ]
+    },
+    {
+      "name": "context-cool",
+      "path": "skills/context-cool/SKILL.md",
+      "lines_read": 100,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "A future-read exclusion list can help retrieval, but append-only conversation history is not reclaimed. Remove the effective-budget-freed claim and fold optional retrieval exclusions into context management only when consumers actually honor them.",
+      "evidence": [
+        {
+          "path": "skills/context-cool/SKILL.md",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "name": "context-restore",
+      "path": "skills/context-restore/SKILL.md",
+      "lines_read": 131,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Uses the real ownership-aware checkpoint helper and has bounded selection/recovery behavior. Preserve it; align examples and source discovery with current layout and distinguish restoring durable state from restoring a model's original hidden context.",
+      "evidence": [
+        {
+          "path": "skills/context-restore/SKILL.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "context-save",
+      "path": "skills/context-save/SKILL.md",
+      "lines_read": 159,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Produces a concrete durable checkpoint through the real context helper, with meaningful mechanics covered by a roundtrip test. Preserve the task/status/next-action contract; simplify stale location and extra confirmation language and document unavailable turn-history capture honestly.",
+      "evidence": [
+        {
+          "path": "skills/context-save/SKILL.md",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "name": "context-warm-adrs",
+      "path": "skills/context-warm-adrs/SKILL.md",
+      "lines_read": 88,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "The selector is useful, but its grep expects YAML status/date fields while actual accepted ADRs use Markdown metadata; accepted/deprecated and recency filtering therefore lose their basis. Use a shared ADR reader and expose this as a context selector.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-adrs/SKILL.md",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "name": "context-warm-customer",
+      "path": "skills/context-warm-customer/SKILL.md",
+      "lines_read": 112,
+      "quality": "mixed",
+      "action": "pack",
+      "reason": "Customer engagement directories, top-file heuristics and Azure/IaC assumptions are optional pack/workspace behavior, not a neutral core context loader. Preserve classification and scoped selection in a configured customer pack; honor explicit repository paths and authority.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-customer/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "context-warm-from-url",
+      "path": "skills/context-warm-from-url/SKILL.md",
+      "lines_read": 99,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Full-page retrieval lacks a clear untrusted-data boundary and its wildcard allowlist broadens exact hosts to sibling subdomains. Consolidate with web retrieval using parsed normalized URLs, explicit wildcard semantics, redirect checks, and provenance-bounded extraction.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-from-url/SKILL.md",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "name": "context-warm-related",
+      "path": "skills/context-warm-related/SKILL.md",
+      "lines_read": 95,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Useful bounded discovery intent, but filename/content similarity is not authority or freshness and can mix archives with accepted design. Make it a selectable strategy in one loader with exclusions, explanation of ranking, and a bounded result set.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-related/SKILL.md",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "name": "context-warm-sessions",
+      "path": "skills/context-warm-sessions/SKILL.md",
+      "lines_read": 80,
+      "quality": "strong",
+      "action": "merge",
+      "reason": "A sound thin selector over actual repository-owned checkpoints, with a useful 1–5 session cap. Retain its behavior as a context/history selector or compatibility alias rather than maintaining another nearly identical logging/loading protocol.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-sessions/SKILL.md",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "name": "context-warm",
+      "path": "skills/context-warm/SKILL.md",
+      "lines_read": 149,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "The core loader uses eval on a path/glob, assumes a fixed context window, and declares preload-pattern behavior without a complete resolver. Replace the executable recipe with a safe scoped loader and shared admission/authority rules; keep explicit selection and provenance.",
+      "evidence": [
+        {
+          "path": "skills/context-warm/SKILL.md",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "name": "design-consultation",
+      "path": "skills/design-consultation/SKILL.md",
+      "lines_read": 125,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Evidence-based critique and bounded alternatives are worthwhile design knowledge. Fold consultation into a unified design entry point; remove legacy personal taste-store assumptions and make the number of alternatives proportional rather than ceremonial.",
+      "evidence": [
+        {
+          "path": "skills/design-consultation/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "design-dna",
+      "path": "skills/design-dna/SKILL.md",
+      "lines_read": 119,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "The most substantial reusable design capability: local retrieval scripts and curated data, attribution, profile precedence, fallback behavior, and validation. Preserve and improve this engine, resolving profiles centrally and distinguishing aesthetic guidance from executable accessibility guarantees.",
+      "evidence": [
+        {
+          "path": "skills/design-dna/SKILL.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "design-html",
+      "path": "skills/design-html/SKILL.md",
+      "lines_read": 119,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "A self-contained preview is a useful output, but neutral/system-font defaults and placeholder copy create a parallel design path that can bypass the active profile. Make this a fast preview mode of the shared web renderer with meaningful supplied content.",
+      "evidence": [
+        {
+          "path": "skills/design-html/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "design-review",
+      "path": "skills/design-review/SKILL.md",
+      "lines_read": 145,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Screenshot-based review and specific visual dimensions add value, but its scoring model overlaps frontend-design-review and promises screenshot compliance effects without a demonstrated consumer. Use one evidence-based design review with artifact-specific checks and unavailable-measurement states.",
+      "evidence": [
+        {
+          "path": "skills/design-review/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "design-shotgun",
+      "path": "skills/design-shotgun/SKILL.md",
+      "lines_read": 143,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Controlled variation and a comparison index are useful, provided one named axis changes and selection is reviewable. Fold into design exploration; resolve undeclared retry flags and axis/count inconsistencies instead of keeping a separate lifecycle.",
+      "evidence": [
+        {
+          "path": "skills/design-shotgun/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "doctor",
+      "path": "skills/doctor/SKILL.md",
+      "lines_read": 116,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "A single diagnostic entry point is useful, but the skill re-describes speculative client paths and probes instead of dispatching through the existing doctor implementation. Make this the front door for health, migration, hook, and installation evidence with explicit coverage.",
+      "evidence": [
+        {
+          "path": "skills/doctor/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "document-generate",
+      "path": "skills/document-generate/SKILL.md",
+      "lines_read": 143,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Source-grounded repository/customer/reference documentation has a distinct useful deliverable. Preserve traceability and specialist writing; reduce repeated scaffolding and require commands, examples, and important factual claims to be checked against sources where possible.",
+      "evidence": [
+        {
+          "path": "skills/document-generate/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "frontend-design-review",
+      "path": "skills/frontend-design-review/SKILL.md",
+      "lines_read": 290,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Contains valuable criteria, but the score loop names six keys that do not match its own emitted schema, and static/source/screenshot evidence cannot establish every runtime criterion. Rebuild the shared review schema, measured/not-tested statuses, optional dimensions, and source-to-render evaluation.",
+      "evidence": [
+        {
+          "path": "skills/frontend-design-review/SKILL.md",
+          "line": 153
+        }
+      ]
+    },
+    {
+      "name": "frontend-design",
+      "path": "skills/frontend-design/SKILL.md",
+      "lines_read": 288,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "A coherent design-director-to-renderer architecture is visible, but current dispatch omits required downstream arguments while still saying rendering is future Phase B. Preserve retrieval, explicit thesis and specialists; complete one tested brief-to-render-to-review path before claiming end-to-end delivery.",
+      "evidence": [
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "line": 174
+        }
+      ]
+    },
+    {
+      "name": "frontend-motion",
+      "path": "skills/frontend-motion/SKILL.md",
+      "lines_read": 210,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Motion hierarchy, performance budgets and reduced-motion intent are substantive knowledge. Correct the schema so CSS-only/no-motion is valid, consume profile durations, and require runtime evidence for motion/performance instead of selecting libraries to satisfy a nonempty validator.",
+      "evidence": [
+        {
+          "path": "skills/frontend-motion/SKILL.md",
+          "line": 155
+        }
+      ]
+    },
+    {
+      "name": "frontend-shader",
+      "path": "skills/frontend-shader/SKILL.md",
+      "lines_read": 186,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "A deliberate no-shader decision and performance fallback are valuable. Ensure the schema represents that choice, make reduced-motion stop the actual render loop, and mark device performance as unmeasured until observed; use as an opt-in domain module.",
+      "evidence": [
+        {
+          "path": "skills/frontend-shader/SKILL.md",
+          "line": 65
+        }
+      ]
+    },
+    {
+      "name": "frontend-style-extract",
+      "path": "skills/frontend-style-extract/SKILL.md",
+      "lines_read": 256,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Confidence and source-preservation are useful, but this duplicates style-learn and calls an unsupported embed-target option. Merge into one extractor that distinguishes observed, inferred and unknown properties and emits an actually consumable design profile.",
+      "evidence": [
+        {
+          "path": "skills/frontend-style-extract/SKILL.md",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "name": "frontend-typography",
+      "path": "skills/frontend-typography/SKILL.md",
+      "lines_read": 202,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Font roles, licensing, variable axes, loading and fallback criteria are worthwhile craft. Keep this module under design; ground font availability/axes in actual assets and use explicit applicability rather than long fashionable font examples as implicit defaults.",
+      "evidence": [
+        {
+          "path": "skills/frontend-typography/SKILL.md",
+          "line": 53
+        }
+      ]
+    },
+    {
+      "name": "generate-app",
+      "path": "skills/generate-app/SKILL.md",
+      "lines_read": 273,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Includes valuable install/build failure handling and a real skeleton deliverable, but overlaps Next.js generation and scaffold skills and mixes stack-specific dependency examples into a common contract. Consolidate project generation with truthful stub disclosure, framework-native choices, and runtime acceptance for the requested flows.",
+      "evidence": [
+        {
+          "path": "skills/generate-app/SKILL.md",
+          "line": 200
+        }
+      ]
+    },
+    {
+      "name": "generate-design",
+      "path": "skills/generate-design/SKILL.md",
+      "lines_read": 207,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Creates a separate legacy palette/font/layout system, bypassing the accepted design.profile precedence used by frontend tools. Replace it with the same resolved design contract for documents, slides and web, preserving per-format layout mappings.",
+      "evidence": [
+        {
+          "path": "skills/generate-design/SKILL.md",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "name": "generate-outline",
+      "path": "skills/generate-outline/SKILL.md",
+      "lines_read": 182,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Narrative structure, key messages and a source-content hash are useful reusable planning. Avoid rejecting complete concise briefs by word count, keep claims tied to evidence, and make format/audience choices precede outline constraints.",
+      "evidence": [
+        {
+          "path": "skills/generate-outline/SKILL.md",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "name": "generate-pdf",
+      "path": "skills/generate-pdf/SKILL.md",
+      "lines_read": 65,
+      "quality": "staged",
+      "action": "staged",
+      "reason": "Explicitly labels itself template-only, so this is staged scope rather than a concealed broken implementation. Keep out of ready-capability counts. A future skill should curate pagination, font embedding, render inspection and source fidelity; those methods are reusable even when document content is fresh.",
+      "evidence": [
+        {
+          "path": "skills/generate-pdf/SKILL.md",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "name": "generate-ppt",
+      "path": "skills/generate-ppt/SKILL.md",
+      "lines_read": 244,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Slide-layout retrieval and format-specific mappings are worth preserving, but brand/voice/schema checks substitute for mandatory rendering and inspection of slides. Rebuild around a working presentation adapter with overflow, assets, editable-chart and slide-by-slide evidence.",
+      "evidence": [
+        {
+          "path": "skills/generate-ppt/SKILL.md",
+          "line": 143
+        }
+      ]
+    },
+    {
+      "name": "generate-qa",
+      "path": "skills/generate-qa/SKILL.md",
+      "lines_read": 218,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "A shared QA report is useful, but errors==0 can become pass without an explicit check-coverage/unavailable model. Format-neutral word/font/logo rules cannot replace rendered page/slide inspection, spreadsheet recalculation or interactive testing. Use artifact-specific validators and explicit evidence.",
+      "evidence": [
+        {
+          "path": "skills/generate-qa/SKILL.md",
+          "line": 166
+        }
+      ]
+    },
+    {
+      "name": "generate-style-learn",
+      "path": "skills/generate-style-learn/SKILL.md",
+      "lines_read": 229,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Reusable palette/font extraction belongs in design, but supported inputs and extraction procedures do not line up with the richer caller, and the legacy palette output does not establish the new profile contract. Merge with frontend-style-extract and validate roundtrip application.",
+      "evidence": [
+        {
+          "path": "skills/generate-style-learn/SKILL.md",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "name": "generate-visio",
+      "path": "skills/generate-visio/SKILL.md",
+      "lines_read": 72,
+      "quality": "staged",
+      "action": "staged",
+      "reason": "Honest template-only slot, with useful recognition of editable diagram output but no verified writer/tool contract. Stage behind capability availability and preserve layout, connectors, labels and reopen/edit checks when implemented.",
+      "evidence": [
+        {
+          "path": "skills/generate-visio/SKILL.md",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "name": "generate-web",
+      "path": "skills/generate-web/SKILL.md",
+      "lines_read": 220,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Useful single-file and framework outputs, corpus lookup and static lint integration; optional preview and duplicated Next.js scope limit evidence. Unify with project generation/preview, consume one resolved profile and required arguments, and verify rendered/runtime behavior before declaring ready.",
+      "evidence": [
+        {
+          "path": "skills/generate-web/SKILL.md",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "name": "generate-word",
+      "path": "skills/generate-word/SKILL.md",
+      "lines_read": 184,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Document/template output is meaningful, but the workflow lacks mandatory pagination/render inspection and relies on generic content/brand checks. Use a verified document adapter with heading/table/section styles, fields and layout QA, while retaining source and template provenance.",
+      "evidence": [
+        {
+          "path": "skills/generate-word/SKILL.md",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "name": "generate-write",
+      "path": "skills/generate-write/SKILL.md",
+      "lines_read": 216,
+      "quality": "weak",
+      "action": "refine",
+      "reason": "The universal content stage applies slide-sized limits to every document/web section and hardcodes language conventions. Make writing constraints format- and audience-aware, preserve source claims and useful narrative planning, and avoid forcing prose artifacts through a slide body schema.",
+      "evidence": [
+        {
+          "path": "skills/generate-write/SKILL.md",
+          "line": 131
+        }
+      ]
+    },
+    {
+      "name": "generate-xlsx",
+      "path": "skills/generate-xlsx/SKILL.md",
+      "lines_read": 68,
+      "quality": "staged",
+      "action": "staged",
+      "reason": "Honest template-only slot. Do not count it as working spreadsheet expertise; future reusable knowledge should include cell/formula conventions, recalculation, cached results, integrity checks and rendered inspection, not merely fresh data generation.",
+      "evidence": [
+        {
+          "path": "skills/generate-xlsx/SKILL.md",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "name": "generate",
+      "path": "skills/generate/SKILL.md",
+      "lines_read": 228,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "One brief feeding several formats is a useful goal, but the current universal pipeline shares lossy content constraints and divergent design contracts, and three renderers are explicitly staged. Rebuild as a thin capability-aware router with shared source facts and artifact-specific authoring/validation.",
+      "evidence": [
+        {
+          "path": "skills/generate/SKILL.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "health",
+      "path": "skills/health/SKILL.md",
+      "lines_read": 141,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "Mostly a stale installed-tree/upstream health workflow tied to older manifests and clone layouts. Merge into doctor using current installer/catalog/parity helpers; retain explicit provenance/version drift checks only when their producers exist.",
+      "evidence": [
+        {
+          "path": "skills/health/SKILL.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "help",
+      "path": "skills/help/SKILL.md",
+      "lines_read": 156,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "A discoverable user entry point is valuable, but manual category/content examples and plugin-root fallbacks can disagree with installed source-root semantics. Render help from the same catalog and capability metadata used by routing, retaining aliases rather than duplicated guidance.",
+      "evidence": [
+        {
+          "path": "skills/help/SKILL.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "hooks-status",
+      "path": "skills/hooks-status/SKILL.md",
+      "lines_read": 117,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Uses hook_name/override_reason while emitters write hook/reason; successful hook invocations are not comprehensively logged. Rebuild observation around a shared event schema and known coverage, avoiding absence-of-log equals dead-hook conclusions.",
+      "evidence": [
+        {
+          "path": "skills/hooks-status/SKILL.md",
+          "line": 56
+        }
+      ]
+    },
+    {
+      "name": "instruction-parity-check",
+      "path": "skills/instruction-parity-check/SKILL.md",
+      "lines_read": 192,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "The intended cross-host instruction parity check matters, but text Jaccard/length heuristics cannot establish semantic parity and duplicate the actual synchronized-block mechanism. Use deterministic block drift checks, with human/model review only for declared semantic differences.",
+      "evidence": [
+        {
+          "path": "skills/instruction-parity-check/SKILL.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "jobs",
+      "path": "skills/jobs/SKILL.md",
+      "lines_read": 207,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Backed by a real repository-owned job helper and useful status/lifecycle primitives. Keep it, route branch/archive transitions through the helper, resolve source roots correctly, and make dormant auto-spawn versus manually managed records explicit.",
+      "evidence": [
+        {
+          "path": "skills/jobs/SKILL.md",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "name": "landing-report",
+      "path": "skills/landing-report/SKILL.md",
+      "lines_read": 140,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "A distinct, source-grounded shipped-work report with honest empty-evidence handling and no unnecessary mutation. Preserve it; tighten commit/PR time boundaries and allow audience shaping without inventing customer impact or delivery claims.",
+      "evidence": [
+        {
+          "path": "skills/landing-report/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "learn",
+      "path": "skills/learn/SKILL.md",
+      "lines_read": 118,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Uses the real L-NNN lesson grammar and add/update/supersede decisions, preserving historical knowledge. Keep the mechanical helper and bounded learning behavior; resolve source/target paths centrally and ensure concurrent writes are handled by the helper.",
+      "evidence": [
+        {
+          "path": "skills/learn/SKILL.md",
+          "line": 46
+        }
+      ]
+    },
+    {
+      "name": "lessons-promote",
+      "path": "skills/lessons-promote/SKILL.md",
+      "lines_read": 86,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Writes dated headings that lesson retrieval explicitly excludes, and confuses a personal source checkout with LINTEL_HOME before branching/committing. Route through a destination-aware promotion helper that preserves grammar and provenance and separates optional publication.",
+      "evidence": [
+        {
+          "path": "skills/lessons-promote/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "lessons-surface",
+      "path": "skills/lessons-surface/SKILL.md",
+      "lines_read": 129,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Concrete bounded retrieval using the real lesson machinery, relevance scoring, superseded exclusion and a small result limit. Preserve it as the shared retrieval behavior rather than duplicating simplified heuristics in other skills.",
+      "evidence": [
+        {
+          "path": "skills/lessons-surface/SKILL.md",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "lessons",
+      "path": "skills/lessons/SKILL.md",
+      "lines_read": 74,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Useful human-friendly name, but its separate heuristic and removal guidance drift from the canonical supersede/retrieval model. Keep an alias or presentation view over lessons-surface/learn rather than another lesson lifecycle.",
+      "evidence": [
+        {
+          "path": "skills/lessons/SKILL.md",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "name": "maintenance",
+      "path": "skills/maintenance/SKILL.md",
+      "lines_read": 165,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Mixes storage archiving, manual usage estimates and a claimed force-compaction operation that cannot remove active context. Separate actual installation/storage maintenance from context guidance; retain no-data honesty and avoid interpreting incomplete manual telemetry as usage census.",
+      "evidence": [
+        {
+          "path": "skills/maintenance/SKILL.md",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "name": "make-pdf",
+      "path": "skills/make-pdf/SKILL.md",
+      "lines_read": 104,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "HTML/Markdown-to-PDF conversion is a concrete useful mode, with recognizable rendering tools. Merge with the PDF capability; file existence and a byte-size threshold are insufficient, so add page rendering, overflow and text/source checks.",
+      "evidence": [
+        {
+          "path": "skills/make-pdf/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "migrations",
+      "path": "skills/migrations/SKILL.md",
+      "lines_read": 113,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "A useful read-only migration view, but active=grace-until-in-the-future hides overdue unresolved migrations and source-root fallback can turn missing catalog into apparent completion. Preserve overdue/unknown states and dispatch through current migration metadata.",
+      "evidence": [
+        {
+          "path": "skills/migrations/SKILL.md",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "name": "open-managed-browser",
+      "path": "skills/open-managed-browser/SKILL.md",
+      "lines_read": 109,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "The simple launcher is useful only when a real managed browser provider exists. Current binary, launch syntax and metadata assumptions are not tied to an installer. Make this a browser adapter mode using the host's supported APIs.",
+      "evidence": [
+        {
+          "path": "skills/open-managed-browser/SKILL.md",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "pack-create",
+      "path": "skills/pack-create/SKILL.md",
+      "lines_read": 154,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "A distinct pack authoring lifecycle with meaningful validation and policy ownership. Keep it, enforce the shared resolver paths and avoid generating policy substance or identity beyond the explicit brief; show validation failures without speculative defaults.",
+      "evidence": [
+        {
+          "path": "skills/pack-create/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "pack-list",
+      "path": "skills/pack-list/SKILL.md",
+      "lines_read": 120,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "A reasonable thin read-only pack inventory, but hardcoded home paths can disagree with resolver-configured pack directories. Route listing through the same resolver as consumers and distinguish discovered, valid, installed and active states.",
+      "evidence": [
+        {
+          "path": "skills/pack-list/SKILL.md",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "name": "pack-switch",
+      "path": "skills/pack-switch/SKILL.md",
+      "lines_read": 145,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Validation before switching and explanation of session cache are valuable. The skill writes a fixed home active-pack path instead of the resolver's configurable active pointer, so a successful switch can leave the effective pack unchanged; use one lifecycle helper.",
+      "evidence": [
+        {
+          "path": "skills/pack-switch/SKILL.md",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "name": "pack-validate",
+      "path": "skills/pack-validate/SKILL.md",
+      "lines_read": 81,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Good bounded validation entry point around existing pack contracts; preserve validation output and non-mutating behavior. Align root resolution with installed source and report which optional capability fields were actually checked.",
+      "evidence": [
+        {
+          "path": "skills/pack-validate/SKILL.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "pair-agent",
+      "path": "skills/pair-agent/SKILL.md",
+      "lines_read": 134,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Live specialist collaboration can add value, but the Claude-only branch contradicts Codex native subagent support and a prompt is not a file-access sandbox. Rebuild capability-based delegation with scoped inputs and explicit review/implementation roles.",
+      "evidence": [
+        {
+          "path": "skills/pair-agent/SKILL.md",
+          "line": 90
+        }
+      ]
+    },
+    {
+      "name": "perf-mode",
+      "path": "skills/perf-mode/SKILL.md",
+      "lines_read": 128,
+      "quality": "weak",
+      "action": "retire",
+      "reason": "A marker file and prose cannot raise a model's context ceiling or alter host pricing/model behavior. Retire this advertised control; expose real host settings only through supported adapters, and keep heavy-task planning as optional context admission guidance.",
+      "evidence": [
+        {
+          "path": "skills/perf-mode/SKILL.md",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "personas-rotate",
+      "path": "skills/personas-rotate/SKILL.md",
+      "lines_read": 81,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Audience/tone rotation is useful but is different from operator role activation; persisted working-state and inherited-agent claims blur those concepts. Make a session audience overlay under role/persona selection with explicit reset and lifetime.",
+      "evidence": [
+        {
+          "path": "skills/personas-rotate/SKILL.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "profile-switch",
+      "path": "skills/profile-switch/SKILL.md",
+      "lines_read": 128,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Advertises plugin disabling via unsupported .disabled marker files and broad configuration snapshot/restoration. Implement only host-supported profile operations with exact ownership and reversible manifests; otherwise label this unsupported/staged.",
+      "evidence": [
+        {
+          "path": "skills/profile-switch/SKILL.md",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "name": "role-new",
+      "path": "skills/role-new/SKILL.md",
+      "lines_read": 172,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Capturing role responsibilities, decisions and bounded context is meaningful, but a long mandatory interview and environment-specific sync guidance make routine authoring burdensome. Use an adaptive interview, preserve validated role schema, and keep storage/publication explicitly configured.",
+      "evidence": [
+        {
+          "path": "skills/role-new/SKILL.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "role",
+      "path": "skills/role/SKILL.md",
+      "lines_read": 104,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful scoped role activation, but sed assumes an existing profile key and deep-dive loading precedes the described sensitivity decision. Use structured update and selective private context access; distinguish current-session activation from persistent defaults.",
+      "evidence": [
+        {
+          "path": "skills/role/SKILL.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "roles-list",
+      "path": "skills/roles-list/SKILL.md",
+      "lines_read": 107,
+      "quality": "strong",
+      "action": "merge",
+      "reason": "A sensible frontmatter-only inventory minimizes private-context reads. Preserve it as the list view of one role lifecycle and use the resolver for relative pack and source paths.",
+      "evidence": [
+        {
+          "path": "skills/roles-list/SKILL.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "safe-install",
+      "path": "skills/safe-install/SKILL.md",
+      "lines_read": 149,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Important user need, but destructive backup/restore/retention recipes are underspecified and the retention shell can enumerate directory contents and delete the newest old snapshots. Replace with a tested transactional helper using verified exact targets and recoverable manifests.",
+      "evidence": [
+        {
+          "path": "skills/safe-install/SKILL.md",
+          "line": 105
+        }
+      ]
+    },
+    {
+      "name": "scaffold-internal-tool",
+      "path": "skills/scaffold-internal-tool/SKILL.md",
+      "lines_read": 128,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "A useful project intent/flavor, but independently creates application and Lintel boilerplate and makes stack/CI assumptions. Fold into one scaffold/project workflow using the existing safe base initializer and acceptance tests for the requested internal flows.",
+      "evidence": [
+        {
+          "path": "skills/scaffold-internal-tool/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "scaffold-mvp",
+      "path": "skills/scaffold-mvp/SKILL.md",
+      "lines_read": 153,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Useful MVP scope and handoff intent, but independently creates legacy instruction/ADR paths and speculative stack/license/CI choices. Consolidate as an intent-driven flavor that preserves existing repository authority and produces working behavior with honest stubs.",
+      "evidence": [
+        {
+          "path": "skills/scaffold-mvp/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "scaffold",
+      "path": "skills/scaffold/SKILL.md",
+      "lines_read": 126,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "The skill manually copies state/templates and misses current AGENTS/layout-marker/MEMORY behavior already provided by bin/li-scaffold. Make it a thin interactive front end to that helper and preserve existing files; do not keep a second installer recipe.",
+      "evidence": [
+        {
+          "path": "skills/scaffold/SKILL.md",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "name": "scrape",
+      "path": "skills/scrape/SKILL.md",
+      "lines_read": 130,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Schema-shaped extraction, partial failure handling and bounded rate/concurrency are useful. Put them on the shared real browser/retrieval adapter, resolve schema-name inconsistencies and contradictory robots handling, and validate each extracted record with provenance.",
+      "evidence": [
+        {
+          "path": "skills/scrape/SKILL.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "setup-browser-cookies",
+      "path": "skills/setup-browser-cookies/SKILL.md",
+      "lines_read": 112,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "Keeping credentials out of prompts and having the user authenticate is sound. The absent browser service and first-run validation metadata cycle make the implementation incomplete. Use host-managed authenticated browser surfaces or a verified provider setup mode.",
+      "evidence": [
+        {
+          "path": "skills/setup-browser-cookies/SKILL.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "skill-router",
+      "path": "skills/skill-router/SKILL.md",
+      "lines_read": 85,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "Natural-language discovery is useful, but reading every full skill defeats progressive disclosure and a local-only privacy claim cannot describe provider-hosted inference. Route over the catalog's compact triggers/capabilities, then load only the selected instruction.",
+      "evidence": [
+        {
+          "path": "skills/skill-router/SKILL.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "skillify",
+      "path": "skills/skillify/SKILL.md",
+      "lines_read": 119,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Converting proven repeated work into a skill is valuable, but this writes to an obsolete scaffolding path and mostly creates TODOs plus a stale symlink activation flow. Use current canonical authoring/discovery and require a useful workflow plus a discriminating outcome case.",
+      "evidence": [
+        {
+          "path": "skills/skillify/SKILL.md",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "path": "skills/status/SKILL.md",
+      "lines_read": 111,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "A useful everyday alias, but its actual home-directory archive reads conflict with the repository-local job helper and its own explanation. Route to jobs/current-cycle state and distinguish absent dormant records from no ongoing work.",
+      "evidence": [
+        {
+          "path": "skills/status/SKILL.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "uniformity",
+      "path": "skills/uniformity/SKILL.md",
+      "lines_read": 127,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Explicitly presents structural consistency as a floor, which is honest. Keep it as a maintainer diagnostic using real checks and source resolution; avoid confusing mechanical uniformity with skill usefulness or host interoperability.",
+      "evidence": [
+        {
+          "path": "skills/uniformity/SKILL.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "usage-log",
+      "path": "skills/usage-log/SKILL.md",
+      "lines_read": 127,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Honest manual event writer and optional token estimates are useful. Preserve that limited provenance; record missing/estimated values distinctly and prevent maintenance/rust reports treating optional manual records as complete invocation telemetry.",
+      "evidence": [
+        {
+          "path": "skills/usage-log/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "v4-migrate",
+      "path": "skills/v4-migrate/SKILL.md",
+      "lines_read": 190,
+      "quality": "mixed",
+      "action": "retire",
+      "reason": "A historical migration can remain available as an explicitly versioned recovery procedure, but obsolete inference/default rules should not appear as a current universal workflow. Archive behind migrations and prefer current schema/layout tooling with idempotence evidence.",
+      "evidence": [
+        {
+          "path": "skills/v4-migrate/SKILL.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "welcome",
+      "path": "skills/welcome/SKILL.md",
+      "lines_read": 202,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "A useful onboarding entry point that consults tier metadata and acknowledges hook limitations. Keep it concise and evidence-driven; remove hardcoded inventory counts and inferred capability promises, then guide the first relevant task rather than reciting every discipline.",
+      "evidence": [
+        {
+          "path": "skills/welcome/SKILL.md",
+          "line": 41
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "CP-01",
+      "priority": "P1",
+      "title": "Remove eval from context path expansion",
+      "problem": "context-warm expands operator-supplied path/glob text with eval. Quoting the outer string does not prevent shell substitutions or separators in the pattern from becoming code when eval executes it.",
+      "impact": "An ordinary context-loading operation can execute commands unrelated to reading files. The word-splitting loop also mishandles paths containing spaces, especially relevant to desktop users.",
+      "recommendation": "Replace the recipe with a small scoped path/glob helper that treats inputs as data, normalizes targets, honors exclusions and limits, and returns a manifest for the host to read. Verify literal shell metacharacters and spaces without executing them.",
+      "evidence": [
+        {
+          "path": "skills/context-warm/SKILL.md",
+          "line": 40
+        },
+        {
+          "path": "skills/context-warm/SKILL.md",
+          "line": 45
+        }
+      ],
+      "verification": "Whole-file read and static shell semantics review; dangerous strings were not executed.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-02",
+      "priority": "P1",
+      "title": "Replace safe-install's destructive prose recipes with a tested transaction",
+      "problem": "Retention uses ls -1t snapshot-* without directory-only handling, then passes whitespace-delimited output to rm -rf. When globs expand to directories, ls lists their contents; a separate age deletion can remove all snapshots older than 30 days, including the newest five, despite the reported retention promise. Backup success/restore identity are also not established by a manifest.",
+      "impact": "A tool advertised as protecting recoverability can prune unexpected relative paths or remove the last known restore points. Broad plugin/config restore can then overwrite state without a proven matching snapshot.",
+      "recommendation": "Implement a concrete platform-aware snapshot/restore helper with exact normalized paths, validated ownership, copy verification, atomic activation, union retention semantics, failure recovery and focused destructive-operation tests in disposable fixtures. Keep the skill a thin explanation and dispatcher.",
+      "evidence": [
+        {
+          "path": "skills/safe-install/SKILL.md",
+          "line": 66
+        },
+        {
+          "path": "skills/safe-install/SKILL.md",
+          "line": 98
+        },
+        {
+          "path": "skills/safe-install/SKILL.md",
+          "line": 107
+        },
+        {
+          "path": "skills/safe-install/SKILL.md",
+          "line": 111
+        }
+      ],
+      "verification": "Read-only analysis of the published recipes; no backup, deletion, install or restore was attempted.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-03",
+      "priority": "P2",
+      "title": "Choose capabilities by available host tools, not a Claude-only product matrix",
+      "problem": "pair-agent declares Codex/Copilot lack the Agent tool and therefore the feature is Claude-only, although lib/cli-tiers declares Codex native subagents. browse similarly rejects named hosts and assumes a managed Playwright Chromium. The inspected installers create browser-profile directories but do not provide the advertised executable/control service.",
+      "impact": "Universal users are denied capabilities their host can offer, while an allowed host may be promised an unavailable implementation. generate-web preview, make-pdf, scrape, browser login and design review inherit the same unresolved dependency.",
+      "recommendation": "Define host capability adapters with states for unavailable, available and authorized, using native tool discovery/metadata. Keep browser navigation, screenshots, session ownership and delegation as explicit operations. Provide honest sequential/manual fallbacks only for missing operations, and never claim a prompt is a filesystem sandbox.",
+      "evidence": [
+        {
+          "path": "skills/pair-agent/SKILL.md",
+          "line": 90
+        },
+        {
+          "path": "lib/cli-tiers.yaml",
+          "line": 27
+        },
+        {
+          "path": "lib/cli-tiers.yaml",
+          "line": 32
+        },
+        {
+          "path": "skills/browse/SKILL.md",
+          "line": 15
+        },
+        {
+          "path": "skills/open-managed-browser/SKILL.md",
+          "line": 39
+        },
+        {
+          "path": "install/install.sh",
+          "line": 161
+        }
+      ],
+      "verification": "Compared canonical skills against tier metadata and searched installer/bin/lib/hook/test surfaces for browser provisioning and consumers. Current vendor documentation is delegated to the coordinating audit.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-04",
+      "priority": "P2",
+      "title": "Do not advertise marker files as real plugin profile controls",
+      "problem": "profile-switch disables plugins by writing .disabled files and restores broad copied configuration, but no repository consumer or supported host API for these marker files is identified. A marker plus .active-profile can claim success without changing client behavior.",
+      "impact": "Dormant mode, profile isolation and restoration are unverifiable; operators may believe instructions/plugins have been disabled while they remain active. Copying back unspecified manifest/config paths also risks overwriting unrelated host state.",
+      "recommendation": "Rebuild per-host profile operations around supported discovery/install/enable APIs with exact scoped state manifests and out-of-band recovery. If a host has no supported operation, expose an unsupported/manual state instead of fabricating a control. Separate Lintel audience/pack settings from actual client plugin configuration.",
+      "evidence": [
+        {
+          "path": "skills/profile-switch/SKILL.md",
+          "line": 63
+        },
+        {
+          "path": "skills/profile-switch/SKILL.md",
+          "line": 65
+        },
+        {
+          "path": "skills/profile-switch/SKILL.md",
+          "line": 78
+        },
+        {
+          "path": "skills/profile-switch/SKILL.md",
+          "line": 104
+        }
+      ],
+      "verification": "Whole-file review and repository consumer search for .disabled; no actual client configuration was mutated.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-05",
+      "priority": "P2",
+      "title": "Replace fictional context reclamation and fixed windows with measured admission",
+      "problem": "context-budget assumes a 1M window and exempts synthetic briefs from its cap. context-cool admits append-only history but reports effective budget freed, perf-mode writes a marker to raise a ceiling, and maintenance's force-compact archives storage rather than removing active conversation history. context-budget and clean also prescribe incompatible watcher keys.",
+      "impact": "Users and agents can load far more than a host supports, confuse future-read exclusions with freed tokens, and believe a mode change affected model capacity. These claims are central to the advertised session harness and undermine portability.",
+      "recommendation": "Retire perf-mode as an advertised capacity control. Consolidate context save/restore/select/admission around host-reported limits and usage where available, clearly bounded estimates otherwise, and actual checkpoint/new-session operations. Report disk cleanup separately from conversation capacity, and only honor ignore policies through real consumers.",
+      "evidence": [
+        {
+          "path": "skills/context-budget/SKILL.md",
+          "line": 12
+        },
+        {
+          "path": "skills/context-budget/SKILL.md",
+          "line": 85
+        },
+        {
+          "path": "skills/context-budget/SKILL.md",
+          "line": 136
+        },
+        {
+          "path": "skills/context-cool/SKILL.md",
+          "line": 76
+        },
+        {
+          "path": "skills/clean/SKILL.md",
+          "line": 49
+        },
+        {
+          "path": "skills/maintenance/SKILL.md",
+          "line": 44
+        },
+        {
+          "path": "skills/perf-mode/SKILL.md",
+          "line": 39
+        }
+      ],
+      "verification": "Read all context/maintenance/performance skills, actual checkpoint helper tests, and searched for perf-mode-active/context-ignore consumers. No host compaction was attempted.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-06",
+      "priority": "P2",
+      "title": "Make the design handoff and review use one executable schema",
+      "problem": "frontend-design still calls rendering Phase B/future while dispatching to currently present renderers without generate-app's required stack or generate-web's required variant. frontend-design-review loops over typography/motion/shader/accessibility/brand/responsive, but its emitted dimensions use six different longer keys.",
+      "impact": "A nominal end-to-end design can stop after a spec, fail downstream argument validation or score nonexistent fields. The review loop can create unrelated entries and derive a misleading overall verdict.",
+      "recommendation": "Define one shared versioned design/review schema consumed by producer, renderer and reviewer. Resolve complete required arguments before dispatch and explicitly distinguish spec-only versus rendered outcomes. Remove stale phase notes only after one real brief-to-render-to-review case proves the integration.",
+      "evidence": [
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "line": 174
+        },
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "line": 179
+        },
+        {
+          "path": "skills/generate-app/SKILL.md",
+          "line": 46
+        },
+        {
+          "path": "skills/generate-web/SKILL.md",
+          "line": 45
+        },
+        {
+          "path": "skills/frontend-design-review/SKILL.md",
+          "line": 153
+        },
+        {
+          "path": "skills/frontend-design-review/SKILL.md",
+          "line": 223
+        }
+      ],
+      "verification": "In-memory source probe extracted loop keys and emitted dimension keys: intersection was empty. Read handoff and consumer requirements; no generative render was invoked.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-07",
+      "priority": "P2",
+      "title": "Unify legacy palettes and accepted design profiles across artifact paths",
+      "problem": "The design-dna/frontend route uses design.profile and brief-over-profile precedence, while generate-design loads ~/.lintel/brand/palettes/<name>.json and emits separate font/palette mappings. design-html has another default aesthetic. Consequently the same configured design preference does not reliably affect slide, Word, web-preview and frontend paths.",
+      "impact": "The user-facing design profile has partial, route-dependent effect. Outputs can drift from the accepted identity even though each subskill reports brand compliance; extracted styles may be saved in a store the selected renderer never reads.",
+      "recommendation": "Resolve one effective design profile centrally, with existing accepted precedence and explicit per-brief overrides. Let format adapters derive layout and font choices from that resolved profile. Migrate legacy palette stores or document compatibility explicitly; retain the intentional default profile rather than changing brand governance during cleanup.",
+      "evidence": [
+        {
+          "path": "skills/design-dna/SKILL.md",
+          "line": 37
+        },
+        {
+          "path": "skills/generate-design/SKILL.md",
+          "line": 57
+        },
+        {
+          "path": "skills/generate-design/SKILL.md",
+          "line": 67
+        },
+        {
+          "path": "skills/generate-design/SKILL.md",
+          "line": 138
+        },
+        {
+          "path": "skills/design-html/SKILL.md",
+          "line": 35
+        }
+      ],
+      "verification": "Read ADR-0016 and the profile/retrieval skills, then compared every assigned design/generate consumer. This is a profile-propagation finding, not a challenge to the accepted Anthropic default.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-08",
+      "priority": "P2",
+      "title": "Separate artifact QA coverage from an empty error count",
+      "problem": "generate-qa declares pass when errors==0 without a strong executed/skipped/unavailable/not-applicable coverage model. The document and slide paths lack mandatory render-and-inspect evidence, spreadsheet generation is staged, and browser previews are optional. The static design validator checks limited source patterns, yet callers describe broader accessibility/profile guarantees.",
+      "impact": "An unrendered, unmeasured or unsupported artifact can be called ready with zero observed errors. Text overflow, page breaks, low contrast, cached formulas, keyboard interaction and runtime motion behavior can remain unchecked.",
+      "recommendation": "Use artifact-specific QA adapters: render every page/slide, recalculate spreadsheets, inspect browser states and important interactions, and reopen/edit diagrams as applicable. Include check evidence and coverage status, distinguish blocking failures from unavailable checks, and state static lint's exact limits. Share a report envelope, not one generic quality checklist.",
+      "evidence": [
+        {
+          "path": "skills/generate-qa/SKILL.md",
+          "line": 166
+        },
+        {
+          "path": "skills/generate-qa/SKILL.md",
+          "line": 215
+        },
+        {
+          "path": "skills/generate-web/SKILL.md",
+          "line": 137
+        },
+        {
+          "path": "skills/generate-web/SKILL.md",
+          "line": 145
+        },
+        {
+          "path": "skills/design-dna/scripts/validate_design.py",
+          "line": 63
+        },
+        {
+          "path": "skills/design-dna/scripts/validate_design.py",
+          "line": 116
+        },
+        {
+          "path": "skills/frontend-design-review/SKILL.md",
+          "line": 125
+        }
+      ],
+      "verification": "Read complete validator. A non-writing in-memory probe using #aaa text on #fff returned no errors and no warnings; this demonstrates absent contrast coverage, not a claim that this static linter promised full contrast analysis by itself.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-09",
+      "priority": "P2",
+      "title": "Do not force long-form artifacts through a slide-sized writing schema",
+      "problem": "generate-write is shared across target formats but limits every section body to 40 words and uses slide-sized bullet limits. The downstream Word/web formats inherit these constraints regardless of the brief's information requirements.",
+      "impact": "A detailed report or substantive page loses reasoning and context before the format-specific renderer sees it. Strong brand/voice ceremony cannot recover information already discarded by a universal content bottleneck.",
+      "recommendation": "Share source facts, audience, thesis, evidence and section identity across formats, then apply format-specific narrative and density constraints. Keep slide brevity for slides, preserve complete long-form explanations for documents, and support explicit deliberate variants instead of irreversible truncation.",
+      "evidence": [
+        {
+          "path": "skills/generate-write/SKILL.md",
+          "line": 22
+        },
+        {
+          "path": "skills/generate-write/SKILL.md",
+          "line": 76
+        },
+        {
+          "path": "skills/generate-write/SKILL.md",
+          "line": 130
+        },
+        {
+          "path": "skills/generate-write/SKILL.md",
+          "line": 131
+        },
+        {
+          "path": "skills/generate/SKILL.md",
+          "line": 40
+        }
+      ],
+      "verification": "Compared complete writer, outline, generate orchestrator and format-consumer contracts. No output quality benchmark was run.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-10",
+      "priority": "P2",
+      "title": "Align hook observation with actual event fields and coverage",
+      "problem": "hooks-status groups hook_name and override_reason, while hook emitters write hook and reason. The inspected emitters log overrides/blocks/errors rather than every successful invocation, so a last-trigger/dead-hook report lacks a complete trigger census.",
+      "impact": "The operator can receive empty or incorrect hook summaries and false dead-hook warnings. This is particularly harmful where host hook availability already differs and observation is presented as assurance.",
+      "recommendation": "Define and version a shared event schema, have producers and readers consume it, and test a recorded event roundtrip. Report installed/registered/last-observed/coverage-known separately. Do not infer inactive or healthy from absent partial logs.",
+      "evidence": [
+        {
+          "path": "skills/hooks-status/SKILL.md",
+          "line": 56
+        },
+        {
+          "path": "skills/hooks-status/SKILL.md",
+          "line": 61
+        },
+        {
+          "path": "skills/hooks-status/SKILL.md",
+          "line": 68
+        },
+        {
+          "path": "hooks/shared/secret-scan-block/run.sh",
+          "line": 52
+        },
+        {
+          "path": "hooks/shared/secret-scan-block/run.sh",
+          "line": 66
+        },
+        {
+          "path": "hooks/shared/secret-scan-block/run.sh",
+          "line": 89
+        }
+      ],
+      "verification": "Compared reader grouping instructions with actual producer calls and full hook/observation test sources. No customer payloads or live audit logs were read.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-11",
+      "priority": "P2",
+      "title": "Keep promoted lessons in the retrievable grammar and correct repository",
+      "problem": "learn explicitly says mechanical retrieval keys on L-NNN headings and dated headings are invisible, but lessons-promote writes a dated heading. It names a personal ~/Workspace/jokerman-lintel destination, then branches and commits from LINTEL_HOME instead.",
+      "impact": "A reported successful promotion may be missed by lesson retrieval, written to the wrong installation/source tree or committed on the wrong repository. The important learn→surface feedback loop breaks at promotion.",
+      "recommendation": "Use a destination-aware promotion helper that resolves the actual configured source repository, preserves/allocates unique lesson IDs and provenance, validates retrieval, and separates local promotion from optional publication. Fold lessons into the canonical learn/surface lifecycle.",
+      "evidence": [
+        {
+          "path": "skills/learn/SKILL.md",
+          "line": 46
+        },
+        {
+          "path": "skills/learn/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "skills/lessons-promote/SKILL.md",
+          "line": 34
+        },
+        {
+          "path": "skills/lessons-promote/SKILL.md",
+          "line": 40
+        },
+        {
+          "path": "skills/lessons-promote/SKILL.md",
+          "line": 48
+        }
+      ],
+      "verification": "Read all four lesson skills plus bin/li-lessons-promote; compared output grammar and path behavior. No lesson store was modified.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-12",
+      "priority": "P2",
+      "title": "Make lifecycle skills call the current helper instead of reimplementing it",
+      "problem": "scaffold manually copies memory/plans/templates, whereas bin/li-scaffold preserves existing files and creates current AGENTS/layout/MEMORY state. pack-switch writes a hardcoded home active-pack file although the resolver exposes configurable packs and pointer paths. Similar installed-source versus target-repository confusion appears in status/help/migration/authoring commands.",
+      "impact": "The same user request behaves differently through the skill and CLI; existing durable state can be overwritten, initialized repositories can miss required entry points, or a reported pack switch can leave the effective pack unchanged.",
+      "recommendation": "Use the actual helper as the sole mutation owner, with one source-root/target-root/installation-root contract. Make skills thin interactive dispatchers and test skill argument mapping against helper behavior. Preserve aliases but remove duplicate shell mutation recipes.",
+      "evidence": [
+        {
+          "path": "skills/scaffold/SKILL.md",
+          "line": 54
+        },
+        {
+          "path": "skills/scaffold/SKILL.md",
+          "line": 60
+        },
+        {
+          "path": "bin/li-scaffold",
+          "line": 178
+        },
+        {
+          "path": "bin/li-scaffold",
+          "line": 225
+        },
+        {
+          "path": "bin/li-scaffold",
+          "line": 242
+        },
+        {
+          "path": "skills/pack-switch/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "lib/pack-resolver.sh",
+          "line": 35
+        },
+        {
+          "path": "lib/pack-resolver.sh",
+          "line": 36
+        }
+      ],
+      "verification": "Read complete scaffold helper and relevant lifecycle skills, and compared resolver declarations. No initialization or pack switch was run.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-13",
+      "priority": "P2",
+      "title": "Preserve exact URL allowlist semantics and treat retrieved content as data",
+      "problem": "context-warm-from-url allows either an exact host or *.${allowed#*.}. For an allowlist entry api.example.com, this also accepts other.example.com, widening an exact-host entry to sibling hosts. Parsing includes userinfo/ports without a URL parser and no clear redirect revalidation or retrieved-content instruction boundary is given.",
+      "impact": "Pack URL policy is weaker than the configured entries suggest, and full external pages enter the context without an explicit source/trust boundary. This affects both compliance and instruction reliability.",
+      "recommendation": "Use parsed normalized URLs, explicit exact/wildcard policy entries, redirect-target validation and scoped extraction. Carry URL/time/provenance and mark page instructions as untrusted data. Reuse the browser/retrieval adapter rather than another bespoke shell URL gate.",
+      "evidence": [
+        {
+          "path": "skills/context-warm-from-url/SKILL.md",
+          "line": 42
+        },
+        {
+          "path": "skills/context-warm-from-url/SKILL.md",
+          "line": 44
+        },
+        {
+          "path": "skills/context-warm-from-url/SKILL.md",
+          "line": 48
+        },
+        {
+          "path": "skills/context-warm-from-url/SKILL.md",
+          "line": 63
+        }
+      ],
+      "verification": "Static predicate analysis; no external URL or sensitive source was fetched.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-14",
+      "priority": "P2",
+      "title": "Add outcome evidence beyond structural skill-presence tests",
+      "problem": "frontend-design-roundtrip constructs its own fixture and tests schema fields and downstream keyword presence; it never invokes the producer or renderer. The frontend and observation presence tests mainly inspect names, colors, fields, flags and text. These checks can pass while CP-06/CP-10 contract mismatches remain.",
+      "impact": "The suite establishes packaging/shape but not the advertised skill's practical quality, cooperation or host behavior. Counting passing shape tests as proof of design intelligence or universal capability overstates what is known.",
+      "recommendation": "Retain cheap shape checks, then add a small discriminating task set with and without the skill, producer-consumer schema roundtrips, and observable artifact/runtime outcomes. Start with the highest-value verticals rather than demanding exhaustive benchmark infrastructure. Keep ADR-0021's staged outcome-eval status visible until built.",
+      "evidence": [
+        {
+          "path": "tests/integration/frontend-design-roundtrip.sh",
+          "line": 10
+        },
+        {
+          "path": "tests/integration/frontend-design-roundtrip.sh",
+          "line": 173
+        },
+        {
+          "path": "tests/integration/frontend-design-roundtrip.sh",
+          "line": 182
+        },
+        {
+          "path": "tests/integration/frontend-design-roundtrip.sh",
+          "line": 239
+        },
+        {
+          "path": "tests/unit/frontend-skills-present.sh",
+          "line": 59
+        },
+        {
+          "path": "tests/unit/frontend-skills-present.sh",
+          "line": 182
+        },
+        {
+          "path": "tests/unit/observation-spine-skills-present.sh",
+          "line": 1
+        }
+      ],
+      "verification": "Read these test files and checkpoint roundtrip as a positive contrasting behavioral example. Did not run the full suite or an LLM evaluation.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-15",
+      "priority": "P2",
+      "title": "Represent optional design choices and extraction inputs consistently",
+      "problem": "frontend-motion allows a CSS-only decision but requires nonempty libraries/key animations for DONE. Shader guidance similarly needs a first-class no-shader result. frontend-style-extract calls generate-style-learn with --embed-target, which its input contract does not define, and supplies URL/screenshot inputs beyond the callee's concrete extraction path.",
+      "impact": "Simple/static designs can be forced into unnecessary dependencies to satisfy schema checks, and style capture can fail or produce data the next step cannot consume. The workflow optimizes for populated JSON rather than the best output.",
+      "recommendation": "Use explicit decision/status fields for no-motion, CSS-only and no-shader, and validate applicability rather than nonemptiness. Merge the two extractors into one observed/inferred/unknown style schema with supported input adapters and a profile-application roundtrip.",
+      "evidence": [
+        {
+          "path": "skills/frontend-motion/SKILL.md",
+          "line": 155
+        },
+        {
+          "path": "skills/frontend-motion/SKILL.md",
+          "line": 164
+        },
+        {
+          "path": "skills/frontend-shader/SKILL.md",
+          "line": 65
+        },
+        {
+          "path": "skills/frontend-style-extract/SKILL.md",
+          "line": 104
+        },
+        {
+          "path": "skills/generate-style-learn/SKILL.md",
+          "line": 41
+        }
+      ],
+      "verification": "Whole-file contract comparison; no style extraction or browser animation was executed.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-16",
+      "priority": "P2",
+      "title": "Do not hide unresolved state behind missing or expired metadata",
+      "problem": "status describes repository-owned jobs but reads the home archive. migrations defines active as grace_until>today, so overdue unresolved migrations vanish. context-warm-adrs parses YAML status/date although accepted ADRs use Markdown metadata. These are separate readers with the same loss-of-state failure mode.",
+      "impact": "An operator can be told there are no active/relevant items when the reader simply used the wrong location, shape or time filter. Architectural context and overdue work may be omitted at exactly the point they matter.",
+      "recommendation": "Use canonical readers for jobs, migration records and ADR metadata; distinguish empty, missing, malformed, unsupported and overdue. Keep authoritative documents discoverable even when metadata cannot be parsed, and include small fixtures for actual repository formats.",
+      "evidence": [
+        {
+          "path": "skills/status/SKILL.md",
+          "line": 19
+        },
+        {
+          "path": "skills/status/SKILL.md",
+          "line": 40
+        },
+        {
+          "path": "skills/migrations/SKILL.md",
+          "line": 45
+        },
+        {
+          "path": "skills/context-warm-adrs/SKILL.md",
+          "line": 38
+        },
+        {
+          "path": "skills/context-warm-adrs/SKILL.md",
+          "line": 39
+        }
+      ],
+      "verification": "Read current skills and relevant canonical documents/helper paths; no live job state or private historical records were opened.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-17",
+      "priority": "P3",
+      "title": "Consolidate discovery and authoring around progressive disclosure",
+      "problem": "skill-router reads every full skill to route one task, help maintains parallel category/examples, and skillify writes an obsolete scaffolding path with many TODO sections and symlink activation. The catalog already supplies a much cleaner source-of-truth pattern.",
+      "impact": "Routing becomes expensive and increasingly ambiguous as the inventory grows, while a nominally created skill can still be an empty draft that is not discovered by current clients. More entries increase maintenance burden without increasing useful capability.",
+      "recommendation": "Use compact trigger/capability metadata for routing and help, load the selected body only, and preserve familiar aliases. Rebuild authoring around current canonical locations and discovery with one useful workflow, an example and a discriminating outcome case; keep unfinished drafts explicitly outside the ready catalog.",
+      "evidence": [
+        {
+          "path": "skills/skill-router/SKILL.md",
+          "line": 32
+        },
+        {
+          "path": "skills/help/SKILL.md",
+          "line": 43
+        },
+        {
+          "path": "skills/catalog/SKILL.md",
+          "line": 20
+        },
+        {
+          "path": "skills/skillify/SKILL.md",
+          "line": 13
+        },
+        {
+          "path": "skills/skillify/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "skills/skillify/SKILL.md",
+          "line": 111
+        }
+      ],
+      "verification": "Read complete router/help/catalog/skillify and house-style/protocol; no new skills were scaffolded.",
+      "confidence": "high"
+    },
+    {
+      "id": "CP-18",
+      "priority": "P3",
+      "title": "Preserve reusable craft instead of treating every implementation method as content-specific",
+      "problem": "generate-pdf/xlsx/visio honestly remain template-only and repeatedly defer real work to fresh invocation content. Elsewhere many skills have elaborate lifecycle/status prose but little curated format methodology. This interpretation of freshness loses reusable pagination, formula, chart, editability and visual-inspection knowledge.",
+      "impact": "The catalog grows without proportional usable expertise. Models still need to improvise the hard work, while the presence of a detailed template can look like a mature capability. Copied upstream design intelligence is useful where actually integrated, but does not establish equivalent document or browser expertise.",
+      "recommendation": "Keep the three entries explicitly staged or hide them from default routing until demand justifies implementation. Build small rich format modules around proven specialist tooling/instructions, preserving reusable methods and evidence standards while generating fresh content. Prefer consolidation over filling templates merely to raise skill counts.",
+      "evidence": [
+        {
+          "path": "skills/generate-pdf/SKILL.md",
+          "line": 15
+        },
+        {
+          "path": "skills/generate-xlsx/SKILL.md",
+          "line": 15
+        },
+        {
+          "path": "skills/generate-visio/SKILL.md",
+          "line": 15
+        },
+        {
+          "path": "skills/design-dna/ATTRIBUTION.md",
+          "line": 1
+        },
+        {
+          "path": "skills/generate/SKILL.md",
+          "line": 40
+        }
+      ],
+      "verification": "Full skill and attribution review; no claim of upstream equivalence was tested. Current upstream comparisons are owned by the coordinator.",
+      "confidence": "high"
+    }
+  ],
+  "interactions": [
+    {
+      "subsystem": "One capability layer for CLI and desktop hosts",
+      "current": "cli-fingerprint and cli_support labels guess product capabilities; pair-agent, codex and browser skills each invent separate execution assumptions. profile-switch/perf-mode imply control of client behavior from local marker files.",
+      "target": "A compact declared host/capability contract with actual discovery, operation adapters and explicit unavailable states. Keep domain instructions portable; perform browser, delegation, authentication, artifact and settings operations through the host's supported surface.",
+      "sequence": "Resolve before expanding universal marketing, browser features, lifecycle mutation or dependent rendering.",
+      "preserve": [
+        "Native subagent support already documented in lib/cli-tiers.yaml",
+        "User-driven authentication with credentials kept out of prompts",
+        "Independent review as a distinct role"
+      ],
+      "findings": [
+        "CP-03",
+        "CP-04"
+      ]
+    },
+    {
+      "subsystem": "Context selection, durable checkpoints and truthful capacity",
+      "current": "Ten warm/save/restore/cool/budget entry points plus clean/perf/maintenance mix valid durable state with unsupported context-size and reclamation claims.",
+      "target": "One context front door with source selectors for files, ADRs, related work, URLs and session checkpoints; one admission/provenance policy; one actual save/restore helper. Keep easy aliases where they improve discoverability.",
+      "sequence": "First remove eval and false capacity controls, then share readers and merge repeated logging/budget ceremony.",
+      "preserve": [
+        "Ownership-aware checkpoint naming/discovery",
+        "Bounded recent-session selection",
+        "Explicit next-action and resume summaries",
+        "Future-read exclusions only when an actual consumer implements them"
+      ],
+      "findings": [
+        "CP-01",
+        "CP-05",
+        "CP-13",
+        "CP-16"
+      ]
+    },
+    {
+      "subsystem": "Design intelligence to rendered artifact to evidence",
+      "current": "design-dna is a substantive retrieval/profile engine, but legacy palettes, multiple frontend/design entry points, phase notes, argument mismatches and incompatible review schemas interrupt its practical effect.",
+      "target": "A shared resolved profile and versioned spec; consultation, exploration, typography, motion and optional shaders as focused modules; one renderer path per actual artifact type; one measured review report with applicability and unavailable evidence.",
+      "sequence": "Repair handoff/schema and profile propagation, then demonstrate one static site and one application vertical with source, rendering, interaction and review evidence.",
+      "preserve": [
+        "BM25/domain/stack retrieval and curated CSV data",
+        "Accepted brief > profile > corpus precedence",
+        "Licensing/fallback typography knowledge",
+        "Deliberate no-shader/no-motion choices",
+        "Bounded alternate-design exploration"
+      ],
+      "findings": [
+        "CP-06",
+        "CP-07",
+        "CP-08",
+        "CP-15"
+      ]
+    },
+    {
+      "subsystem": "Multi-format content and specialist production",
+      "current": "generate shares slide-like writing and design structures across all formats while three advertised renderer slots are explicitly staged. QA uses one report and broad generic criteria.",
+      "target": "Share brief, factual source map and narrative identity; let document, presentation, spreadsheet, PDF, web and diagram adapters author and validate according to their format. Keep generate as a thin routing/orchestration layer.",
+      "sequence": "Preserve Word/PPT/web useful retrieval and templating; replace their unsupported quality assurances with verified format workflows. Keep PDF/XLSX/Visio staged until concrete adapters and outcome cases exist.",
+      "preserve": [
+        "Traceable outline/content hashes",
+        "Narrative planning and source grounding",
+        "Slide layout corpus/token emission",
+        "Template provenance and reuse"
+      ],
+      "findings": [
+        "CP-08",
+        "CP-09",
+        "CP-18"
+      ]
+    },
+    {
+      "subsystem": "Browser operations as shared infrastructure",
+      "current": "browse, open-managed-browser, setup-browser-cookies, scrape and make-pdf assume a common Chromium service but no reliable provider contract ties it together. Preview, extraction, authentication and review depend on it.",
+      "target": "One browser/retrieval adapter with open/read/act/screenshot/print/session operations and explicit ownership. Use native authenticated surfaces where supported; layer schema extraction and PDF conversion as modes, not separate fictitious infrastructure.",
+      "sequence": "Inventory real operations first; then verify one authenticated read-only flow, one UI interaction flow and one rendered PDF conversion using permitted test data.",
+      "preserve": [
+        "Partial extraction failure handling",
+        "Schema-shaped records and provenance",
+        "Rate/concurrency bounds where relevant",
+        "User-owned login interaction"
+      ],
+      "findings": [
+        "CP-03",
+        "CP-08",
+        "CP-13"
+      ]
+    },
+    {
+      "subsystem": "Installation, packs, scaffold and diagnostics",
+      "current": "Skills duplicate safer real helpers and conflate installation/source/target roots. health/doctor/profile/safe-install/migration readers have stale or unsupported state contracts.",
+      "target": "Mechanical lifecycle helpers own all writes and restoration; skills present reviewable options and dispatch to them. One doctor entry point reports observed state, missing capability, drift and overdue work without claiming success from absent metadata.",
+      "sequence": "Rebuild safe-install and unsupported profile controls first, then route scaffold and pack lifecycle through canonical helpers and consolidate diagnostics.",
+      "preserve": [
+        "Validated packs and resolver precedence",
+        "Safe base scaffold behavior already in bin/li-scaffold",
+        "Current layout migration ownership",
+        "Read-only diagnostics"
+      ],
+      "findings": [
+        "CP-02",
+        "CP-04",
+        "CP-12",
+        "CP-16"
+      ]
+    },
+    {
+      "subsystem": "Observation, lessons and maintained knowledge",
+      "current": "Hook observation reads nonexistent fields and overinterprets partial logs; usage-log is honestly manual but maintenance derives usage/rust conclusions from optional records. Promotion breaks the canonical lesson grammar.",
+      "target": "Shared versioned event contracts with provenance and coverage, one lesson add/update/supersede/promote lifecycle, bounded relevance retrieval, and explicit configured publication destinations.",
+      "sequence": "Fix reader/producer schema and lesson promotion before adding dashboards or automated pruning.",
+      "preserve": [
+        "Manual usage provenance",
+        "L-NNN grammar and supersession history",
+        "Top-three relevant lesson retrieval",
+        "Source-grounded landing reports"
+      ],
+      "findings": [
+        "CP-10",
+        "CP-11"
+      ]
+    },
+    {
+      "subsystem": "Role, audience and optional customer context",
+      "current": "role/role-new/roles-list overlap with personas-rotate, while customer warming assumes engagement-specific workspace layout. Session activation, persistent preference and private contextual data are not always clearly separated.",
+      "target": "One role lifecycle with list/create/select and a distinct audience overlay; scoped session lifetime and reset; customer/domain context supplied by explicit pack/workspace configuration.",
+      "sequence": "Clarify the data model and selective loading before simplifying the interfaces. Preserve private frontmatter-only listing and avoid requiring long interviews for simple roles.",
+      "preserve": [
+        "Role responsibility and decision context",
+        "Audience-sensitive writing",
+        "Private-context minimization",
+        "Optional domain packs rather than core customer defaults"
+      ],
+      "findings": []
+    },
+    {
+      "subsystem": "Discovery and skill lifecycle",
+      "current": "Catalog is a good mechanical source of truth, but help/router/skillify duplicate metadata, eager-load full instructions and create largely empty or obsolete drafts.",
+      "target": "One compact catalog with triggers, deliverables, host capabilities, ready/staged status and source ownership. Help and natural-language routing use it; selected skills load progressively. Authoring produces useful content plus a discriminating example, not mandatory boilerplate.",
+      "sequence": "After fixing capability truth, consolidate entry points while retaining common aliases and explicitly marking staged modules.",
+      "preserve": [
+        "Deterministic catalog generation",
+        "Short task-oriented descriptions",
+        "Mechanical parity checks as a floor",
+        "Versioned archived migration access"
+      ],
+      "findings": [
+        "CP-14",
+        "CP-17",
+        "CP-18"
+      ]
+    },
+    {
+      "subsystem": "Upstream knowledge and evaluation",
+      "current": "The repository retains a useful local design retrieval corpus and attribution, but packaging/conformance evidence is stronger than end-to-end artifact evidence. Other artifact domains contain placeholders rather than comparable reusable craft.",
+      "target": "Preserve known-good upstream methods with attribution and explicit integration tests; compare the resulting task behavior with the base host/native specialist skills. Do not copy full workflows or enforce all their ceremony merely because an upstream source is successful.",
+      "provenance": [
+        {
+          "path": "skills/design-dna/ATTRIBUTION.md",
+          "source": "nextlevelbuilder/ui-ux-pro-max-skill v2.5.0 (MIT)",
+          "retained": "Design domain/stack data, retrieval algorithms, slide CSV/token work and validator lineage; attribution documents source and adaptation."
+        },
+        {
+          "path": "skills/design-dna/ATTRIBUTION.md",
+          "source": "Anthropic brand-guidelines/frontend-design (Apache-2.0)",
+          "retained": "Default seven brand colors, typography/doctrine references and explicit derived-token treatment in ADR-0016."
+        },
+        {
+          "path": ".claude/decisions",
+          "source": "ADR-0015, ADR-0016, ADR-0017, ADR-0021",
+          "retained": "Accepted retrieval/profile integration and explicitly staged outcome-evaluation direction."
+        }
+      ],
+      "examples_of_knowhow_to_recover": [
+        "Artifact rendering and visual inspection rather than file-exists success",
+        "Spreadsheet formula recalculation and cached-value integrity",
+        "Document pagination, styles, fields and tables",
+        "Browser-state evidence for accessibility and interaction",
+        "Font/runtime asset availability and measured motion behavior"
+      ],
+      "findings": [
+        "CP-08",
+        "CP-14",
+        "CP-18"
+      ]
+    }
+  ],
+  "limitations": [
+    "Read-only audit. No implementation, source edits, commits, installs, credentials, production access, browser authentication or destructive operations were performed. The only authored repository artifact is this report.",
+    "All 80 assigned canonical SKILL.md files were read in full (11,688 lines). Selected helpers, scripts, accepted ADRs and tests were read to resolve contract questions; this lane did not read every CSV row, every agent or every repository helper.",
+    "Baseline commit was verified by git rev-parse. Unmerged swarm changes are deliberately excluded and require their own delta review.",
+    "The full test suite was not run. Verification consists of source/contract review, repository reference searches and two non-writing in-memory probes: review-key intersection and static validator low-contrast coverage.",
+    "No model output benchmark, cross-host installation matrix, real rendered artifact task or authenticated browser flow was executed. Quality classifications are review judgments about useful instruction, implementability and evidence; they are not measured comparative success rates.",
+    "Current vendor/CLI flags, upstream release changes and external specialist skill comparisons are owned by the coordinating audit. This lane identifies internal contradictions and provenance without pretending local prose establishes current external API behavior.",
+    "Explicitly template-only PDF/XLSX/Visio modules are classified staged, not accused of secretly implemented behavior. Accepted default branding is respected; recommendations concern profile propagation and optionality rather than governance changes.",
+    "Some workflows are intentionally executed by an LLM and need no standalone executable. Findings do not assume prose is invalid by itself; they identify contradictory contracts, unavailable claimed mechanisms, unsafe recipes, duplicated mutation logic, or missing evidence for stronger output claims.",
+    "Recommendations are action proposals only. Architectural consolidation, core/pack boundaries, publication and host-governance changes remain operator decisions."
+  ]
+}
+

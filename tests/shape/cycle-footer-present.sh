@@ -31,7 +31,14 @@ done
 grep -q "render_cycle_footer" skills/cycle/SKILL.md && pass "cycle orchestrator references footer" || fail "cycle orchestrator missing footer"
 
 # The orchestrator must persist cycle_mode into state so the footer resolves skips without --mode.
-grep -qE "cycle_mode[:=]" skills/cycle/SKILL.md && pass "orchestrator persists cycle_mode to state" || fail "orchestrator missing cycle_mode write"
+# It passes the selected mode to the shared lifecycle entry, which records cycle_mode.
+if grep -qE 'workflow_begin "[^"]*" "\$mode"' skills/cycle/SKILL.md \
+  && grep -qE 'state_cycle_begin "\$id" "\$mode"' lib/workflow.sh \
+  && grep -qF '"cycle_mode=$mode"' lib/state.sh; then
+  pass "orchestrator persists cycle_mode to state"
+else
+  fail "orchestrator missing cycle_mode write"
+fi
 
 # High-traffic non-phase entry points also close with the footer (thin ambient outside a cycle).
 ENTRY_SKILLS="welcome jobs resume status"
@@ -40,6 +47,13 @@ for s in $ENTRY_SKILLS; do
   if [ ! -f "$f" ]; then fail "$s: SKILL.md missing"; continue; fi
   if grep -q "render_cycle_footer" "$f"; then pass "$s: renders cycle footer"; else fail "$s: missing render_cycle_footer"; fi
 done
+
+if grep -Fq 'source "$footer_source/lib/cycle-footer.sh" || exit $?' skills/welcome/SKILL.md &&
+   grep -Fq 'UNVERIFIED: shared cycle-position footer is unavailable' skills/welcome/SKILL.md; then
+  pass "welcome uses the trusted helper with an explicit missing-source diagnostic"
+else
+  fail "welcome lacks the trusted footer invocation or missing-source diagnostic"
+fi
 
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "cycle-footer-present: ALL PASS"; exit 0; } || { echo "cycle-footer-present: FAILURES"; exit 1; }

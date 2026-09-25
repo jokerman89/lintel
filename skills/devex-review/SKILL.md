@@ -37,16 +37,24 @@ Six dimensions: time-to-hello-world, error message quality, script ergonomics, d
 ## Workflow
 
 1. **Locate the developer journey.** Read README, CONTRIBUTING, package.json scripts, makefile, justfile, setup script. Identify the documented "first 10 minutes" path.
-2. **Time-to-hello-world.** Execute the documented setup steps (in `--fresh-clone` mode if requested). Time each step. Note any step that requires undocumented action.
+2. **Time-to-hello-world.** Inspect the documented commands and effects first; execute
+   only in an authorized disposable copy with explicit synthetic home/temp/credentials
+   boundaries. A clone is attribution, not a security sandbox. Time actual stages,
+   and report unrun network/install/deploy steps instead of fabricating a full journey.
 3. **Six-dimension pass:**
    - **TTHW (time-to-hello-world):** minutes from `git clone` to "running locally with expected behavior".
    - **Error messages:** intentionally trigger 3-5 common errors (missing dep, wrong node version, missing env var). Score message clarity 1-10.
    - **Script ergonomics:** all package.json/justfile scripts: are names predictable? Do they composite well? Any hidden globals required?
    - **Doc accuracy:** does the README's stated setup actually work? Are any commands stale, removed, or renamed?
    - **Test loop speed:** single-file test, full suite. Score on perceived feedback latency for a TDD-style cycle.
-   - **Recovery:** intentionally break state (delete node_modules, corrupt a lockfile). Does the project guide you back, or fail mysteriously?
-4. **Score + findings.** Each dimension gets 1-10 + a P1/P2/P3 finding list.
-5. **Persist via the native `bin/li-review-log`** with `skill: devex-review`.
+   - **Recovery:** perturb only a specifically owned disposable fixture after recording
+     its original state. Never delete/corrupt the caller's dependencies or lockfile.
+4. **Score + findings.** Six advisory scores with measured evidence and a P1/P2/P3
+   list grounded in user impact/actual obligations, not arbitrary elapsed-time thresholds.
+5. **Evidence.** For mapped work use the [shared original-work procedure](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+   and P05 external preparation, immutable controls, actual QA and independently
+   corroborated review. `li-review-log` stores an actual decision, not a bare score.
+   For ad-hoc read-only review use P05 inspect and state `release_clearance: false`.
 6. **Report.**
 
 ## Report format
@@ -55,7 +63,7 @@ Six dimensions: time-to-hello-world, error message quality, script ergonomics, d
 DevEx Review: <repo>
 
 Scope: full journey
-Mode: in-place (no fresh clone)
+Mode: authorized disposable fixture for recovery/setup; caller source unchanged
 Time spent: 12 min / 15 budget
 
 ## Dimension scores
@@ -77,12 +85,12 @@ Overall: 6.5/10
    Bottleneck: TypeScript project references rebuild on every test invocation.
    Recommendation: enable `tsc --build --watch` separately, OR vitest-native ts handling.
 
-[P2] Error messages — missing LOVABLE_API_KEY
+[P2] Error messages — missing SERVICE_API_KEY
    App crashes with "TypeError: Cannot read properties of undefined". No mention of env var.
-   Fix: validate env at boot, exit with named message "Missing required env var: LOVABLE_API_KEY".
+   Fix: validate env at boot, exit with named message "Missing required env var: SERVICE_API_KEY".
 
-[P2] TTHW — undocumented Supabase CLI requirement
-   README says `npm install && npm dev`. Actually requires `supabase` CLI installed globally first.
+[P2] TTHW — undocumented database CLI requirement
+   README's startup command requires an undeclared database CLI.
    Fix: add preflight check OR document.
 
 [P3] Recovery — deleted node_modules
@@ -99,29 +107,34 @@ P1 test-loop fix has highest impact (4 min × N runs/day per developer). Address
 
 ## Compliance integration
 
-- Review may run actual setup scripts in `--fresh-clone` mode — those scripts touch the filesystem in a sandboxed dir. No production mutation.
+- A fresh copy does not contain side effects automatically. Verify actual scripts,
+  network, environment and permissions before invoking them; no production mutation.
 - Recovery dimension intentionally breaks state — only in `--fresh-clone` mode. Refuses to break state in the operator's working tree.
 
 ## Failure modes
 
-- **Fresh-clone mode but no clean clone target:** create `~/.lintel/devex-runs/<ts>/` clone dir. If permissions fail: report + fall back to in-place review with warning.
-- **Setup script hangs:** time-budget enforces termination. Report which step hung.
-- **Test suite takes longer than time-budget:** measure first-N tests as a sample, extrapolate, flag as estimated.
-- **No documented setup steps found:** that IS the finding. Report TTHW = "undefined" + P1 doc gap.
+- **No authorized clean target:** stop that execution and report the missing fixture;
+  do not fall back to in-place mutation or an unrequested personal-home directory.
+- **Setup hangs:** use the real tool timeout/process handle, record actual termination/
+  remaining state and preserve logs; a declared budget does not terminate a process.
+- **Suite exceeds budget:** retain actual counts/termination. A nonrepresentative
+  first-N subset cannot establish full-suite duration or successful completion.
+- **No documented setup:** report the missing journey and resulting uncertainty;
+  severity follows actual onboarding requirements, not automatic P1.
 
 ## Examples
 
-**Quick in-place pass:**
+**Quick scoped pass:**
 ```
 > /devex-review --scope test-loop
-[Times single-file watch + full suite]
-Dimension: test loop speed 4/10. P1 finding: ts-build bottleneck.
+[Inspect commands; time them only with explicit safe-target authority]
+Report actual feedback latency and impact, or mark the measurement unrun.
 ```
 
 **Full fresh-clone audit:**
 ```
 > /devex-review --fresh-clone --time-budget 30
-[Clones into ~/.lintel/devex-runs/, runs full journey]
+[Uses explicitly authorized synthetic local copy; reports actual executed and unrun stages]
 6 dimensions scored. 5 findings (1 P1, 2 P2, 2 P3). Overall 6.5/10.
 ```
 
@@ -137,4 +150,4 @@ TTHW improved 8m → 5m. Error messages improved 4/10 → 7/10. Test loop regres
 - `/plan-devex-review` — plan-stage equivalent
 - `/design-review` — UI critique (sister skill)
 - `/review` — diff-scoped code review (DX is broader than diff)
-- The active pack's release gate — reads devex-review log as advisory signal (not blocking)
+- The actual required/advisory review obligation governs acceptance; an advisory score alone is not a release gate

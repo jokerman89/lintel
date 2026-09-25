@@ -1,23 +1,26 @@
-# DECLARATION ONLY — nothing here is fetched, cloned, or bundled.
+# DECLARATION ONLY — this registry does not fetch, clone, or execute anything.
 #
 # This file lists external projects that influenced or complement Lintel. The installer does NOT
 # act on it: install.sh reads the entries only to print a count ("this installer does not clone
-# them"). Lintel ships exclusively operator-authored content. If you want any of these tools,
-# install them yourself from their own repository, under their own license.
+# them"). Lintel includes author-written integration and explicitly attributed adapted
+# material. `sources` lists references, not automatic imports; `bundled_materials` records
+# the existing distributed third-party material and its notices. See docs/provenance.md in the
+# Lintel source repository.
 #
 # Fields:
 #   repo            — git URL (HTTPS) of the upstream repo
-#   install_path    — destination on the local machine (`~` expanded by the installer)
+#   install_path    — historical reference location; the installer does not create or expand it
 #   last_verified   — date we last manually confirmed this URL + license combination
 #   license         — SPDX identifier (or "NONE" if upstream has no LICENSE file)
 #   tier            — permissive | restricted | reference-only
-#                       permissive = MIT/Apache/BSD — bundle freely
-#                       restricted = copyleft (CC-BY-SA), no-license, or mixed licensing —
-#                                    OK to install/use, NOT OK to bundle into a permissively-licensed project
+#                       permissive = review the exact component's MIT/Apache/BSD terms
+#                                    and retain required notices; not permission to omit attribution
+#                       restricted = component-level terms need review before reuse;
+#                                    this label makes no blanket use or redistribution grant
 #                       reference-only = catalog/config repo, not a skill pack; install script SKIPS,
 #                                        docs point at it for reference
-#   install_type    — git-clone | git-clone-and-setup | reference-only
-#   post_install    — command to run inside install_path after clone (only if install_type=git-clone-and-setup)
+#   install_type    — historical recipe type: git-clone | git-clone-and-setup | reference-only
+#   post_install    — historical recipe metadata, never executed by this declaration-only listing
 #   description     — one-line summary
 #   docs            — URL of the upstream README or docs entry-point
 #   license_note    — present only when tier=restricted; explains the obligation
@@ -71,11 +74,9 @@ sources:
     description: "Trail of Bits security skills — code auditing, vulnerability detection, differential review, CodeQL/Semgrep wrappers, supply-chain auditing."
     docs: https://github.com/trailofbits/skills#readme
     license_note: >
-      CC-BY-SA-4.0 is share-alike copyleft. Using these skills locally is unrestricted.
-      Bundling, modifying, or redistributing any of these skills (e.g., copy-pasting one
-      into your own internal repo) requires the derivative work to be released under
-      CC-BY-SA-4.0. For internal MS-licensed projects: install and invoke from upstream,
-      do NOT inline.
+      Historical license assessment only. Review the exact component and intended use
+      against its current terms, including attribution and share-alike obligations where
+      applicable. This registry does not authorize copying or claim local use is unrestricted.
 
   anthropic-skills:
     repo: https://github.com/anthropics/skills
@@ -87,11 +88,10 @@ sources:
     description: "Anthropic's official skill examples — mcp-builder, skill-creator, demonstration skills, plus document-creation skills (docx/pdf/pptx/xlsx)."
     docs: https://github.com/anthropics/skills#readme
     license_note: >
-      Most skills in this repo are Apache-2.0 (bundle-friendly). The document-creation
-      skills under `docx/`, `pdf/`, `pptx/`, `xlsx/` are explicitly source-available
-      but NOT open-source per Anthropic's README. Verify license per-skill before
-      bundling. For internal MS-licensed projects: install + invoke from upstream is
-      always safe; inlining requires per-skill license check.
+      Verify terms for the exact skill and revision before reuse. The earlier review
+      distinguished Apache-2.0 examples from source-available document skills; neither
+      a repository-wide label nor installing/invoking a tool proves all uses permitted.
+      Existing scoped design-profile adaptations and retained notices are listed below.
 
   # ----- TIER: reference-only -----
 
@@ -137,3 +137,48 @@ sources:
       No top-level LICENSE — the README states 'see each linked plugin for the relevant
       LICENSE file'. Use this as a catalog to discover plugins; install individual
       plugins from their own upstream repos, not from this catalog clone.
+
+# Existing provenance, not an instruction to download or resynchronize these sources.
+# Null commit revisions are intentionally unknown; a recorded release label or later
+# comparison revision must not be passed off as the exact historical import commit.
+bundled_materials:
+  design-dna-corpus:
+    source: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+    recorded_release: v2.5.0
+    import_commit: null
+    relationship: adapted
+    local_paths:
+      - skills/design-dna/data
+      - skills/design-dna/references
+      - skills/design-dna/scripts/core.py
+      - skills/design-dna/scripts/search.py
+      - skills/design-dna/scripts/design_system.py
+    license: MIT
+    notice: skills/design-dna/LICENSES/MIT-next-level-builder.txt
+    attribution: skills/design-dna/ATTRIBUTION.md
+    modifications: "Recorded in the component attribution and ADR-0015/0017; Lintel token emitter and validator are identified separately."
+    evidence_checked: 2026-09-20
+  design-dna-example-profile:
+    source: https://github.com/anthropics/skills
+    source_components:
+      - brand-guidelines
+      - frontend-design
+    import_commit: null
+    relationship: adapted
+    local_paths:
+      - skills/design-dna/profiles/anthropic-default.yaml
+      - agents/frontend/FrontendArchitect.md
+    license: Apache-2.0
+    notice: skills/design-dna/LICENSES/Apache-2.0-anthropic.txt
+    attribution: skills/design-dna/ATTRIBUTION.md
+    modifications: "Distilled profile/doctrine plus explicitly derived Lintel gap-fill decisions; no endorsement or trademark grant."
+    evidence_checked: 2026-09-20
+
+method_comparisons:
+  scope: "Selected read-only comparison, not import provenance or an executed benchmark."
+  evidence: .claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md
+  checked: 2026-09-20
+  gstack: a6b3a57512ca6d5c6aa5b68f74f736195021f96e
+  superpowers: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+  gsd-core: 88b5775dc8e32ffe8d50fe4db01677650e219ed2
+  ecc: 934195f955cf0da847d59fcd6f68856bce112d8b

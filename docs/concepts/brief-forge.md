@@ -1,188 +1,229 @@
-# Brief Forge — universal hand-off gate
+# Brief Forge — explicit hand-off gate
 
-**Last updated:** 2026-05-29 (v4.0 Phase 3)
-**Status:** Concept doc — referenced by `skills/brief-forge/SKILL.md`, `lib/brief-forge.sh`, `lib/brief-forge-evaluators.sh`, `lib/envelope-schema.yaml`
+**Last updated:** 2026-09-20
+**Status:** Shipped helper and skill contract; activation is explicit
 
-> Every hand-off in Lintel — skill spawning a subagent, phase transitioning to the next phase, workflow handing to another workflow, plan + spec + prompt born together for a cold executor — carries an envelope. Brief Forge is the **gate that constructs that envelope, runs evaluators on it, scores completeness, audits the result, and surfaces escape hatches**. It is what makes hand-offs uniform across the harness.
+Brief Forge gives a workflow boundary a consistent envelope, evaluator result and audit trail. It is
+not a universal host interceptor: a source workflow must invoke `/li:brief-forge` or execute the
+documented helper sequence. Lintel does not register pre-spawn or pre-phase Brief Forge hooks.
 
-## The problem
+This distinction matters. Pack policy configures what an invocation does; the presence of policy in
+`pack.yaml` does not prove that a hand-off was forged.
 
-Pre-v4.0 hand-offs were ad-hoc. Each kind of hand-off shaped its payload differently:
+## Why it exists
 
-- Subagent spawn: parent skill wrote a free-form prompt
-- Phase transition: phase appended to 00-state.md and the next phase read it
-- Cold-executor: plan + spec + prompt files in `.claude/runtime/state/`
+Agent hand-offs tend to lose three things as work scales:
 
-Three failure modes:
+1. a stable statement of the boundary and receiver;
+2. a mechanical signal that required context is present and safe;
+3. replayable evidence of what the receiver actually received.
 
-1. **Drift across hand-off kinds.** Five hand-offs, five shapes. Operators learning Lintel encountered different vocabularies. Tooling couldn't audit uniformly.
-2. **No completeness signal.** A hand-off either worked or broke; there was no shared score telling the receiver "this brief is at 65/100; expect to need escape hatches."
-3. **No replay.** When a hand-off produced bad output, the brief that caused it lived in whatever file the original skill wrote. After cleanup or compaction, it was gone.
+Brief Forge addresses those gaps with the shared envelope schema, three built-in evaluators and a
+scope-routed audit record. Workflows that do not invoke it must describe that degradation honestly.
 
-Brief Forge fixes all three by being **the single gate every hand-off passes through**.
+## Activation reality
 
-## The model
+Brief Forge runs in two supported ways:
 
+- a workflow explicitly invokes `/li:brief-forge <kind> <from> <to> <content_type> <content_file>`;
+- a workflow calls `forge_handoff` from the trusted `lib/brief-forge.sh` bundle.
+
+The Swarm profile requires an explicit Brief Forge boundary before a lane is dispatched. If a host
+cannot invoke the skill, the coordinator records that limitation. A missing mandatory evaluator or
+failed gate blocks the affected handoff; it is not converted into unaudited success.
+
+There is no registered `brief-forge-pre-spawn` or `brief-forge-pre-phase` hook in the shipped hook
+bundle. A future host callback remains inactive until its registration and firing are verified on
+that host.
+
+## Execution model
+
+```text
+source workflow explicitly invokes Brief Forge
+    |
+    v
+read effective policy through the public profile accessor
+    |
+    v
+read the selected nested hand-off policy
+    |
+    +-- disabled or eligible bypass --> audit bypass and stop
+    |
+    v
+validate every configured evaluator name is loaded
+    |
+    +-- unknown evaluator --> audit block and stop
+    |
+    v
+parse and validate content --> reject forbidden payloads --> run every evaluator
+    |
+    v
+check budget/failures/minimum score --> finalize and validate TAIL
+    |
+    v
+write metadata via unified audit_log --> verify persisted receipt --> emit envelope
+    |
+    v
+caller performs any actual authorized dispatch
 ```
-Source skill (e.g. plan)
-    │
-    │ wants to hand off to receiver (e.g. PlanReviewer)
-    ▼
-Brief Forge invoked with: kind, from, to, content_type, content_file
-    │
-    ▼
-Step 1: resolve pack policy
-    │  pack.brief_forge_handoffs.on_<kind>.{enabled, evaluators, budget_tokens}
-    │  pack.brief_forge_handoffs.cold_path_bypass.eligible_skills
-    ▼
-Step 2: cold-path-bypass check
-    │  if from in eligible_skills OR enabled = false → write stub audit + exit 0
-    ▼
-Step 3: construct envelope
-    │  forge_envelope_head + forge_envelope_body
-    │  HEAD: envelope_id, schema_version, kind, from, to, issued_at, pack, operator, voice_tier
-    │  BODY: content_type, content (from content_file)
-    ▼
-Step 4: run evaluators (parallel where possible)
-    │  evaluator_completeness, evaluator_security, evaluator_stale
-    │  each returns {score, budget_used, notes}
-    │  stop on budget exhaustion
-    ▼
-Step 5: compose tail
-    │  completeness_score = min(evaluator scores)
-    │  evaluators_run = list of evaluator names
-    │  escape_hatches = built per content_type
-    │  audit_pointer = .claude/runtime/audit/envelopes-<date>.jsonl
-    ▼
-Step 6: write audit + emit envelope
-    │  envelope written to audit JSONL
-    │  envelope emitted to stdout (receiver consumes)
-    ▼
-Step 7: score-based decision
-    │  score < 40 → escalate to operator (block hand-off)
-    │  score 40-59 → warn (receiver should expect to use escape hatches)
-    │  score ≥ 60 → proceed
-```
 
-The pack policy determines which evaluators run for which event. Operators tune this per-pack without changing skill code.
+`lib/pack-resolver.sh` owns profile selection, inheritance and cache representation. Brief Forge
+uses `resolve_pack_field_json` (or the retained public `resolve_pack_field` accessor on older bundles) for
+`brief_forge_handoffs.<event>.{enabled,evaluators}` and
+`brief_forge_handoffs.cold_path_bypass.eligible_skills`. Boolean/list responses are checked.
+It never reads the private cache file or supplies its own fallback policy. The selected resolver's
+documented fallback/required-profile behavior remains authoritative.
 
-## The five evaluators
+An unreadable event, missing `enabled` value or unknown evaluator fails closed before envelope
+construction. Configuration is data: evaluator names are never evaluated as shell commands.
 
-`lib/brief-forge-evaluators.sh` ships five. All return JSON `{score: 0-100, budget_used: int, notes: string}`. Lower score = worse envelope.
+## Envelope
 
-### security
+The envelope follows `lib/envelope-schema.yaml`:
 
-Scans for known-dangerous patterns: secret strings (API keys, OAuth tokens), shell-injection markers (`$(rm -rf`, `curl ... | sh`), prompt-injection markers (`ignore previous instructions`, `system: you are now`). Mechanical-first via regex.
+- **HEAD** identifies the event, source, receiver, issue time, active pack, operator and cycle.
+- **BODY** carries the typed content supplied by the caller.
+- **TAIL** carries the minimum evaluator score, evaluators run, escape hatches and audit pointer.
 
-Score impact: secret detected = -60, shell-injection = -40, prompt-injection = -30. Clean envelope = 100.
+The same envelope can therefore be inspected by the receiver, the coordinator and later review
+without inventing a second task definition.
 
-### completeness
+The producer emits JSON, also a YAML subset. JSON, Markdown adaptation and the canonical schema
+(JSON stored at the retained `.yaml` path) need only Python 3.9+ standard-library support.
+Legacy YAML input optionally uses `PyYAML>=6.0.3,<7.0` from `lib/envelope-requirements.txt`; import
+is lazy and its absence is an explicit failure, not silent base64 wrapping.
 
-Checks content_type-specific required fields. For `content_type: brief`, requires `task`, `constraints`, `acceptance`. For `spec`, requires `intent`, `inputs`, `outputs`. For `plan`, requires `tasks`.
+Markdown briefs use Task, Ownership/Constraints, Acceptance and optional Inputs headings. The full
+original text is retained under `original_markdown`. The Swarm adapter adds authoritative
+work-map/package/leaf/scope references and the acceptance digest. No text is executed.
+Real structured parsing rejects duplicate keys, YAML aliases, non-finite values, missing/nested
+lookalike fields and wrong types before a payload reaches receiver output or audit.
+Malformed YAML scalar constructors, including invalid explicitly tagged booleans/numbers/timestamps,
+are translated into payload-free errors. The optional parser's exception messages and tracebacks
+are not diagnostics suitable for a handoff caller.
 
-Score impact: each missing required field = -25 (brief/spec) or -50 (plan). Complete = 100.
+## Event policies
 
-### stale
+The neutral `_default` pack declares five event policies:
 
-Verifies `context_pointers` (file paths or URLs in the envelope's BODY) still exist at hand-off time. Envelopes can be issued + replayed minutes/hours later; the world may have moved.
-
-Score impact: each missing pointer = -30, capped at 0.
-
-## Pack-contributed evaluators
-
-The neutral spine ships the three above and nothing else. A pack may contribute its own — a voice
-check tied to its corpus, a compliance check tied to its audit trail — and declare them in
-`pack.yaml.brief_forge_handoffs`. They run alongside the built-in three and score the same way.
-
-A pack-contributed evaluator is a no-op when the envelope does not carry the field it keys on, so a
-brief produced under the neutral pack is never penalised for a check that does not apply to it.
-
-## Score aggregation
-
-`aggregate_evaluator_scores` returns the MINIMUM score across evaluators. Rationale: a brief that passes 4 evaluators at 100 but fails security at 30 is a 30-quality brief, not an 82-quality brief. The worst evaluator wins.
-
-If you average, you can hide a serious problem behind several mild successes. The receiver acts on the score; they need to know if there's a serious problem.
-
-## Cold-path-bypass
-
-Brief Forge has performance cost. For some hand-offs the cost isn't worth it:
-
-- **Hotfix workflow** — operator is in fast-iteration mode; evaluators add friction without much value
-- **Operator input** — operator's curated input doesn't need Brief Forge evaluation (the operator IS the evaluator)
-
-Two ways to bypass:
-
-1. **Skill frontmatter:** add `brief_forge_bypass: true` to the source skill's SKILL.md frontmatter. Brief Forge sees this at Step 2 and writes a stub audit entry instead of constructing/evaluating.
-2. **Pack policy:** `pack.yaml.brief_forge_handoffs.cold_path_bypass.eligible_skills: [hotfix, ...]`. Operator opts a pack out of forging for specific source skills.
-
-Either way, the bypass is audited so the trail survives. Operators inspecting `.claude/runtime/audit/brief-forge.jsonl` see `kind: brief_forge_bypassed` entries with reason.
-
-## Budget enforcement
-
-`pack.yaml.brief_forge_handoffs.budget_tokens` caps total budget per hand-off (default 5000). A pack that contributes extra evaluators raises its own budget.
-
-Each evaluator declares `budget_used` in its JSON return. Brief Forge sums consumption per hand-off and stops invoking further evaluators when the budget is exhausted. The completeness score reflects only the evaluators that ran.
-
-Why total budget vs per-evaluator: gives pack authors a single tuning knob. If a Phase 4 module adds a heavy LLM-backed evaluator, the budget can grow once at the pack level instead of per-evaluator.
-
-## Audit + replay
-
-Every envelope is appended to `.claude/runtime/audit/envelopes-<date>.jsonl` (per-day file for log rotation). The envelope is the audit record — there's no separate log of "Brief Forge ran"; the envelope itself is the evidence.
-
-`bin/li-envelope-replay <envelope-id>` pulls the envelope from the audit log and dry-runs it: surfaces what the receiver would do, given current state of the world. `--apply` actually re-invokes the receiver (audited as `envelope_replay_applied`).
-
-`bin/li-forge-stats` (planned — not yet shipped) will aggregate envelopes across audit logs and report per-skill / per-pack completeness over time. Operators use this to spot evaluators that are too strict (too many low scores) or skills that consistently produce bad briefs (always needing escape hatches).
-
-## Hand-off events
-
-Five events trigger Brief Forge. Each can be enabled/disabled per-pack:
-
-| Event | Trigger | Evaluators under the neutral `_default` pack |
+| Event | Boundary | Default policy |
 |---|---|---|
-| `subagent_spawn` | a skill spawns a subagent | security, stale |
-| `phase_transition` | one cycle phase hands to the next | completeness |
-| `workflow_handoff` | one workflow hands to another | completeness |
-| `cold_executor` | the plan, spec and prompt trio is born | security, completeness |
-| `operator_input` | operator to skill | disabled — operator input is curated, not scored |
+| `subagent_spawn` | parent workflow to agent | enabled; security, stale |
+| `phase_transition` | one cycle phase to the next | enabled; completeness |
+| `workflow_handoff` | one workflow to another | enabled; completeness |
+| `cold_executor` | plan/spec/prompt to a cold executor | enabled; security, completeness |
+| `operator_input` | operator to workflow | disabled |
 
-A pack can add its own evaluators to any of these events, or disable an event outright.
+These entries configure an invocation only. They do not install a callback or cause a host to
+intercept the corresponding event.
 
-Per-pack overrides via `pack.yaml.brief_forge_handoffs.<event>.{enabled, evaluators}`.
+`cold_path_bypass.eligible_skills` lets an active pack identify sources that may bypass evaluation.
+A disabled event or eligible bypass writes a verified metadata record and returns exit 3 without
+an envelope. It does not claim a forged handoff.
 
-## Why this matters
+## Evaluators
 
-Brief Forge is the **interlock that makes packs meaningful in practice**. Without it, packs declare their evaluator preferences in `pack.yaml.brief_forge_handoffs` but nothing enforces them. With Brief Forge as a mandatory gate, the pack's policy is what runs.
+Lintel ships exactly three evaluator functions in `lib/brief-forge-evaluators.sh`:
 
-Phase 4 modules wire their hand-offs through Brief Forge automatically. A `tech_architecture_review` content_type can be added without changing the gate — the gate already supports content_type dispatch.
+- `security` looks for secret-like, command-injection and prompt-injection patterns;
+- `completeness` checks required fields for the envelope's content type;
+- `stale` checks that referenced local context still exists.
 
-## Anti-patterns
+Each returns JSON containing a score, budget use and notes. The aggregate score is the minimum, so
+one serious result cannot be hidden by several high scores. A hard failure or missing/incomplete
+evaluation blocks regardless of score; schema validation and baseline security are always required.
+The security patterns are mechanical checks, not a claim of comprehensive tenant-policy enforcement.
 
-- **Bypassing without audit** — every bypass writes a stub entry; silent bypass is a bug
-- **Aggregating scores as average** — minimum is correct; average hides serious problems
-- **Skipping the audit_pointer** — the envelope IS the audit; no audit = no replay = no debuggability
-- **Ignoring budget exhaustion** — surface that not all evaluators ran; the score is partial
-- **Forging recursively** — Brief Forge doesn't forge envelopes for its own evaluator runs
-- **Hardcoding evaluator weights** — minimum-score aggregation means each evaluator is binary-veto-capable; weights would mask serious problems
+A pack may select another evaluator name, but policy does not load executable code. Trusted
+active-pack integration must first source a library that defines the corresponding
+`evaluator_<name>` function. If that function is not loaded, Brief Forge writes a
+`brief_forge_blocked` audit entry and refuses the hand-off before building the envelope.
+
+## Score and budget decisions
+
+The default decision bands are:
+
+| Score | Result |
+|---|---|
+| 60–100 | proceed |
+| 40–59 | proceed with concerns and exposed escape hatches |
+| 0–39 | block and escalate |
+
+`brief_forge_handoffs.budget_tokens` caps evaluator work for one invocation. Budget exhaustion,
+nonzero evaluator exit and malformed evaluator JSON block before release; missing scores/costs
+cannot default to success. The helper emits nothing if release fails.
+
+## Audit and replay
+
+Brief Forge uses the unified audit router from `bin/_audit.sh`:
+
+1. an explicit `LINTEL_AUDIT_DIR`, when set;
+2. `.claude/runtime/audit/` in a v5-layout repository;
+3. the operator-global Lintel audit directory as the fallback.
+
+`brief-forge.jsonl` retains identity, digest and outcome metadata only. Neither raw payload nor a
+reversible base64 copy is written. Rejected payloads and evaluator notes are absent from audit and
+diagnostics. The envelope pointer and events use the same scope. Because the shared audit writer
+has a fail-open API, this boundary also verifies its exact receipt before releasing the payload.
+
+`bin/li-envelope-replay` validates and inspects an explicitly retained envelope artifact. `--apply`
+records intent with a persisted receipt; the operator's session still invokes the receiver.
+Legacy full-envelope audit records remain readable, but a new metadata-only record cannot
+reconstruct a payload. Preserve an authorized artifact separately and compare its digest.
+
+## Relationship to Swarming work
+
+Brief Forge structures one dispatch boundary; it does not schedule lanes. The Swarm profile owns
+dependency readiness, attributable isolation, lane scopes, reports, independent reviews and serial
+integration. Brief Forge supplies the boundary envelope and audit evidence used before a worker is
+handed a lane.
+
+If the host supports native subagents, several eligible isolated lanes may run concurrently. A
+sequenced host replays the same briefs one at a time. A host with no delegation support leaves the
+artifacts inspectable for manual execution. In every case, the coordinator remains the single
+writer for shared ledgers and reducers.
+
+## Failure and recovery
+
+- **Missing or unreadable policy:** block before construction and repair its source/accessor.
+- **Unknown evaluator:** load the trusted pack evaluator or remove the unsupported policy name;
+  never silently skip it.
+- **Low score or forbidden content:** use the safe diagnostic, correct/redact the original, then retry.
+- **Unavailable host integration:** record the degradation in the lane report and preserve the
+  unmodified worker brief for replay.
+- **Audit write failure or missing receipt:** return failure with no receiver payload.
 
 ## Integration points
 
 **Reads:**
-- `lib/envelope-schema.yaml` (envelope shape)
-- `lib/pack-resolver.sh` (pack policy)
-- `lib/brief-forge.sh` (envelope helpers)
-- `lib/brief-forge-evaluators.sh` (5 evaluators)
-- Content file passed in (varies by content_type)
+
+- `lib/envelope-schema.yaml`
+- the public accessors in `lib/pack-resolver.sh`
+- `lib/envelope_contract.py` (shared structured implementation)
+- `lib/brief-forge.sh`
+- `lib/brief-forge-evaluators.sh`
+- trusted pack evaluator code explicitly sourced by the caller
+- the caller's content file
 
 **Writes:**
-- `.claude/runtime/audit/envelopes-<date>.jsonl` (per-envelope, the audit-of-record)
-- `.claude/runtime/audit/brief-forge.jsonl` (per-forge stats: who-when-score-budget)
-- stdout (the envelope, for receiver consumption)
 
-**Triggered by:**
-- Every skill's hand-off operation
-- Hooks (Phase 4): `hooks/shared/brief-forge-pre-spawn.sh`, `hooks/shared/brief-forge-pre-phase.sh`
+- scope-routed Brief Forge identity/digest/outcome events through the unified writer
+- the envelope on stdout
 
-**Tested by:**
+**Verified by:**
+
 - `tests/unit/brief-forge-evaluator-runs.sh`
-- `tests/shape/brief-forge-evaluators-present.sh`
+- `tests/integration/brief-forge-boundary.py` (including missing optional parser and failed audit)
+- `tests/shape/brief-forge-handoffs-canonical.sh`
 - `tests/shape/every-handoff-uses-envelope.sh`
+- the integrated Swarm workflow and full repository suite
+
+## Anti-patterns
+
+- Calling pack policy an automatic hook.
+- Treating an unknown evaluator as a no-op.
+- Bypassing without an audit record.
+- Averaging evaluator scores and masking a serious result.
+- Writing an audit pointer to a different scope than the emitted event.
+- Forging recursively for Brief Forge's own evaluator work.
+- Letting a forged envelope become a second source of task authority.

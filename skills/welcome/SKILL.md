@@ -1,202 +1,169 @@
 ---
 name: welcome
 layer: foundation
-description: Use on first run, or when someone is new to Lintel, for guided onboarding — detects the CLI, shows its honest capability tier, runs a dry-run cycle, and demonstrates a safety hook. The five-minute "see the harness work" path for a first-time user.
+description: Use on first run to choose a useful task, inspect the actual client surface and take a proportionate plan, build, review or resume path.
 color: green
 tools: Read, Bash
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: full
+cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
 necessity: OPTIONAL
-gap_if_skipped: "A first-time operator meets the full skill set with no guided entry — they read docs instead of feeling the harness work, and never learn their CLI's honest capability tier (e.g. that the enforcement hooks only fire on Claude Code)."
+gap_if_skipped: "The operator has no guided first task or clear distinction between installed resources, host capabilities and observed execution."
 navigation:
-  primary_intent: guided first-run onboarding — see the harness work in five minutes
+  primary_intent: task-first onboarding with truthful client boundaries
   triggers:
-    - operator just installed Lintel and runs /li:welcome
-    - operator asks "how do I start" / "getting started"
-    - the README quickstart + the installer's completion message point here
+    - operator just installed Lintel
+    - operator asks how to start
   sibling_workflows:
-    - /li:cli-fingerprint — the CLI detection this skill delegates to
-    - /li:cycle — the guided demo (invoked with --dry-run)
-    - /li:doctor — the deeper cross-CLI health check
+    - /li:cli-fingerprint
+    - /li:cycle
+    - /li:doctor
   risk_level: low
   auto_mode_eligible: false
   estimated_tokens: 2000
 ---
 
-You are the WELCOME skill — Lintel's first-run guided onboarding.
+# Welcome
 
-## What this skill does
+Start with what the operator wants to accomplish, not a vendor, installation ceremony or
+catalog tour. Show how a bounded task leaves acceptance evidence and a useful next-session
+handoff. Reuse the canonical workflows and capability reader; do not implement a second
+onboarding runtime.
 
-A new operator just installed Lintel and is staring at the full skill set. Your job is to make
-them *feel* the harness work in five minutes, honestly, on whichever CLI they are running:
+## 1. Identify the useful next task
 
-1. Detect the active CLI.
-2. Show that CLI's **honest** capability tier — including what does NOT work here.
-3. Run one guided cycle in dry-run so they see the 9-step discipline without mutating anything.
-4. Demonstrate a safety hook (or honestly explain why it can't fire on their CLI).
-5. Point them at the next step.
+Retain the stated request and existing authorization. Ask only for missing decisions using
+the host's actual question tool; use conversation only where no question tool exists.
+Maintenance, migration, research and reviews do not require venture or customer-engagement
+framing. Company standards and optional audience lenses come from the project or selected pack.
 
-This skill is a **thin orchestrator** — it reuses `/li:cli-fingerprint`, `lib/cli-tiers.sh`,
-and `/li:cycle --dry-run`. It never rebuilds detection and never hardcodes the tier table
-(that lives once in `lib/cli-tiers.yaml`).
+Read the repository's instructions, relevant decisions, memory and active work map first.
+If a task is already planned, offer its next authorized card rather than producing a new plan.
+If the operator only wants orientation, do not create jobs, plans or runtime files.
 
-## When to use
+## 2. Identify the exact surface and available operations
 
-- Right after installing Lintel, on any supported CLI.
-- When an operator asks "how do I get started" or "what can this do".
-
-## When NOT to use
-
-- Returning operators who already know the harness — point them at `/li:catalog` instead.
-- As a step inside `/li:cycle` — welcome is a standalone first-run experience.
-
-## Workflow
-
-### Step 1 — Detect the active CLI
-
-Invoke `/li:cli-fingerprint` to resolve which CLI is running Lintel (env-var → process →
-tool-probe → config fallback). Capture the result as `$cli` (e.g. `claude-code`, `codex`,
-`gemini`, …). If detection is uncertain, default `$cli=other` and say so — never guess a
-capability you can't confirm.
-
-### Step 2 — Show the honest capability tier
-
-Read the tier from the single source (`lib/cli-tiers.yaml` via its lookup helper) and print
-a short, honest banner. Do NOT hardcode any of these values:
+Use `/li:cli-fingerprint` and the Universal adapter. CLI, desktop, IDE and cloud are distinct
+even when a product shares an engine. The canonical source is `lib/cli-tiers.yaml`.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-${LINTEL_HOME:-$LINTEL_REPO_ROOT}}/lib/cli-tiers.sh" 2>/dev/null \
-  || source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/cli-tiers.sh"
-
-cli="${cli:-other}"
-label=$(cli_tier_field "$cli" label)
-tier=$(cli_tier_field "$cli" tier)
-hooks=$(cli_tier_field "$cli" hooks_supported)
-subagents=$(cli_tier_field "$cli" subagents)
-skills_native=$(cli_tier_field "$cli" skills_native)
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-client-capabilities.py" show --client "$surface"
 ```
 
-Then surface (fill in the values):
+Set the trusted source and actual surface before running the example; `python` is valid
+when that is the installed Python 3 command. `cli_tier_field` in `lib/cli-tiers.sh` remains a
+conservative compatibility view for old consumers, not proof that an operation is available.
 
-```
-Lintel — first run on <label>
+Show three separate facts: dated vendor documentation; the delivered discovery/binding or
+manual route; and version-specific observed evidence. Default unrun scenarios to `not_run`.
+Inspect available tool schemas and permissions rather than inferring them from a model,
+process name or plugin manifest. Unknown surface means an explicit manual route, not failure
+of the common workflow.
 
-  Tier:      <tier>            (full / supported / best-effort)
-  Skills:    <native | manual> — how you invoke /li:<skill>
-  Subagents: <native | sequenced | none>
-  Hooks:     <on | OFF here>  — the enforcement layer (secret/customer-data blocks,
-                                no-direct-push) fires ONLY on Claude Code.
-```
+Native discovery can expose `li-plan`, `li-build`, `li-review` and `li-resume`. Invoke the
+names the client actually lists. If discovery is absent, explicitly read the canonical
+SKILL.md through `.github/lintel/START.md` in a portable kit. Do not promise every specialist
+workflow was tested in that host because its source is bundled.
 
-Be direct about the gaps. If `tier != full`, say plainly what degrades. This honesty is the
-whole point — an operator who learns the limits up front trusts the rest.
+## 3. Discover the selected method
 
-### Step 3 — Guided cycle, dry-run (no mutation)
+Use the accepted catalog before opening a specialist body. Resolve the trusted source
+from the loaded adapter, independently of the working target. Select a nonempty keyword
+from the actual task; do not scan personal skill trees or load all prompts for orientation.
 
-Run the 9-step cycle in dry-run so they see the discipline without creating a job, a plan,
-or any state in their repo:
-
-Invocation: `/li:cycle --dry-run "add a hello endpoint"` (a throwaway prompt — dry-run shows
-the phase plan + token forecast + which hooks *would* fire, and mutates **nothing**).
-
-Walk them through what they see: SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW →
-SHIP → CAPTURE, and the gate at each. One sentence each; this is the "way of working" pillar.
-
-### Step 4 — Demonstrate a safety hook (honest per-CLI degradation)
-
-The enforcement hooks are Claude-Code-only. How they activate depends on the install path — a
-**plugin install auto-registers** them (zero-setup, via the plugin's `hooks/hooks.json`); a
-**bare install** ships them inert (bare install only) until the operator symlinks + merges the
-snippet. This is the canonical truth (ADR-0008); the full matrix lives in
-`docs/getting-started.md#how-hook-activation-works` — point the operator there, never restate it
-differently. Branch on `$hooks` and the install state:
-
-- **`hooks == true` AND a hook is already firing** (plugin install — auto-registered; or a bare
-  install where the operator already symlinked into `~/.claude/hooks/`): trigger one live. Show
-  `no-secrets-in-edit` catching a fake key — e.g. narrate writing `AKIA0000000000000000` and the
-  WARN it emits. This is the "whoa". On a plugin install this just works with no setup.
-
-- **`hooks == true` but NO hook firing yet** (Claude Code, **bare install**, not yet armed): do NOT
-  auto-edit `~/.claude/settings.json`. PRINT the exact opt-in for the operator to run, then they
-  re-run this step to see it fire:
-
-  ```bash
-  ln -s ~/.lintel/hooks/shared/no-secrets-in-edit/run.sh ~/.claude/hooks/no-secrets-in-edit.sh
-  # then add to ~/.claude/settings.json under PreToolUse(Edit|Write):
-  #   { "hooks": [{ "type": "command", "command": "~/.claude/hooks/no-secrets-in-edit.sh" }] }
-  ```
-
-  Say: "On a bare install hooks ship inert (bare install only) — Lintel never edits your settings
-  behind your back. Run the two lines above to arm the secret-scan hook, then `/li:welcome` again to
-  watch it fire. (A plugin install would have armed them automatically — see
-  docs/getting-started.md#how-hook-activation-works.)"
-
-- **`hooks == false`** (every CLI except Claude Code): do NOT pretend. Narrate it:
-  "The enforcement layer (secret-scan, customer-data block, no-direct-push) is a Claude Code
-  mechanism — it does not fire on <label>. Here's what it would catch on Claude Code: a
-  commit containing `AKIA…` or a customer email is blocked before it lands. On <label> you
-  still get the skills, the cycle discipline, and the pack-driven knowledge — just not the
-  live hook gate."
-
-### Step 5 — Point at the next step (lead with the light path, not the full surface)
-
-Lintel ships a large surface (125 skills, 69 agents). Do **not** open with `/li:catalog` — a wall of
-125 commands is the fastest way to lose a first-time operator. Lead with the **core "start here" set**
-— the handful you actually use day one — and make the *small-work* path loud, because the #1 reason
-people abandon structured harnesses is "too heavy for a quick task":
-
-```
-Start here (the daily drivers):
-  /li:fix          quick bug fix — skips the heavy ceremony (use this for small work!)
-  /li:cycle        the full SENSE→CAPTURE workflow — for substantial features
-  /li:investigate  "why is this broken" — hypothesis-driven debugging
-  /li:qa           "does it work" — run + verify
-  /li:review       pre-ship review of a diff
-  /li:resume       pick up where you left off
-  /li:doctor       health check (is everything installed + firing?)
-  /li:catalog      …and when you want the *full* surface, it's all here
-
-Small task? → /li:fix or just work directly. The 9-phase cycle is for substantial work — you
-don't pay its ceremony on a one-line change. SCOPE stays silent on small asks; phases are skippable
-(`/li:cycle --from … --to …`); modes (`--mode hotfix`) trim the path.
+```bash
+: "${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
+: "${keyword:?select a nonempty task keyword}"
+"${python_cmd:-python3}" -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" \
+  --json --kind=all --query="$keyword"
 ```
 
-Then the deeper pointers:
-- `docs/getting-started.md` — the per-CLI install + first-task walkthrough.
-- `/li:pack-list` / `/li:pack-switch` — switch identity/compliance per repo (corp vs private).
-- **At-rest cost:** Lintel's always-loaded surface (skill + agent descriptions) is ~10k tokens; skill
-  and agent *bodies* load only when invoked, and heavy work is delegated to subagents — so a large
-  catalog does not mean a large per-turn tax.
+The keyword is one quoted literal argument. A valid zero-match result calls for a broader
+keyword, not a made-up capability. For an explicitly requested demo-script exploration,
+use the existing projection instead:
 
-## Voice
+```bash
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=demo-script
+```
 
-Internal. Honest over impressive — the value of this skill is that it tells the operator the
-truth about their CLI on the first screen. Never over-claim a capability the tier says is off.
+Present the returned method, alias, source-relative path and unknown/staged limitations.
+Read only the selected body under that same trusted source. Retain shared dependency and
+notice obligations without warming all resource bodies. Metadata is not native discovery,
+permission or execution; actual host facts still come from step 2. No selection preserves
+normal task-first onboarding. See [metadata](../catalog/references/metadata.md) and
+[selections](../catalog/references/selections.md).
 
-## Anti-patterns
+If execution is unavailable, disclose the committed `skills/CATALOG.md` as a skills-only
+snapshot, or read a specifically selected canonical file through a permitted file tool.
+An invalid source/parser is an error, not an empty success or an instruction to regenerate.
+This orientation creates no work map, profile, cycle, draft or registration.
 
-- **Hardcoding the tier table** — it lives once in `lib/cli-tiers.yaml`; read it, never inline it.
-- **Auto-installing hooks / editing the operator's settings.json** — print the command, let them run it.
-- **Running a real (non-dry-run) cycle that writes state into their repo on first run** — always `--dry-run` here.
-- **Claiming hooks/subagents work where the tier says they don't** — degrade honestly.
+## 4. Walk through the method without implying execution
+
+For orientation, `/li:cycle --dry-run` describes the phases without running them. Treat that
+as a workflow preview, not a measured host test, successful build or hook demonstration.
+Keep it read-only and verify no state was changed if claiming a no-mutation preview.
+
+For an already authorized real task, follow the selected workflow instead of replacing it
+with a throwaway demo. The shape is SENSE, SCOPE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW, SHIP,
+CAPTURE; small work can use a shorter route.
+
+## 5. Explain controls and honest fallback
+
+The shipped hook adapter is a Claude Code mechanism, separate from the common workflow.
+Claude plugin installation can register selected hooks; bare hook files are inert until
+registered. The portable repository kit installs no hooks on any client. File presence,
+vendor documentation and `hooks_supported` are not proof that a hook fired.
+
+Do not auto-edit settings, activate hooks, invoke paid clients or send project content to
+demonstrate onboarding. Only run a control demo when specifically authorized and using an
+isolated non-sensitive fixture; capture the actual registration, input, outcome and limits.
+Otherwise explain the boundary and keep required unverified controls outstanding. Preserve
+the optional [Claude hook path](../../docs/claude-code.md) without requiring it.
+
+Use actual delegation when available. Without attributable isolated writes, serialize.
+Without delegation, retain scoped package briefs, reports and restart for manual/external
+work. An implementer's self-review never clears a requirement for independent review.
+No browser tool means browser evidence remains missing, not a fabricated successful demo.
+
+## 6. Choose the proportionate path
+
+| Need | Canonical workflow |
+|---|---|
+| Small authorized fix | `fix`, or direct scoped work with verification |
+| Find why something fails | `investigate` |
+| Substantial change | `plan` / `cycle`, then authorized `build` |
+| Verify behavior | `qa` |
+| Review only | `review`, with no write escalation |
+| Continue work | `resume`, preserving the original map and IDs |
+| Diagnose installation | `doctor` plus the installed adapter's `check` |
+| Explore specialist methods | `catalog` metadata, then only selected bodies |
+
+Close with the actual next action and any missing tool, control or review. The catalog's
+size does not establish token cost or productivity. Do not quote an unmeasured time saving.
+See [getting started](../../docs/getting-started.md) and [client adapters](../../docs/client-adapters.md).
 
 ## Failure recovery
 
-- CLI detection uncertain → default to `other`/best-effort and say so; never over-claim.
-- `lib/cli-tiers.yaml` unreadable → `cli_tier_field` returns safe defaults (best-effort, hooks off); proceed, degraded-but-honest.
+Missing source or malformed registry: report the exact error; do not fabricate a capability
+tier. Missing native API: use the explicit permitted fallback. Denied permission: stop the
+affected action. Missing independent actor: leave a usable review handoff outstanding.
 
 ## Cycle-position footer
 
-Close your report with the shared position footer. Outside an active cycle it renders the thin
-ambient line; inside one it shows the operator's position + next step:
+Use the shared `lib/cycle-footer.sh` from the trusted source when available. Do not invent
+state or claim completion from a position label.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-${LINTEL_HOME:-$LINTEL_REPO_ROOT}}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
-render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
+footer_source="${LINTEL_SOURCE_ROOT:?approved installed Lintel source is required}"
+: "${LINTEL_REPO_ROOT:?select the working repository before reading its state}"
+if [ -f "$footer_source/lib/cycle-footer.sh" ]; then
+  source "$footer_source/lib/cycle-footer.sh" || exit $?
+  render_cycle_footer
+else
+  printf '%s\n' "UNVERIFIED: shared cycle-position footer is unavailable" >&2
+fi
 ```
 
-See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
+This reads existing state only. Do not create a cycle or profile merely to render
+an orientation footer. A thin footer describes the recorded cycle, not proof that no
+original mapped tasks remain; use the read-only `status` consumer for that distinction.

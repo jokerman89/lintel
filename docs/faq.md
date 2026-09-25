@@ -76,8 +76,37 @@ kit's managed resources live under `.github/`. See
 ## Does it work with Spec Kit?
 
 Yes, through an optional [workflow bridge](spec-kit.md). Keep existing `spec.md`, `plan.md` and
-`tasks.md` authoritative, with one active executor. Lintel records the artifact mapping and session
-handoff; it should not create a second competing task list or reinitialize an existing feature.
+`tasks.md` authoritative. Lintel records the artifact mapping and session handoff; it should not
+create a second competing task list or reinitialize an existing feature. An explicitly opted-in
+swarm may execute independent task domains, but it still references that one authoritative list.
+
+## When should I use a swarm?
+
+Use the opt-in swarm profile after PLAN when an approved task map has at least two
+dependency-independent ownership domains, bounded acceptance checks and disjoint writer scopes.
+Stay with ordinary sequential BUILD when one shared file or generated reducer dominates, ownership
+is uncertain, or coordination overhead exceeds the work. Lintel never infers swarm opt-in from task
+count. See [swarming work](concepts/swarming-work.md).
+
+## How do I inspect and close a swarm?
+
+Read the mapped task artifact for authoritative cards and dependencies, then inspect
+`swarm/coordination.json` for waves, roles, write scopes and evidence paths. The read-only
+`li-swarm.py validate`, `status` and `wave` commands check topology and show the candidate frontier;
+the coordinator must still verify each card's dependencies before dispatch.
+
+Before fan-in, each attributable lane change set passes `check-scope`, a worker report and an
+independent two-stage review. `verify` checks that lane evidence is complete. The coordinator then
+confirms integration and runs ordinary REVIEW on the reconciled tree; lane reviews do not replace
+that final gate.
+
+## What happens when a swarm worker disappears or changes the wrong path?
+
+Revalidate committed artifacts and inspect attributable worktrees or patches. A lost process or
+gitignored runtime record cancels an attempt, not verified work. Preserve and scope-check attributable
+changes, then finish the evidence or replay the same brief. If attribution is missing or a worker
+changed an unowned path, quarantine the changes and freeze the affected ownership domains until the
+coordinator reconciles or re-plans them. Never discard or merge the discrepancy silently.
 
 ## How do I update or roll back?
 
@@ -113,9 +142,11 @@ report a sanitized reproduction with the installation route and actual file path
 
 ## Can two agents use the same repository?
 
-The knowledge is shared files; Lintel does not mediate concurrent writes. Assign separate file
-ownership, branches or worktrees. Keep one writer responsible for the active task list and session
-ledger, especially when mixing Spec Kit and Lintel workflows.
+Yes, through an explicit [swarm contract](concepts/swarming-work.md), or through carefully sequenced
+work. Concurrent writers need non-overlapping ownership plus attributable isolation in separate
+worktrees, patches or an equivalent host-enforced sandbox. A union diff in one shared checkout is
+not attribution. Keep one coordinator responsible for the active task list, session ledger,
+generated reducers, commits and integration, especially when mixing Spec Kit and Lintel workflows.
 
 ## How do I customize or contribute?
 
@@ -124,6 +155,8 @@ a private pack. Propose reusable fixes upstream through a pull request. Generate
 managed adapter files should be changed through their sources, not patched as final output.
 [CONTRIBUTING.md](../CONTRIBUTING.md) covers contracts and verification.
 
-Two lesson utilities have different purposes: `li-lessons-promote` promotes a lesson into the
-scaffolding baseline; `li-lessons-sync` synchronizes an operator's lessons through a configured
-private Git repository. Review the destinations before using either.
+Two lesson utilities have different purposes: `li-lessons-promote` promotes one ID-managed lesson
+into the scaffolding baseline of a Lintel work tree you name explicitly (it writes only that file,
+records provenance with an explicit source label and commits only on request);
+`li-lessons-sync` synchronizes an operator's lessons through a configured private Git repository.
+Review the destinations before using either.

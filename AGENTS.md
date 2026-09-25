@@ -41,10 +41,13 @@ Or for Codex App: sidebar → Plugins → `+`.
 
 ### Subagents in Codex
 
-Codex has native subagent support (`lib/cli-tiers.yaml`: `subagents: native`). Agents in `agents/<category>/<Name>.md` load through the plugin manifest and can be delegated to directly. For scripted one-shot runs, the `codex exec` subprocess pattern still works:
+Codex documents configured subagent support. Inspect the current surface's actual agent
+inventory and tools; a canonical `agents/<category>/<Name>.md` file is not proof of native
+registration or permission. CLI, desktop and IDE have distinct records in `lib/cli-tiers.yaml`.
+For an explicitly authorized outside-review subprocess, inspect the installed command first:
 
 ```bash
-codex exec --prompt "$(cat agents/security/SecurityAuditor.md). Audit branch X."
+codex exec --help
 ```
 
 ### Plan mode
@@ -57,15 +60,17 @@ Codex's tool-permission model is per-invocation. Auto-mode bounds in `AGENT-INST
 
 ### Skill discovery
 
-Skills live at `skills/<name>/SKILL.md` and surface natively as `/li:<skill>` once the plugin is
-installed (`/plugins`, search lintel, Install). Codex is a **full-tier** CLI: native skills and
-native subagents. The one thing it does not get is the hook enforcement layer, which is a Claude
-Code mechanism.
+Skills live at `skills/<name>/SKILL.md`. The preserved plugin is one distribution route.
+The repository adapter generates `.agents/skills/li-*/SKILL.md`; inspect `/skills` or the
+host's `$` references rather than assuming Claude's colon namespace. Native-format files,
+documented capabilities and observed execution are different facts. Lintel's Claude hook
+bundle is not a Codex adapter.
 
-For a scripted one-shot run outside an interactive session:
+For a portable explicit invocation without native discovery:
 
-```bash
-codex exec --prompt "$(cat skills/ship/SKILL.md). Execute on current branch."
+```text
+Read the Universal adapter and skills/ship/SKILL.md from the trusted Lintel source.
+Prepare delivery only within the current task's authorization.
 ```
 
 ### Compliance
@@ -143,6 +148,26 @@ Subagents report; the coordinating agent decides. Review subagents must not fix 
 findings. Reports include severity counts, actionable findings with file:line citations,
 verification evidence and limitations. Keep implementation and independent review separate.
 Coordinate shared task-state writes rather than having parallel agents overwrite one ledger.
+
+When an approved plan opts in to swarm execution, use one coordinator and the committed swarm
+artifacts under `.claude/plans/<initiative>/swarm/`. The mapped task artifact remains authoritative
+for card text, dependencies, status and acceptance; coordination metadata adds only waves, roles,
+write scopes, isolation and evidence pointers. The coordinator alone writes shared plan/runtime
+state, generated reducers, commits and integration history. A worker writes only its declared
+scope plus its own report, and an independent reviewer writes only that lane's review artifact.
+
+Run writer lanes concurrently only when each change set is attributable through a separate Git
+worktree, isolated patch or equivalent host-enforced scoped-write sandbox, and same-wave write
+scopes do not overlap. A shared-tree union diff is not attribution. If the host cannot provide
+that evidence, execute the same briefs sequentially without weakening dependency, scope or review
+gates. On a host without subagents, the main agent may replay the briefs serially, but must label
+implementation and self-review honestly rather than claiming independent work.
+
+Recover a swarm from committed maps, briefs, reports, reviews and attributable Git evidence, not
+from chat memory or a process-status label. Missing runtime state cancels an attempt, not verified
+committed work. Preserve and quarantine an out-of-scope or unreviewed change set until the
+coordinator can re-plan, re-run or reconcile it. Lane reviews never replace the final independent
+review of the reconciled integration branch.
 
 ### Authorized bug fixing
 

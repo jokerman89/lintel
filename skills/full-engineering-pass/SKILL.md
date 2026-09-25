@@ -8,20 +8,19 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 necessity: STRONGLY_RECOMMENDED
-gap_if_skipped: "Customer engagements + major releases run with no end-to-end engineering discipline. Each module skipped is a class of debt that surfaces in production — either as architectural regret, schema corruption, security audit fail, ops incident, or undetected regression. The composition is what makes the 5 modules add up to more than their sum."
+gap_if_skipped: "Cross-domain work lacks a verified dependency chain between architecture, data, security, operations and quality; isolated positive scores can conceal a missing requirement."
 navigation:
-  primary_intent: produce end-to-end engineering depth (architecture + data + security + ops + quality) for customer engagement or major release
+  primary_intent: produce end-to-end engineering artifacts with original work and evidence identity
   triggers:
-    - customer engagement requiring full evidence package
-    - new service production-ready release prep
+    - engagement or release explicitly requiring all engineering domains
     - operator types /li:full-engineering-pass
-    - SENSE detects customer-engagement-deep mode + sufficient scope
+    - active workflow requests cross-domain depth
   sibling_workflows:
-    - /li:ta — tech-architecture (first stage, runs alone)
-    - /li:da — data-architecture (second stage, parallel with SC)
-    - /li:sc — security-compliance (second stage, parallel with DA)
-    - /li:dh — devops-hosting (third stage, after DA + SC complete)
-    - /li:tq — testing-qa (fourth stage, validates the prior 4)
+    - /li:ta — architecture first
+    - /li:da — data after architecture
+    - /li:sc — security after architecture
+    - /li:dh — hosting after upstream evidence
+    - /li:tq — validation of the prior domains
   risk_level: high
   auto_mode_eligible: false
   estimated_tokens: 500000
@@ -41,327 +40,131 @@ domain:
       parallel: false
   cap_soft: 500000
   cap_hard: 750000
-  partial_rollout: gracefully_skip_missing_modules
-  override_allowed: --skip-module <name>
+  partial_rollout: retain missing requirements and block dependent acceptance
+  override_allowed: --skip-module only for a grounded optional exclusion
 ---
 
-You are the FULL-ENGINEERING-PASS — the composition that runs all 5 engineering-domain modules in DAG order.
+# Full engineering pass
 
-## What this skill does
+Compose TA -> DA/SC -> DH -> TQ without inventing an execution engine. The module
+methods remain in their canonical skills and retained role bodies. The caller owns
+actual tool dispatch, explicit handoffs and verification, using the
+[shared module procedure](references/domain-handoff.md#module-caller-procedure).
+This is not a tenth phase. SENSE -> SCOPE -> DEFINE -> DISCOVER -> PLAN -> BUILD ->
+REVIEW -> SHIP -> CAPTURE remains the lifecycle; resume is a utility.
 
-Orchestrates TA → DA‖SC → DH → TQ as a single end-to-end engineering pass. Produces the complete artifact set for a customer engagement or major release in one invocation.
-
-```
-Stage 1: TA (tech-architecture)
-  ↓ produces: system-arch + ADRs + contracts + dependency graph + NFRs
-  ↓
-Stage 2: DA  +  SC   (run in parallel — independent concerns)
-  ↓ DA produces: data-model + schema + migration + retention + query patterns
-  ↓ SC produces: threat-model + secrets + auth + compliance + audit-path + runbook
-  ↓
-Stage 3: DH (devops-hosting)
-  ↓ reads: TA scaling-plan, DA migration-plan, SC threat-model + audit-path
-  ↓ produces: deployment + observability + SLI/SLO + cost + rollback + on-call
-  ↓
-Stage 4: TQ (testing-qa)
-  ↓ reads: everything above
-  ↓ produces: coverage + perf-budget + contract-tests + regression + chaos
-  ↓
-SHIP gate: aggregate 30-dim score (6 dims × 5 modules); ≥80 per module to ship
-```
-
-Each module has its own 5 checkpoints + 6-dim rubric. The composition is the **orchestration + ordering + cross-module brief handoffs + aggregate scoring**.
-
-## When to use
-
-- Customer engagement requiring complete engineering evidence (architecture review, audit prep, customer audit)
-- New service approaching production
-- Major release prep
-- Annual engineering health review
-- SENSE auto-recommends when customer-engagement-deep mode detected + scope is substantial
-
-## When NOT to use
-
-- Hotfix (use `/li:cycle --mode hotfix`)
-- Single-module work (invoke the module directly: `/li:ta full`, `/li:da full`, etc.)
-- Pre-feature exploration (use `/li:cycle --mode research-dive`)
-- Routine work (the cap is 500k soft / 750k hard — overkill for small changes)
+Use for a genuinely cross-domain request, not an ordinary fix or mandatory venture/
+customer interview. Direct single-module and single-capability entry points remain.
+The historic 500k/750k planning hints are uncalibrated advice, not measured usage,
+host context capacity, a spending authorization or an automatic model setting.
 
 ## Composition DAG
+
+| Stage | Modules | Depends on | Required handoff |
+|---|---|---|---|
+| Stage 1 | TA | original accepted requirements | decisions, interfaces, dependency graph, NFRs and actual consumer impact |
+| Stage 2 | DA and SC | selected TA artifacts | schema/migration/retention and threats/auth/control/audit evidence |
+| Stage 3 | DH | TA, DA, SC | deploy/recovery, signals/SLOs, capacity/cost and on-call plan |
+| Stage 4 | TQ | TA, DA, SC, DH | consumer tests, performance/coverage/regression and recovery evidence |
 
 ```yaml
 stages:
   - stage: 1
-    name: architecture
     modules: [ta]
     parallel: false
-    why_first: "architecture decisions constrain everything downstream"
-
+    depends_on: []
   - stage: 2
-    name: data_and_security
     modules: [da, sc]
     parallel: true
-    why_parallel: "data design + security posture are independent at this layer; both consume only TA's output"
-
+    depends_on: [ta]
   - stage: 3
-    name: deployment
     modules: [dh]
     parallel: false
     depends_on: [ta, da, sc]
-    why_after: "DH reads TA scaling-plan, DA migration-plan, SC threat-model + audit-path"
-
   - stage: 4
-    name: validation
     modules: [tq]
     parallel: false
     depends_on: [ta, da, sc, dh]
-    why_last: "TQ validates everything the prior 4 modules produced"
 ```
+
+`parallel: true` means eligible, not observed concurrency. Default to serial DA then
+SC unless the selected approved work map opts into the existing Swarm coordination,
+disjoint write ownership and actual attributable isolation. Reuse `/li:swarm` only
+when those prerequisites hold; do not implement another scheduler or infer permission
+from an environment variable. Shared data/security decisions may require serialization.
 
 ## Workflow
 
-### Step 1 — Parse invocation + read pack policy
+1. **Retain the requested operation.** Preserve selected map/package/leaves, actual
+   cycle/phase and approved outcome. Full, `--resume` and `dry-run` retain their
+   meaning: dry-run inspects/reports without domain execution or successful results.
+2. **Discover from trusted source.** Read `skills/<module>/SKILL.md` under
+   `LINTEL_SOURCE_ROOT`, not the target repository's potentially hostile/missing
+   `skills/`. Do not search another installation or silently download a module.
+3. **Fix expected scope before observations.** After live P07 verification and
+   original work-reader admission, construct the accepted domain request with every
+   required domain/checkpoint/control. Select real receiver modes and original file
+   preimages. Explicit advisory preferences are distinct from required policy.
+   Do not infer expected domains from whichever results happen to be present.
+4. **Stage 1:** perform TA's methods and verify required upstream artifacts. Hand
+   original IDs/profile/ref and exact artifact identity to DA/SC. Proposed decisions
+   are not accepted decisions; obtain missing material choices through the actual
+   host question channel, without repeating already granted authority.
+5. **Stage 2:** perform DA/SC with scoped receivers. Migration planning and SQL
+   artifacts do not imply live migration. Security reviewers never repair findings.
+   Record actual starts/results; preserve both successful and failed observations.
+6. **Stage 3:** DH uses verified upstream state/constraints and actual SLO/cost
+   sources. Release planning does not imply deploy/merge/publish authority.
+7. **Stage 4:** TQ tests actual requirements with inspected authorized runners.
+   Zero tests, missing browser/renderer or skipped mandatory checks stay unverified.
+8. **Verify and review.** Persist artifacts before external final P05 preparation.
+   Fresh domain summary and actual QA must consume the same context. Request real
+   independent spec then quality and use P05's latest applicable reader/corroboration.
+   Only the original task owner updates original status after those gates.
 
-```bash
-mode="${1:-full}"               # full | resume | dry-run
-skip_modules="${SKIP_MODULES:-}" # CSV of module names to skip
+The callable data commands in the [reference](references/domain-handoff.md) validate,
+record, verify and summarize; they never perform the domain action. Do not paste
+slash commands into a shell loop or report a suggested command as a completed one.
 
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
-voice=$(resolve_pack_field voice.default_tier)
+## Missing required domains and honest composition
 
-# Activate customer-engagement-deep mode if pack defines it
-deep_mode=$(resolve_pack_field navigation.customer_engagement_deep 2>/dev/null || echo false)
-```
+Missing required domains, checkpoints, upstream artifacts or applicable mandatory
+controls block dependent acceptance even when four other domains score 100.
+Missing optional capabilities may be reported as partial scope with a grounded
+exclusion; `--skip-module` does not change required obligations. If exclusion would
+change the approved outcome, obtain that scope decision and fresh bound acceptance.
+Unknown applicability is not optional. Continue truly independent authorized work
+without claiming a complete composed pass.
 
-### Step 2 — Enumerate available modules + check graceful degradation
+The 30-dimension view (six advisory dimensions per module) remains useful feedback,
+not a release mechanism. GREEN means observed required engineering gates and actual
+independent acceptance hold in the selected scope; YELLOW denotes only advisory
+concerns/grounded optional exclusions; RED denotes an unmet required gate. None is
+SHIP authority and none overrules the exact control outcomes.
 
-```bash
-all_modules=(ta da sc dh tq)
-available_modules=()
-missing_modules=()
+## Cold handoff and loop
 
-for module in "${all_modules[@]}"; do
-  if [ -f "$LINTEL_REPO_ROOT/skills/$module/SKILL.md" ]; then
-    available_modules+=("$module")
-  else
-    missing_modules+=("$module")
-  fi
-done
+Use one explicit handoff naming cycle ID, selected map and original task paths,
+request/initial/final context, operation/iteration, actual artifacts, last observation,
+next owner/action and any unknown side effects. Use the accepted runtime namespace
+`.claude/runtime/state/domains/<operation>/iNNNN/`, not colon-bearing time filenames.
+Preserve previously selected module artifacts as history rather than overwriting them.
 
-if [ "${#missing_modules[@]}" -gt 0 ]; then
-  echo "⚠ MODULES NOT FOUND: ${missing_modules[*]}"
-  echo "⚠ Composition will gracefully skip missing modules + audit the gap."
-  echo "⚠ Operator: confirm to proceed with partial pass, or land missing modules first."
-  # Wait for operator confirm unless --auto
-fi
-```
+`--resume` uses `workflow_resume` with the saved cycle/map then the shared cold-attempt
+table. A started step without result is interrupted, not permission to replay a
+deployment/migration/test. Identify the first unmet checkpoint from the original
+request, verify live policy and reconcile actual receiver output. A revised loop
+creates a new iteration with original prior-result references and affected checks.
+No direct reset/rollback, guessed newest report or new lifecycle phase.
 
-### Step 3 — Resolve skip-list + final module set
+## Delivery and observation
 
-```bash
-final_modules=()
-for module in "${available_modules[@]}"; do
-  case ",$skip_modules," in
-    *",$module,"*)
-      echo "Skipping $module (operator-requested via --skip-module)"
-      ;;
-    *)
-      final_modules+=("$module")
-      ;;
-  esac
-done
+Return an original-ID/requirement-to-domain evidence table, actual checks/tool actors,
+artifact paths, mandatory blockers/advisories and next owner. Recording does not
+prove review; the domain core always returns `release_clearance: false`.
+The outer SHIP workflow still requires actual P05 same-context review/QA plus
+publication authorization.
 
-if [ "${#final_modules[@]}" -eq 0 ]; then
-  echo "ERROR: no modules to run (all available skipped or missing)"
-  exit 1
-fi
-```
-
-### Step 4 — Dispatch by DAG stage
-
-```bash
-mkdir -p .claude/runtime/state/full-engineering-pass
-state_file=".claude/runtime/state/full-engineering-pass/00-state.md"
-# Unified audit writer → .claude/runtime/audit/full-engineering-pass.jsonl
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-
-declare -A module_score
-declare -A module_status
-
-# ─── Stage 1: TA ──────────────────────────────────────
-if [[ " ${final_modules[*]} " =~ " ta " ]]; then
-  echo "════ Stage 1: TA (tech-architecture) ════"
-  /li:ta full || module_status[ta]="FAILED"
-  module_score[ta]=$(read_module_score ta)
-  forge_envelope phase_transition full-engineering-pass ta--complete brief .claude/runtime/state/ta/...
-fi
-
-# ─── Stage 2: DA + SC (parallel) ──────────────────────
-echo "════ Stage 2: DA + SC (parallel) ════"
-stage2_modules=()
-[[ " ${final_modules[*]} " =~ " da " ]] && stage2_modules+=(da)
-[[ " ${final_modules[*]} " =~ " sc " ]] && stage2_modules+=(sc)
-
-for module in "${stage2_modules[@]}"; do
-  # Phase 4 may upgrade to actual parallel execution via subagent fan-out;
-  # v4.6 ships sequential-within-stage with parallel-eligible marker
-  /li:"$module" full || module_status["$module"]="FAILED"
-  module_score["$module"]=$(read_module_score "$module")
-done
-
-# ─── Stage 3: DH ──────────────────────────────────────
-if [[ " ${final_modules[*]} " =~ " dh " ]]; then
-  echo "════ Stage 3: DH (devops-hosting) ════"
-  /li:dh full || module_status[dh]="FAILED"
-  module_score[dh]=$(read_module_score dh)
-fi
-
-# ─── Stage 4: TQ ──────────────────────────────────────
-if [[ " ${final_modules[*]} " =~ " tq " ]]; then
-  echo "════ Stage 4: TQ (testing-qa) ════"
-  /li:tq full || module_status[tq]="FAILED"
-  module_score[tq]=$(read_module_score tq)
-fi
-```
-
-### Step 5 — Aggregate 30-dim score (6 dims × 5 modules)
-
-```bash
-total_score=0
-module_count=0
-
-for module in "${final_modules[@]}"; do
-  score="${module_score[$module]:-0}"
-  total_score=$((total_score + score))
-  module_count=$((module_count + 1))
-
-  if [ "$score" -lt 80 ]; then
-    echo "FAIL: $module score $score < 80"
-  fi
-done
-
-aggregate_score=$((total_score / module_count))
-```
-
-### Step 6 — SHIP gate
-
-```bash
-ship_verdict="GREEN"
-[ "$aggregate_score" -lt 80 ] && ship_verdict="YELLOW"
-
-# Any module BLOCKED → composition BLOCKED regardless of aggregate
-for module in "${final_modules[@]}"; do
-  [ "${module_status[$module]:-}" = "FAILED" ] && ship_verdict="RED"
-done
-
-# Missing modules → DONE_WITH_CONCERNS
-[ "${#missing_modules[@]}" -gt 0 ] && [ "$ship_verdict" = "GREEN" ] && ship_verdict="YELLOW"
-```
-
-### Step 7 — Audit + emit composition report
-
-```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-out=".claude/runtime/state/full-engineering-pass/composition-report-$ts.md"
-{
-  echo "# Full engineering pass — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "## Aggregate score: $aggregate_score / 100"
-  echo "## SHIP verdict: $ship_verdict"
-  echo ""
-  echo "## Per-module scores"
-  for module in "${final_modules[@]}"; do
-    echo "- $module: ${module_score[$module]}/100 (${module_status[$module]:-DONE})"
-  done
-  if [ "${#missing_modules[@]}" -gt 0 ]; then
-    echo ""
-    echo "## Missing modules (skipped gracefully)"
-    for module in "${missing_modules[@]}"; do
-      echo "- $module (not present on this branch)"
-    done
-  fi
-  echo ""
-  echo "## Cross-module artifacts produced"
-  echo "- .claude/runtime/state/ta/ (architecture decisions, ADRs, contracts, NFRs)"
-  echo "- .claude/runtime/state/da/ (data model, migrations, retention)"
-  echo "- .claude/runtime/state/sc/ (threat model, secrets, auth, compliance, audit)"
-  echo "- .claude/runtime/state/dh/ (deployment, observability, SLO, cost, on-call)"
-  echo "- .claude/runtime/state/tq/ (coverage, perf budget, contracts, regression, chaos)"
-} > "$out"
-
-# One line via the unified writer (ts/operator/cycle_id come from the envelope)
-audit_log full-engineering-pass full_engineering_pass_complete "aggregate_score=$aggregate_score" \
-  "modules_run=${#final_modules[@]}" "modules_missing=${#missing_modules[@]}" "verdict=$ship_verdict"
-
-echo ""
-echo "════════════════════════════════════════════════════"
-echo "  Full engineering pass: $ship_verdict (aggregate $aggregate_score/100)"
-echo "  Modules: ${final_modules[*]}"
-echo "  Skipped (missing): ${missing_modules[*]:-none}"
-echo "  Report: $out"
-echo "════════════════════════════════════════════════════"
-```
-
-## Status protocol
-
-- **DONE** — all available modules score ≥ 80; aggregate ≥ 80; SHIP verdict GREEN
-- **DONE_WITH_CONCERNS** — aggregate ≥ 60 OR 1-2 modules in DONE_WITH_CONCERNS; SHIP verdict YELLOW
-- **BLOCKED** — any module BLOCKED OR aggregate < 60; SHIP verdict RED
-- **NEEDS_CONTEXT** — pack policy missing customer-engagement-deep mode for high-stakes engagements
-
-## Pause-points
-
-- Pre-Stage 2: if Stage 1 score < 80, surface dimension breakdown, ask to re-loop TA or accept
-- Pre-Stage 3: if either DA or SC BLOCKED, surface gap, ask to refine or skip
-- Pre-Stage 4: same as Stage 3
-- Pre-SHIP: if aggregate < 80, surface module-level breakdown, ask to re-loop or accept-with-concern
-
-## Hop-in support
-
-YES via `--resume`:
-
-```bash
-/li:full-engineering-pass --resume
-# reads .claude/runtime/state/full-engineering-pass/00-state.md
-# continues from the stage where the prior run paused
-```
-
-## Integration
-
-**Reads:**
-- All 5 module SKILL.md files (or as-many as exist)
-- `lib/pack-resolver.sh` for pack policy
-- `~/.lintel/profile.yaml` `engineering.*` block (per-module preferences)
-
-**Writes:**
-- `.claude/runtime/state/full-engineering-pass/composition-report-<ts>.md`
-- `.claude/runtime/state/full-engineering-pass/00-state.md` (for `--resume`)
-- `.claude/runtime/audit/full-engineering-pass.jsonl`
-- Brief Forge envelopes through the standard gate (one per stage transition)
-
-**Triggered by:**
-- Operator: `/li:full-engineering-pass`
-- SENSE auto-recommendation when customer-engagement-deep mode + sufficient scope
-
-## Graceful degradation
-
-If 1-4 of the 5 modules are missing from the repo (partial-rollout state), the composition:
-1. Surfaces the gap to operator before running
-2. Asks confirmation to proceed
-3. Runs the available modules in DAG order
-4. Audits which modules were missing
-5. SHIP verdict goes YELLOW even with full pass if modules were skipped (operator can override)
-
-This handles the v4.x stacking-rollout window where SC + DH + TQ + composition land in stacked PRs.
-
-## Anti-patterns
-
-- **Running full-engineering-pass on a hotfix** — overkill; use `/li:cycle --mode hotfix`
-- **Skipping TA** — every downstream module depends on architecture decisions
-- **Running DA before TA** — DA reads TA's scaling-plan + boundary-review
-- **Parallel-stage modules accessing each other's mid-flight state** — DA + SC must be independent within Stage 2
-- **Treating aggregate score as the only signal** — per-module dimension breakdown is the actionable view
-- **Hardcoding module list** — composition reads available modules from filesystem
-
-## Voice tier behavior
-
-`voice: internal`. Composition produces operator-facing engineering artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (a company pack supplies this; none by default) — composition artifacts are inputs to that, not the customer-facing output.
+Brief Forge or audit use is explicit where configured; no new interception/hook
+activation is implied. Installed consumer closure is a separate check against the
+accepted installer. Local source/provider or copied-source tests cannot substitute.

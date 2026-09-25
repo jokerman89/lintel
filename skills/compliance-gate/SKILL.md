@@ -12,170 +12,129 @@ cli_support:
     level: degraded
 ---
 
-You are the `compliance-gate` skill — an aggregator around the compliance gates the active pack declares. Backlog 6.10: "Nothing runs ALL relevant gates for an artifact at once. The operator has to remember which ones apply. Aggregate it — embarrassment protection, for compliance."
+# Compliance gate
 
-## What this skill does
-
-Resolves which gates the active pack declares (`resolve_pack_field compliance.hooks`), runs the ones relevant to the current artifact/scope, and aggregates the verdict into ONE green/red status. Prevents the operator from missing a gate that applies but was not invoked manually.
-
-The skill is **pack-driven**: it hardcodes no gates. For the `_default` pack, `compliance.hooks` is empty (no gates) → green/no-op with a note that no compliance pack is active. When an installed pack declares gates of its own, the skill picks them up and runs them.
+Resolve the applicable pack controls, preserve per-control evidence, and evaluate
+them through `lib/review_contract.py`. A single applicable mandatory failure,
+execution error or unverified result blocks its affected action. Counts and
+advisory scores never downgrade it. Advisory deviations never become mandatory
+merely because they are numerous.
 
 ## When to use
 
-- **Before customer-share** — always run before a PR/deliverable ships externally
-- **Pre-merge gate** — as the final step of `/li:ship` (can be integrated there)
-- **Per-engagement audit** — quarterly check of engagement state against the compliance baseline
-- **Slot for CI** — can run non-blocking warn-only in CI initially, then be promoted
+- Before an authorized customer-share, release or merge.
+- To assess a selected artifact or engagement against the applicable policy.
+- For preparation or CI feedback, with the actual enforcement layer stated.
 
-## When NOT to use
+This skill is not an installed enforcement mechanism. Compatible hooks, branch
+rules and enterprise controls need separate configuration and observed execution.
+No hook is activated by reading this file.
 
-- During mid-cycle dev work (compliance is an end-of-cycle gate)
-- Single-rule check — run the pack-gate skill directly if you know which one applies
+## Resolve policy before controls
 
-## Where gates come from (pack-resolved, not hardcoded)
+Use the trusted source bundle and the working repository's selected profile.
+Preserve the P07 effective profile reference and `required_policy` result through
+review and delivery. A required profile declaration is external to the potentially
+broken manifest; missing/invalid required policy cannot silently become `_default`.
+`PROFILE_REQUIRED` or `PROFILE_DRIFT` remains a nonzero unresolved requirement.
 
-Gates are resolved from the active pack:
+Gates and their mandatory/advisory requirements come from actual policy and scope,
+not a built-in list of favored gate names. Record source, version and applicability.
+If those are unknown, keep the affected mandatory requirement unverified.
+Neutral first use with no requested organization policy and no applicable controls
+is a valid **no-applicable-controls** result, not verified compliance.
+
+## Run and record
+
+For each declared control, use an available compatible execution path. A tool name,
+pack label, hook file or delegated role is not evidence that it ran. Independent
+controls may run concurrently only when the host can safely do so; otherwise run
+them sequentially. Missing capability blocks its mandatory acceptance, while
+independent authorized preparation may continue.
+
+Use the [shared result/evidence contract](../review/references/evidence.md):
+
+| Field | Meaning |
+|---|---|
+| `requirement` | `mandatory` or `advisory`, derived from policy |
+| `applicability` | `applicable`, `not_applicable` or `unknown` |
+| `status` | exactly `pass`, `fail`, `unverified` or `error` |
+| `reason` | finding, limitation or grounded exclusion |
+| `policy` | source/version/scope; regulatory jurisdiction, actor and effective date |
+| `evidence` | actual local report/command-output references, later content-hashed |
+| `observation` | actual test counts, browser states, measured contrast or other check inputs |
+
+Not-applicable needs a grounded source/version, reason and evidence. Uncertainty is
+not an exemption. Do not relabel a failure as N/A to evade a required control.
+Regulatory conclusions inform qualified legal review, not certification.
+
+## Aggregate through the shared implementation
+
+Prepare a JSON object containing `controls` and `required_policy`, then run:
 
 ```bash
-source "$(dirname "$0")/../../lib/pack-resolver.sh"
-
-# Gates the active pack declares (YAML list under compliance.hooks).
-# _default → empty (no compliance pack active).
-pack_hooks=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
+src="${LINTEL_SOURCE_ROOT:?set the trusted installed source root}"
+python="${LINTEL_PYTHON:-python3}"
+"$python" "$src/bin/li-review-evidence.py" controls \
+  --input "${control_input:?set actual observed control results}"
 ```
 
-If `pack_hooks` is empty → no compliance pack is active. The skill returns green/no-op with a note. No gate names are built into Lintel; each pack owns its own list.
+The return is a structured result with exact `status`, `blocked`, `blockers`,
+`advisories`, `assurance` and all effective per-control outcomes. Exit 3 means
+blocked; malformed input exits 1. Exit 0 alone is not proof of compliance:
+`assurance: no_applicable_controls` explicitly means no applicable controls were
+verified. Preserve the result rather than translating it back into a failure-count
+rule or average.
 
-## Workflow
+The evaluator also rejects false positive observations: normal-text 3.5:1 contrast
+fails AA; zero executed tests, missing browser evidence and unknown policy remain
+unverified. Static inspection cannot establish runtime accessibility or rendering.
 
-### Step 1 — Resolve gates from the active pack
+## Report and integrate
+
+Keep the human-readable report:
+
+```text
+Compliance assessment: <selected artifact and scope>
+Policy source/version: <verified reference or unresolved>
+Assurance: observed_controls | no_applicable_controls
+Blocked: true | false
+Mandatory findings: <control ID, status, evidence, next repair>
+Advisory findings: <control ID, status, suggestion>
+Not applicable: <control ID, grounded reason/evidence>
+Unavailable/unverified: <exact observation still needed>
+```
+
+Feed the same controls into the content-bound review decision, binding its
+package/leaves, acceptance, profile, attempt and result. Persist through
+`bin/li-review-log`; SHIP consumes `li-review-read` and same-context QA. A prose
+GREEN, empty error list or audit event is not standalone clearance.
+
+An operator note does not bypass mandatory policy. A permitted exception needs the
+actual policy source, scope and authorization; the owner must revise the selected
+requirements and obtain new affected review. Keep the original failed observation
+in history. This skill has no magic `--override` success path.
+
+Optional summary telemetry still uses the unified source helper, never an inline
+audit writer:
 
 ```bash
-source "$(dirname "$0")/../../lib/pack-resolver.sh"
-
-artifact="${1:-}"             # path to artifact or 'cwd' for whole-repo
-scope="${2:-customer-share}"  # customer-share | internal | research
-
-# Active pack's declared compliance gates (empty for _default).
-gates_to_run=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
-
-if [ -z "${gates_to_run// /}" ]; then
-  echo "COMPLIANCE GATE — no compliance pack active (compliance.hooks empty)."
-  echo "Verdict: GREEN (no-op). Activate a compliance pack to enable gates."
-  exit 0
-fi
+source "${LINTEL_SOURCE_ROOT:?set source root}/bin/_audit.sh"
+audit_log compliance-gates verdict \
+  "status=${control_status:?set evaluated status}" \
+  "blocked=${controls_blocked:?set evaluated boolean}" \
+  "evidence=${review_record:?set bound decision path}"
 ```
 
-The `scope` argument is passed through to each pack-gate so the pack can decide
-which of its own gates apply to that scope. Lintel itself does not interpret the
-gate names.
+## Status and recovery
 
-### Step 2 — Invoke each gate in parallel (subagent)
+- **DONE**: all applicable mandatory controls verified; distinguish a neutral
+  no-applicable-controls assessment from verified compliance.
+- **DONE_WITH_CONCERNS**: no mandatory blocker; advisory findings remain visible.
+- **BLOCKED**: any mandatory failure/error/unverified, missing required policy or
+  stale supporting content. Repair and re-run the affected checks.
+- **NEEDS_CONTEXT**: scope is not established; this is not clearance.
 
-For each gate in `gates_to_run`:
-- Spawn a subagent that runs the gate against the artifact (gate-invocation is pack-provided)
-- Captures status: PASS / FAIL / N/A / NEEDS_CONTEXT
-- Records the finding if FAIL
-
-### Step 3 — Aggregate verdict
-
-```yaml
-verdict:
-  status: green | yellow | red
-  total_gates: N
-  passed: P
-  failed: F
-  not_applicable: NA
-  needs_context: NC
-
-red_blockers:
-  - gate: <pack-declared gate name>
-    reason: <finding>
-    fix: <action>
-  ...
-
-yellow_warnings:
-  ...
-```
-
-**Verdict rules:**
-- **green** — all applicable gates PASS or N/A (or no gates declared)
-- **yellow** — at least 1 FAIL but no customer-data-blocking
-- **red** — any customer-data-block (5-hard-rules-violation) OR multiple FAILs
-
-### Step 4 — Surface report + return code
-
-```
-COMPLIANCE GATE — <scope> for <artifact>
-============================================
-
-Active pack: <pack-name>
-Verdict: GREEN | YELLOW | RED
-
-Summary:
-  Total gates: N
-  Passed:      P
-  Failed:      F
-  N/A:         NA
-
-Red blockers (must-fix before customer-share):
-  ⛔ <gate> — <finding>; <fix action>
-
-Yellow warnings (recommend-fix):
-  ⚠ <gate> — <finding>
-
-Next:
-  Address red blockers → re-run /li:compliance-gate
-  OR
-  Override (logged): /li:compliance-gate --override "<justification>"
-```
-
-Return code: 0 (green), 1 (yellow), 2 (red).
-
-## Voice tier behavior
-
-`voice: internal`. The compliance verdict is operator-internal. Detailed finding content can be customer-share-sensitive — sanitize the output if the `--for-customer-record` flag is set.
-
-## Status protocol
-
-- **DONE** — verdict green, no blockers (incl. no-gates no-op)
-- **DONE_WITH_CONCERNS** — verdict yellow, warnings present but no must-fix
-- **BLOCKED** — verdict red OR gate-execution failed on multiple gates
-- **NEEDS_CONTEXT** — invocation without a scope when the repo has multiple sub-projects
-
-## Integration
-
-**Reads:**
-- Artifact-path (file or repo)
-- Active pack via `resolve_pack_field compliance.hooks` (which gates) and `compliance.mode` (baseline-stringency)
-- Each pack-gate's PASS/FAIL output
-
-**Writes:**
-- `.claude/runtime/audit/compliance-gates.jsonl` — one line per run via the unified writer:
-  `source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"; audit_log compliance-gates verdict verdict=<green|yellow|red> gates_run=<n> overridden=<true|false>`
-- stdout (verdict report)
-- Exit code (CI consumption)
-
-**Spawns subagents:**
-- Each pack-declared gate, parallel via Agent tool
-
-## Anti-patterns
-
-- **Override without justification** — `--override` requires a justification arg + audit-logs it. Prevents silent bypass.
-- **Default skip on "N/A"** — an N/A skill SHOULD be excluded from the total. If unsure → treat as FAIL.
-- **Run mid-cycle** — gates run end-of-cycle. Mid-cycle invocation can give false-positive blockers.
-- **Hardcoding gate names** — gates come from the active pack only. Never inline a gate list here.
-
-## Failure recovery
-
-- Gate-execution fails (subagent timeout, tool missing): mark the gate as NEEDS_CONTEXT, continue with other gates, surface the count in the verdict
-- Total gate failure (no gates executable): exit BLOCKED with diagnostic
-- No gates declared (no compliance pack): green/no-op, not a failure
-- Override → audit-log entry, do not skip the failed gate; document overridden + justification
-
-## Recommended next steps after invocation
-
-- Green: proceed to /li:ship
-- Yellow: assess warnings, fix or document accepted-risk
-- Red: address blockers individually then re-run
-- For CI integration: add as a non-blocking warn step first, promote to blocking after a clean baseline is established
+If a gate crashes, retain `error` and its diagnostic. If a renderer/browser/tool is
+unavailable, retain `unverified`. Continue unaffected authorized checks, not the
+blocked delivery. Sanitize evidence and do not copy credentials or customer data.

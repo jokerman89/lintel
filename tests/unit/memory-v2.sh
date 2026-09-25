@@ -12,7 +12,8 @@ fail(){ echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/memory-v2.sh"
 echo "======================="
 
-TMP=$(mktemp -d)
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1
 trap 'rm -rf "$TMP"' EXIT
 
 # Sandbox migrated repo

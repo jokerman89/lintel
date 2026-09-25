@@ -43,9 +43,9 @@ fi
 
 # shellcheck disable=SC1090
 source "$helper"
-job_id_created=$(CALLED_BY="${CALLED_BY:-operator}" job_create "$workflow" "$mode")
-
-# Surface
-echo "[lintel] Job started: $job_id_created (workflow=$workflow, mode=$mode)"
+# job_create names its own failure on stderr; success is reported only for a written record.
+if job_id_created=$(CALLED_BY="${CALLED_BY:-operator}" job_create "$workflow" "$mode") && [ -n "$job_id_created" ]; then
+  echo "[lintel] Job started: $job_id_created (workflow=$workflow, mode=$mode)"
+fi
 
 exit 0

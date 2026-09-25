@@ -25,6 +25,9 @@ Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` o
 
 L-001-discipline: skill body is the contract. Agent at invocation produces specific library picks + GLSL recommendations. Don't pre-bake shader-snippets in the SKILL.md body.
 
+Use the shader definition in the [shared design contract](../design-dna/references/design-contract.md).
+Validate `visual_thesis: none` with `library: null` before GPU-only requirements.
+
 ## When to use
 
 - Solo: "hero-background for enterprise SaaS landing — want a subtle mesh-gradient"
@@ -53,7 +56,7 @@ L-001-discipline: skill body is the contract. Agent at invocation produces speci
 brief="${BRIEF:-${1:-}}"
 thesis="${VISUAL_THESIS:-auto}"
 perf="${PERF_BUDGET:-mid-tier}"
-out="${OUT:-/dev/stdout}"
+out="${OUT:-}"  # absent --out means stdout, not a path to validate
 [ -z "$brief" ] && { echo "Need --brief"; exit 2; }
 ```
 
@@ -61,12 +64,15 @@ out="${OUT:-/dev/stdout}"
 
 Hand off to `agents/frontend/ShaderEngineer.md`. Agent picks shader-library:
 
-- **Paper Shaders** (MIT, declarative React/Vue/Vanilla): mesh-gradients + animated bg. Best for non-3D hero-visuals. Lowest implementation-cost.
+- **Paper Shaders** (verify the selected package/release and framework): mesh-gradients
+  and animated backgrounds when required. Do not infer device safety from a library name.
 - **OGL** (MIT, lightweight 3D + raw WebGL): direct GLSL with full control. Best for custom thesis + performance-critical.
 - **react-three-fiber + drei + postprocessing** (MIT, React 3D + effects): production 3D scenes + post-FX. Best for immersive contexts.
-- **Lygia** (MIT, GLSL function library): drop-in functions for noise/SDF/lighting. Pairs with OGL or r3f. Don't ship alone.
+- **Lygia** (GLSL functions; verify selected file/release terms and attribution):
+  noise/SDF/lighting functions paired with a renderer, not a renderer itself.
 - **CSS Houdini Paint Worklet** (W3C, browser-paint API): GPU-accelerated CSS paint. Best for super-lightweight backgrounds where shader-lib is overkill.
-- **shadcn + CSS conic-gradient + filter blur** (zero-lib): no-shader fallback. Often sufficient.
+- **CSS conic-gradient/static artwork:** no-shader fallback with no mandatory
+  component-library dependency.
 
 Agent verifies current licensing at invocation (L-003).
 
@@ -80,8 +86,8 @@ Agent verifies current licensing at invocation (L-003).
   "visual_thesis": "<mesh-gradient | noise-field | fluid-sim | particle-system | displacement-warp | none>",
   "library": {
     "name": "paper-design/shaders",
-    "version_min": "0.x",
-    "license": {"type": "free", "source": "MIT"},
+    "version": "<exact selected release>",
+    "license": {"type": "<verified selected terms>", "source": "<primary release/file source>"},
     "npm": "@paper-design/shaders-react",
     "operator_instruction": "npm i @paper-design/shaders-react"
   },
@@ -105,7 +111,7 @@ Agent verifies current licensing at invocation (L-003).
   "gpu_thesis": {
     "complexity": "low | medium | high",
     "mobile_strategy": "downscale-resolution-50% | disable | full",
-    "explanation": "Paper Shaders runs on fragment-shader-only with 1 fullscreen quad — safe for mid-tier mobile"
+    "explanation": "<selected device/browser/resolution and actual measured frame/GPU evidence, or explicitly unverified>"
   },
   "operator_instructions_md": "# Shader setup\n\n```bash\nnpm i @paper-design/shaders-react\n```\n\n```tsx\nimport { MeshGradient } from '@paper-design/shaders-react'\n\n<MeshGradient\n  colors={['#0078D4', '#50E6FF', '#0d1b2a']}\n  speed={0.3}\n  distortion={0.8}\n  className=\"absolute inset-0 -z-10\"\n/>\n```\n\nFallback for `prefers-reduced-motion`:\n```css\n@media (prefers-reduced-motion: reduce) {\n  .shader-bg { animation: none; }\n}\n```"
 }
@@ -115,22 +121,53 @@ Agent fills in specific picks. Don't hardcode.
 
 ### Step 4 — Schema-validate + emit
 
-```bash
-jq -e '.schema_version == 1 and .library.name != null' "$out" || { echo "Schema invalid"; exit 1; }
+Keep Step 3's actual parsed JSON object as `fragment` until validation and any
+required licensing checks finish. In the trusted source Python scope, `repo` is
+the explicit target root and `out` is `None` when `--out` was omitted, otherwise
+the literal repository-relative output path. For named output, the authorized
+caller captures `original_output_state` through P03 before generation (`None`
+means originally absent, not overwrite permission). Then execute:
 
-# perf_budget required
-jq -e '.perf_budget.fallback_strategy_low_end != null and .perf_budget.respect_prefers_reduced_motion == true' "$out" || {
-  echo "perf_budget incomplete"; exit 1
-}
+```python
+import sys
+import context_safety as safety
+from design_contract import validate_spec
+from review_contract import canonical_json
 
-if [ -n "${CUSTOMER_SHARE:-}" ]; then
-  /li:compliance-gate --check shader-licensing "$out"
-fi
+try:
+    checked = validate_spec(fragment, "shader")
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+    else:
+        root = safety.checked_root(repo)
+        relative = safety.selector_path(out)
+        safety.atomic_write(
+            root, relative, payload,
+            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+            expected=original_output_state, check_expected=True,
+        )
+        if safety.read_owned(root, relative, len(payload))[0] != payload:
+            raise ValueError("Fragment output failed readback")
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
+    raise SystemExit(2)
 ```
+
+This emits only the validated fragment, including the no-shader branch, not a
+success-shaped receipt. Invalid data emits no stdout or named file; publication
+errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
+reader. For `--customer-share`, apply `/li:compliance-gate --check shader-licensing`
+to the same data or an owned relative staging file before release; stdout does
+not exempt the required check.
 
 ### Step 5 — Visual-thesis === "none" short-circuit
 
 Agent can return visual_thesis="none" if the brief doesn't warrant a shader. Skill body STILL emits valid JSON so orchestrator-Step-5 synthesis can handle `shader: null` gracefully.
+This branch is validated before active-shader library/performance checks, not after
+a failing mandatory-library check. Emit no canvas, GPU import or install instruction.
+For an active shader, retain the real fallback/reduced-motion budget and selected
+release/source/license evidence. A CSS media query alone does not stop a JS GPU loop.
 
 ## Status protocol
 

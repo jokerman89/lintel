@@ -15,7 +15,7 @@
 ## What this repo is
 
 Lintel is a **company-neutral, pack-driven session harness** for agent-based development — markdown +
-bash scaffolding that any modern AI CLI loads as a plugin. It is also the **factory** that installs the
+local helpers exposed through documented native adapters or explicit file handoff. It is also the **factory** that installs the
 very disciplines in this file into other repos.
 
 Clear ownership domains:
@@ -127,7 +127,11 @@ Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo they work dir
 `skills/CATALOG.md` is generated with `python3 bin/li-catalog.py` and checked for drift in CI. Edit frontmatter, then regenerate; do not hand-edit the catalog.
 
 ### Per-CLI portability
-Canonical skills and agents are shared through client-specific adapters. Copilot native core skills use `li-*`; the Claude hook bundle is not translated to Copilot. See [docs/multi-cli.md](docs/multi-cli.md); per-CLI capability is declared once in `lib/cli-tiers.yaml`.
+Canonical skills and agents are shared through client-specific adapters. The existing Claude
+plugin, skills, agents and optional hooks remain; portable repository wrappers use `li-*`.
+The hook bundle is not translated to other clients. See [docs/multi-cli.md](docs/multi-cli.md).
+`lib/cli-tiers.yaml` separates vendor, delivered and observed facts for every CLI/desktop/IDE/cloud
+surface; current tool bindings and permissions, not a static tier, govern execution.
 
 ### How you work here
 - Feature branch → PR against `main`. Run relevant shape and unit checks during development; release validation uses `bash tests/runner/run-all.sh --require-all` with the required toolchain. Verify before pushing.
@@ -233,6 +237,26 @@ Subagents report; the coordinating agent decides. Review subagents must not fix 
 findings. Reports include severity counts, actionable findings with file:line citations,
 verification evidence and limitations. Keep implementation and independent review separate.
 Coordinate shared task-state writes rather than having parallel agents overwrite one ledger.
+
+When an approved plan opts in to swarm execution, use one coordinator and the committed swarm
+artifacts under `.claude/plans/<initiative>/swarm/`. The mapped task artifact remains authoritative
+for card text, dependencies, status and acceptance; coordination metadata adds only waves, roles,
+write scopes, isolation and evidence pointers. The coordinator alone writes shared plan/runtime
+state, generated reducers, commits and integration history. A worker writes only its declared
+scope plus its own report, and an independent reviewer writes only that lane's review artifact.
+
+Run writer lanes concurrently only when each change set is attributable through a separate Git
+worktree, isolated patch or equivalent host-enforced scoped-write sandbox, and same-wave write
+scopes do not overlap. A shared-tree union diff is not attribution. If the host cannot provide
+that evidence, execute the same briefs sequentially without weakening dependency, scope or review
+gates. On a host without subagents, the main agent may replay the briefs serially, but must label
+implementation and self-review honestly rather than claiming independent work.
+
+Recover a swarm from committed maps, briefs, reports, reviews and attributable Git evidence, not
+from chat memory or a process-status label. Missing runtime state cancels an attempt, not verified
+committed work. Preserve and quarantine an out-of-scope or unreviewed change set until the
+coordinator can re-plan, re-run or reconcile it. Lane reviews never replace the final independent
+review of the reconciled integration branch.
 
 ### Authorized bug fixing
 

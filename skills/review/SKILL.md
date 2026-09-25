@@ -31,7 +31,7 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 ## When NOT to use
 
 - intent=research-only (no code to review)
-- intent=docs-only (lighter review path — invoke `/li:docs-review` if exists, or skip)
+- intent=docs-only may use proportionate inline review, but selected documents still bind to acceptance and delivery evidence
 - Before BUILD complete (mid-task reviews happen in BUILD's two-stage cycle, not REVIEW phase)
 
 ## Workflow
@@ -44,6 +44,46 @@ Use mapped `spec` for requirements, `plan` for technical decisions, and `tasks` 
 ID and acceptance check. All “plan.md requirements/tasks” below refer to these mapped sources;
 reference-only Lintel companions are navigation, not duplicate specifications. Compare actual
 code and evidence to the original Spec Kit tasks. A work-map approval never replaces review.
+
+Before reviewing, follow [the shared evidence procedure](references/evidence.md):
+prepare an explicit selection and immutable context with package/leaf acceptance,
+base, staged/unstaged/new/deleted content, attempt, profile and required controls.
+Use the actual builder and reviewer invocation identities. Substantive work requires
+separately corroborated independent review; missing delegation means a durable manual
+handoff, not role-play. A reviewer reports findings and never repairs their own findings.
+
+### Swarm integrated-tree close gate
+
+When the validated work map explicitly selects `execution_mode: "swarm"`, REVIEW starts only on
+the reconciled integration branch declared by the coordination document:
+
+```bash
+repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+  source_root="$LINTEL_SOURCE_ROOT"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  source_root="$CLAUDE_PLUGIN_ROOT"
+else
+  echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+  exit 1
+fi
+[ -f "$source_root/bin/li-swarm.py" ] || { echo "NEEDS_CONTEXT: trusted swarm helper missing" >&2; exit 1; }
+python3 "$source_root/bin/li-swarm.py" verify --repo "$repo" --coord "$coordination"
+```
+
+Other host adapters substitute/export their installed bundle path as `LINTEL_SOURCE_ROOT`; tests and
+self-checks set it explicitly. The working repository is data supplied only through `--repo`, never
+an executable-source fallback.
+
+The gate requires every worker report and distinct two-stage lane review to be structurally valid
+and PASS. Also confirm that each attributable passing change set is present on the declared
+integration branch, generated reducers were rebuilt after producer fan-in, and focused integration
+checks passed there. Evidence left only in an isolated worktree is not integrated completion.
+
+After this gate, run all three ordinary REVIEW stages across the full integrated diff. Per-lane
+reviews reduce fan-in risk but never replace specification, quality, compliance, or security review
+of the reconciled system. A missing independent lane review stays BLOCKED on every host; sequenced or
+no-subagent execution changes concurrency only, not evidence requirements.
 
 
 ### Step 1 — Load context
@@ -63,7 +103,8 @@ Then read:
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 
 Identify scope of review:
-- Files changed in BUILD (`git diff <plan-start-sha>..HEAD --name-only`)
+- The prepared snapshot's selected files and states, including dirty/new files and deletions;
+  a commit-range diff is supporting context, not the complete review boundary
 - Subset of plan tasks (if --tasks flag) or all
 - Default: full BUILD output
 
@@ -76,6 +117,10 @@ Prompt:
 - Per-task: PASS or list deviations with file:line + suggested fix
 - Aggregate: total tasks PASS / total deviations / spec-compliance score
 Be terse. Don't praise."
+
+Record exact `pass`, `fail`, `unverified` or `error` per acceptance control and map
+every selected leaf to its evidence. A missing acceptance result blocks that leaf;
+scores cannot average it away.
 
 If Stage 1 FAILS:
 - Surface per-task deviations
@@ -104,7 +149,11 @@ If Stage 2 FAILS:
 
 ### Step 4 — Stage 3: Compliance gates (fires per the active pack + voice + audience)
 
-Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). Each blocks if it fails. A pack contributes its own gate skills/agents; Lintel ships none by default. Typical pack-contributed gates:
+Resolve required-policy status before using the active pack's controls. Use
+`evaluate_controls` / `li-review-evidence.py controls`, not failure counts or an
+average. Each applicable **mandatory** fail/error/unverified result blocks; advisory
+findings remain advisory. Unknown applicability or a failed required profile load is
+not a neutral exemption. A pack contributes its own gate skills/agents; examples:
 
 **Pack compliance audit** (if the pack defines one):
 - Pack-specific compliance sweep (hard-rules + on-demand items as the pack configures)
@@ -150,7 +199,8 @@ If YES:
 - Surface output verbatim under "OUTSIDE VOICE (Codex):" header
 - Cross-synthesize with internal findings
 
-If unavailable: skip silently.
+If unavailable: record the optional pass as unverified. It cannot replace the
+required independent reviewer or supply a fictitious observation.
 
 ### Step 7 — Write artifacts
 
@@ -198,6 +248,15 @@ If unavailable: skip silently.
 - Per-gate breakdown for audit trail
 - Path: `.claude/runtime/state/compliance-report-<datetime>.md`
 
+Keep these human-readable artifacts and persist the version-2 decision using the
+[shared writer/reader](references/evidence.md). Include unverified/error and grounded
+not-applicable controls, full leaf coverage, content-hashed evidence links and
+declared actor provenance. Only the shared reader's strict result can set ship-ready;
+a heading in this report or a historical positive string cannot. The prepared
+`qa_requirements` owns QA IDs/kinds/mandatory applicability/policy; review results
+must match it, not redefine it. V1 evidence requires fresh preparation and review
+for v2 clearance, without rewriting its history.
+
 ### Step 8 — 00-state.md append
 
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `next=` is SHIP, or BUILD on loop-back, or DEFINE on scope gap; per-stage detail lives in review-report.md:
@@ -210,9 +269,9 @@ state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> r
 
 ## Status protocol
 
-- **DONE** — all stages PASS, P1 findings addressed, ship-ready
+- **DONE** — all required stages and leaf acceptance verified for the selected result, strict reader clear
 - **DONE_WITH_CONCERNS** — P2/P3 findings noted, voice gate <100% but ≥85%
-- **BLOCKED** — P1 unfixed OR a blocking compliance gate failed
+- **BLOCKED** — any required failure/error/unverified result, stale content or outstanding independent review
 - **NEEDS_CONTEXT** — review can't proceed without more info (rare)
 
 ## Pause-points (MANDATORY)
@@ -229,12 +288,14 @@ YES — standalone for diff/PR review. Common use:
 - `/li:review --diff origin/main..HEAD` — review against main
 - `/li:review --pr 42` — review specific PR
 
-Skip-conditions: intent=research-only, intent=docs-only.
+Skip-condition: intent=research-only. Documentation-only work uses proportionate
+review, not an exemption from selected-content and acceptance binding.
 
 ## Integration
 
 **Reads:**
 - BUILD output (git diff)
+- optional swarm coordination plus all lane reports/reviews and integration attribution
 - plan.md (PLAN phase)
 - design doc (DEFINE phase)
 - build-log.md (BUILD phase)
@@ -296,6 +357,9 @@ Skip-conditions: intent=research-only, intent=docs-only.
 - **Bundling all 3 stages into one subagent call** — separate dispatches give cleaner findings
 - **Logging P3 findings without surfacing** — operator should see them even if not blocking
 - **Outside-voice Codex review as default** — gated, costs tokens, only when adds clear value
+- **Reviewing isolated lanes instead of the reconciled branch** — run the swarm close gate, confirm
+  integration, then review the complete integrated diff
+- **Treating lane review as final REVIEW** — both per-lane and integrated review are required
 
 ## Failure recovery
 

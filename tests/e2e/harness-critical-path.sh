@@ -42,6 +42,15 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local haystack="$1" needle="$2" label="${3:-not-contains}"
+  if echo "$haystack" | grep -qF "$needle"; then
+    fail "$label: '$needle' unexpectedly found"
+  else
+    pass "$label: '$needle' absent"
+  fi
+}
+
 cleanup() {
   rm -rf "$TEST_TMP" 2>/dev/null || true
 }
@@ -93,10 +102,15 @@ assert_eq "none" "$(resolver_probe voice.enforce)" "resolve voice.enforce (real 
 # 3. cycle footer renders from a fixture append-log state (ADR-0003 contract).
 #    LINTEL_HOME pinned to the sandbox so a pack-sensitive footer change can never
 #    make this test depend on the operator's real ~/.lintel.
-printf 'phase: PLAN\nstatus: DONE\n\nphase: BUILD\nstatus: IN_PROGRESS\nnext_recommended: REVIEW\ncycle_mode: meta-infra\n' > "$TEST_TMP/00-state.md"
+printf 'phase: PLAN\nstatus: DONE\n\nphase: BUILD\nstatus: DONE\nnext_recommended: REVIEW\ncycle_mode: meta-infra\n' > "$TEST_TMP/00-state.md"
 footer_out=$(LINTEL_HOME="$SANDBOX_HOME" bash -c 'source "$LINTEL_HOME/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "$1"' _ "$TEST_TMP/00-state.md" 2>&1 </dev/null)
 assert_contains "$footer_out" "BUILD" "footer: you-are-here phase rendered"
 assert_contains "$footer_out" "/li:review" "footer: next-command derived from state"
+# A08.2.b: an unfinished phase is resumed; a later-phase hint is not completion.
+printf 'phase: PLAN\nstatus: DONE\n\nphase: BUILD\nstatus: IN_PROGRESS\nnext_recommended: REVIEW\ncycle_mode: meta-infra\n' > "$TEST_TMP/01-state.md"
+footer_out=$(LINTEL_HOME="$SANDBOX_HOME" bash -c 'source "$LINTEL_HOME/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "$1"' _ "$TEST_TMP/01-state.md" 2>&1 </dev/null)
+assert_contains "$footer_out" "/li:resume" "footer: unfinished phase resumes"
+assert_not_contains "$footer_out" "/li:review" "footer: next-phase hint does not advance an unfinished phase"
 
 # 4. Generate and verify a downstream Copilot repo using only installed assets.
 # This catches wrappers that accidentally resolve skills/shims from the checkout.

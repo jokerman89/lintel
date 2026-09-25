@@ -43,10 +43,12 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# Source wiki-gen helpers
-if [ -f "$REPO_ROOT/lib/wiki-gen.sh" ]; then
-  # shellcheck disable=SC1091
-  source "$REPO_ROOT/lib/wiki-gen.sh"
+# Validate schema inputs before opening any generated output.
+# shellcheck disable=SC1091
+source "$REPO_ROOT/lib/wiki-gen.sh" || exit 2
+if [ "$CHECK" -eq 1 ] || [ "$WIKI_ONLY" -eq 1 ] || [ "$SHOWCASE_ONLY" -eq 0 ]; then
+  PACK_SCHEMA_SUMMARY="$(wgen_schema_summary "$REPO_ROOT/lib/pack-schema.yaml" pack-manifest)" || exit 2
+  ENVELOPE_SCHEMA_SUMMARY="$(wgen_schema_summary "$REPO_ROOT/lib/envelope-schema.yaml" envelope)" || exit 2
 fi
 
 WIKI_DIR="$OUTPUT_BASE/docs/wiki"
@@ -219,28 +221,16 @@ gen_wiki_schemas() {
     echo "## Pack manifest schema"
     echo "Source: \`lib/pack-schema.yaml\`"
     echo ""
-    if [ -f "$REPO_ROOT/lib/pack-schema.yaml" ]; then
-      local sv
-      sv=$(grep -E "^schema_version:" "$REPO_ROOT/lib/pack-schema.yaml" | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
-      echo "schema_version: $sv"
-      echo ""
-      echo "Required top-level fields: name, version, voice, compliance, navigation, requires_lintel"
-      echo ""
-      echo "See [pack-defaults.md](../concepts/pack-defaults.md) and [pack-inheritance.md](../concepts/pack-inheritance.md)."
-    fi
+    printf '%s\n' "$PACK_SCHEMA_SUMMARY"
+    echo ""
+    echo "See [pack-defaults.md](../concepts/pack-defaults.md) and [pack-inheritance.md](../concepts/pack-inheritance.md)."
     echo ""
     echo "## Envelope schema"
     echo "Source: \`lib/envelope-schema.yaml\`"
     echo ""
-    if [ -f "$REPO_ROOT/lib/envelope-schema.yaml" ]; then
-      local sv
-      sv=$(grep -E "^schema_version:" "$REPO_ROOT/lib/envelope-schema.yaml" | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
-      echo "schema_version: $sv"
-      echo ""
-      echo "Structure: HEAD (6 required) + BODY (content_type discriminator) + TAIL (4 required)"
-      echo ""
-      echo "See [envelope.md](../concepts/envelope.md)."
-    fi
+    printf '%s\n' "$ENVELOPE_SCHEMA_SUMMARY"
+    echo ""
+    echo "See [envelope.md](../concepts/envelope.md)."
   } > "$out"
   echo "wrote $out"
 }

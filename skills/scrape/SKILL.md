@@ -1,130 +1,104 @@
 ---
 name: scrape
 layer: foundation
-description: Extract structured data from one or more pages — declarative selector schema, JSON output.
+description: Use to extract structured data from authorized pages with selector schemas, explicit pacing, visible failures and prior-run comparison.
 color: green
 tools: Read, Bash, Glob
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /scrape
 
-Bulk-extraction sibling of `/browse`. Given a list of URLs + a selector schema, returns structured JSON. Use for research, dataset construction, documentation harvesting — within ToS limits.
-
-Distinct from `/browse`: that one is interactive single-page. This is declarative multi-page.
-
-## When to use
-
-- Build a small dataset from public docs (e.g. extract code examples from a tutorial site)
-- Harvest a vendor's pricing/feature matrix for a `/plan-ceo-review` comparison
-- Compare wording across multiple URLs (e.g. "how does each competitor describe X")
-- Periodic monitoring (with `--diff` against a prior run)
-
-## When NOT to use
-
-- Single page, exploratory — use `/browse`
-- Behind auth — set up via `/setup-browser-cookies` first OR consider that the ToS may forbid scraping
-- High-volume commercial scraping — out of scope. Lintel is a builder's toolbox, not a scraping platform.
-- Customer data, even sanitized — STOP. Layer 2 blocks.
+Declarative multi-page sibling of `/browse`, using the same
+[browser operations and ownership](../browse/references/browser-operations.md).
+Keep research, documentation harvesting, small datasets and prior-run comparison.
+This is not a high-volume scraping platform or permission to collect customer data.
 
 ## Inputs
 
-- Required `--urls <file|inline>` — list of URLs, one per line
-- Required `--schema <yaml>` — declarative extraction spec (selectors → field names)
-- Optional `--concurrency <N>` — parallel page loads (default: 3, max: 10)
-- Optional `--rate-limit <ms>` — minimum delay between requests to the same host (default: 1000ms)
-- Optional `--diff <prior.json>` — diff this run against a prior JSON output
+- `--urls <file|inline>`: explicit URLs, one per line; validate all before fetching.
+- `--schema <yaml>`: selected data-only selector schema. Use an available YAML
+  parser or structured JSON; do not invent a parser or execute transforms as code.
+- `--concurrency <N>`: requested page count, default 3 and maximum 10. Each page
+  needs attributable ownership and the same admission checks. The delivered
+  single-page provider is serial; report effective concurrency 1 and obtain a
+  changed choice if concurrency matters, rather than pretending it ran in parallel.
+- `--rate-limit <ms>`: minimum interval between request starts per hostname,
+  default 1000ms. Browser subresources are not independent scraping jobs.
+- `--diff <prior.json>`: selected previous results, read as data without execution.
 
-## Workflow
-
-1. **Validate schema.** Parse the selector YAML, confirm each rule has `field` + `selector` + optional `transform`.
-2. **Compliance gate.** Resolve each URL's hostname. Block any in `~/.lintel/compliance/prod-hosts.txt`. Warn on hosts whose `robots.txt` disallows the path.
-3. **Fetch loop.** For each URL: load via Playwright (handles JS-rendered content), apply selectors, transform, accumulate.
-4. **Rate-limit.** Respect `--rate-limit` per-hostname. If multiple URLs share a host, queue them serially.
-5. **Output.** JSON file at `~/.lintel/scrape-runs/<ts>/results.json`. Failure entries are emitted (with error) — never silently dropped.
-6. **Optional diff.** If `--diff`: produce a structured diff (added/removed/changed records).
-
-## Schema format
+## Schema and concrete extraction
 
 ```yaml
-# scrape-schema.yaml
 fields:
   - name: title
-    selector: 'h1.product-title'
+    selector: h1.product-title
     transform: trim
   - name: price
-    selector: '.price-tag'
-    transform: number_extract  # strips currency, returns numeric
+    selector: .price-tag
+    transform: number_extract
   - name: features
-    selector: 'ul.features li'
+    selector: ul.features li
     multi: true
     transform: trim
 ```
 
-## Report format
+`name` is the field key (the earlier workflow's `field` wording was inconsistent).
+Require unique nonempty names and selectors, boolean `multi` when present, and a
+known transform. The delivered `scripts/extract.mjs` consumes this **parsed** schema,
+uses the same browser's `read` operation, and implements trim, text and
+number_extract without evaluating supplied code. Ambiguous numeric strings produce
+an explicit field error; do not guess locale/currency or silently emit NaN.
+`number_extract` accepts one complete decimal amount, including `.50`, with at most
+one ASCII sign before or after an optional currency symbol and an optional
+whitespace-separated alphabetic unit/currency label. It preserves the sign; it does
+not convert currencies. Grouping/locale separators, exponent notation, accounting
+parentheses, multiple amounts and unsupported decoration are explicit field errors,
+never partially parsed digit substrings.
+Whitespace, signs, the optional currency symbol, digits and trailing label are
+consumed by one forward cursor. Invalid whitespace/decorated fields within the
+browser's existing read bound do not enter a backtracking regular expression.
 
-```
-Scrape: 12 URLs, schema=product-catalog.yaml
+## Workflow
 
-Concurrency: 3
-Rate limit: 1000ms/host
-Duration: 28s
-Success: 11
-Failure: 1
+1. Validate schema, URL list, requested pacing/concurrency and output ownership
+   before opening pages. Carry the same work map and verified P07 reference.
+2. Inspect actual browser provider/isolation and apply P03 host, scheme/port and
+   redirect admission to pages, robots retrieval and subresources alike.
+3. Establish authorized use and the site's terms/robots rules before the batch.
+   A disallowed path is skipped with a recorded reason; inaccessible/ambiguous
+   rules remain unresolved. Do not auto-invent an `--ignore-robots` permission.
+   An explicit permissible exception needs its own documented scope.
+4. For authenticated data, follow `/setup-browser-cookies`. Keep the user-chosen
+   surface; if it cannot support this extraction, preserve a manual task instead
+   of transferring a session or acquiring personal cookies.
+5. Schedule the next permitted URL only after the same-host interval. Load with
+   `open`, confirm actual status/state, then call `extractPage(browser, schema)`.
+   Preserve one result per input, including HTTP, selector, policy and tool errors.
+6. A missing single value is null; a missing multi value is an empty list; both
+   carry an explicit field error and make that record unsuccessful. A single
+   selector matching several elements is ambiguous, not "take the first".
+7. Do not retry 4xx errors blindly. For 429, honor a bounded Retry-After/backoff,
+   retry once only when authorized, then stop remaining URLs for that host.
+   A policy/provider failure closes the affected context; do not continue in a
+   partially trusted session. Report unattempted inputs with their blocker.
+8. Write JSON under the explicitly owned gitignored run, then use `diffRecords`
+   for added/removed/changed URL records. Preserve failed records in comparisons.
+   Close owned contexts and servers using their exact handles.
 
-## Failures
-- https://vendor3.example.com/missing — 404 (not retried, exit on first 4xx)
+The small extraction/diff module does not launch browsers, parse YAML, schedule
+concurrency or claim to enforce robots/ToS. Those are workflow preconditions and
+provider observations. State which were actually checked; absent mandatory checks
+stay unverified through P05.
 
-## Sample record (first)
-{"url": "https://vendor1.example.com/x", "title": "Widget X", "price": 99.0, "features": ["Auto-sync", "API access", "Free tier"]}
+## Results
 
-## Diff vs prior run
-Added: 2 records
-Removed: 1 record
-Changed: 3 records (prices moved on widget-Y, widget-Z, widget-Q)
+A result contains `url`, `fields`, `errors` and `ok`. Report attempted/succeeded/
+failed/unattempted counts, effective concurrency and pacing, schema/source revision,
+work/profile identity, actual provider/context, output paths and diff summary.
+Do not fabricate duration, robot-policy clearance or success from a JSON file's size.
 
-Output: ~/.lintel/scrape-runs/20260527-161033/results.json
-```
-
-## Compliance integration
-
-- Layer 2 customer-data gate applies per-URL.
-- `robots.txt` checked on first visit per host. Disallowed paths surface as warnings — not auto-blocked (operator owns the ToS judgment), but logged to audit.
-- Rate-limit enforced to avoid hammering target sites. Default 1s/host is conservative.
-- Per-call auth required if any URL hostname matches `~/.lintel/compliance/auth-required-hosts.txt`.
-
-## Failure modes
-
-- **Schema YAML invalid:** parse error with line:col + bail before any fetch.
-- **Selector matches 0 elements on a page:** emit the record with empty field, log the miss. Do not retry.
-- **Host rate-limit triggered (429):** back off exponentially, retry once. If second 429: skip remaining URLs for that host, continue with other hosts.
-- **`robots.txt` disallow + operator did NOT pass `--ignore-robots`:** skip the URL, report it in failures, do not crash the whole run.
-- **Concurrency > 10:** refuse — Lintel does not facilitate aggressive scraping.
-
-## Examples
-
-**Tiny dataset:**
-```
-> /scrape --urls vendors.txt --schema product-catalog.yaml
-✓ 12/12 success, results.json 8KB
-```
-
-**With diff:**
-```
-> /scrape --urls vendors.txt --schema product-catalog.yaml --diff prior.json
-✓ 11/12 success. Diff: 2 added, 1 removed, 3 changed prices.
-```
-
-**Failed schema:**
-```
-> /scrape --urls vendors.txt --schema bad.yaml
-✗ Schema invalid at bad.yaml:14 — `selector` required, found `selecter` (typo).
-```
-
-## See also
-
-- `/browse` — single-page interactive
-- `/make-pdf` — when output should be PDF not JSON
-- `/setup-browser-cookies` — for auth-required scrape targets
-- Layer 2 compliance — robots.txt and ToS judgment
+Keep extracted content within the authorized scope; do not include credentials,
+customer data or personal account information in examples or retained artifacts.
+For visual verification use `/browse`; for a composed PDF use `/make-pdf`.

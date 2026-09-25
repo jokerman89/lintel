@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "tasks": "plan.md",
+  "prompt": "prompt.md"
+}

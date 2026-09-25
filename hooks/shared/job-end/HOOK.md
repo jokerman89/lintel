@@ -16,10 +16,12 @@ Per v3.8 Feature 1: terminating jobs cleanly via this hook removes the "abandone
 ## What it does
 
 1. Reads `job.yaml` cleanup_policy.
-2. **Keep:** promote durable artifacts to their permanent homes:
-   - `adr/*` → `.claude/decisions/` (via existing `lessons-promote` skill pattern)
-   - `lessons.md` → append to `.claude/memory/lessons.md` (via existing `lessons-promote`)
+2. **Keep:** copies durable artifacts to their permanent homes:
+   - `adr/*` → `.claude/decisions/` (copied by the hook when that directory exists)
    - `plan.md` + `spec.md` + `prompt.md` → `.claude/plans/<slug>/` OR operator-configured path
+   - `lessons.md` candidates are **not appended** anywhere. The hook only suggests reviewing
+     them with `/li:learn` (the project store resolved by `lintel_lessons_file`) and
+     `/li:lessons-promote` for general lessons; the candidates stay in the archived job outputs.
 3. **Discard:** delete `scratch/*` and other matching paths from policy.
 4. Moves the job folder to `.claude/runtime/jobs/_archive/<YYYY-MM-DD>/<job-id>/`.
 5. Regenerates the repo-local `.claude/runtime/jobs/_active.md` + syncs the cross-repo registry `~/.lintel/jobs/_active.md` (one line per open job across all repos, pointing at the owning repo).

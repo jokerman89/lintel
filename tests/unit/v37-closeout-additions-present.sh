@@ -83,8 +83,14 @@ fi
 # --- Install scripts bootstrap brand-asset slots (phase A2) ---
 for installer in install/install.sh install/install.ps1; do
   f="$REPO_ROOT/$installer"
-  if [ -f "$f" ] && grep -qE "design-patterns|motion-libraries|shader-snippets" "$f"; then
-    pass "$installer bootstraps brand-asset slots"
+  performer="$REPO_ROOT/install/native.${installer##*.}"
+  slots="$REPO_ROOT/install/directories.txt"
+  if [ -f "$f" ] && grep -q 'native' "$f" && [ -f "$performer" ] &&
+     grep -q 'directories.txt' "$performer" &&
+     grep -qx 'brand/design-patterns' "$slots" &&
+     grep -qx 'brand/motion-libraries' "$slots" &&
+     grep -qx 'brand/shader-snippets' "$slots"; then
+    pass "$installer delegates the shared brand-asset slot contract"
   else
     fail "$installer missing brand-asset bootstrap"
   fi

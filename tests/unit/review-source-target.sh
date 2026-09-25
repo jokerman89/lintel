@@ -13,8 +13,11 @@ export LINTEL_HOME="$review_tmp/home" GSTACK_HOME="$review_tmp/legacy"
 unset LINTEL_AUDIT_DIR LINTEL_REPO_ROOT LINTEL_SOURCE_ROOT
 installed="$review_tmp/installed/.github/lintel"
 mkdir -p "$installed/bin" "$installed/lib"
-cp "$review_source/bin/li-review-log" "$review_source/bin/li-review-read" "$review_source/bin/_audit.sh" "$installed/bin/"
-cp "$review_source/lib/paths.sh" "$installed/lib/"
+cp "$review_source/bin/li-review-log" "$review_source/bin/li-review-read" \
+  "$review_source/bin/li-review-evidence.py" "$review_source/bin/_audit.sh" "$installed/bin/"
+cp "$review_source/lib/paths.sh" "$review_source/lib/review_contract.py" \
+  "$review_source/lib/review-schema.json" "$review_source/lib/markdown_source.py" \
+  "$review_source/lib/native_paths.py" "$installed/lib/"
 for name in target cwd; do
   repo="$review_tmp/$name"
   mkdir -p "$repo/.claude"
@@ -29,8 +32,11 @@ test "$target_head" != "$cwd_head"
 
 # Without environment hints, the installed executable finds its sibling helper
 # code but records the caller's working repository and commit.
-(cd "$review_tmp/cwd" && bash "$installed/bin/li-review-log" '{"skill":"plan-eng-review","status":"CLEAR"}' > "$review_tmp/cwd-write.out"
- bash "$installed/bin/li-review-read" > "$review_tmp/cwd-read.out")
+(cd "$review_tmp/cwd" && bash "$installed/bin/li-review-log" \
+  "{\"skill\":\"plan-eng-review\",\"status\":\"CLEAR\",\"commit\":\"$cwd_head\"}" > "$review_tmp/cwd-write.out")
+rc=0
+(cd "$review_tmp/cwd" && bash "$installed/bin/li-review-read") > "$review_tmp/cwd-read.out" || rc=$?
+test "$rc" = 3
 grep -Fq "current_head: $cwd_head" "$review_tmp/cwd-read.out"
 test -f "$review_tmp/cwd/.claude/runtime/audit/reviews.jsonl"
 test ! -d "$installed/.claude"
@@ -42,24 +48,21 @@ test "$rc" = 3
 grep -Fq "current_head: $target_head" "$review_tmp/target-empty.out"
 echo 'PASS: an installed reader does not reuse a conflicting cwd review'
 
-# Execute the skill's real persistence block with concrete review values. Only
-# its JSON placeholders are filled; command paths and helper calls stay intact.
-awk '
-  /^Persist via first-party/ { section=1; next }
-  section && /^```bash/ { code=1; next }
-  code && /^```/ { exit }
-  code { sub(/\r$/, ""); print }
-' "$review_source/skills/plan-eng-review/SKILL.md" \
-  | sed 's/"status":"\.\.\."/"status":"CLEAR"/g;s/:N/:0/g' > "$review_tmp/persist.sh"
-test -s "$review_tmp/persist.sh"
-(cd "$review_tmp/cwd" && source "$review_tmp/persist.sh") > "$review_tmp/target-review.out"
+# Retain the legacy history-only boundary. The current engineering-review v2
+# snippet is exercised through real prepare/writer/latest/QA/SHIP in
+# integration/universal-work-lifecycle.py::ReviewSnippetTests.
+rc=0
+(cd "$review_tmp/cwd" &&
+ bash "$installed/bin/li-review-log" "{\"skill\":\"plan-eng-review\",\"status\":\"CLEAR\",\"commit\":\"$target_head\"}" &&
+ bash "$installed/bin/li-review-read") > "$review_tmp/target-review.out" || rc=$?
+test "$rc" = 3
 grep -Fq "current_head: $target_head" "$review_tmp/target-review.out"
-grep -q 'VERDICT: Eng Review CLEAR' "$review_tmp/target-review.out"
+grep -q 'VERDICT: BLOCKED' "$review_tmp/target-review.out"
 target_log="$LINTEL_REPO_ROOT/.claude/runtime/audit/reviews.jsonl"
 grep -Fq "\"commit\":\"$target_head\"" "$target_log"
 ! grep -Fq "\"commit\":\"$cwd_head\"" "$target_log"
 test ! -e "$LINTEL_REPO_ROOT/bin/_audit.sh"
-echo 'PASS: the real engineering-review snippet writes and reads the target through installed source helpers'
+echo 'PASS: the legacy writer preserves target history without granting unbound clearance'
 
 # The one-time legacy import must derive both slug and branch from the target.
 for name in target cwd; do

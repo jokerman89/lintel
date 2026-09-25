@@ -49,39 +49,20 @@ mid-cycle) leaves a checkpoint but no `00-state.md` entry; resume must discover 
 hand off to `/li:context-restore` rather than misdirect the operator to a fresh cycle.
 
 ```bash
-resume_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+resume_source="${LINTEL_SOURCE_ROOT:?select the trusted source}"
 source "$resume_source/lib/paths.sh"
+source "$resume_source/lib/state.sh"
 resume_working_repo="$(lintel_repo_root)"
-STATE_FILE="${LINTEL_STATE_DIR:-$(lintel_state_dir)}/00-state.md"
+STATE_FILE="$(state_file)"
 if [ ! -f "$STATE_FILE" ]; then
-  # No state from this repo
   echo "NO_PRIOR_STATE_LOCAL"
-  
-  # Check cross-machine sync
-  if [ -d "~/.lintel/lessons-vault" ]; then
-    # Try to find this repo's state in synced lessons vault
-    repo_slug=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
-    cross_state=$(find ~/.lintel/lessons-vault -name "00-state-$repo_slug-*.md" 2>/dev/null | head -1)
-    [ -n "$cross_state" ] && {
-      echo "CROSS_MACHINE_STATE_FOUND: $cross_state"
-      cp "$cross_state" "$STATE_FILE"
-    }
-  fi
 fi
 
-# ALSO discover the newest context-save checkpoint for this branch. The mechanical
-# core owns path + discovery (no raw glob); fall back to a bare glob if it's absent.
-_ctx="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/bin/_context.sh"
-[ -f "$_ctx" ] || _ctx="$HOME/.lintel/bin/_context.sh"
-checkpoint=""
-if [ -f "$_ctx" ]; then
-  # shellcheck disable=SC1090
-  source "$_ctx"
-  checkpoint="$(cd "$resume_working_repo" && context_latest 2>/dev/null || true)"   # current target branch only
-else
-  branch="$(git -C "$resume_working_repo" rev-parse --abbrev-ref HEAD 2>/dev/null || echo no-branch)"
-  checkpoint="$(ls -t "$(lintel_sessions_dir)/$branch/"*-context-save.md 2>/dev/null | head -1 || true)"
-fi
+# P03 owns checkpoint paths and legacy ownership filtering. No raw-glob or
+# equal-basename cross-machine import fallback may replace that contract.
+source "$resume_source/bin/_context.sh"
+checkpoints="$(cd "$resume_working_repo" && context_list)" || exit $?
+checkpoint="${checkpoints%%$'\n'*}"
 ```
 
 Then branch on what exists:
@@ -112,6 +93,8 @@ machine and does not mean the initiative is new. Follow the
 [shared work-map contract](../spec-kit/references/work-map.md): use an operator-named map,
 then an unambiguous active map linked from `.claude/plans/todo.md` or working-state.md.
 Validate it with `bin/li-work-artifacts.py --repo <working-repo> --map <selected-path>`.
+Use `--view context` to inspect its original task/package IDs and artifact paths,
+not a reconstructed checklist. The derived status is not acceptance evidence.
 
 If no map exists, inspect explicit links to committed plan/spec/prompt artifacts in todo.md
 and working-state.md. Follow one unambiguous unfinished initiative; ask when several remain.
@@ -125,6 +108,55 @@ Recreate only local runtime bookkeeping after reconciling the selected work with
 An APPROVED map records prior scope; verify current user authority before external actions.
 Continue at the selected BUILD/REVIEW phase using the mapped artifacts, without requiring an
 old machine's 00-state.md, private checkpoint or a duplicate Lintel task list.
+
+For an existing local cycle, call `workflow_resume <original-cycle-id> <selected-map>`
+from the trusted `lib/workflow.sh` before consumption. It actually verifies the saved
+P07 context/generation/digest and required-policy bridge. Missing/deleted/drifted policy,
+a changed map path or another target blocks the dependent action. It never bootstraps
+a replacement profile. A fresh clone may inspect committed work, but resuming its policy
+needs an explicit current-target context decision, not automatic reference transfer.
+Its returned `operation` is the original requested operation, or unknown for legacy
+state. A next-phase hint is not authority: a plan/review/research-only request
+does not become BUILD/SHIP on resume without a new explicit scope decision.
+
+#### Swarm-aware committed resume
+
+If the selected map declares `execution_mode: "swarm"` and `coordination`, use the same committed
+artifacts rather than reconstructing lane state from chat or the local ledger:
+
+```bash
+repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+  source_root="$LINTEL_SOURCE_ROOT"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  source_root="$CLAUDE_PLUGIN_ROOT"
+else
+  echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+  exit 1
+fi
+[ -f "$source_root/bin/li-work-artifacts.py" ] && [ -f "$source_root/bin/li-swarm.py" ] || {
+  echo "NEEDS_CONTEXT: Lintel resume helpers missing under trusted source root" >&2
+  exit 1
+}
+python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$selected_map"
+python3 "$source_root/bin/li-swarm.py" status --repo "$repo" --coord "$coordination"
+python3 "$source_root/bin/li-swarm.py" wave --repo "$repo" --coord "$coordination"
+```
+
+Claude may provide `CLAUDE_PLUGIN_ROOT`; other adapters substitute/export their installed bundle as
+`LINTEL_SOURCE_ROOT`. Tests and self-checks set it explicitly. The working repo is only `--repo` and
+never a trusted helper source.
+
+Surface the lane states, earliest incomplete wave, ready task IDs, and actual host execution tier.
+`awaiting_review` resumes at the lane's independent review, while `rework_required` returns to the
+same card. A complete frontier routes to the integrated REVIEW close gate.
+
+Runtime loss cancels attempts, not committed work. Treat an unreported worker process as unfinished.
+If an isolated worktree or patch survives, preserve it, derive its exact changed paths, run
+`check-scope`, and finish the declared report/review. If the change cannot be attributed to one lane,
+surface the discrepancy and sequence a clean retry; never infer completion or silently discard it.
+Do not select another initiative by modification time.
+
 ### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)
 
 Before trusting 00-state.md, validate it. Defensive guard against state-drift / wrong-branch / stale state.
@@ -137,7 +169,7 @@ Before trusting 00-state.md, validate it. Defensive guard against state-drift / 
 # last match inside it is the current truth. The CYCLE entry records
 # branch/commit since v5.3 (skills/cycle Step 4) — empty on older ledgers,
 # and an empty value skips that check rather than warning.
-seg="$(source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/state.sh" 2>/dev/null && state_cycle_segment "$STATE_FILE")"
+seg="$(state_cycle_segment "$STATE_FILE" "${LINTEL_CYCLE_ID:-}")" || exit $?
 state_branch=$(printf '%s\n' "$seg" | grep '^branch:' | tail -1 | awk '{print $2}')
 state_commit=$(printf '%s\n' "$seg" | grep '^commit:' | tail -1 | awk '{print $2}')
 state_ts=$(printf '%s\n' "$seg" | grep '^ts:' | tail -1 | awk '{print $2}')
@@ -162,9 +194,12 @@ fi
 
 # Check 3: staleness (warn if >7 days)
 if [ -n "$state_ts" ]; then
-  state_age_days=$(( ($(date +%s) - $(date -d "$state_ts" +%s 2>/dev/null || echo 0)) / 86400 ))
-  if [ "$state_age_days" -gt 7 ]; then
-    issues+=("stale: state is $state_age_days days old (>7d threshold)")
+  if state_epoch=$(date -d "$state_ts" +%s 2>/dev/null ||
+      date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$state_ts" +%s 2>/dev/null); then
+    state_age_days=$(( ($(date +%s) - state_epoch) / 86400 ))
+    [ "$state_age_days" -le 7 ] || issues+=("old observation: $state_age_days days; reconcile current evidence")
+  else
+    issues+=("timestamp unparsed: age unknown; retain this work in the report")
   fi
 fi
 
@@ -183,10 +218,13 @@ If operator aborts → exit BLOCKED with recommendation to run `/li:sense` for f
 
 ### Step 2 — Parse last state entry
 
-Read `00-state.md`, find the LAST entry. Mechanical read via `lib/state.sh`: `state_last` prints the whole last block, `state_last <field>` (e.g. `state_last status`, `state_last next_recommended`) prints one field:
+Read the selected cycle's latest **canonical phase**, not a later RESUME/WORK metadata
+entry. Use `state_phase_record "" "$STATE_FILE" "$LINTEL_CYCLE_ID"` and
+`state_resume_phase "$STATE_FILE" "$LINTEL_CYCLE_ID"`:
 - Last phase completed
 - Last phase status (DONE / DONE_WITH_CONCERNS / BLOCKED / paused)
-- Next recommended phase
+- Next recommended phase only after DONE/DONE_WITH_CONCERNS; STARTING/BLOCKED/
+  NEEDS_CONTEXT resumes the same phase even when its next hint says REVIEW
 - Cycle ID + timestamp
 
 ```yaml
@@ -214,7 +252,7 @@ incomplete-and-startable step `name`; for a tree job that name *is* the
 node-path:
 
 ```bash
-resume_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}}"
+resume_source="${LINTEL_SOURCE_ROOT:?select trusted source}"
 source "$resume_source/bin/_jobs.sh"
 resume_job_dir="$(job_path "${JOB_ID:?select the job to resume}")"
 # SCOPE writes inside the selected job, never in the shared jobs parent directory.
@@ -265,7 +303,7 @@ Phases remaining: BUILD REVIEW SHIP CAPTURE
 Concerns from last phase:
   - 2 reviewer concerns left in plan.md (line 142, line 187)
   
-Estimated to complete: ~45 min, ~25k tokens, ~$2
+Remaining estimate: <labeled planning estimate with source, or unknown>
 
 Options:
   A) Resume at recommended next phase: BUILD
@@ -277,7 +315,9 @@ Options:
 What's your choice?
 ```
 
-AskUserQuestion to operator.
+Show the selected work and next action. Use the actual host question channel only
+when selection/recovery/authority is unresolved; "resume approved T014" already
+settles the routine choice. Denial is not permission to switch channels.
 
 ### Step 4 — Validate resume context
 
@@ -294,9 +334,13 @@ For BUILD resume:
 
 For REVIEW resume:
 - BUILD output exists (commits since last DEFINE phase) ✓
+- If swarm mode: `li-swarm.py verify` passes and all lane changes are on the declared integration
+  branch ✓
 
 For SHIP resume:
-- REVIEW PASS ✓
+- The actual latest reader and same-context QA/SHIP gate in
+  [evidence.md](../review/references/evidence.md) pass for this exact work/profile/
+  snapshot and immutable QA inventory, with genuine required corroboration
 - Voice gate passed (if customer-engagement mode) ✓
 
 For CAPTURE resume:
@@ -306,10 +350,11 @@ If precondition fails: surface why, suggest correction or different phase.
 
 ### Step 5 — Cross-machine state handling (if applicable)
 
-If state came from another machine (cross-machine sync via lessons-vault or operator manually copied):
-- Surface: "State imported from machine <other>. Branch may differ. Verify before proceeding."
-- AskUserQuestion: "Continue with imported state? (Y/n)"
-- If yes: `state_append RESUME IMPORTED source="<machine-id or path>"`
+Import only an explicitly selected, authorized source through the owned P03
+checkpoint/snapshot path. Verify its repository and work/profile identity before
+use. A basename, timestamp or confirmation alone does not make another target's
+profile reference valid. Preserve unimportable evidence and request the missing
+context decision; no implicit private sync or whole-ledger copy.
 
 ### Step 6 — Invoke chosen phase
 
@@ -318,16 +363,19 @@ Based on operator's choice (Step 3 + 4):
 - If B (restart prior): `/li:<last-phase>` (re-runs from start)
 - If C (specific): `/li:<chosen-phase>`
 - If D (full cycle): `/li:cycle` (from start, ignoring prior state)
-- If E (abort): `state_append RESUME ABORTED cycle_aborted=true`, archive to `~/.lintel/archive/`
+- If E (abort): `state_append RESUME ABORTED cycle_aborted=true`; retain the selected
+  history locally rather than moving it to an implicit global destination
 
 ### Step 7 — 00-state.md append
 
 RESUME is a utility, not a cycle phase. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append RESUME DONE prior_last_phase=<phase> operator_choice=<A|B|C|D|E> next_invoked=<phase> cross_machine=<yes|no>
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
+state_append RESUME DONE "prior_last_phase=${prior_last_phase:?record original position}" \
+  "operator_choice=${operator_choice:?record selected action or existing authorization}" \
+  "next_invoked=${next_invoked:?record actual invocation}" \
+  "cross_machine=${cross_machine:?record actual source}"
 ```
 
 ## Status protocol
@@ -351,11 +399,12 @@ n/a — RESUME is itself the hop-in mechanism.
 **Reads:**
 - `.claude/runtime/state/00-state.md` (PRIMARY)
 - `.claude/runtime/sessions/<branch>/*-context-save.md` (checkpoint discovery via `context_latest` — routes to `/li:context-restore`)
-- `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
+- An explicitly selected owned checkpoint (never a basename-based global fallback)
 - `.claude/runtime/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
 - The explicitly linked `LINTEL_SCOPE_PATH`, else the selected job's `scope.md` (the SCOPE
   writer's path); no jobs-parent or newest-directory lookup
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
+- selected `work.json` and optional swarm coordination/charter/briefs/reports/reviews
 - recent git log
 
 **Calls into:**
@@ -364,17 +413,20 @@ n/a — RESUME is itself the hop-in mechanism.
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (RESUME entry)
-- `~/.lintel/archive/<cycle-id>/` (if operator aborts)
+- Selected repository runtime history retained on abort
 
 **Triggers:**
 - Invokes operator's chosen phase-skill
 
 ## Anti-patterns
 
-- **Auto-resume without confirmation** — always show prior state, let operator decide
+- **Resuming an unresolved selection or authority** — show the exact work; reuse
+  existing approval, ask only for a genuinely missing decision
 - **Loading full prior session conversation history** — read just 00-state.md, not the whole context
 - **Ignoring stale state** (>30 days old) — surface age, ask operator if still valid
 - **Resuming with corrupt state file silently** — explicit error, don't guess
+- **Trusting a lost worker attempt as completed swarm work** — only attributable changes plus valid
+  committed report/review evidence advance the frontier
 
 ## Failure recovery
 
@@ -394,7 +446,7 @@ so the "you are here → next" block is the natural closing line (inside a cycle
 position; with none active, the thin ambient line):
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

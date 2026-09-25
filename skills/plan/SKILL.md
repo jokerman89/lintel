@@ -32,7 +32,9 @@ Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and
 1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
 2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
 3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
-4. **Founder approval gate** — explicit pause before commit
+4. **Operator approval gate** — resolve missing authority without repeating existing approval
+5. **Optional swarm profile** — when independent domains exist and the operator opts in, add one
+   validated coordination pointer without duplicating task authority
 
 Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
 
@@ -77,6 +79,10 @@ without grouping uses singleton packages, without a duplicate task list. Code/he
 Present plan signals and a reviewable plan, but do not ask again for execution already explicitly
 authorized in this session. Ask once when a material scope/authority decision remains unanswered.
 Approval does not extend to production actions, secrets or unrelated work.
+Apply [task-relevant intake](../define/references/intake.md) at every gate. Use
+`workflow_resume` to verify an existing cycle/profile before consuming its policy,
+and `bin/li-work-artifacts.py --view context` for the same original artifact/ID view
+used by BUILD, ANALYZE, CAPTURE and handoff budgeting.
 
 ### Step 1 — Load context
 
@@ -140,6 +146,9 @@ Instantiate the trio from the canonical templates as **DRAFT** before the follow
 keep those drafts current as tasks change. A verification command alone is not an acceptance
 criterion: name the behavior it must demonstrate and its expected result. Link existing
 authoritative requirements instead of copying them into a competing specification.
+For new native work, write/validate its DRAFT work.json at this point and call
+`workflow_bind_work` in the already established cycle. ANALYZE and budgeting then
+use that selection before final approval; a path binding never upgrades DRAFT.
 
 ### Step 3 — Plan-design-review (if frontend in scope)
 
@@ -150,7 +159,7 @@ If design doc indicates UI/frontend work, invoke `/li:plan-design-review`:
 
 Add design tasks to plan.
 
-### Step 4 — Plan-devex-review (always)
+### Step 4 — Plan-devex-review (when developer workflows are affected)
 
 Invoke `/li:plan-devex-review`:
 - Operator-DX implications (will this be painful to use later?)
@@ -160,11 +169,16 @@ Invoke `/li:plan-devex-review`:
 
 Add DX-improving tasks to plan.
 
-### Step 5 — Plan-tune (iterative refinement)
+### Step 5 — Reconcile actual review findings
 
-If plan-eng-review / plan-design-review / plan-devex-review surface conflicts or gaps, invoke `/li:plan-tune` to reconcile.
+Compare findings from engineering, design and developer-experience review against
+the same specification, original IDs, accepted decisions and verified policy.
+The coordinating planner resolves routine corrections within authority. Present a
+material unresolved trade-off to the operator once, with viable alternatives.
 
-Iterate until plan is internally consistent.
+Update the selected original artifacts and re-review affected findings until the
+plan is consistent. `/li:plan-tune` is dormant preference data, not a conflict
+resolver; it is not called here and does not grant approval.
 
 ### Step 6 — Dependency graph
 
@@ -179,6 +193,38 @@ T1 (setup) → T2 (schema) → T3 (api) → T5 (test-e2e)
 Detect cycles and impossible orderings in both views. Keep leaf IDs authoritative; the package
 table is a grouping in plan.md, not a new job-state schema or an automatic dispatch service.
 Surface blockers explicitly.
+
+### Step 6a — Detect swarm candidates without opting in automatically
+
+After the dependency graph is stable, identify whether two or more packages are dependency-independent
+and can own disjoint repository paths. Generated outputs, shared schemas, plan/runtime ledgers,
+commits, and integration are coordinator-owned reducers; do not count them as worker domains.
+
+If no independent ownership exists, keep ordinary sequential BUILD and emit no swarm fields. If it
+does exist, show the candidate waves, write scopes, expected isolation, `max_parallel`, and the
+current host's `subagents` tier from `lib/cli-tiers.yaml`. Ask whether to use the swarm profile unless
+the operator already requested it in the current authorized scope. This is an execution-profile
+choice, not approval for additional scope or external actions.
+
+When selected:
+
+1. Keep the existing mapped `tasks` artifact authoritative for card text, dependencies, checkboxes,
+   and acceptance.
+2. Add only `execution_mode: "swarm"` and a repository-relative `coordination` pointer to the
+   schema-version-1 work map.
+3. Instantiate the charter, coordination, brief, report, and review templates from
+   `scaffolding/01-foundation/templates/swarm/` under the initiative's committed plan directory.
+4. Give each package at most one lane, retaining its authoritative member leaf IDs and aggregate
+   review depth from the plan. Legacy ungrouped tasks are singleton packages. Coordination contains
+   topology and ownership only; it must not duplicate task prose, dependencies, status, or acceptance.
+5. Resolve helpers only from explicit `LINTEL_SOURCE_ROOT`, then `CLAUDE_PLUGIN_ROOT` when Claude
+   supplies it; other adapters export their installed bundle path. If neither trusted root exists,
+   return `NEEDS_CONTEXT`. Run `bin/li-work-artifacts.py` and `bin/li-swarm.py validate` from that
+   source with the working repo only as `--repo`. Validation must pass before the plan is presented
+   as swarm-ready. Tests/self-checks export `LINTEL_SOURCE_ROOT` explicitly.
+
+Sequenced and no-subagent hosts emit the same artifacts. They degrade execution speed, not the
+scope/evidence contract, and must not claim concurrency or independent review they did not perform.
 
 ### Step 7 — Cost estimate (MANDATORY GATE)
 
@@ -212,7 +258,8 @@ token_estimate:
 multiply this prior by the number of tasks or sum it once per leaf. Calibration writes remain
 opt-in under ADR-0008; no usable actuals means `uncalibrated`, even if a log file exists.
 
-AskUserQuestion (MANDATORY):
+When approval or a changed resource boundary is unresolved, use the actual host
+question channel; otherwise present these signals under the existing authorization:
 "Plan ready: <N> tasks across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>). Proceed?"  (append ", ~<duration>" only when `--with-time`; **never** a `$` figure)
 - A) Approve and proceed
 - B) Scope-trim (which tasks to defer)
@@ -223,10 +270,67 @@ If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
 
 ### Step 8 — Cross-section-analyze (delegates to /li:analyze, ADR-0004)
 
-Invoke `/li:analyze` with trigger `plan-step8` — it runs the DEFINE↔PLAN and authority legs
-(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints) and
-persists `.claude/runtime/state/analyze-report.md`. One implementation, shared with BUILD's final pass
-and standalone runs; do not re-implement the checks inline.
+Prepare the selected cycle's request, verifying its original map and actual P07
+reference before consuming policy or selecting a report. Do not bootstrap a missing
+context, adopt the latest cycle, or infer an initiative from a global report:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+analyze_cycle_id="${LINTEL_CYCLE_ID:?select the original cycle}"
+analyze_work_map="${LINTEL_WORK_MAP:?select the original work map}"
+workflow_resume "$analyze_cycle_id" "$analyze_work_map" >/dev/null || exit $?
+analyze_state_dir="$(dirname "$(state_file)")"
+analyze_candidate_path="$(state_cycle_field analyze_report_path)" || exit $?
+if [ -z "$analyze_candidate_path" ]; then
+  analyze_candidate_path="$analyze_state_dir/$analyze_cycle_id-analyze-report.md"
+fi
+_workflow_guard_analyze_report_path "$analyze_candidate_path" "$analyze_state_dir" || exit $?
+analyze_report_path="$analyze_candidate_path"
+```
+
+The identity guard anchors relative input to the explicit working target and
+honors the already declared state root. It refuses global history in native or
+portable spelling even before that file exists. Unsupported, inaccessible or
+uncertain identity is INCOMPLETE, not permission to select a fallback or create
+a directory. Existing distinct locations retain their filesystem identity;
+the guard neither rewrites stored paths nor authorizes a candidate's parent.
+
+Invoke `/li:analyze` with trigger `plan-step8`, this exact report path, original
+map/artifact paths and package/leaf IDs, and the verified `LINTEL_PROFILE_REFERENCE`
+and unchanged `LINTEL_REQUIRED_POLICY`. Carry these selections explicitly across
+delegation or a fresh tool process. ANALYZE runs the DEFINE↔PLAN and authority legs
+(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints).
+Keep that one implementation, shared with BUILD's final pass and standalone runs;
+do not re-implement its checks inline.
+
+ANALYZE writes the selected report with the identity and incomplete-leg fields from
+its [report contract](../analyze/SKILL.md#report-format-persisted). Before reusing a
+linked report, check its map/profile/package/leaf identity; a mismatch is INCOMPLETE
+and requires reconciliation, not permission to overwrite another initiative.
+Retain other cycles' reports and the old global `analyze-report.md` as history only.
+A rerun supersedes this selected report while retaining its operator-accepted findings.
+
+As ANALYZE's persistence handoff, after verifying the written report's identity,
+record its actual status and exact path once using the shared writer below. This is
+ANALYZE's existing persistence step, not a second entry on return to PLAN. Missing or
+incomplete analysis is not GREEN. This utility entry does not complete PLAN or move
+the canonical phase:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+workflow_resume "${analyze_cycle_id:?}" "${analyze_work_map:?}" >/dev/null || exit $?
+if [ ! -s "${analyze_report_path:?}" ]; then
+  echo "INCOMPLETE [lintel/plan]: analysis report was not persisted" >&2
+  exit 2
+fi
+state_append ANALYZE "${analyze_status:?set the actual analysis status}" \
+  "analyze_report_path=$analyze_report_path" || exit $?
+```
+
+Consumers resume the same cycle and read `state_cycle_field analyze_report_path`,
+then check that report's identity rather than falling back to a global GREEN.
+The verdict remains advisory under ADR-0004; declared mandatory controls and P05's
+immutable evidence/QA obligations remain unchanged. A report pointer is not release clearance.
 
 If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
 accept gap (record the acceptance in the report).
@@ -246,13 +350,17 @@ Are dependencies correct, estimates grounded, acceptance and evidence complete f
 
 If Stage 2 finds issues: fix, re-dispatch. Max 3 iterations.
 
-Convergence guard: if same issues persist across 3 iterations, surface as "Reviewer Concerns" in plan.md and proceed.
+Convergence guard: if the same issues persist across three iterations, surface them
+against their original task IDs. Required unresolved acceptance/review remains open;
+the retry limit is not permission to proceed as though it passed.
 
-If subagent unavailable: skip review, note in plan.md "Adversarial review unavailable — plan unreviewed."
+If independent review is unavailable, retain a manual/external handoff and label
+the plan unreviewed. Do not call self-review independent or close a required gate.
 
-### Step 10 — Founder approval gate (MANDATORY PAUSE)
+### Step 10 — Operator approval gate
 
-AskUserQuestion (per Architect image):
+Retain existing authorization for the same reviewed scope. If it is not yet
+approved, ask through the actual host question channel:
 "Plan reviewed. <N tasks> across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED>). Final approval?"  (append ", ~<duration>" only when `--with-time`; never a `$` figure — the basis for this is Step 7)
 - A) APPROVE — proceed to BUILD
 - B) REDIRECT — specific feedback (loop back)
@@ -342,7 +450,7 @@ unfilled template placeholders. Structural validation alone does not prove those
 
 ```bash
 working_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
-lintel_source="${LINTEL_SOURCE_ROOT:-$working_repo}"
+lintel_source="${LINTEL_SOURCE_ROOT:?select the trusted source}"
 selected_work_map="${LINTEL_WORK_MAP:-}"
 if [ -z "$selected_work_map" ] && [ -n "${LINTEL_PLAN_DIR:-}" ]; then
   selected_work_map="${LINTEL_PLAN_DIR%/}/work.json"
@@ -383,26 +491,32 @@ slug_dir="$(dirname "$selected_work_map")"
 [ -f "$slug_dir/handoff.envelope.yaml" ] && "$lintel_source/bin/li-envelope-validate" "$slug_dir/handoff.envelope.yaml" --quiet || true
 ```
 
-### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
+### Step 11b — Handoff-size check of the selected work (advisory)
 
-The trio (plan.md + spec.md + prompt.md) now exists on disk — this is the cold-executor handoff payload. Before recommending BUILD, run the existing cap check so the trio + warming context can't silently exceed the 500k cap (the v4.9 audit's PARTIALLY-UPHELD Promise 6: cap logic existed but was invoked at no handoff).
+Invoke `/li:handoff-size-check --map <same selected work.json>` with exact P03 warming
+inputs. The common reader measures spec/plan/tasks/prompt and constitution without
+double-counting native plan/tasks aliases. It uses actual supplied host capacity
+and usage, or reports unknown; changing a mode never raises a model context limit.
 
-Invoke the existing mechanism — do **not** rebuild it:
-
-`/li:handoff-size-check` (a portable skill call; reads the trio it just wrote + `.claude/runtime/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
-
-- **SURFACE, don't block.** A yellow/red verdict warns ("this plan yields ~Nk handoff, near cap — split it?") and surfaces options (split the plan, cut a warming target, switch to a higher-cap mode). It does NOT halt PLAN — the operator decides.
-- **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely for operators who don't want it. Silent when skipped.
-- Silent green pass when trio + warming < soft cap — no friction in the common case.
+Surface an estimated over-capacity handoff and options to split the work or narrow
+future reads. This advisory result does not itself halt PLAN. A declared required
+limit or host refusal still blocks its dependent load. Missing/unreadable inputs
+remain incomplete, never a silent zero-byte green. A skip flag records an unrun
+advisory estimate rather than claiming the handoff fits. The retained off-switch is
+`--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`), for this advisory estimate only.
 
 ### Step 12 — 00-state.md append
 
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> tokens_est=<total> tokens_est_basis=<calibrated|uncalibrated>
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/workflow.sh"
+workflow_bind_work "${LINTEL_WORK_MAP:?select the approved map}" || exit $?
+state_append PLAN DONE next=BUILD "work_map_path=$LINTEL_WORK_MAP" \
+  "plan_path=${plan_path:?mapped plan}" "tasks_path=${tasks_path:?mapped tasks}" \
+  "spec_draft_path=${spec_path:?mapped spec}" "prompt_path=${prompt_path:?mapped handoff}" \
+  "tasks_count=${tasks_count:?original leaf count}" \
+  "tokens_est=${tokens_est:?labeled estimate}" "tokens_est_basis=$tokens_est_basis"
 ```
 
 ## Status protocol
@@ -418,7 +532,7 @@ state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_
 2. After cost estimate → AskUserQuestion gate (D7)
 3. After cross-section-analyze → if gaps, AskUserQuestion defer/add/accept
 4. After two-stage review → fix gaps before next stage
-5. After full plan + reviews → AskUserQuestion founder approval gate (D10)
+5. After full plan + reviews -> actual host question only for missing scope approval (D10)
 
 ## Hop-in support
 
@@ -443,12 +557,15 @@ Skip-conditions:
 **Writes:**
 - `plan.md` (canonical)
 - `spec.md` (draft, finalized in CAPTURE)
+- `work.json` (schema version 1; optional additive swarm fields only after opt-in)
+- `.claude/plans/<initiative>/swarm/` (optional charter, topology, briefs, and evidence destinations)
 - `.claude/runtime/state/.planner-checkpoint.md`
 - `.claude/runtime/state/00-state.md` (PLAN entry)
 - `.claude/runtime/audit/plan-metrics.jsonl`
 
 **Triggers:**
 - BUILD with plan.md as canonical source
+- `/li:swarm` when the validated map explicitly selects the swarm profile
 
 ## Recommended agents to dispatch (from discover-report)
 
@@ -470,14 +587,21 @@ Skip-conditions:
 - **Ignoring ADRs identified in DISCOVER** — they're constraints, not advisory
 - **Task decomposition too coarse** — 2-5 min per task (superpowers rule); bigger = decompose
 - **Invented model availability** — select roles by package complexity and honor the current host's actual model configuration
-- **Plan finalized without founder gate** — gate is MANDATORY per Architect image pattern
+- **Plan finalized without scope authority** — retain existing approval or ask for
+  the missing decision; no founder identity or repeated interview is required
+- **Treating parallelizable cards as automatic swarm consent** — surface the option; absence of both
+  swarm fields preserves sequential BUILD
+- **Repeating task prose/dependencies in coordination.json** — the mapped tasks artifact is the one
+  authority; coordination owns execution topology only
 
 ## Failure recovery
 
 - **Cost estimate exceeds budget**: AskUserQuestion scope-trim / decompose / abort. Don't proceed silently.
-- **Subagent reviewer unavailable**: skip review, note in plan.md, proceed with caveat in status.
+- **Independent reviewer unavailable**: preserve the report/handoff, label any
+  self-review, and keep the required independent review open.
 - **Cross-section analyze finds critical gap**: PAUSE, fix gap (back to DEFINE if design-level), re-plan.
-- **Operator rejects 3x at founder gate**: status BLOCKED, save state for next session, don't loop indefinitely.
+- **Repeated unresolved approval**: status BLOCKED, preserve the actual decision
+  and next action; do not loop through unrelated intake questions.
 
 ## Voice tier behavior
 
@@ -504,8 +628,8 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
        (job auto-spawn is dormant by decision, ADR-0008 — the job-begin hook is
         not auto-registered; the trio + approval gate below run regardless)
    produces: plan.md + spec.md + prompt.md (the trio)
-   handoff-size-check against 500k cap (trio + warming)
-   founder approval gate
+   handoff-size-check against supplied headroom (or explicitly unknown)
+   operator approval for unresolved scope only
    → DONE, ready for cold-executor handoff
 ```
 
@@ -525,20 +649,23 @@ The calling workflow passes:
 
 ### Output contract (deterministic for callers)
 
-Regardless of invocation mode, PLAN always emits:
+For new native work, regardless of invocation mode, PLAN emits:
 
 - `<run-dir>/plan.md` — task breakdown
 - `<run-dir>/spec.md` — engineering master spec
 - `<run-dir>/prompt.md` — cold-executor handoff (born here, v3.8 Feature 2.2)
 
-Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn't (re)generate.
+The selected work map records those exact paths. Mapped Spec Kit work instead keeps
+its original spec/plan/tasks/prompt; callers read the map, never assume siblings in
+`<run-dir>`. CAPTURE re-affirms but does not recreate a backlog or birth the handoff.
 
 ### Job integration
 
-When `workflow_root: true` fires `job-begin` hook:
-- Job spawned at `.claude/runtime/jobs/plan-<stamp>-<hash>/`
-- Trio written to `outputs/plan.md`, `outputs/spec.md`, `outputs/prompt.md`
-- `job-end` promotes trio to `.claude/plans/<slug>/` on DONE
+Automatic job hooks remain dormant (ADR-0008). Native artifacts are written to
+their selected committed paths; job records, when explicitly used, point at them.
+Do not rely on `job-end` to promote output, strip IDs into a shared "cycle" slug
+or overwrite existing ADRs/plans. Failed/aborted candidates retain their provenance
+and do not replace approved work.
 
 ### Anti-pattern: nested job spawning
 
@@ -555,7 +682,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

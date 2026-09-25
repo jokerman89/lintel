@@ -5,14 +5,7 @@ description: Use to see and steer in-flight Lintel jobs — list what's open, co
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: auto-pick-recommended
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the `jobs` skill — lifecycle controller for in-flight Lintel curated flows (v3.8 Feature 1).
@@ -28,6 +21,11 @@ Provides 5 subcommands to operate on `.claude/runtime/jobs/` (the repo-local job
 - `branch <id>` — create a parallel job from the same starting point (new job-id, copies job.yaml + outputs/)
 
 Each operation regenerates `_active.md` so `/li:status` reflects current truth.
+Mutation helpers maintain that derived view; `list` reads actual job records without
+regeneration. Missing records are unobserved, not proof that no mapped work is open.
+Jobs auto-spawn/hooks remain dormant unless separately activated and verified.
+Apply [task-relevant intake](../define/references/intake.md): no fixed question API
+and no automatic choice when a material decision is unresolved.
 
 ## When to use
 
@@ -67,8 +65,8 @@ esac
 ### Step 2 — Source helper
 
 ```bash
-BIN_DIR="$(cd "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null && pwd)/bin"
-[ -f "$BIN_DIR/_jobs.sh" ] || BIN_DIR="$HOME/.lintel/scaffolding/bin"
+BIN_DIR="${LINTEL_SOURCE_ROOT:?select trusted source}/bin"
+export LINTEL_JOBS_NO_INIT=1
 source "$BIN_DIR/_jobs.sh"
 ```
 
@@ -76,7 +74,8 @@ source "$BIN_DIR/_jobs.sh"
 
 **`list`:**
 ```bash
-list_jobs
+list_jobs --read-only
+stale_jobs 24
 ```
 
 **`continue <id>`:**
@@ -85,13 +84,17 @@ list_jobs
    `job_resume_point <id>` (deepest incomplete + startable WBS node-path, e.g.
    `1.1.a`); for flat/phased plans, read `current_step` from job.yaml. See
    `/li:resume` Step 2.5.
+   For mapped work the original tasks and verified lifecycle reference remain
+   authoritative; job steps are execution observations, not a second backlog.
+   Retain blocked and unknown-age work in the report even when it is not startable.
 3. Invoke `/li:resume --job <id>` (resume skill reads from job dir, not loose `.claude/runtime/state/00-state.md`).
 4. Update last_touched.
 
 **`replan <id>`:**
 1. Verify job exists.
 2. AskUserQuestion: "Replan whole job, OR pick a step to restart from?"
-   - Whole → reset job.yaml steps to empty + invoke `/li:cycle` from the job's workflow start
+   - Whole → preserve existing history and original map/IDs, then select an explicit
+     retry/loop-back through `/li:cycle`; do not erase evidence to simulate a fresh start
    - From step → operator picks; `/li:resume --from <step>` style
 3. Update last_touched.
 
@@ -103,18 +106,25 @@ list_jobs
 
 **`branch <id>`:**
 1. Verify source job exists.
-2. Create new job-id with `--name` suffix (or auto-suffix `-branch-N`).
-3. Copy `job.yaml` + `outputs/` + `inputs/` from source.
-4. Reset new job's `current_step` to source's current_step (operator continues from there).
-5. Update both jobs' last_touched.
-6. Surface `[lintel] Branched <new-id> from <id>. Both active.`
+2. Use `job_create` for a distinct record; never copy the old `job_id` into a new folder.
+3. Retain the original selected map as a reference. A new initiative needs explicit
+   map selection, not copied approval/status or a directory name stripped from the job ID.
+4. Copy only authorized inputs/output candidates, preserving source history and conflicts.
+   They are candidates, not independently reviewed completion.
+5. Use `job_update` for the new current step and verify actual persistence before
+   reporting both records. There is no autonomous branch scheduler.
 
 ### Step 4 — Audit
 
-Every operation logs to `.claude/runtime/audit/jobs.jsonl`:
+The helpers in `bin/_jobs.sh` record their own operations in the `jobs` category
+(`.claude/runtime/audit/jobs.jsonl` on the v5 layout): `job_begin` (`job_create`),
+`job_set_steps`, `job_update` and `job_end` (`job_archive`). `job_stale_warn` is recorded by the
+dormant `job-stale-warn` hook, not by `bin/_jobs.sh`. This skill emits no separate `job_action`
+record; `continue`, `replan` and `branch` leave only the helper records they cause. These audit
+lines are advisory, while a failed `job.yaml` write makes the helper return non-zero:
 
 ```json
-{"ts":"...","kind":"job_action","job_id":"...","action":"continue|replan|abort|branch"}
+{"ts":"...","kind":"job_update","operator":"...","cycle_id":"...","job_id":"...","step":"PLAN","status":"IN_PROGRESS"}
 ```
 
 ## Voice tier behavior
@@ -159,10 +169,10 @@ YES — solo-invocable. Designed to be called anytime.
 - `/li:resume` (for `continue` subcommand)
 - `/li:cycle` (for `replan whole`)
 
-**Hooks fire:**
-- `job-begin` on new workflow_root invocation (not via this skill but via the underlying skill)
-- `job-end` on `abort` or terminal status
-- `job-stale-warn` at session-start (not via this skill but listed for context)
+**Optional hooks (dormant by default):**
+- `job-begin`, `job-end` and `job-stale-warn` are not activated by this skill.
+- File presence is not registration/execution. Do not use dormant promotion recipes
+  to copy failed/colliding outputs over original mapped artifacts.
 
 ## Anti-patterns
 
@@ -200,7 +210,7 @@ Close your report with the shared position footer. Outside an active cycle it re
 ambient line; inside one it shows the operator's position + next step:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

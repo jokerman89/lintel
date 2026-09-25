@@ -61,6 +61,15 @@ resolve inside `LINTEL_REPO_ROOT`, the working repository.
 Set `plan_path` and `tasks_path` from the validated map's original `plan` and `tasks` fields,
 and retain `LINTEL_WORK_MAP` as the selected map path. Native work without a map uses plan.md
 for both paths. Record these references in the ledger with the leaf results.
+Use the shared lifecycle entry in [work-map.md](../spec-kit/references/work-map.md):
+`workflow_resume` verifies the saved P07 reference and required policy, then
+`workflow_inspect "$LINTEL_WORK_MAP"` reads the original task/package definitions.
+A legacy native plan can be inspected without a map, but strict release clearance
+requires a reconciled map and the shared bound evidence, not a parallel backlog.
+
+Before a write, surface any advisory code-freeze scope and its stated limitation;
+do not claim a universal filesystem lock or a host hook that has not been verified.
+Honor an operator's explicit frozen scope even when enforcement is cooperative.
 
 
 **Host portability:** `TodoWrite`, `Task`, `Read` and `Bash` below describe operations, not
@@ -68,6 +77,68 @@ requirements for tool names. Use available host tools, a file checklist if no to
 and the current host's configured model. Haiku/Sonnet/Opus labels express complexity tiers;
 they are not required model IDs on Copilot. If native delegation is unavailable, sequence
 scoped implementation and review and record that the review was not an independent subagent.
+
+### Mapped swarm entry condition
+
+The established package-by-package workflow below remains the default. Enter `/li:swarm run` only when a
+validated schema-version-1 work map declares both `execution_mode: "swarm"` and a `coordination`
+pointer. One field without the other is invalid; no pointer means legacy sequential BUILD unchanged.
+
+For an opted-in map:
+
+1. Resolve the working repo and installed Lintel source separately, then run the shared validators:
+
+   ```bash
+   repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+   if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+     source_root="$LINTEL_SOURCE_ROOT"
+   elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+     source_root="$CLAUDE_PLUGIN_ROOT"
+   else
+     echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+     exit 1
+   fi
+   [ -f "$source_root/bin/li-work-artifacts.py" ] && [ -f "$source_root/bin/li-swarm.py" ] || {
+     echo "NEEDS_CONTEXT: Lintel swarm helpers missing under trusted source root" >&2
+     exit 1
+   }
+   python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$work_map"
+   python3 "$source_root/bin/li-swarm.py" validate --repo "$repo" --coord "$coordination"
+   python3 "$source_root/bin/li-swarm.py" wave --repo "$repo" --coord "$coordination"
+   ```
+
+   Claude may provide `CLAUDE_PLUGIN_ROOT`; other adapters must substitute/export their known
+   installed bundle as `LINTEL_SOURCE_ROOT`. Tests and self-checks set `LINTEL_SOURCE_ROOT`
+   explicitly. Never execute helpers from the working repo merely because it is the current cwd.
+
+2. Treat `frontier.dispatch_task_ids` as an evidence/topology candidate from the earliest incomplete
+   wave, not authoritative dependency resolution. Re-read each candidate package's complete member
+   leaves and brief. Before every worker handoff, inspect every leaf prerequisite and verify completion
+   evidence. Dispatch only when the authoritative prerequisites and candidate frontier agree. If a
+   prerequisite is incomplete or coordination disagrees with the mapped task graph, block and return
+   to PLAN to correct/re-map; never dispatch from `wave` alone. Then invoke Brief Forge explicitly
+   for `subagent_spawn`; when unavailable, disabled, or bypassed, record that audited condition rather
+   than claiming a forged handoff.
+3. Require the worker to run the Lintel startup named in the brief, stay inside `write_scope + own
+   report`, execute acceptance checks, and emit the structured report evidence marker.
+4. Use concurrent writers only with a native-subagent host, disjoint validated scopes, and an
+   attributable isolation backend (`git-worktree`, `isolated-patch`, or `host-scoped-write`). A
+   shared-tree union diff is not attribution. Sequenced/no-subagent hosts execute the same briefs in
+   order; no-subagent execution cannot claim an independent implementer.
+5. Run `li-swarm.py check-scope` against each lane's exact attributable changed-path list before
+   integration. A failure blocks that lane and every dependent wave.
+6. After a valid worker report, review the package with the aggregate-risk rule below: Stage 1 checks
+   every leaf/spec and their integration, then Stage 2 checks quality. Both must PASS. A substantive
+   package needs a distinct reviewer writing only its review artifact; an unavailable independent
+   reviewer leaves it open. Mechanical packages may use explicitly recorded coordinator review.
+7. The coordinator integrates passing lanes serially in deterministic task order, owns all commits,
+   regenerates shared outputs after producer fan-in, runs focused checks, and asks `wave` again.
+8. After every lane closes, run `li-swarm.py verify` and continue to ordinary REVIEW on the
+   reconciled integration branch. Per-lane reviews do not replace final integrated review.
+
+The detailed per-package rules below remain the worker/reviewer discipline for each swarm lane; only
+candidate-wave scheduling and isolation change. Member leaf IDs, acceptance and prerequisites remain
+authoritative; legacy ungrouped tasks are singleton packages.
 
 ### Step 1 — Pre-flight checks
 
@@ -166,6 +237,15 @@ empty-diff block below for tasks whose acceptance requires a code or artifact ch
 
 #### 3c — Two-stage review (complexity-gated)
 
+Use [the accepted evidence contract](../review/references/evidence.md) for each
+package: prepare its exact selected source/acceptance snapshot and immutable
+`qa_requirements`, obtain actual review, persist it with the real writer, then
+consume the latest applicable decision with its expected context/corroboration.
+Do not omit, retype or downgrade obligations after seeing observations. Old/empty/
+positive-string review records remain history only; direct `verify` is not latest-log
+clearance. Carry verified profile context/generation/digest and required policy into
+delegation and cold resume unchanged. An unavailable independent reviewer remains open.
+
 **Review-routing gate (per `docs/concepts/agent-dispatch-rules.md` rule (c) — inline when cheap + deterministic):**
 
 Route review by the **aggregate package** complexity and risk, not by the smallest leaf:
@@ -248,7 +328,15 @@ If `checkpoint_push: true`: also push WIP to origin.
 ### Step 5 — Build log
 
 Append to `.claude/runtime/state/build-log.md`:
+Use an explicitly linked per-cycle log for new work; retain legacy logs as history.
+Each entry identifies the same map, original task source and profile, so two
+initiatives' results cannot be merged by task ID alone:
 ```yaml
+cycle_id: <original cycle ID>
+work_map: <selected work.json>
+tasks_path: <original mapped tasks>
+profile: <verified complete P07 reference>
+required_policy: <unchanged bridge>
 task: T<N>
 package_id: P<N>                  # annotation, not a new job/state schema
 title: <title>
@@ -271,7 +359,7 @@ ts: <timestamp>
 After last task DONE:
 1. Run full test suite (`/li:qa` invoked)
 2. Check no regressions in unmentioned areas
-3. Invoke `/li:analyze` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every plan
+3. Invoke `/li:analyze --map <same selected map>` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every original
    task has a terminal status, no untasked work shipped, deviations reflected back. Surface the
    report verdict; RED/YELLOW findings go to the operator (advisory, not a hard block).
 4. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
@@ -282,8 +370,7 @@ After last task DONE:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
 # Set these from the reviewed package/leaf results, never from an intended outcome.
 case "${build_status:?set actual BUILD status}" in
   DONE|DONE_WITH_CONCERNS) build_next=REVIEW ;;
@@ -362,6 +449,8 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **Skipping review entirely** because "task is simple" — never. Mechanical tasks get INLINE review (3c gate), not NO review; substantive tasks keep the full two-stage dedicated review.
 - **Proceeding with unfixed P1 issues** — never
 - **Splitting one package across competing implementers** — one write owner; packages run sequentially by default
+- **Dispatching multiple implementers outside a validated mapped swarm** — ordinary BUILD stays
+  sequential; opted-in swarms may fan out only the safe isolated frontier
 - **Making subagent read plan.md** — give them task text directly (subagent has no plan-context unless given)
 - **Skipping scene-setting context for implementer** — they need to understand WHY this task
 - **Ignoring subagent questions** — answer + re-dispatch, don't proceed without
@@ -400,7 +489,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

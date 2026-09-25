@@ -17,8 +17,10 @@ trap cleanup EXIT
 installed="$test_dir/installed source"
 target_repo="$test_dir/consumer"
 mkdir -p "$installed/lib" "$installed/bin" "$installed/packs" "$target_repo/packs/base"
-cp "$ROOT/lib/pack-resolver.sh" "$ROOT/lib/paths.sh" "$installed/lib/"
-cp "$ROOT/bin/_audit.sh" "$installed/bin/"
+cp "$ROOT/lib/pack-resolver.sh" "$ROOT/lib/paths.sh" "$ROOT/lib/profile_context.py" "$ROOT/lib/context_safety.py" \
+  "$ROOT/lib/native_paths.py" \
+  "$ROOT/lib/profile-context-schema.json" "$ROOT/lib/pack-schema.yaml" "$ROOT/lib/copilot-env.sh" "$installed/lib/"
+cp "$ROOT/bin/_audit.sh" "$ROOT/bin/li-lifecycle" "$ROOT/bin/li-lifecycle.py" "$installed/bin/"
 cp -R "$ROOT/packs/_default" "$installed/packs/"
 export LINTEL_SOURCE_ROOT="$installed" LINTEL_REPO_ROOT="$target_repo"
 export LINTEL_HOME="$test_dir/operator" LINTEL_PACKS_DIR="$test_dir/operator/packs"
@@ -38,31 +40,29 @@ source "$installed/lib/pack-resolver.sh"
 [ "$(_pack_dir base)" = "$target_repo/packs/base" ]
 echo 'PASS: installed defaults and consumer packs resolve with distinct source/target roots'
 
-# Execute the pack-create template and write steps from the skill itself. A blank
-# pack in an ordinary consumer repo must find _default in the installed bundle.
+# Execute the skill's real dispatcher. A blank pack in an ordinary consumer must
+# find _default in the installed bundle, not maintain a second copy/write recipe.
 extract_step() {
-  awk -v step="$1" '
-    $0 ~ "^### Step "step" " { selected=1; next }
+  awk '
+    /^### 2\. Dispatch/ { selected=1; next }
     selected && /^### / { exit }
     selected && /^```bash/ { block=1; next }
     block && /^```/ { exit }
     block { print }
   ' "$ROOT/skills/pack-create/SKILL.md"
 }
-extends=""; from_pack=""; name=blank; scope=repo; target_dir="$target_repo/packs"
-REPO_PACKS="$target_dir"; HOME_PACKS="$LINTEL_PACKS_DIR"
-source <(extract_step 3)
-source <(extract_step 5)
-source <(extract_step 6)
+parent=""; template_pack=""; name=blank; scope=repo; target_dir="$target_repo/packs"
+dispatcher="$(extract_step)"
+[ -n "$dispatcher" ] || { echo 'FAIL: pack-create dispatcher is missing'; exit 1; }
+printf '%s\n' "$dispatcher" > "$test_dir/create.sh"
+source "$test_dir/create.sh"
+validate_pack blank
 echo 'PASS: blank pack creation uses the installed neutral template'
 
-extends=base; name=team
-source <(extract_step 3)
-source <(extract_step 4)
-source <(extract_step 5)
-source <(extract_step 6)
-printf 'team\n' > "$LINTEL_ACTIVE_PACK_FILE"
-clear_pack_cache
+parent=base; name=team
+source "$test_dir/create.sh"
+validate_pack team
+bash "$installed/bin/li-lifecycle" pack-switch team --reason 'synthetic consumer inheritance check'
 [ "$(resolve_pack_field compliance.mode)" = hard ]
 [ "$(resolve_pack_field compliance.hooks)" = '[evidence]' ]
 echo 'PASS: consumer child created by the skill retains inherited enterprise gates'

@@ -1,22 +1,22 @@
-# {{Skill name}}
-
-> Template for new Lintel skills. Copy this file to `~/.claude/skills/li:<name>/SKILL.md` and fill the placeholders. `verify.sh --frontmatter` will reject any skill missing required fields.
-
-```yaml
 ---
-name: li-<name>                       # REQUIRED: kebab-case, must start with `li-`
-description: <one-line summary of what the skill does — appears in slash-command picker>  # REQUIRED
-color: <blue|purple|green|red|orange|yellow>   # REQUIRED: color tag for the picker
-tools: <comma-separated list — only what the skill needs>  # REQUIRED
-voice: <internal | mixed | custom>        # REQUIRED: resolves to the active pack's voice tier (default: internal)
-cli_support: [claude-code, codex, copilot] # REQUIRED: list of CLIs where this skill is supported
-                                            #   - claude-code: full support
-                                            #   - codex: degraded — operator sequentializes manually
-                                            #   - copilot: degraded — no slash-command mechanism
-                                            #   omit any CLI where the skill genuinely won't work
-license_note: <empty>                       # OPTIONAL: only if this skill bundles third-party content
+name: "{{name}}"
+layer: foundation
+description: "{{description}}"
+color: green
+tools: Read, Bash
+voice: internal
+cli_support: []
 ---
-```
+
+# {{name}}
+
+> DRAFT template. Instantiate only at an explicitly owned new target path. Replace the
+> placeholders with valid YAML-quoted values and reviewed method text. Use a bare canonical
+> kebab-case name; native wrapper/plugin spelling belongs to the actual adapter. An empty
+> cli_support list is unknown declaration coverage, not universal support or activation.
+> Validate the actual draft with the trusted `lib/frontmatter.sh` function
+> `validate_lintel_frontmatter <file> skill`; it checks opening-block required-field
+> presence only, not semantic validity or observed host execution.
 
 ## What this skill does
 
@@ -39,8 +39,19 @@ license_note: <empty>                       # OPTIONAL: only if this skill bundl
 
 ## Outputs
 
-- {{Output 1 — format, where it lands (file path, stdout, AskUserQuestion, etc.)}}
+- {{Output 1 — format, explicitly authorized target path or response channel}}
 - {{Output 2}}
+
+## Workflow
+
+1. {{Validate literal inputs and applicable authority. Name the existing method/helper.}}
+2. {{Perform the useful work using actual permitted host operations or an explicit fallback.}}
+3. {{Verify the result; preserve errors, incomplete work and evidence limitations.}}
+
+## Report format
+
+{{Actual result, selected inputs, owned output, checks run, failures and next action.
+Do not claim a hook, tool, independent reviewer or host execution from a declaration.}}
 
 ## Sub-skill: voice tier behavior
 
@@ -54,7 +65,11 @@ If `voice: custom`: the active pack defines the tier and any corpus/critic behav
 
 ## Compliance integration
 
-If this skill touches any of the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default), state which here and how the skill enforces (or surfaces) the rule.
+If this skill touches any of the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default), state which here and which actual control supplies evidence. Preserve required-policy errors. A declared hook is not proof that it ran; do not claim enforcement from this template.
+
+Preserve actual source attribution and required notices for adaptations. Add an optional
+`license_note` only for real bundled material; do not infer originality or license
+clearance from rewritten wording.
 
 ## Failure modes
 
@@ -63,7 +78,8 @@ If this skill touches any of the active pack's compliance gates (`resolve_pack_f
 
 ## Examples
 
-{{Concrete example invocations + expected outputs. At least 2.}}
+{{At least two concrete examples: valid inputs and expected output, plus a negative case
+with its diagnostic and preserved state. Label illustrations separately from executed evidence.}}
 
 ## See also
 

@@ -7,9 +7,9 @@ How Lintel is put together, and why. If you want the workflow rather than the st
 
 ## One sentence
 
-Lintel is a **spine** — a company-neutral execution engine of skills, agents and hooks — plus one
-active **pack** that supplies identity. The spine decides *how* work runs; the pack decides *what
-counts as correct* for your team.
+Lintel is a **spine** of company-neutral workflows and local helpers, plus an active **pack**
+for team identity and policy. Thin client adapters bind workflow operations to actual host
+tools. The spine is not a universal execution engine: the host owns execution and permissions.
 
 Everything else in this document is a consequence of that split.
 
@@ -49,7 +49,7 @@ Canonical skills live at `skills/<name>/SKILL.md`. Claude plugin workflows use `
 
 | Cluster | What it holds |
 |---|---|
-| **Cycle** | the nine phase skills, the `cycle` orchestrator, four composite shortcuts, plus `resume`, `status`, `jobs` |
+| **Cycle** | the nine phase skills, the `cycle` orchestrator, the opt-in `swarm` execution profile, four composite shortcuts, plus `resume`, `status`, `jobs` |
 | **Engineering modules** | `ta`, `da`, `sc`, `dh`, `tq` — each an orchestrator plus sub-skills — and `full-engineering-pass`, which composes all five in dependency order |
 | **Generate** | a shared content pipeline (outline → write → design → QA) feeding per-format renderers |
 | **Frontend** | a design-director orchestrator over typography, motion and shader sub-skills, each emitting a JSON contract, plus a six-dimension review gate |
@@ -112,7 +112,8 @@ This is where the repo's central rule lives: *if a guarantee is only prose, it i
 | `auto-decide.sh` | `is_one_way_door` — classifies selected irreversible decision patterns when the workflow calls it |
 | `cycle-footer.sh` | `render_cycle_footer` — the position footer, mode-aware, with an ASCII fallback |
 | `scale-estimator.sh` | sizing, and the calibration path that turns token estimates from guesses into measurements |
-| `cli-tiers.sh` | generates the capability table from `cli-tiers.yaml`; a shape test fails the build if the README disagrees |
+| `client_capabilities.py` and `cli-tiers.sh` | one validated surface/operation registry, explicit session-binding selection and conservative legacy/table views |
+| `swarm_contract.py` and `li-swarm.py` | validate opt-in swarm topology, per-lane scope and close evidence without executing artifact content |
 
 ---
 
@@ -163,8 +164,27 @@ Every skill that owns a job declares `workflow_root: true` in frontmatter, along
 exit conditions. At SENSE an **orientator** reads the request, the active pack's navigation policy
 and any open jobs, then recommends a workflow, an entry phase and a risk level.
 
-It is mechanical-first: cheap pattern matching decides the common cases, and only an ambiguous one
-escalates to a model call, inside a pack-overridable token budget.
+It is mechanical-first: pattern matching recommends common routes. An ambiguous result needs
+explicit clarification or judgment; a configured budget or staged escalation path is not evidence
+that an additional model call occurred.
+
+## Swarming as an execution profile
+
+Swarming is an explicit profile over PLAN, BUILD and REVIEW, not a tenth phase. PLAN keeps one
+authoritative task map and adds a pointer to committed execution topology only after operator opt-in.
+BUILD can then fan out dependency-ready lanes whose write scopes are disjoint and whose changes are
+attributable to separate worktrees, patches or an equivalent host-enforced sandbox. If the host or
+isolation cannot prove that attribution, the same lane briefs run sequentially.
+
+Every swarm has one coordinator. Workers own only their declared paths and report; independent
+reviewers own only their lane reviews. The coordinator alone writes shared ledgers, generated
+reducers, commits and integration history. Passing lane reviews are inputs to fan-in; REVIEW still
+checks the reconciled branch across specification, quality and active-pack compliance.
+
+The committed contract lives beside the trio under
+`.claude/plans/<initiative>/swarm/`. Runtime attempts stay gitignored. This makes recovery depend on
+reviewable artifacts and attributable changes rather than chat memory or a still-running worker.
+See [swarming work](concepts/swarming-work.md) for the artifact tree and operating procedure.
 
 ---
 
@@ -193,8 +213,10 @@ security in parallel, then hosting, then testing.
 
 **Hand-off envelopes.** Work crossing a boundary — spawning a subagent, transitioning a phase,
 passing to a cold executor — can be wrapped in a standardised envelope and scored by the active
-pack's evaluators before it is allowed through. *Envelope construction is dormant by decision: it is
-opt-in, not auto-armed.* The schema and evaluators ship; the automatic gate does not.
+pack's evaluators before it is allowed through. The schema, helpers and evaluator policy ship, but
+there is no universal automatic interceptor: a workflow must invoke Brief Forge explicitly, as the
+swarm profile does before dispatch. Pack configuration selects behavior for an invocation; it does
+not install a host hook.
 
 **Meta-infra discipline.** Changes to the harness's own structure ripple into every downstream
 cycle, so they run under four extra gates — a structure-impact entry, a compatibility audit, the
@@ -210,7 +232,7 @@ Four roots. Two are machine-global, two live in your repo:
 |---|---|---|
 | `~/.lintel/` | machine-global (configurable with `LINTEL_HOME`) | operator preferences in `profile.yaml` (mode, role); active pack selected by `packs/active-pack`; installed packs, cross-repo job registry, operator audit log |
 | `~/.claude/` | machine-global | your CLI's own home — `settings.json`, and hooks you armed by hand on a bare install |
-| `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` |
+| `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` including optional swarm topology and evidence |
 | `<repo>/.claude/runtime/` | per-repo, **gitignored** | cycle state, job data, session saves, repo event log |
 
 The committed/gitignored split is the load-bearing part. Knowledge that should be reviewed in a pull
@@ -226,11 +248,22 @@ still uses the legacy locations.
 Two mechanisms, one source each:
 
 1. **Instructions** — the shared `SESSION-PROTOCOL.md` is repeated inline in AGENTS.md, CLAUDE.md and both scaffold templates. `bin/li-instructions.py` keeps those marked blocks identical while preserving unique project context. `AGENT-INSTRUCTIONS.md` supplies the navigation/read order; personal global files are unnecessary for the reusable protocol. This deliberate repetition supersedes the older pointer-only direction.
-2. **Skills and agents** — written once at the repo root, shipped through small per-CLI plugin
-   manifests and generated adapters that reference shared canonical content. Copilot uses generated native core adapters and a dedicated manifest; the portable installer bundles referenced resources for other checkouts. Other adapters may use manifest interoperability.
+2. **Skills and agents** — written once at the repo root, exposed through native plugins,
+   generated discovery wrappers or explicit manual handoff. Existing Claude skills/agents/hooks,
+   Copilot native kit and other useful routes remain. `li-adapter.py` delegates to the same
+   `li-copilot.py` source-bundling and ownership engine rather than duplicating an installer.
 
-Per-CLI capability is declared once in `lib/cli-tiers.yaml` and everything else generates from it —
-the README table, and the honest tier message `/li:welcome` prints on first run.
+`lib/cli-tiers.yaml` is schema-version-2 JSON-compatible YAML, read by the standard-library
+`client_capabilities.py`. Every CLI/desktop/IDE/cloud surface keeps vendor documentation,
+delivered integration and observed execution distinct per operation. The installer, generated
+README and compatibility shell API consume that source. Exact IDs and legacy aliases never
+collapse neighboring surfaces.
+
+Current session bindings select actual tool names, availability, permissions and attributable
+isolation. The selector does not execute tools, grant permission or clear independent review.
+Unknown/denied capabilities remain explicit; manual/serial handoffs retain the original map,
+acceptance and effective profile reference. See [Universal support](multi-cli.md) and the
+[adapter contract](../shims/universal/ADAPTER.md).
 
 ---
 
@@ -267,6 +300,14 @@ self-description — historically this repo's dominant failure mode, and the rea
 - [Multi-CLI support](multi-cli.md) · [Precedence](precedence.md) · [Compliance](compliance.md)
 - Decision records: `.claude/decisions/`
 
-## Copilot repository boundary
+## Portable repository boundary
 
-The portable kit adds native core skills under `.github/skills/li-*` and three custom agent profiles under `.github/agents/`. Installed repositories carry workflow resources under `.github/lintel/` so a new checkout does not depend on the originating workstation. Installation records managed artifacts and refuses local-edit conflicts. It does not provision accounts, enable enterprise policies, install private packs or adapt Claude hooks. See [Copilot](copilot.md) and [enterprise adoption](enterprise-adoption.md).
+Selected clients receive core wrappers only under their documented repository discovery roots,
+or an explicit manual `START.md` route. Copilot retains `.github/skills/li-*` and its three
+`.github/agents/` profiles. All use one `.github/lintel/` bundle, including actual source product
+metadata, so another checkout does not depend on the originating workstation.
+
+Installation records managed files, selected surfaces and protocol blocks, preserves project prose
+and refuses local-edit conflicts before writes. It does not provision accounts, enable policies,
+install private packs, change models or activate/adapt hooks. Local integrity is not live client
+acceptance. See [client adapters](client-adapters.md) and [enterprise adoption](enterprise-adoption.md).

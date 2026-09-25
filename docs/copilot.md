@@ -5,7 +5,7 @@ native core workflow skills and three custom agent profiles. The same reviewed f
 a local checkout and a GitHub cloud agent checkout. The CLI plugin packages the same native core adapters as an optional route.
 
 This page separates what Lintel ships from what the Copilot host supports. Client capabilities
-were checked against GitHub's primary documentation on 2026-09-08; that review is not an
+are recorded with primary sources checked on 2026-09-20 in `lib/cli-tiers.yaml`; that review is not an
 end-to-end validation of your installed client or enterprise configuration.
 
 ## Choose the integration
@@ -14,6 +14,7 @@ end-to-end validation of your installed client or enterprise configuration.
 |---|---|---|
 | Copilot in VS Code | Repository kit: `.github/copilot-instructions.md`, `.github/skills/`, `.github/agents/` | Discover `li-plan`, choose an agent, complete a small task, resume in a fresh session |
 | Copilot CLI | Repository kit, or optional CLI plugin | List installed skills and agents, execute a bounded plan, confirm written state |
+| GitHub Copilot App | Repository kit in the selected local worktree/branch session | Inspect actual app discovery, question/delegation APIs, worktree attribution and fresh-session recovery |
 | GitHub cloud agent | Commit the repository kit to the branch the agent receives | Verify resources, tools, policies and behavior inside the cloud execution environment |
 | Other Copilot IDE clients | Repository instructions where supported | Validate skills and custom agents on that client's current version; no blanket parity claim |
 
@@ -32,20 +33,26 @@ bash bin/li-copilot init --target ../your-repo
 bash bin/li-copilot check --target ../your-repo
 ```
 
+The same ownership/bundling engine has a Universal entry. Select the exact surface, for example
+`python3 bin/li-adapter.py init --client copilot-app --target ../your-repo`, and use its `check`
+command to verify the installed surface set. Repeated `--client` flags add teammates' documented
+native routes without duplicating the source bundle or removing Copilot's native files.
+
 The optional `--source PATH` selects local source content. Installation uses ordinary files,
 not symlinks or an installed plugin cache. The target's `.github/lintel/` resources are designed
 to remain available when another developer or a cloud agent checks out the repository.
 
 Core skills are `li-welcome`, `li-cycle`, `li-sense`, `li-scope`, `li-define`, `li-discover`,
-`li-plan`, `li-build`, `li-review`, `li-ship`, `li-capture`, `li-resume` and `li-spec-kit`. Invoke them as
+`li-plan`, `li-build`, `li-review`, `li-ship`, `li-capture`, `li-resume`, `li-spec-kit` and `li-swarm`. Invoke them as
 `/li-plan` and similar where the host offers slash invocation; otherwise name the skill or its
 file. These are adapters to Lintel's canonical workflow, whose deeper documents often use
 `/li:plan` notation. A colon command is not the portable skill's identifier.
 
 The kit exposes `lintel-planner`, `lintel-builder` and `lintel-reviewer` profiles. They focus on
 planning, implementation and independent review. They do not force a model, grant permissions
-or promise parallel execution. Use host delegation when available; otherwise apply the roles
-in sequence and report when review could not be independent.
+or promise parallel execution. Use actual host delegation and attributable isolated writes
+when available; otherwise retain serial/manual package handoffs. A self-review cannot close
+a requirement for a separately attributable independent reviewer.
 
 The kit and CLI plugin expose the same native core entry points. The wider canonical catalog remains source content to read on demand. Their presence does not prove
 that every specialist skill in the full catalog works on every Copilot surface.
@@ -111,7 +118,27 @@ host's actual input/output contract. Do not infer enforcement from a file named 
 
 Run `init` from the next approved Lintel revision on an upgrade branch. Managed files that remain
 unchanged may refresh; local edits or conflicting files require review before an update proceeds.
+Every planned write is bound to the exact file state its bytes or create/merge decision came
+from. A file created, edited or deleted after planning refuses the write before publication
+and is preserved. Files that were only read are compared once more just before publication; a
+change after that final comparison is outside this non-atomic guarantee.
 Run `check`, inspect the diff, and repeat your pilot task before merging.
+
+`init` records an owned file transaction with an explicit separate recovery store.
+Its reported default is a compact full-target-bound sibling; `--store` or
+`LINTEL_RECOVERY_STORE` overrides it exactly. Interruption is not completion and blocks
+a new init until explicitly reconciled. To inspect or reverse verified owned bytes:
+
+```bash
+python3 "$LINTEL_SOURCE_ROOT/bin/li-copilot.py" inspect \
+  --target "$target" --store "$store" --transaction "$id"
+python3 "$LINTEL_SOURCE_ROOT/bin/li-copilot.py" recover \
+  --target "$target" --store "$store" --transaction "$id"
+```
+
+Recovery refuses later edits, foreign/corrupt receipts and reuse of consumed restore
+permission. It does not reactivate/deactivate a host or roll back external effects.
+See [lifecycle operations](lifecycle.md) for source/profile boundaries and limitations.
 
 Rollback the adoption or upgrade through a reviewed Git change, retaining project lessons,
 plans and decisions. The installer has no remove command; consult its inventory and remove
@@ -134,12 +161,12 @@ revision. Repeat it in the cloud execution environment if that is part of the ro
 5. Confirm the platform's required checks, reviews and permission boundaries under its approved
    test procedure. Verify that no Lintel Copilot hook protection is being assumed.
 
-Passing local installation and contract tests supports the **0.9.0 public beta** release. It does
+Passing local installation and contract tests supports the repository integration. It does
 not replace this client acceptance, prove enterprise compliance or constitute a 1.0 support claim.
 
 ## Pilot evidence
 
-Record the Lintel revision, Copilot client/version, enabled policies, repository kit check output,
+Record the Lintel revision, exact Copilot surface/version, enabled policies, repository kit check output,
 observed skill and agent discovery, first-task result, verification output and fresh-session
 resume result. Mark anything untested explicitly. A structural check is useful evidence of
 installation integrity; it does not establish model adherence, productivity gains or compliance.

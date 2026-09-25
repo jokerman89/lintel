@@ -59,6 +59,14 @@ python3 .github/lintel/bin/li-work-artifacts.py --repo . --map .claude/plans/you
 Use the installed Python 3.9+ executable name if it differs. The validator checks declared paths
 and schema without executing task content. It does not select a feature for you.
 
+Add `--view context` to inspect original task IDs, package membership and a bounded,
+deduplicated input manifest without creating another task list. In an explicitly
+selected Swarm map, the validated coordination supplies existing lane/package
+recognition, including legacy named singletons, and is counted once in that
+manifest and its byte budget. Unselected prose headings are not guessed into
+tasks. DRAFT inspection and source checkboxes do not establish approval, execution
+or review clearance; an actual acceptance binding remains a separate operation.
+
 On a fresh clone, local ledgers and checkpoints may be absent. `/li-resume` first follows the
 explicit active map or unambiguous committed plan/handoff links in todo.md and working-state.md.
 It reads the original task IDs, code and verification evidence before recreating local runtime

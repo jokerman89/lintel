@@ -1,11 +1,15 @@
 {
   "blocks": {},
+  "clients": [
+    "copilot-cli"
+  ],
   "files": {
     ".github/agents/lintel-builder.agent.md": "d799f5f015841e79e44adebcf339c0b715187cd421082f71788a5d52435bb32f",
     ".github/agents/lintel-planner.agent.md": "deae9d1d4a0b0839961a8be1aebba9dc98b62a3959d87d368891c208d921359c",
     ".github/agents/lintel-reviewer.agent.md": "9d09f41ba6be5b5b69e3397597584028b74a22155d5e44648fb62aa7f545884b",
     ".github/copilot-instructions.md": "25f792a39be017734e0703500d3c6b3d578edfa09dad4a5baf66a598e2502e1c",
     ".github/instructions/lintel-session.instructions.md": "3704b500acc26fd7cb3ba18feaa4cbe91767f4cb2b236313c9846ddf3c017d1c",
+    ".github/lintel/START.md": "f332652def114e749b146de6d51f10cd02c3ef4946a4c20f72a193f9e124c6a9",
     ".github/skills/li-build/SKILL.md": "4f2ef0a8564b5c438c7406a0cbd650c2ae5d6dc508db993c0c1cd2f8ebe4166e",
     ".github/skills/li-capture/SKILL.md": "f0823a733b0b8b48fef155645db5d1d21f8163fa4517dc91aa48de9f1111f362",
     ".github/skills/li-cycle/SKILL.md": "cc6c8fe33ecaac7fdbf7c15275646d43a12bb85fbd1b190506047ed34e12314b",
@@ -18,6 +22,7 @@
     ".github/skills/li-sense/SKILL.md": "3f0e753b831f25ac5b0b8638e2c3d5713b5281202391f0e17ddc2111f956a5ff",
     ".github/skills/li-ship/SKILL.md": "09845090db1e0c3f07de0b90eb16dfbce8373a1295e07954edd183f7f2a9946e",
     ".github/skills/li-spec-kit/SKILL.md": "fa2ae01bc7ef2a05f5c815f2799c49ed0d2e23a4b157dcdd97a14f46af5a794c",
+    ".github/skills/li-swarm/SKILL.md": "84fbbf053a23ab3a868cb083ef9b5114192c375b2aad3a1e446718f2e108e8c2",
     ".github/skills/li-welcome/SKILL.md": "365bf59901a08ea6124b9ac73867215c06722fc84e5e4ee290308adb6cfc749b"
   },
   "hooks_installed": false,

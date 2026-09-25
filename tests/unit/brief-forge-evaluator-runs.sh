@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # tests/unit/brief-forge-evaluator-runs.sh
-# Asserts: all 5 default evaluators execute, return well-formed JSON,
-# and identify documented failure patterns.
+# Asserts: all three built-in evaluators execute, return well-formed JSON,
+# identify documented failure patterns, and the skill's three-level hand-off
+# policy resolver reaches both default-enabled and fail-closed paths.
 # tag: v4.0 phase-3 brief-forge
 
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVALS="$REPO_ROOT/lib/brief-forge-evaluators.sh"
 FORGE="$REPO_ROOT/lib/brief-forge.sh"
+SKILL="$REPO_ROOT/skills/brief-forge/SKILL.md"
 FAILED=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAILED=1; }
@@ -15,7 +17,7 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/brief-forge-evaluator-runs.sh"
 echo "=========================================="
 
-for f in "$EVALS" "$FORGE"; do
+for f in "$EVALS" "$FORGE" "$SKILL"; do
   [ -f "$f" ] || { fail "$f MISSING"; exit 1; }
 done
 
@@ -25,6 +27,11 @@ done
 SANDBOX=$(mktemp -d)
 export LINTEL_HOME="$SANDBOX/lintel-home"
 export LINTEL_AUDIT_DIR="$SANDBOX/audit"
+export LINTEL_PACKS_DIR="$SANDBOX/packs"
+export LINTEL_ACTIVE_PACK_FILE="$LINTEL_PACKS_DIR/active-pack"
+export LINTEL_SOURCE_ROOT="$REPO_ROOT"
+export LINTEL_REPO_ROOT="$REPO_ROOT"
+mkdir -p "$LINTEL_PACKS_DIR"
 
 # shellcheck disable=SC1090
 source "$EVALS"
@@ -132,8 +139,76 @@ else
   fail "completeness missed gap → score=$score (expected ≤80)"
 fi
 
-# ─── Scenario 4 removed: it exercised a pack-supplied voice evaluator. Such
-#     evaluators are tested alongside the pack that defines them. ───
+# ─── Scenario 4: nested hand-off policy and unknown evaluator gate ──────
+echo ""
+echo "[4] Nested hand-off policy → default enabled; unknown evaluator blocks"
+
+# The skill now invokes the same library functions instead of duplicating a recipe.
+grep -q 'forge_handoff "$@"' "$SKILL" || { fail "skill does not invoke the shared release gate"; exit 1; }
+
+kind=subagent_spawn
+from=plan
+to=PlanReviewer
+policy_mismatch=0
+for expectation in \
+  'on_subagent_spawn|true|security,stale' \
+  'on_phase_transition|true|completeness' \
+  'on_workflow_handoff|true|completeness' \
+  'on_cold_executor|true|security,completeness' \
+  'on_operator_input|false|'; do
+  IFS='|' read -r policy_event expected_enabled expected_evaluators <<< "$expectation"
+  actual_enabled=$(resolve_brief_forge_handoff_field "$policy_event" enabled)
+  actual_evaluators=$(resolve_brief_forge_handoff_field "$policy_event" evaluators | tr -d '[][:space:]')
+  if [ "$actual_enabled" != "$expected_enabled" ] || \
+     [ "$actual_evaluators" != "$expected_evaluators" ]; then
+    fail "$policy_event mismatch → enabled=$actual_enabled evaluators=$actual_evaluators"
+    policy_mismatch=1
+  fi
+done
+
+default_evaluators=$(resolve_brief_forge_handoff_field on_subagent_spawn evaluators | tr -d '[][:space:]')
+default_bypass=$(resolve_brief_forge_handoff_field cold_path_bypass eligible_skills | tr -d '[][:space:]')
+if [ "$policy_mismatch" -eq 0 ] && [ -z "$default_bypass" ] && \
+   validate_brief_forge_evaluators "$default_evaluators"; then
+  pass "all default event policies and cold-path bypass resolve from the nested block"
+else
+  fail "default nested policy or evaluator validation is unreachable"
+fi
+
+mkdir -p "$LINTEL_PACKS_DIR/unknown-evaluator"
+cat > "$LINTEL_PACKS_DIR/unknown-evaluator/pack.yaml" <<'EOF'
+schema_version: "1"
+name: unknown-evaluator
+version: 1.0.0
+voice:
+  default_tier: internal
+compliance:
+  mode: advisory
+navigation:
+  default_workflow: cycle
+brief_forge_handoffs:
+  on_subagent_spawn:
+    enabled: true
+    evaluators: [security, not_loaded]
+  budget_tokens: 5000
+EOF
+printf '%s\n' unknown-evaluator > "$LINTEL_ACTIVE_PACK_FILE"
+clear_pack_cache
+
+custom_enabled=$(resolve_brief_forge_handoff_field on_subagent_spawn enabled)
+custom_evaluators=$(resolve_brief_forge_handoff_field on_subagent_spawn evaluators | tr -d '[][:space:]')
+unknown_output="$SANDBOX/unknown-evaluator.out"
+if [ "$custom_enabled" != "true" ] || [ "$custom_evaluators" != "security,not_loaded" ]; then
+  fail "custom nested policy unresolved → enabled=$custom_enabled evaluators=$custom_evaluators"
+elif validate_brief_forge_evaluators "$custom_evaluators" >"$unknown_output" 2>&1; then
+  fail "unknown evaluator did not block the hand-off"
+elif grep -q "unknown evaluator 'not_loaded'" "$unknown_output" && \
+     grep -q '"kind":"brief_forge_blocked"' "$LINTEL_AUDIT_DIR/brief-forge.jsonl" && \
+     grep -q '"evaluator":"not_loaded"' "$LINTEL_AUDIT_DIR/brief-forge.jsonl"; then
+  pass "unknown configured evaluator blocks before envelope construction and is audited"
+else
+  fail "unknown evaluator blocked without the required diagnostic or audit evidence"
+fi
 
 # ─── Scenario 5: envelope construction roundtrip ─────────────────────────
 echo ""
@@ -148,7 +223,7 @@ EOF
 head_out=$(forge_envelope_head subagent_spawn plan PlanReviewer)
 if printf '%s' "$head_out" | grep -qE '^head:' && \
    printf '%s' "$head_out" | grep -qE 'envelope_id:' && \
-   printf '%s' "$head_out" | grep -qE 'kind: subagent_spawn'; then
+   printf '%s' "$head_out" | grep -qE 'kind: "?subagent_spawn'; then
   pass "forge_envelope_head produces valid HEAD"
 else
   fail "forge_envelope_head output invalid"
@@ -156,7 +231,7 @@ fi
 
 body_out=$(forge_envelope_body brief "$content_file")
 if printf '%s' "$body_out" | grep -qE '^body:' && \
-   printf '%s' "$body_out" | grep -qE 'content_type: brief'; then
+   printf '%s' "$body_out" | grep -qE 'content_type: "?brief'; then
   pass "forge_envelope_body produces valid BODY"
 else
   fail "forge_envelope_body output invalid"

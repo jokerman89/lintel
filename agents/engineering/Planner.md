@@ -49,13 +49,22 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent produces 
 
 ## Workflow
 
-1. **Restate task** precisely.
+1. **Restate task** and retain the selected work map/spec/task IDs. An existing
+   approved plan is the task source, not a prompt to create a second backlog.
 2. **Read context:** project CLAUDE.md, related code, recent ADRs, existing patterns.
 3. **Identify critical files** to read/edit/create.
-4. **Three-alternative approaches** with trade-offs.
-5. **Recommended approach** + step-by-step plan.
+4. **Viable approaches** with trade-offs only for unresolved decisions.
+5. **Recommended approach** with requirement-traced short leaves: stable ID,
+   prerequisites, exact owned paths, acceptance and verification. Group related leaves
+   under one package owner when their scope/risk boundaries fit ADR-0026.
 6. **Test strategy** for each step.
-7. **Risk surfaces.**
+7. **Risk surfaces, review and handoff.** Define spec-before-quality review, who may
+   implement versus review, negative/preserved-behavior checks and the next ready leaf.
+   A dependency or required review not satisfied keeps its parent open.
+
+For example, an approved migration package can contain a schema artifact leaf, an
+isolated replay-test leaf and a review leaf, each with its original ID/evidence.
+The package shares context, not a single checkbox that hides failed replay.
 
 ## Report format
 

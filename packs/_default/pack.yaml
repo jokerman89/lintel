@@ -1,6 +1,6 @@
 # Lintel _default pack — neutral baseline
 #
-# v4.0 Phase 2 (schema_version added) · 2026-05-29
+# Manifest schema 1; profile context and compatibility contract: ADR-0029.
 #
 # This pack ships with Lintel and represents the neutral-everything baseline.
 # Operators layer their own pack on top — authored locally or installed.
@@ -100,8 +100,8 @@ brief_forge_handoffs:
 # via its own plugin manifest (the host CLI does discovery, namespacing, and
 # hook registration) and declares them here so Lintel is AWARE of them
 # (pack-switch surfaces them; the orientator can route to the pack's workflow).
-# Fields are FLAT (two-level) on purpose — resolve_pack_field is a two-level
-# resolver (ADR-0018). The neutral _default is NOT an extension pack.
+# The flat awareness fields preserve ADR-0018. The resolver also supports deeper
+# data mappings. The neutral _default is NOT an extension pack.
 extension:
   is_extension: false        # true → this pack ships executable surface (skills/agents/hooks)
   namespace: null            # skill/agent prefix, e.g. s4l → /s4l:forge (REQUIRED when is_extension)
@@ -111,4 +111,6 @@ extension:
   provides_hooks: false      # awareness flag: ships a hooks/ tree
 
 # ─── Compatibility ─────────────────────────────────────────────────────────
-requires_lintel: ">=4.0.0"
+requires_capabilities:
+  pack-inheritance: ">=1.0.0"
+  profile-context: ">=1.0.0"

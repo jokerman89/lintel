@@ -1,0 +1,2 @@
+# Optional: legacy YAML envelope/content input only. JSON and Markdown need no packages.
+PyYAML>=6.0.3,<7.0

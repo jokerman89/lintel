@@ -25,6 +25,9 @@ Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` o
 
 L-001-discipline: skill body is the contract. Agent at invocation picks specific motion-libraries + animations. Don't pre-bake choices in the SKILL.md body.
 
+Use the motion definition in the [shared design contract](../design-dna/references/design-contract.md).
+No animation and CSS-only are first-class successful decisions, not missing work.
+
 ## When to use
 
 - Solo: "feature page for hardware product — what scroll-choreography?"
@@ -44,6 +47,8 @@ L-001-discipline: skill body is the contract. Agent at invocation picks specific
 - Optional `--target-device <desktop-only|mobile-first|both>` — affects perf-budget
 - Optional `--out <path>` — output path (default: stdout solo, `$run_dir/motion.json` orchestrator)
 - Optional `--customer-share` — triggers compliance-gate license-check
+- Optional `--mode <none|css|library>` — explicit decision when known; otherwise
+  decide from the brief and existing project before producing the shared contract.
 
 ## Workflow
 
@@ -53,7 +58,7 @@ L-001-discipline: skill body is the contract. Agent at invocation picks specific
 brief="${BRIEF:-${1:-}}"
 energy="${ENERGY_LEVEL:-moderate}"
 target_device="${TARGET_DEVICE:-both}"
-out="${OUT:-/dev/stdout}"
+out="${OUT:-}"  # absent --out means stdout, not a path to validate
 [ -z "$brief" ] && { echo "Need --brief"; exit 2; }
 ```
 
@@ -72,12 +77,18 @@ from the reduced-motion floor.
 
 Hand off to `agents/frontend/MotionDirector.md` with the corpus hits + profile tokens in context. Agent picks motion-language from:
 
-- **GSAP + ScrollTrigger** (commercial license for some plugins; check current terms): scroll-choreographed reveals, scrub-tied keyframes, hero-act sequences. Best for kinetic-energy briefs.
-- **Lenis** (free, MIT): smooth-scroll baseline. Often paired with GSAP.
-- **Theatre.js** (free, Apache-2.0): timeline-based animations, visual editor. Best when operator wants storyboard-style control.
-- **Rive** (commercial / freemium): state-driven vector animation. Best for icon-systems + interactive illustration.
-- **Motion-One** (free, MIT): lightweight WAAPI wrapper. Best for subtle-energy briefs where GSAP feels heavy.
-- **Framer Motion** (free, MIT): React-native motion. Best when the stack is React + motion is UI-component-bound.
+- **GSAP + ScrollTrigger:** scroll-choreographed reveals, scrub-tied keyframes and
+  hero-act sequences when justified. Check the selected release's actual terms;
+  do not repeat an obsolete blanket Club-plugin purchase requirement.
+- **Lenis:** smooth scrolling only when justified over native behavior; verify the
+  selected maintained package, release and license.
+- **Theatre.js:** timeline-based animation/editor; distinguish selected runtime,
+  editor and asset terms when storyboard control is needed.
+- **Rive:** state-driven vector interaction; verify runtime and authoring/asset terms separately.
+- **Motion/WAAPI candidates:** lightweight component transitions when needed; use
+  the current project-compatible package API, version and license.
+- **React motion candidates:** choose only for compatible React projects and
+  UI-bound motion; do not impose them on another framework.
 - **CSS-only** (zero-license): native transitions + `@scroll-timeline` (where supported). Best subtle-energy + perf-critical.
 
 Agent verifies current licensing at invocation (L-003).
@@ -87,6 +98,7 @@ Agent verifies current licensing at invocation (L-003).
 ```json
 {
   "schema_version": 1,
+  "mode": "none | css | library",
   "generated_at": "<iso-8601>",
   "brief_summary": "<one-line>",
   "energy_level": "subtle | moderate | kinetic",
@@ -95,16 +107,16 @@ Agent verifies current licensing at invocation (L-003).
     {
       "name": "gsap",
       "purpose": "scroll-choreography",
-      "version_min": "3.12.x",
-      "license": {"type": "free-tier", "source": "greensock.com", "operator_instruction": "npm i gsap. Club GreenSock plugins (SplitText, MorphSVG) require commercial license."},
+      "version": "<exact project-compatible release>",
+      "license": {"type": "<verified terms>", "source": "<primary source for that release>"},
       "npm": "gsap"
     },
     {
-      "name": "@studio-freight/lenis",
+      "name": "<selected maintained smooth-scroll package, only if needed>",
       "purpose": "smooth-scroll",
-      "version_min": "1.0.x",
-      "license": {"type": "free", "source": "MIT"},
-      "npm": "@studio-freight/lenis"
+      "version": "<exact project-compatible release>",
+      "license": {"type": "<verified terms>", "source": "<primary source for that release>"},
+      "npm": "<verified selected package name>"
     }
   ],
   "scroll_trigger_config": {
@@ -143,32 +155,71 @@ Agent verifies current licensing at invocation (L-003).
     "fallback_for_prefers_reduced_motion": "disable-all-scroll-animations",
     "mobile_strategy": "reduce-scrub-fidelity-and-skip-parallax"
   },
-  "operator_instructions_md": "# Motion setup\n\n```bash\nnpm i gsap @studio-freight/lenis\n```\n\nLenis initialization (Next.js app/layout.tsx):\n```ts\nimport Lenis from '@studio-freight/lenis'\nuseEffect(() => { const lenis = new Lenis({ lerp: 0.1 }); function raf(time){ lenis.raf(time); requestAnimationFrame(raf) }; requestAnimationFrame(raf); return () => lenis.destroy() }, [])\n```\n\nGSAP + ScrollTrigger:\n```ts\nimport { gsap } from 'gsap'\nimport { ScrollTrigger } from 'gsap/ScrollTrigger'\ngsap.registerPlugin(ScrollTrigger)\n```\n\n`prefers-reduced-motion` is respected via gsap.matchMedia()."
+  "operator_instructions_md": "<only the selected mode's setup, reduced-motion and cleanup instructions; no automatic install>"
 }
 ```
 
 Agent fills in specific picks based on the brief. Don't hardcode.
+The example above illustrates the library branch. `mode: none` instead has
+`libraries: []`, `key_animations: []`, native scrolling and no page transition.
+`mode: css` has no JS libraries and marks each selected animation `library: css`.
+Both retain an explicit reduced-motion decision. Source/license/rationale evidence
+for every actual selected library is carried in the common binding at synthesis.
 
 ### Step 4 — Schema-validate + emit
 
-```bash
-jq -e '.schema_version == 1 and (.libraries | length > 0) and (.key_animations | length > 0)' "$out" || { echo "Schema invalid"; exit 1; }
+Keep Step 3's actual parsed JSON object as `fragment` until validation and any
+required licensing checks finish. In the trusted source Python scope, `repo` is
+the explicit target root and `out` is `None` when `--out` was omitted, otherwise
+the literal repository-relative output path. For named output, the authorized
+caller captures `original_output_state` through P03 before generation (`None`
+means originally absent, not overwrite permission). Then execute:
 
-if [ -n "${CUSTOMER_SHARE:-}" ]; then
-  /li:compliance-gate --check motion-licensing "$out"
-fi
+```python
+import sys
+import context_safety as safety
+from design_contract import validate_spec
+from review_contract import canonical_json
+
+try:
+    checked = validate_spec(fragment, "motion")
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+    else:
+        root = safety.checked_root(repo)
+        relative = safety.selector_path(out)
+        safety.atomic_write(
+            root, relative, payload,
+            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+            expected=original_output_state, check_expected=True,
+        )
+        if safety.read_owned(root, relative, len(payload))[0] != payload:
+            raise ValueError("Fragment output failed readback")
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
+    raise SystemExit(2)
 ```
+
+This emits only the validated fragment, including none/CSS choices, not a
+success-shaped receipt. Invalid data emits no stdout or named file; publication
+errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
+reader. For `--customer-share`, apply `/li:compliance-gate --check motion-licensing`
+to the same data or an owned relative staging file before release; stdout does
+not exempt the required check.
 
 ## Status protocol
 
-- **DONE** — motion.json written, schema valid, libraries non-empty
-- **DONE_WITH_CONCERNS** — motion picks include commercial-license-tier (GSAP Club plugins) the operator needs to confirm
+- **DONE** — motion.json written and shared validation passed, including none/CSS branches
+- **DONE_WITH_CONCERNS** — an optional candidate has unresolved terms; do not treat it
+  as an approved dependency in renderable output
 - **BLOCKED** — brief unparsable, OR customer-share license-check failed
 - **NEEDS_CONTEXT** — brief lacks energy-direction (cant determine subtle vs kinetic)
 
 ## Pause-points
 
-- Customer-share + GSAP-Club-plugin reference: surface license-tier explicit + ask for operator confirm
+- Customer-share + unresolved dependency terms: retain the missing source/license
+  decision and use the actual approval boundary; no blanket historical license assumption
 - Brief mentions specific motion-library agent doesn't know: agent verifies + may need NEEDS_CONTEXT
 
 ## Integration

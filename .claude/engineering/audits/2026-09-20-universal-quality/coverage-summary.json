@@ -1,0 +1,37 @@
+{
+  "skills": {
+    "count": 126,
+    "lines": 21524,
+    "quality": {
+      "mixed": 71,
+      "weak": 32,
+      "staged": 5,
+      "strong": 18
+    },
+    "actions": {
+      "refine": 46,
+      "merge": 36,
+      "staged": 5,
+      "rebuild": 29,
+      "keep": 5,
+      "pack": 3,
+      "retire": 2
+    }
+  },
+  "agents": {
+    "count": 69,
+    "lines": 7798,
+    "quality": {
+      "strong": 23,
+      "mixed": 40,
+      "weak": 6
+    },
+    "actions": {
+      "pack": 9,
+      "merge": 9,
+      "rebuild": 13,
+      "refine": 30,
+      "keep": 8
+    }
+  }
+}

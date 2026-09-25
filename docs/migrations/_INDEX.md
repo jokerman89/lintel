@@ -1,6 +1,6 @@
 # Migrations
 
-Current public releases use the 0.9.0 beta line. Older 3.x–5.x labels below record historical engineering transitions; they are not current minimum install versions. For the Copilot repository kit, adopt or upgrade through a reviewed `li-copilot init` change and verify with `check`. See [Copilot](../copilot.md#upgrade-and-rollback).
+Current public releases use the 0.9.0 beta line. Older 3.x–5.x labels below record historical engineering transitions; they are not current minimum install versions. For repository kits, adopt or upgrade through the selected `li-adapter.py init`/`li-copilot init` operation and verify with `check`. See [lifecycle operations](../lifecycle.md) and [Copilot](../copilot.md#upgrade-and-rollback).
 
 Every change that may need action from you, with its grace window. `/li:migrations` reads this file
 at session start and surfaces anything still open for your repo; you can also just read it.
@@ -9,14 +9,18 @@ Each row lives here for the whole grace-plus-removal window, so a repo that has 
 months can still find out what it missed. Detailed guides, where one exists, live beside this file
 as `<date>-<slug>.md`.
 
+Past dates are historical schedules, not automatic removal instructions. Unresolved or
+undetectable consumer work remains visible as overdue or unknown. `li-lifecycle.py migrations`
+reads this installed-source table without executing its example detection commands.
+
 ## Active migrations
 
 | Slug | Started | Grace until | Removal at | Description |
 |---|---|---|---|---|
 | v3-voice-spine-references | 2026-05-29 | 2026-08-29 | 2026-11-29 | Voice, persona and corpus content lifted out of the spine into an installable pack. Repos on the older layout keep working through a warn-only fallback; activate a pack with `/li:pack-switch <name>`. |
-| v3-workprofile-profile-field | 2026-05-29 | 2026-08-29 | 2026-11-29 | `~/.lintel/profile.yaml` `workprofile:` field migrated to `pack.compliance.workprofile_default`. Profile field still read for backward-compat; pack value overrides. Detect: `grep '^workprofile:' ~/.lintel/profile.yaml`. |
+| v3-workprofile-profile-field | 2026-05-29 | 2026-08-29 | 2026-11-29 | Historical `profile.yaml` `workprofile:` preference moved into pack policy. The current structured resolver does not use this legacy preference as policy or pack selection. Inspect the configured profile explicitly; preserve it until a reviewed migration establishes the intended equivalent. |
 | v3-skill-rename-grace | 2026-05-29 | 2026-08-29 | 2026-11-29 | Skill renames (`match` → `skill-router`) are covered by `config/aliases.yaml`, so the old names still resolve. Amended 2026-06-12: two skills were retired early along with their targets and no longer resolve at all; one moved into an external pack. |
-| pack-version-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | v4.0 ships `requires_lintel` enforcement as warn-only; a later release will block on an incompatible pack. Pack authors should declare `requires_lintel: ">=4.0.0"` now to avoid the future warn-storm. |
+| pack-version-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | Historical warn-only compatibility is superseded by ADR-0029. Pack schema/release, source product and capability versions are separate. Exact legacy `requires_lintel: ">=4.0.0"` remains a pack-v1 marker; other legacy ranges need explicit migration. Required/explicit compatibility failure blocks instead of selecting neutral. |
 | wiki-gen-check-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | `bin/li-wiki-gen --check` exits non-zero when the generated wiki is stale. It is not wired into CI yet; run it before a release and commit the result. |
 | envelope-completeness-soft-gate | 2026-05-29 | 2026-08-29 | 2026-11-29 | Brief Forge envelopes with `completeness_score < 40` surface ESCALATE but currently do not hard-block. v4.1 will hard-block at < 40 unless `--no-brief-forge` is explicit. |
 | ta-hooks-warn-only | 2026-05-30 | 2026-11-30 | 2027-02-28 | TA module's 3 hooks (arch-drift, contract-collision, complexity-budget) ship as warn-only in v4.1. v4.2+ may add per-pack opt-in block. Operators wanting a hard block now can run the Brief Forge security evaluator with a failing threshold. |
@@ -60,4 +64,7 @@ detect_pattern: <grep/find pattern operator can run to find callsites>
 ---
 ```
 
-When grace expires → migration moves from `## Active` to `## Archived` (operator file PR removing detect_pattern from `/li:migrations` surface).
+Move a record to archived history only after the migration/removal decision and its
+consumer recovery path are documented. Expiry alone does not establish completion or
+authorize deleting aliases, redirect stubs or backups. Archived rows remain available
+with `--all`; rows without executable detectors are explicitly unknown.

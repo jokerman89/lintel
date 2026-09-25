@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/swarming-work/spec.md",
+  "plan": ".claude/plans/swarming-work/plan.md",
+  "tasks": ".claude/plans/swarming-work/plan.md",
+  "prompt": ".claude/plans/swarming-work/prompt.md",
+  "execution_mode": "swarm",
+  "coordination": ".claude/plans/swarming-work/swarm/coordination.json"
+}
+

@@ -1,109 +1,91 @@
 ---
 name: open-managed-browser
 layer: foundation
-description: Open the Lintel-managed Chromium in headed mode — interactive operator session.
+description: Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching personal profiles.
 color: blue
-tools: Bash
+tools: Read, Bash
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /open-managed-browser
 
-Simple launcher: opens the same managed Chromium that `/browse` and `/scrape` use, but in headed mode for the operator to drive directly. Same persistent profile, same cookie store. Use when you want to do manual work (debug, screenshot, explore) without scripting it.
-
-Named for what it does: opens the managed Chromium profile shared with `/browse` and `/scrape`.
-
-## When to use
-
-- Manually debug a UI bug — easier to drive a real browser than script `/browse`
-- Verify a `/setup-browser-cookies` session interactively
-- Explore a third-party site before writing a `/scrape` schema
-- Inspect a deployed staging build hands-on
-
-## When NOT to use
-
-- Scripted/repeatable browser work — use `/browse`
-- Bulk data extraction — use `/scrape`
-- Customer-data-bearing production page — STOP. Layer 2 customer-data gate.
+The operator-driven entry point for the [shared browser operations](../browse/references/browser-operations.md).
+Retain manual exploration, debugging, preview and authentication-surface choice without
+assuming a Lintel-installed Chromium or a shared cookie store.
 
 ## Inputs
 
-- Optional `--profile <name>` — managed profile to use (default: `default`)
-- Optional `--url <url>` — open directly to this URL (otherwise opens to about:blank)
-- Optional `--check` — verify Chromium is installed + profile dir is healthy, do not actually launch
-- Optional `--devtools` — open with DevTools pane visible
+- `--url <url>`: optional authorized initial URL; otherwise an owned `about:blank`.
+- `--profile <name>`: an **explicit user-owned session choice**, not a directory to
+  discover or create under the user's home. Resolve it through the selected provider
+  only after the user chooses that surface and scope. Never scan personal profiles.
+- `--check`: read-only provider preflight; no browser launch or inspection of tabs,
+  credentials, cookies or service history.
+- `--devtools`: request DevTools if the actual host exposes it. Report unsupported
+  rather than inventing a flag or opening another user's window.
 
-## Workflow
+## Check without launching
 
-1. **Check Chromium binary.** Locate the managed install. If absent: print install command + exit.
-2. **Profile dir.** Verify `~/.lintel/browser-profiles/<profile>/` exists + is writable + `chmod 700`. Create with correct perms if missing.
-3. **Optional compliance.** If `--url` is set AND hostname matches Layer 2 prod-host list: BLOCK + ask for override reason.
-4. **Launch.** `chromium --user-data-dir=<profile-path> [--url <url>] [--auto-open-devtools-for-tabs]`. Process detaches; skill returns immediately.
-5. **Report.** PID, profile path, URL (if any), reminder of cookie state (last-validated services).
+1. Inspect the host's actual deferred/native tool schemas and permission state.
+2. Identify how a new isolated context is created and which exact handle owns it.
+   A default tab or tool named "browser" is not proof of isolation.
+3. For an explicitly selected local executable, check its file presence and the
+   required API/runtime dependencies. The concrete Chromium provider's
+   `checkProvider(executable)` returns `executed:false` and `version:null`.
+4. Report separate facts: binary present/missing, provider API observed/unverified,
+   launch not run, isolation unverified, and permission allowed/unknown/denied.
+   A healthy profile directory cannot turn any of these into an engine pass.
 
-## Workflow (--check mode)
+Do not execute a browser's ambiguous `--version` switch against its default profile.
+Read the running **owned** browser's version API after safe launch instead.
 
-1. Confirm binary exists.
-2. Confirm profile dir healthy.
-3. Print services registered in this profile (from `services.yaml`).
-4. Exit without launching.
+## Open for the operator
 
-## Report format
+1. Establish the chosen surface, exact allowed hosts/origins, intended work and
+   profile reference, and whether the user or this invocation will own closure.
+2. Use the shared provider preflight and URL/redirect admission. A permitted tool
+   still needs a fresh context or an explicitly authorized user-owned context.
+   Do not attach to discovered personal tabs or silently reuse an old profile.
+3. Request a visible session through the actual provider. The delivered Chromium
+   source API accepts `headed:true` with a **new** temporary user-data directory
+   and an isolated-context requirement. Owned headless operations were observed,
+   but a subsequent startup failed reading its own endpoint file and native
+   execution stopped again. Headed use is not verified. It does not reopen saved
+   profiles or prove persistent authentication.
+4. Verify launch through the owned endpoint and actual page state. Keep the
+   process attached and retain its handle. Do not detach by default.
+5. Report executable/API and version, owned context/PID, opened URL, available
+   actions and exact lifetime. Let the user drive their chosen login surface.
+6. When requested work ends, close only what this invocation owns. Leave a
+   user-owned browser/session alone. Removal of user-retained profile data needs
+   separate scope; never "repair" a personal profile by deleting it.
 
-```
-Open Lintel browser
+The single-page Chromium fallback refuses additional targets, credential filling,
+downloads and unsupported dialogs. If the operator needs interactive DevTools,
+multi-tab work or a persistent session, select a host/provider that demonstrably
+supports it or retain a manual handoff. Do not claim these fallback gaps are solved.
 
-Binary: ~/.lintel/bin/chromium (v124.0.6367.x)
-Profile: default (~/.lintel/browser-profiles/default/)
-URL: about:blank
-PID: 47821
+## Failure and recovery
 
-## Registered services in this profile
-- github.com (validated 4h ago)
-- stage.example.com (validated 2d ago)
-- internal.docs.example.com (validated 9d ago, may be stale)
-
-Browser detached. Close manually when done.
-```
-
-## Compliance integration
-
-- Same Layer 2 prod-host gate as `/browse` — if `--url` is set and hits a prod host, it blocks.
-- Profile dir perms verified (chmod 700) — if loose, surface fix.
-- If `audit-mode` is on per `~/.lintel/config.yaml`: log the launch event with timestamp + profile + URL.
-- Browser process is detached and runs under operator's user — anything they do in it is THEIR action, not skill-mediated.
-
-## Failure modes
-
-- **Chromium binary missing:** print exact install command, exit. Do not fall back to system Chrome (which is unmanaged + may have personal cookies).
-- **Profile dir broken (permissions, corruption):** offer to back up + recreate.
-- **Compliance block on `--url`:** report + offer override path (--force-prod + reason).
-- **Launch succeeds but process dies in <1s:** report crash, suggest re-running `--check` to verify install.
+- **Missing binary/API:** report the exact missing prerequisite. Use an existing
+  installed provider first. A scoped dependency restore requires an actual failure,
+  provenance/license review and permission; no automatic global installation.
+- **Unknown isolation:** do not list or navigate existing tabs to "find out".
+  Retain the requested URL/actions as a manual task on the user's chosen surface.
+- **Launch exits early:** retain its actual error/exit; file presence is not success.
+- **Policy or permission denies navigation:** stop that operation, without a
+  production override flag, security warning bypass or fallback to personal Chrome.
+- **Cleanup fails:** retain owned profile/path and exact PID evidence; report
+  unfinished cleanup. Never kill browsers by name or delete a broad profile root.
 
 ## Examples
 
-**Just open it:**
-```
-> /open-managed-browser
-✓ Launched headed Chromium, PID 47821, profile=default.
-```
+`/open-managed-browser --check` reports preflight facts without opening a page.
+`/open-managed-browser --url http://127.0.0.1:5173` requests a new owned visible
+session after that exact loopback service has been authorized and observed responding.
+`/open-managed-browser --profile team-test` asks the provider to resolve the
+user-selected session; the local ephemeral fallback reports persistent reuse unsupported.
 
-**Open to a URL:**
-```
-> /open-managed-browser --url http://localhost:5173
-✓ Launched to http://localhost:5173, PID 47823.
-```
-
-**Diagnose install:**
-```
-> /open-managed-browser --check
-✓ Binary OK, profile healthy. 3 services registered.
-```
-
-## See also
-
-- `/browse` — scripted browser work
-- `/scrape` — multi-URL extraction
-- `/setup-browser-cookies` — bootstrap auth in this same profile
-- `/make-pdf` — PDF generation using the same browser
+See `/browse` for repeatable actions, `/scrape` for extraction, and
+`/setup-browser-cookies` for manual login and subsequent non-secret validation.

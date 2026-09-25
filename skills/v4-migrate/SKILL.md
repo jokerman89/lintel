@@ -1,190 +1,54 @@
 ---
 name: v4-migrate
 layer: foundation
-description: Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally writes active-pack with --apply.
+description: Retain explicit v3-to-v4 identity inspection and recovery through the current migration reader and structured pack switch.
 color: yellow
 tools: Read, Write, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the V4-MIGRATE skill — surfaces what changes between v3.x and v4.0 for THIS operator + applies the recommended migration on confirmation.
+# Historical v4 migration
 
-## What this skill does
+This opt-in alias preserves the v3-to-v4 identity transition. It is not a public product
+version requirement, automatic first-run action or reason to remove old state.
+Start with [migrations](../migrations/SKILL.md), using the installed source and exact
+consumer roots from [lifecycle paths](../../docs/lifecycle.md).
 
-Detects v3.x usage signals in the operator's local state + repo + audit log, surfaces the migration plan, and (with `--apply`) writes the active-pack file + any other safe migrations.
+## Inspect, without changing identity
 
-Detection signals checked:
-1. **Compliance hooks invoked** under v3.x names (e.g. a bare `*_threat_model` hook without pack scope)
-2. **Voice-tier references** in operator's own state files (any non-internal tier)
-3. **Domain-shaped state** (`compliance.workprofile: on` baked into profile.yaml)
-4. **Compliance-mode defaults** in `~/.lintel/profile.yaml`
-5. **Hardcoded paths** referencing pre-v4.0 layout
+Run source-owned `bin/li-lifecycle.py migrations --all` and `profile-status`. Read only
+the explicitly configured local profile and selected target's relevant legacy paths.
+Retain the historical detection questions:
 
-Recommendation per signal:
-- Strong domain signals → recommend the operator's installed domain pack, if present; otherwise the closest installed pack
-- Partial compliance signals → recommend the operator's installed compliance pack, if present
-- No signals → recommend keeping `_default` (no migration needed)
+- Does the local preference file still contain `workprofile` or old compliance fields?
+- Does explicitly authorized legacy state reference non-internal voice or unscoped hooks?
+- Does this target retain `.lintel/state/` or pre-v5 knowledge paths?
+- Is the desired company pack actually installed, valid and explicitly selected?
 
-## When to use
+Record the concrete source of each signal, not private content in public evidence.
+Do not recursively read a personal audit archive by default. Absence of signals is not
+permission to choose `_default`; historical profile fields do not override the accepted
+structured resolver or repository-required policy.
 
-- First-time operator boot under v4.0 (auto-recommended at SENSE Step 0c when version-skew detected)
-- Operator manually invokes after v3.x → v4.0 Lintel upgrade
-- After Phase 2 ships (current cycle)
+## Apply only an explicit, validated choice
 
-## When NOT to use
-
-- Fresh operator (no v3.x history)
-- After migration already applied (skill detects + skips)
-
-## Workflow
-
-### Step 1 — Detect prior usage signals
+`--apply` must include the operator's chosen pack and reason. If either is missing, stop
+for that decision rather than inferring the "closest" company/compliance pack.
 
 ```bash
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-PROFILE="$LINTEL_HOME/profile.yaml"
-signals=0
-declare -a signal_evidence
-
-# Signal 1: workprofile baked into profile.yaml (v3.x compliance-mode field)
-if [ -f "$PROFILE" ] && grep -qE '^workprofile:[[:space:]]*on' "$PROFILE"; then
-  signals=$((signals + 1))
-  signal_evidence+=("workprofile=on in profile.yaml")
-fi
-
-# Signal 2: non-internal voice references in operator state
-if grep -rqE 'voice(_tier)?:[[:space:]]*(customer|[^i])' "$LINTEL_HOME"/profile.yaml "$LINTEL_HOME"/state/ 2>/dev/null; then
-  signals=$((signals + 1))
-  signal_evidence+=("non-internal voice references in operator state")
-fi
-
-# Signal 3: compliance hooks referenced in audit log (v3.x un-scoped hook names)
-if [ -d "$LINTEL_HOME/audit" ] && grep -rqE '_threat_model|_secrets_scan' "$LINTEL_HOME/audit/" 2>/dev/null; then
-  signals=$((signals + 1))
-  signal_evidence+=("compliance hook invocations in audit log")
-fi
-
-# Signal 4: cwd is in a repo with pre-v4.0 layout
-if [ -d ".lintel/state" ] && ! [ -d ".lintel/state/v4" ]; then
-  signals=$((signals + 1))
-  signal_evidence+=(".lintel/state/ exists in pre-v4.0 layout")
-fi
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+  pack-switch "$selected_pack" --reason "$migration_reason"
 ```
 
-### Step 2 — Determine recommendation
+Follow the complete [pack-switch](../pack-switch/SKILL.md) result/rebind contract. A failed
+required pack stays failed; a mid-write interruption is not "effective next session".
+Preserve the returned generation-bound reference and previous history, then replan
+dependent work. Extension identity does not install its host plugin or hooks.
 
-```bash
-# LINTEL_DOMAIN_PACK / LINTEL_COMPLIANCE_PACK are the operator's installed
-# pack names (set in profile/config). If unset, fall back to _default.
-# An installed company pack sets these.
-domain_pack="${LINTEL_DOMAIN_PACK:-_default}"
-compliance_pack="${LINTEL_COMPLIANCE_PACK:-_default}"
-
-if [ "$signals" -ge 3 ]; then
-  recommended="$domain_pack"
-  reason="Strong v3.x domain signals: non-internal voice + compliance hooks + workprofile"
-elif [ "$signals" -ge 2 ]; then
-  recommended="$compliance_pack"
-  reason="Compliance signals but no voice-corpus references"
-elif [ "$signals" -ge 1 ]; then
-  recommended="_default"
-  reason="Single signal — light v3.x footprint; _default is safe"
-else
-  recommended="_default"
-  reason="No v3.x signals — fresh operator or already migrated"
-fi
-```
-
-### Step 3 — Surface migration plan
-
-```
-LINTEL v3.x → v4.0 MIGRATION
-
-Detected signals (4 checked):
-  ✓ workprofile=on in profile.yaml
-  ✓ non-internal voice references in operator state
-  ✓ compliance hook invocations in audit log
-  ✗ .lintel/state/ pre-v4.0 layout
-
-Recommendation: activate `<domain-pack>` (the operator's installed domain pack)
-Reason: Strong v3.x domain signals (non-internal voice + compliance hooks + workprofile)
-
-What happens on apply:
-  1. Writes ~/.lintel/packs/active-pack with: <domain-pack>
-  2. NEXT session reads the pack's extends-chain → _default
-  3. Voice tier, compliance hooks, persona corpus resolve from pack
-  4. Audit entry written to ~/.lintel/audit/pack-lifecycle.jsonl
-
-What does NOT change:
-  - Existing audit logs preserved
-  - Existing .lintel/state/ entries preserved (no schema migration in v4.0)
-  - Existing tasks/lessons.md preserved
-```
-
-### Step 4 — Apply (--apply flag) or surface dry-run
-
-If `--apply`:
-
-```bash
-source "$REPO_ROOT/lib/pack-resolver.sh"
-if ! validate_pack "$recommended" 2>&1; then
-  echo "ERROR: recommended pack '$recommended' does not validate; migration refused"
-  exit 1
-fi
-
-mkdir -p "$LINTEL_HOME/packs" 2>/dev/null
-echo "$recommended" > "$LINTEL_HOME/packs/active-pack"
-
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"v4_migration_applied","pack_activated":"%s","signals":%d,"operator":"%s"}\n' \
-  "$ts" "$recommended" "$signals" "$(whoami)" \
-  >> "$LINTEL_HOME/audit/pack-lifecycle.jsonl"
-
-echo "✓ Migration applied. Next session uses pack: $recommended"
-echo "  Confirm with: /li:pack-list"
-echo "  Inspect with: /li:pack-validate $recommended"
-```
-
-If no `--apply`: print the plan, exit with "Re-invoke with --apply to commit."
-
-### Step 5 — Surface deprecated paths (read-only audit)
-
-```
-Deprecated v3.x references in this session/repo (no auto-removal):
-  - ~/.lintel/profile.yaml line 12: workprofile: on (compliance mode now lives in pack)
-  - tasks/lessons.md line 47: compliance mode mentioned without pack context
-  - .lintel/state/00-state.md line 8: voice tier hardcoded (now derived from pack)
-  
-These continue to work — pack values OVERRIDE these — but you can clean them up:
-  /li:pack-list to confirm pack values, then edit profile.yaml/state if desired.
-```
-
-## Pause-points
-
-- Before apply: surface plan, wait for confirmation (unless `--auto`)
-
-## Integration
-
-**Reads:**
-- `~/.lintel/profile.yaml`
-- `~/.lintel/state/*`
-- `~/.lintel/audit/*.jsonl`
-- `.lintel/state/00-state.md` (current repo)
-- `tasks/lessons.md` (current repo)
-- `lib/pack-resolver.sh` (validation)
-
-**Writes (with --apply):**
-- `~/.lintel/packs/active-pack`
-- `~/.lintel/audit/pack-lifecycle.jsonl`
-
-**Triggers (recommends):**
-- `/li:pack-list` to confirm
-- `/li:pack-validate <name>` to inspect
-
-## Anti-patterns
-
-- **Auto-applying without --apply** — operator's state changes are explicit per L-004
-- **Migrating profile.yaml or state files** — those continue to work; pack overrides them; mass-rewrite invites breakage
-- **Skipping signal evidence surface** — operator needs to see WHY this pack is recommended
-- **Single-shot only** — if signals contradict, surface NEEDS_CONTEXT, don't guess
+Layout migration is separate: use `bin/li-migrate-claude-home` after its explicit dry run.
+Do not mass-rewrite legacy logs, preferences or content while changing a pack pointer.
+Keep historical stubs and unverified backups available for reviewed recovery. Completion
+means the requested effective change was observed in the intended target, not that the
+old alias was invoked.

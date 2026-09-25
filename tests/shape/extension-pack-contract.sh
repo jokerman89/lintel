@@ -11,7 +11,8 @@ fail(){ echo "  FAIL: $1"; FAILED=1; }
 echo "tests/shape/extension-pack-contract.sh"
 echo "======================================"
 
-TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1; trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/.lintel"
 export LINTEL_PACKS_DIR="$TMP/.lintel/packs"
 export LINTEL_AUDIT_DIR="$TMP/.lintel/audit"
@@ -120,12 +121,11 @@ PK="$SCAF/demo-pack"
 [ -f "$PK/.claude-plugin/plugin.json" ] && pass "plugin.json created" || fail "plugin.json missing"
 [ -f "$PK/pack.yaml" ] && pass "pack.yaml created" || fail "pack.yaml missing"
 grep -qE '^[[:space:]]*is_extension:[[:space:]]*true' "$PK/pack.yaml" 2>/dev/null && pass "scaffold is_extension:true" || fail "scaffold not is_extension:true"
-grep -qE '^[[:space:]]*namespace:[[:space:]]*demo([[:space:]]|$)' "$PK/pack.yaml" 2>/dev/null && pass "scaffold namespace set" || fail "scaffold namespace not set"
-grep -qE '^[[:space:]]*workflow:[[:space:]]*demo-forge' "$PK/pack.yaml" 2>/dev/null && pass "scaffold workflow set" || fail "scaffold workflow not set"
+[ "$(_pack_ext_field "$PK/pack.yaml" namespace)" = demo ] && pass "scaffold namespace set" || fail "scaffold namespace not set"
+[ "$(_pack_ext_field "$PK/pack.yaml" workflow)" = demo-forge ] && pass "scaffold workflow set" || fail "scaffold workflow not set"
 for d in skills agents hooks knowhow; do [ -d "$PK/$d" ] && pass "dir $d/ present" || fail "dir $d/ missing"; done
 # the scaffolded pack must validate via the resolver
-export LINTEL_PACKS_DIR="$SCAF"
-if validate_pack demo-pack 2>/dev/null; then pass "scaffolded pack validates"; else fail "scaffolded pack fails validate_pack"; fi
+if LINTEL_PACKS_DIR="$SCAF" validate_pack demo-pack 2>/dev/null; then pass "scaffolded pack validates"; else fail "scaffolded pack fails validate_pack"; fi
 
 # ── 4b. manifest-injection guard: hostile --description must not poison plugin.json ──
 echo ""; echo "[4b] scaffolder manifest-injection guard"
@@ -141,7 +141,14 @@ if command -v jq >/dev/null 2>&1; then
   jq . "$PJ" >/dev/null 2>&1 && pass "plugin.json parses as valid JSON (jq)" || fail "plugin.json invalid JSON after hostile --description"
   [ "$(jq -b -r .name "$PJ" 2>/dev/null)" = "poison" ] && pass "jq .name == poison (not hijacked)" || fail "jq .name was hijacked"
 else
-  echo "  SKIP: jq not present — structural name-key checks only"
+  # Profile resolution already requires Python; preserve the same JSON assertion
+  # on hosts without jq rather than treating a skipped parse as a verified check.
+  if _profile_python && "$_LINTEL_PROFILE_PYTHON" -c \
+    'import json,sys; data=json.load(open(sys.argv[1], encoding="utf-8")); assert data["name"] == "poison"' "$PJ"; then
+    pass "plugin.json parses and its name is not hijacked (Python)"
+  else
+    fail "plugin.json parse/name check failed"
+  fi
 fi
 
 echo ""

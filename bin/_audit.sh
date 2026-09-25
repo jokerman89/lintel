@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
-# bin/_audit.sh — Lintel unified audit writer (v4.0 Phase 1)
+# component: lintel-audit
+# implements: ADR-0005, ADR-0008
+# intent: .claude/plans/universal-implementation/packages/P08.md
+# constraints: audit_log stays advisory (warns, returns 0); mandatory writers verify their own read-back
+# last_intent_review: 2026-09-23
 #
-# Sourced helper that writes append-only JSONL audit records to category-
-# specific logs in ~/.lintel/audit/. Used by:
-# - meta-infra mode override events (category=meta-infra-mode-override)
-# - orientator auto-mode override events (category=orientator-override)
-# - pack-resolver internal events (category=pack-resolver)
-# - Brief Forge override events (category=brief-forge-override)
-# - Migration tracker events (category=migration)
+# bin/_audit.sh — Lintel unified audit writer and its side-effect-free router.
 #
-# All audit logs are append-only JSONL — grep-portable, jq-queryable,
-# replay-able, portable across machines.
+# audit_log appends one JSON object per line to <category>.jsonl with the
+# envelope ts, kind, operator, cycle_id followed by string key/value pairs.
+# lib/event-catalog.json names every producer and its fields; bin/li-events.py
+# is the structured reader. A missing record is only an unobserved event: some
+# producers record only findings, blocks, overrides or failures, a write can
+# fail (audit_log warns on stderr and returns 0), and some hooks discard that
+# stderr.
 #
 # Usage:
 #   source "$(dirname "$0")/_audit.sh"
-#   audit_log meta-infra-overrides override 'detected_mode=meta-infra chosen_mode=internal-tool reason="quick refactor"'
+#   audit_log meta-infra-overrides override detected_mode=meta-infra chosen_mode=internal-tool
 #
 # Scope routing (v5, ADR-0005): events about work IN a repo land in the repo's
 # own audit dir (<repo>/.claude/runtime/audit/) once the repo carries the v5
@@ -22,6 +25,15 @@
 # harness migrations, usage tallies) always stay in ~/.lintel/audit/ — they are
 # about the operator's install, not any one repo. Un-migrated repos keep the
 # historical global path unchanged.
+#
+# Router (sourcing and resolving create nothing; audit_log creates its own
+# directory immediately before a write):
+#   audit_dir <category>         → the write directory
+#   audit_file <category>        → the write file, with no fallback
+#   audit_read_files <category>  → the write file, then the legacy global file
+#                                  when it differs, one per line, unchecked
+# Readers take the first existing file, name it, and report any later listed
+# file that also exists rather than hiding pre-migration history.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 # Use the same native-to-shell root normalization as the state/memory writers.
@@ -36,8 +48,6 @@ if [ -n "${LINTEL_AUDIT_DIR:-}" ] && [ "$LINTEL_AUDIT_DIR" != "$LINTEL_HOME/audi
   _AUDIT_DIR_EXPLICIT=1
 fi
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-
-mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
 
 # Categories that are operator-global by nature (everything else is repo work).
 _AUDIT_GLOBAL_CATEGORIES="pack-lifecycle pack-resolver migration migrations self-test"
@@ -62,25 +72,58 @@ _audit_init_repo_scope() {
 }
 _audit_init_repo_scope
 
-# Resolve the output dir for a category: explicit env override > global list >
-# migrated-repo runtime dir > ~/.lintel/audit.
+# The only routing implementation: explicit env override > operator-global
+# categories > migrated-repo runtime dir > ~/.lintel/audit. It assigns the
+# out-variable _AUDIT_RESOLVED (no fork on the hot write path) and creates nothing.
+_AUDIT_RESOLVED=""
+_audit_resolve() {
+  _AUDIT_RESOLVED="$LINTEL_AUDIT_DIR"
+  [ "$_AUDIT_DIR_EXPLICIT" = 1 ] && return 0
+  case " $_AUDIT_GLOBAL_CATEGORIES " in *" $1 "*) return 0 ;; esac
+  case "$1" in usage-*) return 0 ;; esac
+  [ -z "$_AUDIT_REPO_AUDIT_DIR" ] || _AUDIT_RESOLVED="$_AUDIT_REPO_AUDIT_DIR"
+  return 0
+}
+
+_audit_category_ok() {
+  case "${1:-}" in
+    ''|.*|*/*|*\\*|*[[:space:]]*)
+      printf 'ERROR [lintel/audit]: invalid audit category: %s\n' "${1:-<empty>}" >&2
+      return 2 ;;
+  esac
+}
+
+_AUDIT_READ_FILES=()
+_audit_read_list() {
+  _audit_resolve "$1"
+  _AUDIT_READ_FILES=("$_AUDIT_RESOLVED/$1.jsonl")
+  [ "$LINTEL_AUDIT_DIR/$1.jsonl" = "${_AUDIT_READ_FILES[0]}" ] ||
+    _AUDIT_READ_FILES+=("$LINTEL_AUDIT_DIR/$1.jsonl")
+}
+
+audit_dir() {
+  _audit_category_ok "${1:-}" || return 2
+  _audit_resolve "$1"
+  printf '%s\n' "$_AUDIT_RESOLVED"
+}
+
+audit_file() {
+  _audit_category_ok "${1:-}" || return 2
+  _audit_resolve "$1"
+  printf '%s/%s.jsonl\n' "$_AUDIT_RESOLVED" "$1"
+}
+
+audit_read_files() {
+  _audit_category_ok "${1:-}" || return 2
+  _audit_read_list "$1"
+  printf '%s\n' "${_AUDIT_READ_FILES[@]}"
+}
+
+# Retained for bin/li-review-log and the other historical callers; like the
+# public router it is now side-effect free.
 _audit_out_dir() {
-  local category="$1"
-  if [ "$_AUDIT_DIR_EXPLICIT" = 1 ]; then
-    printf '%s' "$LINTEL_AUDIT_DIR"; return
-  fi
-  case " $_AUDIT_GLOBAL_CATEGORIES " in
-    *" $category "*) printf '%s' "$LINTEL_AUDIT_DIR"; return ;;
-  esac
-  case "$category" in
-    usage-*) printf '%s' "$LINTEL_AUDIT_DIR"; return ;;
-  esac
-  if [ -n "$_AUDIT_REPO_AUDIT_DIR" ]; then
-    mkdir -p "$_AUDIT_REPO_AUDIT_DIR" 2>/dev/null || true
-    printf '%s' "$_AUDIT_REPO_AUDIT_DIR"
-  else
-    printf '%s' "$LINTEL_AUDIT_DIR"
-  fi
+  _audit_resolve "${1:-misc}"
+  printf '%s' "$_AUDIT_RESOLVED"
 }
 
 _audit_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
@@ -136,8 +179,9 @@ audit_log() {
   local kind="${2:-event}"
   shift 2 || true
 
-  local out
-  out="$(_audit_out_dir "$category_file")/${category_file}.jsonl"
+  _audit_resolve "$category_file"
+  local dir="$_AUDIT_RESOLVED"
+  local out="$dir/${category_file}.jsonl"
   local ts cycle_id operator
   ts=$(_audit_iso_now)
   cycle_id="${LINTEL_CYCLE_ID:-${CYCLE_ID:-$_AUDIT_CYCLE_ID}}"
@@ -167,55 +211,75 @@ audit_log() {
 
   rec="${rec}}"
 
-  # Fail-open by design, but never SILENTLY: a dropped record on a full disk /
-  # bad permission must leave at least a stderr trace (the audit trail's value
-  # is that absence of a record means absence of an event).
+  # Advisory by design: a dropped record (full disk, a path that is not a
+  # directory, a bad permission) leaves a stderr warning and returns 0, so a
+  # missing record never proves that nothing happened.
+  [ -d "$dir" ] || mkdir -p "$dir" 2>/dev/null || true
   printf '%s\n' "$rec" >> "$out" 2>/dev/null || echo "WARN [lintel/audit]: failed to write $out" >&2
+  return 0
 }
 
-# Count records by kind across a category (reads the scope-routed file; falls
-# back to the global file so pre-migration history stays countable)
+# Approximate bash line counter over one category log, kept for quick shell
+# checks. It greps text rather than parsing JSON; bin/li-events.py is the
+# structured reader for classification and malformed-record diagnostics.
+# Args: <category> [kind] [since-iso]
+# Reads the first existing audit_read_files entry and names any later listed
+# file that also exists. No listed file: empty stdout, `unobserved:` with the
+# listed paths on stderr, return 3. An existing log prints its count, return 0.
 audit_count() {
-  local category_file="$1"
-  local kind="${2:-}"
-  local since_iso="${3:-}"
-  local out
-  out="$(_audit_out_dir "$category_file")/${category_file}.jsonl"
-  [ -f "$out" ] || out="$LINTEL_AUDIT_DIR/${category_file}.jsonl"
-  [ -f "$out" ] || { printf '0'; return 0; }
-
-  if [ -z "$kind" ]; then
-    wc -l < "$out" | tr -d ' '
-    return 0
+  local category_file="${1:-}" kind="${2:-}" since_iso="${3:-}" log="" f
+  _audit_category_ok "$category_file" || return 2
+  _audit_read_list "$category_file"
+  for f in "${_AUDIT_READ_FILES[@]}"; do
+    if [ -z "$log" ]; then
+      [ -f "$f" ] && log="$f"
+    elif [ -e "$f" ]; then
+      printf 'audit_count: read %s; also present but not read: %s\n' "$log" "$f" >&2
+    fi
+  done
+  if [ -z "$log" ]; then
+    printf 'unobserved: no audit log at %s\n' "${_AUDIT_READ_FILES[*]}" >&2
+    return 3
   fi
 
   if [ -z "$since_iso" ]; then
-    # grep -c prints its own "0" on no-match (rc 1) — an `|| printf '0'`
-    # fallback DOUBLED the output to "0\n0", breaking numeric consumers.
-    grep -c "\"kind\":\"${kind}\"" "$out" 2>/dev/null || true
+    if [ -z "$kind" ]; then
+      wc -l < "$log" | tr -d ' '
+    else
+      # grep -c prints its own "0" on no-match (rc 1) — an `|| printf '0'`
+      # fallback DOUBLED the output to "0\n0", breaking numeric consumers.
+      grep -c "\"kind\":\"${kind}\"" "$log" 2>/dev/null || true
+    fi
     return 0
   fi
 
-  # Since-iso filter (string comparison works for ISO-8601)
+  # Since filter: ISO-8601 string comparison. Records without a ts cannot be
+  # placed in the window; they are excluded and reported, never silently dropped.
   awk -v kind="$kind" -v since="$since_iso" '
-    BEGIN { count=0 }
-    /"kind":"/ {
-      if (index($0, "\"kind\":\""kind"\"") > 0) {
-        match($0, /"ts":"[^"]+"/)
-        ts = substr($0, RSTART+6, RLENGTH-7)
+    BEGIN { count = 0; undated = 0 }
+    kind == "" || index($0, "\"kind\":\"" kind "\"") > 0 {
+      if (match($0, /"ts":"[^"]+"/)) {
+        ts = substr($0, RSTART + 6, RLENGTH - 7)
         if (ts >= since) count++
-      }
+      } else undated++
     }
-    END { print count }
-  ' "$out"
+    END {
+      print count
+      if (undated) printf "audit_count: %d record(s) without ts excluded by the since filter\n", undated > "/dev/stderr"
+    }
+  ' "$log"
 }
 
-# Helper: timestamp N days ago in ISO-8601
+# Helper: timestamp N days ago in ISO-8601. When the date cannot be computed it
+# says so and returns 1 rather than silently widening the window to all history.
 audit_days_ago() {
   local n="${1:-30}"
+  case "$n" in ''|*[!0-9]*) echo "audit_days_ago: day count must be a nonnegative integer" >&2; return 2 ;; esac
   date -u -d "$n days ago" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
-    date -u -v "-${n}d" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
-    printf '1970-01-01T00:00:00Z'
+    date -u -v "-${n}d" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || {
+      echo "audit_days_ago: cannot compute a date $n days ago; no since filter was applied" >&2
+      return 1
+    }
 }
 
 # Self-test
@@ -223,6 +287,6 @@ if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   echo "_audit.sh self-test:"
   echo "  LINTEL_AUDIT_DIR = $LINTEL_AUDIT_DIR"
   audit_log "self-test" "smoke" "key1=value1" "key2=value with spaces"
-  echo "  Wrote 1 record to $LINTEL_AUDIT_DIR/self-test.jsonl"
+  echo "  Wrote 1 record to $(audit_file self-test)"
   echo "  Count for kind=smoke: $(audit_count self-test smoke)"
 fi

@@ -15,7 +15,10 @@ Reviews a plan's impact on developer experience (DX). DX is a leading indicator 
 
 Developer-experience review before build: scores a plan against six DX dimensions. Surfaces time-to-hello-world (TTHW) as the headline metric.
 
-Not solo-invokable without input: requires an existing plan/design doc — produce one via `/office-hours` first.
+Requires an explicitly selected plan/design or
+[work map](../spec-kit/references/work-map.md), validated with
+`bin/li-work-artifacts.py`. No office-hours interview is needed when those inputs
+already exist. Preserve original IDs and verify the P07 profile before policy use.
 
 ## When to use
 
@@ -50,7 +53,12 @@ Measure / score 6 dimensions:
 5. **Error message quality** — does the error tell the engineer what to do, or just "something failed"?
 6. **Documentation freshness** — last commit on README vs last code commit on touched areas?
 
-Each dimension: measure (where possible) + 1-3 specific findings + AskUserQuestion per finding.
+Each dimension: actual measurement where available, otherwise a labeled estimate
+or unknown, plus concrete findings tied to original tasks. Numeric targets above
+are examples, not universal mandatory policy. Use
+[task-relevant intake](../define/references/intake.md); ask only unresolved material
+decisions, not one confirmation per finding. Do not infer attrition or a competitive
+rank from an unmeasured plan.
 
 ## Report format
 
@@ -71,10 +79,13 @@ Each dimension: measure (where possible) + 1-3 specific findings + AskUserQuesti
 **Persona:** resolved from the active pack (`resolve_pack_field persona.source`; none by default)
 ```
 
-Persist via first-party `bin/li-review-log`:
-```bash
-bin/li-review-log '{"skill":"plan-devex-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"product_type":"...","tthw_current":"...","tthw_target":"...","mode":"...","persona":"...","competitive_tier":"...","unresolved":N,"commit":"..."}'
-```
+The example table is illustrative, not measured evidence. Persist the actual
+report through [P05 evidence](../review/references/evidence.md): prepare immutable
+obligations and scope, perform review, use the actual audit writer, then consume
+the latest reader with expected context/corroboration. Same-context QA/SHIP is
+separate. Optional scores cannot hide mandatory failure or unknown policy.
+For a draft/unmapped read-only pass use shared `snapshot`/`inspect` and retain
+`release_clearance:false`; no duplicate work map or positive-string clearance.
 
 ## Failure modes
 

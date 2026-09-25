@@ -12,8 +12,10 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 
 | Doc | What it gives you |
 |---|---|
-| [Getting started](getting-started.md) | Install the Copilot repository kit and finish one verified build card |
+| [Getting started](getting-started.md) | Start from a bounded task, finish an authorized card and resume its evidence |
+| [Client adapters](client-adapters.md) | Select the exact CLI/desktop/IDE/cloud surface or usable manual handoff |
 | [GitHub Copilot](copilot.md) | Native skills, custom agents, CLI plugin and cloud-agent boundaries |
+| [Claude Code](claude-code.md) | Preserved plugin, skills, agents and optional hooks; repository-only alternative |
 | [Enterprise adoption](enterprise-adoption.md) | Pilot criteria, ownership, policy boundaries, upgrades and rollback |
 | [Spec Kit](spec-kit.md) | Keep existing specifications and tasks authoritative while adding session continuity |
 | [Glossary](GLOSSARY.md) | One screen. Pack, spine, cycle, trio, depth schema — the terms you meet before they are defined |
@@ -28,6 +30,7 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 | [The cycle](the-cycle.md) | The nine phases, phase by phase: what each does, what it produces, where the gates are, what skipping it costs |
 | [Architecture](architecture.md) | Spine and pack, the mechanical layer, navigation, depth modules, where state lives, tests as structural guarantee |
 | [Multi-CLI support](multi-cli.md) | One instruction source, per-CLI manifests, and exactly what degrades where |
+| [Swarming work](concepts/swarming-work.md) | Decide when to fan out an approved plan, inspect ownership, recover attempts and close the integrated result |
 | [Precedence](precedence.md) | Which agent gets picked, and which instruction file wins when two disagree |
 | [Compliance](compliance.md) | The neutral baseline, and what an installed pack can add on top |
 | [Enterprise profile value](enterprise-profile-value.md) | How pack requirements change tasks, controls and evidence, and how to measure the benefit |
@@ -42,6 +45,7 @@ Deeper treatment of individual mechanisms. Read on demand rather than in order.
 - [Skill protocol](concepts/skill-protocol.md) — the contract every skill declares
 - [Orientator](concepts/orientator.md) — how SENSE picks a workflow
 - [Planner as module](concepts/planner-as-module.md) — planning as a composable capability
+- [Swarming work](concepts/swarming-work.md) — opt-in lanes, coordinator ownership, evidence and host degradation
 - [Brief forge](concepts/brief-forge.md) · [Envelope](concepts/envelope.md) — the hand-off gate and its schema
 - [Jobs system](concepts/jobs-system.md) — tracking work that outlives one session
 - [Agent dispatch rules](concepts/agent-dispatch-rules.md) — when to spawn a subagent and when not to

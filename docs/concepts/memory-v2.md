@@ -16,6 +16,9 @@ duplication.
 |---|---|
 | Lesson surfacing (SENSE Step 0a) | `lib/memory.sh: lessons_surface` — grep-rank, supersede-aware, top-3 |
 | Capture update-phase | `lessons_find_related` feeds add / update / supersede / no-op classification in CAPTURE Step 2 |
+| Lesson grammar | `## L-<digits> — <title>` outside fences; a block ends at the next level-two heading; `superseded_by:` / `supersedes:` markers anywhere in the block. Two implementations share `tests/fixtures/lessons/`: the awk reads in `lib/memory.sh` and `bin/li-lessons.py` |
+| IDs, retrieval and writes | `bin/li-lessons.py`: next ID = highest existing + 1 (never reused); `get --id L-NNN` prints the exact block; add / update / supersede take the store lock and replace the file only if it is unchanged. Without Python, writes refuse and reads keep working |
+| Promotion | `bin/li-lessons-promote` → the explicit `--lintel-dir` baseline, with provenance; no implicit branch, commit or push |
 | Block budgets | `memory_budget_check` + `hooks/shared/memory-budget-warn` (MEMORY.md ≤200 lines; ≤30 active lessons, warn-only, 1/hour) |
 | Checkpoint paths/discovery | `bin/_context.sh: context_save_path · context_list · context_latest` (content stays LLM-written) |
 | Ready-work view | `bin/_jobs.sh: job_ready` + session-digest "ready in this repo: N" |

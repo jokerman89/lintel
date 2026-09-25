@@ -1,0 +1,718 @@
+{
+  "scope": "Bounded read-only audit of runtime helpers, hooks, installers, adapters/manifests, schemas and verification on main. Companion to workflow.json. No implementation.",
+  "baseline": {
+    "commit": "28061e4",
+    "worktree": "E:/Workspace/jokerman-session-setup/.claude/worktrees/universal-audit-20260920",
+    "excluded": "Unmerged swarm branch in original checkout; no credit given for its features."
+  },
+  "preservation": "Preserve and enrich valuable functionality, methods, depth and accepted ADR-0026 hybrid execution. Every proposed fix retains the feature's intended outcome. Dormant features require a concrete tested activation path, not removal. Proposals do not authorize implementation or supersede accepted ADRs.",
+  "coverage": {
+    "bin": {
+      "mode": "All 26 files fully read",
+      "files": {
+        "_audit.sh": 228,
+        "_context.sh": 120,
+        "_jobs.sh": 641,
+        "_aliases.sh": 108,
+        "li-review-log": 124,
+        "li-review-read": 217,
+        "li-work-artifacts.py": 63,
+        "li-envelope-validate": 163,
+        "li-envelope-replay": 146,
+        "li-copilot": 12,
+        "li-copilot.py": 416,
+        "li-instructions.py": 80,
+        "li-catalog.py": 80,
+        "li-update": 112,
+        "li-adr-new": 89,
+        "li-pack-scaffold": 155,
+        "li-roles-sync": 135,
+        "li-lessons-promote": 120,
+        "li-lessons-sync": 137,
+        "li-scaffold": 280,
+        "li-doctor": 309,
+        "li-migrate-claude-home": 205,
+        "li-vault-init": 130,
+        "li-uniformity": 295,
+        "li-compat-audit": 200,
+        "li-wiki-gen": 440
+      }
+    },
+    "lib": {
+      "mode": "All 19 files inventoried; 14 fully read in this lane or its preceding workflow assignment; five owned by coordinating reviewer, not claimed as independent deep reads here.",
+      "fully_read": {
+        "auto-decide.sh": 33,
+        "memory.sh": 134,
+        "frontmatter.sh": 24,
+        "cli-tiers.sh": 102,
+        "cli-tiers.yaml": 75,
+        "scale-estimator.sh": 310,
+        "cycle-footer.sh": 246,
+        "pack-schema.yaml": 165,
+        "envelope-schema.yaml": 150,
+        "brief-forge.sh": 224,
+        "brief-forge-evaluators.sh": 213,
+        "cycle-modes.sh": 43,
+        "wiki-gen.sh": 57,
+        "uniformity-coverage.sh": 149
+      },
+      "coordinator_owned": [
+        "pack-resolver.sh",
+        "paths.sh",
+        "state.sh",
+        "copilot-env.sh",
+        "orientator-routing.sh"
+      ]
+    },
+    "hooks": {
+      "mode": "All 33 run.sh bodies fully read, plus input/pattern adapters and registration. HOOK.md descriptions sampled rather than all fully read.",
+      "registration": "hooks/hooks.json:1-88",
+      "support": {
+        "hooks/shared/_input.sh": 309,
+        "hooks/shared/_patterns.sh": 86,
+        "hooks/shared/README.md": 113
+      },
+      "fully_read_runs": {
+        "session-digest": 172,
+        "secret-scan-block": 97,
+        "customer-data-block": 87,
+        "no-secrets-in-edit": 36,
+        "no-direct-main-push": 36,
+        "memory-budget-warn": 42,
+        "cycle-incomplete-warn": 42,
+        "cycle-position-inject": 82,
+        "no-customer-data-in-message": 37,
+        "context-bloat-warn": 58,
+        "frozen-zone-warn": 76,
+        "no-customer-data-in-screenshot": 39,
+        "no-production-mutation-without-auth": 42,
+        "no-merge-without-review": 44,
+        "frontend-design-surface": 115,
+        "job-begin": 51,
+        "job-end": 92,
+        "job-stale-warn": 55,
+        "da-migration-irreversible-warn": 78,
+        "da-retention-violation-warn": 72,
+        "da-schema-drift-warn": 52,
+        "dh-cost-budget-warn": 72,
+        "dh-deploy-without-rollback-warn": 70,
+        "dh-observability-gap-warn": 59,
+        "sc-auth-bypass-warn": 77,
+        "sc-compliance-gap-warn": 88,
+        "sc-threat-coverage-warn": 89,
+        "ta-arch-drift-warn": 49,
+        "ta-complexity-budget-warn": 71,
+        "ta-contract-collision-warn": 57,
+        "tq-contract-break-warn": 55,
+        "tq-coverage-drop-warn": 52,
+        "tq-perf-regression-warn": 55
+      },
+      "description_samples": [
+        "ta-complexity-budget-warn/HOOK.md",
+        "dh-observability-gap-warn/HOOK.md",
+        "frozen-zone-warn/HOOK.md"
+      ],
+      "activation": "Nine hooks registered by hooks/hooks.json; remaining families are dormant/opt-in. Findings about domain/job hooks are conditional on manual execution or future activation."
+    },
+    "installation_and_adapters": {
+      "fully_read": {
+        "install/install.sh": 397,
+        "install/install.ps1": 319,
+        "install/verify.sh": 558,
+        ".codex-plugin/plugin.json": 38,
+        ".claude-plugin/plugin.json": 18,
+        ".claude-plugin/marketplace.json": 22,
+        ".cursor-plugin/plugin.json": 21,
+        ".github/plugin/plugin.json": 13,
+        ".github/plugin/hooks.json": 4,
+        "gemini-extension.json": 6,
+        ".opencode/INSTALL.md": 37
+      },
+      "inventoried_only": [
+        "shims/AGENTS.md",
+        "shims/CLAUDE.md",
+        "shims/copilot-instructions.md",
+        "shims/copilot/COPILOT.md",
+        ".github/plugin/marketplace.json"
+      ],
+      "notes": "Copilot generator and owned-file/path protections fully read via bin/li-copilot.py. Generated wrapper corpus and all copied scaffolding templates not reread individually; canonical workflows were fully covered in workflow.json."
+    },
+    "verification": {
+      "mode": "Entire tests/ inventory and CI read; targeted behavior and integration source fully read. No full suite executed, no live host invocation, no network or private pack access.",
+      "fully_read": {
+        "tests/README.md": 71,
+        "tests/runner/run-all.sh": 154,
+        "tests/runner/run-unit.sh": 3,
+        "tests/runner/run-e2e.sh": 3,
+        "tests/runner/check-install.ps1": 78,
+        "tests/behavior/install-fail-closed.sh": 25,
+        "tests/behavior/install-target-boundaries.sh": 55,
+        "tests/e2e/harness-critical-path.sh": 123,
+        "tests/integration/enterprise-pack-impact.sh": 100,
+        "tests/integration/enterprise-workflow-snippets.sh": 220,
+        "tests/integration/security-controls-fire.sh": 112,
+        "tests/unit/review-source-target.sh": 76,
+        "tests/unit/jobs-registry-concurrency.sh": 68,
+        "tests/unit/envelope-schema-validates.sh": 217,
+        ".github/workflows/ci.yml": 92,
+        ".github/workflows/catalog.yml": 26
+      },
+      "prior_workflow_samples": [
+        "tests/unit/ta-routing.sh",
+        "tests/shape/ta-module-contract.sh (partial)",
+        "tests/shape/skill-descriptions-trigger.sh"
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "RU-01",
+      "priority": "P1",
+      "title": "A later failed review does not invalidate an earlier passing review",
+      "problem": "li-review-read filters out negative statuses before choosing the final record. CLEAR followed by NOT CLEARED for the same gate and HEAD therefore returns the older pass. Its comment requires a commit when HEAD is known, but the condition explicitly permits an empty commit. Substring acceptance also accepts statuses outside a controlled enum.",
+      "impact": "PLAN/ANALYZE/SHIP consumers can treat withdrawn or unbound review evidence as clearance. This is distinct from workflow.json's separate dirty-tree evidence problem.",
+      "recommendation": "Retain the durable review log and exact-revision gate; parse records structurally, select the latest applicable decision first, then evaluate its exact status, commit/artifact identity and freshness. A later rejection must revoke clearance. Preserve valid historical evidence for audit, not authorization.",
+      "evidence": [
+        {
+          "path": "bin/li-review-read",
+          "line": 162
+        },
+        {
+          "path": "bin/li-review-read",
+          "line": 178
+        },
+        {
+          "path": "bin/li-review-read",
+          "line": 183
+        },
+        {
+          "path": "bin/li-review-read",
+          "line": 193
+        },
+        {
+          "path": "tests/unit/review-source-target.sh",
+          "line": 45
+        }
+      ],
+      "verification": "Static control-flow trace: feed two otherwise valid current-HEAD records CLEAR then NOT CLEARED; the second is skipped at 178 and tail -1 returns the first. A fresh CLEAR record with commit:\"\" passes 183. Add negative transition, missing-commit and exact-status fixtures. Existing test covers source/target separation and import, not these transitions.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-02",
+      "priority": "P1",
+      "title": "Optional hooks execute a resolver from the project being inspected",
+      "problem": "ta-contract-collision and tq-perf-regression hooks source $LINTEL_REPO_ROOT/lib/pack-resolver.sh; several domain hooks do this as a fallback. li-vault-init also prefers $ROOT/lib/pack-resolver.sh before the trusted installation. Thus a target project's file becomes executable code of a trusted installed tool, including during vault path discovery.",
+      "impact": "Opening or editing a repository with these optional hooks enabled can execute project-supplied shell code; vault initialization can cross the same boundary. Current default registration excludes the domain hooks, so this is an activation prerequisite, not a claim of default exploitation.",
+      "recommendation": "Keep the pack-driven checks and vault integration. Resolve implementation code only from the trusted plugin/install root; load target repository configuration as data through that resolver. Carry the same source/target boundary already used by session-digest into every helper. Prove the boundary before enabling these hooks.",
+      "evidence": [
+        {
+          "path": "hooks/shared/ta-contract-collision-warn/run.sh",
+          "line": 20
+        },
+        {
+          "path": "hooks/shared/tq-perf-regression-warn/run.sh",
+          "line": 19
+        },
+        {
+          "path": "hooks/shared/dh-observability-gap-warn/run.sh",
+          "line": 25
+        },
+        {
+          "path": "bin/li-vault-init",
+          "line": 43
+        },
+        {
+          "path": "hooks/shared/session-digest/run.sh",
+          "line": 45
+        }
+      ],
+      "verification": "Static source-path trace. Safe future fixture: target repo contains a resolver that writes a temporary marker; run installed hook/vault dry-run with a temporary home and assert the marker is never created. No project code was executed during this audit.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-03",
+      "priority": "P1",
+      "title": "Private sync can publish to the old remote after setup or forget",
+      "problem": "Both sync commands write the newly requested URL to a config file, but when a local .git already exists they leave origin unchanged. Push uses origin without comparing it to configured destination. forget deletes only the config and push still accepts the existing .git. Lessons also key documents by repository basename, so different projects named alike overwrite the same vault file.",
+      "impact": "An operator can see a new configured destination yet send private roles or lessons to the previous one; forgotten sync remains operational. Same-name repository lessons can overwrite each other.",
+      "recommendation": "Preserve optional private sync with one verified destination binding. Setup must reconcile and report the actual origin, push/pull must require an enabled binding and match it, and forget must disable future sync while preserving local content. Key lesson records by stable repository identity with a readable name; retain prior records during migration.",
+      "evidence": [
+        {
+          "path": "bin/li-roles-sync",
+          "line": 66
+        },
+        {
+          "path": "bin/li-roles-sync",
+          "line": 69
+        },
+        {
+          "path": "bin/li-roles-sync",
+          "line": 101
+        },
+        {
+          "path": "bin/li-roles-sync",
+          "line": 122
+        },
+        {
+          "path": "bin/li-lessons-sync",
+          "line": 69
+        },
+        {
+          "path": "bin/li-lessons-sync",
+          "line": 91
+        },
+        {
+          "path": "bin/li-lessons-sync",
+          "line": 94
+        },
+        {
+          "path": "bin/li-lessons-sync",
+          "line": 124
+        }
+      ],
+      "verification": "Static two-setup trace: setup A creates origin A; setup B writes B but skips the .git block; push still sends to A. After forget, the push guard checks only .git. Verify later using two local bare remotes and two same-basename fixture repositories; no remote/private content accessed here.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-04",
+      "priority": "P2",
+      "title": "ADR creation rejects its own documented title argument",
+      "problem": "TITLE is initialized from $1 before argument parsing. The first ordinary positional argument then enters the branch that accepts a title only when TITLE is empty, so documented invocations fail with Unknown arg before creating an ADR.",
+      "impact": "The adr-new workflow's executable helper cannot perform its advertised basic operation.",
+      "recommendation": "Retain ADR templating, numbering and traceability. Initialize parser state empty, validate value-taking flags, and exercise documented title/status invocations in a temporary repository. Also cover the first ADR in an otherwise empty decisions directory because the ls pipeline runs under strict shell mode.",
+      "evidence": [
+        {
+          "path": "bin/li-adr-new",
+          "line": 14
+        },
+        {
+          "path": "bin/li-adr-new",
+          "line": 25
+        },
+        {
+          "path": "bin/li-adr-new",
+          "line": 38
+        },
+        {
+          "path": "bin/li-adr-new",
+          "line": 55
+        }
+      ],
+      "verification": "Deterministic static argument trace for li-adr-new \"Example\": TITLE is Example at line14; line38 is false; line42 exits2. No command executed because the utility also performs Git mutations.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-05",
+      "priority": "P2",
+      "title": "Envelope replay and validation do not share a serialized contract",
+      "problem": "The validator advertises YAML or JSON but checks YAML headings and fields with grep instead of parsing the declared schema. Required names with empty values can satisfy presence checks. Replay extracts a JSONL audit line and passes it to that validator, which rejects the JSON heading form. --apply records replay intent rather than dispatching a receiver, as its final source comment acknowledges.",
+      "impact": "The staged envelope feature cannot reliably validate its own audit records or deliver a verifiable replay. Handoff completeness and schema validity are stronger claims than the current checks support.",
+      "recommendation": "Preserve envelopes, evaluators, audit and replay. Use one structured parser/validator and a versioned schema for both serialized forms; define whether replay outputs a reviewable intent or actually invokes a receiver. Complete the chosen execution path with permission/duplicate controls and explicit result evidence before activation.",
+      "evidence": [
+        {
+          "path": "bin/li-envelope-validate",
+          "line": 39
+        },
+        {
+          "path": "bin/li-envelope-validate",
+          "line": 58
+        },
+        {
+          "path": "bin/li-envelope-validate",
+          "line": 69
+        },
+        {
+          "path": "bin/li-envelope-replay",
+          "line": 61
+        },
+        {
+          "path": "bin/li-envelope-replay",
+          "line": 81
+        },
+        {
+          "path": "bin/li-envelope-replay",
+          "line": 138
+        },
+        {
+          "path": "tests/unit/envelope-schema-validates.sh",
+          "line": 25
+        }
+      ],
+      "verification": "Static serialization trace and full read of validator/replay/schema. Current six validator fixtures are hand-authored YAML and do not round-trip actual audit output. Required verification: forged envelope -> audit JSONL -> extraction -> validation; empty/null/type-invalid fields; verified receiver behavior or honestly named intent-only result.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-06",
+      "priority": "P2",
+      "title": "Installer validation happens after replacing the installed payload",
+      "problem": "Both installers copy managed content before validating skill/agent frontmatter and can print installation complete before returning the validation failure. A bad bundle can therefore leave a broken installed tree despite a nonzero result. Bash overlays managed trees with cp while PowerShell replaces their contents, so removed managed files can survive Bash upgrades.",
+      "impact": "A failed upgrade is not transactional and supported platforms can retain different workflows after the same release. Existing backup behavior helps recovery but does not preserve the previously working installation automatically.",
+      "recommendation": "Preserve installed capabilities and operator customizations. Validate a staged bundle before publication, maintain an ownership manifest, publish managed paths transactionally, and recover old bytes on failure. Remove obsolete managed files only as part of a verified replacement, while preserving operator-owned content and feature continuity.",
+      "evidence": [
+        {
+          "path": "install/install.sh",
+          "line": 201
+        },
+        {
+          "path": "install/install.sh",
+          "line": 284
+        },
+        {
+          "path": "install/install.sh",
+          "line": 364
+        },
+        {
+          "path": "install/install.sh",
+          "line": 393
+        },
+        {
+          "path": "install/install.ps1",
+          "line": 69
+        },
+        {
+          "path": "install/install.ps1",
+          "line": 173
+        },
+        {
+          "path": "install/install.ps1",
+          "line": 234
+        },
+        {
+          "path": "tests/behavior/install-fail-closed.sh",
+          "line": 15
+        }
+      ],
+      "verification": "Static order trace across both installers. Existing failure fixture exercises copy failure, not malformed bundle rollback. Required fixtures: installed known-good payload plus invalid new skill; assert old bytes unchanged; remove one managed fixture file in the next bundle and compare Bash/PowerShell results.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-07",
+      "priority": "P2",
+      "title": "Safe output-path checks are not shared by all writing helpers",
+      "problem": "The Copilot generator preflights canonical paths and rejects symlinks/reparse points, but li-scaffold writes through constructed target paths without equivalent checks. job_archive accepts an arbitrary id, concatenates it into the jobs directory, then recursively deletes scratch and moves the directory without proving containment. Move failure is swallowed while an end record is emitted.",
+      "impact": "Scoped writes and cleanup can escape their intended directory through symlinks or path traversal; an archive failure can still appear successful. This matters as host adapters expose helpers to more varied inputs.",
+      "recommendation": "Retain scaffolding and job cleanup, and reuse a common bounded-path/ownership contract across helpers. Validate job IDs against the creation format, resolve final paths under the expected root, reject links before writes/deletes, and propagate failure before reporting completion. Preserve scratch and original job on failed archive.",
+      "evidence": [
+        {
+          "path": "bin/li-copilot.py",
+          "line": 61
+        },
+        {
+          "path": "bin/li-copilot.py",
+          "line": 379
+        },
+        {
+          "path": "bin/li-scaffold",
+          "line": 190
+        },
+        {
+          "path": "bin/li-scaffold",
+          "line": 222
+        },
+        {
+          "path": "bin/_jobs.sh",
+          "line": 295
+        },
+        {
+          "path": "bin/_jobs.sh",
+          "line": 308
+        },
+        {
+          "path": "bin/_jobs.sh",
+          "line": 323
+        }
+      ],
+      "verification": "Static contrast with li-copilot.py's preflight. Future isolated fixtures should cover dangling and directory symlinks, ../ job IDs, inaccessible archive directories and destination collisions, asserting no out-of-root mutation and no false completion. No deletion or exploit fixture was executed.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-08",
+      "priority": "P2",
+      "title": "Migration can stamp success after runtime move loss and cannot refresh local pointers",
+      "problem": "Runtime migration suppresses all move errors and does not connect them to MOVE_FAIL, while moving files onto an existing destination can replace same-named state. The layout marker can then be written despite incomplete runtime transfer. Once layout_version>=5 exists the script immediately exits, although doctor recommends rerunning migration to repair machine-local memory pointers.",
+      "impact": "A migration can lose or strand continuity state, and a relocated checkout cannot use the documented repair path for its local pointer.",
+      "recommendation": "Preserve migration and legacy compatibility. Preflight collisions for knowledge and runtime content, quarantine conflicts without overwriting, track every failed move, and publish the layout marker only after verified completion. Separate idempotent local-pointer repair from the one-time layout migration so existing version markers do not block repair.",
+      "evidence": [
+        {
+          "path": "bin/li-migrate-claude-home",
+          "line": 41
+        },
+        {
+          "path": "bin/li-migrate-claude-home",
+          "line": 104
+        },
+        {
+          "path": "bin/li-migrate-claude-home",
+          "line": 111
+        },
+        {
+          "path": "bin/li-migrate-claude-home",
+          "line": 179
+        },
+        {
+          "path": "bin/li-doctor",
+          "line": 189
+        }
+      ],
+      "verification": "Static filesystem-operation and control-flow trace. Required fixtures: same-named source/destination runtime files, failed move, rerun after partial migration, and already-migrated checkout at a new path; all original content must remain recoverable.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-09",
+      "priority": "P2",
+      "title": "Job completion promotes failed and colliding artifacts into durable plans",
+      "problem": "The dormant job-end hook accepts DONE/ABORTED/FAILED but promotes plan/spec/prompt and ADR files before considering result. It derives the durable directory by stripping date/hash from the job ID, leaving a workflow name such as cycle. Repeated initiatives of that workflow can overwrite one another, and an existing ADR filename is copied over.",
+      "impact": "Activating this hook as written can replace approved durable artifacts with incomplete output from a failed or unrelated job.",
+      "recommendation": "Preserve job lifecycle and durable promotion. Bind the job to the selected work map and initiative, require reviewed completion evidence for promotion, verify target identity and collision policy, and preserve candidates from failed/aborted jobs in their own archive. Keep one coordinator responsible for shared durable state, consistent with accepted architecture.",
+      "evidence": [
+        {
+          "path": "hooks/shared/job-end/run.sh",
+          "line": 14
+        },
+        {
+          "path": "hooks/shared/job-end/run.sh",
+          "line": 47
+        },
+        {
+          "path": "hooks/shared/job-end/run.sh",
+          "line": 51
+        },
+        {
+          "path": "hooks/shared/job-end/run.sh",
+          "line": 75
+        },
+        {
+          "path": "hooks/shared/job-end/run.sh",
+          "line": 88
+        }
+      ],
+      "verification": "Static trace: result is read at14 and next used at88, after both copy loops. Two cycle-<date>-<time>-<hash> IDs produce the same slug. Activation prerequisite fixtures should cover two initiatives, failed result, ADR collision and coordinator-selected artifact mapping.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-10",
+      "priority": "P2",
+      "title": "Domain hook parsers ignore nested company thresholds",
+      "problem": "The complexity and coverage AWK parsers set an inner section flag, then reset it on every subsequent indented lowercase field before testing the desired nested key. Ordinary engineering.tech_architecture and engineering.testing_qa values therefore fall back to hardcoded defaults. The compliance parser repeats the same pattern.",
+      "impact": "An enabled hook can claim to apply company policy while measuring against different thresholds. This undermines pack effects even when the intended profile is correctly selected.",
+      "recommendation": "Keep the domain policy depth. Resolve fields through the same structured, trusted profile contract used by other consumers, record the effective value and provenance, and test nondefault nested thresholds. Separate absent defaults from malformed policy and make the latter observable.",
+      "evidence": [
+        {
+          "path": "hooks/shared/ta-complexity-budget-warn/run.sh",
+          "line": 23
+        },
+        {
+          "path": "hooks/shared/ta-complexity-budget-warn/run.sh",
+          "line": 29
+        },
+        {
+          "path": "hooks/shared/tq-coverage-drop-warn/run.sh",
+          "line": 18
+        },
+        {
+          "path": "hooks/shared/sc-compliance-gap-warn/run.sh",
+          "line": 44
+        }
+      ],
+      "verification": "Deterministic AWK rule-order trace: on an indented complexity_budget_cyclomatic line the reset rule runs before the in_ta extraction, so it cannot print the configured value. Add exact documented profile fixtures with materially different values and assert effective thresholds in the hook result.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-11",
+      "priority": "P2",
+      "title": "Host diagnostics and updater success are weaker than their claims",
+      "problem": "Doctor treats any plugin-list output containing 'li' as Lintel installed, chooses the first Claude cache manifest rather than verified active version, calls hook trees in sync based on directory count, and accepts any historic digest as proof of life. The updater's run wrapper prints a warning after failure and returns echo's success, so its Copilot update-or-install fallback is unreachable on command failure.",
+      "impact": "Universal host readiness can be reported as healthy without an active correct installation; repair/update automation can stop short while returning success.",
+      "recommendation": "Preserve doctor and multi-host updates, enriching them with exact plugin identity, actual active source/version, managed-file comparison and session-scoped proof of activation. Represent unknown or unsupported host probes honestly, including desktop hosts. Preserve child exit status in update and aggregate a truthful outcome while still continuing independent hosts.",
+      "evidence": [
+        {
+          "path": "bin/li-doctor",
+          "line": 81
+        },
+        {
+          "path": "bin/li-doctor",
+          "line": 96
+        },
+        {
+          "path": "bin/li-doctor",
+          "line": 222
+        },
+        {
+          "path": "bin/li-doctor",
+          "line": 249
+        },
+        {
+          "path": "bin/li-update",
+          "line": 42
+        },
+        {
+          "path": "bin/li-update",
+          "line": 85
+        }
+      ],
+      "verification": "Static detection/control-flow trace. Deterministic fixtures: unrelated plugin name containing li, two cached versions with one active, same directory count but changed hook bytes, stale audit record, and stub update returning nonzero. Official host API/CLI command verification remains coordinator-owned; this finding does not assume current external command validity.",
+      "confidence": "high"
+    },
+    {
+      "id": "RU-12",
+      "priority": "P2",
+      "title": "Pre-edit domain warnings inspect old content and often miss absolute paths",
+      "problem": "Domain HOOK.md contracts use PreToolUse Edit|Write but their scripts read the existing on-disk file rather than applying the pending tool input. New files are immediately skipped. Several path classifiers compare raw host file paths against relative patterns such as src/api/*, while the input adapter returns the supplied path without repository-relative normalization.",
+      "impact": "A change that introduces excess complexity or removes observability may receive no relevant warning; a new service file or absolute-path event can evade the intended domain check altogether.",
+      "recommendation": "Preserve and enrich the domain warnings by defining one normalized event contract: repository-relative path, old/new content or a verified post-edit snapshot, tool kind and result. Use a prospective-content check or appropriate post-event consistently, then test real host payload forms before activating the dormant family. Label heuristic metrics accurately and keep substantive agent review.",
+      "evidence": [
+        {
+          "path": "hooks/shared/ta-complexity-budget-warn/HOOK.md",
+          "line": 4
+        },
+        {
+          "path": "hooks/shared/ta-complexity-budget-warn/run.sh",
+          "line": 15
+        },
+        {
+          "path": "hooks/shared/dh-observability-gap-warn/run.sh",
+          "line": 15
+        },
+        {
+          "path": "hooks/shared/dh-observability-gap-warn/run.sh",
+          "line": 20
+        },
+        {
+          "path": "hooks/shared/dh-observability-gap-warn/run.sh",
+          "line": 43
+        },
+        {
+          "path": "hooks/shared/_input.sh",
+          "line": 57
+        }
+      ],
+      "verification": "Static event/data-flow trace. Required fixtures: creating a new file, edit removing an observability marker, relative and absolute paths, and Windows path separators. Existing file content is not evidence of the proposed result.",
+      "confidence": "high"
+    }
+  ],
+  "good_foundations": [
+    {
+      "title": "Source/target-safe generated Copilot kit",
+      "evidence": [
+        {
+          "path": "bin/li-copilot.py",
+          "line": 61
+        },
+        {
+          "path": "bin/li-copilot.py",
+          "line": 379
+        }
+      ],
+      "value": "Preflight path containment and link checks, owned-file handling and structured generation offer a reusable foundation for every host without making Copilot the core product."
+    },
+    {
+      "title": "Registry updates preserve independent repository scopes",
+      "evidence": [
+        {
+          "path": "bin/_jobs.sh",
+          "line": 387
+        },
+        {
+          "path": "tests/unit/jobs-registry-concurrency.sh",
+          "line": 16
+        },
+        {
+          "path": "tests/unit/jobs-registry-concurrency.sh",
+          "line": 41
+        }
+      ],
+      "value": "Directory locking, atomic replacement and failure preservation have actual concurrent-writer and read-error tests. Preserve these guarantees while fixing local job lifecycle."
+    },
+    {
+      "title": "CI includes real runtime behavior on three platforms",
+      "evidence": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "line": 25
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "line": 55
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "line": 62
+        },
+        {
+          "path": "tests/runner/run-all.sh",
+          "line": 149
+        }
+      ],
+      "value": "Linux/macOS/Windows matrix, required scenarios and native PowerShell installation checks are substantive infrastructure; this audit did not run them or claim current green status."
+    },
+    {
+      "title": "Security tests exercise real controls and negative bypass cases",
+      "evidence": [
+        {
+          "path": "tests/integration/security-controls-fire.sh",
+          "line": 43
+        },
+        {
+          "path": "tests/integration/security-controls-fire.sh",
+          "line": 59
+        },
+        {
+          "path": "tests/integration/security-controls-fire.sh",
+          "line": 93
+        }
+      ],
+      "value": "Real hook invocations, shell-command variants, override-in-message rejection and scanner-unavailable failure tests go beyond file-presence assertions."
+    },
+    {
+      "title": "Enterprise snippets use synthetic packs and selected work maps",
+      "evidence": [
+        {
+          "path": "tests/integration/enterprise-workflow-snippets.sh",
+          "line": 99
+        },
+        {
+          "path": "tests/integration/enterprise-workflow-snippets.sh",
+          "line": 152
+        },
+        {
+          "path": "tests/integration/enterprise-workflow-snippets.sh",
+          "line": 203
+        },
+        {
+          "path": "tests/integration/enterprise-pack-impact.sh",
+          "line": 70
+        }
+      ],
+      "value": "Executing actual workflow snippets against synthetic company settings gives useful mechanical evidence without reading private packs. Extend it to full gate transitions and host event contracts."
+    },
+    {
+      "title": "Test documentation states limits",
+      "evidence": [
+        {
+          "path": "tests/README.md",
+          "line": 33
+        },
+        {
+          "path": "hooks/shared/README.md",
+          "line": 1
+        }
+      ],
+      "value": "The repository distinguishes mechanics from model/host behavior and registered hooks from optional families. Keep those distinctions explicit as capabilities expand."
+    }
+  ],
+  "interactions": [
+    "RU-01 compounds WF-02: selecting a historic pass and binding only to HEAD are independent ways to reuse inappropriate evidence; one shared evidence identity/state machine should solve both without removing independent review.",
+    "RU-02/RU-10/RU-12 are activation prerequisites for valuable domain hooks. Preserve the method corpus and create a trusted configuration/event adapter, then prove equivalent behavior per host rather than register the existing files blindly.",
+    "RU-06/RU-07/RU-08/RU-09 share a state-preservation requirement: ownership, containment, collision handling, atomic completion and honest failure propagation. Use existing strong generator/registry patterns as seeds for common primitives.",
+    "Envelope validation and job promotion should consume the same selected work-map and evidence identifiers as ADR-0026 hybrid execution; runtime automation must preserve reviewer independence and rich artifact content.",
+    "Do not use unit/shape scenario totals as proof of universal operation. Add a small outcome matrix covering fresh install, upgrade failure, company-policy effect, clear->reject transition, new-file edit, interruption/recovery and deliberate absence of host hooks.",
+    "Root independently covers pack resolution, fallback session identity, invalid-default advisory fallback, read-only intent misrouting and CYCLE pre-marker loss. Those are not duplicated as findings here."
+  ],
+  "limitations": [
+    "Read-only static audit; no sources modified, no installation, no external scripts, no private profile/pack access, no production action, no remote sync or full test suite execution.",
+    "Findings describe concrete source-level behavior, not successful live exploitation. Reproduction fixtures listed above are verification proposals unless explicitly identified as existing repository test code.",
+    "All bin files and hook run bodies were fully read; individual hook documentation, generated wrappers, scaffolding template corpus and historical tests were sampled/inventoried as stated rather than claimed fully read.",
+    "External host support and current documented CLI commands were not independently browsed in this lane; coordinator owns universal-host research. Manifest presence and valid JSON are not treated as proof of discovery or activation.",
+    "Repository governance and ADR context were read in the preceding workflow assignment. No recommendation silently overrides ADR-0026 or claims dormant functionality is already active."
+  ]
+}

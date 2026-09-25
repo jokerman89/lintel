@@ -1,7 +1,7 @@
 ---
 name: migrations
 layer: foundation
-description: Surface pending v4.x migrations at SENSE. Sister to /li:status. Read-only — surfaces operator-callsites still on deprecated shape with grace-window remaining. Per v4.0 Chapter 4 §5.6.
+description: Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical recovery states.
 color: yellow
 tools: Read, Bash, Glob, Grep
 voice: internal
@@ -12,102 +12,45 @@ cli_support:
     level: full
 ---
 
-You are the `migrations` skill — pending-migration surfacer (v4.0 Phase 1).
+# Migrations
 
-## When to use
+A read-only view of migration obligations and recovery guides. It does not rewrite
+code or select a new company pack. The historical v4/v5 names describe engineering
+transitions, not the current public product version.
 
-- Session-start (auto-invoked by SENSE Step 0c if any migration window is active)
-- Standalone: "what migrations are pending?" → `/li:migrations`
-- Before invoking a workflow that touches deprecated paths
-
-## When NOT to use
-
-- For ad-hoc renaming questions — use `/li:catalog` or `git grep`
-- To actually perform the migration — that's PR work, not surfacing
-
-## Inputs
-
-No required args. Optional `--all` to include CLOSED migrations (last 30 days).
-
-## Workflow
-
-### Step 1 — Read tracker
+## Run the real reader
 
 ```bash
-TRACKER="$(pwd)/docs/migrations/_INDEX.md"
-[ -f "$TRACKER" ] || { echo "_No active migrations._"; exit 0; }
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" migrations
 ```
 
-### Step 2 — Parse active entries
+Use `--all` to include archived records. The helper reads the trusted source's
+`docs/migrations/_INDEX.md`, never a same-named catalog in an unrelated current directory.
+It classifies the full Markdown source with the accepted provider so examples and quoted
+rows are not records. It never executes `detect_pattern`, shell fragments or catalog prose.
 
-Each migration file under `docs/migrations/<date>-<slug>.md` declares grace + removal in its frontmatter. The `_INDEX.md` is the catalog. Read both.
+## Interpret the result
 
-For each ACTIVE migration (grace_until > today):
-- Grep operator's repo for deprecated callsites
-- Compute days remaining in grace window
-- Surface 1-line summary
+Keep two separate facts: the schedule (`open`, `overdue`, `archived`) and the target
+observation (`current`, `needs_migration`, `incomplete`, `not_applicable`, `unknown`).
+The layout reader checks actual legacy files, marker and retained redirect stubs.
+Rows without an implemented detector remain unknown with a readable guide; they are not
+assumed complete. A missing/malformed catalog is an error, not "no pending migrations".
 
-### Step 3 — Surface verdict
+An expired grace window never removes an unresolved migration, alias or backup. An
+archived schedule is history, not evidence that this consumer finished its migration.
+Use the operator's known target evidence before recommending any cleanup.
 
-```
-LINTEL MIGRATIONS — <N> active
-══════════════════════════════════════════════════════════════════
+## Explicit execution and recovery
 
-⚠ <slug> — grace until <date> (<N> days remaining)
-   Old shape: <pattern>
-   Detected in: <files>
-   Action: <one-line>
+For the v5 layout, first run source-owned `bin/li-migrate-claude-home --dry-run --repo
+<target>` and inspect conflicts. Apply only the authorized helper operation, retain its
+receipt, and use its explicit recovery path if interrupted. Never substitute a shell
+move/copy recipe, publish a marker over stranded data, or delete stubs by date.
 
-⚠ <slug-2> — grace until <date> (<N> days)
-   ...
+For v3-to-v4 identity history, retain [v4-migrate](../v4-migrate/SKILL.md) as an opt-in
+inspection and explicit pack-switch route. It is not an automatic current bootstrap.
 
-(Run `/li:migrations <slug>` for full migration guide)
-```
-
-If no active migrations: `_No pending migrations._`
-
-If operator has zero callsites on any active migration: list still appears but with `   No callsites in current cwd — safe to ignore`.
-
-### Step 4 — Audit (optional)
-
-```bash
-source "$(dirname "$0")/../../bin/_audit.sh"
-audit_log migration surfaced "active_count=$active_count"
-```
-
-## Integration
-
-**Reads:**
-- `docs/migrations/_INDEX.md` (catalog)
-- `docs/migrations/<date>-<slug>.md` (per-migration detail)
-
-**Writes:**
-- `~/.lintel/audit/migration.jsonl` (surface events, optional)
-
-**Consumed by:**
-- `/li:sense` Step 0c (auto-invocation)
-- Operator standalone
-
-## Anti-patterns
-
-- **Auto-migrating code** — this skill is read-only by design. Migration is operator-driven.
-- **Surfacing CLOSED migrations** — wastes operator attention. Use `--all` flag if needed.
-- **Hard-blocking on detected callsite** — surface ONLY. Operator decides timing.
-
-## Failure recovery
-
-- Tracker missing: `_No pending migrations._` (silent OK)
-- Malformed entry: skip that entry, surface others, log warning
-- Grep timeout: cap at 5s, surface partial result
-
-## Recommended next steps after invocation
-
-- Per surfaced migration: read `docs/migrations/<slug>.md` for full migration guide + rollback procedure
-- After completing migration: file PR removing operator's old callsites
-- After grace expires + removal lands: `/li:migrations` no longer surfaces that entry
-
-## See also
-
-- `/li:status` (sister — what's open right now)
-- `docs/migrations/_INDEX.md` (tracker)
-- `docs/concepts/meta-infra-discipline.md` (Gate M3 enforcement context)
+Report every surfaced row's evidence, action and limitation. No audit/schema mutation,
+private-home search, network operation or automatic migration is needed to list status.

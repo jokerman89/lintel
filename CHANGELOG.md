@@ -5,6 +5,71 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.11.0 — unreleased
+
+The Universal initiative: one company-neutral lifecycle across clients, with owned installation,
+content-bound review evidence and explicit limits on what each check proves.
+
+### Added
+
+- An owned installation lifecycle. The native installers (`install/native.ps1`, verified with
+  PowerShell 7; `install/native.sh`) need no Python. `bin/li-lifecycle` initializes and checks
+  consumer repositories through a managed-transaction journal and snapshots, and preserves
+  consumer customizations. Interrupted operations are recovered explicitly through
+  `bin/li-managed-transaction.py recover`, and only for verified owned bytes. The doctor reports
+  installed state without inferring whether hooks fired.
+- Content-bound independent review evidence (`bin/li-review-evidence.py`, `lib/review_contract.py`).
+  Mandatory controls dominate scores, and the review readers and ship readiness refuse a later
+  rejecting review before SHIP instead of selecting an older pass.
+- A stable effective profile (`lib/profile_context.py`) with required-caller policy and explicit
+  pack compatibility checks.
+- One lifecycle work map shared by plan, build, review, capture and resume
+  (`bin/li-work-artifacts.py`). A cycle's identity starts before its phases.
+- Concrete specialist modules for architecture, data, security, operations and testing, with a
+  shared domain-result handoff (`bin/li-domain-result.py`).
+- A structured event catalog and reader (`lib/event-catalog.json`, `bin/li-events.py`), and
+  ID-managed lessons with by-ID retrieval and promotion (`bin/li-lessons.py`).
+- Catalog metadata queries (`bin/li-catalog.py --json`), optional capability selections with
+  dependency, resource and provenance closure (`lib/capability-selections.json`), and a
+  126-row preservation map of the original skill inventory.
+- Guarded browser operations (`lib/url_policy.py`), a design contract with profile precedence
+  (`skills/design-dna/scripts/design_contract.py`), and format helpers for Word, PowerPoint,
+  workbook and PDF sources with explicit staged boundaries. A static page and a React/Vite app
+  are built from the same design contract and checked in a real browser.
+- A deterministic `--shard K/N` option for `tests/runner/run-all.sh`. CI runs the strict suite in
+  shards on every system (ADR-0032).
+
+### Changed
+
+- Safe execution and recovery keep native Windows paths at their default roots, including long
+  paths, and context capacity stays unknown unless measured.
+- Host capability records separate vendor documentation, delivered adapters and observed behavior
+  for each client surface.
+- The Swarm integration, the dormant envelope handoff, the trusted implementation source and the
+  explicit private-sync destination are preserved under their accepted contracts.
+
+### Removed
+
+- The pypdf-based PDF reader (`skills/generate-pdf/scripts/check_pdf.py`) and its tests. Lintel has
+  no PDF reader and depends on no PDF library. `generate-pdf` still prepares HTML and prints through
+  the accepted browser route, but the produced PDF's text, pages and rendering are unverified
+  (ADR-0033).
+
+### Known limits
+
+- Evidence is from native Windows with Python 3.11 and PowerShell 7. CI adds Linux and macOS with
+  Python 3.12. Windows PowerShell 5.1, which the native performer supports, and a Python 3.9 runtime
+  are not verified.
+- Complete document rendering and editability for Word, PowerPoint, PDF and workbooks are not
+  verified, and Visio stays a template-only staged slot. These acceptance items are removed from
+  the release's scope (ADR-0033).
+- Required-policy enforcement is not verified without a resolved company policy source.
+
+These changes remain in the beta line. They do not claim a completed enterprise pilot, compliance
+certification or a published 1.0 release.
+
+---
+
 ## 0.10.0 — unreleased
 
 - Preserve enterprise controls through block-list parsing, team-pack inheritance, required-field

@@ -72,7 +72,7 @@ done
 # ─── Scenario 5: 3 raise-help triggers ──────────────────────────────────
 echo ""
 echo "[5] Raise-help triggers documented"
-for trigger in migration_against_table_above_100k_rows retention_conflicts_with_compliance_policy schema_change_breaks_3_plus_consumers; do
+for trigger in unknown_migration_window_or_recovery retention_conflicts_with_policy active_consumer_break; do
   if grep -q "$trigger" "$DA"; then
     pass "raise-help trigger: $trigger"
   else

@@ -1,0 +1,21 @@
+schema_version: "1"
+name: strict-change
+version: 1.0.0
+extends: _default
+compliance:
+  mode: hard
+  hooks: [inventory-atomic-publication, inventory-owned-recovery]
+  workprofile_default: off
+navigation:
+  default_workflow: cycle
+  high_risk_workflows: [cycle, plan, build, ship]
+  orientator_budget_tokens: 2000
+  orientator_max_output_tokens: 200
+  escalation_threshold: medium
+opinions:
+  source: policies
+knowhow:
+  source: quality
+  override_session_priors: false
+requires_capabilities:
+  profile-context: ">=1.0.0"

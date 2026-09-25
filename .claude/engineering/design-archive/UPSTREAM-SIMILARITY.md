@@ -1,5 +1,13 @@
 # Upstream Similarity Methodology (T-303)
 
+> **Superseded as guidance on 2026-09-20 (Universal A20).** This historical, unbuilt
+> proposal is retained for continuity, not an active gate or implementation plan.
+> Changing wording, synonyms or section order to lower a similarity score does not
+> establish originality, quality, licensing permission or satisfaction of notice
+> obligations. Use component provenance and exact license/notice review, and assess
+> method quality through behavior and preservation evidence. See
+> [current provenance guidance](../../../docs/provenance.md).
+
 Methodology placeholder for Gate 7 of `SHIP-GATE.md`. Operationalizes "inspired by, not plagiarized" with measurement.
 
 ## The question this answers

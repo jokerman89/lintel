@@ -20,24 +20,59 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
 ## When NOT to use
 
 - Operator already knows the skill — wastes a turn
-- For agent selection (different — agents spawn via Task tool, this is about skills)
+- For agent selection (use help's agent metadata and the host's actual delegation mechanism)
 
 ## Workflow
 
-1. **Read operator intent.** From skill argument or AskUserQuestion.
+1. **Read operator intent.** Use the supplied request. Ask only for a missing decision
+   through the current host's available question tool; conversation is a fallback only
+   when there is no question tool, never when permission was denied.
 
-2. **Load skill catalog.** Read all `skills/*/SKILL.md` files. Extract: name, description, when-to-use, when-NOT-to-use.
+2. **Query compact metadata first.** Resolve `LINTEL_SOURCE_ROOT` from the loaded trusted
+   adapter or explicitly selected Lintel source, separately from the working project.
+   Use an available permitted shell and Python 3.9+:
 
-3. **Match intent to skills:**
-   - Direct keyword match
-   - Semantic match (description / when-to-use phrasing)
-   - Anti-match (operator intent mentions something a skill's when-NOT-to-use says it's wrong for)
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
+   ```
 
-4. **Score top 3.** Confidence H/M/L.
+   Select a nonempty keyword from the intent, not a fabricated regex or shell fragment.
+   Pass it as one quoted literal argument; never use `eval` or interpolate a command.
+   Use `python` if that is the Python 3 command. If a keyword is too narrow, broaden it
+   or request `--json` without filters: that still returns metadata, not prompt bodies.
+   Use the [single metadata contract](../catalog/references/metadata.md); do not glob
+   and parse the corpus separately.
 
-5. **For top match, also surface telemetry if available** (skill usage frequency from `~/.lintel/telemetry/`).
+   If the request already names a capability selection, use its existing projection:
 
-6. **Present.** With invocation command and rationale.
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection="$selection"
+   ```
+
+   `selection` is an exact nonempty ID from `--json --list-selections`, not an inferred
+   installation or policy choice. Keep ordinary routing unchanged without it. Follow
+   the [selection contract](../catalog/references/selections.md); do not turn its
+   closure into a second routing graph or read every dependency body. A role-oriented
+   selection such as `demo-script` uses help's agent-selection path rather than
+   relabeling roles as skills. Invalid selection data stops the affected discovery.
+
+3. **Shortlist at most three skills.** Match names, descriptions, families and existing
+   aliases. This is model judgment over source metadata, not a new routing engine or a
+   measured confidence score. Preserve staged/template warnings. A `full` hint does not
+   establish maturity, implemented formats, permission or live host support.
+
+4. **Read only selected candidates.** Read the shortlisted canonical bodies (at most
+   three) via their returned paths under the same trusted `source_root`. Check their
+   actual when-to-use, exclusions, prerequisites and failure behavior before recommending
+   a method. Preserve alias notes and arguments; do not invent an alias rewrite or silently
+   retire an alias because its recorded date passed. Never load all skill/role bodies.
+
+5. **Present up to three recommendations.** Explain fit, important limitations and the
+   actual invocation/fallback. Native wrapper and agent registration require current host
+   evidence; use explicit canonical-file reading when permitted instead of made-up tools.
+   Recommendation alone does not execute the selected workflow or authorize new work.
 
 ## Output format
 
@@ -45,41 +80,50 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
 MATCH: <operator intent quoted>
 
 Top match (confidence H):
-  /<skill-name>
-  → <one-line why>
-  → Invocation: /<skill-name> [args]
-  → Last used: <date> (if telemetry available)
+  <canonical name, retained alias if used>
+  → <one-line why, plus source/body limitations>
+  → Invocation: <verified host entrypoint or explicit canonical-file path>
 
 Alternative #2 (confidence M):
-  /<skill-name>
+  <canonical name>
   → <rationale>
   → When this is better: <condition>
 
 Alternative #3 (confidence M):
-  /<skill-name>
+  <canonical name>
   → <rationale>
   → When this is better: <condition>
 
 If none of these fit, your intent might need:
-- A new skill (`/skillify` to draft one)
+- A new skill (`/li:skillify`, if authoring is authorized)
 - An agent instead (see agents/<category>/)
 - A direct conversation (no skill needed)
 ```
 
 ## Edge cases
 
-- **No good match** — recommend `/skillify` to draft new skill OR direct conversation.
-- **Match is an agent, not a skill** — note distinction; route to Task tool with agent name.
-- **Intent is multi-step workflow** — recommend `/autoplan` as orchestrator.
+- **No good match** — broaden the metadata query before suggesting new authoring or direct conversation.
+- **Match is an agent, not a skill** — query `--json --kind=agent` through the same helper,
+  then read only the selected role. Use actual host delegation or an honest serial/manual
+  handoff; a role file is not a registered agent or independent reviewer.
+- **Intent is multi-step workflow** — consider the existing `/li:cycle` and its authorized
+  entry phase. The nine phases remain SENSE, SCOPE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW,
+  SHIP and CAPTURE. Resume is a utility returning to saved work, not another phase.
 - **Customer-data in intent** — strip before processing; flag to operator.
+- **Invalid source or helper/parser failure** — report the failure, not an empty success.
+  Do not regenerate, install, activate, change roots or skip malformed entries.
+- **Execution unavailable** — the trusted `skills/CATALOG.md` is a disclosed skills-only
+  snapshot fallback. Read only selected canonical files afterward, through permitted tools.
+  Missing source or denied reads block the affected work.
 
-## How this reduces 70+ skill cognitive load
+## Discovery cost
 
-Without router: operator types `/help` → scrolls 70+ skills → remembers one → invokes.
-With router: operator types `/match "ship this PR"` → top 3 → picks → invokes.
-
-For new operators, this halves time-to-first-skill-use.
+Selection uses one maintained metadata inventory before any candidate prompt reads.
+No personal telemetry is consulted. Metadata tests establish this file/query behavior,
+not a measured improvement in model accuracy or time to first use.
 
 ## Privacy note
 
-Match runs locally. No external API calls. Intent never leaves the CLI session.
+The helper performs local data reads and no network calls. Model processing still follows
+the actual host's service and policy; do not promise offline processing or that intent
+never leaves the machine. Keep secrets and customer data out of queries and reports.

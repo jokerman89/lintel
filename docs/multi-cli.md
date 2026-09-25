@@ -1,150 +1,118 @@
-# Multi-CLI support
+# Universal client support
 
-Lintel keeps a shared workflow in `skills/`, role definitions in `agents/`, and reusable resources
-in `lib/` and `scaffolding/`. Client adapters expose the parts each host can discover. Installation,
-invocation, delegation and hook activation are separate capabilities.
+Lintel keeps one shared workflow in `skills/`, specialist roles in `agents/`, and reusable
+helpers/templates in `lib/` and `scaffolding/`. Thin adapters expose documented native
+discovery formats or a useful explicit file handoff. Universal means continuity of intent,
+work, policy and evidence, not identical client tools or blanket support.
 
-## The capability table
+## Three separate facts
 
-The [README capability table](../README.md#multi-cli-support) is generated from
-`lib/cli-tiers.yaml` and checked by `tests/shape/cli-tiers-sync.sh`. It is the single published
-matrix; this page does not keep a second copy that can drift.
+`lib/cli-tiers.yaml` is the canonical schema-version-2 registry. It uses JSON-compatible YAML
+so the same standard-library reader serves the installer, shell compatibility API, onboarding
+and generated [README view](../README.md#multi-cli-support).
 
-- **Tier:** Lintel's declared integration level, not a promise of full end-to-end certification.
-- **Skills:** whether the host discovers native skills or requires explicit file references.
-- **Subagents:** how the integration can delegate work; actual availability depends on the host.
-- **Hooks:** whether Lintel supplies an activated compatible hook integration, not whether the
-  host has a hook API of its own.
+| Layer | What it establishes | What it does not establish |
+|---|---|---|
+| Vendor | Dated official URL, version scope and documented/conditional/unsupported operation | Availability, permission or execution in your session |
+| Delivered | Generated native-format path or explicit manual/operation-contract binding | That a host discovered it, ran it or honored the instructions |
+| Observed | Scenario, host version, Lintel revision, date, evidence and limitations | Parity with another surface/version or an unrun scenario |
 
-The Copilot repository kit supports native core skills and custom agents. Its integration remains
-beta and does not translate Lintel's Claude Code hooks. Other hosts may expose features beyond
-what the current Lintel adapter uses.
+Unknown vendor capability remains `unknown`. Unrun observation remains `not_run`. Partial
+session observations cannot become complete client acceptance. CLI, desktop, IDE and cloud
+are separate records, including Copilot, Codex, Cursor, OpenCode, Factory and newer clients.
+Use the [adapter guide](client-adapters.md) and registry output rather than another support matrix.
 
-## One instruction source
+```bash
+python3 bin/li-client-capabilities.py show --client copilot-app
+python3 bin/li-client-capabilities.py validate
+```
 
-`AGENT-INSTRUCTIONS.md` is the canonical Lintel workflow entry in this repository. Client-specific
-entry files link to it or to installed portable resources:
+## One instruction source and one installer engine
 
-| Entry | Client |
+The full `scaffolding/01-foundation/SESSION-PROTOCOL.md` is synchronized into marked blocks
+in AGENTS.md, CLAUDE.md and both foundation templates (ADR-0025). Short client pointers
+lead to that authority; personal global instructions are not required. Project prose outside
+managed blocks remains project-owned.
+
+`bin/li-adapter.py` is a small entry into `bin/li-copilot.py`, not another installer. It
+reuses the same scoped source bundling, safe paths, ownership inventory, conflict refusal,
+foundation seeding and integrity checks. A mixed-client repository gets one `.github/lintel/`
+source bundle and each selected native root; manual-only clients get `START.md` and canonical
+files, without invented discovery paths. Updates retain the installed surface set.
+
+No hooks, clients, settings, credentials, permissions or user-global files are installed.
+The source product manifest is retained for product constraints, not fabricated from a
+version label in prose. `check` validates local files, not live models or enterprise controls.
+
+## Bind semantic operations to the actual host
+
+The [Universal contract](../shims/universal/ADAPTER.md) covers questions, planning,
+instructions/skills, read/edit/shell/browser, delegation/isolation, memory/resume, hooks
+and plugin/model controls. Populate a session declaration only from inspected tool schemas
+and permissions. It carries the actual stable session ID, exact surface, version if known,
+selected work map, unchanged effective profile reference and isolation evidence.
+
+`li-client-capabilities.py resolve --session <file>` selects routes; it never calls tools.
+It returns `executed: false` and `evidence_level: declared-session-bindings`. The runtime
+host still owns execution and permission. No fixed tool name, model ID or vendor table is
+required to ask a question or perform a review.
+
+| Missing capability | Retained useful behavior |
 |---|---|
-| `CLAUDE.md` | Claude Code |
-| `AGENTS.md` | Codex and clients that read this convention |
-| `GEMINI.md` | Gemini CLI extension |
-| `.github/copilot-instructions.md` | GitHub Copilot |
+| Native skill discovery | Explicitly read the selected canonical file through `START.md` |
+| Question tool | Conversation, only if the host has no question channel |
+| Safe attributable parallel writes | Serial execution of the same approved briefs |
+| Delegation | Bounded manual/external handoff, reports, status and restart |
+| Independent reviewer | Keep the review requirement open for a real separate actor |
+| Browser | Keep the browser evidence task open; search is not browser automation |
+| Hook/plugin/model API | Explicit unsupported result, not marker files or fictional settings |
 
-AGENTS.md and CLAUDE.md repeat the full shared session protocol inline, generated from `scaffolding/01-foundation/SESSION-PROTOCOL.md`. This makes startup independent of personal user-global files. Short client pointers still need to resolve inside the target environment. A path into one developer's plugin cache
-or private home directory will not work in another developer's checkout or a cloud agent job.
-The Copilot repository kit therefore carries its resources under `.github/lintel/`.
+Denied permission blocks; pending/unknown permission requires resolution, not a fallback
+around the host. A worktree is change isolation, not a security sandbox. The effective
+profile reader and shared review evidence implementation remain authoritative in their domains.
 
-The host decides automatic instruction loading. Lintel's own [precedence](precedence.md) describes
-how to reconcile its workflow documents after loading, not a universal override of host rules.
+## Preserved client routes
 
-## GitHub Copilot
+### GitHub Copilot
 
-Recommended for shared repository adoption:
+The native `.github/skills` and `.github/agents` kit and `.github/plugin/` manifest remain.
+CLI, App, VS Code and cloud have individual records. Use the [Copilot guide](copilot.md).
+Lintel does not translate Claude hooks into Copilot's distinct hook API.
 
-```bash
-bash bin/li-copilot init --target ../your-repo
-bash bin/li-copilot check --target ../your-repo
-```
+### Claude Code
 
-This exposes native `.github/skills/li-*/SKILL.md` workflows and
-`.github/agents/lintel-*.agent.md` profiles. Use `/li-plan`, `/li-build`, `/li-review` and
-`/li-resume` where supported. The source kit is portable across machines and cloud checkouts.
+The `.claude-plugin/` route, canonical skills, agents and optional hooks remain. The
+repository-only `.claude/skills/li-*` route is additive and deliberately hook-free.
+Desktop Code local is separate from CLI, Chat, Cowork and cloud. See [Claude Code](claude-code.md).
 
-Copilot CLI also has a plugin route:
+### Other clients
 
-```bash
-copilot plugin marketplace add jokerman89/lintel
-copilot plugin install li@jokerman-lintel
-```
+Codex and Cursor manifests, the Gemini extension and OpenCode manual guide are retained.
+The [client adapter guide](client-adapters.md) identifies native-format and manual routes for
+those clients and Antigravity, Kiro, Devin/Cascade, Junie, Factory, Cline, Continue and Aider.
+Do not use a retired install incantation or a neighboring surface's settings API without
+checking the intended host's current documentation and available commands.
 
-The repository ships a Copilot manifest at `.github/plugin/plugin.json`, separate from the Claude
-manifest. Confirm names in the installed plugin's discovery view. Client and repository skill
-copies can overlap, so choose an adoption route deliberately.
+## Swarm compatibility
 
-Copilot has native hooks, but Lintel does not adapt its Claude Code hook contract in this release.
-That is an integration limit, not a claim that Copilot lacks hooks or delegation. Use the
-[Copilot guide](copilot.md) for the surface matrix, installation, verification and cloud setup.
+All modes preserve the original work map, dependencies, ownership, package/leaf acceptance
+and evidence. `resolve` selects `native-isolated` only when delegation and isolation bindings
+are available/permitted and the session supplies attributable isolation evidence. Otherwise
+use `serial`, or `manual-handoff` when delegation is absent. Review remains outstanding;
+selection is not proof of actor independence.
 
-## Claude Code
+The old `cli_tier_*` functions remain a conservative reader over the same registry.
+`subagents=sequenced` means a source-backed delegation feature still needs live binding;
+`none` means use the manual path. No static row authorizes concurrent writers. An unknown
+legacy ID warns and degrades to manual; explicit installer requests reject unknown IDs.
+The [swarm guide](concepts/swarming-work.md) retains the complete artifact and recovery method.
 
-```text
-/plugin marketplace add jokerman89/lintel
-/plugin install li@jokerman-lintel
-```
+<a id="adding-a-new-cli"></a>
 
-`CLAUDE.md` is the entry point, skills use `/li:<skill>`, and the plugin supplies agent definitions.
-The selected hook registrations in `hooks/hooks.json` apply through the Claude plugin. A bare
-installation copies hooks without activating them. See
-[hook activation](getting-started.md#how-hook-activation-works).
+## Adding or verifying a surface
 
-The Copilot repository kit is additive; it does not replace the existing Claude manifest or
-change Claude's hook protocol. Keep the original integration when your team uses both clients.
-
-## Codex CLI / App
-
-Use `/plugins`, search for Lintel, and install. Codex uses `.codex-plugin/plugin.json` and
-`AGENTS.md`. Skills and subagents are native to the declared integration; plan-first workflow is
-an instruction convention. Lintel's Claude hooks do not run through this adapter.
-
-## Cursor
-
-The declared installation is `/add-plugin lintel`, using `.cursor-plugin/plugin.json`. Point
-repository instructions at `AGENTS.md`. Lintel declares native skills and sequenced delegation.
-Check the installed client's actual behavior; the adapter does not supply Lintel hooks.
-
-## Gemini CLI
-
-```bash
-gemini extensions install https://github.com/jokerman89/lintel
-gemini extensions update li
-```
-
-`gemini-extension.json` loads `GEMINI.md`. Lintel's declared integration uses explicit skill-file
-references and main-session role prompts. This describes the adapter shipped here, not every
-capability the current Gemini host may offer.
-
-## OpenCode
-
-Read and follow [`.opencode/INSTALL.md`](../.opencode/INSTALL.md). The integration uses `AGENTS.md`
-and explicit skill/agent file references. Lintel does not register hooks on this route.
-
-## Factory Droid
-
-```bash
-droid plugin marketplace add jokerman89/lintel
-droid plugin install li@jokerman-lintel
-```
-
-The declared adapter uses Claude plugin interoperability for native skills; delegation is treated
-as main-session role use. Lintel hooks are not supplied as a Droid integration.
-
-## Other clients
-
-For Cline, Continue, Aider and unknown clients, use `AGENT-INSTRUCTIONS.md` as explicit task context
-and point to the required skill by path. This is best-effort workflow guidance. Skill discovery,
-delegation and automatic state injection should not be assumed.
-
-## What degrades
-
-Without native discovery, read the required `SKILL.md` explicitly. Without subagents, sequence
-the roles and report that review was not independently delegated. Without compatible registered
-hooks, read state and rules explicitly at session start and preserve state at handoff.
-
-The shared `.claude/memory/`, `.claude/plans/` and `.claude/decisions/` files work across clients.
-Do not run simultaneous writers against the same task state without coordinating ownership.
-Use independent branches or worktrees for separate implementation tasks.
-
-## Adding a new CLI
-
-1. Declare the adapter in `lib/cli-tiers.yaml` and regenerate the README table.
-2. Verify the host's current primary documentation and actual discovery/input/output contracts.
-3. Add only the manifest or generated adapter the host needs; keep canonical source content shared.
-4. Add an instruction entry point that resolves inside the installed environment.
-5. Update CLI fingerprint normalization where needed.
-6. Add deterministic discovery/installation checks and document an actual client smoke procedure.
-7. State untested behavior and unsupported hooks explicitly in [getting started](getting-started.md).
-
-Do not infer a working integration from a manifest that merely parses. Scope advertised support
-to the artifacts and behavior that were verified.
+Add a distinct record with official sources, version conditions and a documented discovery
+root, or keep an explicit manual route. The shared validator and generator must consume it;
+add behavioral selection and consumer installation cases. Regenerate shared outputs through
+their owner. Then run a real client pilot with exact version/revision, discovery, permitted
+plan/build/review and cold resume. Do not mark source research or fixture tests as that pilot.

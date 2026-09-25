@@ -1,9 +1,11 @@
 # Envelope — the universal hand-off shape
 
-**Last updated:** 2026-05-29 (v4.0 Phase 2)
-**Status:** Concept doc — referenced by `lib/envelope-schema.yaml`, `bin/li-envelope-validate`, `bin/li-envelope-replay`, future Brief Forge (Phase 3)
+**Last updated:** 2026-09-20
+**Status:** Explicit opt-in contract; shared producer, validator and evaluator implementation
 
-> Every hand-off in Lintel — skill spawning a subagent, phase transitioning to the next phase, workflow handing to another workflow, plan + spec + prompt born together for a cold executor — carries an envelope. The envelope is the **universal contract** for what travels with a hand-off: who sent it, who it's for, what it contains, what evaluators ran on it, and what audit log captures it.
+> An explicitly invoked Brief Forge boundary carries an envelope: who sent it, who it is for, what
+> it contains, which checks ran and which audit receipt identifies it. Automatic construction stays
+> dormant under ADR-0008. The caller, not this format or its helper, owns actual dispatch.
 
 ## The problem
 
@@ -18,7 +20,8 @@ Three failure modes:
 2. **No replay.** When a hand-off goes wrong, there's no canonical envelope to inspect. The brief lives in whatever file the original skill wrote — gone after cleanup, partial after compaction.
 3. **No completeness signal.** A hand-off either works or breaks; there's no shared score for "is this brief complete enough that the receiver can act?" Brief Forge (Phase 3) needs this score.
 
-The envelope fixes all three by being **the single shape every hand-off carries**.
+The envelope supplies one shared shape for boundaries that explicitly invoke it, without inventing
+host callbacks or weakening the original task authority.
 
 ## The model
 
@@ -47,6 +50,12 @@ ENVELOPE
 
 Three sections, all required. HEAD answers "what kind of hand-off is this and who's it between." BODY carries the payload (shape varies per kind). TAIL closes the loop with score + audit trail.
 
+The canonical schema remains `lib/envelope-schema.yaml`, serialized as JSON (a YAML subset) so the
+default producer and consumers need only Python 3.9+. `lib/envelope_contract.py` is the shared
+implementation. Optional legacy YAML input requires `PyYAML>=6.0.3,<7.0` from
+`lib/envelope-requirements.txt`; it is lazily imported, never installed automatically.
+Missing parser support fails before output/audit. JSON and Markdown need no third-party package.
+
 ## Content-type discrimination
 
 `body.content_type` is the discriminator that tells the receiver what shape `body.content` will be:
@@ -60,12 +69,19 @@ Three sections, all required. HEAD answers "what kind of hand-off is this and wh
 
 This is how the envelope absorbs different kinds of hand-off without forking the shape. Brief Forge writes `brief`. PLAN phase writes `plan`. DEFINE writes `spec`. A subagent reply writes `payload_freeform`.
 
+These are explicit caller choices, not automatic phase emissions. A rich Markdown brief is adapted
+to `task`, nonempty `constraints` and `acceptance`, with the whole source preserved as
+`original_markdown`. Swarm adds work-map/package/leaf/scope references and an acceptance digest.
+Duplicate keys, malformed/nested lookalike fields, wrong types, non-finite values and YAML aliases
+are rejected. Diagnostics do not echo a rejected payload.
+
 ## Replay semantics
 
 Every envelope can be replayed via `bin/li-envelope-replay <envelope-file>`:
 
 - **Default: dry-run.** The tool surfaces what the hand-off would do without actually re-invoking the receiver. The operator sees the envelope content + the current state of the world.
-- **Explicit: `--apply`.** Actually re-invokes the receiver with the original envelope. Requires `envelope.tail.replay_safe: true` OR `--force` (forced replay is audited).
+- **Explicit: `--apply`.** Records replay intent for the operator's session; the tool does not invoke
+  a receiver. Requires `envelope.tail.replay_safe: true` OR `--force`, with a verified audit receipt.
 - **Refused if past `deprecated_after`.** Envelopes may declare a TTL after which replay is rejected (relevant for envelopes carrying time-bound context).
 
 Why dry-run by default: envelopes capture state at the moment of hand-off. The world may have moved on — files renamed, packs switched, dependencies updated. Replaying blind risks acting on stale assumptions. Dry-run lets the operator diff against now and decide.
@@ -81,7 +97,10 @@ Scoring rubric (Phase 3 Brief Forge will own this):
 - 40-59 — minimal; receiver should expect to request more context
 - < 40 — should escalate to operator before acting
 
-Phase 2 envelopes (pre-Brief Forge) default to `completeness_score: 100` if not specified. Phase 3 will tighten this.
+No missing score defaults to success. Candidate envelopes start unevaluated. Every configured
+evaluator must finish with a valid result within budget before release; mandatory failure blocks
+even when other scores are high. The complete Brief Forge release gate validates forbidden content,
+checks the minimum score and confirms its audit receipt before writing a receiver payload.
 
 ## Escape hatches
 
@@ -98,9 +117,15 @@ The receiver acts on the envelope and uses an escape hatch when it hits ambiguit
 
 ## Audit pointer
 
-`tail.audit_pointer` is the file path where this envelope is logged. Every envelope MUST be logged to the audit trail at issue time. The pointer tells future audit tools where to find it.
+`tail.audit_pointer` identifies the minimal identity/digest/outcome receipt, not a stored payload.
+Brief Forge writes through the existing unified audit helper and verifies that the matching record
+persisted before output. An audit failure cannot be converted into a successful handoff.
 
-Default path: `.claude/runtime/audit/envelopes-<date>.jsonl`. Pack-overridable per `compliance.audit_paths`.
+The route is explicit `LINTEL_AUDIT_DIR`, then the migrated working repository's
+`.claude/runtime/audit/brief-forge.jsonl`, then the operator-global fallback. Raw content, evaluator
+notes and reversible base64 are never copied to this audit. Preserve an authorized envelope artifact
+separately for replay. `--from-audit` can read legacy full-envelope records, but metadata-only records
+fail with an explicit request for the original artifact rather than fabricating one.
 
 ## Schema versioning
 
@@ -120,7 +145,8 @@ Per design doc §1.3 C1-D2: warn-only enforcement in v4.0, block-on-incompat fro
 ## Anti-patterns
 
 - **Inventing a new hand-off shape for a new kind of work** — extend `content_type` instead. Brief, spec, plan, payload_freeform cover most cases; if not, propose a new `content_type` via a structure-changes entry.
-- **Bypassing the audit_pointer** — every envelope writes to its audit_pointer at issue. No audit means no replay means no debuggability.
+- **Bypassing the audit_pointer** — a release needs its persisted metadata receipt; an artifact alone
+  is not proof of a successful audited handoff.
 - **Lying about completeness_score** — receivers act on this score. Inflating it to skip Brief Forge gates undermines the contract.
 - **Replaying with `--force` without an operator note** — forced replays are audited, but the audit entry is more useful when it carries the operator's reasoning.
 
@@ -130,14 +156,16 @@ Per design doc §1.3 C1-D2: warn-only enforcement in v4.0, block-on-incompat fro
 - `lib/envelope-schema.yaml` — the contract
 
 **Writes:**
-- `.claude/runtime/audit/envelopes-<date>.jsonl` (or pack-overridden path)
+- scope-routed `brief-forge.jsonl` metadata through the unified audit writer
 
 **Tools:**
 - `bin/li-envelope-validate <file>` — validates against schema, returns PASS/FAIL + errors
-- `bin/li-envelope-replay <file>` — dry-run by default, `--apply` to re-execute
+- `bin/li-envelope-replay <file>` — dry-run by default, `--apply` to record caller-owned replay intent
 - `bin/li-forge-stats` (planned — not yet shipped) — will aggregate completeness scores across envelopes
 
-**Consumed by (Phase 3):**
+**Consumed by:**
 - Brief Forge — issues briefs as envelopes with completeness scoring
-- Navigation orientator — surfaces envelope counts in SENSE diagnostic
-- Wiki gen — documents envelope shape per `content_type`
+- explicit workflow callers, including Swarm's structured brief export
+
+Host enforcement, a real independent reviewer and final shared work/profile/domain binding need
+their own evidence. A valid envelope or different actor name never supplies those guarantees.

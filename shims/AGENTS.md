@@ -17,9 +17,14 @@ These are tips that only apply when running under Codex CLI. They do not overrid
 
 ### Sub-agents
 
-Codex has native subagents (`lib/cli-tiers.yaml`: `subagents: native`), so the agent precedence rules in `AGENT-INSTRUCTIONS.md` apply directly. For a scripted one-shot outside an interactive session, a separate `codex exec` run with a scoped prompt is the equivalent.
+Codex documents configured subagents. Apply the shared agent precedence rules to the actual
+inventory and permissions of the selected CLI, desktop or IDE surface. A separate subprocess
+needs authorization and attributable read-only scope; its existence alone is not review clearance.
 
-Skills surface natively as `/li:<skill>` once the plugin is installed. The one capability Codex does not get is the hook enforcement layer, which is a Claude Code mechanism.
+The preserved plugin is one route; the portable adapter generates `.agents/skills/li-*`.
+Inspect the host's skill names and invocation rather than assuming `/li:<skill>` syntax.
+The Claude hook bundle is not a Codex translation. Missing tools or safe write isolation retain
+manual/serial work and outstanding independent review. See `universal/ADAPTER.md` in this tree.
 
 ### Plan mode
 

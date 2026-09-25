@@ -22,20 +22,22 @@ Maintains a Keep-a-Changelog-style `CHANGELOG.md`: parses git log since last rel
 
 ## When to invoke
 
-- Pre-release: promote Unreleased → versioned section + tag
+- Pre-release: promote Unreleased to an approved versioned section; tagging/publishing is separate
 - Post-merge: append new commits to Unreleased
 - Audit: missing entries that should be there
 
 ## When NOT to invoke
 
-- Single-commit PR — usually conventional-commits hook handles it
+- Already covered by a verified changelog process with unchanged release inputs;
+  a Conventional Commit or a hook file alone does not establish an entry was written
 - Project doesn't use semver / Keep-a-Changelog — wrong format
 - Stale info — operator wants a refresh outside Keep-a-Changelog cadence
 
 ## Workflow
 
 1. **Detect format.** Read CHANGELOG.md, confirm Keep-a-Changelog. If absent: propose creating one.
-2. **Find last release.** Latest version section. Get the commit/tag.
+2. **Find last release.** Reconcile the version section with the exact tag/commit
+   and ancestry. Retain hand-authored entries and protected sections.
 3. **Parse commits since last release.** Convention-commits prefixes.
 4. **Group:**
    - Added (feat)
@@ -44,7 +46,9 @@ Maintains a Keep-a-Changelog-style `CHANGELOG.md`: parses git log since last rel
    - Deprecated (chore with !-deprecation)
    - Removed (chore with !-remove)
    - Security (fix(sec) or chore(security))
-5. **Update Unreleased.** Or promote to version on `--release <version>`.
+5. **Update Unreleased.** Or promote to the explicitly requested release version.
+   Collapse duplicates and cancelled changes only with history evidence; a reverted
+   feature is not a shipped addition. Compare the final entry against the release diff.
 
 ## Report format
 
@@ -65,7 +69,8 @@ Commits since: 17
 ## Action
 Updated CHANGELOG.md Unreleased section.
 
-To promote to release: run /changelog-maintainer --release 1.5.0
+To promote: ask the release owner to invoke this role with the approved version,
+release ref and changelog path. No standalone slash command or tag action is implied.
 ```
 
 ## Edge cases / what to do when blocked
@@ -76,5 +81,8 @@ To promote to release: run /changelog-maintainer --release 1.5.0
 - **CHANGELOG.md frozen-zone:** can't edit — surface drift, do not modify.
 
 ## Voice tier behavior
+
+Use the host's configured resources and actual read/edit operations. Retained native
+model metadata is optional adapter configuration under ADR-0028, not a forced model.
 
 `voice: internal`. Changelog is engineering-internal.

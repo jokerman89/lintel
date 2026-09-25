@@ -8,6 +8,471 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Universal implementation (2026-09-20)
+
+**Recovery, updated 2026-09-23:** the operator transferred the broken MasterSession to
+`88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
+branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
+changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
+and original work map. Existing owners are retained. Operator directive: every
+session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
+rule. Current original acceptance
+is **108/109**, not full release readiness. On 2026-09-25 the operator ordered A15.1–.4 and the
+pypdf-based PDF reader removed from Lintel (ADR-0033). A23.4 (leaf `A23.4.ci`) closes on the strict
+CI run of the removal head. A23.5 closed on 2026-09-24.
+**Delivery, 2026-09-25:** PR #93 (draft, `jokerman89`) head `ed91ef4f`; CI run `36065850657`
+passes 149/150 entries per system, and only `document-pdf` fails (undeclared `pypdf`). The A23.5
+Phase 3 addendum passes the CI-repair delta and binds that run (`reviews/A23.5-phase3-ci-ed91ef4.md`).
+The open leaf `A23.4.ci` keeps the gate visible to the product reader. The session
+"Removing legacy skills and agents" (`f4584b03`) waits for an explicit CI-ready handoff after
+the merge. A08, A10, A13, A14.5 and A23.1–.3 closed on 2026-09-24. A19.3, A19.4 and A20.4 close from P13's accepted
+fan-in (`cd877232`). A18.3 and A18.4 close from P13's accepted
+installed-consumer closure (`d0eb793e`, integrated `1e41deb0`). A12.1–A12.4 close from P10's accepted
+integration repair and the joined checks (kit 50/50, light 8/8). A09.5 and A17.5 close from P09's accepted
+installed closure, revalidated after P10's integration repair. A24.1-.4 now close from the completed
+original three-profile experiment and final cross-profile verification.
+A03.2 is reclosed after independently
+accepted P05 native observations (`06a41fe2`, integrated `b22443f`) and both
+original caller joins: P14 15/15 and P12 default/explicit 33/33 each. Old
+failures and the separate reviewer cleanup ERROR remain. Final Swarm A22.7 is accepted and
+integrated in `6e32d1f`, with joined shared, retained, real-Git and enterprise/
+hybrid checks. Discovery consumers are joined in `991ca73`; stale PDF/XLSX
+template metadata is reconciled without maturity promotion in `678ae22`.
+Standalone common/Word/PPT, workbook and PDF source scopes are joined in
+`751af6c`/`81c5b01`; 102 source/retention and six pure print-request checks pass.
+The ten-path document pipeline join and its ordinary test entry are independently
+accepted and integrated in `095c435`; original caller report `4a8c744` is
+preserved in `b9264b2`.
+Native lifecycle comparisons/cold resume remain active; the N1 and two finite
+specialist execution review-consumption chains are complete, not whole P09.
+P10's supported linked-init remains blocked by repeated journal WinError 5 with
+unknown cause. Recovery released one bounded owned journal-replacement retry on
+the P03 `aa7fad4` precedent; review by `1578dfd8` follows. Word/Excel,
+P12 structured-record and tool/CI permission boundaries remain unchanged.
+No push, PR, main merge or whole-initiative completion is claimed.
+
+Latest continuation: P08's original fresh context c2 consumed the exact new
+T027 current-byte record `45b6964b` through the real producer/latest-reader/QA
+chain. The caller-only Windows/Bash path assertion failed before tests and remains
+history. Its handoff25 correction then completed the actual fresh 13-case final
+suite, mandatory author documentation and self-ANALYZE. Exact integrated packet
+`55c829c6` passes SAME9db whole-result SPEC, QUALITY, mandatory local compliance
+and cross-artifact review. T011/T027 retain separate decisions `b369afc6` and
+`6ceab2a4`; package PASS was not transferred. Recovery verified the returned
+records/current evidence and supplied distinct actual host receipts `af0d9fe3`
+and `60a53f12`. Actual original f2/c2 consumption now passes both chains,
+including after-both and final-pin currentness. Packet `913d6864` is quiescent;
+recovery verifies 1,078 snapshots, 95 current MAIN files and both audit additions.
+Concrete grant `801459b` completed the exact original three-path CAPTURE.
+Final packet `6d1edc70` is independently verified: 1,310 snapshots, 97 current
+MAIN pairs, five complete ledger entries with the old prefix, actual cycle-audit
+readback and twelve paired reader/QA passes. Local T011/T027 outcome is DONE;
+the map remains APPROVED, T042 deferred and SHIP skipped. Actual handoff budget
+is a byte-derived 56,292-token estimate with unknown capacity/usage, not a fit.
+Grant `39f8107` now releases only the original ship-direct/ship-alias refusal
+comparison to SAMEc2, one target at a time, without publication or borrowed
+profile/review/QA clearance. Actual ship-direct first reached target-specific
+REVIEW, not a publication refusal: its own seed base `dfeba1d3`, nine exact
+inherited inputs, profile `5b911814`, local 13-case suite and typed QA are
+recorded in packet `f88fa37c`. Both readers correctly return 3 for no applicable
+decision. Recovery verifies 330 snapshots, all 40 current target files, exact
+inheritance and original contexts `3f76896f`/`e7ef37fb`; no fixture action is
+replayed. SAME9db now passes target-specific SPEC, subsequent QUALITY and
+mandatory local compliance/full FR-DOC, report `93b12243`, handoff `65fd7a87`.
+Recovery validates both exact decisions `28df28a3`/`61bb7c2b`, all 21 returned
+artifacts, 751 identical before/after records, unchanged typed QA and 26 current
+raw control files per decision. Actual host receipts `1180271d`/`cd99efb2`
+then cleared SAMEc2's own-target consumer gates. Final direct packet `91ac416c`
+now proves the separate next boundary: current REVIEW/QA and local evidence
+readiness pass, but SHIP refuses absent publication authority. CYCLE remains
+PAUSED/resume SHIP; CAPTURE is unreached. Recovery data intake verifies 999
+final and 330 old snapshots, 46 current files, 42 inner command records,
+twelve reader/QA observations, two readiness checks, six complete ledger
+appends and preserved audit prefixes. No external command or rejecting review
+was observed. Direct is quiescent/revoked. Handoff30 `8e2fdd37` ran the actual
+ship-alias composition with the same nine inherited input snapshots and its
+own seed `3459e693`, profile `b67e4a2a` and one local 13-case suite. Its initial
+missing-REVIEW stop remains frozen in packet `ad9e0a1c`.
+Recovery verifies 419 snapshots, 40 current alias files, all 47 native files
+represented with zero boundary-only files, exact typed QA and original
+contexts `e8359100` / `07bff3be`. The controller corrected a message-only
+T027 hash triplet; unchanged packet, full brief and current files agree on
+`07bff3be`, raw `800f8fe7`, QA `269bc045`. No context was rewritten.
+SAME9db now passes alias-specific SPEC, subsequent QUALITY and mandatory local
+compliance/FR-DOC, report `bd645854`, handoff `1901152f`. Recovery verifies
+36 returned artifacts, 913 unchanged before/after records, current snapshots/
+contexts and verbatim typed QA. Exact decisions `8b794af6`/`5689f02c` have
+separate actual host receipts `cb55ea29`/`a8c5046a`. Actual alias consumption
+then passed both current review/QA/readiness chains and refused publication
+authority in SHIP, preserving CYCLE PAUSED/resume SHIP and unreached CAPTURE.
+Final alias `32ec612f` and pair `2e495335` pass parent data intake02: 1,161
+alias snapshots, 419 prior, 269 paired support snapshots, all46 alias files,
+42 actual inner command records, twelve reader/QA boundaries, two readiness
+checks, six complete appends and unchanged nine inherited inputs. This is
+finite observed parity, not arbitrary-input or whole-P08 acceptance.
+Original owner report-only `229656cf` (sole parent `8318c308`, Git-byte SHA
+`53c921c6`, full original prefix retained) is frozen with handoff `fc638af9`.
+SAME9db completed that COMPLETE original A08/A10/advisory A13.3 review in
+`624b554f`, preserved report-only as `d1e821a` without importing blocked source.
+Selected SPEC is UNVERIFIED/BLOCKED and first whole QUALITY NOT STARTED.
+One P2 gap F06/A10.3 remains: a genuine later-rejecting native review is absent;
+no new product defect was reproduced. Exact full report/handoff and unchanged
+13,831 before/after records/344 supplements pass parent intake01.
+The original card now records a bounded declared negative-test re-plan using
+the original sorting defect, existing direct/alias targets and original actors.
+Its independent method check c08335a2 passes evidentiary SPEC fit but identifies
+M01: the old launcher guards the pre229 report. Only the additive, exactly
+pinned private guard correction is released to controllerf2; its independent
+recheck must pass before a concrete target release. No native write is granted.
+The correction is now frozen as packet `c5d00ee8`/launcher `0ada32c2`, with
+17 actual private guard checks and2,640 unchanged protected records. Parent
+binding01 verifies all42 artifacts and the still-unchanged target implementations.
+SAME9db is commissioned for the bounded M01 recheck; the parked direct request
+and18 proposed fresh files are not a native grant or executed negative case.
+Subsequent actual recheck `d116b057` closes M01 and passes bounded plan QUALITY.
+The original card now concretely releases only SAMEc2/ship-direct candidate
+execution through originalf2, with exact packet/path identities and one real
+unchanged test run. Freeze and revoke before independent candidate review;
+alias, review-record publication and F06/whole-package acceptance remain gated.
+The direct execution stopped after its fifth pin: exits0/0/1/3/1 retain the
+single13-case/four-failure negative run and blocked QA, but no final packet.
+Read-only diagnosis `5c8cd35c` identifies12 additive MAIN checkpoint files,
+not changed old product/HEAD/index/branch bytes. Parent intake binds all37
+snapshots/290 stopped artifacts;15 other siblings are exact. The exhausted
+lease is revoked. Only a narrow private preservation-observer/pin-preparation
+correction is released to originalf2, for SAME9db review before any pin retry;
+no source/test/context/QA or target write replay is allowed.
+The private preservation package is frozen as `bdb85a5a`. Parent intake01
+binds375 artifacts/336 original-preserving copies and author55+12 private
+checks, with no package execution or target writes. SAME9db is now reviewing
+the observer, post-exit accounting and dormant pin-only caller; corrected
+native pin execution and candidate review remain gated.
+SAME9db passed that package; actual pin02 then stopped on eight CR bytes in the
+actor-copied request. One transport-only pin03 (byte-exact copy with SHA assertion)
+is released; candidate SPEC follows only after its actual packet and post-exit result.
+Pin03 succeeded; candidate-03 `2890b808` passed coordinator intake (37/37).
+SAME9db rejected it (SPEC FAIL T011/T027 on the injected sort; QUALITY not run),
+and coordinator intake of that record passed 27/27. f2 prepares the remaining
+packages for one preparation review, then runs the released chain: direct
+consumption, alias candidate and review, alias consumption, report appendix,
+recheck. Each step has its own grant and stops on any failure.
+No forced verdict, waiver, new actor, source repin or remote operation follows.
+A13 contract `92d677c8` releases A13.1.a/.2/.3/.4.a to f2 on a new branch stacked
+on `229656cf`; A13.1.b/.4.b stay gated on P10. Installer gates remain separate.
+`855a5c27` resolves f2's A13 contract defect with one write-site mkdir in the P05
+`li-review-read` marker append, reviewed as a cross-package change. The coordinator's
+P08 trial merge (`d59072a8`) finds three test-contract reconciliations with a verified
+draft patch, a P13 status union and catalog/wiki regeneration, and no other P08 finding.
+Recovery jq execution and copying stay denied (L-046).
+Clean integrated-suite triage leaves two genuine test seams: P12 skill presence
+(`49ba9eb5` / `61c3afdb`, SAME31 PASS `635c76cc`, integrated `66090974`) and the
+e2e footer (reconciled in `ebfbcd0d`). P10 B01 is independently closed in scope, but
+the first whole QUALITY (`2685bd57`) found P1 F05 (adapter late-edit overwrite) and
+P2 F06 (Bash accepts header-shaped native inventory rows). Both, plus the A23.4.p2
+`config/aliases.yaml` native payload item, are released to the original P10 owner.
+Its frozen fix `a2df2021` / `56346ad3` passes SAME's final review `f460eb9f` (SPEC and
+QUALITY PASS, 0/0/0; compliance UNVERIFIED without a resolved policy source) and is
+integrated in `68d32240`. The complete kit on `3397311f` passes 48 of 49; the failure is
+integration defect F-INT-2 (context_safety observed before the source preflight).
+Reconciliation `756835f6` pins `install/directories.txt` to LF. F-INT-2, IC-F01 (an
+intermittent journal read change found by P13) and F-INT-4 (the full-source Bash
+performer exceeds the tests' timeout on Windows) are repaired by the P10 owner
+(`0caba6fe` / `d4b90259`), accepted in SAME `1578dfd8`'s integration review `9ca6402a`
+and integrated in `b0598b0b` / `f740141e`. The joined checks pass, and A12.1–A12.4 are
+closed.
+A13.a and A13.1.b/.4.b are accepted (`0e1746a8`, `5a058dd5`). **F06 is accepted** on
+SAME9db's recheck of `624` (selected SPEC PASS, whole QUALITY PASS with five P3s;
+`a337161c`), and **recovery has integrated P08** (`b38b4b3e`, then the F06 appendix in
+`9f351a00`). Recovery's product tree equals the tested integration branch `ad1045b8`.
+SAME9db now runs the whole-P08 integration review (conflict resolutions and
+reconciliations 1–6). The A08, A10 and A13 parents close after that review and the joined
+checks: the kit (`p08int-kit`) and the other 148 entries (`p08int-rest`, three failures
+so far).
+P09's installed closure is integrated (`da5a599b`), and A09.5/A17.5 are closed.
+P13: the installed-consumer closure is accepted and integrated (`1e41deb0`), and A18.3 and
+A18.4 are closed. The fan-in is accepted and integrated (`cd877232`, review preserved in
+`2172dd31`), and A19.3, A19.4 and A20.4 are closed. Its N4 becomes reconciliation 7; N3 and
+N5 are an optional owner follow-up for a recheck by `30146eab`.
+P14: the A23 unit (product `96bd5bab`, report `0a091f34`, on `ad1045b8`; final run 8/8 in
+963 s; an 81-row matrix) is frozen and under review by `6310f7ad` (Opus 5.5).
+P10 F-INT-5: the test-only repair `b7555ca3` / `b7cf10ef` is with SAME `1578dfd8`.
+Operator question (2026-09-24 17:58): why is nothing pushed? Answer: everything is committed
+locally (682 commits); L-045 holds publication until the final accepted batch. The offer to
+push a draft PR early got no answer (the operator is away), so L-045 stands. Push and PR
+follow directly after the last gates: P08 integration review, A23, F-INT-6 and A23.5.
+A14.5 (2026-09-24, about 19:25; session record 19:30:41): the operator authorized the Microsoft npm feed proxy
+(`packagefeedproxy.microsoft.io`), and a credential-free synthetic probe resolved vite 8.3.0.
+The framework half is released to the P11 owner (`cf483bc8`). V1 needs an image-capable
+observer. A15 stays open: its Word/Excel, PDF-raster and P12 record-persistence denials are not
+npm-related, and the question about lifting them went unanswered, so no authorization is assumed.
+P15 (coordinator): the Windows CI job cannot fit 30 minutes. The sharding and timeout
+decision follows from the joined run's per-entry durations.
+Host note (2026-09-24, 14:00 UTC): host commit-memory exhaustion killed the coordinator's
+async runs and keeper. Exit `3221226091` (`0xC000012D`) with a 0-byte log means `bash.exe`
+could not start, so that result is environmental, not a test result. `/tmp` is now pinned to
+SAME9db's `%LOCALAPPDATA%\Temp\i9f\r2\t`, kept on request, and the new keeper is
+`msyskeeper2`. At 14:42 UTC a session restart killed that keeper and the `fin1` runs. `/tmp` now
+resolves to `30146eab`'s `%LOCALAPPDATA%\Temp\p13v\t`, kept on request and held by `msyskeeper3`.
+The joined runs restarted as `fin2-*` on `3d7f1284`. Earlier:
+Host note (L-049): the host-wide MSYS `/tmp` mount moved at about 07:30 to
+`%LOCALAPPDATA%\Temp\p10n1\r0\temp`, after the shared table reset while no MSYS process
+was running. The launcher guard keeps that root after its run, and a keeper MSYS `sleep`
+in the coordinator session holds the table. Keep `p10n1` until `mount` shows `/tmp`
+elsewhere; `a13t1` can go once nothing uses it. F06 step
+1 stopped on that host warning; recovery is `consume-02` under `dcdaa44e`/`b8803e29`.
+All native leases are revoked;
+no target changes are released merely by the proposed evidence design.
+Source `70469296` and bound inputs stay frozen; no fourth actor.
+P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
+`c544fd0`. Native release `acc18df` permits the original controller's sequential
+neutral/rapid/strict/fresh-strict experiment. Neutral actor `7742184c` completed
+actual T001, then the runtime rejected its follow-up BUILD because it was a
+synchronous task. The P14 card now permits exactly one new background neutral
+continuation, at most five total implementer contexts including the plan-only
+actor. Actual background continuation `7169bb1a` implemented neutral T002.
+Recovery88 independently passes complete neutral SPEC then QUALITY in
+`reviews/P14-neutral-native-01.md`, preserved with the native milestone in
+`e0a18a9`. Controller11 and reviewer11 business methods are separate runs;
+eight additional reviewer probes pass. Exact decision `cfa1c812` and handoff
+`1598c17c` were returned to the distinct controller. It now reports actual
+producer/latest-reader/QA0/0/0, SAME7169's T003 checkbox-only progress and
+postprogress reader/QA0/0, local CAPTURE and quiescence. Final cross-profile
+intake below now verifies those receipts. Actual rapid actor3 `f1030ad2` separately passes
+recovery88 SPEC then QUALITY in `b14d927`, not by transferring neutral acceptance.
+Required profile loading is independently verified; its advice stays advisory.
+Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
+`847ce8d0` were returned for actual rapid host/producer/latest-reader/QA,
+original T003/local CAPTURE and quiescence; the controller reports those
+completed, with exact receipts frozen in final report `13c18a0`.
+Strict PLAN context4 `6cc62d16` completed a bounded T001 formatting rework: its
+explanatory QA table's generic `ID` header made the real reader find three
+unassigned pseudo-tasks. Command47 failed before phase progression. SAME4
+renamed only that header to `QA control`; exact replacement and the real reader
+then passed with only the original three tasks. Plan `d09c16db` preserves the
+actual pre-BUILD pause with the original stub and context4 revocation. Final genuinely fresh context5
+`5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` actually recovered from literal original
+paths/durable handoff, verified the same live pin and then implemented strict
+after real pre-BUILD SC2. The same actor performed substantive finite TQ;
+original P09 request/start/result and all three typed obligations are retained.
+Separate recovery88 strict SPEC then QUALITY passes in `ed45a73`: independent
+business11/atomic2/eight probes/two fresh non-clearing domain consumers pass,
+with all53 candidate/cold and nine recovery-store files unchanged. Decision
+`7ab7f5dc`/handoff `39717efc` returned to the distinct controller and cleared real
+host/producer/latest-reader/QA/P09 consumption, then original progress/
+local CAPTURE and final three-profile synthesis. No provider fix, sixth actor
+or waiver; the original plan remains substantive-byte unchanged.
+Final whole A24 acceptance now passes in
+`reviews/P14-cross-profile-final.md` on report-only `13c18a0` and immutable
+packet `c9a5a3ce`. All three separate decisions were actually consumed, original
+progress rechecked and local capture completed. Recovery verifies all 253 final
+artifacts, 565 source files, 18 raw fixtures, 70 controller events, seven old
+preparation histories and 13 fresh current read-only consumer calls. Five actual
+contexts, source/target identities, earlier failures and unknown model/usage/cost
+remain; SHIP is skipped. This closes A24's finite local experiment only, not
+A23/full P14 or the remaining installer/format/CI/remote gates.
+Preserve the original plan, refusal and genuine fresh strict recovery; the
+extra neutral handoff is an intervention, not same-context reuse. Source raw
+archive/Git identities remain distinct; all565 source and18 raw fixture pins
+were independently verified without rewriting the `c544fd0` baseline.
+The shape runner previously reported 39 passes, including on exact `924a40c`,
+but inspection found the manifest guard hid unavailable jq parity as a NOTE.
+A real-script RED/GREEN regression now verifies SKIP/partial reporting and strict
+refusal without executing or replacing jq. Earlier reported counts remain
+history, not full strict coverage. The corrected complete shape scope on frozen
+`c6ebaec` now records 39 passes, zero failures, one partial suite and exit 1,
+honestly refusing missing parity. The current full strict runner, required
+installed P10 case and original artifact gates remain. The same focused scan
+found two more hidden-skip producers in hook-input and plugin-manifest tests;
+real-entry RED/GREEN now verifies missing-tool partial reporting, no false
+valid-JSON output, real valid/malformed Python parsing and parser-error failure.
+Production hooks/manifests and denied jq/CI routes are unchanged.
+The ten additional
+optional families pass independent `8f0f7dc` and are
+integrated in `c62606b`. Actual committed clone coverage `2b672bb` passes for
+all twelve selections, resources/notices and refusal paths. This closes the
+source metadata/core, one-catalog/honest-routing and provenance-retirement leaves,
+not native utility or P10. `6885d9e` reconciles accepted pipeline preflight and
+explicit document-content unions without forcing them onto standalone formats.
+Release `8c9ab714` advances the still-open native-utility portion with one
+declared demo-script example on read-only accepted source `9c15d690`.
+The original P13 owner (bef/projectc4) retains control; one fresh drafter is the
+maximum, with actual arc approval before narration and original486's separate
+critique after the frozen return through88. This is not P10, native rendering,
+source maturity or full A18.3/A19.4 acceptance. Original79/113 is unchanged.
+The native case is now frozen at manifest `2817e492` / case `7964b27b`.
+One actualb9fd8733 context completed Plan, controller approval and same-context
+Junior narration. Parent intake01 binds all1,055 files and exact two new drafts;
+all434 exported source blobs match accepted9c15. SAME486 now performs the
+actual independent critique and bounded SPEC/QUALITY. Unknown injected-context
+visibility, initial ZIP/CRLF RED, unchanged owner/source and all broader
+installer/format/maturity gates remain explicit. No acceptance count changed.
+Actual original486 critique is now complete: bounded SPEC PASS then QUALITY
+PASS_WITH_ADVISORY_P3, handoff `2180ffb4`. Parent intake01 binds52 reviewer
+evidence files/11 artifacts and unchanged1,055 case inputs. N01 is optional
+wording repetition, not a required defect; no new draft is commissioned.
+This one native selected-method utility proof is accepted and captured:
+report-onlyec5dfef2 is integrated asdde0d0c8 with the exact full old prefix.
+The original owner/reviewer are parked; full A18.3/A19.4/P10/final-map gates remain.
+
+### Historical integration chronology
+
+The records below preserve prior checkpoints and failures. The current recovery
+summary above and the linked handoff supersede their then-current pending states.
+
+**Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
+audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the
+source worktree. A separate verified Git bundle retains the complete Swarming history.
+
+**Scope:** all A01-A26, useful function/method preservation, actual Universal client boundaries,
+stable profile/work/review contracts, short leaves with package execution, independent review.
+The [work map](../plans/universal-implementation/work.json) selects the sole task source.
+See [handoff](../plans/universal-implementation/handoff.md) for current worker and integration state.
+
+**Verified checkpoint:** independent spec and quality review accepted the historical Swarming
+merge at `e74849d`; report `4bf5315` and both ancestries are integrated in `40c2795`. All 76
+delta destinations are preserved and 17 historical topology/brief/report/review artifacts
+are unchanged. This closes only A22.1/A22.2, not the SW fixes or final A22 integration.
+
+**Accepted products:** after scoped repairs and independent spec then quality review,
+P01 trusted helpers, P02 private sync and P03 context/recovery are integrated at `a2ef318`,
+`39561c0` and `9a1cf17`. Exact reviewed blobs and selected joined consumers passed; source
+catalog was regenerated and checked. Earlier rejected reports remain history, not current
+verdicts. P07 combination, remaining role/browser consumers and final platform checks are open.
+
+**Further accepted components:** P04 final `279dfc9` accepts `aa73651`, integrated in
+`490a0f4` with report history `8964267`; P07 final `3d8e715` accepts `a8de574`, its owned
+commit sequence integrated through `62ca389` without replaying P04's dependency. Exact
+source comparisons and selected joined consumers pass. P01's copied fixture needed real
+profile dependencies after that join; `d7eb92f` corrects the fixture only and six tests pass.
+
+P06 provider/adapters are also independently accepted: exact product `7425960`, report
+`1067da29`, integrated `36593cd`. C01-C07 are closed. Joined regeneration exposed and
+repaired a wiki schema-reader mismatch (JSON envelope, optional legacy pack field);
+actual source-derived metadata, error refusal, idempotency and local adapter checks pass.
+
+**What's pending:** P04 final A22.7 remains open. P05's `9c8ef727` consumer was rejected
+by report `0cdbf596` for lost excerpt-classification identity. Its repair `b023e8c`
+now passes complete owned spec and first whole quality in `33eac071`, integrated
+with history in `c5c8f86`. All 29 product/provider blobs match; focused Q01, current
+P07 bridge, mandatory-control, hook/source-target and generated/shape checks pass.
+The reviewer's cleanup ERROR remains historical; its exact two empty directories were
+later inspected and removed nonrecursively by the coordinator. The provider remains
+unchanged and accepted. P07's native long-path repair `4d001463` passed independent spec/quality in
+`a7450597` and is integrated as `c344133` with reports through `56de830`; eight joined
+adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c88c`;
+the operator requires installation without Python (ADR-0030) and explicitly approved
+existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
+Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's root
+routing/PLAN product `171daa8` / report `723b067f` is frozen after the second
+independent SPEC FAIL. Intake is verified, not acceptance; an exact reviewed-core
+join and two fixture consumer migrations precede combined review.
+Joined product `2f4cc38` preserves the frozen root/core blobs. Its verification
+stopped on synthetic Git-ancestor discovery and two unrepresentable exact-size
+fixtures; only the private harness correction in the P08 card is released.
+The interrupted aggregate and uninspected host output capture are not acceptance.
+Final report-only `8eb00b87` now records the corrected 22-command joined run on
+unchanged `2f4cc38`, with complete explicit 26+2 fixture coverage. Intake is verified
+and the original reviewer is completing selected-subset SPEC before eligible QUALITY.
+That review is now frozen as `402fd804`, preserved `26c80a0`: two P2 compound-head/
+newline findings, selected SPEC FAIL and QUALITY NOT STARTED. Mechanical F03 is
+closed from valid c20; q02 is INVALID and home effects UNKNOWN. The original P08
+owner has the bounded class repair and must plan actual semantic/host evidence,
+not substitute another mechanical-only pass for the remaining original controls.
+P10's migration F01 is independently closed
+by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
+A13 remains gated.
+
+Joined investigation `990b0daa` reopens A01.2/A01.4/A11.1: ordinary Python long-path
+I/O, Git ref handling and fixture cleanup are distinct boundaries. ADR-0031 and the
+P03 card authorize a first shared-path core/extraction unit, followed by separately
+owned P10 consumer work after independent acceptance. No global settings, shortened
+defaults, identity/schema migration or real-home inspection/rollback is authorized.
+The reviewed core `ce7415f` + fixture `5fc657f` now passes independent spec/quality
+in `062d0f20` and is integrated as `1d44d2a`, with all 16 product paths exact.
+Core checkpoint/snapshot/bisect leaves are reclosed, restoring 52/113 original items.
+The classic adapter's 256->263 publication and full P10 default init/check/recovery
+remain blocked under their separate consumer gate. P10's original owner has a bounded
+exact-dependency/direct-I/O follow-up; no inventory/schema/store-policy redesign or
+A13 release. Its four additional adapter metadata/read sites are explicitly scoped
+in the P10 card; both active streams still require immutable product/review checkpoints.
+Earlier failed and diagnostic-only evidence is preserved.
+P10 consumer `a31c5eb` / report `f7d2151` is frozen with new builder passes, not
+independent acceptance. After failed bounded Git-root/setup variants, the operator
+selected documented pre-write refusal for unverifiable Git operations, not expanded
+compatibility work. The P10 card now scopes that final error/preflight/doc follow-up;
+original default/classic/canonical dimensions and independent gates stay unchanged.
+The later refusal product `a559c9f` / report `4c0519e3` is now frozen and its scope,
+protected runtime/test identities and report are verified. The original reviewer is
+completing full P10 SPEC before the first eligible whole QUALITY; no acceptance yet.
+That review now reports a real scaffold user-content overwrite at an existing
+long plain-folder target, distinct from the Git limitation. Immutable report
+`c1a38a03` is SPEC FAIL, P1 F02; testing stopped and QUALITY has not started.
+Report-only rejection is preserved as `3649dc5`. The original builder's bounded
+native-observation/producer-expectation repair is now scoped in P10; no shared
+transaction/core/schema or Git compatibility redesign is allowed. Same-reviewer
+complete SPEC and first whole QUALITY remain required.
+The operator challenged the prolonged pathing focus on 2026-09-21. The target is
+useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
+Close only the bounded active P08/P10 corrections and required review, then advance
+dependency-ready skill depth and client experience. Reconcile any newly proposed
+infrastructure blocker with the original outcome before expanding scope (L-038).
+P09's content unit is independently accepted by `19eb776` and integrated in
+`4983af2`: 61 improved/eight retained roles, all 69 frontmatters and five domain
+references. Joined 12-method/catalog checks pass and reviewed source identity is
+exact. The data-core unit `ea92df8` / report `53145bd` is now frozen, its intake
+verified, and with the existing P09 reviewer. It uses accepted P03/P05/P07 only;
+P08/module procedure binding and original parents remain gated.
+P08 is repairing F04/F05 and planning the original semantic/host evidence; P10 is
+repairing F02 under the clarified consumer-admission/write-set contract.
+P11 owner `f413bdcb` has frozen blocked A16 source and only the bounded native
+location/conditional owned-fixture scope. P09 module-runtime binding and P11 A14/design/agent work
+retain their predecessor gates; no whole-package acceptance is implied.
+P10's frozen F02 product `a797b2d` / report `7bf5a31` is back with the same reviewer
+after verified intake; full SPEC/QUALITY remain open. P12 owner `0a75211f` is
+implementing the standalone content/Word/PPT unit; shared-design wiring remains
+gated. Native artifacts are being exercised, not accepted from method prose alone.
+Continue P08-P14 in dependency order,
+not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
+`1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
+and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
+
+Original Swarming worktree remains at `275a354`. On 2026-09-21 the operator authorized
+final accepted PR/CI/main merge and scoped cleanup for this initiative. The new
+account-selected CLI credential was verified as `jokerman89` during the 2026-09-22
+continuation; authenticated reads
+confirm main is still `28061e4`, push permission and merge-commit support. Verify
+each publishing path's actor; rejected injected credentials remain forbidden.
+No release/tag, production/deployment, private sync or dormant-hook activation follows.
+Preserve original histories/reports/backups and unrelated or unmerged work during cleanup.
+The canonical nine phases remain unchanged; resume is a utility, not a replacement
+phase or shortened lifecycle (L-039). The morning target does not waive acceptance.
+
+## Completed — Universal whole-system quality audit (2026-09-20)
+
+**Status:** COMPLETE as an audit and prioritized action list, not as implementation.
+Isolated worktree `.claude/worktrees/universal-audit-20260920`, branch
+`codex/universal-audit-20260920`, main baseline `28061e4`. Original `codex/swarming-work`
+checkout remains untouched. Audit artifacts and these continuity updates are local and uncommitted.
+
+**Outcome:** all126 canonical skill bodies and69 agent bodies read; all771 baseline files
+inventoried; runtime, current documentation, official client surfaces and pinned upstream methods
+reviewed. Independent synthesis review completed, with precision corrections applied.
+See [report](../engineering/audits/2026-09-20-universal-quality/report.md),
+[action list](../engineering/audits/2026-09-20-universal-quality/action-plan.md) and
+[verification](../engineering/audits/2026-09-20-universal-quality/verification.md).
+
+**Operator requirements:** Universal CLI and desktop support; preserve and enrich all valuable
+functionality/knowledge/use cases. Preserve the entire Swarming initiative as far as feasible,
+including planning/coordination/manual handoff when native concurrency is unavailable. All76
+branch-delta files are mapped in the [preservation record](../engineering/audits/2026-09-20-universal-quality/swarm-preservation.md).
+Keep ADR0026 short leaves plus coherent packages and independent substantive review.
+
+**What's pending:** separately scope implementation from the26 proposed outcomes. Prioritize unsafe
+recipes, stale/false clearance, trusted source boundaries, private sync destination, then Universal
+profile/work/evidence contracts and rich capability integration. No product fixes, source removals,
+private profile activation, full suite, paid model benchmark or complete host matrix occurred.
+Do not treat prior September8 main-delivery authorization as approval for a new merge batch.
+
 ## Completed — enterprise value review (2026-09-08)
 
 **Status:** COMPLETE. [PR #84](https://github.com/jokerman89/lintel/pull/84) merged to main at `bb1a16cdf3ce2d53f75623d30d37b528b9bb9393` on 2026-09-08T15:15:12Z.

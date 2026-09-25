@@ -1,5 +1,33 @@
 # Work index — current initiative and historical plans
 
+Current initiative: [Universal implementation](universal-implementation/work.json), coordinated by
+MasterSession's recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
+Follow its [current handoff](universal-implementation/handoff.md); the original plan remains
+the sole task ledger. The entries below are preserved history.
+
+Current review checkpoint: 79/113 original acceptances. Complete P08 selected
+SPEC `624b554f` is BLOCKED on F06/A10.3; whole QUALITY has not started.
+The negative-control method and private M01 correction pass their bounded
+reviews. The first exact candidate-only release is SAMEc2/ship-direct;
+its actual negative execution, independent verdict and consumer gates remain.
+Direct's single negative suite ran, but final pin stopped on additive MAIN
+checkpoint metadata. Private preservation accounting is being corrected;
+candidate review waits for a verified pin, without any test/QA replay.
+
+## Historical: first-class swarming work — 2026-09-08
+
+Historical initiative: [work map](swarming-work/work.json), [plan](swarming-work/plan.md),
+[specification](swarming-work/spec.md), [handoff](swarming-work/prompt.md), and
+[swarm charter](swarming-work/swarm/charter.md).
+
+The original operator authorized delivery from vision through reviewed PR merge to `main`.
+Swarming is an opt-in execution profile; ordinary BUILD stays sequential. The historical phase was
+BUILD; the recorded planning gate passed with no unresolved P0–P3 findings. Those claims describe
+the original branch, not current integration acceptance or standing remote authority. Current
+preservation and repairs are P04 in the Universal implementation plan.
+
+---
+
 ## Copilot enterprise launch — 2026-09-08
 
 Completed initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). All seven build cards and 31 leaves delivered through [PR #83](https://github.com/jokerman89/lintel/pull/83), merged to main. See the [completion review](copilot-enterprise-launch/review.md) for exact CI evidence and environment-specific beta acceptance boundaries.
@@ -329,7 +357,7 @@ bin/_audit.sh, lib/state.sh, secret/customer hooks, _patterns.sh, _input.sh) are
 audit-writes-via-helper.sh caught a raw-append contract violation (the only test I broke; now green).
 One deviation flagged for operator: plan-design-review:75 external gstack `design` binary — NOT in the
 ADR row list, already guarded/optional/off the required path; left intact pending decision.
-# Current: independent enterprise value review (2026-09-08)
+# Historical: independent enterprise value review (2026-09-08)
 
 Isolated baseline `6b10a84`; parent checkout belongs to another active session.
 See [plan](enterprise-value-review/plan.md), [specification](enterprise-value-review/spec.md) and [handoff](enterprise-value-review/prompt.md).
@@ -355,3 +383,30 @@ with eight targeted scripts passing after the rebase. CI and integration review 
 remain context, not this initiative's authority.
 
 ---
+
+## Historical: Universal whole-system quality audit (2026-09-20)
+
+- [x] Establish isolated main baseline and the review rubric.
+- [x] Audit every canonical skill and agent, cross-component contracts, runtime and documentation.
+- [x] Compare relevant original harnesses and current client surfaces using primary sources.
+- [x] Deliver an independently challenged action list with evidence and acceptance criteria.
+
+Authority: audit and recommendations only. [Execution plan](universal-quality-audit/plan.md).
+The unmerged swarm branch is a separate delta; this audit does not implement or merge it.
+The September 8 delivery remains complete.
+
+Review: audit complete, independently challenged and corrected. See [report](../engineering/audits/2026-09-20-universal-quality/report.md) and [26 proposed actions](../engineering/audits/2026-09-20-universal-quality/action-plan.md). Product implementation is not complete or authorized by this checklist. Preserve all valuable capabilities and the entire Swarming initiative as far as feasible.
+
+## Current: Universal implementation (2026-09-20)
+
+The operator now explicitly authorizes implementation of all 26 outcomes, preserving useful
+capabilities, Swarming history and ADR-0026 hybrid execution. The audit checklist above remains
+historical evidence, not implementation completion.
+
+Authoritative [work map](universal-implementation/work.json),
+[implementation plan](universal-implementation/plan.md),
+[specification](universal-implementation/spec.md) and
+[handoff](universal-implementation/handoff.md).
+MasterSession owns common state and integration; isolated workers implement bounded packages
+and separate reviewers inspect exact results. First wave: P01-P04. Remote delivery requires
+verified `jokerman89` credentials; no main merge or production action is authorized.

@@ -16,141 +16,117 @@ cli_support:
 
 # /li:help
 
-Meta-skill. Lists what Lintel makes available in this session so the operator knows what they can
-run, without grepping the plugin tree. A quick in-session lister; for the full generated reference
-see `/li:catalog` (it builds `skills/CATALOG.md` from frontmatter), and for install/version health
-see `/li:doctor`.
+List the source-declared skills and agents using the same compact inventory as catalog and
+skill-router. This is not a list of tools actually registered or permitted in the current host.
+Do not turn a frontmatter support hint, a hook file or a native wrapper into execution evidence.
+For installation/version health use `/li:doctor`; this discovery read changes no installation.
 
 ## When to use
 
 - First session after install — discover what's there
 - Picking the right skill for a task (filter by category)
 - Onboarding a teammate to Lintel
-- Debugging "is this skill available?" / "is it the right CLI?"
+- Finding a source method and distinguishing it from observed host availability
 
 ## Inputs
 
 Optional flags:
-- `--category <name>` — filter to one category (`plan`, `qa`, `ship`, `compliance`, `voice`, `meta`, `ops`)
+- `--category <name>` — exact display category (`plan`, `qa`, `ship`, `compliance`, `voice`, `meta`, `ops`, or an agent category)
 - `--voice <internal|customer|mixed>` — filter by voice tier
-- `--cli <claude-code|codex|copilot>` — show only skills supported on a specific CLI
+- `--cli <surface-or-alias>` — filter declared hints through the accepted surface registry, not measured support
+- `--selection <id>` — use an existing additive source selection; no installation change
 - `--verbose` — include description per entry (default: one-line entries)
 
-No arguments: full list grouped by category, one line per skill.
+No arguments: source-declared skills and agents grouped by category. Counts come from the
+returned inventory, not a hardcoded fleet or hook count.
 
 ## Workflow
 
-Lintel ships as a plugin, so skills/agents/hooks are resolved from the installed plugin — not from a
-hand-managed `~/.claude/` tree.
+1. Resolve `LINTEL_SOURCE_ROOT` from the loaded trusted adapter or explicitly selected Lintel
+   source. Keep it separate from the working project's `LINTEL_REPO_ROOT`. Never fall back to
+   arbitrary target code, personal settings or another checkout.
+2. Use an available permitted shell and Python 3.9+ to read metadata:
 
-1. Resolve the plugin root: `${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}`.
-2. Glob `"$root"/skills/*/SKILL.md` for the available skills (they are invoked namespaced as `/li:<name>`).
-3. Glob `"$root"/agents/*/*.md` for the subagent fleet (resolve by name via the Agent tool).
-4. For each skill/agent, parse YAML frontmatter for: name, description, voice, cli_support, color.
-5. Filter per operator's flags.
-6. Group by category (heuristic from skill name: `plan-*` → plan, `qa*` → qa, etc.).
-7. Output structured list. Read the plugin version from `"$root"/.claude-plugin/plugin.json`.
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
+   ```
+
+   Pass only supplied filters, as separate quoted literal arguments. `--verbose` changes
+   presentation, not the query. `python` may replace `python3` when that is the installed
+   Python 3 command. See the [single metadata reference](../catalog/references/metadata.md).
+3. Present the returned names, categories, declared voice/support hints and aliases. Use
+   full descriptions when requested; retain template/staged warnings even in a short view.
+   An absent level or `maturity: unknown` stays unknown. Do not label a `full` declaration
+   as implemented or tested. Registry aliases select one surface, not the whole client family.
+4. Listing requires no prompt bodies. Only after an entry is selected, read its returned
+   `path` relative to the same trusted `source_root`. For an agent, a role file is not proof
+   of native registration: inspect the current host's real delegation API and inventory.
+   If unavailable, offer the selected role as explicit serial/manual guidance, without
+   claiming independent execution or bypassing a denial.
+5. For hooks or actual availability questions, inspect the chosen host's real tools and
+   evidence only when requested and permitted. The catalog does not inventory activated
+   hooks. Missing observations stay unverified; use `/li:hooks-status` through its actual
+   adapter or explicit canonical-file fallback rather than making up counts or enablement.
+
+### Selected capability
+
+For an explicitly selected capability, use this instead of the ordinary all-kind query.
+`selection` is a literal ID, such as `demo-script`, not command text. `python_cmd` may
+name the inspected Python 3 executable when it is not `python3`.
+
+```bash
+: "${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
+: "${selection:?select a nonempty capability ID}"
+"${python_cmd:-python3}" -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" \
+  --json --selection="$selection"
+```
+
+Use catalog's `--json --list-selections` to discover IDs separately. Repeat `--selection`
+only for distinct explicitly requested IDs; never expand a wildcard or concatenate a shell
+command. Existing filters may narrow this query's entries, but its shared core, dependency,
+resource and provenance closure remains required. See the
+[single selection reference](../catalog/references/selections.md).
+
+For the demo-script example, present DemoNarrativeArc, DemoNarratorJunior and
+SlideNarrationCritic as source methods. Read only the selected role after the operator's
+Plan/draft/critique need is known; listing the closure does not load unrelated bodies.
+Missing delegation retains a manual method and an outstanding independent-review gate.
 
 ## Report format
 
-**Default (full list):**
-```
-Lintel v<version> — <N skills>, <M agents>, <K hooks>
-
-## Plan (<count>)
-- /li:plan-ceo-review     [internal, all CLIs] — Strategy & scope review
-- /li:plan-eng-review     [internal, all CLIs] — Architecture & tests review
-- /li:plan-design-review  [internal, claude-code] — UI/UX gaps
-- /li:plan-devex-review   [internal, all CLIs] — DX gaps
-
-## QA + debug (<count>)
-- /li:qa                  [internal, claude-code] — Real-browser testing
-- /li:qa-only             [internal, claude-code] — Test-only flow
-- /li:investigate         [internal, all CLIs] — Bug forensics
-- /li:review              [internal, all CLIs] — Diff-scoped pre-ship review
-
-## Voice (<count>)
-- /li:eval               [internal, claude-code] — Calibrate the pack's voice corpus
-
-## Compliance (<count>)
-- /li:compliance-gate    [internal, all CLIs] — Run the active pack's compliance gates
-
-## Meta + ops (<count>)
-- /li:context-save       [internal, claude-code] — Save checkpoint
-- /li:context-restore    [internal, claude-code] — Read checkpoint
-- /li:clean              [internal, claude-code] — Manual self-maintenance
-- /li:help               [internal, all CLIs] — This skill
-- /li:doctor             [internal, all CLIs] — Install/version/hook health check
-
-## Agents (the plugin fleet)
-- CodeReviewer           [engineering, claude-code] — Reviews diffs for correctness/quality/security
-- SecurityAuditor        [security, claude-code] — Injection/secret/auth-bypass audit
-- ...  (run /li:catalog for the full list)
-
-## Hooks (activation per ADR-0008)
-- Auto-registered on plugin install (9): session-digest, secret-scan-block, customer-data-block,
-  no-secrets-in-edit, no-direct-main-push, memory-budget-warn, cycle-incomplete-warn,
-  cycle-position-inject, no-customer-data-in-message
-- Opt-in module warn-hooks (24): the ta/da/sc/dh/tq-* warn hooks — enable via a `~/.lintel/hooks`
-  symlink. Run /li:hooks-status for live state.
-```
-
-**Filtered by category:**
-```
-> /li:help --category qa
-QA + debug skills:
-- /li:qa            [internal, claude-code]
-- /li:qa-only       [internal, claude-code]
-- /li:investigate   [internal, all CLIs]
-- /li:review        [internal, all CLIs]
-```
-
-**Filtered by CLI (Copilot user):**
-```
-> /li:help --cli copilot
-Lintel workflows supported on GitHub Copilot:
-- /li:plan-ceo-review   [internal]
-- /li:plan-eng-review   [internal]
-- /li:investigate       [internal]
-- /li:help              [internal]
-- /li:doctor            [internal]
-
-Use native li-* skills from .github/skills (for example /li-plan where slash discovery is available), or ask Copilot to load the matching skill. The CLI plugin supplies the same adapters. Lintel hooks are not ported.
-```
-
-## Edge cases
-
-- **Plugin root not resolvable:** report "Lintel plugin not detected — install via `/plugin install li@jokerman-lintel`, then restart the session."
-- **Skill missing frontmatter fields:** flag the skill (`⚠ <name>: missing cli_support`) — report it.
-- **Filter matches zero skills:** report "no skills match these filters" + suggest dropping a flag.
-- **Version drift across CLIs:** defer to `/li:doctor`, which is the cross-CLI drift checker.
-
-## Failure modes
-
-- **No `skills/` under the plugin root:** report "no Lintel skills found at the plugin root."
-- **Frontmatter parse error in a skill:** skip that skill, report which one was unparseable.
-
-## Examples
+Populate this shape from the query; these are placeholders, not measured availability:
 
 ```
-> /li:help
-[full list output]
+Lintel source inventory — <matched> of <total> declarations
+Source: <trusted source_root>
+Evidence: source-metadata; execution not observed by this query
 
-> /li:help --category compliance --verbose
-Lintel compliance skills:
-- /li:compliance-gate  [internal, all CLIs]
-    Runs the active pack's compliance gates (`resolve_pack_field
-    compliance.hooks`; none by default). Surfaces results; does NOT
-    enforce — operator confirms.
-
-> /li:help --voice customer
-Lintel customer-voice skills:
-- /li:eval  [claude-code]
+## <category>
+- <kind>:<name> [<voice>; <declared surface and level>; maturity unknown]
+  <description, including any staged/template warning>
+  <source-relative path; aliases and migration note where applicable>
 ```
+
+Use `/li:<name>` only for an applicable plugin route. For a verified native `li-*` wrapper,
+show that host's actual invocation; otherwise name the canonical file and explicit read
+fallback. Do not imply that the query installed, registered or activated anything.
+
+## Errors and fallback
+
+- A valid zero-match response means no source declarations match; suggest a broader filter.
+- Missing/empty/malformed source or parser failure is an error, not a partial list. Report
+  it without skipping broken entries, regenerating the catalog or inventing support.
+- Without the helper/interpreter/parser, use the trusted committed `skills/CATALOG.md` as
+  a disclosed skills-only snapshot, or read an explicitly named selected file. Do not
+  recreate the inventory by globbing and parsing every skill/agent body in model context.
+- Missing trusted source or denied read permission blocks discovery; never choose another
+  root or channel to bypass that boundary. Dependency installation needs its own authority.
 
 ## See also
 
-- `/li:catalog` — the full generated skill reference (built from frontmatter)
+- `/li:catalog` — compact discovery and explicit source-maintenance generation
 - `/li:doctor` — install + version + hook-firing health (cross-CLI)
 - `/li:hooks-status` — live hook activation state
 - `AGENT-INSTRUCTIONS.md` — canonical session-start ritual
