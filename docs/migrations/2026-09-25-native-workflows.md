@@ -49,9 +49,9 @@ An installed file is not evidence of native discovery or a completed client test
 | `help`, `v4-migrate` | `/li:catalog` or `/li:welcome` for navigation; `/li:migrations` for historical inspection and explicitly authorized apply/rebind guidance. |
 | `personas-rotate` | `/li:role --audience [name]` and `--clear-audience`, using configured persona sources. This is a conversation overlay, not a change to the persistent working role. |
 
-The PDF writer remains supported. The `make-pdf` print route stays available until its
-options and resource consumers are joined to `generate-pdf`; do not remove a working
-writer or claim a PDF reader/inspection result during that transition. Workbook, slide,
+The PDF writer remains supported. The former `make-pdf` print route is folded into
+`generate-pdf`, which carries its print options and provider; there is still no PDF
+reader, so do not claim a PDF reader/inspection result. Workbook, slide,
 Word and other format providers are not an optional cleanup quota.
 
 `verify --json` retains compatible reporting fields (`runner`, `passes`, `failures`,
