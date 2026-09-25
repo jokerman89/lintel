@@ -1,17 +1,7 @@
----
-name: scrape
-layer: foundation
-description: Use to extract structured data from authorized pages with selector schemas, explicit pacing, visible failures and prior-run comparison.
-color: green
-tools: Read, Bash, Glob
-voice: internal
-cli_support: [claude-code, codex, copilot]
----
+# Extract pages mode
 
-# /scrape
-
-Declarative multi-page sibling of `/browse`, using the same
-[browser operations and ownership](../browse/references/browser-operations.md).
+Use `/web-session --mode scrape` for declarative multi-page extraction, using the same
+[browser operations and ownership](browser-operations.md) as browse mode.
 Keep research, documentation harvesting, small datasets and prior-run comparison.
 This is not a high-volume scraping platform or permission to collect customer data.
 
@@ -46,7 +36,7 @@ fields:
 
 `name` is the field key (the earlier workflow's `field` wording was inconsistent).
 Require unique nonempty names and selectors, boolean `multi` when present, and a
-known transform. The delivered `scripts/extract.mjs` consumes this **parsed** schema,
+known transform. The delivered [`extract.mjs`](../scripts/extract.mjs) consumes this **parsed** schema,
 uses the same browser's `read` operation, and implements trim, text and
 number_extract without evaluating supplied code. Ambiguous numeric strings produce
 an explicit field error; do not guess locale/currency or silently emit NaN.
@@ -70,7 +60,7 @@ browser's existing read bound do not enter a backtracking regular expression.
    A disallowed path is skipped with a recorded reason; inaccessible/ambiguous
    rules remain unresolved. Do not auto-invent an `--ignore-robots` permission.
    An explicit permissible exception needs its own documented scope.
-4. For authenticated data, follow `/setup-browser-cookies`. Keep the user-chosen
+4. For authenticated data, follow `/web-session --mode cookies`. Keep the user-chosen
    surface; if it cannot support this extraction, preserve a manual task instead
    of transferring a session or acquiring personal cookies.
 5. Schedule the next permitted URL only after the same-host interval. Load with
@@ -101,4 +91,4 @@ Do not fabricate duration, robot-policy clearance or success from a JSON file's 
 
 Keep extracted content within the authorized scope; do not include credentials,
 customer data or personal account information in examples or retained artifacts.
-For visual verification use `/browse`; for a composed PDF use `/make-pdf`.
+For visual verification use `/web-session --mode browse`; for a composed PDF use `/make-pdf`.

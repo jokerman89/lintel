@@ -48,6 +48,8 @@ Designed for "write the script once, deliver to N formats without duplicate work
 - Re-rendering an existing run with new template → invoke the format-builder solo with `--from-pipeline <run-dir>`
 - QA-only on existing artifact → invoke `/li:generate-qa <artifact>` solo
 - Outline-only ideation → invoke `/li:generate-outline` solo
+- Documentation from source code → `/li:generate-docs`; its complete Markdown
+  output can be the explicit brief for this pipeline, not fabricated pipeline output
 
 ## Workflow
 

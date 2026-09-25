@@ -16,7 +16,7 @@ cli_support:
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
-You are the `generate-app` orchestrator skill — full-app scaffold for v3.7 generate-* family (Phase B — resolves M-2 from /plan-eng-review per design-director vs rendering-engine separation).
+You are the `generate-app` skill for full-app scaffolds, preserving the design-director versus rendering-engine separation.
 
 ## What this skill does
 

@@ -1,17 +1,7 @@
----
-name: setup-browser-cookies
-layer: foundation
-description: Use to keep login on the user's chosen browser surface and verify authorized signed-in state without copying cookies or credentials.
-color: orange
-tools: Read, Bash, Edit
-voice: internal
-cli_support: [claude-code, codex, copilot]
----
+# Authentication mode
 
-# /setup-browser-cookies
-
-Preserved authentication entry point for `/browse` and `/scrape`, using the
-[shared browser operations](../browse/references/browser-operations.md). The name
+Use `/web-session --mode cookies` before authorized browse or extraction work, using the
+[shared browser operations](browser-operations.md). The mode
 does **not** authorize cookie export/import. Authentication remains on the user's
 chosen browser/provider surface, with the user entering credentials and MFA.
 
@@ -77,7 +67,7 @@ cookie databases to repair that gap.
 
 ## Concrete local-provider boundary
 
-`skills/browse/scripts/chromium.mjs` requires a fresh isolated context and declares
+`skills/web-session/scripts/chromium.mjs` requires a fresh isolated context and declares
 an optional headed launch. Headless operations and password/HTTP-auth refusals
 were observed on a synthetic fixture; headed mode and real login were not.
 A subsequent startup failed and native execution stopped again. Do not treat

@@ -1,16 +1,6 @@
----
-name: open-managed-browser
-layer: foundation
-description: Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching personal profiles.
-color: blue
-tools: Read, Bash
-voice: internal
-cli_support: [claude-code, codex, copilot]
----
+# Open mode
 
-# /open-managed-browser
-
-The operator-driven entry point for the [shared browser operations](../browse/references/browser-operations.md).
+Use `/web-session --mode open` for the operator-driven [shared browser operations](browser-operations.md).
 Retain manual exploration, debugging, preview and authentication-surface choice without
 assuming a Lintel-installed Chromium or a shared cookie store.
 
@@ -81,11 +71,11 @@ supports it or retain a manual handoff. Do not claim these fallback gaps are sol
 
 ## Examples
 
-`/open-managed-browser --check` reports preflight facts without opening a page.
-`/open-managed-browser --url http://127.0.0.1:5173` requests a new owned visible
+`/web-session --mode open --check` reports preflight facts without opening a page.
+`/web-session --mode open --url http://127.0.0.1:5173` requests a new owned visible
 session after that exact loopback service has been authorized and observed responding.
-`/open-managed-browser --profile team-test` asks the provider to resolve the
+`/web-session --mode open --profile team-test` asks the provider to resolve the
 user-selected session; the local ephemeral fallback reports persistent reuse unsupported.
 
-See `/browse` for repeatable actions, `/scrape` for extraction, and
-`/setup-browser-cookies` for manual login and subsequent non-secret validation.
+See `/web-session --mode browse` for repeatable actions, `--mode scrape` for extraction, and
+`--mode cookies` for manual login and subsequent non-secret validation.

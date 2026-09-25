@@ -27,15 +27,8 @@ esac
 pattern_count=$(find "$VAULT" -maxdepth 2 -name 'pattern.json' 2>/dev/null | wc -l | tr -d ' ')
 [ "$pattern_count" -eq 0 ] && exit 0
 
-# Operator-disabled escape hatch (kill-switch under ~/.lintel/).
-# Grace-window migration (until 2026-09-12): if the operator set the legacy
-# ~/.gstack/ kill-switch and the lintel one is absent, recreate it under ~/.lintel/
-# once so the disable preference is preserved, then read only the lintel path.
-legacy_disabled="$HOME/.gstack/.frontend-design-surface-disabled"
+# Read the current disable preference; the migration window has ended.
 lintel_disabled="$LINTEL_HOME/.frontend-design-surface-disabled"
-if [ -f "$legacy_disabled" ] && [ ! -f "$lintel_disabled" ]; then
-  : > "$lintel_disabled" 2>/dev/null || true
-fi
 [ -f "$lintel_disabled" ] && exit 0
 
 # Throttle marker — per-session, per-file

@@ -1,16 +1,6 @@
----
-name: browse
-layer: foundation
-description: Use to open, read and interact with an authorized page using an observed browser provider, retaining screenshots, print output and session ownership.
-color: blue
-tools: Read, Bash, Edit, Glob
-voice: internal
-cli_support: [claude-code, codex, copilot]
----
+# Browse mode
 
-# /browse
-
-Use the [shared browser operations](references/browser-operations.md) for **open, read,
+Use `/web-session --mode browse` and the [shared browser operations](browser-operations.md) for **open, read,
 act, screenshot, print and close**. Discover the current host's real schemas first.
 Client names do not establish browser availability, isolation or permission. This
 skill is a workflow, not a bundled browser daemon or a promise that Playwright exists.
@@ -23,7 +13,7 @@ skill is a workflow, not a bundled browser daemon or a promise that Playwright e
 - Inspect console/network failures when the chosen provider exposes those observations.
 - Print an authorized page to a local PDF. Document composition remains with `/make-pdf`.
 
-Use `/scrape` for declarative multi-page extraction. Use `/setup-browser-cookies` when
+Use `/web-session --mode scrape` for declarative multi-page extraction. Use `/web-session --mode cookies` when
 authentication is needed; do not move an existing personal session into automation.
 Customer-bearing production pages, credential stores and unapproved destinations are
 not test fixtures.
@@ -38,7 +28,7 @@ not test fixtures.
 | `--out <dir>` | Explicit owned artifact root, normally under the working project's gitignored `.claude/runtime/`. Never default to a personal browser directory. |
 | `--headed` | Request an operator-visible owned session when the provider supports it; no silent background/foreground substitution. |
 
-These are skill inputs, not flags for an invented `browse` executable. The delivered
+These are skill inputs, not flags for an invented browser executable. The delivered
 Node API in the shared reference uses explicit arguments and a separately selected
 installed Chromium executable. The actual host browser tools are equally valid when
 their ownership and pre-navigation checks can be established.
@@ -50,7 +40,7 @@ their ownership and pre-navigation checks can be established.
    them with the shared helpers, not a copied parser. Resolve the actual policy;
    unknown mandatory controls block their affected action through P05.
 2. **Select a provider.** Inspect schemas, permission and operation support. Prove a
-   fresh owned context before any page or tab access. `/open-managed-browser --check`
+   fresh owned context before any page or tab access. `/web-session --mode open --check`
    is a preflight, not evidence that a page launched. A readable executable/profile
    folder does not prove engine execution.
 3. **Admit destinations.** Use P03 `lib/url_policy.py` for initial URLs and every raw
@@ -98,13 +88,13 @@ cookies and customer content out of logs. Raw page/console capture is opt-in and
 
 A timeout may leave a useful partial capture if the provider still safely responds;
 label it partial and keep the failed action failed. Missing browser/print support is
-`unverified`, not a successful `/qa-only` substitution. An applicable mandatory browser
+`unverified`, not a successful source-only verification substitute. An applicable mandatory browser
 check cannot pass via source inspection or a manual task that nobody performed.
 
 ## See also
 
-- `/open-managed-browser` - operator-driven debugging with explicit ownership.
-- `/setup-browser-cookies` - user-chosen login surface and non-secret validation.
-- `/scrape` - selector schemas, pacing, failures and comparison across pages.
-- `/design-review`, `/qa`, `/make-pdf` - consume actual browser artifacts; their other
+- `/web-session --mode open` - operator-driven debugging with explicit ownership.
+- `/web-session --mode cookies` - user-chosen login surface and non-secret validation.
+- `/web-session --mode scrape` - selector schemas, pacing, failures and comparison across pages.
+- `/frontend-design-review`, `/verify`, `/make-pdf` - consume actual browser artifacts; their other
   acceptance obligations remain separate.

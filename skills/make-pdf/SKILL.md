@@ -10,17 +10,24 @@ cli_support: [claude-code]
 
 # /make-pdf
 
-PDF generation through the accepted [browser operations](../browse/references/browser-operations.md).
+PDF generation through the accepted [browser operations](../web-session/references/browser-operations.md).
 Use the [standalone PDF procedure](../generate-pdf/SKILL.md) for explicit local
 HTML, Markdown through an available declared converter, or an authorized URL.
 No personal browser/profile, assumed daemon or Office export is required.
 
+**Consolidation boundary:** this entry remains available. Joining its input,
+paper/orientation, header/footer, print-CSS and background choices into
+`generate-pdf` is deferred until that tree's upstream ownership freeze is released.
+The HTML preparation and browser-print writer remain in place. No bundled PDF
+reader is restored or required; use only an explicitly available, authorized
+inspection operation, and otherwise report inspection as unverified.
+
 ## When to use
 
-- Operator wants a PDF copy of a `/office-hours` design doc for distribution
+- Operator wants a PDF copy of a `/define` design doc for distribution
 - Customer-facing deliverable that's been voice-checked and needs to leave the chat as a static artifact
 - Print-friendly version of a runbook or onboarding doc
-- Snapshot of a rendered page for archival (combine with `/scrape --diff` for monitoring)
+- Snapshot of a rendered page for archival (combine with `/web-session --mode scrape --diff` for monitoring)
 
 ## When NOT to use
 
@@ -48,7 +55,7 @@ No personal browser/profile, assumed daemon or Office export is required.
    manifest-declared task-local restore occur; no global install or TLS bypass.
 3. **Prepare existing print choices.** Preserve paper/orientation/CSS/header-footer/
    background flags. The local helper uses print CSS and CSS page-margin content;
-   actual PDF inspection establishes their effect.
+   actual PDF inspection, when available, establishes their effect; writing alone does not.
 4. **Verify policy and navigation.** Use P07's live reference and actual controls,
    then P03 admission on an explicit authorized origin. Serve local HTML/assets
    through an owned loopback server and verify health. The accepted provider
@@ -59,12 +66,12 @@ No personal browser/profile, assumed daemon or Office export is required.
    available permitted native print API. Create a fresh owned context, apply print
    media, call print, record output and verify exact process/profile/server cleanup.
    Missing API, timeout or partial output is failure, not a successful export.
-6. **Inspect actual PDF content.** Use an explicit existing reader for searchable
+6. **Inspect actual PDF content when an authorized operation is available.** Use an explicit existing reader for searchable
    full text, page-specific material and physical paper dimensions using its
    finite positive UserUnit. Preserve raw boxes/origins and check the nonempty
    MediaBox/CropBox intersection, not an oversized crop alone.
    File size/page count alone is not QA. Complete page rendering remains separate;
-   unavailable/denied inspection stays unverified, not replaced with text origins
+   unavailable/denied inspection stays unverified, not replaced with a new dependency, text origins
    or an HTML screenshot.
 7. **Report and bind evidence.** Retain exact source/config/tool/artifact identity,
    failures and P05 outcomes. QA is not an independent decision or SHIP clearance.
@@ -119,7 +126,7 @@ hf.yaml:
 
 ## See also
 
-- `/browse` — page rendering without PDF output
-- `/scrape` — extracting structured data instead of producing PDF
+- `/web-session --mode browse` — page rendering without PDF output
+- `/web-session --mode scrape` — extracting structured data instead of producing PDF
 - The active pack's compliance gates — voice gate before customer-facing PDF leaves
-- `/design-html` (batch 7) — generate the HTML that feeds this skill
+- `/generate-web --mode mockup` — generate the HTML that feeds this skill
