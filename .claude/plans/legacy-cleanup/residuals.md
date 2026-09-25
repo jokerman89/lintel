@@ -939,19 +939,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
     },
     {
-      "id": "set03-span-066",
-      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
-      "start": "Role file format (AI consumption optimized):",
-      "end": "### 4.3 — Role-lifting skills",
-      "sha256": "80463fc1da6d93c5ab1a89779bdc8b6018338943a19128c9ebb3362692830b07",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:887-940 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
-      "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-188",
       "path": ".claude/plans/universal-implementation/reviews/P06-provider-repair-final.md",
       "start": "In particular, `skills/codex/SKILL.md` retains ad-hoc inspection without inventing",
@@ -974,19 +961,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/plans/universal-implementation/reports/P08-A13.md:630-686 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9",
       "declaration_digest": "08d166e365bace37911dcbf036f961636e892c9cac70565245ebd5356eadaf3a",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-007",
-      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
-      "start": "context-save machinery stays (wired-unproven acceptable for an explicit operator command —",
-      "end": "gains a roundtrip test in B7).",
-      "sha256": "e71ac35991fbf056d3058ffd985c2c4e58ce9719e8fc4e9959778a8d59e403b9",
-      "category": "original audit record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md:162-162 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 eb8f176915d6190850644ce7759fba701276537080cb499b9d6a2506952d1b09",
-      "declaration_digest": "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -1121,19 +1095,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
     {
-      "id": "set03-span-088",
-      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
-      "start": "### New agent family",
-      "end": "Total: 5 nya agents i ny `frontend/` category.",
-      "sha256": "0c2a12458e230642b9e271773131bc82ac22ef3257d1cca5e6fd82823951178f",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:119-129 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
-      "declaration_digest": "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-055",
       "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
       "start": "moment 1 (skill→subagent: `pair-agent`, `codex`), moment 4 (workflow→cold executor:",
@@ -1147,19 +1108,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
     {
-      "id": "set03-span-065",
-      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
-      "start": "**Output example:**",
-      "end": "### §2.2 — Phase 2: DEFINE (~2-5k tokens, 3-15 min)",
-      "sha256": "ee7798bb0534298f605d24fabaaa018063d1ae9294881a54e3555a1f76b4b57e",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:223-247 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
-      "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-121",
       "path": ".claude/plans/todo.md",
       "start": "same-session. The reviews earned their keep: the registry-clobber race (A), the /li:learn",
@@ -1169,19 +1117,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/plans/todo.md:341-341 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 08dcf301d8aa31a723acf14430135b9f7fbfbdcb3e3cf2fa88970082be659dee",
       "declaration_digest": "2b7f2cdaf10cb5de2e628d9b11f84e6cf0440321849d04affeb8efc6ae362b3b",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-029",
-      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
-      "start": "The audit surfaced three structural themes, not 44 scattered defects:",
-      "end": "Plus: uniform weaknesses (necessity declarations absent on ~148 components; frontmatter drift on 33 agents; counts stale in README), and designed-not-built layers (envelope, Brief Forge, knowhow, wiki, engineering-domain modules) that are on-schedule, not regressions.",
-      "sha256": "9b65b993edd449ca814f09232073fbda15dab9a16f6a2ffc1e94606453d6d2f6",
-      "category": "original audit record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md:16-21 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 aa6d3cdcf3fef08ec5433686175e20db8562e47b0e3c7ab9a269d83f07ad646b",
-      "declaration_digest": "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -1273,19 +1208,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/plans/universal-implementation/reviews/P11-browser-3115790.md:31-46 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 ded59a0bc2de86d2f2ee959f6c0b8781323785f20f4832825838ffdd17de3204",
       "declaration_digest": "33065c98de1a04440c3caed25d6f1fc404514c2821e8838b5b56dfbbb024fa65",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-068",
-      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
-      "start": "### Approach C: Ny /li:doc-orchestrator (rejected)",
-      "end": "## Recommended Approach",
-      "sha256": "0bbe401fe2d2d65fc3dac2b31290786412482e6888c975e2f6b33257a11ef211",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md:87-90 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 5896e3130474f475a31abd62dd92411ef40c8c05fee1a3ef742b4e2b305d470a",
-      "declaration_digest": "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -1390,19 +1312,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md:52-77 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d2d1c9714893bd537bc83c0c2513d6520bde02fc7253ff59620b3d5aa03cb2c4",
       "declaration_digest": "3dc211b98137548282797940b23968f32c706a0283f679c3f84d9de53b4240ca",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-076",
-      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
-      "start": "| D-4b | 4.4 | Working session — orphan names (landing-report, match, setup/sync-brain, agt-tier-stamp) | 4 |",
-      "end": "| D-5a | 6.7 | Internal-voice check: intended or drift? | 5 |",
-      "sha256": "7a927d2e9e1e5345f3cdc841d22264eeadbb0fffa5ba8c3f1333d7d0690adb24",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md:247-247 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 deb128edd1f03b9c587dcc6888d2de1a42c4e60024d7aed67fbe99a1490ff9e9",
-      "declaration_digest": "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -1784,19 +1693,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
     {
-      "id": "set03-span-092",
-      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
-      "start": "**Recommendation — Fas A split into A1 + A2:**",
-      "end": "Net: Operator can dogfood A1 helhet-mode + delar-mode before investing in shader/extract/review. L-001 risk in canonical-pattern hand-curation gets deferred until schema is operator-validated.",
-      "sha256": "1a18e7534728e6076fea5c384ec12499230aa031db71cfdd14fce8375f1963b7",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:449-470 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
-      "declaration_digest": "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-163",
       "path": ".claude/plans/universal-implementation/reports/P11.md",
       "start": "Exactly three paths changed, 76 insertions and 3 deletions:",
@@ -1992,19 +1888,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
     {
-      "id": "set03-span-089",
-      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
-      "start": "## Success Criteria",
-      "end": "## Distribution Plan",
-      "sha256": "44180728214fe65fc9f692c1fb0524ac3d14b2ae91018cf92736fb4a60a12eb0",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:323-331 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
-      "declaration_digest": "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-010",
       "path": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md",
       "start": "| design-review + frontend-design-review | 2 → 1 | 6-axis visual gates, ~70% overlapping axes; `--scope changes\\|artifact` flag. |",
@@ -2014,19 +1897,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md:159-160 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d2d1c9714893bd537bc83c0c2513d6520bde02fc7253ff59620b3d5aa03cb2c4",
       "declaration_digest": "9e052f2853b2b8a5dec86cf7511f6c50d8773107d0fc439de6d018bde1aafde1",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-006",
-      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
-      "start": "| match→skill-router alias (08-29) · context-budgetwatch (09-10) · 44 aliases + post-grace v5 sweep + dual-accept removal | aliases.yaml, ADR-0005/0009/0011 | 2026-09-12 → removal sweep 2026-12-12 |",
-      "end": "| I7 Subtraction-Bias data-modeling exception ADR · J9 jsonl-vs-OTel · J10 plan-mode | syntheses | 2026-08-31 or cut |",
-      "sha256": "788769266cb1db9496d249215cb8c9030d6c6772bcef5dc7086d89f5139ceb8e",
-      "category": "original audit record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md:152-152 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 eb8f176915d6190850644ce7759fba701276537080cb499b9d6a2506952d1b09",
-      "declaration_digest": "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -2330,19 +2200,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
     {
-      "id": "set03-span-012",
-      "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
-      "start": "**Belägg:** WF-05/06; inventoryrader för DEFINE, office-hours, autoplan och plan-tune.",
-      "end": "Styr frågor efter beslut som saknas, uppgiftstyp och risk. Företagsmigrering, underhåll och",
-      "sha256": "aa0aab3c0c5e915c6e708132e7b218a3fce5d3ef330a79ebc28fc1285915765c",
-      "category": "original audit record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md:168-169 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 66de4deee5d28627ca091d1dbad04cf0a952e023b3572174404710511c55dc58",
-      "declaration_digest": "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
       "id": "set03-span-178",
       "path": ".claude/plans/universal-implementation/reviews/P03-joined-path-final.md",
       "start": "| Direct documentation | `skills\\context-save\\SKILL.md`, `skills\\safe-install\\SKILL.md`: same-location I/O and explicit non-guarantees, not a shorter store, policy change or blanket installer claim. |",
@@ -2599,19 +2456,6 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/plans/universal-implementation/reports/P11.md:905-905 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7",
       "declaration_digest": "ebd34a87ba6499a3a378678572eb3426fddb6caa697cb8c7901ce30ff8cf4feb",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
-    },
-    {
-      "id": "set03-span-071",
-      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
-      "start": "### MAJOR — adressera innan Fas 1-implementation börjar",
-      "end": "### MINOR — adressera vid implementation eller skip",
-      "sha256": "172af6d3a10ebfb01f261463e9d62e7f5094c1632684c63f9d50ae2b2b2e86a8",
-      "category": "original design-archive record excerpt",
-      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
-      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md:264-283 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 5896e3130474f475a31abd62dd92411ef40c8c05fee1a3ef742b4e2b305d470a",
-      "declaration_digest": "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
     },
@@ -3004,6 +2848,201 @@ acceptance. No other historical candidate is accepted by this register.
       "declaration_digest": "609abc128e493aff6625e0433e811edc46460787f3e587963c2134c6cd828524",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set04-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set04-corroboration.json"
+    },
+    {
+      "id": "set04-span-006",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start": "The reviewer instructions Lintel actually sends today are thin and divergent:",
+      "end": "If MARS keeps its own prompt, a multi-model run and a single review are not comparable.",
+      "sha256": "23f2b7f0211fc6b70aa7e91df34594358187a87d983c79ac7663efaa88f2d935",
+      "category": "completed checklist record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/plans/mars/review-method-design.md:10-18 at a4ae1f57dacea1c3e17b0589dc0eaade5158c27a; source sha256 6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240",
+      "declaration_digest": "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-066",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "start": "Role file format (AI consumption optimized):",
+      "end": "### 4.3 — Role-lifting skills",
+      "sha256": "80463fc1da6d93c5ab1a89779bdc8b6018338943a19128c9ebb3362692830b07",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:887-940 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
+      "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-007",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "start": "context-save machinery stays (wired-unproven acceptable for an explicit operator command —",
+      "end": "gains a roundtrip test in B7).",
+      "sha256": "e71ac35991fbf056d3058ffd985c2c4e58ce9719e8fc4e9959778a8d59e403b9",
+      "category": "original audit record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md:162-162 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 eb8f176915d6190850644ce7759fba701276537080cb499b9d6a2506952d1b09",
+      "declaration_digest": "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set04-span-005",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start": "**Inputs:** current REVIEW (integration branch), CodeReviewer, code-review, plan-eng-review,",
+      "end": "define Step 11, MARS protocol and pilot, [MDASH lessons](mdash-lessons.md)",
+      "sha256": "19dab4348859be96dc53f27e68c3bb191b6d003389f240d7b0ce26e08a045715",
+      "category": "completed checklist record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/plans/mars/review-method-design.md:5-5 at a4ae1f57dacea1c3e17b0589dc0eaade5158c27a; source sha256 6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240",
+      "declaration_digest": "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-088",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start": "### New agent family",
+      "end": "Total: 5 nya agents i ny `frontend/` category.",
+      "sha256": "0c2a12458e230642b9e271773131bc82ac22ef3257d1cca5e6fd82823951178f",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:119-129 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
+      "declaration_digest": "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-065",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "start": "**Output example:**",
+      "end": "### §2.2 — Phase 2: DEFINE (~2-5k tokens, 3-15 min)",
+      "sha256": "ee7798bb0534298f605d24fabaaa018063d1ae9294881a54e3555a1f76b4b57e",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:223-247 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
+      "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-029",
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "start": "The audit surfaced three structural themes, not 44 scattered defects:",
+      "end": "Plus: uniform weaknesses (necessity declarations absent on ~148 components; frontmatter drift on 33 agents; counts stale in README), and designed-not-built layers (envelope, Brief Forge, knowhow, wiki, engineering-domain modules) that are on-schedule, not regressions.",
+      "sha256": "9b65b993edd449ca814f09232073fbda15dab9a16f6a2ffc1e94606453d6d2f6",
+      "category": "original audit record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md:16-21 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 aa6d3cdcf3fef08ec5433686175e20db8562e47b0e3c7ab9a269d83f07ad646b",
+      "declaration_digest": "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-068",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "start": "### Approach C: Ny /li:doc-orchestrator (rejected)",
+      "end": "## Recommended Approach",
+      "sha256": "0bbe401fe2d2d65fc3dac2b31290786412482e6888c975e2f6b33257a11ef211",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md:87-90 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 5896e3130474f475a31abd62dd92411ef40c8c05fee1a3ef742b4e2b305d470a",
+      "declaration_digest": "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-076",
+      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+      "start": "| D-4b | 4.4 | Working session — orphan names (landing-report, match, setup/sync-brain, agt-tier-stamp) | 4 |",
+      "end": "| D-5a | 6.7 | Internal-voice check: intended or drift? | 5 |",
+      "sha256": "7a927d2e9e1e5345f3cdc841d22264eeadbb0fffa5ba8c3f1333d7d0690adb24",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md:247-247 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 deb128edd1f03b9c587dcc6888d2de1a42c4e60024d7aed67fbe99a1490ff9e9",
+      "declaration_digest": "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set04-span-001",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "start": "opinion, plan-eng-review, code-review's Codex gate) and no way to put the same question to",
+      "end": "several different models deliberately. Hosts such as the Copilot App now select a model per",
+      "sha256": "346df6bc5a03e5a494df37159b3e3aee71d06cefe9a302431046626148e8205e",
+      "category": "accepted decision record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/decisions/0036-mars-multi-model-review.md:18-18 at a4ae1f57dacea1c3e17b0589dc0eaade5158c27a; source sha256 5ccb9fc10fc0e854af0d63c1513e7031863a172cbefcdcf97fd73f10af945087",
+      "declaration_digest": "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-092",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start": "**Recommendation — Fas A split into A1 + A2:**",
+      "end": "Net: Operator can dogfood A1 helhet-mode + delar-mode before investing in shader/extract/review. L-001 risk in canonical-pattern hand-curation gets deferred until schema is operator-validated.",
+      "sha256": "1a18e7534728e6076fea5c384ec12499230aa031db71cfdd14fce8375f1963b7",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:449-470 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
+      "declaration_digest": "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-089",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start": "## Success Criteria",
+      "end": "## Distribution Plan",
+      "sha256": "44180728214fe65fc9f692c1fb0524ac3d14b2ae91018cf92736fb4a60a12eb0",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md:323-331 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5",
+      "declaration_digest": "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-006",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "start": "| match→skill-router alias (08-29) · context-budgetwatch (09-10) · 44 aliases + post-grace v5 sweep + dual-accept removal | aliases.yaml, ADR-0005/0009/0011 | 2026-09-12 → removal sweep 2026-12-12 |",
+      "end": "| I7 Subtraction-Bias data-modeling exception ADR · J9 jsonl-vs-OTel · J10 plan-mode | syntheses | 2026-08-31 or cut |",
+      "sha256": "788769266cb1db9496d249215cb8c9030d6c6772bcef5dc7086d89f5139ceb8e",
+      "category": "original audit record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md:152-152 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 eb8f176915d6190850644ce7759fba701276537080cb499b9d6a2506952d1b09",
+      "declaration_digest": "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-012",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+      "start": "**Belägg:** WF-05/06; inventoryrader för DEFINE, office-hours, autoplan och plan-tune.",
+      "end": "Styr frågor efter beslut som saknas, uppgiftstyp och risk. Företagsmigrering, underhåll och",
+      "sha256": "aa0aab3c0c5e915c6e708132e7b218a3fce5d3ef330a79ebc28fc1285915765c",
+      "category": "original audit record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md:168-169 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 66de4deee5d28627ca091d1dbad04cf0a952e023b3572174404710511c55dc58",
+      "declaration_digest": "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+    },
+    {
+      "id": "set03-span-071",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "start": "### MAJOR — adressera innan Fas 1-implementation börjar",
+      "end": "### MINOR — adressera vid implementation eller skip",
+      "sha256": "172af6d3a10ebfb01f261463e9d62e7f5094c1632684c63f9d50ae2b2b2e86a8",
+      "category": "original design-archive record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md:264-283 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 5896e3130474f475a31abd62dd92411ef40c8c05fee1a3ef742b4e2b305d470a",
+      "declaration_digest": "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
     }
   ]
 }

@@ -1,0 +1,254 @@
+{
+  "review_type": "finite-set06-exact-context-renewal-adjudication",
+  "status": "CLASSIFICATION_ONLY",
+  "candidate": "cda5539ae1b1b995814fdaf0c126dbf076dfb3d7",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-06.json",
+    "sha256": "56f94f3a9e76042affe795b9753d64f6e12d0a2171736e9fd44d3ddfe1aa0e2c",
+    "bytes": 21629,
+    "declarations": 15,
+    "context_renewals": 15,
+    "new_spans": 0,
+    "source_files": 9,
+    "raw_span_bytes": 10971
+  },
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "session_state_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "role": "Same prior source-spec reviewer; no descendants, implementation, MARS invocation or canonical review-record mutation."
+  },
+  "counts": {"ACCEPT": 15, "REJECT": 0, "NEEDS_NARROWING": 0},
+  "source_contexts": {
+    ".claude/engineering/audits/2026-06-12-launch-readiness-register.md": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882",
+    ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6",
+    ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664",
+    ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3",
+    ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14",
+    ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374",
+    ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf",
+    ".claude/decisions/0036-mars-multi-model-review.md": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821",
+    ".claude/plans/mars/review-method-design.md": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27"
+  },
+  "scope": "Only the fifteen supplied unchanged declarations, independently renewed against their changed complete source contexts. Every selected raw span and every source-context delta was read; earlier unchanged context was reused without another general source or editorial audit.",
+  "prior_selection": {
+    "set03_candidate": "5f086471069fddf9926acf4c7d0176f98b35946b",
+    "set04_candidate": "a4ae1f57dacea1c3e17b0589dc0eaade5158c27a",
+    "set03_decisions_sha256": "e664ab0808e7a8dadb0c6c8f6f36af7dea74d3eeb7d9b92c3dc2f2b31c8292af",
+    "set04_decisions_sha256": "eae89ff9570be0bbcfa196f1d93e7f8ac800735c2be16936176ca82cd2d93342",
+    "relationship": "All fifteen eight-field declarations and raw-span hashes match the actual earlier ACCEPTs; only the explicitly supplied full-source contexts and some physical line coordinates changed."
+  },
+  "context_assessment": [
+    "The selected launch-register fields still describe the original deferred schedule and machinery-retention disposition; the changed B6 wording and editorial source link are outside their exact ranges.",
+    "The A10 evidence citation and remediation problem statement remain original source subjects and findings; revised operative adjustment/remediation directions are not included.",
+    "The cycle/roles output transcript and role-file specimen remain complete original fenced examples, separated from the changed current wrapper/namespace guidance.",
+    "The document-pipeline rejected alternative and original review concerns, the backlog decision-table subject, and the frontend inventory/criteria/reviewer recommendation retain their original roles despite nearby editorial and operative-pointer updates.",
+    "ADR-0036's new dated implementation-status account is separate from its unchanged account of previous outside-voice hooks; it does not turn the selected old name into a current invocation.",
+    "The MARS design's input metadata and original prompt-comparison problem remain original design evidence; its updated architecture, callable-entry table, RM5 card and preservation rule are outside the renewed ranges."
+  ],
+  "conditions": [
+    "Bind every verdict to its exact declaration_digest and raw_sha256 together with the selected path, candidate and new full-source SHA-256 above; matching span bytes alone do not authorize reuse across a changed context.",
+    "Original source_evidence strings retain the earlier source identity as provenance. They are not silently rewritten, and they do not replace the new full-context acceptance binding.",
+    "Each unchanged raw span was read semantically, including every field in the fenced examples and original review recommendations; no verdict rests only on an editorial note, date, heading, merged status or parent-decision label.",
+    "The request's option-B editorial authorization is parent-provided context, not independent approval of that edit batch or its governance implications; unselected batch files and current-pointer correctness await their appropriate review.",
+    "All outside text, including the new editorial links, current method pointers, normative requirements, ADR implementation-status note and previously rejected broader sections, remains checked.",
+    "The preserved alias schedule does not extend a grace period or revive retired aliases; sample commands and historical criteria do not establish current routing, host support, successful tests or permission to execute.",
+    "No old REJECT is erased or converted, no new range is approved, and no whole-file mask or broadened framing exception is granted.",
+    "The separate quality decision, exact registration/consumption checks, current-routing guard, required QA and final changed-scope review remain independent requirements; this artifact cannot clear them."
+  ],
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED",
+  "candidate_source_spec_verdict": "NOT_REVIEWED_IN_THIS_TASK",
+  "guard_and_runtime_execution": "NOT_RUN",
+  "checks_actually_performed": [
+    "Verified the exact 21629-byte request and SHA-256, candidate commit and clean unchanged reviewer checkout.",
+    "Loaded all nine full selected source blobs, totaling 236706 bytes, and verified every new full-source hash against the packet.",
+    "Read all changes from each earlier selected source to the current source: seven selected archival files from the set03 candidate and two MARS files from the set04 candidate.",
+    "Read all fifteen complete selected spans with actual shared-classified containing sections, adjacent context and the updated editorial/status framing.",
+    "Independently recomputed all fifteen eight-field declaration digests; verified unique ordered whole-line top-level prose markers, exact raw hashes, exact UTF-8 byte counts, current physical ranges and pairwise non-overlap.",
+    "Compared every declaration and raw hash with both the earlier packet and this reviewer's actual prior ACCEPT record, rather than relying on a claimed registration or another reviewer's label.",
+    "Verified the existing local shared-classifier and review-contract helper sources match the selected candidate before pure data validation; no runtime or live admission helper was invoked."
+  ],
+  "not_run": [
+    "No current guard, dynamic/runtime fixtures, hosted CI, integration/mechanism review, live admission, profile operation or model panel.",
+    "No external link was fetched and no immutable-source link was treated as fresh observation or authority.",
+    "No source, registry, plan, ADR, memory, runtime, branch, existing reviewer artifact or canonical evidence record was changed.",
+    "No denied launcher, copied/inlined substitute, private-environment sourcing, borrowed launcher authority or denied jq."
+  ],
+  "executed_command_ledger": [
+    {"command": 0, "action": "Pin set06 request/candidate, inventory nine sources and verify reviewer HEAD/status.", "exit": 0},
+    {"command": 1, "action": "Read the complete context delta in the seven selected archival files from their original set03 candidate.", "exit": 0},
+    {"command": 2, "action": "Read the complete ADR/MARS context delta from the set04 candidate plus updated identity/status framing.", "exit": 0},
+    {"command": 3, "action": "Verify all fifteen unchanged declarations and raw bytes against prior packets/ACCEPTs and the nine new source contexts.", "exit": 0},
+    {"command": 4, "action": "Read the first eight complete selected spans with actual containing sections and neighboring prose.", "exit": 0},
+    {"command": 5, "action": "Read the final seven complete selected spans with actual containing sections and neighboring prose.", "exit": 0}
+  ],
+  "decisions": [
+    {
+      "id": "set03-span-007",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "start_line": 162,
+      "end_line_exclusive": 163,
+      "decision": "ACCEPT",
+      "declaration_digest": "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
+      "raw_sha256": "e71ac35991fbf056d3058ffd985c2c4e58ce9719e8fc4e9959778a8d59e403b9",
+      "reason": "The unchanged continuation still records the original machinery-retention disposition in its source-era cycle, not a present context-save invocation."
+    },
+    {
+      "id": "set03-span-006",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "start_line": 152,
+      "end_line_exclusive": 153,
+      "decision": "ACCEPT",
+      "declaration_digest": "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
+      "raw_sha256": "788769266cb1db9496d249215cb8c9030d6c6772bcef5dc7086d89f5139ceb8e",
+      "reason": "The unchanged deferred-date row remains the original alias-removal schedule and provenance, with no renewed alias validity or current workflow selection."
+    },
+    {
+      "id": "set03-span-012",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+      "start_line": 172,
+      "end_line_exclusive": 174,
+      "decision": "ACCEPT",
+      "declaration_digest": "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
+      "raw_sha256": "aa0aab3c0c5e915c6e708132e7b218a3fce5d3ef330a79ebc28fc1285915765c",
+      "reason": "The evidence citation still identifies original A10 inventory subjects while all following operative intake and preference directions remain outside the span."
+    },
+    {
+      "id": "set03-span-029",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "start_line": 16,
+      "end_line_exclusive": 22,
+      "decision": "ACCEPT",
+      "declaration_digest": "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
+      "raw_sha256": "9b65b993edd449ca814f09232073fbda15dab9a16f6a2ffc1e94606453d6d2f6",
+      "reason": "The problem statement remains an account of what the original audit found, separate from the changed live-form W5 implementation directions."
+    },
+    {
+      "id": "set03-span-066",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "start_line": 886,
+      "end_line_exclusive": 940,
+      "decision": "ACCEPT",
+      "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
+      "raw_sha256": "80463fc1da6d93c5ab1a89779bdc8b6018338943a19128c9ebb3362692830b07",
+      "reason": "The complete fenced role-file specimen remains explicitly the original proposal, including placeholders and companion examples, and excludes the following current invocation menu."
+    },
+    {
+      "id": "set03-span-065",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "start_line": 222,
+      "end_line_exclusive": 247,
+      "decision": "ACCEPT",
+      "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+      "raw_sha256": "ee7798bb0534298f605d24fabaaa018063d1ae9294881a54e3555a1f76b4b57e",
+      "reason": "The complete dated SENSE transcript remains a fenced output example rather than a current recommendation, real host observation or permission."
+    },
+    {
+      "id": "set03-span-068",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "start_line": 91,
+      "end_line_exclusive": 95,
+      "decision": "ACCEPT",
+      "declaration_digest": "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
+      "raw_sha256": "0bbe401fe2d2d65fc3dac2b31290786412482e6888c975e2f6b33257a11ef211",
+      "reason": "The unchanged alternative still explicitly rejects doc-orchestrator and records why, without enabling it as a current route."
+    },
+    {
+      "id": "set03-span-071",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "start_line": 268,
+      "end_line_exclusive": 288,
+      "decision": "ACCEPT",
+      "declaration_digest": "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331",
+      "raw_sha256": "172af6d3a10ebfb01f261463e9d62e7f5094c1632684c63f9d50ae2b2b2e86a8",
+      "reason": "All nine concerns remain the reported original adversarial-review findings and proposed remedies, not a new implementation assignment or renewed gate result."
+    },
+    {
+      "id": "set03-span-076",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+      "start_line": 251,
+      "end_line_exclusive": 252,
+      "decision": "ACCEPT",
+      "declaration_digest": "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
+      "raw_sha256": "7a927d2e9e1e5345f3cdc841d22264eeadbb0fffa5ba8c3f1333d7d0690adb24",
+      "reason": "The D-4b row still records the original unresolved naming-decision subject and cohort, not an instruction to invoke or schedule the named workflows now."
+    },
+    {
+      "id": "set03-span-088",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start_line": 123,
+      "end_line_exclusive": 134,
+      "decision": "ACCEPT",
+      "declaration_digest": "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
+      "raw_sha256": "0c2a12458e230642b9e271773131bc82ac22ef3257d1cca5e6fd82823951178f",
+      "reason": "The fenced five-agent tree remains the original proposed inventory, not current native discovery or dispatch evidence."
+    },
+    {
+      "id": "set03-span-092",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start_line": 453,
+      "end_line_exclusive": 475,
+      "decision": "ACCEPT",
+      "declaration_digest": "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
+      "raw_sha256": "1a18e7534728e6076fea5c384ec12499230aa031db71cfdd14fce8375f1963b7",
+      "reason": "The complete A1/A2 split remains the explicitly historical engineering-review recommendation and artifact inventory, not a newly released build card."
+    },
+    {
+      "id": "set03-span-089",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "start_line": 327,
+      "end_line_exclusive": 336,
+      "decision": "ACCEPT",
+      "declaration_digest": "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
+      "raw_sha256": "44180728214fe65fc9f692c1fb0524ac3d14b2ae91018cf92736fb4a60a12eb0",
+      "reason": "The unchanged success scenarios and timing thresholds remain original design targets, not current execution directions or evidence that those targets passed."
+    },
+    {
+      "id": "set04-span-001",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "start_line": 18,
+      "end_line_exclusive": 19,
+      "decision": "ACCEPT",
+      "declaration_digest": "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+      "raw_sha256": "346df6bc5a03e5a494df37159b3e3aee71d06cefe9a302431046626148e8205e",
+      "reason": "The continuation still describes the outside-voice hooks Lintel previously had, while the later dated implementation-status and current hook guidance remain outside."
+    },
+    {
+      "id": "set04-span-005",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 5,
+      "end_line_exclusive": 6,
+      "decision": "ACCEPT",
+      "declaration_digest": "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+      "raw_sha256": "19dab4348859be96dc53f27e68c3bb191b6d003389f240d7b0ce26e08a045715",
+      "reason": "The unchanged input metadata still identifies the original design's source material rather than selecting a current callable reviewer."
+    },
+    {
+      "id": "set04-span-006",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 12,
+      "end_line_exclusive": 21,
+      "decision": "ACCEPT",
+      "declaration_digest": "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+      "raw_sha256": "23f2b7f0211fc6b70aa7e91df34594358187a87d983c79ac7663efaa88f2d935",
+      "reason": "The full original prompt-comparison problem remains descriptive design evidence, distinct from the separately updated operative caller tables and method requirements."
+    }
+  ],
+  "readback": "Final readback verifies all fifteen exact decision identities, new full-source hashes, byte counts, unchanged earlier artifacts and clean reviewer checkout; the resulting artifact hash is returned separately rather than embedded as a self-hash."
+}
