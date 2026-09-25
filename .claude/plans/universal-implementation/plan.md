@@ -664,6 +664,9 @@ Its Phase 3 addendum (2026-09-25, `reviews/A23.5-phase3-ci-ed91ef4.md`) covers t
 resolved correction of its own Phase 2 (A5-25). It binds CI run `36065850657`, whose test merge has
 exactly `ed91ef4f`'s tree. The binding carries to a later head only if that head changes nothing
 outside `.claude/` and its own CI run reproduces the outcome.
+Its post-merge Phase 4 addendum (`reviews/A23.5-phase4-removal-b7b245f.md`) covers the operator-ordered
+removal `d285a332..b7b245fa`: SPEC PASS, then QUALITY PASS. It has one P2 records finding (A5-35, the merge
+timing, recorded in `reports/final.md`) and four P3 advisories, and binds run `36108366549` (22/22 green).
 A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
 (`fin2-kit`, `3d7f1284`).
 - For g3, its data-driven missing-resource refusals cover every declared resource, reconciliations 6
