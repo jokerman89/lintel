@@ -1152,3 +1152,19 @@ bypass without explicit authorization.
 **Rule:** Correct mistakes with a new ordinary commit. Never pass `--amend`, `--no-verify`
 or a `core.hooksPath` override unless the operator explicitly authorizes that exact action,
 even when no hook is currently installed or the commit is local-only.
+
+## L-061 - Verify byte-bound checks on an LF checkout and reconcile diverged lines first
+
+**Date:** 2026-09-26
+
+**Context:** A stabilization session built a green #104 candidate without knowing that another
+session had left 27 unpushed commits on the same initiative. Its "LF" proofs used `git archive`,
+which still applies `core.autocrlf=true`. The other line looked hopelessly red, but one edit to a
+byte-bound record had disabled every later reviewed span. The same session also squashed its own
+unpublished commits with `git reset --soft`, which L-060 forbids without authorization.
+
+**Rule:** Before rebuilding an initiative branch, list every local and remote branch and worktree
+for it and reconcile with an ordinary merge. Run byte- or span-bound guards in a
+`core.autocrlf=false` clone or on LF-pinned paths; `git archive` is not an LF proof. When a guard
+suddenly reports many findings, first look for a broken binding that silently disables later
+classifications. Record a correction as a new commit, not a reset or amend.
