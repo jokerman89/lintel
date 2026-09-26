@@ -1757,6 +1757,10 @@ def main() -> int:
             label = item.get("classification", "EXEMPT")
             print(f"{label} {item['path']}:{item['line']} [{item['field']}] ({item['category']}): {item['reason']}")
         historical = [item for item in exemptions if item.get("classification") == "HISTORICAL"]
+        checked = {args.root / RESIDUAL_REGISTER} | {args.root / item.path for item in findings}
+        if findings and any(path.is_file() and b"\r\n" in path.read_bytes() for path in checked):
+            print("HINT: LF-pinned records are checked out with CRLF; re-clone or renormalize this checkout "
+                  "(see CONTRIBUTING.md, Running the tests).", file=sys.stderr)
         print(f"native-command-surface: {'FAIL' if findings else 'PASS'} ({len(findings)} findings; "
               f"{len(historical)} historical observations in "
               f"{len({item['path'] for item in historical})} declared records)")
