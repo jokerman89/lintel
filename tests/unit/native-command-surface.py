@@ -178,6 +178,27 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(any("qa" in item.message for item in self.findings(text, "docs/api.md")))
         stray = "# API\n\n```python\nx = `bad`\ndef f(*, skill: str,\n      limit: int): ...\n```\n"
         self.assertTrue(any(item.code == "missing-command" for item in self.findings(stray, "docs/api.md")))
+        for bad in ("!pip install x", "x = 1 \u20ac 2"):
+            with self.subTest(block=bad):
+                text = f"# API\n\n```python\n{bad}\ndef f(*, skill: str,\n      limit: int): ...\n```\n"
+                self.assertTrue(any(item.code == "missing-command" for item in self.findings(text, "docs/api.md")))
+        valid = "# API\n\n```python\ny = f'{a!r}'\ndef f(*, skill: str,\n      limit: int): ...\n```\n"
+        self.assertFalse(any(item.code == "missing-command" for item in self.findings(valid, "docs/api.md")))
+
+    def test_generic_operator_tokens_are_unrecognized_on_every_python(self):
+        real = guard.tokenize.generate_tokens
+
+        def generic_op(readline):
+            for token in real(readline):
+                if token.string == "=":
+                    yield guard.tokenize.TokenInfo(guard.tokenize.OP, "`", token.start, token.end, token.line)
+                    continue
+                yield token
+
+        text = "# API\n\n```python\nx = 1\ndef f(*, skill: str,\n      limit: int): ...\n```\n"
+        self.assertFalse(any(item.code == "missing-command" for item in self.findings(text, "docs/api.md")))
+        with mock.patch.object(guard.tokenize, "generate_tokens", generic_op):
+            self.assertTrue(any(item.code == "missing-command" for item in self.findings(text, "docs/api.md")))
 
     def test_declared_source_revision_fields_are_documented_in_the_register(self):
         register = (ROOT / guard.RESIDUAL_REGISTER).read_text(encoding="utf-8")

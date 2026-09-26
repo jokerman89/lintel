@@ -1451,8 +1451,11 @@ def python_fence_lines(text: str) -> set[int]:
             for token in tokenize.generate_tokens(io.StringIO(source).readline):
                 # Python 3.12+ returns stray characters such as ` ? $ as OP tokens with no exact
                 # operator type, where 3.11 returned ERRORTOKEN; both mean unrecognized input.
-                if token.type == tokenize.ERRORTOKEN or (
-                        token.type == tokenize.OP and token.exact_type == tokenize.OP):
+                exclamation = getattr(tokenize, "EXCLAMATION", None)
+                if (token.type == tokenize.ERRORTOKEN
+                        or (token.type == tokenize.OP and token.exact_type == tokenize.OP)
+                        or (token.type == tokenize.OP and token.exact_type == exclamation and not opened)
+                        or (token.type == tokenize.NAME and not token.string.isidentifier())):
                     raise tokenize.TokenError("unrecognized token")
                 if token.type in LITERAL_TOKENS:
                     touched.update(range(token.start[0], token.end[0] + 1))

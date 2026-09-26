@@ -55,13 +55,15 @@ final candidate requires newly bound review and QA.
 intake entry (now `/li:define`) once as the input of a proposed case (reported by the guard at line 1721).
 Both span reviewers rejected classifying lines 1721-1723 as an original observation
 (`set03-span-154`, sets `set03` and `set03a`), because the case was never executed. That rejection
-stands: the line is not an observation. It is not a current route either, because it sits in a
-PARTIAL, NOT ACCEPTED report whose bytes are context-bound by `remaining-source-record-28`, and
-editing them disables every later reviewed span (a4307a9a, reverted in 0d3a7d9e). The exact-count
+stands: the line is not an observation. It is not a current route either: A10.3 is ticked complete
+in `.claude/plans/universal-implementation/plan.md` and closed through F06
+(`packages/P08.md`), so the proposal can no longer be released, and nothing in that section ever
+ran. The report's bytes are context-bound by `remaining-source-record-28`, and editing them
+disables every later reviewed span (a4307a9a, reverted in 0d3a7d9e). The exact-count
 [historical-record register](historical-records.json) therefore declares this single reference as a
-non-live proposal, bounded by that section's headings. This override is **pending independent
-acceptance**; if it is refused, the alternative is the one-phrase edit plus freshly re-bound P08
-spans and new unanimous span decisions.
+non-live proposal, bounded by that section's headings. The independent spec review of 0cd1dbd8
+**accepted** this override. The acceptance lapses if the entry's path, headings, count or reason,
+or P08's bytes, change; any such change needs a new independent decision.
 
 ## Provenance requiring explicit retention review
 
