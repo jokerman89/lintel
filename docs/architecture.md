@@ -54,7 +54,7 @@ They fall into clusters:
 
 | Cluster | What it holds |
 |---|---|
-| **Cycle** | the nine phase skills, the `cycle` orchestrator with explicit phase ranges, the `fix` shortcut, the opt-in `swarm` execution profile, plus `resume`, `status`, `jobs` |
+| **Cycle** | the nine phase skills, the `cycle` orchestrator with explicit phase ranges, the `fix` and `research` shortcuts, the opt-in `swarm` execution profile, plus `resume`, `status`, `jobs` |
 | **Engineering modules** | `ta`, `da`, `sc`, `dh`, `tq` — each an orchestrator plus sub-skills — and `full-engineering-pass`, which composes all five in dependency order |
 | **Generate** | a shared content pipeline (outline → write → design → QA) feeding per-format renderers |
 | **Frontend** | a design-director orchestrator over typography, motion and shader sub-skills, each emitting a JSON contract, plus a six-dimension review gate |
