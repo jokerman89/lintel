@@ -15,7 +15,7 @@
 ## Context
 
 Lintel had several host-specific "outside voice" hooks (review Step 6, define's cross-model
-opinion, the former plan engineering review, code-review's Codex gate) and no way to put the same question to
+opinion, plan-eng-review, code-review's Codex gate) and no way to put the same question to
 several different models deliberately. Hosts such as the Copilot App now select a model per
 child context and record which model ran, but many hosts override or fall back silently.
 Swarm (ADR-0027) fans out implementation; it is the wrong tool for a targeted second look.
