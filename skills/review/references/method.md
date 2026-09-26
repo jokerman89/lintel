@@ -3,9 +3,9 @@
 **Status:** Accepted (ADR-0036). Rendered by `lib/review_method.py` and
 `bin/li-review-packet.py`; sections 1-5 below are the packet text sent to reviewers.
 **Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars` (every panel slot,
-including the optional `/li:code-review` panel) and the plan approval review. The planning
-and quality consolidation adopts it for `/li:inspect --target plan`, `define`'s
-spec review and code-review's single pass (see `skills/mars/references/integration.md`).
+including the optional `/li:code-review` panel), the plan approval review and a dispatched
+`CodeReviewer`. `/li:inspect` and `/li:define` reach it through their optional MARS offers;
+code-review's own single pass keeps its dimensions (see `skills/mars/references/integration.md`).
 **Standing questions:** `lib/review-questions.json` (stable IDs; projects extend with
 `.claude/review/questions.json`).
 

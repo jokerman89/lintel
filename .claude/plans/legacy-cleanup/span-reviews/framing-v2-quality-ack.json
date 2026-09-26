@@ -1,0 +1,309 @@
+{
+  "artifact_type": "Focused context-framing acknowledgment; session artifact, not a P05 decision",
+  "date": "2026-09-25",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-framing-refinement-mapping-v2.json",
+    "bytes": 53652,
+    "sha256": "ad1789e399ade34b70858e002c2e5b07a96f64ca870276878c9087876ee96abf",
+    "revision": 2,
+    "source_anchor": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+    "superseded_v1_sha256": "23ca3fbefcfe7247ce0b2f28c21c978aa96ab2a33e46c9f73822531afbc6134c",
+    "v1_decisions_issued": false
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "app_project_session": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_artifact_session": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "result": {
+    "ACK": 27,
+    "REJECT": 0,
+    "NARROWING_REQUIRED": 0,
+    "scope": "Context adequacy only for the exact 27 v2 framing digests in cohort2/3/7.",
+    "code_or_mechanism_review": "NOT_PERFORMED",
+    "runtime_or_mechanism_tests": "NOT_RUN",
+    "activation_or_release_clearance": false
+  },
+  "interpretation": [
+    "The parent explicitly authorized this bounded refinement of the earlier full-source-context condition. These ACKs apply only to the exact v2 packet, unchanged declaration/raw-record identities, and the framing digests listed below.",
+    "For these 27 declarations only, the proposed admission context may use the exact existing acceptanceRef excerpts plus the actual full-source containing-ancestor trail. The old full-file digest is provenance, not an equality requirement for every unrelated edit.",
+    "The prior 68 semantic outcomes are not repeated, widened or reversed. The other 41 registered declarations receive no framing refinement here. Earlier rejected or disputed declarations remain excluded.",
+    "The original work map, INTEGRATE package, 58 original leaf identities and their completion state are unchanged. This acknowledgment neither completes a leaf nor replaces any mandatory QA control.",
+    "The ba603 changed-scope quality report remains immutable. It reviewed the then-committed full-source mechanism; this acknowledgment does not extend its code-quality verdict to an uncommitted framing implementation."
+  ],
+  "conditions": [
+    "Bind each framing manifest and exact expected ancestor trail together with the unchanged path, record SHA-256 and declaration digest. Do not treat a matching title, date, heading or digest alone as semantic proof.",
+    "Use the existing shared excerpt machinery and classify the full original Markdown before locating markers or deriving containing ancestors. Exclude preceding same-level siblings; include every actual containing ancestor.",
+    "Require unique, ordered, nonnested, nonliteral record and framing markers. Changed record bytes/EOL, widening, missing or repeated markers, changed framing bytes and changed ancestor trails must fail closed.",
+    "Mask only the original approved record span. Framing excerpts are admission evidence, not additional masking permission. Outside current text, links, imports, selections and result-consumer instructions remain checked.",
+    "An unrelated edit outside the raw span, framing excerpts and their boundary identities, which leaves its actual containing ancestry unchanged, need not invalidate the record solely through the old whole-file hash.",
+    "An edit within a bound framing excerpt or its boundary identity is intentionally not covered by that unrelated-edit allowance. A new or changed actual ancestor must not inherit the old ACK.",
+    "Preserve invalid historical pseudo-YAML as literal raw data. Do not repair it, normalize it, or substitute a looser parser to obtain admission.",
+    "This bounded structural framing cannot prove the meaning of arbitrary outside indirection. Final current-source review remains required; no universal NLP-proof, whole-file mask or release claim follows.",
+    "The packet's five required behavior tests remain implementation obligations, NOT RUN in this acknowledgment. Current source/guard/hosted QA, profile ownership and independent final-candidate review remain separate."
+  ],
+  "framing_groups": {
+    "G1": {
+      "source": "cohort2-planner",
+      "rows": 7,
+      "framing_source_lines_inclusive": [[1, 29], [42, 43]],
+      "basis": "The root excerpt binds the retained-historical-role statement, audit date, scale, covered components and source scope. The Finding records excerpt binds the actual parent role. The true trail is the document title then Finding records; no preceding component sibling is an ancestor."
+    },
+    "G2": {
+      "source": "cohort3-handoff",
+      "rows": 9,
+      "framing_source_lines_inclusive": [[1, 41], [148, 153]],
+      "basis": "The root excerpt binds retained historical status, audit date, scope/method, component inventory and the original hand-off assessment. Per-component records binds the record interpretation and cohort-finding references. The true trail is the document title then Per-component records."
+    },
+    "G3": {
+      "source": "cohort7-packs-roles",
+      "rows": 2,
+      "framing_source_lines_inclusive": [[1, 41], [42, 43]],
+      "basis": "The root excerpt binds historical role, audit date/branch/auditor, scope, component census and original comparison framing. Role-skill finding records is the actual parent. Unchanged record headings and contents supply the individual subjects."
+    },
+    "G4": {
+      "source": "cohort2-planner",
+      "rows": 4,
+      "framing_source_lines_inclusive": [[1, 29], [711, 712]],
+      "basis": "The same dated source-audit scope frames the unchanged summary observations. Cohort summary is their actual parent; preceding component and summary-subsection peers are not ancestors. This preserves the original summary role rather than making it current execution guidance."
+    },
+    "G5": {
+      "source": "cohort3-handoff",
+      "rows": 1,
+      "framing_source_lines_inclusive": [[1, 41], [49, 53]],
+      "basis": "The dated historical audit scope and Cohort-level structural findings introduction bind the source-assessment role of the unchanged CF-4 record. The introduction says these are the four recurring original patterns; earlier CF siblings do not belong in its ancestor trail."
+    },
+    "G6": {
+      "source": "cohort7-packs-roles",
+      "rows": 4,
+      "framing_source_lines_inclusive": [[1, 41]],
+      "basis": "These records start their own level-two sections, so their sole containing heading is the document title. The bound root covers historical role/date/scope/census/comparison framing; their own unchanged section headings are already included in the approved raw spans. Preceding level-two sections must not be promoted to parents."
+    }
+  },
+  "decisions": [
+    {
+      "id": "cohort-2-record-46",
+      "declaration_digest": "6f2cf811e6443a8d7104a422ec43273472ada7db9c85bd50824417cdf4f1e9a5",
+      "framing_digest": "ccf9b3ae775f04b0a844730c0518da9db176cfcd372461214f64a9a68cdafed6",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-162",
+      "declaration_digest": "2392ddcf8c125d1fa2f6a0d2873272c0ad83a9aeeee9131273c8455bcab07a37",
+      "framing_digest": "8056fdb343b3ef361d0ece38b9ab0a2ee21de9d177fdcd500edbdd001e73e655",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-258",
+      "declaration_digest": "85557358040fa473b01085d1efa06b705d867c9713f5a27c43af8cd8f6c12089",
+      "framing_digest": "08159869c7dc658901c539b3fdbeff95cb46db41a46784c79eb8fd910844588d",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-348",
+      "declaration_digest": "e73b13887fe900782fd5f4cc314b722342fef0dd8ee305802c3e9b983bda1531",
+      "framing_digest": "f08659bc5fed8b2093e0e869c5eea20668742ebadc4165d3f628e0487a8fcc1f",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-437",
+      "declaration_digest": "df5c5895a5412e2f867a6512e8d188268e37ffef89b3a55e7d8a081e7d470e77",
+      "framing_digest": "c7ad204752b88c66d98daf565e36a4774836e79bd60a1b3913a18e192107d9ba",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-526",
+      "declaration_digest": "f4a8721453a58a877b0fc09877d7ab00b284207629b9b3daf5a87f1f428d57d0",
+      "framing_digest": "d6ba754fe35536f823f9b4756cb6596d20db1fae014f6c3e3441c6b1f7704de9",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-2-record-615",
+      "declaration_digest": "0c647479ba940ee82b373fe81f24abb5c4a48e52629cb375594371cd6caa2ff6",
+      "framing_digest": "9413f0fb8706f22d419b924488b56bd338c5ba700786290a542994a5a8513d15",
+      "decision": "ACK",
+      "basis": "G1"
+    },
+    {
+      "id": "cohort-3-record-156",
+      "declaration_digest": "8b7b2544e8f490c9c14ff9be3e65e3144a92f2915e4136cb9034aebe1d72c435",
+      "framing_digest": "44ed1b34ce9252e0fb9d343326b6c9070a112c01c93ee9b60e7cdefd2c5aa00f",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-246",
+      "declaration_digest": "139dc45b72ee220ac0e06fc2da251791396049670a0985da59adcb7c9a39a350",
+      "framing_digest": "63255873f3b7ada93a55d394df698c2bb9c65f76ebab140dec59549b637016c8",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-300",
+      "declaration_digest": "754e11ade412e5c3dafd25b3c9b8c07c7d2690f51a98f0a0069072591adddef3",
+      "framing_digest": "b201914272f15c8b756acefabf0ff52fcb93c9e908c5fb2decca3a481e2b1fd1",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-340",
+      "declaration_digest": "b2c851f6344c635fe847dc5db8a5680a32606023de06a4c8f62f4835c43912b1",
+      "framing_digest": "63a50d3a47706579de7faee3763307af89bd9eebafdbece788e07b8620d27c36",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-587",
+      "declaration_digest": "39b9eb0065a3c2ea81acf5b2c00964ae58919cb70ee0ba2ed387b4ee856fa515",
+      "framing_digest": "abc647b8030946416bfd45fd1cf5593b17534bc464f1d89e4da1272ae747b923",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-667",
+      "declaration_digest": "b847225489c33c72134ef6bf202b3283679d64f56ac99d00b9b1faeb40ed5ab5",
+      "framing_digest": "2319105f2c29b59deab4cea7c50b1c9a3f6b160e64f567e56849283f5a9f52ea",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-735",
+      "declaration_digest": "af12d99c068e6150a56c30fd7a8e323da33d40bf4e61768863be7a2c1209cc7a",
+      "framing_digest": "202cffaf0651cc2ff89b918af484973a845b14c48ab3be730eec342d80c9eeb3",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-3-record-777",
+      "declaration_digest": "d71dcd20ce93e7276c03299b066f05ba6f94078ee1f0cdf26ec0d0cbebe0358c",
+      "framing_digest": "da15ddfbad5d7fbb90c92240d79c4e9ad63230fef88bb926e856f1391d589b51",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "cohort-7-record-46",
+      "declaration_digest": "ae0387bba935b5358fae5544520ae6f4b85a013512fe10d61bd3675b7de57244",
+      "framing_digest": "42ee8084fbc44e170dc34059feea4dc80d5574cc37a446391c90a685afca27f8",
+      "decision": "ACK",
+      "basis": "G3"
+    },
+    {
+      "id": "remaining-source-record-13",
+      "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+      "framing_digest": "1e8ed9e2293a9f9b063ffe4429116a1b5af194d79c7f43cf0e0dcbdb2389345d",
+      "decision": "ACK",
+      "basis": "G4"
+    },
+    {
+      "id": "remaining-source-record-14",
+      "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
+      "framing_digest": "2509f58e8f2e76cd0940cdafa73142c6d975304c36ef6aeddbbcfb7ef75e7fa5",
+      "decision": "ACK",
+      "basis": "G4"
+    },
+    {
+      "id": "remaining-source-record-15",
+      "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+      "framing_digest": "91c7b55f557672f49ae4ce0806205d5944b0c24d1b6a6a891ce4c0c59885804b",
+      "decision": "ACK",
+      "basis": "G4"
+    },
+    {
+      "id": "remaining-source-record-16",
+      "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+      "framing_digest": "dda589841efc43c8a3986b5a11b5e1d51e90f6252e691fc16e52c775a283bcea",
+      "decision": "ACK",
+      "basis": "G4"
+    },
+    {
+      "id": "remaining-source-record-17",
+      "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+      "framing_digest": "0db9c0ff194be703e295bb8565b4eee6dc230eaf599d43f7fdd06e74cac8d11a",
+      "decision": "ACK",
+      "basis": "G5"
+    },
+    {
+      "id": "remaining-source-record-18",
+      "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+      "framing_digest": "227c28d59dc27af7c1a548860ad92ac75e8d274ac0ef4811942839d1fadce0e9",
+      "decision": "ACK",
+      "basis": "G2"
+    },
+    {
+      "id": "remaining-source-record-19",
+      "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+      "framing_digest": "bc1a5a02fcd87d15f1c8b391fb9c9957842c92b6979ea7b387e2168428c8fd76",
+      "decision": "ACK",
+      "basis": "G3"
+    },
+    {
+      "id": "remaining-source-record-20",
+      "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+      "framing_digest": "0405d29163995e032b6577ee437d0738a6cd3c21ac3d169f346d1e51af149fa1",
+      "decision": "ACK",
+      "basis": "G6"
+    },
+    {
+      "id": "remaining-source-record-21",
+      "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+      "framing_digest": "2853b127b44a243629810179b1f9d58157d810a002905244b34aceb87cd0955d",
+      "decision": "ACK",
+      "basis": "G6"
+    },
+    {
+      "id": "remaining-source-record-22",
+      "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+      "framing_digest": "59f2b10f653db6fc0cbb9bb16867e22ce48c9ea0e93eae118acfdaf0096f3c2d",
+      "decision": "ACK",
+      "basis": "G6"
+    },
+    {
+      "id": "remaining-source-record-23",
+      "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+      "framing_digest": "081083dbac314c2e97204a02fa6aaf8616511d8a4f0176a934538225b72995ab",
+      "decision": "ACK",
+      "basis": "G6"
+    }
+  ],
+  "verification": {
+    "actual_checks": [
+      "Verified the superseding v2 input's exact 53652 bytes and SHA-256; no v1 acknowledgment was issued.",
+      "Matched all 27 IDs, declaration digests, raw span hashes and unchanged record markers to the ba603 register; all three original full-source provenance hashes match its Git blobs.",
+      "Read all eight unique proposed framing excerpts and their immediate boundaries. Compared all manifests to exact LF source bytes using the existing half-open marker semantics.",
+      "Classified each full source with the existing shared Markdown classifier, located the original spans and independently checked all 27 actual containing-ancestor trails. The v2 trails correctly exclude same-level siblings.",
+      "Recomputed all 27 framing digests using canonical JSON over the seven listed fields; all matched.",
+      "Did not rerun the completed 68 semantic adjudications or inspect an uncommitted mechanism. No code, runtime, profile, hosted or admission-behavior tests were performed."
+    ],
+    "framing_digest_fields": [
+      "id",
+      "declaration_digest",
+      "record_sha256",
+      "path",
+      "framing_refs",
+      "framing_manifest",
+      "expected_ancestors"
+    ],
+    "canonical_json": "ensure_ascii=True, sort_keys=True, separators=(',', ':'), allow_nan=False; UTF-8 SHA-256",
+    "source_files": 3,
+    "rows": 27,
+    "unique_framing_excerpts": 8,
+    "true_ancestor_groups": 6,
+    "record_semantics_reopened": false,
+    "required_behavior_tests": "NOT_RUN; remain required for the later implementation and frozen-candidate review"
+  },
+  "preservation": {
+    "only_new_output": "c-framing-refinement-ack-v2.json in this reviewer's session artifact folder",
+    "repository_edits": false,
+    "prior_reports_or_decisions_edited": false,
+    "new_actors": false,
+    "runtime_or_profile_writes": false,
+    "canonical_p05_or_qa_record_written": false,
+    "release_clearance": false
+  }
+}

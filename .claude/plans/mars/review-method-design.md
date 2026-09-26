@@ -5,6 +5,8 @@
 **Inputs:** current REVIEW (integration branch), CodeReviewer, code-review, plan-eng-review,
 define Step 11, MARS protocol and pilot, [MDASH lessons](mdash-lessons.md)
 
+_Editorial note (2026-09-25): nomenclature and operative pointers are updated for the native workflow consolidation (ADR-0034); the original record remains at [`af94ff74`](https://github.com/jokerman89/lintel/blob/af94ff7499cbb3a180be3be4eadbfd05e8aa16f7/.claude/plans/mars/review-method-design.md)._
+
 ## Problem
 
 The reviewer instructions Lintel actually sends today are thin and divergent:
@@ -59,7 +61,7 @@ lib/review-questions.json      standing questions (stable IDs, triggers, evidenc
 skills/review/references/method.md   role, procedure, rubric, evidence levels, report shape
 lib/review_method.py           select questions · render packet · parse/validate report + coverage
         │
-        ├── single reviewer:   REVIEW Stage 1/2, code-review, plan-eng-review, define, CodeReviewer
+        ├── single reviewer:   REVIEW Stage 1/2, code-review, inspect, define, CodeReviewer
         └── panel (MARS):      same packet × N distinct models → challenge → synthesis
                                     (lib/mars_contract.py: roster, offer, state, close)
         │
@@ -119,7 +121,7 @@ orchestration:
 | `/li:review` (single, default) | MARS, multi-model hosts, panel state | one independent reviewer context (or a labelled manual review) |
 | `/li:review` panel mode | — | MARS capability gate + consent; falls back to single if declined or unavailable |
 | `/li:mars` standalone | a cycle, a work map, REVIEW | ≥2 distinct models, consent |
-| `/li:code-review`, `/li:plan-eng-review`, `/li:define` | MARS | the method; may offer MARS once |
+| `/li:code-review`, `/li:inspect`, `/li:define` | MARS | the method; may offer MARS once |
 
 Dependency direction: `review_method` ← REVIEW, MARS, and the other review skills.
 REVIEW's panel mode calls the MARS panel engine optionally; MARS never imports REVIEW.
@@ -135,7 +137,7 @@ and records with MARS helpers absent, and MARS runs a panel with no cycle state 
 | RM2 | Method library | `lib/review_method.py` | catalog validation (unique stable IDs, required fields, supersede chains); selection by kind/tags/stage; packet render; report + coverage parse |
 | RM3 | One header schema | `lib/review-method-schema.json` (absorbs `mars-schema.json` request/report; MARS extends with panel fields) | schema round-trip tests; MARS tests still pass |
 | RM4 | Renderers | `bin/li-review-packet.py`; `li-mars.py panel brief` delegates to `review_method` | **parity test**: single vs panel body identical except header |
-| RM5 | Consumers wired | review SKILL Stage 1/2 + Step 6 → panel mode; CodeReviewer; code-review; plan-eng-review; define Step 11; security/compliance agents keep domain checklists but use the canonical rubric | **drift guard**: no severity rubric or reviewer dimension list defined outside `method.md` |
+| RM5 | Consumers wired | review SKILL Stage 1/2 + Step 6 → panel mode; CodeReviewer; code-review; the engineering plan-review lens (now `inspect`); define Step 11; security/compliance agents keep domain checklists but use the canonical rubric | **drift guard**: no severity rubric or reviewer dimension list defined outside `method.md` |
 | RM6 | Evidence bridge | map report → P05 controls (spec, quality, tests); panel corroboration from host receipts | integration test: single and panel reports produce equivalent decisions for equivalent findings |
 | RM7 | Coverage enforcement | reports missing an applicable SQ status are `incomplete`, not PASS | unit + pilot rerun |
 | RM7b | Independence of entry points | no new cross-imports | REVIEW single works with MARS files removed; standalone MARS works with no cycle/work map |
@@ -150,7 +152,8 @@ can land before the shared-file edits in RM5.
 - Domain reviewers (GDPR, OAuth, Terraform…) keep their domain checklists as standing
   question sets under their own namespace, sharing the rubric and report shape.
 - Compliance gates (REVIEW Stage 3) stay pack-driven; they are policy, not review opinion.
-- plan-eng-review's interactive per-issue decisions stay; its reviewer pass uses the method.
+- The engineering plan-review lens (now `inspect`) keeps its interactive per-issue decisions;
+  its reviewer pass uses the method.
 
 ## Risks
 

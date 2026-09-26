@@ -122,9 +122,10 @@ shared-rule `outcome` and `release_clearance: false`), then:
 `coverage_complete: true` means every received round-1 report is complete and consistent
 under the method (questions, acceptance rows, header agreement, not `unable`). When a
 `spec` or `full` packet lists acceptance IDs, `--adjudicated` must include the deviation
-count. A REVIEW panel (any spelling of caller `review`) also needs a bound selection, the
-method packet and adjudicated counts, or its outcome is `incomplete` and `panel inspection`
-refuses it.
+count. A REVIEW panel (caller `review` in any case, also as the last `:` part such as
+`cycle:review`, or the native `li-review` / `/li-review`) also needs a bound selection and the
+method packet, or its outcome is `incomplete`. `panel inspection` refuses it without them, and
+without adjudicated counts: a synthesis written without `--adjudicated` carries no outcome.
 
 | Disposition | Rule |
 |---|---|

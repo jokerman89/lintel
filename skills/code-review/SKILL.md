@@ -126,9 +126,8 @@ For a high-risk diff (auth, data loss, concurrency, migration or a security boun
 offer [MARS](../mars/SKILL.md) once when `li-mars.py offer` (caller `code-review`) returns 0.
 The panel sends the shared [Review Method](../review/references/method.md) packet (kind
 `code-review`, stage `quality`) and binds the same selection; this workflow's own single
-pass keeps its four dimensions until the quality consolidation adopts the method. Findings
-stay read-only inspection input; the large-diff Codex gate, required independence and the
-shared evidence gate are unchanged.
+pass keeps its four dimensions. Findings stay read-only inspection input; the optional
+`--cross-check` pass, required independence and the shared evidence gate are unchanged.
 
 ## Confidence scoring
 

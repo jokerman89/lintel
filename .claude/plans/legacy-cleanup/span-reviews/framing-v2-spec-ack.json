@@ -1,0 +1,260 @@
+{
+  "review_type": "finite-existing-span-framing-acknowledgment",
+  "status": "FRAMING_ACKNOWLEDGMENT_ONLY",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-framing-refinement-mapping-v2.json",
+    "bytes": 53652,
+    "sha256": "ad1789e399ade34b70858e002c2e5b07a96f64ca870276878c9087876ee96abf",
+    "revision": 2,
+    "selected_declarations": 27,
+    "selected_source_files": 3,
+    "unique_framing_excerpts": 8
+  },
+  "superseded_input": {
+    "sha256": "23ca3fbefcfe7247ce0b2f28c21c978aa96ab2a33e46c9f73822531afbc6134c",
+    "consumed": false,
+    "disposition": "Coordinator superseded v1 before consumption to remove preceding same-level siblings from ancestor trails. No v1 acknowledgment is issued or silently transferred."
+  },
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "session_state_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "role": "Same prior source-spec reviewer; no descendants. This identity label is not P05 corroboration."
+  },
+  "source_selection": {
+    "git_commit": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+    "scope": "Only the three unchanged historical sources and existing declarations needed for these 27 framing rows. Evolving coordinator files and follow-up implementation were not reviewed.",
+    "original_source_sha256": {
+      ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+      ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+    }
+  },
+  "scope": "ACK means the exact v2 framing selection adequately preserves the original identity, observational role and actual containing ancestors of the specified already-accepted, unchanged span under the parent's newly approved bounded condition. It is not a repeat semantic approval, new mask, source implementation approval or general guarantee about arbitrary outside prose.",
+  "counts": {"ACK": 27, "REJECT": 0, "NEEDS_NARROWING": 0},
+  "original_semantic_decisions_reopened": false,
+  "new_record_masks_approved": false,
+  "canonical_p05_record_written": false,
+  "release_clearance": false,
+  "overall_acceptance": "UNVERIFIED",
+  "framing_digest_recipe": {
+    "keys": ["id", "declaration_digest", "record_sha256", "path", "framing_refs", "framing_manifest", "expected_ancestors"],
+    "operation": "Existing review_contract.content_digest over exactly these row fields: sorted dictionary keys, preserved list order, compact separators, ensure_ascii=True, allow_nan=False, UTF-8, SHA-256.",
+    "verified_rows": 27
+  },
+  "common_conditions": [
+    "This expressly refines the earlier whole-file editorial dependency for these 27 identities only. Old full-source hashes remain original-source provenance, not the proposed live acceptance filter. Earlier reports and semantic verdicts remain unchanged; no extension to other declarations or previously rejected spans is inferred.",
+    "Exact approved LF span bytes, unique ordered whole-line markers and declaration identity remain binding. No widening, normalization, stale-marker substitution or change to the record's own heading is acknowledged.",
+    "The exact framing manifest and actual containing ancestor trail must remain bound. Recompute ancestry from the whole current source using shared Markdown classification; insertion or replacement of a real parent must fail even when selected record bytes are unchanged. Preceding same-level peers are not ancestors.",
+    "Framing is an acceptance identity selection, NOT a masking permission. All bytes outside the existing approved spans, including these framing excerpts, component tables, adjacent summaries, current instructions and imports, remain subject to unchanged live-text checks and any still-required adjudication.",
+    "Unrelated unselected summary/navigation edits may leave admission intact. An edit touching a registered summary span, its framing or its real ancestors is not unrelated and must fail. No universal NLP detection of semantic repurposing through arbitrary outside indirection is claimed; final current-source review remains required.",
+    "Before implementation acceptance, paired tests must cover permitted unrelated edits with outside scanning preserved; changed title/date/scope/record-role/ancestor; changed raw bytes/EOL; missing, duplicate, reordered or widened markers; and adjacent retired commands/imports. Reuse the existing bind_work/classify_markdown contracts, without a new parser, schema or service.",
+    "This data acknowledgment does not establish those consumer tests, final quality, mandatory QA, current-routing PASS, canonical P05 PASS or release clearance. The separate ba603072 source-spec report covers the prior whole-source mechanism, not this prospective refinement."
+  ],
+  "decisions": [
+    {
+      "id": "cohort-2-record-46",
+      "declaration_digest": "6f2cf811e6443a8d7104a422ec43273472ada7db9c85bd50824417cdf4f1e9a5",
+      "framing_digest": "ccf9b3ae775f04b0a844730c0518da9db176cfcd372461214f64a9a68cdafed6",
+      "decision": "ACK",
+      "reason": "The dated seven-component audit scope and explicit historical role remain bound with Finding records; the unchanged office-hours heading belongs to its own span."
+    },
+    {
+      "id": "cohort-2-record-162",
+      "declaration_digest": "2392ddcf8c125d1fa2f6a0d2873272c0ad83a9aeeee9131273c8455bcab07a37",
+      "framing_digest": "8056fdb343b3ef361d0ece38b9ab0a2ee21de9d177fdcd500edbdd001e73e655",
+      "decision": "ACK",
+      "reason": "The historical planner audit scope and Finding records role remain bound; office-hours is a preceding peer, not a containing ancestor."
+    },
+    {
+      "id": "cohort-2-record-258",
+      "declaration_digest": "85557358040fa473b01085d1efa06b705d867c9713f5a27c43af8cd8f6c12089",
+      "framing_digest": "08159869c7dc658901c539b3fdbeff95cb46db41a46784c79eb8fd910844588d",
+      "decision": "ACK",
+      "reason": "The original planner audit identity and Finding records parent remain bound; plan-ceo-review is a sibling, while the unchanged plan-eng-review heading remains inside the span."
+    },
+    {
+      "id": "cohort-2-record-348",
+      "declaration_digest": "e73b13887fe900782fd5f4cc314b722342fef0dd8ee305802c3e9b983bda1531",
+      "framing_digest": "f08659bc5fed8b2093e0e869c5eea20668742ebadc4165d3f628e0487a8fcc1f",
+      "decision": "ACK",
+      "reason": "The dated planner scope and historical finding-record role remain explicit; preceding component headings correctly contribute no additional ancestry."
+    },
+    {
+      "id": "cohort-2-record-437",
+      "declaration_digest": "df5c5895a5412e2f867a6512e8d188268e37ffef89b3a55e7d8a081e7d470e77",
+      "framing_digest": "c7ad204752b88c66d98daf565e36a4774836e79bd60a1b3913a18e192107d9ba",
+      "decision": "ACK",
+      "reason": "The historical planner audit scope and Finding records parent identify this unchanged component record without treating the preceding design review as a parent."
+    },
+    {
+      "id": "cohort-2-record-526",
+      "declaration_digest": "f4a8721453a58a877b0fc09877d7ab00b284207629b9b3daf5a87f1f428d57d0",
+      "framing_digest": "d6ba754fe35536f823f9b4756cb6596d20db1fae014f6c3e3441c6b1f7704de9",
+      "decision": "ACK",
+      "reason": "The bound original audit scope and Finding records role adequately frame the unchanged plan-tune record; earlier component headings are siblings."
+    },
+    {
+      "id": "cohort-2-record-615",
+      "declaration_digest": "0c647479ba940ee82b373fe81f24abb5c4a48e52629cb375594371cd6caa2ff6",
+      "framing_digest": "9413f0fb8706f22d419b924488b56bd338c5ba700786290a542994a5a8513d15",
+      "decision": "ACK",
+      "reason": "The original planner-audit scope and Finding records parent remain bound through this last component record; the following Cohort summary is outside its span."
+    },
+    {
+      "id": "cohort-3-record-156",
+      "declaration_digest": "8b7b2544e8f490c9c14ff9be3e65e3144a92f2915e4136cb9034aebe1d72c435",
+      "framing_digest": "44ed1b34ce9252e0fb9d343326b6c9070a112c01c93ee9b60e7cdefd2c5aa00f",
+      "decision": "ACK",
+      "reason": "The dated 18-component hand-off audit and designed-not-built scope remain bound; Per-component records also binds the explanation of the original finding/proposal fields."
+    },
+    {
+      "id": "cohort-3-record-246",
+      "declaration_digest": "139dc45b72ee220ac0e06fc2da251791396049670a0985da59adcb7c9a39a350",
+      "framing_digest": "63255873f3b7ada93a55d394df698c2bb9c65f76ebab140dec59549b637016c8",
+      "decision": "ACK",
+      "reason": "The historical hand-off scope and per-component field-role introduction remain bound; context-save is a preceding peer, not a parent of context-restore."
+    },
+    {
+      "id": "cohort-3-record-300",
+      "declaration_digest": "754e11ade412e5c3dafd25b3c9b8c07c7d2690f51a98f0a0069072591adddef3",
+      "framing_digest": "b201914272f15c8b756acefabf0ff52fcb93c9e908c5fb2decca3a481e2b1fd1",
+      "decision": "ACK",
+      "reason": "The original audit scope and Per-component records explanation preserve this snapshot record's observational role; previous persistence records are siblings."
+    },
+    {
+      "id": "cohort-3-record-340",
+      "declaration_digest": "b2c851f6344c635fe847dc5db8a5680a32606023de06a4c8f62f4835c43912b1",
+      "framing_digest": "63a50d3a47706579de7faee3763307af89bd9eebafdbece788e07b8620d27c36",
+      "decision": "ACK",
+      "reason": "The dated hand-off audit, historical scope and per-component field roles remain bound around the unchanged context-dump record."
+    },
+    {
+      "id": "cohort-3-record-587",
+      "declaration_digest": "39b9eb0065a3c2ea81acf5b2c00964ae58919cb70ee0ba2ed387b4ee856fa515",
+      "framing_digest": "abc647b8030946416bfd45fd1cf5593b17534bc464f1d89e4da1272ae747b923",
+      "decision": "ACK",
+      "reason": "The original 18-component scope and historical per-component record format remain bound; other warm-family headings do not become ancestors."
+    },
+    {
+      "id": "cohort-3-record-667",
+      "declaration_digest": "b847225489c33c72134ef6bf202b3283679d64f56ac99d00b9b1faeb40ed5ab5",
+      "framing_digest": "2319105f2c29b59deab4cea7c50b1c9a3f6b160e64f567e56849283f5a9f52ea",
+      "decision": "ACK",
+      "reason": "The historical hand-off/budget scope and Per-component records parent bind this unchanged budgetwatch record without coupling its ancestry to the previous budget peer."
+    },
+    {
+      "id": "cohort-3-record-735",
+      "declaration_digest": "af12d99c068e6150a56c30fd7a8e323da33d40bf4e61768863be7a2c1209cc7a",
+      "framing_digest": "202cffaf0651cc2ff89b918af484973a845b14c48ab3be730eec342d80c9eeb3",
+      "decision": "ACK",
+      "reason": "The original cross-context hand-off scope and historical field-role introduction remain bound around the unchanged pair-agent record."
+    },
+    {
+      "id": "cohort-3-record-777",
+      "declaration_digest": "d71dcd20ce93e7276c03299b066f05ba6f94078ee1f0cdf26ec0d0cbebe0358c",
+      "framing_digest": "da15ddfbad5d7fbb90c92240d79c4e9ad63230fef88bb926e856f1391d589b51",
+      "decision": "ACK",
+      "reason": "The bound scope explicitly identifies the source-era subprocess hand-off component; Per-component records, not the preceding pair-agent peer, is its parent."
+    },
+    {
+      "id": "cohort-7-record-46",
+      "declaration_digest": "ae0387bba935b5358fae5544520ae6f4b85a013512fe10d61bd3675b7de57244",
+      "framing_digest": "42ee8084fbc44e170dc34059feea4dc80d5574cc37a446391c90a685afca27f8",
+      "decision": "ACK",
+      "reason": "The dated audit branch, role/profile scope, original component inventory and historical notice remain bound with Role-skill finding records."
+    },
+    {
+      "id": "remaining-source-record-13",
+      "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+      "framing_digest": "1e8ed9e2293a9f9b063ffe4429116a1b5af194d79c7f43cf0e0dcbdb2389345d",
+      "decision": "ACK",
+      "reason": "The original planner audit scope and Cohort summary parent identify the already-accepted peer comparison as historical summary, not a component execution record."
+    },
+    {
+      "id": "remaining-source-record-14",
+      "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
+      "framing_digest": "2509f58e8f2e76cd0940cdafa73142c6d975304c36ef6aeddbbcfb7ef75e7fa5",
+      "decision": "ACK",
+      "reason": "The historical planner scope and Cohort summary role remain bound; Strongest / weakest peers is a sibling, not the parent of Top findings."
+    },
+    {
+      "id": "remaining-source-record-15",
+      "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+      "framing_digest": "91c7b55f557672f49ae4ce0806205d5944b0c24d1b6a6a891ce4c0c59885804b",
+      "decision": "ACK",
+      "reason": "The dated original audit and Cohort summary parent fix the role of these secondary findings; the preceding Top findings heading is correctly excluded from ancestry."
+    },
+    {
+      "id": "remaining-source-record-16",
+      "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+      "framing_digest": "dda589841efc43c8a3986b5a11b5e1d51e90f6252e691fc16e52c775a283bcea",
+      "decision": "ACK",
+      "reason": "The original planner scope and summary parent adequately frame this unchanged designed-not-built observation. The following Operator decisions section remains outside the approved span."
+    },
+    {
+      "id": "remaining-source-record-17",
+      "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+      "framing_digest": "0db9c0ff194be703e295bb8565b4eee6dc230eaf599d43f7fdd06e74cac8d11a",
+      "decision": "ACK",
+      "reason": "The historical hand-off scope and cohort-level structural-findings introduction bind the original CF-2 role; CF-1 is a preceding sibling, not a containing ancestor."
+    },
+    {
+      "id": "remaining-source-record-18",
+      "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+      "framing_digest": "227c28d59dc27af7c1a548860ad92ac75e8d274ac0ef4811942839d1fadce0e9",
+      "decision": "ACK",
+      "reason": "The original audit scope and per-component field-role introduction remain bound; the preceding context-dump heading is not an ancestor of this context-warm record."
+    },
+    {
+      "id": "remaining-source-record-19",
+      "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+      "framing_digest": "bc1a5a02fcd87d15f1c8b391fb9c9957842c92b6979ea7b387e2168428c8fd76",
+      "decision": "ACK",
+      "reason": "The dated pack/role scope and Role-skill finding records parent identify the unchanged shared record; role-activate is a same-level peer."
+    },
+    {
+      "id": "remaining-source-record-20",
+      "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+      "framing_digest": "0405d29163995e032b6577ee437d0738a6cd3c21ac3d169f346d1e51af149fa1",
+      "decision": "ACK",
+      "reason": "The original audit date, branch, pack-consumer scope and historical role remain bound. This root-level finding has only the document root as ancestor; preceding H2 sections are siblings."
+    },
+    {
+      "id": "remaining-source-record-21",
+      "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+      "framing_digest": "2853b127b44a243629810179b1f9d58157d810a002905244b34aceb87cd0955d",
+      "decision": "ACK",
+      "reason": "The original WorkProfile audit scope and historical role remain bound at the document root; the preceding pack-resolver finding is a peer, not a parent."
+    },
+    {
+      "id": "remaining-source-record-22",
+      "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+      "framing_digest": "59f2b10f653db6fc0cbb9bb16867e22ce48c9ea0e93eae118acfdaf0096f3c2d",
+      "decision": "ACK",
+      "reason": "The dated original scope explicitly includes the designed-not-built lifecycle note. Root-only ancestry is correct for this unchanged H2 record."
+    },
+    {
+      "id": "remaining-source-record-23",
+      "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+      "framing_digest": "081083dbac314c2e97204a02fa6aaf8616511d8a4f0176a934538225b72995ab",
+      "decision": "ACK",
+      "reason": "The original cohort identity, inventory and historical role remain bound at the root. The summary's own H2 stays inside its exact span; the preceding lifecycle note is not its ancestor."
+    }
+  ],
+  "checks_actually_performed": [
+    "Verified the v2 packet's raw size/SHA and exact 27-row selection; did not consume superseded v1.",
+    "Read all eight unique framing excerpts from the three immutable Git blobs and verified their exact LF hashes and original-source provenance hashes.",
+    "Matched every ID/declaration/raw-span hash and marker pair to the existing ba register and this reviewer's unchanged prior ACCEPT identity, without repeating semantic adjudication.",
+    "Used the existing shared Markdown classifier and acceptanceRef shape validator to verify unique ordered top-level prose boundaries, exact spans and all actual containing ancestor trails.",
+    "Inspected existing bind_work excerpt semantics; no live bind_work/profile operation was run. Independently recomputed all 27 seven-key framing digests with existing content_digest after receiving the explicit recipe.",
+    "No guard consumer, paired runtime fixture suite, hosted QA, quality gate or broader historical audit was run or claimed for this refinement."
+  ],
+  "executed_command_ledger": [
+    {"command": 32, "action": "Pin v2 raw packet hash/size and inspect metadata/first-row shape.", "exit": 0},
+    {"command": 34, "action": "Read 27 identities, eight unique immutable framing excerpts and three full-source hashes.", "exit": 0},
+    {"command": 36, "action": "Verify existing helper source identity and prior accepted declaration shapes. Four explicitly exploratory digest projections did not match; no projected recipe was accepted.", "exit": 0},
+    {"command": 37, "action": "Verify all 27 prior ACCEPT identities, exact unchanged spans, framing hashes and actual ancestry with shared Markdown facts.", "exit": 0},
+    {"command": 38, "action": "Independently recompute all 27 exact seven-key digests using the coordinator-supplied recipe and existing content_digest.", "exit": 0}
+  ],
+  "readback": "The delivered artifact's raw hash is reported separately after checking the exact 27 ordered ID/declaration/framing triples, counts and limits. No self-hash is embedded."
+}
