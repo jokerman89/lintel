@@ -1,0 +1,688 @@
+{
+  "schema_version": 2,
+  "skill": "review",
+  "status": "unverified",
+  "timestamp": "2026-09-25T15:35:54.983986+00:00",
+  "reason": "Faithful coordinator transcription of two exact framing ACKs; original full-context record retained as immutable history. Overall acceptance remains unverified.",
+  "context": {
+    "attempt_id": "legacy-cleanup-final-framing-v2",
+    "builder": {
+      "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+      "id": "cleanup-integration"
+    },
+    "independence_required": true,
+    "profile": {
+      "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+      "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+      "generation": 2,
+      "name": "_default",
+      "schema_version": 1,
+      "version": "1.0.0"
+    },
+    "purpose": "verification_only",
+    "qa_requirements": [
+      {
+        "applicability": "applicable",
+        "id": "historical-spans",
+        "kind": "check",
+        "policy": {
+          "actor": null,
+          "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+          "effective_date": null,
+          "jurisdiction": null,
+          "source": ".claude/plans/legacy-cleanup/spec.md",
+          "version": "2026-09-25"
+        },
+        "requirement": "mandatory"
+      }
+    ],
+    "required_controls": [
+      "historical-spans"
+    ],
+    "required_policy": {
+      "applicability": "not_applicable",
+      "required": false,
+      "source": "bundled-neutral",
+      "status": "not_required",
+      "version": "1.0.0"
+    },
+    "schema_version": 2,
+    "snapshot": {
+      "base": "a7a1df338bacf900f1210f08131f391831992f1f",
+      "entries": [
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          }
+        }
+      ],
+      "head": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+      "record_path": ".claude/runtime/reviews/legacy-cleanup-final-framing-v2.json",
+      "result_digest": "9c40e8cb20d3796ae16e0ea65f67e867b5ff2702f77e8af3b3444c03bdb76e30",
+      "selection": [
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md"
+      ]
+    },
+    "work": {
+      "acceptance_digest": "a2b1e9eb868d6e98ad9ae991a8a5341c4c803e1e2f9a398634fad172ea4fc8c0",
+      "acceptance_manifest": [
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/plan.md",
+          "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/prompt.md",
+          "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/spec.md",
+          "sha256": "a101f99340629ae655a111da3aa8c03a0c2ace51b569e71fc75b93232b9b549c",
+          "start": null
+        },
+        {
+          "end": "## Architecture-level note (designed-not-built dimensions)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "sha256": "a5b6650fc3ae6bc1e421d12dfa8e694c357d5ae1ce68196282610107a69162f7",
+          "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain"
+        },
+        {
+          "end": "## NO-CUT reminder",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "sha256": "318d1d0ccb9ae7d8e72e7862b3d87edae922e2d35c943f7f0cd3aa9230972de1",
+          "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates"
+        },
+        {
+          "end": "## Role-skill finding records",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e",
+          "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+        },
+        {
+          "end": "### CF-1 \u2014 Storage-root schism (D3, D5, high-severity)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "sha256": "b98ad01620617150fa04b0998e816e301f5248224896315414d0e6c247ad618b",
+          "start": "## Cohort-level structural findings (apply across the cohort)"
+        },
+        {
+          "end": "### Strongest / weakest peers",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "sha256": "fc7ca25db5a110dee7785de8a002e531ad032aac0b6cde8cfb1606c8b38b8768",
+          "start": "## Cohort summary"
+        },
+        {
+          "end": "### component: skills/role-activate/SKILL.md",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "sha256": "635dd1978cfea46baf8e00dc0b6f44f6e55e4c00affa31efc6166b80027a2c7a",
+          "start": "## Role-skill finding records"
+        },
+        {
+          "end": "### context-save (strongest of the persistence pair, but root-broken)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "sha256": "7d5cf4ed2b288fd0364f86d1a6b1333202a54649e27d0a35eaddb6f25b00a0c7",
+          "start": "## Per-component records"
+        }
+      ],
+      "acceptance_paths": [
+        ".claude/plans/legacy-cleanup/plan.md",
+        ".claude/plans/legacy-cleanup/prompt.md",
+        ".claude/plans/legacy-cleanup/spec.md",
+        {
+          "end": "## Architecture-level note (designed-not-built dimensions)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain"
+        },
+        {
+          "end": "## NO-CUT reminder",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates"
+        },
+        {
+          "end": "## Role-skill finding records",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+        },
+        {
+          "end": "### CF-1 \u2014 Storage-root schism (D3, D5, high-severity)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "start": "## Cohort-level structural findings (apply across the cohort)"
+        },
+        {
+          "end": "### Strongest / weakest peers",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "start": "## Cohort summary"
+        },
+        {
+          "end": "### component: skills/role-activate/SKILL.md",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "start": "## Role-skill finding records"
+        },
+        {
+          "end": "### context-save (strongest of the persistence pair, but root-broken)",
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "start": "## Per-component records"
+        }
+      ],
+      "leaf_ids": [
+        "0.2.c",
+        "9.3.a",
+        "10.2.a"
+      ],
+      "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+      "package_id": "INTEGRATE",
+      "work_map": ".claude/plans/legacy-cleanup/work.json"
+    }
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "provenance": "declared",
+  "controls": [
+    {
+      "applicability": "applicable",
+      "id": "historical-spans",
+      "kind": "check",
+      "policy": {
+        "actor": null,
+        "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+        "effective_date": null,
+        "jurisdiction": null,
+        "source": ".claude/plans/legacy-cleanup/spec.md",
+        "version": "2026-09-25"
+      },
+      "requirement": "mandatory",
+      "status": "pass",
+      "reason": "Both original independent actors explicitly acknowledged these exact v2 framing digests; record bytes/declarations and semantic conclusions unchanged.",
+      "evidence": [
+        ".claude/plans/legacy-cleanup/span-reviews/final-spec-decisions.json",
+        ".claude/plans/legacy-cleanup/span-reviews/final-quality-decisions.json",
+        ".claude/plans/legacy-cleanup/span-reviews/framing-v2-spec-ack.json",
+        ".claude/plans/legacy-cleanup/span-reviews/framing-v2-quality-ack.json"
+      ],
+      "observation": {
+        "span_declarations": [
+          "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+          "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+          "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+          "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+          "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+          "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+          "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+          "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+          "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+          "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+          "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9"
+        ],
+        "span_framing": {
+          "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57": {
+            "id": "remaining-source-record-20",
+            "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+            "record_sha256": "2adf3ae7fb782b7f1d7a3374536f9a34e04507b4daab960a178f7460e2bc782d",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records",
+                "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e"
+              }
+            ],
+            "expected_ancestors": [
+              "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+            ]
+          },
+          "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e": {
+            "id": "remaining-source-record-13",
+            "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+            "record_sha256": "5c27128524c44aa4f8192b151e9f52c6293870cd5f903e08dbbb8520f9309bc2",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)",
+                "sha256": "a5b6650fc3ae6bc1e421d12dfa8e694c357d5ae1ce68196282610107a69162f7"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers",
+                "sha256": "fc7ca25db5a110dee7785de8a002e531ad032aac0b6cde8cfb1606c8b38b8768"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+              "## Cohort summary"
+            ]
+          },
+          "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5": {
+            "id": "remaining-source-record-17",
+            "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+            "record_sha256": "d0b6d5bdda27268a4043be2e46c3236fd6e6efb3edb1dba5b26cde51fefd1746",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+                "end": "## NO-CUT reminder"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "## Cohort-level structural findings (apply across the cohort)",
+                "end": "### CF-1 \u2014 Storage-root schism (D3, D5, high-severity)"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+                "end": "## NO-CUT reminder",
+                "sha256": "318d1d0ccb9ae7d8e72e7862b3d87edae922e2d35c943f7f0cd3aa9230972de1"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "## Cohort-level structural findings (apply across the cohort)",
+                "end": "### CF-1 \u2014 Storage-root schism (D3, D5, high-severity)",
+                "sha256": "b98ad01620617150fa04b0998e816e301f5248224896315414d0e6c247ad618b"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+              "## Cohort-level structural findings (apply across the cohort)"
+            ]
+          },
+          "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2": {
+            "id": "remaining-source-record-23",
+            "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+            "record_sha256": "30f4fd1f3c0a6ea1ce57c4f014eb00df49f7bbc516cb20a880e288691b8a137a",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records",
+                "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e"
+              }
+            ],
+            "expected_ancestors": [
+              "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+            ]
+          },
+          "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01": {
+            "id": "remaining-source-record-15",
+            "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+            "record_sha256": "a498a1d7e61636a8eafe73f762d099fa6cfeca5e9834130d1ab6426bdb3a1354",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)",
+                "sha256": "a5b6650fc3ae6bc1e421d12dfa8e694c357d5ae1ce68196282610107a69162f7"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers",
+                "sha256": "fc7ca25db5a110dee7785de8a002e531ad032aac0b6cde8cfb1606c8b38b8768"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+              "## Cohort summary"
+            ]
+          },
+          "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa": {
+            "id": "remaining-source-record-18",
+            "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+            "record_sha256": "42a6df994f09823c0f8cfecb7893a41ab584f2b7311f39fc5f66982b0e34b22a",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+                "end": "## NO-CUT reminder"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "## Per-component records",
+                "end": "### context-save (strongest of the persistence pair, but root-broken)"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+                "end": "## NO-CUT reminder",
+                "sha256": "318d1d0ccb9ae7d8e72e7862b3d87edae922e2d35c943f7f0cd3aa9230972de1"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+                "start": "## Per-component records",
+                "end": "### context-save (strongest of the persistence pair, but root-broken)",
+                "sha256": "7d5cf4ed2b288fd0364f86d1a6b1333202a54649e27d0a35eaddb6f25b00a0c7"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 3: Brief Forge / hand-off / envelope candidates",
+              "## Per-component records"
+            ]
+          },
+          "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698": {
+            "id": "remaining-source-record-21",
+            "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+            "record_sha256": "35cf52f7313df6a96cc451183d108300726d3fedc05d8bcdc13354304573078a",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records",
+                "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e"
+              }
+            ],
+            "expected_ancestors": [
+              "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+            ]
+          },
+          "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0": {
+            "id": "remaining-source-record-19",
+            "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+            "record_sha256": "836cda9a25541067fdcb35dbc9b5baf3f4761112e2436427cf4253416c7adbd6",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "## Role-skill finding records",
+                "end": "### component: skills/role-activate/SKILL.md"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records",
+                "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "## Role-skill finding records",
+                "end": "### component: skills/role-activate/SKILL.md",
+                "sha256": "635dd1978cfea46baf8e00dc0b6f44f6e55e4c00affa31efc6166b80027a2c7a"
+              }
+            ],
+            "expected_ancestors": [
+              "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+              "## Role-skill finding records"
+            ]
+          },
+          "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1": {
+            "id": "remaining-source-record-22",
+            "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+            "record_sha256": "4a1e23f5aa5f0a22b1d6711bbf0e41970263a7ce264b5e3ce72b923ab36bab31",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+                "start": "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic",
+                "end": "## Role-skill finding records",
+                "sha256": "b026eb2bcc1874572b766d467ac44539817528bc11f338d79fb3b2e147625e9e"
+              }
+            ],
+            "expected_ancestors": [
+              "# Cohort 7 \u2014 pack lifecycle skills + role/profile mechanics + WorkProfile logic"
+            ]
+          },
+          "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6": {
+            "id": "remaining-source-record-16",
+            "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+            "record_sha256": "f3c00f6697cc738739524dfdd8563ebef973b7ee78c56890c490d94d9510983d",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)",
+                "sha256": "a5b6650fc3ae6bc1e421d12dfa8e694c357d5ae1ce68196282610107a69162f7"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers",
+                "sha256": "fc7ca25db5a110dee7785de8a002e531ad032aac0b6cde8cfb1606c8b38b8768"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+              "## Cohort summary"
+            ]
+          },
+          "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9": {
+            "id": "remaining-source-record-14",
+            "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
+            "record_sha256": "082e59f783da13c39867dd9c0a28f9f5db5313afbab2c18fff82ab15b5cbbef1",
+            "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+            "framing_refs": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers"
+              }
+            ],
+            "framing_manifest": [
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+                "end": "## Architecture-level note (designed-not-built dimensions)",
+                "sha256": "a5b6650fc3ae6bc1e421d12dfa8e694c357d5ae1ce68196282610107a69162f7"
+              },
+              {
+                "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+                "start": "## Cohort summary",
+                "end": "### Strongest / weakest peers",
+                "sha256": "fc7ca25db5a110dee7785de8a002e531ad032aac0b6cde8cfb1606c8b38b8768"
+              }
+            ],
+            "expected_ancestors": [
+              "# Lintel uniformity audit \u2014 Cohort 2: planner sub-chain",
+              "## Cohort summary"
+            ]
+          }
+        },
+        "framing_declarations": [
+          "0405d29163995e032b6577ee437d0738a6cd3c21ac3d169f346d1e51af149fa1",
+          "1e8ed9e2293a9f9b063ffe4429116a1b5af194d79c7f43cf0e0dcbdb2389345d",
+          "0db9c0ff194be703e295bb8565b4eee6dc230eaf599d43f7fdd06e74cac8d11a",
+          "081083dbac314c2e97204a02fa6aaf8616511d8a4f0176a934538225b72995ab",
+          "91c7b55f557672f49ae4ce0806205d5944b0c24d1b6a6a891ce4c0c59885804b",
+          "227c28d59dc27af7c1a548860ad92ac75e8d274ac0ef4811942839d1fadce0e9",
+          "2853b127b44a243629810179b1f9d58157d810a002905244b34aceb87cd0955d",
+          "bc1a5a02fcd87d15f1c8b391fb9c9957842c92b6979ea7b387e2168428c8fd76",
+          "59f2b10f653db6fc0cbb9bb16867e22ce48c9ea0e93eae118acfdaf0096f3c2d",
+          "dda589841efc43c8a3986b5a11b5e1d51e90f6252e691fc16e52c775a283bcea",
+          "2509f58e8f2e76cd0940cdafa73142c6d975304c36ef6aeddbbcfb7ef75e7fa5"
+        ],
+        "original_full_source_provenance": {
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+        },
+        "scope": "Exact existing record masks only; framing evidence is not a mask or release clearance"
+      }
+    }
+  ],
+  "coverage": {
+    "0.2.c": [
+      "historical-spans"
+    ],
+    "9.3.a": [
+      "historical-spans"
+    ],
+    "10.2.a": [
+      "historical-spans"
+    ]
+  },
+  "evidence": [
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/final-quality-decisions.json",
+      "sha256": "49849ac92449ac2fde2fbd8816807a830ff63ee895ae42a04226957e988a6c45"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/final-spec-decisions.json",
+      "sha256": "4f3573c78baa4f7156c749d795afe83f67035d5558c31fa9a59e34250adaf894"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/framing-v2-quality-ack.json",
+      "sha256": "a263b5104b39616eb84d405f4b50127083c83a0777785617920557eb912ed756"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/framing-v2-spec-ack.json",
+      "sha256": "95f802057f0e134f543c5b35acc2295a1118df4f97caebedd0e72f938532dbba"
+    }
+  ]
+}

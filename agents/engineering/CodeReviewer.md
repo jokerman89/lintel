@@ -72,6 +72,10 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews a
 5. **Per-finding:** severity (P1 blocks ship, P2 must resolve, P3 advisory),
    confidence (1-10), file:line, observed impact, evidence and suggested fix.
 
+When dispatched with a [Review Method](../../skills/review/references/method.md) packet,
+follow the packet's stage, rubric and report shape exactly; the dimension list above is
+background for reading the change, not a second rubric.
+
 Bind the decision through the [shared evidence contract](../../skills/review/references/evidence.md):
 selected work/package/leaves, acceptance, attempt, base/result manifest and actual
 builder/reviewer contexts. Cover every required control for every selected leaf.
