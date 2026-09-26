@@ -1,7 +1,8 @@
 # Legacy cleanup integration state
 
-**Status:** implementation in progress; not reviewed or released.
-**Updated:** 2026-09-25.
+**Status:** reconciled candidate awaiting independent review, hosted CI and publication; not released.
+**Updated:** 2026-09-26. The final reconciliation section supersedes the earlier guard and
+presentation-permission state recorded below.
 **Host/routing session:** e9c20b62-f877-4242-82cd-b5002d452da8.
 **Workspace project-session identifier:** e9d7470d-278c-4d7a-8a73-e1fd7a108ece.
 
@@ -231,14 +232,18 @@ records remain overall **UNVERIFIED**, not release clearance. Rejected, disputed
 widened or changed spans are not accepted. Exact-path LF and evidence-byte attributes
 preserve original Git/evidence bytes; they do not exempt content from scanning.
 
-Latest real forward-tree guard: **exit 1, 688 unresolved diagnostics**, 2190 visible
+Superseded 2026-09-26 (see the reconciliation section): latest forward-tree guard at that time: **exit 1, 688 unresolved diagnostics**, 2190 visible
 observations, all 68 approved spans emitted. Of these, **687 are still unadjudicated
 internal references**, not automatically defects or accepted historical observations.
 No ordinary shipped code/skill/doc surface outside internal records/presentation is
 reported. The remaining single presentation item below is a genuine current route,
 not history. The guard is NOT green and this candidate is NOT merge-ready.
 
-### Current deferred permission
+### Former deferred permission (resolved without a presentation edit)
+
+Superseded 2026-09-26: the retained `/li:research` shortcut keeps the field guide's route valid, so
+no presentation bytes change. The original record follows.
+
 
 `presentations/tech-shots-2026-09-25/show/field-guide.html:4` actively advertises the
 removed research shortcut. The exact proposed replacement is the existing cycle
