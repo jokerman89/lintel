@@ -48,7 +48,7 @@ publishing the harness possible at all.
 Canonical skills live at `skills/<name>/SKILL.md`, one source for every client. The invocation
 form depends on the adapter: `/li:<name>` in the Claude plugin, generated `li-<name>` wrappers
 where a [client adapter](client-adapters.md) has a documented discovery root, or an explicit
-file handoff through the Universal adapter. The tree holds 95 skill entries (directories with a
+file handoff through the Universal adapter. The tree holds 96 skill entries (directories with a
 `SKILL.md`; `python bin/li-catalog.py --check` verifies the generated catalog against them).
 They fall into clusters:
 
