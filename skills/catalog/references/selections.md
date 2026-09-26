@@ -168,7 +168,7 @@ The `core` and `demo-script` definitions remain unchanged.
 | `document-content` | design-knowledge | Full shared content preparation and repository documentation |
 | `document-word` | core | Standalone editable Word method |
 | `document-ppt` | design-knowledge | Editable slides, full notes and actual slide inspection |
-| `document-pdf` | core | Existing preparation/print/reader path |
+| `document-pdf` | core | Existing preparation/print path; no bundled PDF reader |
 | `document-xlsx` | core | Workbook composition and persisted integrity |
 | `document-visio` | core | Staged-slot discovery, not a writer |
 | `customer-communication` | core | Drafts, empathy/claim review and explicit voice evaluation |

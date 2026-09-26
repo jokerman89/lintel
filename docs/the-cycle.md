@@ -233,6 +233,7 @@ Use explicit cycle ranges or a documented preset for a shorter route:
 
 ```
 /li:fix                              SENSE + BUILD + REVIEW + SHIP
+/li:research                         SENSE + DEFINE + DISCOVER (shortcut for the next line)
 /li:cycle --mode research-dive        SENSE + DEFINE + DISCOVER
 /li:cycle --from PLAN --to BUILD      PLAN + BUILD
 /li:cycle --from REVIEW --to CAPTURE  REVIEW + SHIP + CAPTURE
