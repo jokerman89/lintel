@@ -16,7 +16,9 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 retrospective_text() {
   awk '
     { sub(/\r$/, "") }
-    /^### Step 8 — Retrospective \(--retrospective\)$/ { starts++; active=1; next }
+    /^### Step 8 — Retrospective \(--retrospective\)$/ { starts++; active=1; fence=""; next }
+    active && fence == "" && /^[ ]{0,3}(```|~~~)/ { fence=substr($0, match($0, /(```|~~~)/), 3); print; next }
+    active && fence != "" { if (index($0, fence) && $0 ~ /^[ ]{0,3}(```|~~~)[ \t]*$/) fence=""; print; next }
     active && /^#{1,3} / { active=0 }
     active { print }
     END { if (starts != 1) exit 2 }
