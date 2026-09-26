@@ -143,7 +143,7 @@ skill through the Universal adapter. Use `verify` for read-only testing (repairs
 
 Related entrypoints were consolidated into native methods with explicit modes; capabilities were
 kept. For example QA runs through `verify`, failure investigation through `diagnose` and context
-saving through `pause`. The former research shortcut is `/li:cycle --mode research-dive`, and the
+saving through `pause`. `/li:research` remains a native shortcut for `/li:cycle --mode research-dive`, and the
 composite build and delivery shortcuts are cycle ranges such as `--from PLAN --to BUILD` and
 `--from REVIEW --to CAPTURE`. Old names are not executable aliases. The [native workflow migration](migrations/2026-09-25-native-workflows.md)
 maps every former entry and explains how to update an owned installation without losing saved work.
