@@ -31,8 +31,8 @@
 
 Per the v4.0 reframe these dimensions are **designed-not-built** across the whole repo. To avoid per-component spam they are recorded once here and marked `n/a-unbuilt` in each record:
 
-- **D7 (pack / WorkProfile runtime influence):** pack-influence at runtime is DESIGNED-NOT-BUILT. No Cohort-2 skill declares a `pack` or `work_profile` frontmatter key or resolves one at runtime. Arch-level uplift: when D7 lands, every planner skill should declare which WorkProfile dimensions (e.g. rigor, scope-appetite) modulate its question set — e.g. plan-ceo-review's scope-expansion vs scope-reduction default should be pack-driven, not hardcoded.
-- **D9 (Brief Forge):** DESIGNED-NOT-BUILT. The chain hand-offs (office-hours → ceo → eng → design/devex, and autoplan's aggregation step) are exactly the hand-off boundaries Brief Forge is meant to own. Today hand-off is "freshest design doc in projects dir" — implicit and fragile. Arch-level uplift: when Brief Forge lands, autoplan step transitions and each review's design-doc ingestion are the first call sites. This is the single highest-value future integration point in the cohort.
+- **D7 (pack / WorkProfile runtime influence):** pack-influence at runtime was DESIGNED-NOT-BUILT in this audit. No Cohort-2 skill declared a `pack` or `work_profile` frontmatter key or resolved one at runtime. The proposed uplift was for planner methods to declare which WorkProfile dimensions (e.g. rigor, scope-appetite) modulated their questions; the original strategy-review component's scope-expansion versus scope-reduction default was one example.
+- **D9 (Brief Forge):** DESIGNED-NOT-BUILT in this audit. The recorded intake-to-strategy-to-engineering-to-design/developer-experience handoffs and the composing workflow's aggregation were the proposed boundaries. The then-current handoff was "freshest design doc in projects dir" — implicit and fragile. The proposed first consumers were composition transitions and review-input ingestion. This was the cohort's highest-leverage future integration point, not a claim about today's implementation.
 - **Envelope / wiki:** DESIGNED-NOT-BUILT; no records reference them.
 
 These three are NOT re-litigated per component below.
@@ -739,4 +739,4 @@ priority: high
 
 ### Operator decisions required: 5
 
-`office-hours`, `plan-ceo-review`, `plan-design-review`, `plan-devex-review`, `autoplan` are marked `operator_decision_required: yes` (path normalization, first-party log binary, cli_support breadth, lessons wiring, verdict tokens). `plan-eng-review` (no — uplift is additive/non-controversial) and `plan-tune` (no — low-priority polish).
+The original intake, strategy, design, developer-experience and composition records above are marked `operator_decision_required: yes` (path normalization, first-party log binary, cli_support breadth, lessons wiring, verdict tokens). The original engineering-review record says no because its uplift was additive; the planning-preference record says no because its polish was low priority. Exact original identifiers and findings remain in those records; these are historical decision flags, not pending current permissions.

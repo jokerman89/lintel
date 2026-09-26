@@ -1,5 +1,9 @@
 # Design: Lintel v3.5 — Doc-Generation Pipeline (generate-familjen)
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md) remains at that immutable revision.
+> Original IDs, dates, pipeline contracts, examples and results remain; no check was rerun.
+
 > Historical pipeline design. Original dates, phases, counts and outcomes are retained,
 > not rerun. Current entrypoint consolidation preserves renderers and pipeline contracts;
 > see the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
@@ -156,7 +160,7 @@ Befintligt mönster bevaras. Lägg till slot-folders:
 - **Full chain (multi-format):** `/li:generate "Azure Arc for Nordic Public Sector" --formats=ppt,web,word` → kedjar S1-S5, output i alla 3 format
 - **Single format:** `/li:generate "topic" --formats=ppt` → samma kedja, bara PPT-output
 - **Partial:** `/li:generate-outline "topic"` → bara outline.md, operatören tar över
-- **QA-only på befintlig artefakt:** `/li:generate-qa <deck.pptx>` → kvalitet-kontroll på vilken som helst PPT (även ej generate-genererad)
+- **Quality check on an existing artifact:** `/li:generate-qa <deck.pptx>` → kvalitet-kontroll på vilken som helst PPT (även ej generate-genererad)
 - **Direct format-builder (bevarar existing pattern):** `/li:generate-ppt --brief brief.md --template pitch-deck` → fungerar som idag, bypass shared pipeline för power-users
 - **Style-learn (fas 3):** `/li:generate-style-learn <deck1.pptx> <deck2.pptx>` → `~/.lintel/brand/palettes/<name>.json`
 
@@ -165,7 +169,7 @@ Befintligt mönster bevaras. Lägg till slot-folders:
 Phase F refactor (per skill):
 
 1. **Behåll backward-compat CLI.** Befintliga flags (`--brief`, `--template`, `--variant`, etc.) fungerar oförändrat.
-2. **Lägg till `--from-pipeline <dir>`-flag.** Om angiven, skill:n läser shared pipeline-output (content.md + design-spec.json) istället för att parsa brief.
+2. **Lägg till `--from-pipeline <dir>`-flag.** Om angiven, format-buildern läser shared pipeline-output (content.md + design-spec.json) istället för att parsa brief.
 3. **Internt refaktor:** brief-parsing-logiken extraheras till generate-outline + generate-write. Format-builder blir tunn converter.
 4. **Voice-gating bevaras.** TrailblazerVoiceCritic + T0-check kallas oförändrat.
 5. **Brand-template-pull bevaras.** Samma `~/.lintel/brand/<X>-templates/`-pattern.

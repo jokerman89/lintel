@@ -9,8 +9,8 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ### Changed
 
-- Consolidate the public surface into 94 canonical skills while retaining all 69
-  useful agent roles. DEFINE owns intake; `inspect` owns plan/repository lenses;
+- Consolidate the public surface into 96 canonical skills (including MARS) while retaining
+  all 69 useful agent roles. `research` stays as a native research-dive shortcut. DEFINE owns intake; `inspect` owns plan/repository lenses;
   `verify` is read-only by default with explicit authorized repair; `diagnose` and
   `cross-check` retain owned investigation and actual independent review.
 - Consolidate browser modes under `web-session` without changing the browser or

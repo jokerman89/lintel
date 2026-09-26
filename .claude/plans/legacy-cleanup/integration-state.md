@@ -88,7 +88,8 @@ Actual local observations, not full acceptance:
 - Repository-local profile bootstrap, before the later launcher restriction, observed
   `_default` 1.0.0 generation 1 under the actual host session. The whole-cycle estimator
   returned 120000, uncalibrated, zero samples. Neither grants release permission.
-- Real metadata query: 94 canonical skills, 69 agents. The former print wrapper is
+- Real metadata query at the ba603 candidate: 94 canonical skills, 69 agents (96 after
+  converging MARS and retaining `research`). The former print wrapper is
   removed after its options and consumers joined the retained PDF writer. Asset-only
   bridges are removed after live imports switched to canonical web-session resources.
 - Native in-place adapter init/check: 20 managed files verified, no live-host claim.
@@ -261,24 +262,32 @@ parallel with hosted CI; source-spec, quality, strict QA/current routing and act
 permission remain separate merge gates. Client cleanup follows #104; downstream
 documentation PRs follow both. No current task is completed by this handoff.
 
-## PR stabilization pass (2026-09-25 evening)
+## PR stabilization pass and line reconciliation (2026-09-25/26)
 
-The operator asked a new session to fix every open PR problem, shorten PR CI and use a
-swarm. That session's coordinator changes on this branch:
+The operator asked session 4125f187 to fix every open PR problem, shorten PR CI and use a
+swarm. That session first produced `fix/104` (e48786d1) from the published head ba603072;
+Go Live (88aecc43) then found the unpublished f48e6199 line of this session's work.
+`fix/104-reconciled` merges both lines without rewriting either:
 
-- Merged main `af94ff74` (MARS, PR #105). Conflicts: both lesson series kept (L-056 to
-  L-059), MARS cycle section kept beside the range guidance, canonical catalog comparison
-  kept in the Copilot kit test, trigger-form list gained `mars`; generated files regenerated.
-- The guard's remaining failures were dated internal records, 22 of them byte-bound by
-  reviewed spans. They are now declared by exact path, exact count and rationale in
-  [historical-records.json](historical-records.json) and reported as HISTORICAL
-  observations (ADR-0034 amendment). Current surfaces stay strict: merged MARS/review
-  references, ADR-0033/ADR-0036 wording and the open S4L item were corrected instead.
-- The deferred presentation route was edited on this branch after the operator's
-  fix-all-PR-problems instruction; the operator was asked and was unavailable, so the edit
-  is flagged in the PR for review. Nothing is published until an authorized merge to main.
-- Local evidence: guard PASS (0 findings; 693 HISTORICAL observations in 106 records), guard
-  unit cases 78/78, shape scope 42/42, MARS/review-method/planning/quality unit files pass. The full
-  strict hosted matrix is still the required gate; it is not replaced by these results.
-- Downstream docs PRs #94-#100 are stacked on this branch; CI tiering arrives from the
-  separate CI PR. Merge order: CI PR, then #104, then the docs PRs.
+- f48e6199 is merged whole. Conflicts took its reviewed side: MARS joins to inspect, define,
+  cross-check and CodeReviewer, N1 caller normalization, the retained research-dive shortcut,
+  lessons through L-060 and every unanimously accepted span. The earlier field-guide
+  presentation edit is dropped, so no presentation bytes change.
+- a4307a9a edited the byte-bound P08 report. That broke remaining-source-record-28 and made
+  the guard skip every later reviewed span, which caused its nine parse errors and most of its
+  550 CI findings. It is reverted as an ordinary commit (0d3a7d9e). The stabilization edits to
+  ADR-0033 and ADR-0036 were dropped for the same reason: both fall inside reviewed spans.
+- The exact-count [historical-record register](historical-records.json) now declares one
+  reference: the P08 oracle phrase. Reviewed spans cover everything else.
+- Tiered PR CI (ADR-0037, separate CI PR) is merged in. Guard-scanned suffixes are pinned to
+  LF, so a Windows `core.autocrlf=true` checkout matches CI.
+- Local evidence: the guard PASSes (0 findings; 1 historical observation) in a shallow LF
+  clone, in a full-history LF worktree and in a CRLF-default worktree. The guard unit tests
+  pass (102), and so do ci-matrix, the MARS, review-method and consolidation unit files, the
+  42/42 shape scope, catalog, instructions, adapter and wiki checks. The full strict hosted
+  matrix is still the required gate.
+- The quality re-review of 0d17a0b1 failed with three P2 findings. ece87fea and f48e6199
+  repair them, but no one has reviewed those repairs yet, and they are still an open
+  independent-review gate.
+- Downstream docs PRs #94-#100 are stacked on this branch. Merge order: CI PR, then #104,
+  then the docs PRs. Publication needs an account with write access.

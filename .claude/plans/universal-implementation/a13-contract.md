@@ -1,5 +1,7 @@
 # A13 observation and learning contract
 
+_Editorial note (2026-09-25): ordinary prose names are updated for the native workflow consolidation (ADR-0034); exact target paths, write scopes and required literals stay as executed. The original record remains at [`77cb8d3f`](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/plans/universal-implementation/a13-contract.md)._
+
 ## Status and authority
 
 This is the coordinator contract for P08. The P08 card section "A13 contract release"
@@ -543,7 +545,7 @@ If P10's installed inventory pins that file, the coordinator reconciles it at fa
 
 ## A13.3 Freeze: advisory boundary corrections
 
-Keep P08's advisory `code-freeze` and `code-unfreeze` metadata and its existing test.
+Keep P08's advisory freeze and unfreeze metadata and its existing test.
 Fix these contradictions:
 
 - `skills/code-freeze/SKILL.md` keeps a `--ignore-freeze` failure mode although it
