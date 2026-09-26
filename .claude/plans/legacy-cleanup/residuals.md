@@ -48,6 +48,21 @@ final candidate requires newly bound review and QA.
 | `.claude/plans/universal-implementation/reviews/P10-migration-recheck.md` | Original absent-environment observation | Earlier migration recheck only |
 | `.claude/plans/universal-implementation/reviews/P10-preservation-a797b2d.md` | Original non-adopted-selector observation | Earlier preservation evidence only |
 
+### Declared proposal outside the reviewed spans (2026-09-26)
+
+`.claude/plans/universal-implementation/reports/P08.md`, the A10.3 paired-case table under
+"Proposed bounded original-proof execution, not yet released or run", names the former
+intake entry (now `/li:define`) once as the input of a proposed case (reported by the guard at line 1721).
+Both span reviewers rejected classifying lines 1721-1723 as an original observation
+(`set03-span-154`, sets `set03` and `set03a`), because the case was never executed. That rejection
+stands: the line is not an observation. It is not a current route either, because it sits in a
+PARTIAL, NOT ACCEPTED report whose bytes are context-bound by `remaining-source-record-28`, and
+editing them disables every later reviewed span (a4307a9a, reverted in 0d3a7d9e). The exact-count
+[historical-record register](historical-records.json) therefore declares this single reference as a
+non-live proposal, bounded by that section's headings. This override is **pending independent
+acceptance**; if it is refused, the alternative is the one-phrase edit plus freshly re-bound P08
+spans and new unanimous span decisions.
+
 ## Provenance requiring explicit retention review
 
 | Exact path | Field or category | Current-tree acceptance treatment |
