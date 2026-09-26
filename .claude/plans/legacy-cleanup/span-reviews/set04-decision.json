@@ -1,0 +1,182 @@
+{
+ "schema_version": 2,
+ "skill": "review",
+ "status": "unverified",
+ "timestamp": "2026-09-25T17:51:10.865684+00:00",
+ "reason": "Faithful coordinator transcription of actual matching semantic ACCEPTs; neither rejected spans nor overall release clearance is inferred.",
+ "context": {
+  "attempt_id": "legacy-cleanup-span-set04",
+  "builder": {
+   "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+   "id": "cleanup-integration"
+  },
+  "independence_required": true,
+  "profile": {
+   "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+   "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+   "generation": 2,
+   "name": "_default",
+   "schema_version": 1,
+   "version": "1.0.0"
+  },
+  "purpose": "verification_only",
+  "qa_requirements": [
+   {
+    "applicability": "applicable",
+    "id": "historical-spans",
+    "kind": "check",
+    "policy": {
+     "actor": null,
+     "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+     "effective_date": null,
+     "jurisdiction": null,
+     "source": ".claude/plans/legacy-cleanup/spec.md",
+     "version": "2026-09-25"
+    },
+    "requirement": "mandatory"
+   }
+  ],
+  "required_controls": [
+   "historical-spans"
+  ],
+  "required_policy": {
+   "applicability": "not_applicable",
+   "required": false,
+   "source": "bundled-neutral",
+   "status": "not_required",
+   "version": "1.0.0"
+  },
+  "schema_version": 2,
+  "snapshot": {
+   "base": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+   "entries": [
+    {
+     "base": {
+      "kind": "absent",
+      "mode": "000000",
+      "sha256": null
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe"
+     },
+     "path": ".claude/plans/mars/research.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe"
+     }
+    }
+   ],
+   "head": "94495bda55f4e7249ad1dd1ef4e0bcfc05a02d6f",
+   "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-04.json",
+   "result_digest": "52684a060bce65030ed74c55c76c4bcee1dceb8ec5f8b3d240f83f9d8d804516",
+   "selection": [
+    ".claude/plans/mars/research.md"
+   ]
+  },
+  "work": {
+   "acceptance_digest": "a39e95b305ff36ec84212e4340bc11a23fb75d9cedd2fbb4f6e4351b91553f17",
+   "acceptance_manifest": [
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/plan.md",
+     "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/prompt.md",
+     "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/spec.md",
+     "sha256": "784fc37543854985199b8aad171406ae33737fefa7486cc7fc643e720e6fda2d",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/mars/research.md",
+     "sha256": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe",
+     "start": null
+    }
+   ],
+   "acceptance_paths": [
+    ".claude/plans/legacy-cleanup/plan.md",
+    ".claude/plans/legacy-cleanup/prompt.md",
+    ".claude/plans/legacy-cleanup/spec.md",
+    ".claude/plans/mars/research.md"
+   ],
+   "leaf_ids": [
+    "0.2.c",
+    "9.3.a",
+    "10.2.a"
+   ],
+   "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+   "package_id": "INTEGRATE",
+   "work_map": ".claude/plans/legacy-cleanup/work.json"
+  }
+ },
+ "reviewer": {
+  "id": "cleanup-quality-reviewer",
+  "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+ },
+ "provenance": "declared",
+ "controls": [
+  {
+   "applicability": "applicable",
+   "id": "historical-spans",
+   "kind": "check",
+   "policy": {
+    "actor": null,
+    "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+    "effective_date": null,
+    "jurisdiction": null,
+    "source": ".claude/plans/legacy-cleanup/spec.md",
+    "version": "2026-09-25"
+   },
+   "requirement": "mandatory",
+   "status": "pass",
+   "reason": "Both independently attributed actors accepted only these 1 exact LF declaration digests; rejected, narrowed and superseded entries excluded.",
+   "evidence": [
+    ".claude/plans/legacy-cleanup/span-reviews/set04-spec-decisions.json",
+    ".claude/plans/legacy-cleanup/span-reviews/set04-quality-decisions.json"
+   ],
+   "observation": {
+    "span_declarations": [
+     "609abc128e493aff6625e0433e811edc46460787f3e587963c2134c6cd828524"
+    ],
+    "review_scope": "semantic classification only"
+   }
+  }
+ ],
+ "coverage": {
+  "0.2.c": [
+   "historical-spans"
+  ],
+  "9.3.a": [
+   "historical-spans"
+  ],
+  "10.2.a": [
+   "historical-spans"
+  ]
+ },
+ "evidence": [
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set04-quality-decisions.json",
+   "sha256": "d4e589f4f87ac1a743d65fe3b0b759a3aefcf78d61209c825c678f352a64e216"
+  },
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set04-spec-decisions.json",
+   "sha256": "eae89ff9570be0bbcfa196f1d93e7f8ac800735c2be16936176ca82cd2d93342"
+  }
+ ]
+}

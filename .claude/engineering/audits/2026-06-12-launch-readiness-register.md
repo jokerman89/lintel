@@ -1,8 +1,8 @@
 # Launch-readiness register — v5.x "old-school ready"
 
-> Retained historical narrative. Terminology was neutralized on 2026-09-25;
-> former external path/name labels are symbolic, not executable current routes.
-> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/audits/2026-06-12-launch-readiness-register.md) remains at that immutable revision.
+> Original IDs, dates, results and failure evidence are retained; no check was rerun.
 
 > 2026-06-12/13 · cycle `launch-readiness-20260612` (meta-infra) · operator directive: *"a complete
 > list of everything that's needed in order to comfortably, in every possible aspect, say that
@@ -133,7 +133,7 @@ largest undated security promise = real git pre-commit/pre-push install. ADR num
 | B3 | **New hook bypasses (L-012 class)** | Flatten `$CMD` newlines before matcher+override greps in both BLOCK hooks + negative tests (line-continuation, multiline override forgery); `git diff --no-ext-diff --no-textconv`; push-path outgoing-commit scan; `read -t` integer fallback (macOS fail-open); audit record on scanner-unavailable exit | A5, A7 |
 | B4 | **Footer/state cross-cycle class** | `state_cycle_segment` helper in lib/state.sh; footer consumes it (fixes thin-tier P0 + wrong here/done/mode); `audit_log` derives cycle_id from ledger; resume integrity last-match + CYCLE block writes branch/commit; multi-cycle regression tests | A7, A1 |
 | B5 | **Windows + portability floor** | install.ps1: seed identity + copy lib/bin/templates + `shared/` hook layout + real validation scope; li-doctor bash-3.2 + stale-path fixes; verify.sh mapfile + scaffolding-coherence repoint + cli-matrix repoint-or-delete; `lintel@`→`li@` ×4; Cursor tier demote; fingerprint↔tiers normalization; `.opencode/INSTALL.md` rewrite-or-demote (CAIP leak); exec bits +x; GEMINI.md slug/name | A3, A7, A8 |
-| B6 | **Docs truth sweep** | README (v5.0→5.3.0, manifests, per-cli promise, missing rows); getting-started (role-activate, opencode pointer); AGENTS/GEMINI v3-plan + lessons-path + codex-subagents contradiction; shims (tasks/ paths, retired-provider rec); AGENT-INSTRUCTIONS matrix→cli-tiers pointer; state-of-the-harness + multi-cli.md rewrite-or-banner; LAYERS lists; MS-Layer language ×2; GLOSSARY/ta/tq dormancy qualifiers; Swedish ×3 + no-swedish covers docs+README; CATALOG UTF-8 generator fix | A4, A8, A6 |
+| B6 | **Docs truth sweep** | README (v5.0→5.3.0, manifests, per-cli promise, missing rows); getting-started (predecessor role-activation guidance, opencode pointer); AGENTS/GEMINI v3-plan + lessons-path + codex-subagents contradiction; shims (tasks/ paths, retired-provider rec); AGENT-INSTRUCTIONS matrix→cli-tiers pointer; state-of-the-harness + multi-cli.md rewrite-or-banner; LAYERS lists; MS-Layer language ×2; GLOSSARY/ta/tq dormancy qualifiers; Swedish ×3 + no-swedish covers docs+README; CATALOG UTF-8 generator fix | A4, A8, A6 |
 | B7 | **Mechanism honesty** | usage-log demote (P0); cycle-runs telemetry → one `audit_log` line in cycle Step 8; granularity contradiction → one truth (dormant note in capture); jobs registry claims demoted until a writer fires; 7 compliance-flavored prose streams → `audit_log` one-liners or deleted; 6 bespoke `>>` writers → helper; pack-resolver cache key + sourced set -u leak; `_audit.sh` C0 catch-all + audit_count + append-warn; state.sh phase/key strip; li-doctor smoke + customer-data-block/warn-hooks execution tests | A2, A1, A7 |
 | B8 | **Release close + hygiene** | "Upgrading & uninstalling" section (reconcile 3 provisioning models); migration-index date conflict + version-pinned labels → dates; working-state/MEMORY stale entries (PRs merged, v4.0-reframe closed); TODOS-v2 disposition; scaffolding `tasks/` template leftovers; M1 structure-changes entry + M2 compat audit + M4 recap for this cycle | A3, A6, A2 |
 

@@ -473,7 +473,7 @@ Audit raw-byte SHA-256 (opening JSON records, not prompt-body reconstruction):
   Preserve L-NNN retrieval/add/update/supersede and explicit destination/provenance; no extra knowledge store. No private destination or promotion was run for this map; final selected P08 review remains.
 - **F08-advice** - P08 explicitly advisory freeze/context source: [P08](P08.md), [selected-subset history](../reviews/P08-selected-final-229656c.md), [current card](../packages/P08.md).
   Retain coordination/checkpoint value while keeping freeze advisory and chat compaction non-magical. No universal write barrier, reclaimed model context or automatic permission change.
-- **F08-dormant** - P08 plan-tune source: [P08](P08.md), [selected-subset history](../reviews/P08-selected-final-229656c.md), [current card](../packages/P08.md).
+- **F08-dormant** - P08 dormant plan-tuning source (entry removed by ADR-0034, 2026-09-25): [P08](P08.md), [selected-subset history](../reviews/P08-selected-final-229656c.md), [current card](../packages/P08.md).
   Preserve inspectable tuning vocabulary/history; PLAN does not invoke a nonexistent preference reader. Dormant data has no automatic decision effect; general maturity remains unknown.
 - **F10-historical** - P10 retained historical identity/migration mode: [P10 final](../reviews/P10-final-a2df202.md).
   Retain explicit v3/v4 recovery as inspection and chosen structured pack switch, not automatic migration. Historical availability is not a current required product version or permission to rewrite state.

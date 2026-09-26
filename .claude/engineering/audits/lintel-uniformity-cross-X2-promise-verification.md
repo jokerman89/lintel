@@ -239,3 +239,5 @@ Verdict vocabulary:
 1. **Pack-driven behavior (BROKEN)** — `lib/pack-resolver.sh` is built, tested, self-described as a 30+-skill critical-path interface, and has ZERO consumers; every skill grep-reads legacy `profile.yaml` against a different file than the canonical `pack.yaml`.
 2. **First-party-first (BROKEN)** — Lintel's own planner reviews + codex + design-review call retired-provider-plugin binaries (`~/.claude/skills/retired-provider/bin/retired-provider-review-log`, retired-provider design binary) on the execution path, violating the rule Lintel ships a hook to enforce on others.
 3. **Cross-session memory via lessons (PARTIALLY-UPHELD, write-only)** — CAPTURE/role-update write lessons but PLAN, BUILD, REVIEW, SHIP, the entire planner chain, and ~80 of 83 agents never read them; the marquee miss is "don't mock Azure SDK" never reaching the BUILD implementer.
+
+_Editorial note (2026-09-25): the record above is preserved as originally written; current workflow names are listed in `skills/CATALOG.md`._
