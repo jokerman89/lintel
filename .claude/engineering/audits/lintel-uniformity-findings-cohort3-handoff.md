@@ -65,9 +65,9 @@ The cohort writes to **four mutually-inconsistent roots** for the same conceptua
 
 **high:** breaks the cross-session-memory promise and the future envelope promise
 (`~/.lintel/jobs/<id>/envelopes/`). A save written to `~/.retired-provider/` is invisible to a
-restore family that reads `~/.lintel/sessions/`. context-save and context-restore are a
-matched pair that work; context-dump explicitly reads `*-context-save.md` from
-`~/.lintel/sessions/` (context-dump:38) but context-save writes to `~/.retired-provider/` — **the
+restore family that reads `~/.lintel/sessions/`. The original save/restore pair was
+matched; the original dump reader explicitly read `*-context-save.md` from
+`~/.lintel/sessions/` (reader line 38), but its compared writer used `~/.retired-provider/` — **the
 dump skill cannot find what save wrote.** This is a live breakage, not just a style nit.
 
 **proposed (uplift):** Adopt a single canonical root. The brief-forge envelope already
@@ -107,9 +107,10 @@ runtime behavior, but the *declaration gap* is a real finding now.
 
 Two dialects coexist:
 
-- **retired-provider dialect** (context-save, -restore, -budgetwatch, pair-agent, codex,
-  skill-router): prose `## Report format` with a `✓` line, no DONE/BLOCKED status token.
-- **lintel dialect** (context-snapshot, -dump, -cool, -warm + all warm variants):
+- **retired-provider dialect** (the original persistence pair, budget watcher,
+  delegation/second-opinion wrappers and router): prose `## Report format` with a
+  `✓` line, no DONE/BLOCKED status token.
+- **lintel dialect** (the original snapshot/dump, cooling and warming methods):
   explicit `## Status protocol` with `DONE / BLOCKED / NEEDS_CONTEXT` + `## Hop-in support`
   + `## 00-state.md append`.
 
@@ -869,18 +870,20 @@ priority: high
 
 ## Cohort summary
 
-**18 components, 14 dimensions.** This cohort earns its "highest-fragmentation" label:
+**18 components, 14 dimensions.** The original audit gave this cohort its
+"highest-fragmentation" label; the counts below are retained observations, not a rerun:
 
 1. **Storage-root schism (CF-1)** — four roots for the same data; **two live producer/consumer
-   breakages** (context-save→context-dump, context-save→context-warm-sessions) where a
-   consumer cannot find what its named producer writes. This is the cohort's headline.
+   breakages** from the original checkpoint writer to its dump and prior-session
+   readers, where a consumer could not find its named producer's output.
 2. **Config schism (D3)** — `~/.retired-provider/`, `~/.lintel/profile.yaml`, `~/.lintel/config.yaml`,
    `.lintel/state/`, plus `context-state.json` vs `00-state.md`. Five-way drift inside one cohort.
 3. **Dialect split (CF-4)** — retired-provider-prose tail vs lintel Status-protocol tail; ~7 skills
    below the machine-readable-tail floor.
 4. **Brief Forge should-fire is dense here (D9)** — designed-not-built, but moments 1
-   (pair-agent, codex), 2 (context-warmup), 4 (save/snapshot/dump/warm-sessions), and 5
-   (all) are all present and un-gated. pair-agent + codex are the most-built proto-gates;
+   (delegation and outside opinion), 2 (the original phase-budget warmer), 4
+   (persistence and prior-session reading), and 5 (all) were present and un-gated.
+   The original delegation and outside-opinion wrappers were the most-built proto-gates;
    several skills already contain proto-evaluators (customer-PII scans, domain allowlists,
    IGNORE lists) that should be formalized as named Brief Forge evaluators rather than
    reinvented.
@@ -889,13 +892,16 @@ priority: high
 
 **Strongest peer:** `context-warm` (full uniform stack + base-skill spine).
 Runner-up: `context-warm-customer` (best D7/D13).
-pair-agent sets the **D11** bar; codex sets the **D3-out / D4** bar.
+The original delegation wrapper set the **D11** bar; the outside-opinion wrapper
+set the **D3-out / D4** bar.
 
 **Weakest peer:** `skill-router` (no tail, no checkpoint, no observability, loosest
 contract, body/frontmatter name drift).
 
-**operator_decision_required: 6** — context-save (CF-1 root), context-snapshot
-(snapshot-vs-save consolidation), context-dump (CF-1/CF-2), context-warm-sessions
-(CF-1/CF-2), context-warmup (state-file naming), context-budget (mode_envelopes home),
-context-budgetwatch (config + hook duplication). *(7 records flag yes; context-dump and
-context-warm-sessions share the same CF-1/CF-2 decision, so 6 distinct decisions.)*
+**operator_decision_required: 6** — the original writer (CF-1 root), snapshot
+wrapper (snapshot-versus-save consolidation), dump and prior-session readers
+(CF-1/CF-2), phase-budget warmer (state-file naming), budget method
+(mode_envelopes home), and watcher (config plus hook duplication).
+*(7 original records flag yes; the dump and prior-session readers share one
+CF-1/CF-2 decision, so 6 distinct decisions.)* Exact original identifiers and
+recommendations remain in the individual records above.

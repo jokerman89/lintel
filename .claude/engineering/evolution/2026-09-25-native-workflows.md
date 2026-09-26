@@ -20,7 +20,8 @@ breaking_change: true
 
 ## What changed
 
-The source now declares 94 canonical skills and retains all 69 agent roles. Six
+The source now declares 96 canonical skills (94 after consolidation, plus MARS from main and
+the retained native `research` shortcut) and retains all 69 agent roles. Six
 attributable lanes consolidate duplicate methods, with a single coordinator
 joining actual provider, helper, installer, generator and evidence consumers.
 [ADR-0034](../../decisions/0034-native-workflow-consolidation.md) records the decision.

@@ -520,7 +520,7 @@ class BindingTests(unittest.TestCase):
             self.assertEqual(single["outcome"], expected, (stage, slot_report))
             self.assertEqual(self.panel_outcome(panel, schema, adjudicated), expected, (stage, slot_report))
             if acceptance:
-                with self.assertRaises(mc.ContractError, msg="deviations may not be omitted"):
+                with self.assertRaisesRegex(mc.ContractError, r"p1,p2,p3,deviations"):
                     self.panel_outcome(panel, schema, adjudicated[:3])
 
     def test_inspection_recomputes_the_outcome_and_review_callers_need_binding(self):
@@ -573,15 +573,26 @@ class BindingTests(unittest.TestCase):
         unbound = mc.new_panel("c1", OWNER, self.brief, "turn", defaults, "implementation", ORIGIN, "x")
         record(unbound, "c1")
         self.assertEqual(outcome(unbound), "pass")
-        for caller in ("review", "REVIEW", " review ", "cycle:REVIEW"):
+        for caller in ("review", "REVIEW", " review ", "cycle:REVIEW", "cycle: REVIEW", "Cycle : Review",
+                       "li-review", "/li-review", "/li:review", "LI-REVIEW"):
             unbound["origin"]["caller"] = caller
             self.assertEqual(outcome(unbound), "incomplete", caller)
+        for caller in ("standalone", "code-review", "cycle:PLAN", "li-code-review", "reviewer", "plan"):
+            unbound["origin"]["caller"] = caller
+            self.assertEqual(outcome(unbound), "pass", caller)
 
         self.assertEqual(self.init("--select", "src", "--caller", " Review ").returncode, 0)
         without_method = mc.read_json(self.panel)
         self.assertEqual(without_method["origin"]["caller"], "Review")
         record(without_method, "b1")
         self.assertEqual(outcome(without_method), "incomplete")
+        for caller in ("Review", "li-review", "cycle: review"):
+            without_method["origin"]["caller"] = caller
+            self.assertEqual(outcome(without_method), "incomplete", caller)
+            checked = mc.verify_input(without_method)
+            with self.assertRaisesRegex(mc.ContractError, "method packet"):
+                mc.inspection_record(without_method, mc.synthesis_header(
+                    without_method, schema, defaults, [0, 0, 0], checked), schema, checked)
 
         self.panel.unlink()
         (self.inputs / "snapshot.json").unlink()
@@ -598,9 +609,11 @@ class BindingTests(unittest.TestCase):
         complete = mc.read_json(self.panel)
         record(complete, "m1")
         verified = mc.verify_input(complete)
-        with self.assertRaises(mc.ContractError, msg="a REVIEW inspection needs adjudicated counts"):
+        with self.assertRaisesRegex(mc.ContractError, "needs adjudicated counts"):
             mc.inspection_record(complete, mc.synthesis_header(complete, schema, defaults, None, verified),
                                  schema, verified)
+        with self.assertRaises(TypeError):
+            mc.panel_outcome(mc.summary(complete), (0, 0, 0, 0), "verified")
 
     def test_an_aliased_output_path_still_overlaps(self):
         """S3: a junction or symlink spelling of the repository cannot hide an overlap."""

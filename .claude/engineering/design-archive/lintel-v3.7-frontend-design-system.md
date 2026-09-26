@@ -1,5 +1,9 @@
 # Design: Lintel v3.7 — Frontend Design System (separat family)
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md) remains at that immutable revision.
+> Original IDs, dates, schema/rubric requirements, decisions and failure evidence remain; no check was rerun.
+
 > Historical design and review record. Original IDs, dates, schema decisions, counts,
 > unresolved findings and skipped checks remain historical. Native route names below
 > are navigation, not rerun evidence; see the
@@ -56,7 +60,7 @@ Tre revolutionära element vs raw-tool-generation (V0/Lovable/Bolt):
 
 - **No commercial-asset bundling.** Pangram fonts, Velvetyne, Future Fonts = operator-licensierar separately. Lintel-skills pekar på dem som recommendations; operator installerar via Google Fonts CDN ELLER kommersiella font-services ELLER dropps assets i `~/.lintel/brand/fonts/`. Lintel ships ingen kommersiell font.
 - **No bundling av runtime libraries.** GSAP, Lenis, OGL, Paper Shaders, Aceternity etc = operator installerar via npm i sitt projekt. Lintel-skills genererar code som imports them (per L-001: agent vid invocation generates the import + usage; Lintel ships skill body + agent-mapping).
-- **MS-internal default tier.** Default voice_tier: internal. Customer-share kräver `/li:rais-customer-voice-check` + `/li:compliance-gate` (befintliga gates).
+- **MS-internal default tier.** Default voice_tier: internal. Customer sharing still requires the predecessor's customer-voice review and compliance aggregation. Current `/li:compliance-gate` must resolve the actual required pack controls; a missing corporate voice check is not satisfied by renaming it.
 - **L-001 (scaffolding-not-content):** 1 canonical bundled "ultra-modern Lovable-style" design-pattern. Resten är ⚠ template only-slots tills operator extraherar via `/li:frontend-style-extract`.
 - **L-001 trade-off acknowledgment** — canonical-pattern är medvetet curated content (typography.json + motion.json + shader-snippets + component-imports.json). Skäl: serverar som schema-by-example för operator-extraktioner. Utan en konkret reference vet inte extraktion-target hur en pattern.json ska se ut. **Re-evaluate efter Fas D dogfood** — om operator-extracted patterns dominerar vault (>3 patterns), kan canonical demotas till sample-fil i docs/.
 - **L-002 (grep-first):** retain web generation, mockups, style extraction and brand-pattern
@@ -340,7 +344,7 @@ Operator-side dependencies (npm packages: gsap, lenis, ogl, paper-design, three,
 - **Existing generate-web** — modifies för `--from-frontend-design <dir>` mode (parallel till `--from-pipeline` från Fas 2). Non-breaking.
 - **Existing generate-style-learn** — sibling-relationship med frontend-style-extract. Document boundary i båda skill bodies.
 - **Existing compliance-gate** — frontend-design orchestrator calls för customer-share.
-- **Existing TrailblazerVoiceCritic** / `/li:rais-customer-voice-check` — voice-gate.
+- **Customer-voice review dependency** — the predecessor paired its named voice critic with a separate corporate voice-check workflow. Preserve that review obligation; current work must resolve the actual required reviewer/control instead of assuming a neutral entry supplies it.
 - **Existing `~/.lintel/brand/`-pattern** — new sub-folders följer existing convention.
 - **operator-side npm-packages** — gsap, lenis, ogl, paper-design, three, @react-three/fiber, etc. Lintel-skill outputs operator-instruction.
 
@@ -362,7 +366,7 @@ Operator-side dependencies (npm packages: gsap, lenis, ogl, paper-design, three,
 **Fas A2: Foundation Extension (1 PR, ~2-3 dagar CC)**
 - 3 new SKILL.md files: `frontend-shader/` + `frontend-style-extract/` + `frontend-design-review/` — ~1 dag
 - 2 new agent .md files: `agents/frontend/ShaderEngineer.md` + `DesignSystemAuditor.md` — ~0.3 dag
-- Inline schema-spec för `shader.json` + `pattern.json` + design-review scoring rubric (≥80=green, 60-79=yellow, <60=red per dimension) — ~0.3 dag
+- Inline schema-spec för `shader.json` + `pattern.json` + visual-quality scoring rubric (≥80=green, 60-79=yellow, <60=red per dimension) — ~0.3 dag
 - Canonical `ultra-modern-lovable-style/`-pattern bundled (hand-curation) — ~1 dag
 - Test: canonical-pattern presence + schema-validation
 - Document `--overwrite` flag inheritance från generate-style-learn i frontend-style-extract (m-3)

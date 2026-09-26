@@ -1,0 +1,346 @@
+{
+  "artifact_type": "Finite set04 exact-span semantic decisions",
+  "status": "COMPLETE_SEMANTIC_CLASSIFICATION_ONLY",
+  "candidate": "a4ae1f57dacea1c3e17b0589dc0eaade5158c27a",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-04.json",
+    "bytes": 13739,
+    "sha256": "a683a57a7ed83b51aa2ec178017740b8299e33afd06aface0f0d975c6d9b0251"
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "app_project_session": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_artifact_session": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "result": {
+    "ACCEPT": 4,
+    "REJECT": 6,
+    "NEEDS_NARROWING": 0,
+    "UNVERIFIED": 0,
+    "completed_semantic_decisions": 10,
+    "requested_declarations": 10,
+    "source_files": 4,
+    "raw_bytes": 3238,
+    "input_guard_findings_inside": 11,
+    "activation_release_qa_routing_or_mechanism_clearance": false
+  },
+  "context_read_permission_history": {
+    "tool": "functions.view",
+    "path": "C:\\Users\\jokerman\\AppData\\Local\\Temp\\1790356567765-copilot-tool-output-49620-477c8f8c-7df0-475a-b605-bc8ca0cea7a2.txt",
+    "view_range": [
+      1,
+      125
+    ],
+    "result": "Permission denied and could not request permission from user",
+    "affected_context": "Complete ADR0036 and research introduction from the immutable Git output.",
+    "permission_question_result": "The user is not available to respond and will review your work later; no explicit permission change was supplied.",
+    "denied_output_read_retried": false,
+    "initially_blocked_ids": [
+      "set04-span-001",
+      "set04-span-002",
+      "set04-span-004"
+    ],
+    "subsequent_explicit_authority": "Coordinator e9c20b62 expressly authorized fresh direct read-only Git reads of the four committed set04 sources and distinguished those source reads from recovery of the denied output.",
+    "fresh_authorized_reads": "Direct git show of the complete ADR0036 and complete mars/research.md at a4ae1f57 both succeeded with exit0.",
+    "disposition": "Resolved under the new source-read authority before issuing the final three judgments; the denied output itself was not retried."
+  },
+  "conditions": [
+    "All ten exact declarations are adjudicated after the complete four-source context was read.",
+    "ACCEPT applies only to the exact raw/declaration/full-source identities and bound context supplied in this packet, not a whole file or the accuracy of every original claim.",
+    "Draft, accepted or completed headings alone do not establish historical semantics; the inspected role of the complete window and its surrounding current instructions governs.",
+    "Current assumptions, ownership releases, consumer architecture, invocation menus and implementation cards remain checked when they still prescribe behavior rather than report an observation.",
+    "The initial three unverified placeholders were replaced only after the freshly authorized complete source reads succeeded, not through inferred context or an assumed permission change.",
+    "No source, mechanism, runtime, hosted, profile, P05, corroboration or release review is supplied here.",
+    "All earlier set03/addendum artifacts and earlier semantic and quality reports remain immutable; no new authorization or registration follows."
+  ],
+  "decisions": [
+    {
+      "id": "set04-span-001",
+      "decision": "ACCEPT",
+      "status": "DECIDED",
+      "declaration_digest": "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+      "sha256": "346df6bc5a03e5a494df37159b3e3aee71d06cefe9a302431046626148e8205e",
+      "reason": "The line continues the ADR's explicit past-tense account of earlier outside-voice hooks and their limitation, rather than selecting plan-eng-review for current use.",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "source_lines_inclusive": [
+        18,
+        18
+      ],
+      "source_context_sha256": "5ccb9fc10fc0e854af0d63c1513e7031863a172cbefcdcf97fd73f10af945087"
+    },
+    {
+      "id": "set04-span-002",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "d2e504c3706031c19bd0784259af9b4e46f5ef37aa7289c1d32e66b57651a6a7",
+      "sha256": "d902d28d261ba612f2c17f3677662ea140ef13c4a1f9a455b89b234855b6aa54",
+      "reason": "The line selects the pending current inspection/consolidation target in operative implementation notes, so its former-name comparison does not make the whole handoff historical.",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "source_lines_inclusive": [
+        89,
+        89
+      ],
+      "source_context_sha256": "5ccb9fc10fc0e854af0d63c1513e7031863a172cbefcdcf97fd73f10af945087"
+    },
+    {
+      "id": "set04-span-003",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "35c61eb5cebd278180ac5d88d129edc74e9b4b224b365c973810ea924ae795c1",
+      "sha256": "6f0e4f83679b561f4b78309846d1545e60c380d60b126a256e10cea33a358e78",
+      "reason": "The assumptions actively adopt D1 evidence behavior and prescribe pending consolidated-hook ownership and drift scope, not merely record completed checklist outcomes.",
+      "path": ".claude/plans/mars/plan.md",
+      "source_lines_inclusive": [
+        13,
+        23
+      ],
+      "source_context_sha256": "df994a39d7f85273736869227f11c0df6d5b530f3f67cf88819c86393d359cee"
+    },
+    {
+      "id": "set04-span-004",
+      "decision": "ACCEPT",
+      "status": "DECIDED",
+      "declaration_digest": "609abc128e493aff6625e0433e811edc46460787f3e587963c2134c6cd828524",
+      "sha256": "9b729ef4eada46b34505e5d883bbb0d780b7eeb488424924dbcea21730c55e0a",
+      "reason": "The row preserves a source-cited observation and design consequence from the expressly retained original2026-09-22 research proposal, not a current invocation or newly released consumer instruction.",
+      "path": ".claude/plans/mars/research.md",
+      "source_lines_inclusive": [
+        46,
+        46
+      ],
+      "source_context_sha256": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe"
+    },
+    {
+      "id": "set04-span-005",
+      "decision": "ACCEPT",
+      "status": "DECIDED",
+      "declaration_digest": "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+      "sha256": "19dab4348859be96dc53f27e68c3bb191b6d003389f240d7b0ce26e08a045715",
+      "reason": "The Inputs fragment attributes the source-era reviewer methods examined to form this design, rather than instructing their current invocation.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        5,
+        5
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    },
+    {
+      "id": "set04-span-006",
+      "decision": "ACCEPT",
+      "status": "DECIDED",
+      "declaration_digest": "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+      "sha256": "23f2b7f0211fc6b70aa7e91df34594358187a87d983c79ac7663efaa88f2d935",
+      "reason": "The problem statement records the original divergent prompt and severity-rubric observations that motivated the shared method, not a current route selection.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        10,
+        18
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    },
+    {
+      "id": "set04-span-007",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "f9470e0b5eb437978f61686f2984d8b79800f622336d6bda37b548e166ccd4a5",
+      "sha256": "9e294883be08a29f018624b90780e8425a4ea0774af2d9ac23a3c6770726f134",
+      "reason": "The architecture block defines the method's consumer and P05 decision flow used by the selected implementation design, not a quoted past execution result.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        55,
+        69
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    },
+    {
+      "id": "set04-span-008",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "f02ec6c7b2f5519ec1ba60b16d7578acb3312a254ab9e1e3e9df9f42a5de52f8",
+      "sha256": "7a9e8a0c9fd727058b720a115778d6898279c33b27bb8b3ea7e6b7d1a40b58d4",
+      "reason": "The row is an operative independently runnable entrypoint and method/offer requirement, so its retired command remains current routing to check.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        122,
+        123
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    },
+    {
+      "id": "set04-span-009",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "52381dae4533f915fcffc939938c98dc88d5ea0b6b99101d1ab8fa0111beb996",
+      "sha256": "09e86556ab06f4c5f9dbe9b7f7f5f6a63aa586c4db9498da570828c6745705ad",
+      "reason": "RM5 selects actual consumer rewiring and its drift-guard obligation in an implementation card rather than reporting the observed result of that work.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        138,
+        138
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    },
+    {
+      "id": "set04-span-010",
+      "decision": "REJECT",
+      "status": "DECIDED",
+      "declaration_digest": "b5d5f878364ff45555c94dfd4ab3515bf6e28087bdfc74b6b7c1bd6485eb31c7",
+      "sha256": "7788c3d385543e08cd733d463329235d5c8fa4e6eace0b925999dbf8d28d703a",
+      "reason": "The section prescribes retained domain, compliance and interactive plan-review behavior, so it remains an operative method boundary.",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "source_lines_inclusive": [
+        148,
+        154
+      ],
+      "source_context_sha256": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+    }
+  ],
+  "verification": {
+    "actual_checks": [
+      "Verified exact packet byte count and SHA-256 and full immutable a4ae1f57 candidate identity.",
+      "Verified all10 declaration digests, raw hashes/3238 bytes, four full-source hashes, unique ordered nonnested boundaries, source ranges and11 included diagnostic positions.",
+      "Read the full87-line MARS plan and full162-line review-method-design from immutable Git output.",
+      "After explicit new authorization, direct immutable-source reads succeeded for the complete98-line ADR0036 and complete MARS research document, resolving the earlier missing context.",
+      "Verified every94 consolidated set03/addendum source hash is unchanged at a4ae1f57; this was identity checking, not readjudication.",
+      "The denied generated-output read was not retried; fresh source reads were undertaken only after the coordinator expressly authorized that distinct operation."
+    ],
+    "not_run": [
+      "counterexamples",
+      "full guard",
+      "mechanism",
+      "runtime",
+      "hosted",
+      "profile",
+      "P05 or QA persistence"
+    ]
+  },
+  "completed_addendum_reference": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\8b0c4a2f-3e1b-4c3d-8237-74d02ff29710\\files\\c-span-semantic-decisions-03-with-addendum.json",
+    "bytes": 161688,
+    "sha256": "e1f52cf6a197218a14c37c06375547e416a689d09c4f824d71036062cb7c3f04",
+    "addendum_decisions": "4 ACCEPT; completed and delivered before this set04 request",
+    "supporting_byte_count_discrepancies": "Preserved explicitly in that artifact; no silent input correction."
+  },
+  "preservation": {
+    "only_new_output": "c-span-semantic-decisions-04.json in this reviewer's session files",
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_count": 58,
+    "completed_leaves": [],
+    "source_edits": false,
+    "new_actors": false,
+    "runtime_profile_or_canonical_p05_writes": false,
+    "checkout_mutations_commits_pushes_or_publication": false,
+    "verified_prior_artifacts": [
+      {
+        "name": "legacy-cleanup-integrated-quality-review-a7a1df33.md",
+        "bytes": 31485,
+        "sha256": "54615423fc63810db9d64476f14fdc48f1f8b1482abcb25389b62bb6c09ad78a",
+        "outcome": "SOURCE QUALITY FAIL; P0 0, P1 0, P2 6, P3 1. Not reopened or revised by this semantic task."
+      },
+      {
+        "name": "c-span-semantic-decisions-01.json",
+        "bytes": 31881,
+        "sha256": "71838a8e8bbbf7a0ffd7f11d3a856f946921b4a3b605d4f389df3185d59112fd",
+        "outcome": "Superseded CRLF registration history only; no approval transfer."
+      },
+      {
+        "name": "c-span-semantic-decisions-01-lf.json",
+        "bytes": 31160,
+        "sha256": "b6cb3e61d15c1e3d666c0ce9a3031f18512ebdbcde4852ba7be4422b1bdfd75a",
+        "outcome": "17 ACCEPT, unchanged and not repeated here."
+      },
+      {
+        "name": "c-span-semantic-decisions-02-lf.json",
+        "bytes": 18913,
+        "sha256": "3dc35ad36977975266eee64952ef04f6b3475f5ce9a8503ccd6e539a4fd0c228",
+        "outcome": "2 ACCEPT, 3 REJECT, unchanged. The P08 authored-path, P11 frozen-path/next-gate and W1 changed-files rejections are not reversed."
+      },
+      {
+        "name": "c-span-semantic-decisions-final-lf.json",
+        "bytes": 93307,
+        "sha256": "49849ac92449ac2fde2fbd8816807a830ff63ee895ae42a04226957e988a6c45"
+      },
+      {
+        "name": "legacy-cleanup-changed-quality-review-ba603072.md",
+        "bytes": 26159,
+        "sha256": "6f16593bb4da6b03d3b03c7fb9436c90a235f52b4359c28794d2f8bf72d3bd57"
+      },
+      {
+        "name": "c-framing-refinement-ack-v2.json",
+        "bytes": 16753,
+        "sha256": "a263b5104b39616eb84d405f4b50127083c83a0777785617920557eb912ed756"
+      },
+      {
+        "name": "c-span-semantic-decisions-03.json",
+        "bytes": 141969,
+        "sha256": "9a8030b76b0289f3bc285de69a93e27daa71af2a7d93d304d4096d1837561354"
+      },
+      {
+        "name": "c-span-semantic-decisions-03-with-addendum.json",
+        "bytes": 161688,
+        "sha256": "e1f52cf6a197218a14c37c06375547e416a689d09c4f824d71036062cb7c3f04"
+      }
+    ],
+    "original_leaf_ids": [
+      "3.1.a",
+      "3.2.a",
+      "3.3.a",
+      "3.4.a",
+      "4.1.a",
+      "4.3.a",
+      "4.4.a",
+      "2.1.a",
+      "5.1.a",
+      "5.2.a",
+      "5.10.a",
+      "5.12.a",
+      "5.4.a",
+      "5.5.a",
+      "5.7.a",
+      "5.7.c",
+      "5.8.a",
+      "6.1.a",
+      "6.2.a",
+      "6.3.a",
+      "6.4.a",
+      "5.6.a",
+      "7.1.a",
+      "7.2.a",
+      "7.3.a",
+      "7.4.a",
+      "7.5.a",
+      "0.3.a",
+      "0.3.b",
+      "0.3.c",
+      "1.5.a",
+      "1.6.a",
+      "1.6.b",
+      "1.7.b",
+      "7.1.c",
+      "1.8.a",
+      "2.2.a",
+      "2.3.a",
+      "2.4.a",
+      "8.8.a",
+      "9.3.a",
+      "0.1.b",
+      "0.2.c",
+      "4.2.a",
+      "5.7.e",
+      "8.2.a",
+      "8.4.a",
+      "8.5.a",
+      "8.7.a",
+      "9.1.a",
+      "9.2.a",
+      "10.1.a",
+      "10.2.a",
+      "10.4.a",
+      "10.5.a",
+      "10.5.b",
+      "10.6.a",
+      "10.8.a"
+    ]
+  }
+}

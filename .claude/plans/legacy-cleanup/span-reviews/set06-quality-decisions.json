@@ -1,0 +1,322 @@
+{
+  "artifact_type": "Finite set06 exact-span context-renewal decisions",
+  "status": "COMPLETE_SEMANTIC_CLASSIFICATION_ONLY",
+  "candidate": "cda5539ae1b1b995814fdaf0c126dbf076dfb3d7",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-06.json",
+    "bytes": 21629,
+    "sha256": "56f94f3a9e76042affe795b9753d64f6e12d0a2171736e9fd44d3ddfe1aa0e2c"
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "app_project_session": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_artifact_session": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710",
+    "builder": false
+  },
+  "result": {
+    "ACCEPT": 15,
+    "REJECT": 0,
+    "NEEDS_NARROWING": 0,
+    "NEEDS_EVIDENCE": 0,
+    "CONTEXT_RENEWAL": 15,
+    "NEW_NARROWED": 0,
+    "source_files": 9,
+    "selected_raw_utf8_bytes": 10971,
+    "scope": "Explicit renewal of the source context for 12 previously accepted set03 declarations and 3 previously accepted set04 declarations; no new raw span or broader semantic classification.",
+    "activation_release_qa_routing_or_mechanism_clearance": false,
+    "runtime_or_counterexample_execution": "NOT_RUN"
+  },
+  "conditions": [
+    "Each ACCEPT applies only to the exact path, unique ordered start/end markers, raw span, declaration digest and new source_context_sha256 at cda5539ae1b1b995814fdaf0c126dbf076dfb3d7.",
+    "These are explicit new-context decisions, not automatic transfers of prior approvals; the existing acceptance/evidence path must bind the renewed context and attributable decision before admission.",
+    "The unchanged source_evidence fields remain original provenance at 5f086471 or a4ae1f57, not proof that the complete source still has its former hash.",
+    "All 15 raw spans and eight-field declaration digests are identical to their prior accepted versions; changed line numbers are citations, not alternate or drift-tolerant marker locators.",
+    "The seven selected audit/archive sources were assessed against all of their changes since 5f086471, including the editorial notes; the two MARS sources were assessed against all of their changes since a4ae1f57.",
+    "Editorial headings, dates, immutable links and unchanged bytes alone are not semantic permission; the inspected windows remain evidence labels, original findings, proposal inventories, samples, rejected alternatives or original review recommendations.",
+    "Operative text outside each exact span remains checked, including the W5 task and ownership list, current role and workflow menus, document refactor instructions, current voice-control obligations, MARS consumer architecture, invocation table, implementation cards and implementation-status note.",
+    "No earlier rejected wider declaration is reversed, and no adjacent boundary line or entire file becomes an approved mask.",
+    "The role-file specimen remains literal fenced example data; this decision does not parse, repair or promote its mixed YAML/Markdown content into valid configuration.",
+    "Historical counts, schedules, goals, approvals, unproven mechanisms, policy claims and review outcomes are observations, not current capability, completed tests or release evidence.",
+    "No EOL normalization, dual hash, widened marker, whole-file/subtree waiver, parser expansion or new clearance schema is authorized.",
+    "Any later changed framing or source context needs the applicable explicit review/evidence renewal; an unchanged interior does not inherit permission under a new current-use context.",
+    "Only unanimous exact decisions may subsequently be registered by the coordinator under the existing mechanism; this reviewer neither registered spans nor issued canonical P05 or QA records."
+  ],
+  "decisions": [
+    {
+      "id": "set03-span-007",
+      "decision": "ACCEPT",
+      "reason": "The unchanged retention sentence remains the original audit's checkpoint-machinery decision tied to its B7 roundtrip proposal, not a present invocation or evidence that the test ran.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "declaration_digest": "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
+      "sha256": "e71ac35991fbf056d3058ffd985c2c4e58ce9719e8fc4e9959778a8d59e403b9",
+      "source_context_sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882",
+      "source_git_blob": "c8a9675f87ec849003735cef7a9c01c4ba945821",
+      "raw_bytes": 93,
+      "source_lines_inclusive": [162, 162]
+    },
+    {
+      "id": "set03-span-006",
+      "decision": "ACCEPT",
+      "reason": "The unchanged row still records the audit-era alias-removal schedule rather than declaring a current alias or completed removal, and the separate B6 wording update does not change that role.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "declaration_digest": "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
+      "sha256": "788769266cb1db9496d249215cb8c9030d6c6772bcef5dc7086d89f5139ceb8e",
+      "source_context_sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882",
+      "source_git_blob": "c8a9675f87ec849003735cef7a9c01c4ba945821",
+      "raw_bytes": 205,
+      "source_lines_inclusive": [152, 152]
+    },
+    {
+      "id": "set03-span-012",
+      "decision": "ACCEPT",
+      "reason": "The unchanged evidence field cites the original WF findings and inventory subjects under the pinned review proposal, while the revised dormant-preference instruction remains outside the span.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+      "declaration_digest": "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
+      "sha256": "aa0aab3c0c5e915c6e708132e7b218a3fce5d3ef330a79ebc28fc1285915765c",
+      "source_context_sha256": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6",
+      "source_git_blob": "3c8a8907d82d1844eafae625cb040674f5e683e0",
+      "raw_bytes": 90,
+      "source_lines_inclusive": [172, 173]
+    },
+    {
+      "id": "set03-span-029",
+      "decision": "ACCEPT",
+      "reason": "The unchanged problem statement still reports the uniformity audit's original structural findings, without extending approval to the separately revised W5 instructions or preserved ownership list.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "declaration_digest": "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
+      "sha256": "9b65b993edd449ca814f09232073fbda15dab9a16f6a2ffc1e94606453d6d2f6",
+      "source_context_sha256": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664",
+      "source_git_blob": "22f378770136bef4212921cb9841f09d9ccd8ff4",
+      "raw_bytes": 902,
+      "source_lines_inclusive": [16, 21]
+    },
+    {
+      "id": "set03-span-066",
+      "decision": "ACCEPT",
+      "reason": "The complete fenced role-file specimen remains expressly identified as the original proposal and ends before the current invocation menu, despite the separate wrapper-owner navigation edits.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
+      "sha256": "80463fc1da6d93c5ab1a89779bdc8b6018338943a19128c9ebb3362692830b07",
+      "source_context_sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3",
+      "source_git_blob": "7ab53428f96cdcfddfddb1efa52515fc83c87b0e",
+      "raw_bytes": 2228,
+      "source_lines_inclusive": [886, 939]
+    },
+    {
+      "id": "set03-span-065",
+      "decision": "ACCEPT",
+      "reason": "The unchanged timestamped SENSE output remains a fenced original specimen rather than current routing or observed policy enforcement, and the actual DEFINE instructions stay beyond its end boundary.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+      "sha256": "ee7798bb0534298f605d24fabaaa018063d1ae9294881a54e3555a1f76b4b57e",
+      "source_context_sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3",
+      "source_git_blob": "7ab53428f96cdcfddfddb1efa52515fc83c87b0e",
+      "raw_bytes": 706,
+      "source_lines_inclusive": [222, 246]
+    },
+    {
+      "id": "set03-span-068",
+      "decision": "ACCEPT",
+      "reason": "Approach C remains the explicitly rejected doc-orchestrator alternative, unaffected by the separate editorial changes to operative quality-check and refactor wording.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "declaration_digest": "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
+      "sha256": "0bbe401fe2d2d65fc3dac2b31290786412482e6888c975e2f6b33257a11ef211",
+      "source_context_sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14",
+      "source_git_blob": "364809d4ead4b227027f9e70ffa5ab90cd6d3e5a",
+      "raw_bytes": 213,
+      "source_lines_inclusive": [91, 94]
+    },
+    {
+      "id": "set03-span-071",
+      "decision": "ACCEPT",
+      "reason": "The unchanged nine concerns retain the original adversarial review's findings and recommendations, without converting their cited predecessor controls into current consumer instructions or a passing review.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "declaration_digest": "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331",
+      "sha256": "172af6d3a10ebfb01f261463e9d62e7f5094c1632684c63f9d50ae2b2b2e86a8",
+      "source_context_sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14",
+      "source_git_blob": "364809d4ead4b227027f9e70ffa5ab90cd6d3e5a",
+      "raw_bytes": 3104,
+      "source_lines_inclusive": [268, 287]
+    },
+    {
+      "id": "set03-span-076",
+      "decision": "ACCEPT",
+      "reason": "The unchanged D-4b row remains an original decision-subject inventory of orphan names, while the separately updated working-session prose does not turn that row into an invocation menu.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+      "declaration_digest": "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
+      "sha256": "7a927d2e9e1e5345f3cdc841d22264eeadbb0fffa5ba8c3f1333d7d0690adb24",
+      "source_context_sha256": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374",
+      "source_git_blob": "961528ecf7edd9407ca7547d0a934e91f955b5e1",
+      "raw_bytes": 112,
+      "source_lines_inclusive": [251, 251]
+    },
+    {
+      "id": "set03-span-088",
+      "decision": "ACCEPT",
+      "reason": "The unchanged fenced agent-family inventory still describes the original proposed roles, and the new voice-control dependency wording elsewhere neither dispatches those agents nor validates their availability.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "declaration_digest": "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
+      "sha256": "0c2a12458e230642b9e271773131bc82ac22ef3257d1cca5e6fd82823951178f",
+      "source_context_sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf",
+      "source_git_blob": "149c854bcd20d2fbf3c0653c6c87778a4d1143c4",
+      "raw_bytes": 433,
+      "source_lines_inclusive": [123, 133]
+    },
+    {
+      "id": "set03-span-092",
+      "decision": "ACCEPT",
+      "reason": "The unchanged A1/A2 split remains the original scope-challenge review's recommendation and proposed artifact sets, not an activated execution scope after the separate editorial edits.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "declaration_digest": "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
+      "sha256": "1a18e7534728e6076fea5c384ec12499230aa031db71cfdd14fce8375f1963b7",
+      "source_context_sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf",
+      "source_git_blob": "149c854bcd20d2fbf3c0653c6c87778a4d1143c4",
+      "raw_bytes": 1085,
+      "source_lines_inclusive": [453, 474]
+    },
+    {
+      "id": "set03-span-089",
+      "decision": "ACCEPT",
+      "reason": "The unchanged performance and output criteria remain original hypothetical targets rather than observed capabilities, while current dependency and voice-review requirements remain outside this window.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "declaration_digest": "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
+      "sha256": "44180728214fe65fc9f692c1fb0524ac3d14b2ae91018cf92736fb4a60a12eb0",
+      "source_context_sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf",
+      "source_git_blob": "149c854bcd20d2fbf3c0653c6c87778a4d1143c4",
+      "raw_bytes": 1102,
+      "source_lines_inclusive": [327, 335]
+    },
+    {
+      "id": "set04-span-001",
+      "decision": "ACCEPT",
+      "reason": "The line still continues the ADR's past-tense account of earlier outside-voice hooks, while the new implementation-status note is separate and receives no execution or correctness clearance here.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "declaration_digest": "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+      "sha256": "346df6bc5a03e5a494df37159b3e3aee71d06cefe9a302431046626148e8205e",
+      "source_context_sha256": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821",
+      "source_git_blob": "be51adeab4e95ce7bc7c984c4db5f2618a979f05",
+      "raw_bytes": 91,
+      "source_lines_inclusive": [18, 18]
+    },
+    {
+      "id": "set04-span-005",
+      "decision": "ACCEPT",
+      "reason": "The unchanged Inputs fragment still attributes the source-era methods examined for the design, while the updated current consumer and invocation sections remain separately checked.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "declaration_digest": "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+      "sha256": "19dab4348859be96dc53f27e68c3bb191b6d003389f240d7b0ce26e08a045715",
+      "source_context_sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27",
+      "source_git_blob": "c48666e6b21a6bec869f29fff332cfbdd21ad068",
+      "raw_bytes": 93,
+      "source_lines_inclusive": [5, 5]
+    },
+    {
+      "id": "set04-span-006",
+      "decision": "ACCEPT",
+      "reason": "The unchanged problem statement remains the original observation of divergent reviewer prompts and rubrics, not a live route selection after the document's separate native-consumer updates.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "declaration_digest": "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+      "sha256": "23f2b7f0211fc6b70aa7e91df34594358187a87d983c79ac7663efaa88f2d935",
+      "source_context_sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27",
+      "source_git_blob": "c48666e6b21a6bec869f29fff332cfbdd21ad068",
+      "raw_bytes": 514,
+      "source_lines_inclusive": [12, 20]
+    }
+  ],
+  "prior_decision_artifacts": [
+    {
+      "file": "c-span-semantic-decisions-03.json",
+      "bytes": 141969,
+      "sha256": "9a8030b76b0289f3bc285de69a93e27daa71af2a7d93d304d4096d1837561354",
+      "prior_result": "155 ACCEPT, 50 REJECT, 0 NEEDS_NARROWING",
+      "renewed_ids": 12,
+      "edited": false
+    },
+    {
+      "file": "c-span-semantic-decisions-04.json",
+      "bytes": 15235,
+      "sha256": "d4e589f4f87ac1a743d65fe3b0b759a3aefcf78d61209c825c678f352a64e216",
+      "prior_result": "4 ACCEPT, 6 REJECT, 0 NEEDS_NARROWING",
+      "renewed_ids": 3,
+      "edited": false
+    }
+  ],
+  "verification": {
+    "actual_checks": [
+      "Verified the exact 21629-byte input and SHA-256, and resolved the full immutable cda5539a commit identity through Git without checking it out.",
+      "Recomputed all 15 eight-field declaration digests using sorted compact ASCII JSON and all exact raw SHA-256 values and UTF-8 byte counts.",
+      "Compared every declaration and raw span with its previously ACCEPTed set03/set04 decision and original Git source; all were unchanged.",
+      "Verified all nine new full-source SHA-256 values and Git blob identities, unique ordered whole-line markers, inclusive/exclusive ranges and disjoint selected intervals.",
+      "Read every changed source hunk since the corresponding prior candidate, every complete selected span, the seven audit/archive prefixes and relevant adjacent boundaries, and both complete MARS documents.",
+      "Rechecked the isolated checkout at a7a1df338bacf900f1210f08131f391831992f1f with empty git status; no candidate checkout or repository mutation was needed.",
+      "Rehashed the existing a7 and ba603072 quality reports and final/set03/set04/set05 semantic artifacts before writing this new artifact; none was edited."
+    ],
+    "inspection_limit": "This was a finite context renewal, not a semantic reread of every unchanged line in all nine files or a review of the complete new candidate.",
+    "display_recovery": "One initial Python diff-display attempt failed on the host cp1252 encoder; ordinary read-only Git diff displays then succeeded for every selected path, with no source or configuration changes.",
+    "not_run": [
+      "counterexample fixtures",
+      "current-routing guard",
+      "C admission mechanism tests",
+      "full source or runtime suites",
+      "native installer or hook acceptance",
+      "browser, PDF or Office execution",
+      "hosted CI",
+      "profile bootstrap or borrowing",
+      "P05, QA or corroboration persistence"
+    ]
+  },
+  "preservation": {
+    "only_new_output": "c-span-semantic-decisions-06.json in this reviewer's session files",
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_count": 58,
+    "completed_leaves": [],
+    "previously_unverified_leaves_not_cleared": [
+      "7.1.c",
+      "9.3.a",
+      "0.2.c",
+      "9.2.a",
+      "10.2.a",
+      "10.5.a",
+      "10.8.a"
+    ],
+    "original_agents": 69,
+    "original_canonical_skills": 94,
+    "source_edits": false,
+    "prior_artifact_edits": false,
+    "descendants": false,
+    "staging_commits_pushes_or_pr_mutations": false,
+    "isolated_checkout_preserved_at": "a7a1df338bacf900f1210f08131f391831992f1f"
+  },
+  "qa_and_review_limits": {
+    "semantic_scope_only": true,
+    "integrated_source_quality_verdict": "NOT_ASSESSED_FOR_CDA5539A",
+    "prior_a7_and_ba603072_reports": "UNCHANGED",
+    "canonical_p05_pass": false,
+    "registration_or_runtime_activation": false,
+    "independent_peer_corroboration_claimed": false,
+    "guard_count_or_pass_claimed": false,
+    "required_qa_unchanged": [
+      {"id": "source-tests", "kind": "tests", "mandatory": true},
+      {"id": "strict-hosted-tests", "kind": "tests", "mandatory": true},
+      {"id": "current-routing", "kind": "tests", "mandatory": true}
+    ],
+    "release_or_merge_clearance": false,
+    "next_gate": "A separately requested exact final candidate still requires its scoped source/spec/quality reviews and actual mandatory QA; this finite semantic result cannot substitute for them."
+  }
+}
