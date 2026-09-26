@@ -17,8 +17,17 @@ retrospective_text() {
   awk '
     { sub(/\r$/, "") }
     /^### Step 8 — Retrospective \(--retrospective\)$/ { starts++; active=1; fence=""; next }
-    active && fence == "" && /^[ ]{0,3}(```|~~~)/ { fence=substr($0, match($0, /(```|~~~)/), 3); print; next }
-    active && fence != "" { if (index($0, fence) && $0 ~ /^[ ]{0,3}(```|~~~)[ \t]*$/) fence=""; print; next }
+    active && fence == "" && /^ ? ? ?(```|~~~)/ {
+      line=$0; sub(/^ */, "", line); ch=substr(line, 1, 1); fence=""
+      while (substr(line, length(fence) + 1, 1) == ch) fence=fence ch
+      print; next
+    }
+    active && fence != "" {
+      line=$0; sub(/^ */, "", line); run=""
+      while (substr(line, length(run) + 1, 1) == substr(fence, 1, 1)) run=run substr(fence, 1, 1)
+      if (length(run) >= length(fence) && substr(line, length(run) + 1) ~ /^[ \t]*$/) fence=""
+      print; next
+    }
     active && /^#{1,3} / { active=0 }
     active { print }
     END { if (starts != 1) exit 2 }
