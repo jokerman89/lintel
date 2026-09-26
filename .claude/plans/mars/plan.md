@@ -7,6 +7,8 @@
 plan in [status.md](status.md) ("Remaining", items 0-5). The CyberGym benchmark is paused.
 **Sources:** [spec.md](spec.md) (R01-R17), [review-method-design.md](review-method-design.md)
 (RM1-RM9), [integration.md](../../../skills/mars/references/integration.md).
+
+_Editorial note (2026-09-25): nomenclature and operative pointers are updated for the native workflow consolidation (ADR-0034); the original record remains at [`af94ff74`](https://github.com/jokerman89/lintel/blob/af94ff7499cbb3a180be3be4eadbfd05e8aa16f7/.claude/plans/mars/plan.md)._
 **Coordinator:** Finish work / Go Live (`88aecc43-40f9-41d4-8947-6c2fb0a55481`) owns merge
 timing, version assignment and delivery. Go Live published the branch as PR #105; merge pending.
 
@@ -15,9 +17,10 @@ timing, version assignment and delivery. Go Live published the branch as PR #105
 - **D1** (review-method-design.md) is adopted as designed: in panel mode REVIEW records its
   decision through the existing content-bound path from the adjudicated panel result.
   MARS alone never clears anything; standalone MARS stays advisory.
-- `define` and the former plan engineering review are being rewritten or removed by the in-flight native
-  planning consolidation lane, and `CodeReviewer` by the quality lane. Their MARS hooks are
-  specified in integration.md for the consolidated files instead of edited here.
+- `define` and the engineering plan review were then being rewritten or consolidated by the
+  in-flight native planning lane (the plan review is now part of `inspect`), and `CodeReviewer`
+  by the quality lane. Their MARS hooks were specified in integration.md for the consolidated
+  files instead of edited here; they are now applied there.
 - The drift guard is scoped to REVIEW's reviewer prompts. A repository-wide "no rubric
   outside method.md" sweep would rewrite files owned by active cleanup lanes.
 

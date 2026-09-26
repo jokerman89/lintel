@@ -1,8 +1,8 @@
 # Lintel uniformity remediation plan
 
-> Retained historical narrative. Terminology was neutralized on 2026-09-25;
-> former external path/name labels are symbolic, not executable current routes.
-> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md) remains at that immutable revision.
+> Original IDs, dates, ownership lists and results are retained; no check was rerun.
 
 **Status:** DRAFT_FOR_REVIEW — produced from the system-wide uniformity audit (8 cohorts + X1–X5 + MASTER + VOTE in `.claude/engineering/audits/`).
 **Branch target:** new work off `v4.0-phase1-meta-infra-spine`.
@@ -94,7 +94,7 @@ Close every BROKEN/PARTIAL promise, fix the correctness bugs, normalize the cont
 
 ### W5 — Correctness bugs + first-party-first (finding #4, #5, #16; DEC-4, DEC-5, DEC-15)
 
-**What:** Fix the live producer/consumer breakages and native-ownership the planner chain. Canonicalize storage on `~/.lintel/`; fix `context-save`→`dump`/`warm-sessions` paths and planner-chain `~/.retired-provider`→`~/.lintel`. Replace retired-provider-binary calls in plan-*-review/codex with in-repo equivalents. Unify config (`profile.yaml` canonical; fold `config.yaml`).
+**What:** Fix the live producer/consumer breakages and establish native ownership of the planner chain. Canonicalize storage on `~/.lintel/`; repair the predecessor checkpoint writer-to-reader/session-loading paths and planner-chain `~/.retired-provider`→`~/.lintel`. Replace retired-provider-binary calls in the predecessor planning-review and independent cross-check chain with in-repo equivalents. Unify config (`profile.yaml` canonical; fold `config.yaml`).
 
 **Files:** `skills/context-{save,dump,warm-sessions}/SKILL.md`, `skills/office-hours/SKILL.md`, `skills/plan-{ceo,eng,design,devex}-review/SKILL.md`, `skills/codex/SKILL.md`.
 **Tasks:** W5.1 canonical-root decision applied; W5.2 fix two broken read paths; W5.3 planner-chain path fix; W5.4 first-party log/tooling swap; W5.5 config unification + migration entry.

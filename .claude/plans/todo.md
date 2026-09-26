@@ -296,7 +296,7 @@ Independent review (L-007): SHIP-WITH-FIXES — 3 P1 (registry war, marker-on-pa
 - [x] `lib/paths.sh` — single source for all Lintel paths, legacy fallback
 - [x] Shape test: no skill/hook/bin hardcodes legacy paths outside lib/paths.sh
 - [x] `bin/li-migrate-claude-home` — idempotent: git mv knowledge, create runtime/, .gitignore, redirect stubs, settings.json autoMemoryDirectory
-- [x] Widest-token-set sweep (L-005) of all legacy path refs across skills/hooks/lib/bin/agents/scaffolding/AGENT-INSTRUCTIONS/CLAUDE.md.template
+- [x] Widest-token-set sweep (L-005) of legacy path references across `skills`, `hooks`, `lib`, `bin`, `agents`, `scaffolding`, the agent instructions and the `CLAUDE.md.template` source. These are separate source families, not one combined filesystem path.
 - [x] `bin/_audit.sh` scope routing (repo → .claude/runtime/audit/, global → ~/.lintel/audit/)
 - [x] `bin/_jobs.sh` — job data in-repo, ~/.lintel/jobs/_active.md becomes cross-repo registry
 - [x] session-digest hook reads new paths (+ legacy fallback)

@@ -1,5 +1,9 @@
 # Design: Lintel v3.6 — Backlog Sequencing & Valuation Plan
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md) remains at that immutable revision.
+> Original item/decision IDs, dates, estimates, concerns and outcomes remain; no check was rerun.
+
 > Historical sequencing record. Original item/decision IDs, dates, counts, concerns and
 > statuses remain unchanged; no old check was rerun or pending item newly authorized.
 > Current routes are in the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
@@ -84,7 +88,7 @@ Ship endast Wave 0 + 1. Pausa 4 veckor för dogfooding.
 
 **Items:**
 - **0.1** — Agent count 78 → 73 i README/SHIP-GATE/CHANGELOG. Källa: `find agents -name '*.md' | grep -v README | wc -l = 73`.
-- **0.2** — Path leaks: `asset-search`, `brand-update`, `design-html`, `generate-web` SKILL.md. Replace med `$LINTEL_HOME` / `~/.lintel/`.
+- **0.2** — Path leaks in asset search, brand refresh, the predecessor UI-mockup method and web generation. Replace med `$LINTEL_HOME` / `~/.lintel/`.
 - **0.3** — Rebrand-drift: `bin/li-lessons-promote` + `bin/li-update` har `$JSTACK_DIR/$JSTACK_HOME`. Rename till `$LINTEL_*`.
 - **0.4** — `tasks/personas.md` + `tasks/memory.md` saknas. **Split från Cohort 1 om D-1a inte locked vid PR-öppning** — kan skickas i egen "Cohort 1b"-PR efter operator-svar. Recommendation: skapa filerna (load-bearing per backlog-författare).
 - **6.3** — Resume integrity check på `00-state.md` (branch X, commit Y, N days old). Liten defensive add.
@@ -139,7 +143,7 @@ Ship endast Wave 0 + 1. Pausa 4 veckor för dogfooding.
 - **WS-4a (4.2)** — Historical review of 19 external-name collisions for keep/rename/merge.
   **D1 rationale:** focus on method identity and capability, not a numerical removal target.
   Original estimate: 1-2h operator time.
-- **WS-4b (4.4)** — Sit-down decision om orphan names (landing-report, match, setup-brain/sync-brain, agt-tier-stamp). Estimat 30min operator-tid.
+- **WS-4b (4.4)** — Sit-down decision on orphan names for post-delivery reporting, semantic skill routing, private-index setup/sync and agent-tier stamping. Estimat 30min operator-tid.
 
 **Items efter operator working-sessions:**
 - **4.1** — Alias-mekanism. Pre-req för all rename.

@@ -24,6 +24,9 @@ separate reasoning. For a trivial task, avoid unnecessary external cost. If two 
 produce unresolved disagreement on the same content, retain the disagreement and escalate
 to a human decision rather than repeating the same framing.
 
+Cross-check keeps one independent reviewer. A request for several models on the same
+question is [MARS](../mars/SKILL.md), never a panel role-played inside cross-check.
+
 ## Inputs
 
 - Exactly one target: `--diff`, `--plan <file>`, `--code <file>` or `--hypothesis <text>`.

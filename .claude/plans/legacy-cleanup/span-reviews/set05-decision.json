@@ -1,0 +1,291 @@
+{
+ "schema_version": 2,
+ "skill": "review",
+ "status": "unverified",
+ "timestamp": "2026-09-25T17:45:43.002630+00:00",
+ "reason": "Faithful coordinator transcription of actual matching semantic ACCEPTs; neither rejected spans nor overall release clearance is inferred.",
+ "context": {
+  "attempt_id": "legacy-cleanup-span-set05",
+  "builder": {
+   "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+   "id": "cleanup-integration"
+  },
+  "independence_required": true,
+  "profile": {
+   "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+   "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+   "generation": 2,
+   "name": "_default",
+   "schema_version": 1,
+   "version": "1.0.0"
+  },
+  "purpose": "verification_only",
+  "qa_requirements": [
+   {
+    "applicability": "applicable",
+    "id": "historical-spans",
+    "kind": "check",
+    "policy": {
+     "actor": null,
+     "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+     "effective_date": null,
+     "jurisdiction": null,
+     "source": ".claude/plans/legacy-cleanup/spec.md",
+     "version": "2026-09-25"
+    },
+    "requirement": "mandatory"
+   }
+  ],
+  "required_controls": [
+   "historical-spans"
+  ],
+  "required_policy": {
+   "applicability": "not_applicable",
+   "required": false,
+   "source": "bundled-neutral",
+   "status": "not_required",
+   "version": "1.0.0"
+  },
+  "schema_version": 2,
+  "snapshot": {
+   "base": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+   "entries": [
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "5341f2e6c8cb8726a076eb2b34c30b2c0924621d40025d2e5c3ed966f4e2280a"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b"
+     },
+     "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "1f0728884bb8128d01e3a38109575cf0e8dba38d3ce4cb25fbd99d434a3f8f70"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3"
+     },
+     "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "e4cd138fc8abd904bd368290a1bd4b1fa7375213582de743a24028abb2dcb12e"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef"
+     },
+     "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d"
+     },
+     "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d"
+     }
+    }
+   ],
+   "head": "db55e47df5e1d3693a9b47bcca16c1d7e79c5826",
+   "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-05.json",
+   "result_digest": "d89d1998c20fb8c64e4b80fb179a6fd68eea2bc7dc50f518677390d051338431",
+   "selection": [
+    ".claude/engineering/audits/lintel-state-of-the-harness.md",
+    ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+    ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+    ".claude/plans/universal-implementation/reports/P13-skills-preservation.md"
+   ]
+  },
+  "work": {
+   "acceptance_digest": "f5778c0ab0d476163587c9631b6fcce0b171b31c1f8533890dfff77907068e0e",
+   "acceptance_manifest": [
+    {
+     "end": null,
+     "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+     "sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+     "sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/plan.md",
+     "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/prompt.md",
+     "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/spec.md",
+     "sha256": "784fc37543854985199b8aad171406ae33737fefa7486cc7fc643e720e6fda2d",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+     "sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+     "sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d",
+     "start": null
+    }
+   ],
+   "acceptance_paths": [
+    ".claude/engineering/audits/lintel-state-of-the-harness.md",
+    ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+    ".claude/plans/legacy-cleanup/plan.md",
+    ".claude/plans/legacy-cleanup/prompt.md",
+    ".claude/plans/legacy-cleanup/spec.md",
+    ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+    ".claude/plans/universal-implementation/reports/P13-skills-preservation.md"
+   ],
+   "leaf_ids": [
+    "0.2.c",
+    "9.3.a",
+    "10.2.a"
+   ],
+   "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+   "package_id": "INTEGRATE",
+   "work_map": ".claude/plans/legacy-cleanup/work.json"
+  }
+ },
+ "reviewer": {
+  "id": "cleanup-quality-reviewer",
+  "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+ },
+ "provenance": "declared",
+ "controls": [
+  {
+   "applicability": "applicable",
+   "id": "historical-spans",
+   "kind": "check",
+   "policy": {
+    "actor": null,
+    "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+    "effective_date": null,
+    "jurisdiction": null,
+    "source": ".claude/plans/legacy-cleanup/spec.md",
+    "version": "2026-09-25"
+   },
+   "requirement": "mandatory",
+   "status": "pass",
+   "reason": "Both independently attributed actors accepted only these 17 exact LF declaration digests; rejected, narrowed and superseded entries excluded.",
+   "evidence": [
+    ".claude/plans/legacy-cleanup/span-reviews/set05-spec-decisions.json",
+    ".claude/plans/legacy-cleanup/span-reviews/set05-quality-decisions.json"
+   ],
+   "observation": {
+    "span_declarations": [
+     "0ac3360c21e210559963adad7f10cf91fda9fa530e1b3b1e00c2e688aa88ce57",
+     "0e940c805be04bde77c4ad586070e024ab3b8c62bed6e4eeb6903c74c501946d",
+     "15c030a263ead371c65bbe48b4740b78fb3963ab5e15831fd403c55c9d9a11eb",
+     "1aa1bb3be7a8eb42e95e0fb819137bab6173f5a79fbbf8296fe6dafb5c63970d",
+     "1ea3ebf261e0e2b2e2be9c0263f15d9ee66b0d0e20a8481dfb97f7a45da9c975",
+     "23f6c97ff543f4c2608c6373f041ddc8bfc06097e920483b0342bde6a8590c10",
+     "24431fffbe5ba9636c1d3ece431eaf765ace7d2b47af031977b146c5d2359b15",
+     "2c7c71b2cb680e813c662c82f0b91e64aa1632fe6f80c1354e2f826db3146a51",
+     "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+     "62cfe99e0cc4e386c9771ba5e1599f21c11dce73a15ec87935012be1f786ca47",
+     "698d0bd8bf26f2255ac768ca848f6d08a803437f45353274633f308723874514",
+     "7d3814cdabf39e6b5fb964dce532bcb662a8bbf18e8b7e8b089e9597a7eee47b",
+     "82faa06532fc2e88740f92a146d584c50c166b874b750b4086cd9f6c5a748bb1",
+     "83353391191985bf0a72c64b2cc5b762cbc9d84832eb8958b5c155ba74f8e92e",
+     "85402fa70bbd71005b74ed0f1ecd09e74e286c862539252b30c9dfb9265f1314",
+     "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815",
+     "eebce2f0b7a8508c739100be2611872ea6659a84deff03a9cb7ce4a9a56fb758"
+    ],
+    "review_scope": "semantic classification only"
+   }
+  }
+ ],
+ "coverage": {
+  "0.2.c": [
+   "historical-spans"
+  ],
+  "9.3.a": [
+   "historical-spans"
+  ],
+  "10.2.a": [
+   "historical-spans"
+  ]
+ },
+ "evidence": [
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set05-quality-decisions.json",
+   "sha256": "eb8c7e230112ed9ca76905f26d9e86d8b8c866ba5805bc43cb71636113383ea4"
+  },
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set05-spec-decisions.json",
+   "sha256": "7ea1f09c66d97055039e41bfefb50d7c19457dab909073db4ab58e02c39e6538"
+  }
+ ]
+}
