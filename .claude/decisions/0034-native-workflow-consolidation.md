@@ -63,10 +63,14 @@ rationale, optionally bounded by exact headings, in
 of their references as a HISTORICAL observation by path and line instead of failing, so
 byte-bound records stay unmodified, and its summary states the historical count. Entries outside
 those trees, malformed entries and any count mismatch (a new or removed reference) fail.
-Unanimously reviewed spans in `residuals.md` remain the primary classification; the register
-only covers what no reviewed span covers. Current skills, documentation, decisions, memory and
-root files remain strict. Guard-scanned suffixes are pinned to LF in `.gitattributes`, so a
-Windows checkout sees the same bytes as CI.
+Current skills, documentation, decisions, memory and root files remain strict.
+
+Amended 2026-09-26: unanimously reviewed spans in `residuals.md` remain the primary
+classification; the register only covers what no reviewed span covers, and any entry that departs
+from a span decision is recorded in `residuals.md` and needs independent acceptance.
+Guard-scanned suffixes are pinned to LF in `.gitattributes`, so a Windows checkout sees the same
+bytes as CI. `/li:research` is retained as a native shortcut that only delegates to
+`/li:cycle --mode research-dive`; it adds no engine, mode or flag.
 
 ## Alternatives
 
