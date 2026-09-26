@@ -1394,6 +1394,36 @@ class CommandSurfaceTests(unittest.TestCase):
             self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 2, "records": []}))
             self.assertIn("historical-register", self.register_codes())
 
+    def test_historical_register_refuses_reversed_boolean_and_bounded_edge_cases(self):
+        record = ".claude/plans/old/record.md"
+        self.write(record, "# Record\n## End\nUse /li:qa.\n## Start\n")
+        for name, entry in {
+            "reversed range": {"path": record, "count": 1, "reason": "Old.",
+                               "from_heading": "## Start", "to_heading": "## End"},
+            "boolean count": {"path": record, "count": True, "reason": "Old."},
+        }.items():
+            with self.subTest(case=name):
+                self.historical_register([entry])
+                self.assertIn("historical-register", self.register_codes())
+        self.write(record, "# Record\nUse /li:qa.\n## Current\nRun /li:qa now.\n")
+        self.historical_register([{"path": record, "count": 1, "reason": "Old.", "to_heading": "## Current"}])
+        findings = guard.scan(self.root)
+        self.assertEqual([(item.path, item.line, item.code) for item in findings],
+                         [(record, 4, "retired-command")])
+
+    def test_failed_run_on_a_crlf_checkout_prints_a_renormalization_hint(self):
+        self.write("docs/old.md", "Use /li:qa.\n")
+        (self.root / "docs/old.md").write_bytes(b"Use /li:qa.\r\n")
+        result = subprocess.run([sys.executable, "-B", str(GUARD), "--root", str(self.root)],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("HINT: LF-pinned records are checked out with CRLF", result.stderr)
+        (self.root / "docs/old.md").write_bytes(b"Use /li:qa.\n")
+        result = subprocess.run([sys.executable, "-B", str(GUARD), "--root", str(self.root)],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 1)
+        self.assertNotIn("HINT:", result.stderr)
+
     def test_declared_record_keeps_non_reference_codes_strict(self):
         path = ".claude/plans/old/record.md"
         self.write(path, "Use /li:qa.\n")
