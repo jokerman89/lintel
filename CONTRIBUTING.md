@@ -102,6 +102,13 @@ One more check CI runs, worth running locally before you push:
 bash install/verify.sh --all
 ```
 
+The command-surface guard (`tests/shape/native-command-surface.sh`) hashes reviewed record spans
+byte for byte, and `.gitattributes` checks out the files it reads with LF. A checkout created before
+those rules, or with `core.autocrlf=true` from an older revision, keeps its CRLF files and reports
+hundreds of false findings. Re-clone, or renormalize that checkout once:
+`git -c core.autocrlf=false rm -r --cached -q . && git -c core.autocrlf=false reset --hard`
+(this discards uncommitted edits, so commit or stash them first).
+
 New tests follow `tests/conventions/bash-test-template.sh`. Copy it, fill in the description, tags,
 setup, run, and cleanup, then confirm the runner discovers it.
 
