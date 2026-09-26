@@ -232,7 +232,8 @@ records remain overall **UNVERIFIED**, not release clearance. Rejected, disputed
 widened or changed spans are not accepted. Exact-path LF and evidence-byte attributes
 preserve original Git/evidence bytes; they do not exempt content from scanning.
 
-Superseded 2026-09-26 (see the reconciliation section): latest forward-tree guard at that time: **exit 1, 688 unresolved diagnostics**, 2190 visible
+Superseded 2026-09-26 (see the reconciliation section). Latest forward-tree guard at that
+time: **exit 1, 688 unresolved diagnostics**, 2190 visible
 observations, all 68 approved spans emitted. Of these, **687 are still unadjudicated
 internal references**, not automatically defects or accepted historical observations.
 No ordinary shipped code/skill/doc surface outside internal records/presentation is
@@ -243,7 +244,6 @@ not history. The guard is NOT green and this candidate is NOT merge-ready.
 
 Superseded 2026-09-26: the retained `/li:research` shortcut keeps the field guide's route valid, so
 no presentation bytes change. The original record follows.
-
 
 `presentations/tech-shots-2026-09-25/show/field-guide.html:4` actively advertises the
 removed research shortcut. The exact proposed replacement is the existing cycle
@@ -296,3 +296,9 @@ Go Live (88aecc43) then found the unpublished f48e6199 line of this session's wo
   independent-review gate.
 - Downstream docs PRs #94-#100 are stacked on this branch. Merge order: CI PR, then #104,
   then the docs PRs. Publication needs an account with write access.
+- Independent reviews (session 4125f187 reviewer subagents, reports in that session's files):
+  the spec/capability review failed at 2ffa0e77 (S-01..S-06, 2 P2) and passed at 0cd1dbd8,
+  where it accepted the P08 register override. The quality/verification review failed at
+  2ffa0e77 (P1: the Python 3.12 tokenizer let stray characters through) and passed at 0cd1dbd8.
+  Its later P3 advisories (the `!` and non-ASCII tokens, mawk portability) are fixed afterwards;
+  P3-1 (setext headings) and P3-2 (unquoted annotation names) remain disclosed follow-ups.
