@@ -206,7 +206,10 @@ permission to mark it passed.
 An optional independent second perspective follows the same read-only handoff and
 actual host permissions. A self-review is not an independent review. When no
 reviewer is available, preserve the review brief and mark that requirement open.
-Do not claim that installing an agent profile performed a review.
+Do not claim that installing an agent profile performed a review. A cross-model second
+opinion routes to [MARS](../mars/SKILL.md) with subject kind `problem` or `spec`, only for
+a standalone DEFINE whose `li-mars.py offer` (caller `define`) returns 0 and with consent;
+inside a cycle PLAN owns the single offer. MARS output is review input, not approval.
 
 Use the [shared evidence contract](../review/references/evidence.md) when binding
 a result: prepare the selected context and immutable `qa_requirements` before

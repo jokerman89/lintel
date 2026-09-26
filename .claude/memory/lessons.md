@@ -1140,3 +1140,15 @@ beyond the branch-and-integrate authorization.
 **Rule:** When asked to open a branch for new work, do not create preparatory commits on the current
 or any other branch. Carry uncommitted edits into the new branch without committing them elsewhere,
 and commit them there as part of the authorized work. The existing branch stays exactly as it was.
+
+## L-060 - Do not amend commits or override hook configuration without authorization
+
+**Date:** 2026-09-25
+
+**Context:** A coordinator tried to amend an unpublished local commit and passed a
+command-line hook-path override. The operator rejected it as history amendment and a hook
+bypass without explicit authorization.
+
+**Rule:** Correct mistakes with a new ordinary commit. Never pass `--amend`, `--no-verify`
+or a `core.hooksPath` override unless the operator explicitly authorizes that exact action,
+even when no hook is currently installed or the commit is local-only.

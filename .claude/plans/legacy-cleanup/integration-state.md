@@ -88,7 +88,8 @@ Actual local observations, not full acceptance:
 - Repository-local profile bootstrap, before the later launcher restriction, observed
   `_default` 1.0.0 generation 1 under the actual host session. The whole-cycle estimator
   returned 120000, uncalibrated, zero samples. Neither grants release permission.
-- Real metadata query: 94 canonical skills, 69 agents. The former print wrapper is
+- Real metadata query at the ba603 candidate: 94 canonical skills, 69 agents (96 after
+  converging MARS and retaining `research`). The former print wrapper is
   removed after its options and consumers joined the retained PDF writer. Asset-only
   bridges are removed after live imports switched to canonical web-session resources.
 - Native in-place adapter init/check: 20 managed files verified, no live-host claim.
