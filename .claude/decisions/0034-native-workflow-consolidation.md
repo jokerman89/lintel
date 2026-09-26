@@ -62,8 +62,11 @@ rationale, optionally bounded by exact headings, in
 `.claude/plans/legacy-cleanup/historical-records.json`. The command-surface guard reports each
 of their references as a HISTORICAL observation by path and line instead of failing, so
 byte-bound records stay unmodified, and its summary states the historical count. Entries outside
-those trees, malformed entries and any count mismatch (a new or removed reference) fail. Current skills, documentation, decisions, memory and root files remain
-strict; the one live presentation route was corrected rather than declared.
+those trees, malformed entries and any count mismatch (a new or removed reference) fail.
+Unanimously reviewed spans in `residuals.md` remain the primary classification; the register
+only covers what no reviewed span covers. Current skills, documentation, decisions, memory and
+root files remain strict. Guard-scanned suffixes are pinned to LF in `.gitattributes`, so a
+Windows checkout sees the same bytes as CI.
 
 ## Alternatives
 

@@ -237,6 +237,12 @@ material choices; do not ask once per finding or reopen existing authorization.
 Rerun affected checks after fixes. ANALYZE remains the separate cross-artifact
 consistency workflow; inspection quality does not replace it or BUILD/REVIEW.
 
+An optional multi-model outside voice routes to [MARS](../mars/SKILL.md): standalone
+inspection only, when `li-mars.py offer` (caller `inspect`, live host facts) returns 0 and
+the operator consents. Inside a cycle PLAN owns the single offer; never offer here. Panel
+findings are reconciled like any other finding and stay informational; they never set
+this report's verdict or clear a release.
+
 ### Persist via first-party
 
 For mapped acceptance, first use the shared `prepare` procedure with exact

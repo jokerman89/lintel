@@ -1,0 +1,281 @@
+{
+  "review_type": "finite-set05-context-renewal-and-narrowed-span-adjudication",
+  "status": "CLASSIFICATION_ONLY",
+  "candidate": "e0f89432477f1d3c343c54007be42899f7da87ae",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-05.json",
+    "sha256": "da29bc4cfe03e4d5ab330359f4860e7d1542eaf119521eabc82bd3f9f850ec10",
+    "bytes": 24771,
+    "declarations": 17,
+    "context_renewals": 14,
+    "new_narrowed": 3,
+    "source_files": 4,
+    "raw_span_bytes": 28244
+  },
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "session_state_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "role": "Same prior source-spec reviewer; no descendants, source implementation or canonical review-record mutation."
+  },
+  "counts": {"ACCEPT": 17, "REJECT": 0, "NEEDS_NARROWING": 0},
+  "counts_by_kind": {
+    "CONTEXT_RENEWAL": {"ACCEPT": 14, "REJECT": 0, "NEEDS_NARROWING": 0},
+    "NEW_NARROWED": {"ACCEPT": 3, "REJECT": 0, "NEEDS_NARROWING": 0}
+  },
+  "source_contexts": {
+    ".claude/engineering/audits/lintel-state-of-the-harness.md": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+    ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+    ".claude/plans/legacy-cleanup/swarm/reports/W4.md": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+    ".claude/plans/universal-implementation/reports/P13-skills-preservation.md": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d"
+  },
+  "scope": "Renew only the fourteen specified prior decisions against these changed complete source contexts, and adjudicate only the three new exact proposal windows. Complete selected spans and every context delta were read; previously reviewed unchanged content was reused rather than treating this as another general source audit.",
+  "context_change_assessment": [
+    "The harness edits adjust the separate current pairing, plan-inspection and checkpoint descriptions; the selected original phase/inventory/finding records and their historical framing remain unchanged.",
+    "The reframe edits give TA, DA, DH and TQ proposal labels distinct wording; they do not move the live route rows into the proposed original-record windows or change the selected old review/criteria records.",
+    "The W4 report now separates its report-time deferred print instruction from a dated coordinator status overlay and uses past-tense foreign-owner wording; the selected worker result, resource and ownership records retain their original role.",
+    "The P13 change is in the separate current F08-dormant legend; the pinned source-delta and original 46-alias observation sections retain their original source identities and limitations."
+  ],
+  "new_narrowed_boundaries": [
+    {
+      "id": "set05-span-001",
+      "prior_rejected_id": "set03-span-093",
+      "start_line": 326,
+      "end_line_exclusive": 350,
+      "excluded_current_route_line": 324,
+      "assessment": "Includes original TA method, agent and hook proposals; excludes the current targeted-route row and subsequent checkpoint section."
+    },
+    {
+      "id": "set05-span-002",
+      "prior_rejected_id": "set03-span-094",
+      "start_line": 396,
+      "end_line_exclusive": 426,
+      "excluded_current_route_line": 394,
+      "assessment": "Includes original DA method, agent, hook and proposed checkpoint criteria, all read in full; excludes the current targeted-route row and subsequent recovery instruction."
+    },
+    {
+      "id": "set05-span-003",
+      "prior_rejected_id": "set03-span-095",
+      "start_line": 564,
+      "end_line_exclusive": 574,
+      "excluded_current_route_line": 562,
+      "assessment": "Contains only the original TQ method proposals and their unique label; the current targeted-route row and following agent section are excluded."
+    }
+  ],
+  "conditions": [
+    "These are explicit new-context semantic decisions, not automatic transfers from matching raw span hashes. Bind each exact declaration/raw hash to its selected path and new full-source hash above.",
+    "The fourteen renewal declarations, raw bytes and original source_evidence strings remain unchanged; old source_evidence identities are retained provenance, not a substitute for the new full-context binding.",
+    "Set03-span-093, -094 and -095 remain rejected for their original broader windows. The three new set05 digests are distinct, genuinely narrower selections; no old rejection is erased or silently converted.",
+    "Unique proposal labels are boundary anchors, not approval by heading alone. Every selected list, ancillary agent/hook field and DA checkpoint criterion was reviewed as part of the proposed original design.",
+    "The current route rows at 324, 394 and 562 remain outside all three new masks and continue to be checked, as do adjacent current prose, the modified F-key legend and unselected W4 instructions/status.",
+    "The dated W4 coordinator status is a visible later overlay, not a newly executed test or independent acceptance. This review does not certify that join or treat the entire edited worker report as byte-identical to its original version.",
+    "The P13 alias section remains the original source-era 46-alias observation, not a live registry, extended grace period, current replacement table or authority to restore removed names/readers.",
+    "No full-file exception, parser/schema change, new framing filter, registration, profile transfer or broader source/quality verdict is authorized. The separate quality decision and actual guard/integration/QA gates remain required."
+  ],
+  "registration_observation": {
+    "scope": "Read-only data observation at the selected candidate, not an admission or guard execution.",
+    "present_unchanged_declarations": ["original-report-1", "original-report-2"],
+    "set03_renewals_not_present_at_selected_head": [
+      "set03-span-021",
+      "set03-span-022",
+      "set03-span-023",
+      "set03-span-027",
+      "set03-span-028",
+      "set03-span-096",
+      "set03-span-097",
+      "set03-span-098",
+      "set03-span-113",
+      "set03-span-114",
+      "set03-span-116",
+      "set03-span-117"
+    ],
+    "meaning": "Prior semantic acceptance is not current register presence, and register presence is not valid admission under changed context; neither is asserted by this report."
+  },
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED",
+  "candidate_source_spec_verdict": "NOT_REVIEWED_IN_THIS_TASK",
+  "guard_and_runtime_execution": "NOT_RUN",
+  "checks_actually_performed": [
+    "Verified the raw packet SHA-256/24771-byte identity and exact committed candidate without moving the reviewer checkout.",
+    "Loaded and hashed all four complete selected source blobs, totaling 317370 bytes.",
+    "Read every base-to-candidate context change in those files, all seventeen complete selected spans with their surrounding framing, and the original set02 decision rationale for both P13 records.",
+    "Independently recomputed all seventeen eight-field declaration digests and verified unique ordered whole-line top-level prose markers, exact raw hashes, exact UTF-8 byte counts, current physical line ranges and pairwise non-overlap.",
+    "Matched all fourteen renewal digests and raw hashes to this reviewer's actual prior ACCEPT records; no peer verdict was assumed or rechecked.",
+    "Verified the current route rows still exist outside the new TA/DA/TQ spans and that none of the three proposed windows contains a current targeted-route row.",
+    "Observed both set02 declarations in the selected register and the twelve set03 renewals absent there, without treating that staging state as a product or semantic defect."
+  ],
+  "inspection_corrections": [
+    "An extra parallel file view starting at line 361 was rejected because the packet has 326 lines; the first two reads covered the complete packet.",
+    "The first verification script incorrectly assumed every prior ACCEPT was already present in the selected register and stopped on set03-span-021; the corrected check distinguishes prior decisions from current register presence and validates all seventeen exact identities."
+  ],
+  "not_run": [
+    "No dynamic/runtime fixture suite, current guard, hosted CI, integration/mechanism review, live admission check, profile operation or model panel.",
+    "No denied launcher, replacement launcher, private environment sourcing or denied jq.",
+    "No source, registry, plan, memory, ADR, runtime, branch or earlier reviewer-artifact mutation."
+  ],
+  "executed_command_ledger": [
+    {"command": 35, "action": "Pin request/candidate, inspect four selected source identities and verify reviewer HEAD/status.", "exit": 0},
+    {"command": 36, "action": "Read every context delta across the four selected files from the earlier set03 source to the new candidate.", "exit": 0},
+    {"command": 37, "action": "Initial exact-identity verification stopped on an incorrect assumption that prior accepted set03-span-021 was present in the current register.", "exit": 1},
+    {"command": 38, "action": "Read both complete P13 selected sections, original/current framing and their prior set02 semantic decisions.", "exit": 0},
+    {"command": 39, "action": "Read every renewed harness/reframe/W4 span and the three complete narrowed proposals with surrounding text.", "exit": 0},
+    {"command": 40, "action": "Locate the registration lookup error: prior decision exists, selected register has one 208-entry block and no set03-span-021.", "exit": 0},
+    {"command": 41, "action": "Verify all seventeen exact identities, fourteen prior ACCEPT matches, current registration observations, byte counts and exclusion of all three current route rows.", "exit": 0}
+  ],
+  "decisions": [
+    {
+      "id": "set03-span-021",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "0ac3360c21e210559963adad7f10cf91fda9fa530e1b3b1e00c2e688aa88ce57",
+      "raw_sha256": "b1c48772cf85447813ae87bc3ab9dd970d31befc6768443389c3ad203da77133",
+      "reason": "Under the changed context, the unchanged DEFINE cell remains the original phase-method inventory rather than an office-hours invocation."
+    },
+    {
+      "id": "set03-span-022",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "15c030a263ead371c65bbe48b4740b78fb3963ab5e15831fd403c55c9d9a11eb",
+      "raw_sha256": "d4203ad78c089bc03b497d3ef617a3a613b75354e005718569ddfe08d2dc2520",
+      "reason": "The sentence still names the original snapshot's composite delegators and ends before the separately labelled current navigation."
+    },
+    {
+      "id": "set03-span-023",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "2c7c71b2cb680e813c662c82f0b91e64aa1632fe6f80c1354e2f826db3146a51",
+      "raw_sha256": "54661c89ee5be4f5821c8bc3e6e4af8ade8264cea268cb24225ab10edea86dfb",
+      "reason": "The complete source-era cluster inventory and admitted stubs retain their original audit role despite navigation corrections elsewhere."
+    },
+    {
+      "id": "set03-span-027",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "eebce2f0b7a8508c739100be2611872ea6659a84deff03a9cb7ce4a9a56fb758",
+      "raw_sha256": "a363f9f2816112182e27152d17859f9c00e41e30c788df7b43e1f11dd164f408",
+      "reason": "The unchanged naming and documentation findings remain observations of the original audit, not current workflow selection."
+    },
+    {
+      "id": "set03-span-028",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "23f6c97ff543f4c2608c6373f041ddc8bfc06097e920483b0342bde6a8590c10",
+      "raw_sha256": "9edfcee368a8511aca57293a4e43426fd02fcb7e508a86f4ac4883ad3856aa5c",
+      "reason": "The complete readiness-defect list remains the source-era assessment and does not renew its old readiness claims or assign a current invocation."
+    },
+    {
+      "id": "set03-span-096",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "62cfe99e0cc4e386c9771ba5e1599f21c11dce73a15ec87935012be1f786ca47",
+      "raw_sha256": "83a3bbedc6ad9f58e5b23798d701f8333f84dea52049721967369f0d2c471da2",
+      "reason": "The original conditional criteria remain explicitly separated from current API guidance as unrun targets, unaffected by the proposal-label changes elsewhere."
+    },
+    {
+      "id": "set03-span-097",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "1aa1bb3be7a8eb42e95e0fb819137bab6173f5a79fbbf8296fe6dafb5c63970d",
+      "raw_sha256": "93efa85435934a87a9255cd3b7bc011fe87d4af524c588768237a3eaeee490dc",
+      "reason": "The unchanged historical review finding and its proposed scope remedy remain a recorded assessment, not new authority to remove modules."
+    },
+    {
+      "id": "set03-span-098",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "85402fa70bbd71005b74ed0f1ecd09e74e286c862539252b30c9dfb9265f1314",
+      "raw_sha256": "53f4942b46370585f49d2b76c9bc5e4bfd400adc6fc9f1e93c54b9e3d895e670",
+      "reason": "Both original overlap and validation findings retain their historical reviewer-proposal role without becoming current execution instructions."
+    },
+    {
+      "id": "set03-span-113",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "1ea3ebf261e0e2b2e2be9c0263f15d9ee66b0d0e20a8481dfb97f7a45da9c975",
+      "raw_sha256": "aaf6ee3cdc176150f1cfe9feebeebde5f114e10cfa191869f7bf57dcb8b9822f",
+      "reason": "The unchanged consumer-list continuation still reports W4's original implementation work, distinct from the later coordinator status overlay."
+    },
+    {
+      "id": "set03-span-114",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "698d0bd8bf26f2255ac768ca848f6d08a803437f45353274633f308723874514",
+      "raw_sha256": "acb4a07080b18b712e3ea7f3149bd868e6d215e4d8475aafc67f11970dfdf290",
+      "reason": "The three unchanged paths remain the original compatibility-resource observation rather than a present instruction to install or retain those bridges."
+    },
+    {
+      "id": "set03-span-116",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "83353391191985bf0a72c64b2cc5b762cbc9d84832eb8958b5c155ba74f8e92e",
+      "raw_sha256": "8b16d77b469b29eef67a87b59505295d226eb9b8824fee84d50a4061ce33f6da",
+      "reason": "The unchanged owner/consumer list remains the original handoff inventory, with the following obligation now explicitly described in past tense."
+    },
+    {
+      "id": "set03-span-117",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "82faa06532fc2e88740f92a146d584c50c166b874b750b4086cd9f6c5a748bb1",
+      "raw_sha256": "c6b837fa98b85de5198bce161c3036ba8ec8288b80d746c285f4ddb7223192b2",
+      "reason": "The unchanged W3 ownership continuation remains historical handoff data and does not issue a new task or invocation."
+    },
+    {
+      "id": "original-report-1",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+      "raw_sha256": "9583978d30843804689c3b92226e9988a4ee52b0cdc08a40058172d1465a40c0",
+      "reason": "The complete pinned source-delta, role and Swarm account retains its original attribution and non-clearing limits while the modified current F-key legend remains outside the span."
+    },
+    {
+      "id": "original-report-2",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815",
+      "raw_sha256": "3303d2a91be9c8eb05beb2b2b49f6bd2137e1a1b4b3350f679eea4b93b1df895",
+      "reason": "The unchanged 46-alias observation remains current only at its explicitly pinned original source, and the later removal note does not reactivate those aliases."
+    },
+    {
+      "id": "set05-span-001",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "24431fffbe5ba9636c1d3ece431eaf765ace7d2b47af031977b146c5d2359b15",
+      "raw_sha256": "77441146a237dfe88bbb27a07a02c9f163a1e8ab91404b18d46ac085f51b4acd",
+      "reason": "The entire narrowed TA window contains original method, agent and hook proposals without a present invocation, while the live targeted route and following checkpoint section remain outside."
+    },
+    {
+      "id": "set05-span-002",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "7d3814cdabf39e6b5fb964dce532bcb662a8bbf18e8b7e8b089e9597a7eee47b",
+      "raw_sha256": "76bf0528bac9de51867eebe538992be5181a795242c65b3a987e365c451f781b",
+      "reason": "The complete DA inventory and proposed checkpoint criteria remain original design targets rather than current migration instructions, with the live route and recovery text excluded."
+    },
+    {
+      "id": "set05-span-003",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "decision": "ACCEPT",
+      "declaration_digest": "0e940c805be04bde77c4ad586070e024ab3b8c62bed6e4eeb6903c74c501946d",
+      "raw_sha256": "d07e57293ddc68db898328eebef3d79d1d113de3ee05680a8e04917f982c5fc7",
+      "reason": "The narrowed TQ window contains only original proposed method identifiers and descriptions, not the current targeted route or following agent instructions."
+    }
+  ],
+  "readback": "Final readback verifies all seventeen exact decision identities, new full-source hashes, counts, preservation and gate limits; the resulting raw artifact hash is returned separately rather than embedded as a self-hash."
+}

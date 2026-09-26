@@ -43,7 +43,7 @@ An installed file is not evidence of native discovery or a completed client test
 | `health` | `/li:doctor`, including `--fast` as a quick view and layer/hook/source-registry views of the actual helper result, not invented remote checks. |
 | `code-unfreeze` | `/li:code-freeze --lift <exact-path...>`, `--lift --all` or `--list`. Freeze metadata and its optional warning hook remain advisory, not a filesystem lock. |
 | `pair-agent`, `careful` | Actual native delegation or an approved swarm, with bounded ownership, explicit confirmation at authority boundaries and owned recovery. Without safe isolation, serialize; without independent review, keep that gate open. |
-| `research`, `plan-and-build`, `review-and-ship` | `/li:cycle --mode research-dive`, `--from PLAN --to BUILD`, or `--from REVIEW --to CAPTURE`. Preserve continuity and phase gates. |
+| `plan-and-build`, `review-and-ship` | `/li:cycle --from PLAN --to BUILD` or `--from REVIEW --to CAPTURE`. Preserve continuity and phase gates. `/li:research` stays as a native shortcut for `/li:cycle --mode research-dive` (SENSE, DEFINE, DISCOVER; no BUILD or SHIP). |
 | `help`, `v4-migrate` | `/li:catalog` or `/li:welcome` for navigation; `/li:migrations` for historical inspection and explicitly authorized apply/rebind guidance. |
 | `personas-rotate` | `/li:role --audience [name]` and `--clear-audience`, using configured persona sources. This is a conversation overlay, not a change to the persistent working role. |
 

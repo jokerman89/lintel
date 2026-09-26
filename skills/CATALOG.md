@@ -5,9 +5,9 @@ CI checks this file for drift; edit the source SKILL.md to change a description.
 
 Use `/li:<name>` in a Lintel plugin, or ask Copilot to run the named Lintel skill.
 
-Total skills: 95
+Total skills: 96
 
-## foundation layer (95 skills)
+## foundation layer (96 skills)
 
 | Skill | Description |
 |---|---|
@@ -81,6 +81,7 @@ Total skills: 95
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
 | [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |
+| [`/li:research`](research/SKILL.md) | Use when the operator wants to understand a domain, codebase or option space before committing to implementation. Runs … |
 | [`/li:resume`](resume/SKILL.md) | Use when returning in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint … |
 | [`/li:review`](review/SKILL.md) | Use after BUILD, before SHIP, to adversarially review what was built — checks spec compliance, code quality, the active… |
 | [`/li:role`](role/SKILL.md) | Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its… |
