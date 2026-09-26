@@ -1,3 +1,21 @@
+# Files read by the byte-bound command-surface guard check out with LF on every host, so a
+# Windows clone with core.autocrlf=true sees the same bytes, spans and counts as CI (ADR-0034).
+# Later exact-path lines, including the -text evidence bytes, override these defaults.
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.py text eol=lf
+*.ps1 text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.html text eol=lf
+*.htm text eol=lf
+*.txt text eol=lf
+*.template text eol=lf
+*.example text eol=lf
+
 *.sh text eol=lf
 *.bash text eol=lf
 bin/* text eol=lf
