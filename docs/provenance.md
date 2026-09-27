@@ -19,6 +19,17 @@ not captured in the existing attribution and remain explicitly unknown. Do not r
 that gap with a current upstream head or the revision inspected in a later comparison.
 An update should pin the actual reviewed source revision and retain applicable notices.
 
+## Workflow consolidation
+
+The 2026-09-25 [native workflow migration](migrations/2026-09-25-native-workflows.md)
+retired or renamed entrypoints, including several whose names came from an earlier external
+harness (see [ADR-0011](../.claude/decisions/0011-native-workflow-ownership.md) and
+[ADR-0034](../.claude/decisions/0034-native-workflow-consolidation.md)). It changed only design-dna's
+routing text in `SKILL.md`; the attributed corpus, scripts, profile, attribution and license files
+are unchanged and stay with the component. Removing an
+entrypoint does not remove a notice owed by retained content; if a retained file still carries
+adapted material, its notice stays with that file.
+
 ## Adding or adapting material
 
 Record the source URL, exact revision and component path, whether material was copied,

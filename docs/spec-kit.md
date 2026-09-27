@@ -11,7 +11,9 @@ Spec Kit, and installing Lintel does not require Spec Kit.
 
 ## Connect an existing project
 
-In Copilot, run `/li-spec-kit`, or ask it to read the installed skill directly. A useful request is:
+Invoke the `spec-kit` workflow in your client's form (`/li:spec-kit` in the Claude plugin,
+`li-spec-kit` in generated adapters such as Copilot's `/li-spec-kit`), or ask the agent to read
+the installed skill directly. A useful request is:
 
 ```text
 Use Lintel with this repository's existing Spec Kit feature. Find the active feature and
@@ -67,7 +69,7 @@ manifest and its byte budget. Unselected prose headings are not guessed into
 tasks. DRAFT inspection and source checkboxes do not establish approval, execution
 or review clearance; an actual acceptance binding remains a separate operation.
 
-On a fresh clone, local ledgers and checkpoints may be absent. `/li-resume` first follows the
+On a fresh clone, local ledgers and checkpoints may be absent. `resume` first follows the
 explicit active map or unambiguous committed plan/handoff links in todo.md and working-state.md.
 It reads the original task IDs, code and verification evidence before recreating local runtime
 state. Multiple active initiatives require a choice; the newest directory is not an authority.

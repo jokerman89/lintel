@@ -8,7 +8,8 @@ for adoption and the [skill catalog](../../skills/CATALOG.md) for the canonical 
 
 The page combines repository-derived counts with a short system map and architecture overview.
 It is a snapshot of its generation source, not proof that every catalog item runs on every client.
-The [Copilot guide](../copilot.md) defines native integration scope, and
+The [multi-CLI guide](../multi-cli.md) and [client adapters](../client-adapters.md) define
+per-client integration scope, and
 [enterprise adoption](../enterprise-adoption.md) defines the evidence needed for a rollout.
 
 ## Open it
