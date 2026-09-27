@@ -241,7 +241,7 @@ On-demand 1M-context utilization beyond session-start. Default session-start sta
 - `/li:context-warm-from-url <url>` — WebFetch + dump (URL gate when pack compliance mode is `hard`)
 - `/li:context-budget` — utilization visibility
 - `/li:pause [--label <name>]` — checkpoint; existing filenames and saved data remain compatible
-- `/li:resume --from <checkpoint-path>` — load a selected prior save; recognized phases/selected-job step IDs retain the existing `--from <step>` override, and ordinary resume keeps selected-work, ledger and job precedence
+- `/li:resume --from <checkpoint-path>` — load a selected prior save; recognized phases/selected-job step IDs retain the existing `--from <step>` override (spell a checkpoint whose name collides with a phase or step as an explicit path, such as `./BUILD`), and ordinary resume keeps selected-work, ledger and job precedence
 - `/li:context-cool` — selective IGNORE marker
 
 For >20k token loads: explicit budget confirmation required.

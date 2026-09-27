@@ -21,11 +21,11 @@ labels: bug
 
 ## Environment
 
-- Copilot surface (CLI / VS Code / GitHub cloud agent), or other host, plus version:
+- Client and surface, plus version (for example Claude Code, GitHub Copilot CLI / VS Code / cloud agent, Codex, Cursor, or the Universal handoff):
 - Lintel version and installation route (repository kit / plugin / bare install):
-- Adapter check output (`li-copilot check --target <repo>`, if applicable):
+- Adapter check output, if applicable (for example `li-copilot check --target <repo>`):
 - OS (Windows / macOS / Linux):
-- Active pack (run `/li:pack-list`, default is `_default`):
+- Active pack (run the `pack-list` skill: `/li:pack-list` in the Claude plugin; elsewhere ask the agent to read `skills/pack-list/SKILL.md`, which is `.github/lintel/skills/pack-list/SKILL.md` in a repository kit; default is `_default`):
 
 ## Logs / output
 

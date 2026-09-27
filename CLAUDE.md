@@ -73,6 +73,7 @@ not an exhaustive map — run `/li:catalog` to discover the full set.
 - Record a decision → `/li:adr-new`  ·  Capture a lesson → `/li:capture`
 - Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role`
 - Discover everything → `/li:catalog`
+- Looking for a consolidated or renamed entrypoint → [native workflow migration](docs/migrations/2026-09-25-native-workflows.md)
 
 ---
 
