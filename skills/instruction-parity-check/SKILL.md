@@ -5,7 +5,7 @@ description: Use to verify shared session protocol equality and client-entry lin
 color: yellow
 tools: Read, Bash, Glob, Grep
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # Instruction parity

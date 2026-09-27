@@ -600,7 +600,7 @@ def doctor(config: ProfileConfig, *, store: Path | None = None, native_store: Pa
               "host_activation": "unverified", "hook_execution": "unverified",
               "installed_clis": [], "cached_plugins": [], "issues": issues}
     load_registry(config.source / "lib/cli-tiers.yaml")
-    for name in ("claude", "codex", "cursor", "gemini", "opencode", "copilot", "droid"):
+    for name in ("claude", "codex", "cursor", "copilot"):
         report["installed_clis"].append({"name": name, "path": shutil.which(name),
                                          "plugin_activation": "unverified"})
     metadata = read_json(read_owned(config.source, ".claude-plugin/plugin.json")[0].decode("utf-8-sig"))

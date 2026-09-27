@@ -25,9 +25,10 @@ echo "======================="
 [ "$(cli_tier_field codex hooks_supported)" = "false" ] && pass "codex hooks_supported=false (Claude-only enforcement)" || fail "codex hooks"
 
 # ── supported / best-effort tiers ──
-[ "$(cli_tier_field gemini tier)" = "supported" ] && pass "gemini tier=supported" || fail "gemini tier"
-[ "$(cli_tier_field gemini skills_native)" = "true" ] && pass "Gemini native-format route is delivered" || fail "gemini discovery"
+[ "$(cli_tier_field cursor tier)" = "supported" ] && pass "cursor tier=supported" || fail "cursor tier"
+[ "$(cli_tier_field cursor skills_native)" = "true" ] && pass "Cursor native-format route is delivered" || fail "cursor discovery"
 [ "$(cli_tier_field other tier)" = "best-effort" ] && pass "other tier=best-effort" || fail "other tier"
+[ "$(cli_tier_normalize gemini)" = "other" ] && pass "removed client degrades to the manual route" || fail "removed client normalization"
 
 # ── unknown CLI → safe defaults (degrade honestly, never over-claim) ──
 [ "$(cli_tier_field frobnicator tier)" = "best-effort" ] && pass "unknown CLI tier→best-effort" || fail "unknown tier"
@@ -45,9 +46,9 @@ for c in $(cli_tier_list); do
 done
 [ "$hooks_clis" = "1" ] && pass "exactly 1 CLI supports hooks (claude-code)" || fail "hooks-supporting CLIs=$hooks_clis (expected 1)"
 
-# ── the list enumerates the manifest CLIs ──
+# ── the list enumerates exactly the registered surfaces (four families plus other, ADR-0035) ──
 n=$(cli_tier_list | wc -l | tr -d ' ')
-[ "$n" -ge 7 ] && pass "cli_tier_list enumerates ≥7 CLIs ($n)" || fail "cli_tier_list n=$n"
+[ "$n" -eq 14 ] && pass "cli_tier_list enumerates the 14 registered surfaces" || fail "cli_tier_list n=$n (expected 14)"
 
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "cli-tiers: ALL PASS"; exit 0; } || { echo "cli-tiers: FAILURES"; exit 1; }
