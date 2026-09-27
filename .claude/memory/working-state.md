@@ -10,14 +10,15 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Supported clients narrowed to four families (2026-09-25)
 
-**Status:** built and locally verified on branch `jokerman-microsoft-trim-supported-clients`
-(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
-On 2026-09-27 it converged onto #104 with ordinary merge `66b56aa4` of `22d502be`, and Go Live
-published it as draft PR #107, with #104's branch as base. Lintel supports GitHub Copilot, Claude,
-Codex and Cursor plus the manual `other` route; the ten other families, the Gemini extension, the
-OpenCode guide and two `li-update` routes are removed.
-**What's pending:** Go Live's independent review of the convergence delta, green hosted CI on
-PR #107, and its retargeting to `main` after #104 merges; then the docs PRs, #95 first.
+**Status:** delivered. After converging onto #104 with ordinary merge `66b56aa4` of `22d502be`,
+the branch `jokerman-microsoft-trim-supported-clients` merged into `main` through PR #107 as
+`10b0eea7` on 2026-09-27, with an independent review PASS and 23 of 23 CI jobs green (ADR-0035;
+[plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
+Lintel supports GitHub Copilot, Claude, Codex and Cursor plus the manual `other` route; the ten
+other families, the Gemini extension, the OpenCode guide and two `li-update` routes are removed.
+**What's pending:** when each remaining documentation PR merges `main` after #107, re-run the
+live-path scan, `li-catalog.py --check` and `li-wiki-gen --check` on the combined candidate
+(ADR-0035). The review's record-wording follow-up is `jokerman-microsoft-supported-clients-record-fixes`.
 
 ## Active - Native workflow cleanup (2026-09-25)
 

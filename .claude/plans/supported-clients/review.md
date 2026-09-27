@@ -1,15 +1,16 @@
 # Review — supported clients: Copilot, Claude, Codex and Cursor
 
 **Date:** 2026-09-25 · **Branch:** `jokerman-microsoft-trim-supported-clients` · **Base:** `1981e591`
-(origin/main) · **Plan:** [plan.md](plan.md) · **Decision:** ADR-0035
+(origin/main) · **Plan:** [plan.md](plan.md) · **Decision:** ADR-0035 · **Merged:** PR #107 as
+`10b0eea7` on 2026-09-27
 
 ## Verdict
 
-PASS FOR LOCAL DELIVERY PREPARATION. All 15 leaves are implemented and their local checks
-pass. The independent review found no P0 or P1 issue. Its P2/P3 findings are resolved, except
-two operator decisions listed under "Open". Until 2026-09-27 nothing was pushed (L-045, L-053);
-the branch then converged onto #104 and Go Live published it as draft PR #107 (see
-"Convergence onto #104").
+PASS, and delivered. All 15 leaves are implemented and their local checks pass. The independent
+review found no P0 or P1 issue, and its P2/P3 findings are resolved; one operator decision remains
+under "Open". Until 2026-09-27 nothing was pushed (L-045, L-053). The branch then converged onto
+#104, Go Live published it as PR #107, and #107 merged into `main` (see "Convergence onto #104"
+and "Delivery").
 
 ## Environment
 
@@ -38,7 +39,7 @@ the branch then converged onto #104 and Go Live published it as draft PR #107 (s
 | 3.3 records | PASS | ADR-0035, M1 evolution entry, migration guide and index row (parsed by `li-lifecycle.py migrations`: `schedule: open`), changelog |
 | 4.1 verification | PASS | this file |
 | 4.2 compatibility audit | RED, dispositioned | `.claude/engineering/compat-audits/2026-09-25-supported-clients.md` |
-| 4.3 review and capture | PASS | independent review below; working state, memory index and work index updated |
+| 4.3 review and capture | PASS | independent review below; working state and memory index updated. The work-index pointer was withdrawn when converging onto #104 (see below) |
 
 ## Tests
 
@@ -128,26 +129,40 @@ reached this session through Go Live, not from the operator directly (L-057).
 - **Sweep:** Git's rename detection carried the `cli_support` trim into #104's renamed review
   skill, now `skills/cross-check`. A scan of the merged live paths finds no other removed-client
   route. The remaining hits are this change's own notes and tests, Gemini as a MARS model
-  family, and third-party text. The changelog entry moved to #104's 0.12.0 section (`bed56fc8`).
+  family, and third-party text. The changelog entry moved to #104's 0.12.0 section, and its link
+  now points to the migration guide instead of the migration index (`bed56fc8`).
 - **Generated outputs:** registry validation, `li-catalog.py --check`, `li-copilot.py check`
   (21 managed files), `li-instructions.py check`, `li-wiki-gen --check`, `adr-numbers-unique.sh`
   (ADR-0033 to ADR-0037 are unique) and `cli-tiers-sync.sh` pass on `bed56fc8`.
 - **Guard:** in a `core.autocrlf=false` clone of `bed56fc8`, the shape tier ran 42 entries and
   #104's `native-command-surface.sh` failed with two findings on one line of this file's former
-  "Open" section, which named the path of the retired review skill. This record's rewrite of
-  that section clears them. The guard's 78 observations are #104's registered historical records.
-- **Publication:** Go Live published the branch as `jokerman89` as draft PR #107, with #104's
-  branch as its base. The app's PR tool in this session had been refused on 2026-09-25 (403 for
-  the Enterprise Managed User) and was not retried. After #104 merges, Go Live retargets #107 to
-  `main`.
-- **Local unit and integration runs:** started on `bed56fc8` in the same clone. Their results go
-  to Go Live for the pull request record. Hosted CI on PR #107 gives the strict cross-platform
-  result.
+  "Open" section, which named the path of the retired review skill. The rewrite in `d2ea0f45`
+  clears them. On that head the guard prints `native-command-surface: PASS (0 findings; 1
+  historical observations in 1 declared records)`. Its observation lines include #104's
+  registered records and 12 inventory entries from this change's compatibility audit.
+- **Publication:** Go Live published the branch as `jokerman89` as draft PR #107, first with
+  #104's branch as its base and then retargeted to `main`. The app's PR tool in this session had
+  been refused on 2026-09-25 (403 for the Enterprise Managed User) and was not retried.
+- **Local runs:** under the same launcher, in fresh `core.autocrlf=false` clones, without jq.
+  - Shape tier on `d2ea0f45`: 42 of 42 pass, 1 jq-only partial.
+  - Unit tier on `bed56fc8`: 85 of 85 pass, 1 jq-only partial.
+  - `tests/integration/universal-adapters.sh` on `bed56fc8`: 17 tests pass.
+  - The lifecycle doctor test and `install/verify.sh --all` pass.
+  - `d2ea0f45` differs from `bed56fc8` only in three record files.
+
+## Delivery
+
+- **Independent review:** a read-only `lintel-reviewer` (`49a756b1`), commissioned by Go Live,
+  reviewed `22d502be..d2ea0f45` and passed it: 0 P0, 0 P1, 0 P2 and 5 P3 findings. All five were
+  record wording in this file and are fixed on `jokerman-microsoft-supported-clients-record-fixes`.
+  Go Live holds the report (SHA-256
+  `805a7799f1777232c2d7793b9d017efd9064922a74df0978adb7710cbff99389`).
+- **CI and merge:** PR #107's hosted CI passed 23 of 23 jobs. Go Live merged it at
+  2026-09-27 22:01:18Z as `10b0eea7`, with parents `22413558` and `d2ea0f45`. The merged tree
+  equals the tested head's tree (`24895535`).
 
 ## Open
 
-- An independent review of the convergence delta, from `22d502be` to the final head. Go Live
-  commissions it once this branch's owner declares the head final.
-- Green hosted CI on PR #107, then its retargeting to `main` after #104 merges. The documentation
-  PRs follow with ordinary merges, #95 first.
+- When each remaining documentation PR merges `main` after #107, re-run the live-path scan,
+  `li-catalog.py --check` and `li-wiki-gen --check` on the combined candidate (ADR-0035).
 - The operator decides whether to update the dated presentation deck, or leave it as history.
