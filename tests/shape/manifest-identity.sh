@@ -3,8 +3,8 @@
 # Single-source identity sync guard (decision D2 of the five-lens remediation).
 # `.claude-plugin/plugin.json` is the canonical source for version + repo slug +
 # maintainer email; every other plugin manifest must agree, and no stale identity
-# may reappear anywhere on the shipped surface (manifests + installers + .opencode
-# + bin/). Fails CI on drift.
+# may reappear anywhere on the shipped surface (manifests + installers + bin/).
+# Fails CI on drift.
 #
 # Why this exists: the repo carried THREE different identities at once —
 #   jokerman89/lintel              (the actual git remote — ground truth)
@@ -49,7 +49,6 @@ if command -v jq >/dev/null 2>&1; then
     .cursor-plugin/plugin.json
     .github/plugin/plugin.json
     .github/plugin/marketplace.json
-    gemini-extension.json
   )
   for m in "${VERSION_MANIFESTS[@]}"; do
     [ -f "$m" ] || { fail "missing manifest: $m"; continue; }
@@ -68,7 +67,7 @@ fi
 # Drift tripwires: no stale identity anywhere on the shipped surface (jq-free).
 # The literals in the loops below are the historical strings being DETECTED —
 # each must stay byte-identical or the guard stops biting.
-SURFACE=(.claude-plugin .codex-plugin .cursor-plugin gemini-extension.json install .opencode bin)
+SURFACE=(.claude-plugin .codex-plugin .cursor-plugin install bin)
 for bad in 'jokerman89/jokerman-lintel' 'Azureflipper/jokerman-session-setup' '3.5.0-dev' 'akerman@microsoft.com'; do
   if git grep -qF "$bad" -- "${SURFACE[@]}" 2>/dev/null; then
     fail "stale identity '$bad' still present: $(git grep -lF "$bad" -- "${SURFACE[@]}" 2>/dev/null | tr '\n' ' ')"
