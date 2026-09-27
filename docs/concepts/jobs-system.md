@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-20 (selected work and observable runtime state)
 **Status:** Concept doc — referenced by skills/jobs/SKILL.md, skills/status/SKILL.md, hooks/shared/job-{begin,end,stale-warn}/
 
-> Invocation: commands use the Claude plugin form `/li:<skill>`. Copilot, Codex and Gemini adapters expose the installed core workflows as `li-<skill>`; for any other skill, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
+> Invocation: commands use the Claude plugin form `/li:<skill>`. Repository adapters (Claude Code, Codex, Copilot and Cursor) expose the installed core workflows as `li-<skill>`; for any other skill, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
 
 > Curated flows in Lintel (cycle, plan, future Azure-e2e recipes, safe-install) carry implicit state — which phase are we in, what produced what, what's waiting on what. Before v3.8 that state lived scattered across `00-state.md`, `.planner-checkpoint.md`, and operator memory. The jobs system is **the place that lists in-flight curated work, a rule that abandoned ones must be cleaned up, and a way to operate on them as units.**
 
