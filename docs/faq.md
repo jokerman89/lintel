@@ -9,8 +9,10 @@ there is no hosted Lintel service. See [architecture](architecture.md).
 
 ## Which coding clients does it support?
 
-Claude Code, GitHub Copilot (CLI, app and cloud agent), Codex and Cursor, plus any
-other agent through the Universal adapter's explicit file handoff. No client is the default.
+Lintel supports four client families ([ADR-0035](../.claude/decisions/0035-four-supported-client-families.md)):
+Claude (Claude Code and Desktop Code local), GitHub Copilot (CLI, app, VS Code and cloud agent),
+Codex and Cursor. Any other host can use the manual `other` route, an explicit canonical-file
+handoff that is not a supported integration. No client is the default.
 The [repository adapter](client-adapters.md) installs `li-*` wrappers where a client documents
 native discovery; see [Copilot](copilot.md) and [Claude Code](claude-code.md) for their preserved
 routes. Start with [getting started](getting-started.md). Client discovery and enterprise policies
@@ -134,9 +136,10 @@ retained upstream license terms still apply. Spec Kit is not bundled by this wor
 
 Start with `welcome`, `plan`, `build`, `review` and `resume`, then `cycle` for the broader workflow.
 Invocation follows the client: `/li:<skill>` in the Claude Code plugin, the discovered `li-<skill>`
-wrapper on adapter routes such as Copilot, Codex and Cursor, or an explicit read of the canonical
-skill through the Universal adapter. Use `verify` for read-only testing (repairs need `--repair`),
-`diagnose` for a failure, and `pause`/`resume` to hand work to a fresh session. Explore the
+wrapper on adapter routes such as Copilot, Codex and Cursor (generated only for the core workflows (welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars)),
+or an explicit read of the canonical skill file. Use `verify` for read-only testing (repairs need
+`--repair`), `diagnose` for a failure, and `pause`/`resume` to hand work to a fresh session; on
+adapter routes, read `verify`, `diagnose` and `pause` from their canonical `SKILL.md` files. Explore the
 [full catalog](../skills/CATALOG.md) when you need specialist depth.
 
 ## A skill I used before is missing. Where did it go?
@@ -146,7 +149,10 @@ kept. For example QA runs through `verify`, failure investigation through `diagn
 saving through `pause`. `/li:research` remains a native shortcut for `/li:cycle --mode research-dive`, and the
 composite build and delivery shortcuts are cycle ranges such as `--from PLAN --to BUILD` and
 `--from REVIEW --to CAPTURE`. Old names are not executable aliases. The [native workflow migration](migrations/2026-09-25-native-workflows.md)
-maps every former entry and explains how to update an owned installation without losing saved work.
+maps every entry consolidated on 2026-09-25 and explains how to update an owned installation without
+losing saved work. Aliases whose grace window ended earlier, including the engineering sub-skill
+aliases that are now capabilities of their module skill (`ta`, `da`, `sc`, `dh`, `tq`), are covered by
+the [migrations index](migrations/_INDEX.md) and the current [catalog](../skills/CATALOG.md).
 
 ## What if the agent ignores the instructions?
 
