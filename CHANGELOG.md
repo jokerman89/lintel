@@ -28,6 +28,15 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   installation receipts, user files and the no-Python bare-install prerequisite.
   Update existing adapter resource closure, catalogs and source documentation.
 
+### Removed
+
+- Client support outside GitHub Copilot, Claude, Codex and Cursor (ADR-0035). The registry drops
+  the Gemini, OpenCode, Factory Droid, Antigravity, Kiro, Devin/Cascade, Junie, Cline, Continue and
+  Aider records (24 surfaces). The Gemini extension (`gemini-extension.json`, `GEMINI.md`), the
+  OpenCode guide (`.opencode/INSTALL.md`) and the Gemini and Droid routes in `bin/li-update` are
+  deleted. Other hosts can still use the explicit manual route (`other`); see the
+  [migration guide](docs/migrations/2026-09-25-supported-clients-four-families.md).
+
 ### Migration and evidence
 
 - Follow [native workflow migration](docs/migrations/2026-09-25-native-workflows.md).
@@ -99,12 +108,6 @@ content-bound review evidence and explicit limits on what each check proves.
 
 ### Removed
 
-- Client support outside GitHub Copilot, Claude, Codex and Cursor (ADR-0035). The registry drops
-  the Gemini, OpenCode, Factory Droid, Antigravity, Kiro, Devin/Cascade, Junie, Cline, Continue and
-  Aider records (24 surfaces). The Gemini extension (`gemini-extension.json`, `GEMINI.md`), the
-  OpenCode guide (`.opencode/INSTALL.md`) and the Gemini and Droid routes in `bin/li-update` are
-  deleted. Other hosts can still use the explicit manual route (`other`); see the
-  [migration index](docs/migrations/_INDEX.md).
 - The pypdf-based PDF reader (`skills/generate-pdf/scripts/check_pdf.py`) and its tests. Lintel has
   no PDF reader and depends on no PDF library. `generate-pdf` still prepares HTML and prints through
   the accepted browser route, but the produced PDF's text, pages and rendering are unverified
