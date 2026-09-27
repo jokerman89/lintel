@@ -11,16 +11,13 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 ## Active - Supported clients narrowed to four families (2026-09-25)
 
 **Status:** built and locally verified on branch `jokerman-microsoft-trim-supported-clients`
-(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)):
-targeted tests, the shape tier and `install/verify.sh --all` pass under a synthetic home;
-independent review has no open P0-P2 finding. Lintel supports GitHub Copilot, Claude, Codex and
-Cursor plus the manual `other` route; the ten other families, the Gemini extension, the OpenCode
-guide and two `li-update` routes are removed.
-**What's pending:** publication as `jokerman89` (L-045, L-053): the app PR tool in this session
-runs as the Enterprise Managed User and was refused (403, fork creation), so the operator pushes
-the branch and opens the draft PR (commands in the review). Recorded merge order: #105, then #104,
-then this branch (ordinary merge of `main`, no rebase), then the docs branches; re-apply ADR-0035
-to what lands first.
+(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
+On 2026-09-27 it converged onto #104 with ordinary merge `66b56aa4` of `22d502be`, and Go Live
+published it as draft PR #107, with #104's branch as base. Lintel supports GitHub Copilot, Claude,
+Codex and Cursor plus the manual `other` route; the ten other families, the Gemini extension, the
+OpenCode guide and two `li-update` routes are removed.
+**What's pending:** Go Live's independent review of the convergence delta, green hosted CI on
+PR #107, and its retargeting to `main` after #104 merges; then the docs PRs, #95 first.
 
 ## Active - Native workflow cleanup (2026-09-25)
 
