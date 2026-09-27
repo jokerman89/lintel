@@ -36,6 +36,12 @@ This file is a SELF-CONTAINED prompt. A fresh AI session reading only this promp
 
 ## How to re-execute
 
+Commands below use the Claude plugin form `/li:<skill>`. Generated client adapters expose
+`li-<skill>` wrappers for the core workflows (here `li-cycle` and `li-ship`; Copilot invokes
+`/li-<skill>`). `verify` has no wrapper: read the trusted `skills/verify/SKILL.md`
+(`.github/lintel/skills/verify/SKILL.md` in a repository kit). On a manual route, read each
+trusted `skills/<skill>/SKILL.md` through the Universal adapter.
+
 1. Read spec.md fully
 2. Read plan.md
 3. Run /li:cycle --from BUILD (skip DEFINE/PLAN, they're done)
