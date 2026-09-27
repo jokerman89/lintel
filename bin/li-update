@@ -3,10 +3,10 @@
 #
 # Usage: li-update [--dry-run]
 # component: li-update
-# implements: ADR-0008
+# implements: ADR-0008, ADR-0035
 # intent: .claude/plans/universal-implementation/packages/P01.md
 # constraints: preserve subprocess failure while continuing independent hosts
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-25
 
 set -euo pipefail
 
@@ -30,9 +30,7 @@ Per-CLI update commands run:
   claude code:    /plugin update li@jokerman-lintel   (operator-driven inside CLI)
   codex:          /plugins (search li, click update)         (operator-driven)
   cursor:         /update-plugin li                          (operator-driven)
-  gemini:         gemini extensions update li
   copilot cli:    copilot plugin update li@jokerman-lintel
-  droid:          droid plugin update li
 
 Note: Claude Code, Codex, and Cursor update via in-CLI commands —
       this script just lists them for you to run.
@@ -104,28 +102,12 @@ echo ""
 # 2. Per-CLI plugin update
 echo "## Per-CLI plugin updates"
 
-# Gemini (scriptable)
-if command -v gemini >/dev/null 2>&1; then
-  if plugin_installed gemini extensions list; then
-    echo "gemini:"
-    run gemini extensions update li || record_failure "$?"
-  fi
-fi
-
 # Copilot CLI (scriptable)
 if command -v copilot >/dev/null 2>&1; then
   if plugin_installed copilot plugin list; then
     echo "copilot cli:"
     run copilot plugin update li@jokerman-lintel || \
       run copilot plugin install li@jokerman-lintel --force || record_failure "$?"
-  fi
-fi
-
-# Droid (scriptable)
-if command -v droid >/dev/null 2>&1; then
-  if plugin_installed droid plugin list; then
-    echo "droid:"
-    run droid plugin update li || record_failure "$?"
   fi
 fi
 

@@ -33,26 +33,30 @@ class ClientCapabilities(unittest.TestCase):
             ("copilot-cli", "copilot-app", "copilot-vscode", "copilot-cloud"),
             ("codex-cli", "codex-desktop", "codex-ide", "codex-cloud"),
             ("cursor-cli", "cursor-ide", "cursor-cloud"),
-            ("opencode-cli", "opencode-desktop", "opencode-ide"),
-            ("droid-cli", "factory-desktop", "factory-cloud"),
-            ("antigravity-cli", "antigravity-desktop", "antigravity-ide"),
-            ("kiro-cli", "kiro-ide", "kiro-web"),
-            ("devin-cli", "devin-desktop", "devin-local", "devin-cloud"),
-            ("junie-cli", "junie-ide"),
-            ("cline-cli", "cline-ide"), ("continue-cli", "continue-ide"),
         )
         for group in groups:
             resolved = [capabilities.surface_id(self.registry, name) for name in group]
             self.assertEqual(resolved, list(group))
             self.assertEqual(len(set(resolved)), len(group))
-        self.assertIn("aider-cli", self.registry["surfaces"])
+        self.assertIn("other", self.registry["surfaces"])
+
+    def test_only_the_supported_families_and_manual_route_are_registered(self):
+        surfaces = self.registry["surfaces"].values()
+        self.assertEqual({record["family"] for record in surfaces},
+                         {"claude", "copilot", "codex", "cursor", "other"})
+        cited = {claim["source"] for record in surfaces for claim in record["vendor"].values()}
+        cited |= {record["discovery"]["source"] for record in surfaces if record["discovery"]["source"]}
+        cited |= {source for record in surfaces for source in record.get("sources", [])}
+        self.assertEqual(set(self.registry["sources"]), cited)
+        for removed in ("gemini", "gemini-cli", "opencode", "droid", "factory-droid", "windsurf",
+                        "antigravity-cli", "kiro-cli", "devin-cli", "junie-cli", "cline", "continue", "aider"):
+            with self.subTest(removed=removed), self.assertRaises(ValueError):
+                capabilities.surface_id(self.registry, removed)
 
     def test_legacy_aliases_are_unambiguous(self):
-        for old, new in {"claude": "claude-code", "codex": "codex-cli",
+        for old, new in {"claude": "claude-code", "codex": "codex-cli", "codex-app": "codex-desktop",
                          "copilot": "copilot-cli", "copilot-coding-agent": "copilot-cloud",
-                         "cursor": "cursor-ide", "gemini": "gemini-cli",
-                         "opencode": "opencode-cli", "droid": "droid-cli",
-                         "factory-droid": "droid-cli", "windsurf": "devin-desktop"}.items():
+                         "cursor": "cursor-ide"}.items():
             self.assertEqual(capabilities.surface_id(self.registry, old), new)
         with self.assertRaises(ValueError):
             capabilities.surface_id(self.registry, "invented-host")
@@ -60,14 +64,14 @@ class ClientCapabilities(unittest.TestCase):
     def test_evidence_layers_round_trip_without_promotion(self):
         decoded = json.loads(json.dumps(self.registry))
         capabilities.validate_registry(decoded)
-        record = capabilities.describe(decoded, "gemini-cli")
+        record = capabilities.describe(decoded, "cursor-cli")
         skill = record["operations"]["skills"]
         self.assertEqual(skill["vendor"]["status"], "documented")
         self.assertEqual(skill["delivered"]["kind"], "native-files")
         self.assertEqual(skill["observed"]["status"], "not_run")
         self.assertTrue(skill["vendor"]["sources"][0]["checked"])
         self.assertTrue(skill["vendor"]["sources"][0]["version"])
-        browser = capabilities.describe(decoded, "opencode-desktop")["operations"]["browser"]
+        browser = capabilities.describe(decoded, "codex-cloud")["operations"]["browser"]
         self.assertEqual(browser["vendor"]["status"], "unknown")
         self.assertEqual(browser["observed"]["status"], "not_run")
         hook = capabilities.describe(decoded, "claude-code")["operations"]["hooks"]
@@ -86,6 +90,7 @@ class ClientCapabilities(unittest.TestCase):
             lambda r: r["surfaces"]["codex-cli"]["vendor"]["skills"].update(status="full"),
             lambda r: r["sources"]["codex-skills"].update(checked="yesterday"),
             lambda r: r["sources"]["codex-skills"].update(url="file:///private"),
+            lambda r: r["surfaces"]["codex-cloud"].update(sources=["missing"]),
         )
         for mutate in mutations:
             registry = copy.deepcopy(self.registry)

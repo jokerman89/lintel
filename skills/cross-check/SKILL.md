@@ -5,7 +5,7 @@ description: Use for an independent second opinion on a diff, plan, code or hypo
 color: purple
 tools: Bash, Read
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # /cross-check

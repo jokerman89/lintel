@@ -96,8 +96,7 @@ cp "$ROOT/tests/shape/manifest-identity.sh" "$TMP/tests/shape/manifest-identity.
 
   for path in .claude-plugin/plugin.json .claude-plugin/marketplace.json \
       .codex-plugin/plugin.json .cursor-plugin/plugin.json .github/plugin/plugin.json \
-      .github/plugin/marketplace.json gemini-extension.json .opencode/INSTALL.md \
-      CLAUDE.md AGENTS.md GEMINI.md; do
+      .github/plugin/marketplace.json CLAUDE.md AGENTS.md; do
     mkdir -p "$(dirname "$TMP/$path")"
     cp "$ROOT/$path" "$TMP/$path"
   done
