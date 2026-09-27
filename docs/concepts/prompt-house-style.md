@@ -9,8 +9,9 @@
 ## The two rules that change the most
 
 ### 1. `description:` is a TRIGGER, not a summary
-The description is the auto-invocation mechanism — Claude reads it to decide WHEN to use the
-skill, often WITHOUT reading the body. If it summarizes the workflow, Claude follows the summary
+On clients with native skill discovery, the description is the auto-invocation mechanism — the
+host agent reads it to decide WHEN to use the skill, often WITHOUT reading the body. If it
+summarizes the workflow, the agent follows the summary
 instead of the body. The cited historical regression describes a summary saying "code review
 between tasks" leading to one review when the body specified two; that observation is not a
 new test result.
@@ -24,8 +25,9 @@ new test result.
 > Good: `Use to implement an approved plan task-by-task. Trigger after PLAN is approved, when a plan.md exists and code needs writing.`
 
 ### 2. Dial back the ALL-CAPS imperatives
-Current models OVERTRIGGER on aggressive `MUST` / `NEVER` / `CRITICAL` / `BLOCKING`. Anthropic
-names ALL-CAPS mandatory language a **yellow flag** and a cause of overtriggering for Opus 4.5+.
+Current models OVERTRIGGER on aggressive `MUST` / `NEVER` / `CRITICAL` / `BLOCKING`. Vendor
+guidance cited in the audit names ALL-CAPS mandatory language a **yellow flag** and a cause of
+overtriggering in recent model generations.
 
 - State the rule, then the **why** — "never use ellipses, because the TTS engine can't pronounce
   them" generalizes better than "NEVER USE ELLIPSES."

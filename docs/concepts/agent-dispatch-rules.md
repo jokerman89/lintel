@@ -8,7 +8,7 @@
 
 ## The rule (2 conditions for dedicated, 2 for inline)
 
-### Spawn a dedicated subagent (via Agent tool) when:
+### Spawn a dedicated subagent (via the host's native delegation tool) when:
 
 **(a) Step produces heavy intermediate reasoning you don't want in the main window.**
 
@@ -87,6 +87,10 @@ Does the step need conversation context to make sense?
 | CAPTURE | inline (rule d) | Synthesizes what just happened |
 
 ## Operator override
+
+Commands below use the Claude plugin form `/li:<skill>`; repository adapters (Claude Code, Codex, Copilot
+and Cursor) expose the installed core workflows as `li-<skill>` (for example `li-cycle`). Other skills,
+and the Universal adapter, use an explicit `skills/<skill>/SKILL.md` handoff.
 
 `/li:cycle --inline-all` forces all phases inline (for context-budget pressure).
 `/li:cycle --dedicated-all` forces all phases dedicated (rare; usually wasteful).
