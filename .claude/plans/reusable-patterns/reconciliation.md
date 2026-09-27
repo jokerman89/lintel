@@ -13,7 +13,8 @@ Date: 2026-09-28. Card 0.1.a. Owner: the integration/core implementation session
 - Prerequisite PR #104 merged 2026-09-27T21:07:41Z at
   `224135581d4dd71f18d39efe5c0882b7e65ec76d` (reviewed head `22d502be`).
 - Implementation base: `origin/main` at `7ba544a49f62d7e0eadb8ec383f07b3ba73a0b54`
-  (merge of #100). It contains the #104 merge and the later client/docs batch
+  (merge of #100), later advanced by an ordinary merge of `origin/main`
+  `fa8ddce5249b8730638644f8f59381d341361ea6` (#99, #108). It contains the #104 merge and the later client/docs batch
   (#94-#98, #100, #107, ADR-0035). Original planning baseline: `00136c9d`.
 - No production, credential, real-home installation, private pack, cloud-tenant or
   organization discovery authority is granted. Tests use synthetic roots only.

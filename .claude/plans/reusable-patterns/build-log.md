@@ -101,3 +101,15 @@ parent approves the reordering in [topology.md](topology.md) or 2.1.d lands.
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
 at this milestone.
+
+## Milestone integration with main
+
+- P0/P1 commit `2d750892` on base `7ba544a4`. Ordinary merge of `origin/main` `fa8ddce5`
+  (#99, #108) as `e128d08a`; one conflict in `.claude/memory/MEMORY.md` resolved by keeping
+  main's updated client note and adding this initiative's line.
+- On the merged head: `bash tests/unit/patterns.sh` -> 33 OK; command-surface guard PASS
+  (0 findings); work-map validator exit 0; `tests/shape/bin-scripts-executable.sh` ALL PASS
+  (`bin/li-pattern.py` is 100755); `tests/unit/memory-v2.sh` ALL PASS;
+  `bash tests/runner/run-all.sh --scope unit --tag patterns` exit 0 (discovers
+  `unit/patterns.sh`). Before the merge, `run-all.sh --scope shape`: 42 total, 0 failed,
+  1 partial (pre-existing: `jq` absent on this host skips version-parity assertions).
