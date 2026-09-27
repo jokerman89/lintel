@@ -154,10 +154,13 @@ reached this session through Go Live, not from the operator directly (L-057).
 
 - **Independent review:** a read-only `lintel-reviewer` (`49a756b1`), commissioned by Go Live,
   reviewed `22d502be..d2ea0f45` and passed it: 0 P0, 0 P1, 0 P2 and 5 P3 findings. All five were
-  record wording in this file and are fixed on `jokerman-microsoft-supported-clients-record-fixes`.
-  Go Live holds the report (SHA-256
-  `805a7799f1777232c2d7793b9d017efd9064922a74df0978adb7710cbff99389`).
-- **CI and merge:** PR #107's hosted CI passed 23 of 23 jobs. Go Live merged it at
+  record wording, mostly in this file; P3-1 also cited `plan.md`, and P3-4 also covered
+  `working-state.md`. PR #108 (`a0a67c28`) fixes them. The same reviewer's re-check of
+  `a0a67c28` passed with two further wording notes, which are fixed on the same branch. Go Live
+  holds both reports (SHA-256 `805a7799f1777232c2d7793b9d017efd9064922a74df0978adb7710cbff99389`
+  and `e3e524fcac2d9a1fb6f87a5aaeac79d1fd5e08e346b423fafe35c5098c0bbce1`).
+- **CI and merge:** PR #107's hosted CI passed all 23 jobs (the plan job, 21 suite jobs and the
+  syntax job) and all 24 checks, which add the separate Catalog check. Go Live merged it at
   2026-09-27 22:01:18Z as `10b0eea7`, with parents `22413558` and `d2ea0f45`. The merged tree
   equals the tested head's tree (`24895535`).
 

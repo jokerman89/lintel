@@ -12,13 +12,14 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 **Status:** delivered. After converging onto #104 with ordinary merge `66b56aa4` of `22d502be`,
 the branch `jokerman-microsoft-trim-supported-clients` merged into `main` through PR #107 as
-`10b0eea7` on 2026-09-27, with an independent review PASS and 23 of 23 CI jobs green (ADR-0035;
-[plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
+`10b0eea7` on 2026-09-27, with an independent review PASS and all 23 CI jobs and 24 checks green
+(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
 Lintel supports GitHub Copilot, Claude, Codex and Cursor plus the manual `other` route; the ten
 other families, the Gemini extension, the OpenCode guide and two `li-update` routes are removed.
 **What's pending:** when each remaining documentation PR merges `main` after #107, re-run the
 live-path scan, `li-catalog.py --check` and `li-wiki-gen --check` on the combined candidate
-(ADR-0035). The review's record-wording follow-up is `jokerman-microsoft-supported-clients-record-fixes`.
+(ADR-0035). The review's record-wording follow-up is PR #108
+(`jokerman-microsoft-supported-clients-record-fixes`).
 
 ## Active - Native workflow cleanup (2026-09-25)
 

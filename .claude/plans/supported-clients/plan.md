@@ -77,7 +77,7 @@ ADR number 0035: open PR #104 already adds `0034-native-workflow-consolidation.m
 |---|---|---|---|
 | 4.1 | Run targeted tests, generator checks, shape tier and verify.sh | evidence in [review.md](review.md) | P1–P3 |
 | 4.2 | Run the M2 compatibility audit | `.claude/engineering/compat-audits/2026-09-25-supported-clients.md` | 4.1 |
-| 4.3 | Independent review, then capture | `review.md`, `.claude/memory/*`, `.claude/plans/todo.md` | 4.2 |
+| 4.3 | Independent review, then capture | `review.md`, `.claude/memory/*`; the planned `.claude/plans/todo.md` pointer was withdrawn when converging onto #104 (see [review.md](review.md)) | 4.2 |
 
 ## Per-task detail
 
