@@ -5,7 +5,7 @@ description: Use to identify the current CLI, desktop, IDE or cloud surface and 
 color: blue
 tools: Read, Bash
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # Client fingerprint
@@ -76,8 +76,9 @@ there is a separately attributable reviewer, not a second role played by the imp
 
 Malformed registry or bindings fail explicitly; repair the inputs rather than reporting
 success with empty capability data. A new host needs a distinct surface record, official
-sources for native outputs and consumer tests. No `.disabled` marker, model setting or
-plugin command is assumed.
+sources for native outputs and consumer tests; a host outside the supported Copilot, Claude,
+Codex and Cursor families first needs an ADR (ADR-0035). No `.disabled` marker, model setting
+or plugin command is assumed.
 
 The old `cli_tier_normalize`, `cli_tier_field`, `cli_tier_list` and table functions remain
 in `lib/cli-tiers.sh`. They use the same registry; static hints never authorize concurrency.

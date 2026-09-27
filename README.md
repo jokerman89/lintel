@@ -1,6 +1,7 @@
 # Lintel
 
 [Presentation, demos & technical reference](https://jokerman89.github.io/lintel/) · [Presentation source](presentations/tech-shots-2026-09-25/README.md)
+(a 2026-09-25 event snapshot; its client matrix predates the four supported client families)
 
 **A shared engineering workflow across coding agents.** Turn an issue into a
 reviewed plan, small build cards, verified changes and a handoff the next session can use.
@@ -34,7 +35,7 @@ that work a shared shape:
 | Safe multi-agent scale | An opt-in swarm profile with bounded ownership, attributable changes, lane evidence and serial fallback |
 | Continuity across sessions | Committed lessons, architecture decisions and a current working state |
 | Organisation-specific standards | A separate pack for policies, terminology, roles and reusable context |
-| Existing investment to carry forward | A workflow bridge for Spec Kit and shared source content for other agent clients |
+| Existing investment to carry forward | A workflow bridge for Spec Kit and one shared source for Copilot, Claude, Codex and Cursor |
 
 There is no hosted Lintel service or background daemon. Markdown defines the workflow; local
 Bash and Python utilities handle installation and validation. Your agent client executes work
@@ -77,7 +78,7 @@ Do not claim independent review by switching roles in the same conversation. The
 [walkthrough](docs/getting-started.md) covers installation, the first build and resuming work.
 
 Existing routes remain: the [Copilot repository kit and CLI plugin](docs/copilot.md),
-[Claude skills, agents and optional hooks](docs/claude-code.md), and the other
+[Claude skills, agents and optional hooks](docs/claude-code.md), and the Codex and Cursor
 [client-specific paths](docs/client-adapters.md). No personal installation is needed for
 the portable repository kit.
 
@@ -152,11 +153,13 @@ system or substitute for repository protection. [Security](SECURITY.md) and
 
 ## Multi-CLI support
 
-The canonical registry distinguishes vendor documentation, delivered discovery/binding and
-observed execution per operation and surface. A CLI record never proves desktop, IDE or cloud
-parity. The generated view below comes from `lib/cli-tiers.yaml`; use
-`python3 bin/li-client-capabilities.py show --client <surface>` for dated sources, conditions
-and observation details. Static compatibility tiers are conservative hints, not runtime grants.
+Lintel supports four client families: GitHub Copilot, Claude, Codex and Cursor. Any other
+host can use the explicit manual `other` route. The canonical registry distinguishes vendor
+documentation, delivered discovery/binding and observed execution per operation and surface.
+A CLI record never proves desktop, IDE or cloud parity. The generated view below comes from
+`lib/cli-tiers.yaml`; use `python3 bin/li-client-capabilities.py show --client <surface>`
+for dated sources, conditions and observation details. Static compatibility tiers are
+conservative hints, not runtime grants.
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
 | Surface | Delivered discovery route | Vendor delegation | Live Lintel evidence |
@@ -174,30 +177,6 @@ and observation details. Static compatibility tiers are conservative hints, not 
 | Cursor CLI | .cursor/skills | conditional | not_run |
 | Cursor editor | .cursor/skills | conditional | not_run |
 | Cursor cloud | .cursor/skills | conditional | not_run |
-| Gemini CLI | .gemini/skills | conditional | not_run |
-| OpenCode CLI/TUI | .opencode/skills | documented | not_run |
-| OpenCode desktop | manual canonical-file handoff | unknown | not_run |
-| OpenCode IDE | manual canonical-file handoff | unknown | not_run |
-| Factory Droid CLI | .factory/skills | conditional | not_run |
-| Factory desktop | manual canonical-file handoff | unknown | not_run |
-| Factory web/cloud | manual canonical-file handoff | unknown | not_run |
-| Antigravity CLI | .agents/skills | unknown | not_run |
-| Antigravity desktop | .agents/skills | unknown | not_run |
-| Antigravity IDE | .agents/skills | unknown | not_run |
-| Kiro CLI | .kiro/skills | conditional | not_run |
-| Kiro IDE | .kiro/skills | conditional | not_run |
-| Kiro web | .kiro/skills | unknown | not_run |
-| Devin Desktop Cascade / Windsurf | .windsurf/skills | unknown | not_run |
-| Devin CLI | .devin/skills | conditional | not_run |
-| Devin Local | manual canonical-file handoff | unknown | not_run |
-| Devin cloud | manual canonical-file handoff | unknown | not_run |
-| JetBrains Junie CLI | .junie/skills | unknown | not_run |
-| JetBrains Junie IDE | manual canonical-file handoff | unknown | not_run |
-| Cline editor | .cline/skills | conditional | not_run |
-| Cline CLI | manual canonical-file handoff | conditional | not_run |
-| Continue IDE | manual canonical-file handoff | unknown | not_run |
-| Continue CLI | manual canonical-file handoff | unknown | not_run |
-| Aider CLI | manual canonical-file handoff | unknown | not_run |
 | Unidentified host (explicit manual route) | manual canonical-file handoff | unknown | not_run |
 <!-- CLI-TIERS:END -->
 

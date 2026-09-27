@@ -45,8 +45,8 @@ Frozen / handle-with-care zones:
 
 > **Claude Code auto-loads a digest** of the items below via the `session-digest` SessionStart
 > hook (active pack/mode/role + recent lessons + open jobs + recent ADRs; see [ADR-0002](.claude/decisions/0002-session-digest-auto-load.md)).
-> This ritual is the deeper read on top of that digest — **and the fallback for non-hook CLIs**
-> (Codex, Gemini, …), which do not run SessionStart hooks and must read these files explicitly.
+> This ritual is the deeper read on top of that digest — **and the fallback for the other clients**
+> (Codex, Copilot, Cursor), which do not run Lintel's SessionStart hook and must read these files explicitly.
 
 1. Read this file (load-bearing rules below) + [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the cross-CLI specifics.
 2. Review [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md) — the 10 load-bearing rules.

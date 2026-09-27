@@ -48,7 +48,7 @@ Register as a SessionStart hook in `settings.json` (the installer / `li-scaffold
 ] } ] } }
 ```
 
-Non-hook CLIs (Codex, Gemini, …) do not run SessionStart hooks — they fall back to the
+Codex, Copilot and Cursor do not run this Claude Code hook — they fall back to the
 `## Session-start ritual` in CLAUDE.md, which reads the same files explicitly.
 
 ## Override
