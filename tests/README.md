@@ -87,6 +87,11 @@ Catalog drift checks never push a
 follow-up commit to the default branch. Native Windows install/reinstall tests require no Pester
 installation and assert preservation of operator profile, packs and custom hooks.
 
+Hook tests run the Claude Code hook scripts locally with synthetic input. They do not prove that
+any host registered or ran a hook, and that bundle is not translated to other clients. Adapter
+tests for Copilot, Codex, Cursor and the Universal handoff likewise check generated files and
+local behavior, not a live client session.
+
 ## Adding a test
 
 1. Start from `tests/conventions/bash-test-template.sh`, or wrap a Python unittest module in a
