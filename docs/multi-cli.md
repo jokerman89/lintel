@@ -79,7 +79,7 @@ invoke it depends on the route, not on a preferred client:
 | Route | Invocation form |
 |---|---|
 | Claude Code plugin | Namespaced `/li:<skill>`, for example `/li:plan` |
-| Generated repository wrappers (Claude Code, Codex, Copilot, Cursor, Gemini CLI, OpenCode and other documented roots) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
+| Generated repository wrappers (Claude Code, Codex, Copilot and Cursor) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
 | Universal manual handoff | Ask the host to read `.github/lintel/START.md` and the canonical `skills/<skill>/SKILL.md` |
 
 Wrappers are generated for the core workflow entry points (welcome, cycle phases, resume, spec-kit, swarm and mars). Other catalog workflows are read
@@ -90,7 +90,11 @@ they are not executable aliases.
 
 ## Preserved client routes
 
-Routes are listed alphabetically; the order is not a priority ranking.
+### GitHub Copilot
+
+The native `.github/skills` and `.github/agents` kit and `.github/plugin/` manifest remain.
+CLI, App, VS Code and cloud have individual records. Use the [Copilot guide](copilot.md).
+Lintel does not translate Claude hooks into Copilot's distinct hook API.
 
 ### Claude Code
 
@@ -98,39 +102,11 @@ The `.claude-plugin/` route, canonical skills, agents and optional hooks remain.
 repository-only `.claude/skills/li-*` route is additive and deliberately hook-free.
 Desktop Code local is separate from CLI, Chat, Cowork and cloud. See [Claude Code](claude-code.md).
 
-### Codex
+### Other clients
 
-The `.codex-plugin/plugin.json` manifest is retained. `codex-cli`, `codex-desktop` and
-`codex-ide` receive `.agents/skills/li-*` wrappers; `codex-cloud` is a manual handoff.
-The Claude hook bundle is not translated. See the [client adapter guide](client-adapters.md).
-
-### Cursor
-
-The `.cursor-plugin/plugin.json` manifest is retained. `cursor-cli`, `cursor-ide` and
-`cursor-cloud` receive project `.cursor/skills/li-*` wrappers. Inspect the installed plugin
-UI rather than assuming an older install command.
-
-### Gemini CLI
-
-The `gemini-extension.json` context route is retained. `gemini-cli` receives
-`.gemini/skills/li-*` wrappers; activation consent and subagent limits follow the exact version.
-
-### GitHub Copilot
-
-The native `.github/skills` and `.github/agents` kit and `.github/plugin/` manifest remain.
-CLI, App, VS Code and cloud have individual records. Use the [Copilot guide](copilot.md).
-Lintel does not translate Claude hooks into Copilot's distinct hook API.
-
-### OpenCode
-
-`opencode-cli` receives `.opencode/skills/li-*` wrappers; desktop and IDE surfaces use a
-manual handoff. The OpenCode guide at `.opencode/INSTALL.md` remains the fetch-and-follow route.
-
-### Universal and other clients
-
-The [Universal contract](../shims/universal/ADAPTER.md) serves any host through explicit file
-handoff. The [client adapter guide](client-adapters.md) identifies native-format and manual
-routes for Antigravity, Kiro, Devin/Cascade, Junie, Factory, Cline, Continue and Aider.
+Codex and Cursor manifests, the Gemini extension and OpenCode manual guide are retained.
+The [client adapter guide](client-adapters.md) identifies native-format and manual routes for
+those clients and Antigravity, Kiro, Devin/Cascade, Junie, Factory, Cline, Continue and Aider.
 Do not use a retired install incantation or a neighboring surface's settings API without
 checking the intended host's current documentation and available commands.
 
