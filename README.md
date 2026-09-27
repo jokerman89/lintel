@@ -95,7 +95,8 @@ Small fixes can use a shorter route. A larger change can span multiple sessions 
 Every client reaches the same skills; only the invocation form differs. The Claude plugin uses
 `/li:<skill>`, portable adapter wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review`
 and related skills where the host discovers them, and the Universal adapter uses explicit file
-handoff. Hosts with native agent profiles also receive planner, builder and reviewer roles.
+handoff. The Copilot kit also installs `lintel-planner`, `lintel-builder` and `lintel-reviewer`
+agent profiles.
 Common entrypoints include `define` to shape a request, `inspect` for plan or repository
 lenses, `verify` for read-only checks, `diagnose` for bugs, `cross-check` for an independent
 second review, and `pause`/`resume` for continuity. The full catalog contains architecture, data,
