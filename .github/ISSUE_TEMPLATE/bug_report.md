@@ -21,7 +21,7 @@ labels: bug
 
 ## Environment
 
-- Client and surface, plus version (for example Claude Code, GitHub Copilot CLI / VS Code / cloud agent, Codex, Gemini CLI, Cursor, OpenCode, or the Universal handoff):
+- Client and surface, plus version (for example Claude Code, GitHub Copilot CLI / VS Code / cloud agent, Codex, Cursor, or the Universal handoff):
 - Lintel version and installation route (repository kit / plugin / bare install / adapter wrappers):
 - Adapter check output, if applicable (for example `li-copilot check --target <repo>`):
 - OS (Windows / macOS / Linux):

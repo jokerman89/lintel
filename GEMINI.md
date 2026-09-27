@@ -53,10 +53,7 @@ Follow instructions from skills/ship/SKILL.md and execute on the current branch.
 
 ### Available skill catalog
 
-Common skills (see `skills/` for full list). Names below use the plugin form `/li:<skill>`;
-generated Gemini workspace wrappers expose the same skills as `li-<skill>`, and the
-[native workflow migration](docs/migrations/2026-09-25-native-workflows.md) maps consolidated
-former entrypoints:
+Common skills (see `skills/` for full list):
 - `/li:verify` — run checks without repairs by default; repair requires explicit authorization
 - `/li:cycle` — 9-step work cycle (sense→capture)
 - `/li:ship` — pre-flight checks + PR creation
