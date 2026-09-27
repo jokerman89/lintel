@@ -98,7 +98,8 @@ The precedence model assumes the CLI supports subagents.
 - **Claude Code:** Full support. Apply as described.
 - **Codex:** native subagents, same as Claude Code. Apply the model as described.
 - **GitHub Copilot:** use native custom agents when available; the portable kit exposes planner, builder and reviewer profiles. Host discovery and permissions still apply.
-- **Adapters without delegation** (the declared Gemini CLI, OpenCode and Factory Droid integrations): sequentialize what would be parallel. The precedence model still decides *which prompt* to use, even when the delegation is manual.
+- **Cursor:** subagents are documented, but their execution environment and isolation differ by surface; use them where the active surface exposes them.
+- **Surfaces with no delegation record** (Claude Desktop, the Copilot cloud agent, Codex desktop, IDE and cloud, and the manual `other` route): sequentialize what would be parallel. The precedence model still decides *which prompt* to use, even when the delegation is manual.
 
 When operating on a degraded CLI, the precedence model still informs **which prompt to use** even if the delegation mechanism is manual.
 

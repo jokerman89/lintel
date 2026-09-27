@@ -44,7 +44,6 @@ MANIFESTS=(
   "$REPO_ROOT/.cursor-plugin/plugin.json"
   "$REPO_ROOT/.github/plugin/plugin.json"
   "$REPO_ROOT/.github/plugin/marketplace.json"
-  "$REPO_ROOT/gemini-extension.json"
 )
 
 for m in "${MANIFESTS[@]}"; do
@@ -61,19 +60,33 @@ for m in "${MANIFESTS[@]}"; do
   fi
 done
 
-# OpenCode INSTALL.md (markdown, not JSON)
-if [ -f "$REPO_ROOT/.opencode/INSTALL.md" ]; then
-  pass "exists: .opencode/INSTALL.md"
-else
-  fail "missing: .opencode/INSTALL.md"
-fi
-
 # Root entrypoint context files
-for f in CLAUDE.md AGENTS.md GEMINI.md; do
+for f in CLAUDE.md AGENTS.md; do
   if [ -f "$REPO_ROOT/$f" ]; then
     pass "root entrypoint: $f"
   else
     fail "missing root entrypoint: $f"
+  fi
+done
+
+# Only Copilot, Claude, Codex and Cursor are supported (ADR-0035); removed client routes stay out
+# of the shipped tree. In a checkout only tracked files count, so a contributor's local tool
+# configuration (an untracked .opencode/ or GEMINI.md) is not a failure.
+removed_route_shipped() {
+  local tracked
+  if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    # A Git error must not read as absence.
+    tracked=$(git -C "$REPO_ROOT" ls-files -- "$1") || return 0
+    [ -n "$tracked" ]
+  else
+    [ -e "$REPO_ROOT/$1" ]
+  fi
+}
+for f in GEMINI.md gemini-extension.json .opencode; do
+  if removed_route_shipped "$f"; then
+    fail "removed client route present: $f"
+  else
+    pass "removed client route absent: $f"
   fi
 done
 
@@ -111,17 +124,6 @@ sys.exit(0 if m.get('skills') == './skills/' and m.get('agents') == './agents/' 
     pass "cursor-plugin manifest points at ./skills/ + ./agents/"
   else
     fail "cursor-plugin manifest path issue"
-  fi
-
-  # Gemini contextFileName
-  if python3 -c "
-import json,sys
-m = json.load(open(sys.argv[1]))
-sys.exit(0 if m.get('contextFileName') == 'GEMINI.md' else 1)
-" "$REPO_ROOT/gemini-extension.json"; then
-    pass "gemini-extension contextFileName -> GEMINI.md"
-  else
-    fail "gemini-extension contextFileName missing or wrong"
   fi
 else
   echo "  SKIP: python3 absent — manifest field assertions not run"

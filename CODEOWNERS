@@ -14,17 +14,14 @@
 /CODEOWNERS                             @Azureflipper
 /SECURITY.md                            @Azureflipper
 
-# Plugin manifests (cross-CLI compatibility; Copilot/Droid read .claude-plugin via interop)
+# Plugin manifests (Claude, Codex and Cursor; Copilot's lives under .github/plugin/)
 /.claude-plugin/                        @Azureflipper
 /.codex-plugin/                         @Azureflipper
 /.cursor-plugin/                        @Azureflipper
-/.opencode/                             @Azureflipper
-/gemini-extension.json                  @Azureflipper
 
 # Per-CLI entrypoint context files
 /CLAUDE.md                              @Azureflipper
 /AGENTS.md                              @Azureflipper
-/GEMINI.md                              @Azureflipper
 
 # Skills + agents — open to team contributions
 /skills/                                @Azureflipper
