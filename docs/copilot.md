@@ -59,7 +59,8 @@ that every specialist skill in the full catalog works on every Copilot surface.
 
 Catalog workflows without a native wrapper, such as `inspect`, `verify`
 (read-only unless repair is authorized), `diagnose`, `cross-check` and `pause`, are read
-from `.github/lintel/skills/<name>/SKILL.md`. Former entry names are mapped in the
+from `.github/lintel/skills/<name>/SKILL.md` in the repository kit; with the CLI plugin, read the
+plugin's installed `skills/<name>/SKILL.md`. Former entry names are mapped in the
 [native workflow migration](migrations/2026-09-25-native-workflows.md); they are not aliases.
 
 ## Copilot CLI plugin

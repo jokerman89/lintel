@@ -81,9 +81,11 @@ invoke it depends on the route, not on a preferred client:
 |---|---|
 | Claude Code plugin | Namespaced `/li:<skill>`, for example `/li:plan` |
 | Generated repository wrappers (Claude Code, Codex, Copilot and Cursor) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
+| Copilot CLI plugin | The same core `li-<skill>` wrappers as the repository kit |
+| Codex and Cursor plugins | Canonical `skills/<skill>` names as the host's plugin UI lists them (form not verified here) |
 | Universal manual handoff | Ask the host to read `.github/lintel/START.md` and the canonical `skills/<skill>/SKILL.md` |
 
-Wrappers are generated for the core workflow entry points (welcome, cycle phases, resume, spec-kit, swarm and mars). Other catalog workflows are read
+Wrappers are generated only for the core workflows (welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars). Other catalog workflows are read
 from their canonical file on demand. Deeper documents use `/li:<skill>` notation; translate
 it to the route you actually use. Former entry names from the workflow consolidation are
 mapped in the [native workflow migration](migrations/2026-09-25-native-workflows.md);
