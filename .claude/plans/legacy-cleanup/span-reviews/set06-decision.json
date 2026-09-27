@@ -1,0 +1,444 @@
+{
+ "schema_version": 2,
+ "skill": "review",
+ "status": "unverified",
+ "timestamp": "2026-09-25T18:13:31.672972+00:00",
+ "reason": "Faithful coordinator transcription of actual matching semantic ACCEPTs; neither rejected spans nor overall release clearance is inferred.",
+ "context": {
+  "attempt_id": "legacy-cleanup-span-set06",
+  "builder": {
+   "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+   "id": "cleanup-integration"
+  },
+  "independence_required": true,
+  "profile": {
+   "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+   "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+   "generation": 2,
+   "name": "_default",
+   "schema_version": 1,
+   "version": "1.0.0"
+  },
+  "purpose": "verification_only",
+  "qa_requirements": [
+   {
+    "applicability": "applicable",
+    "id": "historical-spans",
+    "kind": "check",
+    "policy": {
+     "actor": null,
+     "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+     "effective_date": null,
+     "jurisdiction": null,
+     "source": ".claude/plans/legacy-cleanup/spec.md",
+     "version": "2026-09-25"
+    },
+    "requirement": "mandatory"
+   }
+  ],
+  "required_controls": [
+   "historical-spans"
+  ],
+  "required_policy": {
+   "applicability": "not_applicable",
+   "required": false,
+   "source": "bundled-neutral",
+   "status": "not_required",
+   "version": "1.0.0"
+  },
+  "schema_version": 2,
+  "snapshot": {
+   "base": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+   "entries": [
+    {
+     "base": {
+      "kind": "absent",
+      "mode": "000000",
+      "sha256": null
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821"
+     },
+     "path": ".claude/decisions/0036-mars-multi-model-review.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eb8f176915d6190850644ce7759fba701276537080cb499b9d6a2506952d1b09"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882"
+     },
+     "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "66de4deee5d28627ca091d1dbad04cf0a952e023b3572174404710511c55dc58"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6"
+     },
+     "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "aa6d3cdcf3fef08ec5433686175e20db8562e47b0e3c7ab9a269d83f07ad646b"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664"
+     },
+     "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "58dfb0badb7b49b4777850934e8e0183a9669a0924ed911713c0bd2c3356c999"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+     },
+     "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "5896e3130474f475a31abd62dd92411ef40c8c05fee1a3ef742b4e2b305d470a"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14"
+     },
+     "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "deb128edd1f03b9c587dcc6888d2de1a42c4e60024d7aed67fbe99a1490ff9e9"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374"
+     },
+     "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374"
+     }
+    },
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "4307329da71dc4cb10823349d38982c012e7bf2ea92e96c1437bef692ea2e9a5"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf"
+     },
+     "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf"
+     }
+    },
+    {
+     "base": {
+      "kind": "absent",
+      "mode": "000000",
+      "sha256": null
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27"
+     },
+     "path": ".claude/plans/mars/review-method-design.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27"
+     }
+    }
+   ],
+   "head": "cda5539ae1b1b995814fdaf0c126dbf076dfb3d7",
+   "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-06.json",
+   "result_digest": "086873d7e4e323805335a2650e2d9a2cacbc7db85fe3cb22cf08e7797b1ce308",
+   "selection": [
+    ".claude/decisions/0036-mars-multi-model-review.md",
+    ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+    ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+    ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+    ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+    ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+    ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+    ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+    ".claude/plans/mars/review-method-design.md"
+   ]
+  },
+  "work": {
+   "acceptance_digest": "d5a55d00b22cd76e8c4548e382f16714763da13e5a511cedd5e40b93c65903ac",
+   "acceptance_manifest": [
+    {
+     "end": null,
+     "path": ".claude/decisions/0036-mars-multi-model-review.md",
+     "sha256": "7f316d120e44400b8f0c91842100d85786b153fa84412198cfdb97a97115d821",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+     "sha256": "a9818c9ee0482cba922a6d0891b46a65feaa82b40b6e4131e0dcf0fb3d339882",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+     "sha256": "eadbb8177cf7a3bb4a1fd715da71e4701434db303a5493e928e9365e79d170f6",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+     "sha256": "fcfa7753b0a460c5705354d9dbd2298c71c2cc5ca9fff2711209749bb322c664",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+     "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+     "sha256": "ab655e9fc933c35dc2d9172c5d1b760563205ad7646b1955e6817b1297b4ba14",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+     "sha256": "96a20f6c8ee270058120410b1c02ac721f85e23e5dc81708d833ebc9a6a45374",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+     "sha256": "5f495fa987ae2bdf0f71d162e7bfa1ffa163256635617861cf4c25dd5695dadf",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/plan.md",
+     "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/prompt.md",
+     "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/spec.md",
+     "sha256": "784fc37543854985199b8aad171406ae33737fefa7486cc7fc643e720e6fda2d",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/mars/review-method-design.md",
+     "sha256": "68b990b0eda49f487e03a95259c6298cde3a5c80908d8fe069586e2501f2bd27",
+     "start": null
+    }
+   ],
+   "acceptance_paths": [
+    ".claude/decisions/0036-mars-multi-model-review.md",
+    ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+    ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+    ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+    ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+    ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+    ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+    ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+    ".claude/plans/legacy-cleanup/plan.md",
+    ".claude/plans/legacy-cleanup/prompt.md",
+    ".claude/plans/legacy-cleanup/spec.md",
+    ".claude/plans/mars/review-method-design.md"
+   ],
+   "leaf_ids": [
+    "0.2.c",
+    "9.3.a",
+    "10.2.a"
+   ],
+   "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+   "package_id": "INTEGRATE",
+   "work_map": ".claude/plans/legacy-cleanup/work.json"
+  }
+ },
+ "reviewer": {
+  "id": "cleanup-quality-reviewer",
+  "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+ },
+ "provenance": "declared",
+ "controls": [
+  {
+   "applicability": "applicable",
+   "id": "historical-spans",
+   "kind": "check",
+   "policy": {
+    "actor": null,
+    "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+    "effective_date": null,
+    "jurisdiction": null,
+    "source": ".claude/plans/legacy-cleanup/spec.md",
+    "version": "2026-09-25"
+   },
+   "requirement": "mandatory",
+   "status": "pass",
+   "reason": "Both independently attributed actors accepted only these 15 exact LF declaration digests; rejected, narrowed and superseded entries excluded.",
+   "evidence": [
+    ".claude/plans/legacy-cleanup/span-reviews/set06-spec-decisions.json",
+    ".claude/plans/legacy-cleanup/span-reviews/set06-quality-decisions.json"
+   ],
+   "observation": {
+    "span_declarations": [
+     "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+     "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
+     "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
+     "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+     "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
+     "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+     "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
+     "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
+     "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
+     "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+     "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
+     "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
+     "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
+     "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
+     "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331"
+    ],
+    "review_scope": "semantic classification only"
+   }
+  }
+ ],
+ "coverage": {
+  "0.2.c": [
+   "historical-spans"
+  ],
+  "9.3.a": [
+   "historical-spans"
+  ],
+  "10.2.a": [
+   "historical-spans"
+  ]
+ },
+ "evidence": [
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set06-quality-decisions.json",
+   "sha256": "0e03b5778f8f7b232b4668f20e3ab0aeed263b53c595fb91a6a3e17706467cb3"
+  },
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set06-spec-decisions.json",
+   "sha256": "b68cd02efd2585e3816eb82c4e2b993314daebfaa4a23ddd23bc8624388a5b50"
+  }
+ ]
+}

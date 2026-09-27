@@ -33,11 +33,15 @@ MARS = **Multi-Model Adversarial Review & Screening**.
 | Tests | `tests/unit/review-method.sh`, `tests/unit/mars-contract.sh`, `tests/unit/mars-hooks.sh` |
 | Records | ADR-0036, `.claude/engineering/evolution/2026-09-25-mars-integration.md`, L-059 (recorded as L-056 in a4a264e1; #104 holds L-056 to L-058) |
 
-## Pending (needs the in-flight legacy cleanup base)
+**Merged (2026-09-25):** PR #105 merged to main as `af94ff74` (tree identical to reviewed head
+`019da427`). The legacy cleanup branch converged onto it in `178196da`, applied the owner's
+N1-N3 follow-up in `3d9146e3`, and applied the consolidated-workflow hooks in `49905419`.
 
-- MARS hooks for the consolidated planning inspection (replacing `plan-eng-review`),
-  `define`'s spec review, `cross-check` and `CodeReviewer`: specified in
-  `skills/mars/references/integration.md`, not applied to files that lane removes or rewrites.
+## Pending
+
+- Consolidated-workflow hooks (native `inspect`, `define`'s spec review, `cross-check` and
+  `CodeReviewer`): applied on the cleanup branch in `49905419`, listed under "Applied hooks" in
+  `skills/mars/references/integration.md`; delivered with PR #104.
 - Repository-wide drift guard (no rubric outside the method) after that consolidation.
 - CAPTURE wiring for the opt-in calibration log (RM8); today it is the CLI and method §7.
 - D1 (ADR-0036) ships as proposed on the operator's merge instruction.

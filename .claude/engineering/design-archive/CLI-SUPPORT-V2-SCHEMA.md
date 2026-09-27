@@ -1,5 +1,14 @@
 # cli_support v2 schema
 
+> Historical schema proposal. Keep its IDs, examples and stated limitations as design
+> history, not current enforcement or host support. Current adapters use the operation
+> registry and actual permissions; native delegation replaces the retired pairing wrapper.
+> No schema or host check below was rerun in this documentation update.
+
+> Navigation update, 2026-09-25: current workflow examples use native routes.
+> The original YAML specimens, strategy enums, client claims and validation rules
+> are preserved historical proposals, not new client policy or observed acceptance.
+
 Frontmatter schema for skill + agent CLI support declarations. v2 introduces per-CLI degradation maps + runtime enforcement (Phase B).
 
 **P1 fix T8 from eng-review.** Source of truth referenced by `TEMPLATE-skill.md` and `TEMPLATE-agent.md`.
@@ -52,7 +61,7 @@ cli_support:
 Allowed `capability` values:
 - `AskUserQuestion` — interactive decision prompts
 - `Agent` — subagent spawning (Task tool)
-- `Browser` — managed Chromium via /browse
+- `Browser` — browser interaction; current workflow route `/li:web-session --mode browse`, subject to actual provider availability and admission
 - `MCP` — Model Context Protocol calls
 - `WebFetch` — fetch arbitrary URLs
 - `WebSearch` — web search calls
@@ -109,7 +118,7 @@ Map persisted to `~/.lintel/sessions/$SESSION_ID/shim-map.json`. Recomputed if c
 
 ## Examples
 
-### Pure claude-code skill (e.g. `/pair-agent`)
+### Historical Claude-only delegated-workflow example
 
 ```yaml
 cli_support:
@@ -126,7 +135,7 @@ cli_support:
     reason: same
 ```
 
-### Full multi-CLI skill (e.g. `/qa`)
+### Historical multi-client verification example
 
 ```yaml
 cli_support:
@@ -149,7 +158,11 @@ cli_support:
         strategy: sequential-prompt
 ```
 
-### Browser-dependent skill (e.g. `/browse`)
+### Browser-dependent workflow example
+
+Current navigation: `/li:web-session --mode browse`. The YAML below remains the
+original support-declaration specimen; renaming the example does not validate
+those client claims or install a browser provider.
 
 ```yaml
 cli_support:
@@ -223,6 +236,6 @@ Override takes precedence over skill frontmatter. Logged on use.
 
 - `scaffolding/01-foundation/TEMPLATE-skill.md` — references this schema
 - `scaffolding/01-foundation/TEMPLATE-agent.md` — references this schema
-- `/li:cli-fingerprint` skill — runtime CLI detection that feeds shim lookup
+- `cli-fingerprint` — original proposed detection identifier, not a current callable skill; use `/li:welcome` and the actual adapter's tool inventory for current navigation
 - `verify.sh --portability` — schema validation subcommand
 - Phase B implementation (this design) — runtime that consumes the schema

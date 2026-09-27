@@ -1,5 +1,9 @@
 # /autoplan review — Lintel uniformity remediation plan
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Reviewed:** 2026-05-29 · branch `v4.0-phase1-meta-infra-spine` · `[subagent-only]` (codex unavailable)
 **Plan:** [lintel-uniformity-REMEDIATION-PLAN.md](lintel-uniformity-REMEDIATION-PLAN.md) · restore: `.claude/engineering/audits/.restore-remediation-20260529-191518.md`
 **Pipeline:** CEO → (Design skipped, no UI) → Eng → DX.
@@ -15,7 +19,7 @@
 | W1 "replace profile.yaml grep with pack-resolver" sound? | premise-risky | **NO — category error** | undercount 25≠16 | **DISAGREE w/ plan — split W1** |
 | Does the plan repeat contract-before-consumer? | YES (W4-inert, W6-DA) | — | — | **CONFIRMED — defer those** |
 | 6 meta-infra PRs proportionate? | NO (stalls) | over-heavy for W2/W5 | **NO — collapse to 3** | **CONFIRMED — 3 themed PRs** |
-| Promote de-gstack (first-party) to first PR? | YES (credibility bug) | — | — | **CONFIRMED** |
+| Promote native-ownership (first-party) to first PR? | YES (credibility bug) | — | — | **CONFIRMED** |
 | "Default A on 15 votes" good? | NO (hides 5 strategic) | — | NO (hides 3) | **DISAGREE — split 3 explicit + 12 confirm** |
 | W5 bugs first? | yes, but W1 behind it | — | yes + front-load save→dump | **CONFIRMED w/ TTHW reorder** |
 
@@ -56,7 +60,7 @@ Gate ceremony is flat (every PR carries M1 structure-impact + M4 future-operator
 | 6 | Eng | Fix dep graph: W6 depends on W1a AND W3; W1 not independent | P3 |
 | 7 | CEO | Defer W4-inert (brief_forge/tokens_est) + W6-DA-hooks to their consumers | P4 (don't dup the sin) |
 | 8 | DX | Collapse 6 PRs → 3 themed PRs | P3 pragmatic |
-| 9 | CEO | Promote de-gstack to first PR headline | P6 (credibility) |
+| 9 | CEO | Promote native-ownership to first PR headline | P6 (credibility) |
 | 10 | DX | Front-load context-save→dump round-trip = first visible win | P6 bias-to-action |
 | 11 | DX/CEO | Split VOTE: 3 explicit (DEC-1/4/5) + 12 confirm-at-gate | P5 |
 
@@ -80,9 +84,9 @@ Your answer sets the plan's shape. Everything else is the recommended uplift.
 
 ## Recommended plan v2 (shape, pending your premise answer)
 
-- **PR-A (meta-infra):** state-ownership table → W5 bugs (**de-gstack headline + save→dump round-trip first**) → W1a pack-config adoption → W1b profile helper. Verifies: first-party-first + 2 broken read-paths fixed; pack/profile state cleanly split.
+- **PR-A (meta-infra):** state-ownership table → W5 bugs (**native-ownership headline + save→dump round-trip first**) → W1a pack-config adoption → W1b profile helper. Verifies: first-party-first + 2 broken read-paths fixed; pack/profile state cleanly split.
 - **PR-B (mixed):** W2 lessons read-side (internal-tool) + W3 unified audit (meta-infra). Verifies: lessons + override-audit promises flip.
 - **PR-C (meta-infra):** W4 substrate (necessity + counts only; brief_forge/tokens_est deferred) + W6 dispatch fixes (DISCOVER directory-scan + orphan wiring; DA hooks deferred to v4.1).
 - **Deferred to their consumers:** brief_forge_handoffs frontmatter, tokens_est_typical, DA enforcement hooks, hooks pack-drive (rides W1a).
 
-3 explicit votes remain: **DEC-1** (adopt pack-resolver for pack fields — yes if packs real), **DEC-4** (canonical root `~/.lintel/`), **DEC-5** (de-gstack). The other 12 are confirm-at-gate uplifts.
+3 explicit votes remain: **DEC-1** (adopt pack-resolver for pack fields — yes if packs real), **DEC-4** (canonical root `~/.lintel/`), **DEC-5** (native-ownership). The other 12 are confirm-at-gate uplifts.

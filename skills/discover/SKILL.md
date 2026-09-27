@@ -78,7 +78,7 @@ For relevant ADRs:
 
 ### Step 3 — Lessons scan (filtered by relevance)
 
-Invoke `/li:lessons` skill OR inline:
+Invoke `/li:lessons-surface` skill OR inline:
 - Read the project lessons store through `lib/memory.sh` (`lessons_find_related <wedge keywords>`;
   the store is `lintel_lessons_file`, and a second ignored store is named, never hidden)
 - Filter by keyword match + topic similarity to wedge
@@ -111,7 +111,7 @@ done
 
 If skills overlap >50% with proposed work:
 - Flag operator: "Skill /li:<existing> already covers <area>. Extend it or build new?"
-- Recommend `/li:skillify` if creating new vs extending
+- Recommend `/li:skill-new` if an authorized new skill is needed rather than an extension
 
 ### Step 6 — Related agent scan (PLAN dispatch hints)
 
@@ -136,7 +136,7 @@ Output recommended agents organized by category. PLAN uses this to know which su
 
 ### Step 6b — Synthesize findings via `ResearchSynthesizer` (research-dive mode, or on operator request)
 
-When invoked in research-dive mode (via `/li:research`) or when the wedge spans many sources, dispatch `ResearchSynthesizer` to aggregate the codebase map + ADRs + lessons + deps into a single structured brief:
+When invoked in research-dive mode (via `/li:cycle --from SENSE --to DISCOVER`) or when the work spans many sources, use an available, authorized `ResearchSynthesizer` role to aggregate the codebase map, ADRs, lessons and dependencies into a structured brief. Without real delegation, synthesize serially and label that limitation:
 
 ```bash
 synth_brief=$(mktemp)
@@ -162,11 +162,12 @@ EOF
 If discover-report identifies files outside what's currently in context, surface:
 
 "Context warmup recommended for PLAN phase:
-- 8 ADRs (~12k tokens) — `/li:context-warm-adrs networking`
+- Relevant ADRs — `/li:context-warm` with its ADR-topic selection mode
 - Related skills overlap (~5k tokens) — `/li:context-warm 'skills/li-*'`
-- Infra templates (~15k tokens) — `/li:context-warm '~/Workspace/project-X/infra/*'`
+- Selected infrastructure templates — `/li:context-warm 'infra/*'`
 
-Estimated total warm-up: ~32k tokens. Headroom available: <X>k."
+Use the actual selected inputs and known host headroom; otherwise report the
+estimate and capacity as unknown."
 
 Operator decides whether to warm up before PLAN.
 
@@ -224,6 +225,10 @@ skills_overlap: <count>
 - <gap 1>
 - <gap 2>
 ```
+
+Link the exact report from the selected work handoff. PLAN and
+`/li:inspect --target plan` consume the same reuse map, accepted constraints and
+unresolved findings; discovery does not grant review or implementation clearance.
 
 ### Step 9 — 00-state.md append
 

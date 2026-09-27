@@ -522,13 +522,23 @@ def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Di
                 "this panel checks acceptance rows: pass --adjudicated p1,p2,p3,deviations")
         counts = _adjudicated_counts(adjudicated)
         fields["adjudicated"] = _format_adjudicated(counts)
-        fields["outcome"] = panel_outcome(facts, counts, input_status, origin.get("caller"), bool(method))
+        fields["outcome"] = panel_outcome(facts, counts, input_status,
+                                          caller=origin.get("caller"), has_method=bool(method))
     return render_header("synthesis", fields, schema)
 
 
+REVIEW_CALLER_TOKENS = ("review", "li-review")
+
+
 def _is_review_caller(caller: Optional[str]) -> bool:
-    """REVIEW panel mode however the caller is spelled: `review`, `REVIEW`, `cycle:REVIEW`."""
-    return (caller or "").strip().lower().rsplit(":", 1)[-1] == "review"
+    """REVIEW panel mode however the caller is spelled.
+
+    Case and surrounding space are ignored; the last `:`-separated part counts (`cycle:review`,
+    `cycle: REVIEW`, `/li:review`), as do the native wrapper forms `li-review` and `/li-review`.
+    Other callers, such as `code-review` or `cycle:PLAN`, are not REVIEW.
+    """
+    token = (caller or "").strip().lower().rsplit(":", 1)[-1].strip().lstrip("/")
+    return token in REVIEW_CALLER_TOKENS
 
 
 def _adjudicated_counts(values: Sequence[int]) -> Tuple[int, int, int, int]:
@@ -541,8 +551,8 @@ def _format_adjudicated(counts: Sequence[int]) -> str:
     return f"p1={counts[0]} p2={counts[1]} p3={counts[2]} deviations={counts[3]}"
 
 
-def panel_outcome(facts: Dict[str, Any], counts: Sequence[int], input_status: str,
-                  caller: Optional[str] = None, has_method: bool = True) -> str:
+def panel_outcome(facts: Dict[str, Any], counts: Sequence[int], input_status: str, *,
+                  caller: Optional[str], has_method: bool) -> str:
     """The Review Method's decision rule over adjudicated counts.
 
     A partial panel, a report that is incomplete, inconsistent or `unable`, a changed or
@@ -703,7 +713,8 @@ def inspection_record(panel: Dict[str, Any], synthesis_text: str, schema: Dict[s
         match = re.fullmatch(r"p1=(\d+) p2=(\d+) p3=(\d+) deviations=(\d+)", header["adjudicated"])
         require(match is not None, "adjudicated field is malformed")
         counts = tuple(int(n) for n in match.groups())
-        outcome = panel_outcome(facts, counts, verification["status"], caller, bool(panel["subject"].get("method")))
+        outcome = panel_outcome(facts, counts, verification["status"],
+                                caller=caller, has_method=bool(panel["subject"].get("method")))
         require(header.get("outcome") == outcome,
                 f"synthesis outcome {header.get('outcome')!r} does not match its adjudicated counts ({outcome!r})")
     return {"schema_version": 1, "purpose": "inspection", "source": "mars", "release_clearance": False,

@@ -8,8 +8,8 @@ import childProcess from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import { syncBuiltinESMExports } from 'node:module';
 import { join } from 'node:path';
-import { Admission, BrowserSession } from '../../skills/browse/scripts/chromium.mjs';
-import { diffRecords, extractPage } from '../../skills/scrape/scripts/extract.mjs';
+import { Admission, BrowserSession } from '../../skills/web-session/scripts/chromium.mjs';
+import { diffRecords, extractPage } from '../../skills/web-session/scripts/extract.mjs';
 
 const request = JSON.parse(await readFile(process.argv[2], 'utf8'));
 const { origin, trapOrigin, denyProxy, executable, outputRoot, context } = request;

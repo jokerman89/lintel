@@ -1,0 +1,185 @@
+{
+ "schema_version": 2,
+ "skill": "review",
+ "status": "unverified",
+ "timestamp": "2026-09-25T17:26:10.642783+00:00",
+ "reason": "Faithful coordinator transcription of actual matching semantic ACCEPTs; neither rejected spans nor overall release clearance is inferred.",
+ "context": {
+  "attempt_id": "legacy-cleanup-span-set03a",
+  "builder": {
+   "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+   "id": "cleanup-integration"
+  },
+  "independence_required": true,
+  "profile": {
+   "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+   "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+   "generation": 2,
+   "name": "_default",
+   "schema_version": 1,
+   "version": "1.0.0"
+  },
+  "purpose": "verification_only",
+  "qa_requirements": [
+   {
+    "applicability": "applicable",
+    "id": "historical-spans",
+    "kind": "check",
+    "policy": {
+     "actor": null,
+     "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+     "effective_date": null,
+     "jurisdiction": null,
+     "source": ".claude/plans/legacy-cleanup/spec.md",
+     "version": "2026-09-25"
+    },
+    "requirement": "mandatory"
+   }
+  ],
+  "required_controls": [
+   "historical-spans"
+  ],
+  "required_policy": {
+   "applicability": "not_applicable",
+   "required": false,
+   "source": "bundled-neutral",
+   "status": "not_required",
+   "version": "1.0.0"
+  },
+  "schema_version": 2,
+  "snapshot": {
+   "base": "ba6030720489d3429f3a4970071dd7b1c33635ec",
+   "entries": [
+    {
+     "base": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d"
+     },
+     "head": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd"
+     },
+     "index": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd"
+     },
+     "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+     "worktree": {
+      "kind": "file",
+      "mode": "100644",
+      "sha256": "082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd"
+     }
+    }
+   ],
+   "head": "9e9ff6a0710544d1750f73c03f7ac4b712a71319",
+   "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-03a.json",
+   "result_digest": "5119dc7cdd45384e97dd83d42fc9636264e4158ca7252e2583c4993e2465f1d2",
+   "selection": [
+    ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md"
+   ]
+  },
+  "work": {
+   "acceptance_digest": "0bd0d0560fa1bc71492d67bb2c339c03c1906cbb521c15136e6dbb3879e660a6",
+   "acceptance_manifest": [
+    {
+     "end": null,
+     "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+     "sha256": "082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/plan.md",
+     "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/prompt.md",
+     "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+     "start": null
+    },
+    {
+     "end": null,
+     "path": ".claude/plans/legacy-cleanup/spec.md",
+     "sha256": "0f2983febbee13b6a69dbd360266ca5a828b1763fbdf67f5c780c339ced76945",
+     "start": null
+    }
+   ],
+   "acceptance_paths": [
+    ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+    ".claude/plans/legacy-cleanup/plan.md",
+    ".claude/plans/legacy-cleanup/prompt.md",
+    ".claude/plans/legacy-cleanup/spec.md"
+   ],
+   "leaf_ids": [
+    "0.2.c",
+    "9.3.a",
+    "10.2.a"
+   ],
+   "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+   "package_id": "INTEGRATE",
+   "work_map": ".claude/plans/legacy-cleanup/work.json"
+  }
+ },
+ "reviewer": {
+  "id": "cleanup-quality-reviewer",
+  "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+ },
+ "provenance": "declared",
+ "controls": [
+  {
+   "applicability": "applicable",
+   "id": "historical-spans",
+   "kind": "check",
+   "policy": {
+    "actor": null,
+    "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+    "effective_date": null,
+    "jurisdiction": null,
+    "source": ".claude/plans/legacy-cleanup/spec.md",
+    "version": "2026-09-25"
+   },
+   "requirement": "mandatory",
+   "status": "pass",
+   "reason": "Both independently attributed actors accepted only these 4 exact LF declaration digests; rejected, narrowed and superseded entries excluded.",
+   "evidence": [
+    ".claude/plans/legacy-cleanup/span-reviews/set03a-spec-decisions.json",
+    ".claude/plans/legacy-cleanup/span-reviews/set03a-quality-decisions.json"
+   ],
+   "observation": {
+    "span_declarations": [
+     "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
+     "4bf8437489a9ea93bb4e2554f5f60e8807372b58eccd5978022e7e56db317dbf",
+     "edc99d530a402524bc08e27b4480ea8582e45befe448581a278c0daa913fb801",
+     "f384e702e32f43583442c0f69a8390c1ce77b6223501814308c69c5e84d39483"
+    ],
+    "review_scope": "semantic classification only"
+   }
+  }
+ ],
+ "coverage": {
+  "0.2.c": [
+   "historical-spans"
+  ],
+  "9.3.a": [
+   "historical-spans"
+  ],
+  "10.2.a": [
+   "historical-spans"
+  ]
+ },
+ "evidence": [
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set03a-quality-decisions.json",
+   "sha256": "e1f52cf6a197218a14c37c06375547e416a689d09c4f824d71036062cb7c3f04"
+  },
+  {
+   "path": ".claude/plans/legacy-cleanup/span-reviews/set03a-spec-decisions.json",
+   "sha256": "5d1ee236f65140e1fb05053e95a2e8367bf4b537811e84d06c339ae97033a91c"
+  }
+ ]
+}

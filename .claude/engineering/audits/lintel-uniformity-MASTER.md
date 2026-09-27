@@ -1,5 +1,9 @@
 # Lintel uniformity audit — MASTER (top-20 ranked)
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Completed:** 2026-05-29 · branch `v4.0-phase1-meta-infra-spine`
 **Inputs:** 8 cohort findings files + 5 cross-cut files (X1–X5) in `.claude/engineering/audits/`. Scale audited: 144 skills, 83 agents, 19 hooks, 1 pack, 6 cross-cutting layers.
 **Method note:** removes nothing — every recommendation is an uplift to the strongest peer's depth, per the operator motto *kraftfullt från start, ständigt evolverande*.
@@ -18,7 +22,7 @@ These are not authoring tasks. They are **wiring + subtraction** — the cheapes
 
 The second theme: **a handful of real correctness bugs** (producer/consumer path mismatches) hiding under the uniformity gaps. Those are bugs, not taste — fix regardless of the broader reframe.
 
-The third theme: **first-party-first is broken in Lintel's own planner chain** (it calls gstack binaries on the execution path) — the exact rule Lintel ships a hook to enforce on others.
+The third theme: **first-party-first is broken in Lintel's own planner chain** (it calls retired-provider binaries on the execution path) — the exact rule Lintel ships a hook to enforce on others.
 
 ---
 
@@ -29,8 +33,8 @@ The third theme: **first-party-first is broken in Lintel's own planner chain** (
 | 1 | D7 | **pack-resolver has zero consumers** — pack-driven behavior is BROKEN; 16/18 entry-points hardcode `profile.yaml` grep against a different file than canonical `pack.yaml` | all phase skills, 8 role skills, sense, compliance-gate, context-warm-from-url | One `source lib/pack-resolver.sh` + `resolve_pack_field` at each skill head; delete duplicate grep sites | The whole v4.0 reframe rests on packs; the engine exists and is tested — this is the single change that makes "swap pack = swap behavior" true | S–M | — |
 | 2 | D10 | **lessons.md write-only** — cross-session memory broken; captured rule never reaches the BUILD implementer | plan, build, review, ship, all 6 planner skills, ~80 agents | Add a lessons-consult step at PLAN/BUILD/REVIEW head; SENSE already proves the pattern | Compounding edge is the motto's core; capture without consult is theatre | S | — |
 | 3 | D13 | **`_audit.sh` zero phase callers + 3 divergent audit writers**; block-overrides (secret, customer-data) bypass the unified trail | all phases, 17 logging hooks, cycle, ship | Route all audit writes through `_audit.sh`; migrate bespoke jsonl; add a reader | Override-with-audit is only real if the audit is unified and consumed | M | — |
-| 4 | D3 | **Storage-root schism + 2 live producer/consumer breakages** — `context-save`→`context-dump`/`warm-sessions` can't find files; planner chain reads `~/.gstack` but office-hours writes `~/.lintel` | context-save/dump/warm-sessions, office-hours, all 5 plan-* reviews | Pick one canonical root; fix the two broken read paths | These are correctness BUGS, not style — features silently no-op today | S | DEC-4 |
-| 5 | promise | **First-party-first BROKEN in own planner chain** — reviews + codex + design-review call gstack-plugin binaries on the execution path | plan-ceo/eng/design/devex-review, codex | Replace gstack binary calls with first-party/in-repo equivalents | Lintel ships `non-first-party-warn` to enforce this on others; it violates it itself | M | — |
+| 4 | D3 | **Storage-root schism + 2 live producer/consumer breakages** — `context-save`→`context-dump`/`warm-sessions` can't find files; planner chain reads `~/.retired-provider` but office-hours writes `~/.lintel` | context-save/dump/warm-sessions, office-hours, all 5 plan-* reviews | Pick one canonical root; fix the two broken read paths | These are correctness BUGS, not style — features silently no-op today | S | DEC-4 |
+| 5 | promise | **First-party-first BROKEN in own planner chain** — reviews + codex + design-review call retired-provider-plugin binaries on the execution path | plan-ceo/eng/design/devex-review, codex | Replace retired-provider binary calls with first-party/in-repo equivalents | Lintel ships `non-first-party-warn` to enforce this on others; it violates it itself | M | — |
 | 6 | D4 | **DISCOVER dynamic dispatch omits `frontend` category** (1-word fix) + 11 orphan agents never invoked | discover, 5 frontend agents + 11 orphans | Make the scan directory-derived (`for cat in agents/*/`); wire Explorer→DISCOVER, ResearchSynthesizer→/research | 5 agents permanently unreachable via the dynamic path; one-line fix kills the whole drift class | XS–S | — |
 | 7 | depth | **Data Architecture is the thinnest engineering domain** — 2 agents, 0 skills/hooks/audit/gate, vs Security-Compliance's full block-on-ship stack | DA domain | Build DA enforcement layer copying SC's proven stack (3 designed hooks + module verdict) | A destructive migration / untagged-PII schema reaches main with zero DA gate today | L | v4.1 module work |
 | 8 | D14 | **necessity + gap_if_skipped absent on ~148 components** — skipping a step silently degrades the result with no signal | all skills, agents, hooks | Make `necessity` + `gap_if_skipped` required frontmatter; backfill top-20 first | Architect declares it per-section; Lintel asserts "ship-ready" without saying what was skipped | M | DEC-8 |
@@ -45,7 +49,7 @@ The third theme: **first-party-first is broken in Lintel's own planner chain** (
 | 17 | D13 | **Counts drift / stale docs** — README says "14 hooks" (actual 19), "81 skills"/"78 agents" (actual 144/83) | README, CLAUDE.md, design docs | Regenerate counts; tie to a count-check (L-003 made mechanical) | The repo's own L-003 lesson; a generated wiki/CATALOG closes it | S | — |
 | 18 | D3 | **`cycle` promises `tokens_est_typical`** no phase frontmatter declares — broken reference | cycle + 8 phases | Add the field to phase frontmatter, or stop promising it | Dry-run/progress output references a field that doesn't exist | XS | — |
 | 19 | D2/D13 | **Observability non-uniform across phases** — composites indistinguishable from raw `/li:cycle` in logs; SENSE/DISCOVER/SHIP lack peers' analytics | 8 phases + 4 composites | Uniform analytics line per phase + composite tag | Can't measure what you can't see; composites vanish in telemetry | S | DEC-3 |
-| 20 | D6/D12 | **plan-design-review is the weakest planner** — gstack path bug, no checkpoint, claude-only cli_support, depends on external gstack binary | plan-design-review | Raise to plan-eng-review's bar (BLOCKING gate, checkpoint, in-repo) | Strongest peer (plan-eng-review) sets a clear bar; this one is below on 5 dims | M | DEC-5 |
+| 20 | D6/D12 | **plan-design-review is the weakest planner** — retired-provider path bug, no checkpoint, claude-only cli_support, depends on external retired-provider binary | plan-design-review | Raise to plan-eng-review's bar (BLOCKING gate, checkpoint, in-repo) | Strongest peer (plan-eng-review) sets a clear bar; this one is below on 5 dims | M | DEC-5 |
 
 ---
 
@@ -63,7 +67,7 @@ The third theme: **first-party-first is broken in Lintel's own planner chain** (
 
 1. **Wiring sprint (findings #1, #2, #3, #6, #12, #15):** pack-resolver adoption + lessons read-side + unified audit + DISCOVER frontend fix. All cheap; converts 4 broken/partial promises to upheld. *This is itself a meta-infra change — ships under Gate M1–M4.*
 2. **Correctness bugs (#4, #18):** storage-root + broken read paths + tokens_est reference. Fix regardless.
-3. **First-party-first (#5):** de-gstack the planner chain.
+3. **First-party-first (#5):** native-ownership the planner chain.
 4. **Contract sprint (#8, #14, #17):** necessity field + agent frontmatter normalization + counts regen — the substrate a continuous uniformity shape-test would later check (the parked reframe).
 5. **Designed-not-built, on-schedule (#11, #13):** envelope (Phase 2), Brief Forge (Phase 3) per existing v4.0 plan.
 6. **Domain depth (#7):** build DA first using SC as template (v4.1).

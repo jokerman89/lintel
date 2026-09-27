@@ -85,11 +85,17 @@ standalone MARS stays advisory.
 
 Applied: cycle Step 5 (surfaces PLAN's recorded answer, never offers), plan Step 10
 (option E), review Stage 1/2 (method packet) and Step 6b (panel mode), code-review
-(optional panel), Copilot `WORKFLOWS` and the MARS resource closure. Pending on the native
-planning and quality consolidation: the inspection workflow replacing plan-eng-review,
-define's spec review, cross-check and CodeReviewer
-(`skills/mars/references/integration.md`). A repository-wide drift guard (no rubric outside
-the method) waits for that consolidation; today's guard covers REVIEW's prompts.
+(optional panel), Copilot `WORKFLOWS` and the MARS resource closure.
+
+_Implementation status, 2026-09-25:_ after this ADR merged as `af94ff74`, the native workflow
+consolidation (ADR-0034) applied the remaining hooks: `inspect` (standalone outside voice,
+caller `inspect`), `define` Step 7 (standalone cross-model second opinion), `cross-check`
+(one reviewer; a multi-model request is `/li:mars`) and `CodeReviewer` (follows a dispatched
+method packet). See `skills/mars/references/integration.md`; `tests/unit/mars_hooks.py` checks
+those joins and that REVIEW's declared callers stay under REVIEW panel enforcement. A
+repository-wide drift guard (no rubric outside the method) is still pending; today's guard
+covers REVIEW's prompts. The wording at merge is in the
+[`af94ff74` snapshot](https://github.com/jokerman89/lintel/blob/af94ff7499cbb3a180be3be4eadbfd05e8aa16f7/.claude/decisions/0036-mars-multi-model-review.md#implementation-notes).
 
 ## References
 

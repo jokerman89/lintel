@@ -8,6 +8,25 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Native workflow cleanup (2026-09-25)
+
+**Status:** all six isolated implementation lanes are integrated on verified main
+`77cb8d3f893d2ef42be2631fe35ae45594f21bd3`; final acceptance is incomplete.
+The [work map](../plans/legacy-cleanup/work.json) and
+[integration handoff](../plans/legacy-cleanup/integration-state.md) own the original
+cleanup tasks, remaining structural census gate, preserved worker commits and actual
+review/verification boundaries. Coordinator host/routing identity is
+`e9c20b62-f877-4242-82cd-b5002d452da8`; parent is `f4584b03`.
+
+**What's pending:** freeze the reviewable aggregate draft, reuse spec reviewer
+`1742f900-1de4-4a59-beee-95c3a907a063` on exact current inputs, then use a separate
+quality reviewer. Obtain cleanup-specific strict hosted CI and close the actual
+current-routing guard; source-only checks are not native artifact or shared runtime
+acceptance. Seven downstream documentation drafts wait for this aggregate merge.
+Keep generation-1 profile observations historical; final preparation uses the
+explicitly rebound generation-2 target-local context. No denied environment launcher
+is resumed, and the PDF reader removed by ADR-0033 stays absent.
+
 ## Active - Universal implementation (2026-09-20)
 
 **Recovery, updated 2026-09-23:** the operator transferred the broken MasterSession to
@@ -710,8 +729,8 @@ regression assertions (L-012). M2 GREEN. Manifests 5.4.0.
 
 **What shipped:** 6-persona adversarial battletest (.claude/engineering/audits/2026-06-12-battletest-synthesis.md,
 6 KO + 24 HARD). ADR-0010 security (block-hook bypass + modern tokens + vault PII scan + sed RCE
-+ CR/LF-safe audit/state), ADR-0011 gstack de-heritage (44 edits/30 files, zero loss, grace
-2026-09-12), ADR-0012 agent memory:/model: (23+4). Friction: resume↔context-restore, honest cost
++ CR/LF-safe audit/state), ADR-0011 native workflow ownership (44 edits/30 files, zero loss, grace
+2026-09-12), ADR-0012 agent memory:/model: (23+4). Friction: resume and checkpoint restore, honest cost
 gates, DEFINE feature fast-path, SENSE marker-gate. New behavior tests caught 3 real bugs incl. a
 P0 forgeable-override I introduced (L-012). Suite 76/76. Manifests 5.2.0.
 
@@ -815,7 +834,7 @@ L-011 captured (structural estimates are ceilings).
 - **Feature 1 (jobs system):** ~/.lintel/jobs/_active.md as single source of truth. 3 hooks (job-begin, job-end, job-stale-warn). 2 skills (`/li:jobs`, `/li:status`). `workflow_root: true` frontmatter flag on cycle + plan. Helper bin/_jobs.sh.
 - **Feature 2.1:** plan declares workflow_root: true (spawns its own job when invoked standalone).
 - **Feature 2.2:** prompt.md generation moved from CAPTURE to PLAN. Trio (plan.md + spec.md + prompt.md) born together. CAPTURE now reaffirms (annotates with build evidence), doesn't regenerate.
-- **Feature 2.3:** granularity hard check in plan-eng-review Step 0 — per-task ≤5min (operator-LOCKED). Tasks >5min trigger decompose-or-accept AskUserQuestion.
+- **Feature 2.3:** granularity hard check in engineering inspection Step 0 — per-task ≤5min (operator-LOCKED). Tasks >5min trigger decompose-or-accept AskUserQuestion.
 - **Feature 2.4:** plan/SKILL.md documents Module-callable section. Three invocation modes documented (inside cycle, standalone, sub-module called by another workflow_root skill). --no-job flag for nested calls.
 
 **Concept docs:** docs/concepts/jobs-system.md + docs/concepts/planner-as-module.md.

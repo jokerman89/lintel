@@ -57,7 +57,7 @@ Do not claim a hook, tool, independent reviewer or host execution from a declara
 
 This skill's output voice resolves from the active pack (`resolve_pack_field voice.default_tier`; neutral default: `internal`). A pack may map a tier to a voice corpus (`resolve_pack_field voice.corpus`; none by default) and a voice-critic check that surfaces non-conforming output to the operator before it lands.
 
-If `voice: internal`: direct, builder-talking-to-builder. No voice-corpus overhead.
+If `voice: internal`: direct engineering prose focused on decisions, evidence and risks. No voice-corpus overhead.
 
 If `voice: mixed`: this skill produces both internal and customer-facing output. The skill body explicitly tags which sections are which.
 

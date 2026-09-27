@@ -8,7 +8,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
-gap_if_skipped: "Ad-hoc phase sequencing without cost-estimate gate, founder-approval gate, or compliance gates between REVIEW and SHIP."
+gap_if_skipped: "Ad-hoc phase sequencing without cost-estimate, operator scope approval, or compliance gates between REVIEW and SHIP."
 navigation:
   primary_intent: full feature/cycle work with structured 9-step pipeline
   triggers:
@@ -37,6 +37,21 @@ Coordinates execution of the Lintel cycle (8 core phases + the light SCOPE phase
 SCOPE is a light, skippable phase (like DEFINE): it sizes + disambiguates the request before DEFINE burns tokens. Light modes (hotfix) skip it.
 
 Each phase is its own skill (`/li:sense`, `/li:define`, etc.). CYCLE chains them with gates between, propagates context, handles pause-points.
+
+### Select a bounded route
+
+Use one cycle identity and the same selected work map across these routes:
+
+| Intent | Invocation | Preserved boundary |
+|---|---|---|
+| Research without implementation | `/li:cycle --mode research-dive` | SENSE, DEFINE and DISCOVER produce sourced findings and uncertainty, not BUILD approval |
+| Plan and execute an approved design | `/li:cycle --from PLAN --to BUILD` | Original task IDs and BUILD package reviews remain required; integrated REVIEW/SHIP/CAPTURE are deferred |
+| Review and deliver a built candidate | `/li:cycle --from REVIEW --to CAPTURE` | Same-context review/QA, existing publication authority and CAPTURE remain required |
+
+A selected Spec Kit map keeps its original artifacts; a route never creates another
+backlog or upgrades a missing review. After a partial range, `/li:resume` returns to
+the actual unfinished phase. Research framing remains task-relevant, not a mandatory
+venture interview, and artifact writes still require authority.
 
 ## When to use
 
@@ -150,6 +165,21 @@ question. A new scope or irreversible action still requires authorization for th
 Use [task-relevant intake](../define/references/intake.md) and the
 [selected work-map contract](../spec-kit/references/work-map.md). A read/review
 operation never becomes BUILD/SHIP because its topic mentions a release or deployment.
+
+### Explicit confirmation and owned recovery
+
+For high-stakes work, state the mutation scope and expected effect, show the intended
+command, and identify a verified owned baseline or approved recovery path before
+acting. A requested per-mutation confirmation cadence applies to that scope; ask
+only unresolved decisions or new permission boundaries, never repeat settled approval.
+Keep mutations sequential when that cadence was requested, then verify the actual
+result before proceeding. A backup, a valid rollback and permission to run it are
+separate facts. Never use a whole-tree reset to undo an owned change.
+
+Use the trusted shared audit writer for sanitized reason/scope/result where required.
+An unavailable mandatory audit or failed validation blocks the affected continuation;
+do not silently roll back or treat an advisory check as enforcement. This guidance
+does not switch host modes, register hooks or override host/enterprise controls.
 
 ### Step 0 — Dry-run mode (v3.6 cohort 3 item 2.5)
 

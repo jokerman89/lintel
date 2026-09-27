@@ -121,7 +121,7 @@ class SharedBinding(unittest.TestCase):
                     "LINTEL_STATE_DIR", "LINTEL_JOBS_DIR", "LINTEL_REPO_ROOT"):
             self.assertTrue(Path(self.env[key]).resolve().is_relative_to(self.root), key)
         self.assertFalse(any(key in self.env for key in (
-            "GSTACK_HOME", "GH_TOKEN", "GITHUB_TOKEN", "PACK_CACHE_FILE", "BASH_ENV",
+            "GH_TOKEN", "GITHUB_TOKEN", "PACK_CACHE_FILE", "BASH_ENV",
             "PYTHONPATH", "LINTEL_PROFILE_REFERENCE", "GIT_CONFIG_COUNT",
         )))
         self.assertEqual(Path(self.env["HOMEDRIVE"] + self.env["HOMEPATH"]).resolve(), self.home)
@@ -900,7 +900,7 @@ class SharedBinding(unittest.TestCase):
                 self.fixture.save()
                 rejected = self.consume("validate", profile_args=False, expected=1)
                 self.assertIn("shared.skill", {item["code"] for item in rejected["diagnostics"]})
-        for value in ("review", "plan-eng-review", "review-" + "a" * 96):
+        for value in ("review", "inspect", "review-" + "a" * 96):
             with self.subTest(value=value):
                 review.validate_shape(value, "skill")
                 self.paths["review_skill"] = value

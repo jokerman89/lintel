@@ -27,7 +27,7 @@ This phase is where most token spend happens. Cost-estimate from PLAN sets expec
 
 ## When to use
 
-- After PLAN has APPROVED plan.md with founder gate passed
+- After PLAN has APPROVED plan.md within the operator's authorized scope
 - For hotfix mode: lighter version, skip continuous review, fast iteration
 - Standalone if operator has existing plan.md and wants execution
 
@@ -309,21 +309,25 @@ leaves and their impacted verification. Do not repeat unrelated checks without a
 
 ### Step 4 — Continuous checkpoint (if checkpoint_mode=continuous)
 
-After a coherent package passes review:
+After a coherent package passes review, keep a scoped Conventional Commit and the
+durable mapped handoff. Existing `checkpoint_mode` and `checkpoint_push` preferences
+remain readable; they never authorize publication outside the current task.
 ```bash
 git add <intentional files only — NEVER git add -A>
 git commit -m "<type>: <package outcome>
 
-[lintel-context]
 Decisions: <key choices made>
 Remaining: <what's left in logical unit>
-Skill: /li:build (package P<N>, leaves <IDs> in plan.md)
-[/lintel-context]"
+Work-map: <selected work.json>
+Package: <original package ID>
+Leaves: <original leaf IDs>"
 ```
 
-NEVER `git add -A`. NEVER commit broken state. Operator can resume from any WIP via `/li:context-restore`.
+NEVER `git add -A`. NEVER commit broken state. Use `/li:pause` for an owned checkpoint;
+`/li:resume --from <path>` reads it without discarding the selected work map.
 
-If `checkpoint_push: true`: also push WIP to origin.
+If `checkpoint_push: true`, push only when the current authorization covers that
+reviewed batch and destination. Otherwise retain the checkpoint locally.
 
 ### Step 5 — Build log
 
@@ -357,12 +361,15 @@ ts: <timestamp>
 ### Step 6 — All tasks complete: final pass
 
 After last task DONE:
-1. Run full test suite (`/li:qa` invoked)
+1. Run the applicable final test suite through `/li:verify` without edits
 2. Check no regressions in unmentioned areas
 3. Invoke `/li:analyze --map <same selected map>` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every original
    task has a terminal status, no untasked work shipped, deviations reflected back. Surface the
    report verdict; RED/YELLOW findings go to the operator (advisory, not a hard block).
-4. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
+4. If a specialist walkthrough was requested, delegate a bounded review through the
+   actual native host or preserve the same brief for an independent external actor.
+   Include original work/leaf IDs, profile, exact result and read scope. Reviewers
+   report; implementers fix. Serial self-review is not independent review.
 5. Write the 00-state.md BUILD entry via `state_append` (Step 7)
 
 ### Step 7 — 00-state.md append
@@ -469,7 +476,9 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **Reviewer unavailable**: preserve implementation evidence; keep a substantive package open
   until independent review is available. For an eligible mechanical package, the coordinator
   can apply the documented inline review. Never label missing review as completed review.
-- **Test suite breaks during task**: revert task, mark BLOCKED, investigate via `/li:investigate`.
+- **Test suite breaks during task**: preserve the owned change, mark the affected
+  leaf BLOCKED and diagnose via `/li:diagnose`. A rollback requires its own scoped
+  authority and must preserve unrelated or later edits.
 - **A blocking compliance hook fires repeatedly**: STOP. Investigate why operator's content keeps triggering. Likely real issue.
 - **Voice gate fails 3x for same artifact**: surface to operator, decide accept-with-caveat or re-write from scratch.
 

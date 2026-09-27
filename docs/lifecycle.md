@@ -193,9 +193,11 @@ Private storage is `LINTEL_PRIVATE_ROLES_DIR`, or `<home>/roles/private/`; publi
 the configured pack role directory, otherwise `<home>/roles/`. Review the destination
 before choosing public scope. Keep private drafts and evidence out of committed artifacts.
 
-`persona-sources` lists configured pack and target persona resources. Audience rotation
-is a current-conversation overlay; clearing it does not erase chat history. It never
-rewrites durable working state or assumes delegates inherit private context.
+`persona-sources` lists configured pack and target persona resources. The skill route is
+`/li:role --audience [name]`, with `/li:role --clear-audience` to clear the overlay.
+Audience rotation is conversation-only; clearing it does not erase chat history or change
+the persistent working role. It never rewrites durable working state or assumes delegates
+inherit private context.
 
 ## Host controls and historical recovery
 
@@ -214,13 +216,17 @@ never authorizes deletion.
 `li-doctor --source <source> --target <consumer> --json` diagnoses local profile,
 foundation/layout and adapter files without running host plugin commands. It compares
 installed hook bytes where both roots exist, preserves operator extras, and labels cached
-versions/historical audit logs as unverified activation evidence. `health` is a view of the
-same result; source structure checks are separate from installation and live-host checks.
+versions/historical audit logs as unverified activation evidence. `/li:doctor` owns the
+health views (`--quick`/`--fast`, `--layers-only`, `--hooks-only`, `--upstream-only`) over
+that actual helper result; a view does not add a remote check or prove activation.
+Source structure checks remain separate from installation and live-host checks.
 
 `li-lifecycle.py migrations [--all]` reads the source migration catalog. Open/overdue/
 archived schedules are distinct from actual target observations. Missing catalogs and
-malformed metadata are errors; absent detectors are unknown. `v4-migrate` remains an
-opt-in historical inspection and explicit pack-switch route, not a neutral fallback.
+malformed metadata are errors; absent detectors are unknown. `/li:migrations` retains
+historical inspection and explicitly authorized apply/rebind guidance. Inspect before
+applying; an expired date, missing policy or retired wrapper is not a neutral fallback
+or permission to remove saved data.
 
 Layout observations use checked, same-location native I/O for the marker, legacy files
 and nested directories. Missing paths are distinguished from inspection failures;

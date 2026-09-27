@@ -29,9 +29,18 @@ source even though PDF editing is not promised.
   with `--format pdf`, external input context, original package/leaves and live
   profile. Retain the full content and design bytes without inventing a
   `per_format.pdf` layout. Input admission is not a conversion or PDF inspection.
-- Preserve `--out`, `--format <a4|letter|custom>`, `--orientation`,
-  `--header-footer <yaml>`, `--print-css` and `--no-background` from
-  [make-pdf](../make-pdf/SKILL.md).
+- `--out <path>` selects the PDF destination. If omitted, propose
+  `<input-stem>.pdf` in the working directory and apply the same explicit
+  ownership/no-overwrite checks before publication. Inline input first gets an
+  owned editable source; URL input uses its selected document name, never a
+  credential-bearing query string.
+- `--format <a4|letter|custom>` defaults to `a4`; `--orientation
+  <portrait|landscape>` defaults to `portrait`. Custom size requires explicit
+  `@page` print CSS, not a guessed dimension.
+- `--header-footer <yaml>` selects declarative title/date/page content;
+  `--print-css <path>` selects the print stylesheet. Missing or malformed
+  explicit input stops before print rather than silently choosing a default.
+- `--no-background` removes CSS backgrounds for print, not content images.
 - `--customer-share` applies the actual profile's customer-facing controls.
   `--accessible` requires actual PDF structure/reading-order/link/accessibility
   evidence, not merely searchable text or a structure-tree flag.
@@ -50,7 +59,7 @@ TLS negotiation; no installation or verification bypass followed. The independen
 **explicit HTML** route remains usable. AI-authored HTML from a brief is retained
 and compared with the complete source; it is not an executed Markdown conversion.
 
-Use the accepted [A16 browser provider](../browse/references/browser-operations.md)
+Use the accepted [browser provider](../web-session/references/browser-operations.md)
 for real print, with P03 URL guards and caller-verified P07 work/profile context.
 The helper consumes public `Admission`, `BrowserSession.start`, `open`, `media`,
 `read`, `print` and `close` operations, not a daemon or private CDP extension.
@@ -131,6 +140,20 @@ checks, preserving unverified QA status when applicable. No overwrite, URL
 refusal, incomplete cleanup or timeout is converted to successful completion.
 The provider's real DOM read bounds cause explicit refusal, never source truncation.
 
+## Direct conversion examples
+
+```text
+/li:generate-pdf --input design-doc.md --out design-doc.pdf
+/li:generate-pdf --input report.html --format letter --orientation landscape --out report.pdf
+/li:generate-pdf --input https://docs.example.com/runbook --header-footer header-footer.yaml --out runbook.pdf
+```
+
+Markdown requires its selected available converter. URL input requires an authorized
+guarded origin with no personal cookies or credential transfer. These are invocation
+examples, not executed conversion or inspection evidence. Use
+`/li:web-session --mode browse` for page interaction without PDF output and
+`/li:generate-web --mode mockup` for an editable single-file HTML source.
+
 ## Roles, status and evidence
 
 Retain WordTechnicalEditor as the read-only document-structure/accuracy method,
@@ -139,11 +162,21 @@ Use actual available delegation only; do not invent a role or independent review
 Apply configured brand references from explicit verified paths, never a personal
 template scan. A PDF visual reference is not itself a writer or required template.
 
-- **DONE:** all requested writer/fidelity/visual and policy controls met.
-- **DONE_WITH_CONCERNS:** mandatory observations complete, advisory concerns only.
+- **DONE:** every applicable mandatory control in the selected required QA inventory
+  was actually met, including required PDF text, page, visual, fidelity and policy
+  observations. Successful preparation/print cannot stand in for inspection.
+- **DONE_WITH_CONCERNS:** all selected mandatory observations are complete; only
+  advisory concerns remain.
 - **BLOCKED:** missing selected converter, writer or print error, partial content,
-  failed required check or unverified required visual inspection.
+  failed required check, unknown required applicability, or any missing/unverified
+  mandatory PDF text, page or visual observation.
 - **NEEDS_CONTEXT:** missing source/output authority or unresolved applicability.
+
+**Partial artifact, not completion:** when writing succeeds but a required observation
+is unavailable, preserve and return the owned PDF path with **BLOCKED** and the exact
+missing obligations. Do not call that an inspected/complete PDF. The QA inventory is
+selected before observations; never omit, downgrade or waive a requirement after seeing
+the result, and never restore/install the removed reader to bypass its boundary.
 
 Record exact input/output hashes, converter/library/browser versions, actual
 URL/origin/process/context/cleanup evidence and the precise text, page and visual

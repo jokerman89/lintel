@@ -1,5 +1,9 @@
 # Prioriterad åtgärdslista
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/audits/2026-09-20-universal-quality/action-plan.md) remains at that immutable revision.
+> Original IDs, dates, requirements and results are retained; no check was rerun.
+
 Förslag efter granskning av main `28061e4`, 2026-09-20. Inga produktändringar är genomförda.
 Varje kort nedan är ett sammanhållet resultat. Vid implementation delas det i korta, verifierbara
 deluppgifter enligt ADR0026; exekvering och oberoende granskning sker per arbetspaket.
@@ -170,7 +174,7 @@ en saknad eller underkänd obligatorisk domän kan inte döljas i snittet. Ingen
 Styr frågor efter beslut som saknas, uppgiftstyp och risk. Företagsmigrering, underhåll och
 research ska inte automatiskt få en startupintervju. Gör autoplan/plan-and-build/review-and-ship
 till tydliga sammansättningar över samma kärna. Flytta venture-linsen till valbart läge/paket.
-Behåll plan-tune vilande tills inställningarna har verkliga läsare.
+Keep the predecessor planning-preference adjustment dormant until its settings have real readers.
 
 **Klart när:** samma indata ger samma arbetsartefakter och godkännandestatus oavsett ingång;
 redan besvarade frågor och given behörighet återanvänds. Kort arbete får proportionerlig process.
@@ -247,7 +251,7 @@ beräkning har rätt sorts kontroll. Saknad renderer ger ett tydligt ofärdigt r
 **Prioritet:** P2. **Beroenden:** A06 och A01 för URL-hantering.
 **Belägg:** CP-03/08/13.
 
-Samordna browse, managed-browser, cookies, scrape och make-pdf med preview/design/QA.
+Coordinate browser navigation, managed sessions, cookie access, extraction and PDF printing with preview/design/QA.
 Använd klientens faktiska browserstöd när det finns; beskriv öppna/läsa/agera/skärmbild/utskrift
 och sessionsägande. Anta inte att en profilkatalog innebär att en browsermotor är installerad.
 

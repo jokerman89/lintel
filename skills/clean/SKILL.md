@@ -1,7 +1,7 @@
 ---
 name: clean
 layer: foundation
-description: Manual self-maintenance trigger. Suggests /context-save + restart when session feels heavy.
+description: Use for an honest context-weight readout and a pause/fresh-session/resume path when the current session feels heavy.
 color: yellow
 tools: Read, Bash, Grep
 voice: internal
@@ -10,10 +10,12 @@ cli_support: [claude-code]
 
 # /clean
 
-Manual companion to the Layer 4 context-bloat watchers. Operator runs this when a session feels heavy (or when a watcher fired and you want to act). Outputs a short readout + offers the cleanup path: `/context-save` → restart fresh session → `/context-restore`.
+Manual companion to optional context-bloat watchers. When a session feels heavy, show
+the available observations and the continuity path: `/li:pause`, a fresh session, then
+`/li:resume --from <checkpoint>`. Nothing is compacted or deleted automatically.
 
 **Lintel cannot expand or erase a host's active model context.** This is a
-compatibility entry into P03 context-budget/save/restore guidance, not a second
+compatibility entry into shared context-budget/checkpoint guidance, not a second
 context policy or compaction engine.
 
 ## When to use
@@ -21,7 +23,7 @@ context policy or compaction engine.
 - A watcher hook fired and surfaced "consider /clean"
 - You FEEL the session got heavy — output quality dropped, you're repeating context, tool-call rate accelerated, agent forgets earlier decisions
 - Before stepping away for >2 hours (so resume is clean)
-- After a long multi-skill chain (office-hours → plan-eng-review → implementation) where the chain itself ate context
+- After a long DEFINE, PLAN and BUILD sequence consumed substantial context
 
 ## When NOT to use
 
@@ -53,7 +55,7 @@ context policy or compaction engine.
 4. **Decision tree:**
    - If relevant signals are unknown, report unknown; absent telemetry is not green.
    - Supplied observations below configured advice thresholds do not certify session health.
-   - If session is ABOVE warn threshold(s): recommend `/context-save` + restart.
+   - If session is ABOVE warn threshold(s): recommend `/li:pause` + restart.
    - Reuse a checkpoint only after verifying its selected work/profile and contents,
      not simply because it is younger than five minutes.
 5. **Print readout + offer next step.**
@@ -65,7 +67,7 @@ context policy or compaction engine.
 Session observations: within configured advisory thresholds; host headroom still requires evidence
   Estimated tokens: ~24,000 (warn at 50,000)
   Tool calls: 42 (warn at 80)
-  Skills invoked: office-hours, plan-eng-review
+  Skills invoked: define, inspect
   Time elapsed: 1h 47m
   Latest checkpoint: 2h ago (.claude/runtime/sessions/main/20260527-...-context-save.md)
 
@@ -77,12 +79,12 @@ No cleanup needed yet. Run /clean again if session grows heavier.
 Session observations: over a configured advisory warning
   Estimated tokens: ~62,000 (warn at 50,000 — exceeded)
   Tool calls: 73 (warn at 80 — close)
-  Skills invoked: office-hours, plan-eng-review, plan-eng-review, /clean
+  Skills invoked: define, inspect, build, clean
   Time elapsed: 3h 12m
   Latest checkpoint: 45m ago
 
 Recommended:
-  1. /context-save phase-2-batch-1 (write a checkpoint)
+  1. /li:pause phase-2-batch-1 (write a checkpoint)
   2. Close this session
   3. Open a fresh session in the actual host, restore the owned checkpoint
 
@@ -98,9 +100,9 @@ Session health: ✗ context bloat likely
   Time elapsed: 5h 22m
 
 STRONG recommendation:
-  1. /context-save (now — before more work fights heavier context)
+  1. /li:pause (before more work adds context)
   2. Close session
-  3. Fresh session → /context-restore
+  3. Fresh session → /li:resume --from <checkpoint>
 
 If you push past this, expect:
   - Slower tool calls
@@ -121,12 +123,12 @@ If you push past this, expect:
 Only a real supported host operation can compact a conversation. This skill:
 
 - Surfaces the right thresholds
-- Suggests the right ritual (`/context-save` + restart + `/context-restore`)
+- Suggests `/li:pause` + restart + `/li:resume --from <checkpoint>`
 - Doesn't perform any auto-action — operator owns the call
 - Keeps selected-map/P07 references in the checkpoint through the shared lifecycle.
   Disk archiving and future read exclusions cannot reclaim already-sent context.
 
-That's the design per office-hours D5 (hybrid soft-warning + manual /clean) and reframed per eng-review A5 (watchers, not "self-maintenance").
+These are optional observations and manual continuity steps, not a background maintenance engine.
 
 ## Failure modes
 
@@ -149,12 +151,12 @@ No cleanup needed yet.
 > /clean
 Session health: ✗ context bloat likely
   ...
-STRONG recommendation: /context-save then restart.
+Recommendation: /li:pause, then resume the owned checkpoint in a fresh session.
 ```
 
 ## See also
 
-- `/context-save` — paired write step
-- `/context-restore` — paired read step
+- `/li:pause` — paired write step
+- `/li:resume --from <checkpoint>` — paired read step
 - Optional watcher hooks — registration and observation must be separately verified
 - `~/.lintel/config.yaml` — threshold overrides

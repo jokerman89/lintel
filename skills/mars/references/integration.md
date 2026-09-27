@@ -26,23 +26,11 @@ never consent; ask with the offer text in [the skill](../SKILL.md).
 | `skills/cycle/SKILL.md` Step 5 | surfaces PLAN's `mars_offer` | never offers, repeats or upgrades |
 | `skills/review/SKILL.md` Stage 1/2 | the shared method packet | same packet a MARS slot receives |
 | `skills/review/SKILL.md` Step 6b | panel mode, standalone only | REVIEW records its own decision from the adjudicated outcome |
-| `skills/code-review/SKILL.md` | optional panel for high-risk diffs | Codex gate and evidence gate unchanged |
-
-## Pending hooks for the consolidated planning and quality workflows
-
-The native planning consolidation replaces `plan-eng-review` (and related plan reviews)
-with a consolidated inspection workflow and rewrites `define`; the quality consolidation
-renames `codex` to `cross-check` and revises `CodeReviewer`. Apply these on that base,
-not to the files being removed:
-
-- **Inspection (replacing `plan-eng-review`):** its optional outside-voice step routes to
-  `/li:mars` with caller `plan-eng-review` or the new workflow name; stays informational.
-- **`define` spec review:** the optional cross-model second opinion routes to `/li:mars`
-  with subject kind `problem` or `spec`, standalone only (inside a cycle PLAN owns the offer).
-- **`cross-check`:** keeps the single independent reviewer; a multi-model request is
-  `/li:mars`, never a role-played panel inside `cross-check`.
-- **`CodeReviewer`:** when dispatched with a method packet, follow the packet's rubric and
-  report shape; its own dimension list is background, not a second rubric.
+| `skills/code-review/SKILL.md` | optional panel for high-risk diffs | optional cross-check pass and evidence gate unchanged |
+| `skills/inspect/SKILL.md` Report and reconcile | optional outside voice, standalone only (caller `inspect`) | informational; never sets the verdict |
+| `skills/define/SKILL.md` Step 7 | cross-model second opinion, subject kind `problem` or `spec`, standalone only (caller `define`) | review input, not approval; inside a cycle PLAN owns the offer |
+| `skills/cross-check/SKILL.md` When to use | keeps one independent reviewer | a multi-model request is `/li:mars`, never a role-played panel |
+| `agents/engineering/CodeReviewer.md` Workflow | follows a dispatched method packet | its dimension list is background, not a second rubric |
 
 ## Distribution
 

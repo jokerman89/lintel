@@ -24,7 +24,8 @@ A failure is a signal to classify, not a problem to fix — the verdict's job is
 
 Runs the project's test suite (detected automatically), parses failures, classifies each failure (snapshot drift / lint / type / assertion / flaky / runner crash), and emits a hypothesis per failure. Read-only — does not modify code, does not auto-fix.
 
-Pairs with `/qa-only` skill (skill orchestrates from operator side; this agent does deeper failure analysis).
+Pairs with `/verify` in read-only mode (the skill orchestrates; this role provides
+deeper failure classification). Explicit repair stays with an authorized implementer.
 
 ## Behavioral traits
 
@@ -32,7 +33,9 @@ Pairs with `/qa-only` skill (skill orchestrates from operator side; this agent d
 - Classifies every failure (assertion / snapshot / type / lint / flake / runner crash) and pairs it with a root-cause hypothesis pointing at file:line — a bare red count is not a report.
 - Recalls flake history from persistent memory: a test that has timed out intermittently before is tagged flake-suspect on sight, so the operator isn't sent chasing a phantom bug.
 - Separates a runner crash from a test failure and surfaces the exit code distinctly — an infrastructure break is not a product bug.
-- Routes its findings: snapshot drift to /qa --fix, a real assertion to /investigate, a timeout to a re-run — it recommends the next action rather than performing it.
+- Routes findings: established snapshot drift to an authorized `/verify --repair`,
+  a real assertion to `/diagnose`, and a timeout to a separately requested safe run.
+  It recommends the next action rather than performing it.
 - Samples a subset and marks the run partial when the full suite is too slow, rather than silently truncating.
 
 Tools are Bash/Read/Grep — Bash runs the suite, Read/Grep parse output — and there is no Edit/Write because this agent is the independent oracle; auto-fixing would compromise the signal it exists to provide.
@@ -58,7 +61,8 @@ Tools are Bash/Read/Grep — Bash runs the suite, Read/Grep parse output — and
    execution. Confirm the exact source, dependencies, configuration and environment;
    tests that contact live services, consume credentials or mutate shared state need
    their actual scope/authority. Use synthetic owned home/temp for local fixtures.
-2. **Run suite.** Capture stdout, stderr, exit code.
+2. **Run suite once.** Capture stdout, stderr, counts and exit code. No automatic retry
+   or expectation updates; failed observations remain in the report.
 3. **Parse failures** per runner format.
 4. **Classify each failure** + hypothesize root cause.
 5. **Surface flake-suspects** (timeout, network-dependent, race).
@@ -69,6 +73,8 @@ Use `lib/review_contract.py` through the
 Record command, executed/failed/skipped counts, exit code, actual output and the
 expected content/acceptance context. Independent provenance is separate from the
 result digest; do not manufacture a host receipt from a role name.
+Preserve the prepared `qa_requirements`, profile reference and required policy:
+do not omit, retype or downgrade a failed requirement after seeing the results.
 
 ## Report format
 
@@ -90,12 +96,14 @@ Pass / Fail / Skip: N / M / K
 
 ## Verdict
 1 likely real product bug, 1 flake-suspect, 1 snapshot drift.
-Recommend /qa --fix for the snapshot, /investigate for the assertion, re-run for the timeout.
+Recommend authorized /verify --repair for the snapshot, /diagnose for the assertion,
+and a separately requested read-only run for the timeout.
 ```
 
 ## Edge cases / what to do when blocked
 
-- **Multiple test runners detected:** ask operator which to run, or run both.
+- **Multiple test runners detected:** follow approved validation scope, or resolve
+  the ambiguity before execution; do not silently choose or expand coverage.
 - **Runner crashes (not test fail):** capture stderr to file, surface exit code separately.
 - **No tests in scope:** report `unverified`; zero executed tests cannot clear
   required acceptance. Skipped/unavailable required checks likewise stay blocked.
