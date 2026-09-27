@@ -92,7 +92,8 @@ failed attempts and outstanding review.
 The existing `/li:resume --from <step>` override also remains: recognized cycle phases and exact
 step IDs in the selected job use their normal readiness and authority checks. Otherwise the value
 selects a checkpoint path. If a checkpoint name collides with a step, use an explicit relative or
-absolute path (for example `.\BUILD` on Windows). `--explicit` applies only to authorized shared
+absolute path (for example `.\BUILD` on Windows). On other platforms the same prefix is
+`./BUILD`. `--explicit` applies only to authorized shared
 checkpoint reads, not to bypassing a job's readiness gate.
 
 **Continuous checkpointing** is off by default. Set `checkpoint_mode: continuous` in

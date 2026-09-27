@@ -7,18 +7,23 @@ plans, lessons and decisions. The core workflow takes a request through scope, s
 planning, implementation, review, delivery and capture. Local helpers support the workflow;
 there is no hosted Lintel service. See [architecture](architecture.md).
 
-## Is GitHub Copilot a first-class adoption route?
+## Which coding clients does it support?
 
-Yes. The [Copilot repository kit](copilot.md) supplies native `li-*` core workflow skills,
-planner/builder/reviewer profiles and portable resources. Start with [getting started](getting-started.md).
-Client discovery and enterprise policies still need validation in your environment.
+Lintel supports four client families ([ADR-0035](../.claude/decisions/0035-four-supported-client-families.md)):
+Claude (Claude Code and Desktop Code local), GitHub Copilot (CLI, app, VS Code and cloud agent),
+Codex and Cursor. Any other host can use the manual `other` route, an explicit canonical-file
+handoff that is not a supported integration. No client is the default.
+The [repository adapter](client-adapters.md) installs `li-*` wrappers where a client documents
+native discovery; see [Copilot](copilot.md) and [Claude Code](claude-code.md) for their preserved
+routes. Start with [getting started](getting-started.md). Client discovery and enterprise policies
+still need validation in your environment.
 
-The CLI plugin is optional. Installing it locally does not provision a GitHub cloud agent or
-other developers; commit the repository kit for shared adoption.
+A locally installed plugin does not provision a cloud agent or other developers; commit the
+repository kit for shared adoption.
 
 ## Do I need Claude Code?
 
-No. Copilot, Claude Code and Codex have different integration paths. The generated
+No. Each client has its own integration path. The generated
 [capability table](../README.md#multi-cli-support) and [multi-CLI guide](multi-cli.md) state what
 Lintel's adapters provide. `.claude/` is the shared knowledge/state directory name, including
 on Copilot; it does not require a Claude subscription.
@@ -27,7 +32,7 @@ on Copilot; it does not require a Claude subscription.
 
 The current line is 0.9.0 beta. Interfaces, generated artifacts and pack schema may change before
 1.0. Local tests cover structural and behavioral contracts; they do not prove every model follows
-every instruction or every Copilot surface has passed a live pilot. Review
+every instruction or every client surface has passed a live pilot. Review
 [release notes](../CHANGELOG.md) and [migration notes](migrations/_INDEX.md) on upgrade.
 
 ## What is a pack?
@@ -44,10 +49,10 @@ implementation and verification. Lintel is not a certification or data-loss-prev
 Its pattern scanners have bounded coverage, and its local audit files are editable.
 See [compliance](compliance.md) and [enterprise adoption](enterprise-adoption.md).
 
-## Does Copilot get Lintel's safety hooks?
+## Do other clients get Lintel's safety hooks?
 
-No. Copilot supports native hooks, but this release does not translate Lintel's Claude Code hooks
-into Copilot's protocol. The repository kit installs no hooks. Use GitHub policies, CI and
+No. Several clients, including Copilot, support native hooks, but this release does not translate
+Lintel's Claude Code hooks into their protocols. The repository adapters install no hooks. Use GitHub policies, CI and
 organisation controls for checks that must hold independently of agent instructions.
 
 The Claude Code plugin registers selected hooks; bare installs leave hook files inert until
@@ -69,8 +74,8 @@ complete classifier for sensitive data.
 ## Where does project knowledge live?
 
 Committed `.claude/memory/`, `.claude/plans/` and `.claude/decisions/` keep the lessons, plan and
-decisions with the project. Gitignored `.claude/runtime/` holds local session state. The Copilot
-kit's managed resources live under `.github/`. See
+decisions with the project. Gitignored `.claude/runtime/` holds local session state. The repository
+adapter's shared managed bundle lives under `.github/lintel/` on every client route. See
 [the path map](getting-started.md#where-things-live).
 
 ## Does it work with Spec Kit?
@@ -110,8 +115,9 @@ coordinator reconciles or re-plans them. Never discard or merge the discrepancy 
 
 ## How do I update or roll back?
 
-For the Copilot kit, use an upgrade branch, run `li-copilot init` from the next approved source,
-then `check` and your pilot checks. Locally edited managed files cause a conflict instead of silent
+For a repository kit, use an upgrade branch, run `li-adapter.py init` (or the preserved
+`li-copilot init`) with the same client selection from the next approved source, then `check` and
+your pilot checks. Locally edited managed files cause a conflict instead of silent
 overwrite. Review the diff before merging. Roll back the adoption/upgrade with a reviewed Git
 change, preserving project knowledge.
 
@@ -128,10 +134,25 @@ retained upstream license terms still apply. Spec Kit is not bundled by this wor
 
 ## Which skills should I use first?
 
-Start with `/li-welcome`, `/li-plan`, `/li-build`, `/li-review` and `/li-resume` in the portable
-Copilot kit. Use `/li-cycle` for the broader workflow. Explore the
-[full catalog](../skills/CATALOG.md) when you need specialist depth. A native `li-*` name differs
-from the `/li:*` notation used by existing Claude plugin workflows.
+Start with `welcome`, `plan`, `build`, `review` and `resume`, then `cycle` for the broader workflow.
+Invocation follows the client: `/li:<skill>` in the Claude Code plugin, the discovered `li-<skill>`
+wrapper on adapter routes such as Copilot, Codex and Cursor (generated only for the core workflows (welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars)),
+or an explicit read of the canonical skill file. Use `verify` for read-only testing (repairs need
+`--repair`), `diagnose` for a failure, and `pause`/`resume` to hand work to a fresh session; on
+adapter routes, read `verify`, `diagnose` and `pause` from their canonical `SKILL.md` files. Explore the
+[full catalog](../skills/CATALOG.md) when you need specialist depth.
+
+## A skill I used before is missing. Where did it go?
+
+Related entrypoints were consolidated into native methods with explicit modes; capabilities were
+kept. For example QA runs through `verify`, failure investigation through `diagnose` and context
+saving through `pause`. `/li:research` remains a native shortcut for `/li:cycle --mode research-dive`, and the
+composite build and delivery shortcuts are cycle ranges such as `--from PLAN --to BUILD` and
+`--from REVIEW --to CAPTURE`. Old names are not executable aliases. The [native workflow migration](migrations/2026-09-25-native-workflows.md)
+maps every entry consolidated on 2026-09-25 and explains how to update an owned installation without
+losing saved work. Aliases whose grace window ended earlier, including the engineering sub-skill
+aliases that are now capabilities of their module skill (`ta`, `da`, `sc`, `dh`, `tq`), are covered by
+the [migrations index](migrations/_INDEX.md) and the current [catalog](../skills/CATALOG.md).
 
 ## What if the agent ignores the instructions?
 

@@ -18,6 +18,8 @@ promises of executable aliases. Counts and historical removal schedules are not 
 
 Commands use the canonical `/li:<name>` notation. Use the actual host's native `li-*`
 wrapper when discovered, or read the canonical skill from the trusted source bundle.
+The notation is the Claude Code plugin form; on Copilot, Codex, Cursor or
+another client, use that host's discovered wrapper or the Universal adapter's explicit file read.
 An installed file is not evidence of native discovery or a completed client test.
 
 ## Capability replacements
@@ -33,6 +35,7 @@ An installed file is not evidence of native discovery or a completed client test
 | `learn`, `lessons` | `/li:lessons-add` for additions and `/li:lessons-surface` for lookup. Preserve `L-NNN` grammar, update-before-append, deduplication and supersession. |
 | `skillify` | `/li:skill-new`, retaining owned scaffold targets and frontmatter validation. Historical candidate preference/type values remain compatible. |
 | `document-generate` | `/li:generate-docs --source <path> --target reference\|customer-guide\|tutorial`, retaining source fidelity, voice, depth and output selection. |
+| `make-pdf` | `/li:generate-pdf`, which carries the former print options and provider. See the PDF writer note below. |
 | `context-save`, `context-restore` | `/li:pause [label]` or `--label <label>`, and `/li:resume --from <checkpoint>`. Ordinary resume keeps selected-work/ledger/job precedence. |
 | `context-warm-related`, `context-warm-adrs`, `context-warm-sessions` | `/li:context-warm --related <topic>`, `--adrs <topic>` or `--sessions [N]`, alongside retained `--path`, `--glob` and `--pattern` selection. |
 | `browse`, `scrape`, `open-managed-browser`, `setup-browser-cookies` | `/li:web-session --mode browse\|scrape\|open\|cookies`, preserving each mode's inputs, provider, URL admission, lifecycle and cookie-consent boundaries. |
@@ -76,6 +79,7 @@ The existing `resume --from <step>` route is also retained. A recognized cycle p
 exact step ID in the selected job keeps the existing override and readiness checks;
 otherwise `--from` selects a checkpoint path. Use an explicit relative/absolute path
 when a checkpoint name collides with a step (for example `.\BUILD` on Windows).
+On other platforms the same prefix is `./BUILD`.
 `--explicit` is only for authorized shared checkpoint reads, not a readiness override.
 
 Related-context searches still require bounded selectors. Decision loading retains
