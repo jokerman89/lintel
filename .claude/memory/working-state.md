@@ -8,6 +8,17 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Supported clients narrowed to four families (2026-09-25)
+
+**Status:** built and locally verified on branch `jokerman-microsoft-trim-supported-clients`
+(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)).
+On 2026-09-27 it converged onto #104 with ordinary merge `66b56aa4` of `22d502be`, and Go Live
+published it as draft PR #107, with #104's branch as base. Lintel supports GitHub Copilot, Claude,
+Codex and Cursor plus the manual `other` route; the ten other families, the Gemini extension, the
+OpenCode guide and two `li-update` routes are removed.
+**What's pending:** Go Live's independent review of the convergence delta, green hosted CI on
+PR #107, and its retargeting to `main` after #104 merges; then the docs PRs, #95 first.
+
 ## Active - Native workflow cleanup (2026-09-25)
 
 **Status:** all six isolated implementation lanes are integrated on verified main

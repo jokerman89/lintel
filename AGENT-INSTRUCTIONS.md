@@ -1,6 +1,6 @@
 # Agent instructions — Lintel canonical navigation pointer
 
-Read this file at session start. Every supported agent CLI (see `lib/cli-tiers.yaml`) reaches it through its root entry file (CLAUDE.md / AGENTS.md / GEMINI.md) or a shim under `shims/` that points here.
+Read this file at session start. Every supported agent CLI (see `lib/cli-tiers.yaml`) reaches it through its root entry file (CLAUDE.md / AGENTS.md) or a shim under `shims/` that points here.
 
 This file is **navigation, not content.** Load-bearing content lives in the layer files below. Follow the order; each layer file is short and authoritative.
 
