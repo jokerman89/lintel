@@ -89,7 +89,7 @@ installation and assert preservation of operator profile, packs and custom hooks
 
 Hook tests run the Claude Code hook scripts locally with synthetic input. They do not prove that
 any host registered or ran a hook, and that bundle is not translated to other clients. Adapter
-tests for Copilot, Codex, Gemini and the Universal handoff likewise check generated files and
+tests for Copilot, Codex, Cursor and the Universal handoff likewise check generated files and
 local behavior, not a live client session.
 
 ## Adding a test
