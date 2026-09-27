@@ -31,6 +31,11 @@ invent or reinterpret profile evidence. Missing required policy blocks its affec
 
 ## Bind the current session
 
+Invocation differs per route: the Claude Code plugin uses `/li:<skill>`; generated native
+wrappers use `li-<skill>` through the host's own skill mechanism; a manual route reads
+`START.md` and the canonical `skills/<skill>/SKILL.md` explicitly. Canonical references to
+`/li:<skill>` in workflows name the skill, not a required syntax.
+
 Read `lib/cli-tiers.yaml` through `bin/li-client-capabilities.py show --client <surface>`.
 Choose the exact CLI, desktop, IDE or cloud surface. Legacy aliases select one explicit
 surface, not an entire product family. Unidentified hosts can use `other` for manual

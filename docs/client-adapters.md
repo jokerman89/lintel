@@ -30,6 +30,13 @@ observations. Locally exercised installer fixtures do not establish discovery or
 
 ## Client-specific routes
 
+No client is the default. Every native route generates `li-<skill>` wrappers for the core
+workflow entry points; invoke them through the host's own mechanism (slash command, `$`
+reference, skills UI or skill tool). The Claude Code plugin keeps its namespaced
+`/li:<skill>` form. Manual routes read the canonical `skills/<skill>/SKILL.md` through
+`START.md`. Former workflow names are mapped in the
+[native workflow migration](migrations/2026-09-25-native-workflows.md), not aliased.
+
 **GitHub Copilot:** `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud` each select
 the existing `.github/skills` and custom-agent kit. Organization policy and available APIs
 still differ. Other Copilot IDEs use `other` until their contracts are verified.
