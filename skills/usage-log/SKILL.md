@@ -54,8 +54,8 @@ The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build
   "kind": "invocation",
   "operator": "<operator>",
   "cycle_id": "<cycle id or unknown>",
-  "skill": "research",
-  "mode": "full",
+  "skill": "cycle",
+  "mode": "research-dive",
   "tokens_est": "3500",
   "cli": "claude-code"
 }
@@ -76,7 +76,7 @@ Run the one-liner from "What this skill does". That is the whole writer — no s
 
 ```bash
 source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log usage-skill invocation skill=research mode=full tokens_est=3500 cli=claude-code
+audit_log usage-skill invocation skill=cycle mode=research-dive tokens_est=3500 cli=claude-code
 ```
 
 ### Step 2 — Reader mode (solo-invokable)

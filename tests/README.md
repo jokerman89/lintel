@@ -15,7 +15,7 @@ bash tests/integration/copilot-kit.sh       # portable Copilot behavior
 only those, so strict accounting stays exact within each shard. The shards `1/N` to `N/N`
 are disjoint and together equal the unsharded run. A malformed shard exits 2, and an empty
 shard fails closed. CI runs the unit tier in 2 shards and the integration tier in 4 on
-every system (ADR-0032).
+every system it selects (ADR-0032, ADR-0037).
 
 A unittest skip whose reason begins `platform: windows-only` marks a Windows-native assertion.
 Off Windows, the runner reports such skips as `N/A`, not as partial coverage, but only when every
@@ -75,8 +75,15 @@ under `behavior/build-pilot.sh` overstated that evidence. The enterprise integra
 execute actual workflow snippets and pack consumers; neither test category proves a live
 model follows the complete cycle or establishes measured enterprise productivity.
 
-CI runs every tier on Ubuntu, macOS and Windows, with explicit Python and jq preflight. Actions
-use reviewed commit pins and read-only repository tokens. Catalog drift checks never push a
+CI runs every tier on Ubuntu for every pull request and push, with explicit Python and jq preflight.
+Pushes to `main`, manual dispatches, pull requests labelled `ci:full-matrix` and pull requests that
+touch a platform-sensitive path also run every tier on macOS and Windows. Adding, deleting or
+renaming any file outside `docs/`, `.claude/` and `presentations/` counts as platform-sensitive;
+editing existing Markdown, HTML, text or images outside code locations does not. A
+documentation-only pull request stays on Ubuntu, and a diff that cannot be computed selects all
+three (ADR-0037,
+`tests/unit/ci-matrix.sh`). Actions use reviewed commit pins and read-only repository tokens.
+Catalog drift checks never push a
 follow-up commit to the default branch. Native Windows install/reinstall tests require no Pester
 installation and assert preservation of operator profile, packs and custom hooks.
 

@@ -1,0 +1,1600 @@
+{
+  "review_type": "finite-set03-exact-span-semantic-adjudication",
+  "status": "CLASSIFICATION_ONLY",
+  "candidate": "5f086471069fddf9926acf4c7d0176f98b35946b",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-03.json",
+    "sha256": "73619bf643bd47d23e175b9c5fd94e2c702bf9bedc448bbc24a82f22ce99342c",
+    "bytes": 287044,
+    "declarations": 205,
+    "source_files": 94,
+    "raw_span_bytes": 179579,
+    "supplied_findings_inside": 436
+  },
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "session_state_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "role": "Same prior source-spec reviewer; no descendants, product implementation or canonical review-record mutation."
+  },
+  "counts": {
+    "ACCEPT": 154,
+    "REJECT": 51,
+    "NEEDS_NARROWING": 0
+  },
+  "scope": "Only the 205 exact declarations in the pinned packet, not another source/mechanism audit. Each complete selected span was read with its enclosing document role, source framing, containing sections and surrounding text; contextual continuations are not made historical by clipping their verbs outside the span.",
+  "decision_meaning": {
+    "ACCEPT": "This exact span is a retained observation, completed record, quoted specimen or explicitly historical proposal in the selected source context; it does not itself select a current workflow or grant present execution authority.",
+    "REJECT": "This exact span includes operative navigation, normative acceptance/ownership/permission text or an unresolved execution instruction; this is a classification rejection, not automatically a source bug or a reopened implementation finding.",
+    "NEEDS_NARROWING": "Reserved for a specifically identified smaller qualifying span with exact proposed boundaries; no such new boundary is approved or proposed by this artifact."
+  },
+  "conditions": [
+    "Bind each verdict to its exact declaration_digest, raw_sha256, candidate and complete source_context_sha256/path in the pinned packet; changed source context requires renewed adjudication unless separately authorized exact framing covers that declaration.",
+    "The earlier 27-declaration framing acknowledgment is separate and is not extended to these 205 declarations. Original full-source hashes are not silently discarded or replaced by a date, folder, heading or this reviewer's role label.",
+    "Preserve exact raw bytes and unique ordered whole-line boundaries. P08-integration-3ff5998.md and its two selected spans retain their actual CRLF bytes; the other selected source blobs are LF. Display line splitting is not hash normalization.",
+    "An accepted span supplies only a narrow observation classification. All surrounding prose, current navigation, imports and unregistered or disputed spans remain checked; no whole-file, census-baseline, parser or binary exception is granted.",
+    "Only the coordinator's exact intersection with the separate quality review may be registered. This reviewer did not read or inherit that actor's set03 decisions.",
+    "Earlier ACCEPTs and REJECTs remain preserved. Set03-span-030 still contains the rejected W5 work directions; set03-span-186 is a genuinely narrower original method observation that excludes the previously rejected prospective quality instruction.",
+    "No release, signature, current profile, P05 PASS, runtime QA, current-routing PASS, mechanism approval or broader source-spec verdict follows from this artifact."
+  ],
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED",
+  "candidate_source_spec_verdict": "NOT_REVIEWED_IN_THIS_TASK",
+  "quality_and_required_qa": "UNVERIFIED",
+  "current_guard_execution": "NOT_RUN",
+  "outside_scope": [
+    "The separately reserved launch-polish line 50 framing question.",
+    "The permission-blocked presentation line and publication/Pages actions.",
+    "New registration or changes to source, attributes, plans, memory, runtime, profiles, CI or existing review records."
+  ],
+  "checks_actually_performed": [
+    "Pinned the packet's raw SHA-256/size and resolved 5f086471 to the exact immutable commit through shared repository Git objects, without checkout or branch movement.",
+    "Loaded all 94 complete source blobs, totaling 3134399 bytes, and verified every full-source SHA-256 against the packet.",
+    "Independently recomputed all 205 eight-field declaration digests using existing content_digest; verified exact marker uniqueness/order, physical line ranges, raw byte counts and raw span hashes.",
+    "Used the existing shared Markdown classifier to verify all 205 start/end boundaries are top-level prose; did not parse malformed historical pseudo-YAML as successful structured data.",
+    "Verified the proposed spans do not overlap each other or the existing 68 registered spans.",
+    "Read every complete selected span with source framing and adjacent/containing context; expanded the entire cohort1 audit and specific original evolution/context sections where needed to distinguish completed actions, original proposals and live instructions.",
+    "Used the selected battletest evolution's Wave H outcome for the original K5 disposition, the selected launch evolution's manifest outcome for the original alignment direction, and the selected A23.5 final review's S4 evidence for the earlier Phase 2 traceability statement.",
+    "Preserved the original source/runtime evidence as attributed records, not checks rerun by this reviewer."
+  ],
+  "not_run": [
+    "No dynamic/runtime fixture suite, guard consumer, hosted CI, full integration review, profile operation, native host acceptance or publication query.",
+    "No denied launcher, replacement/inlined launcher, private environment sourcing, borrowed launcher authority or denied jq.",
+    "No fresh editorial audit of all unselected source prose and no automatic classification beyond these 205 declarations."
+  ],
+  "executed_command_ledger": [
+    {
+      "command": 0,
+      "action": "Verify packet bytes/hash, immutable candidate/base, reviewer HEAD/status and input shape.",
+      "exit": 0
+    },
+    {
+      "command": 1,
+      "action": "Read finite instructions and complete source blobs for size/selection metadata.",
+      "exit": 0
+    },
+    {
+      "command": 2,
+      "action": "Verify helper identities, all source/span/declaration bytes and hashes, top-level boundaries and separation from the existing 68 spans.",
+      "exit": 0
+    },
+    {
+      "command": 3,
+      "action": "Render complete spans 001-020 with document framing and surrounding context.",
+      "exit": 0
+    },
+    {
+      "command": 4,
+      "action": "Render complete spans 021-036 with source context.",
+      "exit": 0
+    },
+    {
+      "command": 5,
+      "action": "Read prior rejected declarations and original action-register ending context.",
+      "exit": 0
+    },
+    {
+      "command": 6,
+      "action": "Render complete spans 037-049 and cross-audit context.",
+      "exit": 0
+    },
+    {
+      "command": 7,
+      "action": "Read the entire cohort1 source including all spans 050-052 and literal fields.",
+      "exit": 0
+    },
+    {
+      "command": 8,
+      "action": "Render complete spans 053-073 with shared-classified containing context.",
+      "exit": 0
+    },
+    {
+      "command": 9,
+      "action": "Render complete spans 074-092 with proposal and navigation context.",
+      "exit": 0
+    },
+    {
+      "command": 10,
+      "action": "Render complete spans 093-111 including current specification and worker boundaries.",
+      "exit": 0
+    },
+    {
+      "command": 11,
+      "action": "Read the complete selected battletest and launch evolution records for specific original outcomes.",
+      "exit": 0
+    },
+    {
+      "command": 12,
+      "action": "Render complete spans 112-134 with plan/report context.",
+      "exit": 0
+    },
+    {
+      "command": 13,
+      "action": "Render complete spans 135-153 with normative-contract and original-result context.",
+      "exit": 0
+    },
+    {
+      "command": 14,
+      "action": "Render complete spans 154-173 with exact result/instruction boundaries.",
+      "exit": 0
+    },
+    {
+      "command": 15,
+      "action": "Render complete spans 174-190 with final-report and independent-review context.",
+      "exit": 0
+    },
+    {
+      "command": 16,
+      "action": "Render complete spans 191-205 with immutable review evidence and caveats.",
+      "exit": 0
+    },
+    {
+      "command": 17,
+      "action": "Read bounded source context for remaining ambiguities and exact supplied finding labels; no guard execution.",
+      "exit": 0
+    },
+    {
+      "command": 18,
+      "action": "Bulk-copy only generated declaration/raw-hash fields from the pinned packet by exact ID; verify 205 ordered identities, 154/51 verdicts and unchanged semantic decisions/reasons.",
+      "exit": 0
+    }
+  ],
+  "artifact_assembly": "The semantic decisions below were individually authored. A deterministic bulk metadata step copies only declaration_digest and raw_sha256 from the hash-verified input by exact ID; it does not classify spans or alter decisions/reasons. Final readback and preservation checks precede delivery, whose raw artifact hash is reported separately.",
+  "decisions": [
+    {
+      "id": "set03-span-001",
+      "decision": "ACCEPT",
+      "reason": "The ADR context recounts the two former PR blockers and denied dependencies without restoring the removed reader or directing a current workflow.",
+      "declaration_digest": "c10cb5b93c7067e0ea8e637162c3fe7c3a9147801d96bbfc1d95bce5e2a2de7f",
+      "raw_sha256": "fdddef4e877ee2a6e149e647e6d5abbc377ffc2e807290ee4fa6053d05cf95a9"
+    },
+    {
+      "id": "set03-span-002",
+      "decision": "ACCEPT",
+      "reason": "The K5 defect and original FIX NOW disposition are specifically discharged by the retained battletest evolution account of Wave H resume/checkpoint wiring, not renewed here.",
+      "declaration_digest": "e57fd4f09b4e22a5851b3b60d434a07d96a8ee11df70839d938f2bfa5085f6a4",
+      "raw_sha256": "dc68b28cd4a67e5ff6a2217180d52713a3c9bf83dd9101f54563e88d2c587dea"
+    },
+    {
+      "id": "set03-span-003",
+      "decision": "ACCEPT",
+      "reason": "This continuation records the original audit observation that cycle named a nonexistent command and overstated pauses, not an invocation of that command.",
+      "declaration_digest": "4dd592057014caddab47bca6e993107d0ca226b2cf2445958180f20e2e94ff42",
+      "raw_sha256": "dde1712601a5b14c74284eea4633cde6fd878e4810219f7cf3678d0a14f957ad"
+    },
+    {
+      "id": "set03-span-004",
+      "decision": "ACCEPT",
+      "reason": "The sentence reports already-pruned and de-heritaged source labels as completed historical work.",
+      "declaration_digest": "bd9d12fe51478843431e6fc11698ad25ea33f703593ad7c41bcbfa13a72667b7",
+      "raw_sha256": "ae9184273130ddbac763443dc5bb47028cc05cf60b72d4b55491e93fe211d162"
+    },
+    {
+      "id": "set03-span-005",
+      "decision": "REJECT",
+      "reason": "B6 is an actionable fix-now docs-sweep work item selecting rewrite targets and remedies, not only a retained observation of the old names.",
+      "declaration_digest": "ad798b8b29f0762ca807986260834b49f7c498d02fbccaf23d04b78620937718",
+      "raw_sha256": "ed8705b23d4c246ea3b96aa520e6b8e2b90f810517c1b132559cf704dfb853ac"
+    },
+    {
+      "id": "set03-span-006",
+      "decision": "ACCEPT",
+      "reason": "The row records the original deferred alias-removal schedule and provenance rather than choosing a workflow to run now.",
+      "declaration_digest": "a12f46837993458832bc0b118fdb37881475d1b7c1920b91266f4b7c5a6ac62c",
+      "raw_sha256": "788769266cb1db9496d249215cb8c9030d6c6772bcef5dc7086d89f5139ceb8e"
+    },
+    {
+      "id": "set03-span-007",
+      "decision": "ACCEPT",
+      "reason": "This continuation records the original retention disposition for context-save machinery rather than invoking it.",
+      "declaration_digest": "093739716bba918e9dbdf44605dd8839a221bbfd1999bad3ed3d68d0f317437b",
+      "raw_sha256": "e71ac35991fbf056d3058ffd985c2c4e58ce9719e8fc4e9959778a8d59e403b9"
+    },
+    {
+      "id": "set03-span-008",
+      "decision": "ACCEPT",
+      "reason": "The complete list is the identified audit snapshot of broken commands and conflicting implementations, with old calls quoted as defects rather than operative routes.",
+      "declaration_digest": "3dc211b98137548282797940b23968f32c706a0283f679c3f84d9de53b4240ca",
+      "raw_sha256": "242428f01c84ac7095b1e4550a0337a14e8df9b43bbf3fbbccb11b022d4af50b"
+    },
+    {
+      "id": "set03-span-009",
+      "decision": "ACCEPT",
+      "reason": "The P1 list records the original launch findings and proposed repairs, with its explicit manifest-alignment directive discharged by the retained 5.8.0 evolution outcome.",
+      "declaration_digest": "c6f777c99409e25ef01e1b03b28c1a3fa5fb8d2fb1898957be1a10f193185ddf",
+      "raw_sha256": "da1e7d373f3d01893493bbbead08bf756d12cc20fa946609d8d4c26a7ffe6c9d"
+    },
+    {
+      "id": "set03-span-010",
+      "decision": "ACCEPT",
+      "reason": "These comparison rows record proposed consolidation alternatives for design review and PDF production, not current command selection.",
+      "declaration_digest": "9e052f2853b2b8a5dec86cf7511f6c50d8773107d0fc439de6d018bde1aafde1",
+      "raw_sha256": "7f4bfe862f425159c6988eb169181e536708cdccd2ee66c7e31fea2466c40d16"
+    },
+    {
+      "id": "set03-span-011",
+      "decision": "ACCEPT",
+      "reason": "The alias row records a proposed office-hours consolidation and its rationale without instructing present use.",
+      "declaration_digest": "477165c1572d088446e57121ba62f34afc557cb7cca7519a77d96f4e0f7d90ac",
+      "raw_sha256": "6821e2b904f02f7b13ad71c30361cd02d080fb8c7377fcb4fa4b65011a7913e9"
+    },
+    {
+      "id": "set03-span-012",
+      "decision": "ACCEPT",
+      "reason": "The evidence line cites original inventory subjects for the A10 review proposal and carries no execution direction.",
+      "declaration_digest": "c92905cae9cb0c2f3af9a6f899da4f3877b347a7a4d22b213c1b0c14bd77b2b5",
+      "raw_sha256": "aa0aab3c0c5e915c6e708132e7b218a3fce5d3ef330a79ebc28fc1285915765c"
+    },
+    {
+      "id": "set03-span-013",
+      "decision": "REJECT",
+      "reason": "The unquoted instruction to keep plan-tune dormant until readers exist is a prospective operating constraint, not a recorded finding or completed action.",
+      "declaration_digest": "8420888cab4f3de75d25732617b0e764fc50b2b8afe04600f8675273ff4c6979",
+      "raw_sha256": "265cfec775128d7e8f48999d348075f64445c4baf91f677425c807f0e38b2cab"
+    },
+    {
+      "id": "set03-span-014",
+      "decision": "REJECT",
+      "reason": "The selected sentence commands coordination of browse, cookies, scrape and make-pdf with current workflows rather than describing an observed result.",
+      "declaration_digest": "4163e7059c360c75e989fd50895d7ed78605b14a86e2e412229d74e4f28ff2ec",
+      "raw_sha256": "21aba6a0820187e4fd5964d24f1588a84172db839715e96a918b235cf588f3f1"
+    },
+    {
+      "id": "set03-span-015",
+      "decision": "ACCEPT",
+      "reason": "The continuation records the review recommendation to preserve the historical migration recovery capability, not a current migration invocation.",
+      "declaration_digest": "a9a50e9a6da54e1919d8cd92cb77e6106e7eefea7f9fbcb730066417dd9384ac",
+      "raw_sha256": "99a01e91d4e99fefa889eca4dd4cc8896dea8867aebe56ce81796e9a8396bc35"
+    },
+    {
+      "id": "set03-span-016",
+      "decision": "ACCEPT",
+      "reason": "The title identifies the original five-lens audit and its historical role without selecting office-hours as a current entrypoint.",
+      "declaration_digest": "81102e53a76981febae6394f2214b7096795f6dcddf2e82beba6bc9a0d672b5a",
+      "raw_sha256": "7f9575a7a07ebfed08ab8be36bb3127dc4900ada79f314d777779bf147e80c57"
+    },
+    {
+      "id": "set03-span-017",
+      "decision": "ACCEPT",
+      "reason": "The row records six observed orphan agents and its explicitly proposed wiring remedy within the advisory snapshot, not a present dispatch instruction.",
+      "declaration_digest": "69ae62f301e83bfea8065568107fe59b5a9d3576c1f8231a83f16212edde3414",
+      "raw_sha256": "731de66b5fb3e5aef7b31662a53ac623f0036abb4f8170412b594b71ed22bb91"
+    },
+    {
+      "id": "set03-span-018",
+      "decision": "ACCEPT",
+      "reason": "The table row records an observed budget/watch overlap and a proposed consolidation alternative rather than current command usage.",
+      "declaration_digest": "16ae604ae28aa5eb50ac0d45b2bdba7afdbe7f829a0b4c90e2e7e83430340497",
+      "raw_sha256": "3eb08e1aa1677b44e2122df1410b1a28150e387efa4388ab70348f572ad4cd3f"
+    },
+    {
+      "id": "set03-span-019",
+      "decision": "ACCEPT",
+      "reason": "The table row records divergent source-era rubric families and an advisory alignment proposal, not current workflow routing.",
+      "declaration_digest": "1aaa61e5f4c5e54e3e56bda3b17ad8ba3c9cba8d0b66e93270013248eb9a32b5",
+      "raw_sha256": "07f71bc7504bfd3cbc00015885bbe00b43bd87106811491f4f201a34b9fd81fd"
+    },
+    {
+      "id": "set03-span-020",
+      "decision": "ACCEPT",
+      "reason": "Both tasks are explicitly completed checklist records of pattern extraction and capability-preserving consolidation, not fresh implementation authority.",
+      "declaration_digest": "e4c6dbbdcf29c924835d883a6226544fa7c998c884e896e974bdaa95f2f40581",
+      "raw_sha256": "ea87cd365bc99781f9d0da04718ac888d2a1e02f674b98b281f86bd0d6288d2b"
+    },
+    {
+      "id": "set03-span-021",
+      "decision": "ACCEPT",
+      "reason": "The DEFINE inventory cell describes the source-era phase method and output; it does not invoke the removed office-hours entrypoint.",
+      "declaration_digest": "0ac3360c21e210559963adad7f10cf91fda9fa530e1b3b1e00c2e688aa88ce57",
+      "raw_sha256": "b1c48772cf85447813ae87bc3ab9dd970d31befc6768443389c3ad203da77133"
+    },
+    {
+      "id": "set03-span-022",
+      "decision": "ACCEPT",
+      "reason": "The sentence explicitly completes the original composite inventory, while the separately labelled current navigation remains outside the span.",
+      "declaration_digest": "15c030a263ead371c65bbe48b4740b78fb3963ab5e15831fd403c55c9d9a11eb",
+      "raw_sha256": "d4203ad78c089bc03b497d3ef617a3a613b75354e005718569ddfe08d2dc2520"
+    },
+    {
+      "id": "set03-span-023",
+      "decision": "ACCEPT",
+      "reason": "The complete cluster inventory describes the audit snapshot, including counts and admitted stubs, without adding present execution directions.",
+      "declaration_digest": "2c7c71b2cb680e813c662c82f0b91e64aa1632fe6f80c1354e2f826db3146a51",
+      "raw_sha256": "54661c89ee5be4f5821c8bc3e6e4af8ade8264cea268cb24225ab10edea86dfb"
+    },
+    {
+      "id": "set03-span-024",
+      "decision": "REJECT",
+      "reason": "Lines 191-193 explicitly supply Current interactive delegation instructions for /li:build inside the proposed historical mask.",
+      "declaration_digest": "e8b66b6806191974c99f908db8c6eebf026b737afc18627d58008b4ad09f5361",
+      "raw_sha256": "9a28252803867072a973d38dcaba07c5167c5231d89c41f5b5c6baffaa6f9c37"
+    },
+    {
+      "id": "set03-span-025",
+      "decision": "REJECT",
+      "reason": "Lines 302-303 explicitly select the current inspect plan route inside an otherwise historical planning account.",
+      "declaration_digest": "8ed45f1308651c862e3dd9eb0bda8a36b3e2e70f16b6aa75323f35124397f658",
+      "raw_sha256": "a24e17c51be4621ec6c3fb754bb411c63dc9e6f76101dc40e6ae0b0a33b080f9"
+    },
+    {
+      "id": "set03-span-026",
+      "decision": "REJECT",
+      "reason": "This table cell is the editorially current checkpoint reader route /li:resume --from, not only an old context-save observation.",
+      "declaration_digest": "676b007eff749ffb97feb8fcd248f0fa501d737cb8da4d63ff4f07ae482ea72f",
+      "raw_sha256": "c7270f211bb21d38f01b3da12fccfcfd1987babab3bdb26777059f7aa52704c1"
+    },
+    {
+      "id": "set03-span-027",
+      "decision": "ACCEPT",
+      "reason": "The section records original naming and documentation inconsistencies as audit findings rather than invoking the named workflows.",
+      "declaration_digest": "eebce2f0b7a8508c739100be2611872ea6659a84deff03a9cb7ce4a9a56fb758",
+      "raw_sha256": "a363f9f2816112182e27152d17859f9c00e41e30c788df7b43e1f11dd164f408"
+    },
+    {
+      "id": "set03-span-028",
+      "decision": "ACCEPT",
+      "reason": "The section records source-era readiness defects and a residual consolidation assessment, not current workflow selection or renewed readiness.",
+      "declaration_digest": "23f6c97ff543f4c2608c6373f041ddc8bfc06097e920483b0342bde6a8590c10",
+      "raw_sha256": "9edfcee368a8511aca57293a4e43426fd02fcb7e508a86f4ac4883ad3856aa5c"
+    },
+    {
+      "id": "set03-span-029",
+      "decision": "ACCEPT",
+      "reason": "The problem statement recounts what the original audit found, while the prospective workstream instructions remain outside this span.",
+      "declaration_digest": "2bab4b79eb8c3d1d55837c2411fd090990a735d689c56ba1f627b9bf6ea09fd8",
+      "raw_sha256": "9b65b993edd449ca814f09232073fbda15dab9a16f6a2ffc1e94606453d6d2f6"
+    },
+    {
+      "id": "set03-span-030",
+      "decision": "REJECT",
+      "reason": "This narrowed W5 selection still contains the same live Fix, Canonicalize, Replace and Unify work directions rejected in the earlier broader declaration.",
+      "declaration_digest": "2817ea0d337977e7422a0fc92a551d354dee7dabd9163617261afcec30e5bf2e",
+      "raw_sha256": "344cf620a37d44da283e354b6c4e14c2878c97891a4489deb00504c19699bef0"
+    },
+    {
+      "id": "set03-span-031",
+      "decision": "ACCEPT",
+      "reason": "The row is an explicitly auto-decided and logged original review disposition, not a new save/dump invocation.",
+      "declaration_digest": "e03c121a82f78b2d23ae6328ce646dd42c47fa53316c278f43b69a98612a6360",
+      "raw_sha256": "1508fb312757ae4412a35203bd29618690d2ad2312af38449071e17ffbda4916"
+    },
+    {
+      "id": "set03-span-032",
+      "decision": "ACCEPT",
+      "reason": "The span preserves the original storage-root finding and mutually exclusive unselected alternatives without selecting a current root or workflow.",
+      "declaration_digest": "d16bd4a729ec901352632e0418a05321c9347d719293ae6149b5d327c946cf84",
+      "raw_sha256": "fc5e819fac75a50d4b61f741575b3d346087290e9988139523bd598487315512"
+    },
+    {
+      "id": "set03-span-033",
+      "decision": "ACCEPT",
+      "reason": "The span records a cited source dependency finding and alternative ownership proposals, not authority to call or replace a current provider.",
+      "declaration_digest": "8441fae645bc7d5560cf250009f19f8f3c46120c4dbd4fffbe0ba956453cec67",
+      "raw_sha256": "66acd2c9fe7127a0681cd59806fe54cd692ec16409a1369840143110b6d608ee"
+    },
+    {
+      "id": "set03-span-034",
+      "decision": "ACCEPT",
+      "reason": "The record preserves competing unselected save/snapshot consolidation proposals rather than directing a current checkpoint action.",
+      "declaration_digest": "a4c71e43eeed9a45627aba1c6a7f24c5e5fb504858b7c03e4c6bad4f76d514b1",
+      "raw_sha256": "f02992ee67f6a6075e9ad950bb0e4e4d8f3653417954de542f095294f6926692"
+    },
+    {
+      "id": "set03-span-035",
+      "decision": "REJECT",
+      "reason": "These cohort assignments remain part of an active-form audit execution prompt and direct what the reader will investigate rather than record completed observations.",
+      "declaration_digest": "8568df90438a9ad8dbd6f347cb0b99dc62d2f85e5a7931014e018f5d07041320",
+      "raw_sha256": "ec7af3989ffb747b23353f386161cd041a1037f0ee2ee7a0e12dd5c81d649c6a"
+    },
+    {
+      "id": "set03-span-036",
+      "decision": "REJECT",
+      "reason": "Build a matrix is an unquoted audit execution instruction that selects documented entrypoints, not an original matrix result.",
+      "declaration_digest": "a642dd02d7eb81135a3b3df34a54bd623dcd296c58d45df08d1abfe38e6cf1d4",
+      "raw_sha256": "308eba79eefaeffa2f60de0d8f7bd7111cc32987ca9725d9bdc8fc0137db72df"
+    },
+    {
+      "id": "set03-span-037",
+      "decision": "ACCEPT",
+      "reason": "The span synthesizes cited original write/read findings and cohort uplift proposals without issuing a new execution assignment.",
+      "declaration_digest": "84627cb2840218896b5f61ef0c4a6ee985857ca7491277460bea9e9355dcd13d",
+      "raw_sha256": "657a30c9dd9b541faa662bc1c5f2c0587fba8a9bb147aaf1f204a401c8ce3804"
+    },
+    {
+      "id": "set03-span-038",
+      "decision": "ACCEPT",
+      "reason": "The span quotes original jobs-adoption evidence and advisory enforcement limitations rather than invoking the composite routes.",
+      "declaration_digest": "893b8a10d1fcc5459d6fbab6ef2f12bc52de185124cca64b791964862df47eec",
+      "raw_sha256": "e3a28c3b11a2cbc941cb3073c8b54b220cee6e57fd42630fd650123f039acdc1"
+    },
+    {
+      "id": "set03-span-039",
+      "decision": "ACCEPT",
+      "reason": "The span records designed-not-built findings and candidate future integration sites as assessment, not current Brief Forge execution.",
+      "declaration_digest": "c663517f4526c5ecb7df60fc3f9d92116923551641c918a3010de688c8e8e319",
+      "raw_sha256": "1054554caa97c66b710d2e8070806f7997555aa4f96eac2064c017190fd76d69"
+    },
+    {
+      "id": "set03-span-040",
+      "decision": "ACCEPT",
+      "reason": "The span records the original unconnected cap logic and explicitly identifies suggested wiring as proposed rather than implemented or selected.",
+      "declaration_digest": "bfe036812432919d0478b89b0b82dd51d62edecd745baf5630647fd23d0fbad7",
+      "raw_sha256": "b8f387ae855726df893d0bc2aa559f8834346c3320eab62b5b9e3a0512a22f3c"
+    },
+    {
+      "id": "set03-span-041",
+      "decision": "ACCEPT",
+      "reason": "The span cites original external-binary and producer-root defects as evidence, not authority to execute those paths.",
+      "declaration_digest": "ed70bab10eb817438141f278f94993e786012d212edaf82c32eeadc77710b0a7",
+      "raw_sha256": "851ea7e9c7959f41dbf2a2430455cade0664b136ea6ac2f6b1516299e1bd5d07"
+    },
+    {
+      "id": "set03-span-042",
+      "decision": "ACCEPT",
+      "reason": "The bounded final list records three original promise-verification conclusions; the new editorial navigation note is excluded.",
+      "declaration_digest": "c058a51a40f6d7e12db41b775378f2a681e13ed1e4db57e63a5399fc7e18244d",
+      "raw_sha256": "8d70dcd803ca8b39ea43e74e09e54adbb20a570a2215c8953a7c4b099f71b906"
+    },
+    {
+      "id": "set03-span-043",
+      "decision": "ACCEPT",
+      "reason": "The synthesis reports source-era operator-memory loop strengths and gaps with cohort references, not present workflow routing.",
+      "declaration_digest": "0b63a95cb5c634bf812486b78bef814d3098c69f5d0a3a6002f1d6fe8048842d",
+      "raw_sha256": "043eaed491f3ea2df5f009a610ced19b5b28b84767b644d1f631bf3b37969044"
+    },
+    {
+      "id": "set03-span-044",
+      "decision": "ACCEPT",
+      "reason": "The synthesis reports original repo-loop observations and broken consumer seams rather than telling the reader to invoke them.",
+      "declaration_digest": "2c6ceb68fa7e52a60846a6ab04a291146d6b64fac34dcf5bee0a58fa87ebb610",
+      "raw_sha256": "ca96f7b2692c0db26f46aed120b0e25197a0b7485b2283834a76b64b789136bb"
+    },
+    {
+      "id": "set03-span-045",
+      "decision": "ACCEPT",
+      "reason": "The conclusion summarizes the identified audit findings and their implications without adding a current execution protocol.",
+      "declaration_digest": "9b7bad70fd5442ec46870cb3b27c2d8e3b189dca5803178a66b9f39f4546190f",
+      "raw_sha256": "c318ddd30c95fe191cdc08d94ea844c249b394d72e34a1895be39a5e2e840384"
+    },
+    {
+      "id": "set03-span-046",
+      "decision": "ACCEPT",
+      "reason": "The list states the original matrix denominator and verified source inventory, not a current menu of commands.",
+      "declaration_digest": "6eecaf2c68ee4a079d4dda1fb374e9bbb5b8d6ea87eebdceac235989f286f33c",
+      "raw_sha256": "306c2367afca9562ef390f93ce0d460f017cb2d26c8f02711d0e6a1bc16c1f5c"
+    },
+    {
+      "id": "set03-span-047",
+      "decision": "ACCEPT",
+      "reason": "The span reports counted matrix cells and layer-by-layer source observations; SHOULD labels are assessed gaps, not present run instructions.",
+      "declaration_digest": "1d79112752045b3712f0864b7c50220c9ed9625b08c1a71615cc70caa09337d9",
+      "raw_sha256": "d011be058e9f2df3bb2651a210e8a206c5d516a50d3ca4396d649d95caeca75a"
+    },
+    {
+      "id": "set03-span-048",
+      "decision": "ACCEPT",
+      "reason": "The sentence explicitly reports necessity values proposed in the original cohorts rather than imposing a current release gate.",
+      "declaration_digest": "4a7a0ac35bd96f5e5d30541235b7ac23fd9dbcb35fef45b49960c7f422826030",
+      "raw_sha256": "cb25c184f9185918d914b480ce55e35f3288130bf5c64a07cb5d2c31df255ec3"
+    },
+    {
+      "id": "set03-span-049",
+      "decision": "ACCEPT",
+      "reason": "The distribution summarizes original proposed necessity classifications and estimated counts, not current acceptance or invocation requirements.",
+      "declaration_digest": "d5ee52dab22f5fae1aa5c304379fa956c0ff398f1d011a6e6bcfdb9851482cf1",
+      "raw_sha256": "9f06d6ab451083b646027ceddbe532c56f500d7d19a148c422cc005c999340d8"
+    },
+    {
+      "id": "set03-span-050",
+      "decision": "ACCEPT",
+      "reason": "All eight complete fenced phase records retain original subject, finding and proposed fields; none escapes that source-audit role into a present instruction.",
+      "declaration_digest": "df5fa9b826e4dd6be7837db49e2d337b38ae71a0e138f2e547787f602361145a",
+      "raw_sha256": "e1d433003d7b4cd2c5540f43ace2657f2ff7a2d87819c6d82a32074bbcc206b8"
+    },
+    {
+      "id": "set03-span-051",
+      "decision": "ACCEPT",
+      "reason": "The comparative introduction and four fenced composite records assess original behavior and proposed improvements without selecting a current workflow.",
+      "declaration_digest": "2f2fb89639091bf1138f5b9954aac2fcf7d459b9e1e97c7494f63a5a74c644f9",
+      "raw_sha256": "bbcd22c31c11ceb398ee8f0376041e716cff589e2c2bb41cbe3e200e5605c2a5"
+    },
+    {
+      "id": "set03-span-052",
+      "decision": "ACCEPT",
+      "reason": "The list counts original outstanding design-decision subjects and priorities rather than directing their execution.",
+      "declaration_digest": "70cfa132d65e176401895d94d6a41e171a5ec2cb5d77140549353b47498ca647",
+      "raw_sha256": "428cbd981cbd0a5b3454348bec9eb600adb93d38dc882d3cf045ce47c8fb52c4"
+    },
+    {
+      "id": "set03-span-053",
+      "decision": "ACCEPT",
+      "reason": "The scope note records which original components were excluded or confused with external namesakes, not current planner routing.",
+      "declaration_digest": "3d808018feb2e03d8b5a68d31c5cbd00ed218d4592834a9b47476e52a6226cd1",
+      "raw_sha256": "66dba78bb49dc84225b7b741ffeded0a4c35ef346f72c320181241a3e6f1db23"
+    },
+    {
+      "id": "set03-span-054",
+      "decision": "ACCEPT",
+      "reason": "The list is the completed cohort audit denominator of eighteen components rather than a current invocation menu.",
+      "declaration_digest": "f2e2eb6da5ba3d359fe35c4d001882199688a9b5a6552db244c86d669c5c2010",
+      "raw_sha256": "6367fc26f1064895a6588f1661370054c625c9636df96a2c4e0e17e0ebc131ad"
+    },
+    {
+      "id": "set03-span-055",
+      "decision": "ACCEPT",
+      "reason": "The continuation maps original hand-off subjects to the audit model and is immediately qualified as designed-not-built.",
+      "declaration_digest": "2534921a55f930619a4bb95123c0627c1f57f61a964a47998cd2befeab1e4235",
+      "raw_sha256": "32d64635aa088dc18d4ccf99d5fc77fe93333af768d387e5f0b069694f59c659"
+    },
+    {
+      "id": "set03-span-056",
+      "decision": "ACCEPT",
+      "reason": "The row records the original counted Architect references and observed callers, not present agent dispatch.",
+      "declaration_digest": "11462980fb5b14c32c618401307efa4355fa0358a68f177b7094f85ac32d1f24",
+      "raw_sha256": "385066936fd8e2ef8b57aed5319efe3423b0a149c5d86ab217fd18cbd6d65e12"
+    },
+    {
+      "id": "set03-span-057",
+      "decision": "ACCEPT",
+      "reason": "The complete F-402 finding separates observed orphan evidence, proposed wiring and an unresolved design choice without assigning a current invocation.",
+      "declaration_digest": "1826ca89b9547c6f4ba41c395e192a9efc7f62297f1ca8cd1111e3d2ac31ea07",
+      "raw_sha256": "c0de326418fb3170912e9dd3f60a4264101487622152a3dce09200b1e505ce7f"
+    },
+    {
+      "id": "set03-span-058",
+      "decision": "ACCEPT",
+      "reason": "All nine footnotes cite source-time consumer behavior and missing links as matrix evidence rather than current implementation or execution.",
+      "declaration_digest": "6e97f6b3a1d4f2d409c2fc768579f520aeb7cc71d6422e6e29e7779697ef40c9",
+      "raw_sha256": "754c2a9ca10d2a0ba0ce523935982fee139ceca509e008dd730ae18d89daee47"
+    },
+    {
+      "id": "set03-span-059",
+      "decision": "ACCEPT",
+      "reason": "The single migration inventory row records a v2.1 backlog proposal for deprecation-status, not a shipped current command.",
+      "declaration_digest": "4e799a89a0b7c4509e3b1c3ad41f1b1a1d9fab689e283e59bfb8a372b0851b15",
+      "raw_sha256": "a064187fd90eb451a32cf8976be55d419b0761099ead960aa3ff9afd2a5b73c7"
+    },
+    {
+      "id": "set03-span-060",
+      "decision": "ACCEPT",
+      "reason": "The conditional success scenarios describe the original reframe proposal and its intended outcomes rather than direct a current pack or cycle invocation.",
+      "declaration_digest": "c759bab97a5653e4fc71a78d2567108c189f124cb57128aa5d38e442ee7ef818",
+      "raw_sha256": "1f656e80c2def114707d40099ea13b2b77ff83f71df2fd097a705076fe514607"
+    },
+    {
+      "id": "set03-span-061",
+      "decision": "ACCEPT",
+      "reason": "The premise records the original proposed watcher mechanism and manual override design, not an instruction to run clean now.",
+      "declaration_digest": "2c38ff8b697e875512a0bfbd9ce3ca1acc1356c0922f685ab99cc1b1dddb224c",
+      "raw_sha256": "ca685e822a25f6f5df8ee43c8ed2ac8ebbea0cfd07a0797a75a75e7a3d5b5b8f"
+    },
+    {
+      "id": "set03-span-062",
+      "decision": "ACCEPT",
+      "reason": "The structural criteria preserve the original v2 target inventory and migration proposal rather than impose a current release gate.",
+      "declaration_digest": "74a329100bb6fae0012530c29e779944bf21514d10ece2e11e50f23e7d4874aa",
+      "raw_sha256": "ad9d1d916bc992390969d3d1a8e845b64df9c1178f0eac3b0a28a7f81c0782a9"
+    },
+    {
+      "id": "set03-span-063",
+      "decision": "ACCEPT",
+      "reason": "The list records the original v3-over-v2 value proposition and source-time inventory without refreshing the capability claims.",
+      "declaration_digest": "b67a4a4b9a74724d5139784858e2d2fbe54a50fa157c543533769222ba6fbbd1",
+      "raw_sha256": "9254ea3fa914b4e1aea6e5b1eb67657211ce9416350b4a01721d64419c4c8b18"
+    },
+    {
+      "id": "set03-span-064",
+      "decision": "ACCEPT",
+      "reason": "The v3.5 deliverable inventory records originally planned Azure-toolbox artifacts and documentation, not a present az-tldr invocation.",
+      "declaration_digest": "f0bafee3c16a9ffaefcdc7e369f1513b7c0e2629c87cd60964eb861fb7356d98",
+      "raw_sha256": "64366fc337ccf6ea0550f519b54fe58fffb28ffc4a5da87c8cff537138ada785"
+    },
+    {
+      "id": "set03-span-065",
+      "decision": "ACCEPT",
+      "reason": "The entire fenced SENSE transcript is expressly an output example with source-time values, not a current recommendation or observed host result.",
+      "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+      "raw_sha256": "ee7798bb0534298f605d24fabaaa018063d1ae9294881a54e3555a1f76b4b57e"
+    },
+    {
+      "id": "set03-span-066",
+      "decision": "ACCEPT",
+      "reason": "The complete fenced role-file specimen is explicitly the original proposal, including placeholder fields and companion examples, while the current menu is excluded.",
+      "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
+      "raw_sha256": "80463fc1da6d93c5ab1a89779bdc8b6018338943a19128c9ebb3362692830b07"
+    },
+    {
+      "id": "set03-span-067",
+      "decision": "REJECT",
+      "reason": "The span is an unquoted conditional execution sequence with branch, rename, remote, verification and push commands and a revised current namespace route, not a preserved result record.",
+      "declaration_digest": "a90aec1ee6649be654f21cb1bafcefde017149c64bd02a2a5dd655d115ff07bd",
+      "raw_sha256": "5a94de5eebd2f042f3f43b5b7b738ae0cab327a2804a677d0f514aa027c3c89b"
+    },
+    {
+      "id": "set03-span-068",
+      "decision": "ACCEPT",
+      "reason": "The section explicitly records a rejected doc-orchestrator alternative and its rationale rather than enabling that command.",
+      "declaration_digest": "35bbff0319f7dbd01de13f3c41a87cc39bd5830f6e9934be455a735111110967",
+      "raw_sha256": "0bbe401fe2d2d65fc3dac2b31290786412482e6888c975e2f6b33257a11ef211"
+    },
+    {
+      "id": "set03-span-069",
+      "decision": "REJECT",
+      "reason": "The Invocation modes list directly presents runnable generation routes and flags rather than isolating original observed output or a quoted proposal.",
+      "declaration_digest": "61e687620ab65f5b80edc911f9d431af71ca28541fa001738933a4d11c0c247f",
+      "raw_sha256": "d0ea37a910d2c95d1728572d276b7b8fa22642f4d306ee9e259b0ec8b3a06d21"
+    },
+    {
+      "id": "set03-span-070",
+      "decision": "REJECT",
+      "reason": "The numbered refactor protocol actively directs adding flags, extracting logic and retaining current gate calls, so it is not observation-only.",
+      "declaration_digest": "db377e66239d23912607785ae855d269ae1fb0e5a2186bdbdaef71ff83e07347",
+      "raw_sha256": "1dccdeef2aae0673eb0be142bc158567fdf865c2968ffd9015c82dce636e9eb9"
+    },
+    {
+      "id": "set03-span-071",
+      "decision": "ACCEPT",
+      "reason": "The complete numbered concerns are explicitly the retained adversarial review findings and recommendations, not a new execution or gate result.",
+      "declaration_digest": "ecb37a64f5f6c4f1fcf68e930e5679812bc65fe789cb6e354dade2ec73f83331",
+      "raw_sha256": "172af6d3a10ebfb01f261463e9d62e7f5094c1632684c63f9d50ae2b2b2e86a8"
+    },
+    {
+      "id": "set03-span-072",
+      "decision": "ACCEPT",
+      "reason": "The text records a rejected alias architecture with its limited proposed use and does not establish live alias resolution.",
+      "declaration_digest": "d73ad9f20bbeca5682d77b8a6bf63ebc592e041941b8c6d5450d23f36560b417",
+      "raw_sha256": "57a67c42f20dac9835a16a65bee4b1c053305d3d5674b856fd71f3cc56314b98"
+    },
+    {
+      "id": "set03-span-073",
+      "decision": "ACCEPT",
+      "reason": "The success criteria preserve the historical alias-design target behavior and generic test examples without claiming a current resolver or test result.",
+      "declaration_digest": "e739d2eb92e9fae56c7af30e0e2347818c9c087ebbac970952099952c629ac4f",
+      "raw_sha256": "47eee4a926373752b5a22b1ac943a461c27101af45b8ff236666fd1d4850dd78"
+    },
+    {
+      "id": "set03-span-074",
+      "decision": "REJECT",
+      "reason": "The selected cohort block is a prospective implementation worklist with replacement, rename and conditional PR-splitting instructions rather than a result record.",
+      "declaration_digest": "d21e8379dff0cf995d24369fb033d69b05601f719a5ced09887d4e94eb550b96",
+      "raw_sha256": "08ef330edcee42dbc2a4312e20a48ae80ced165089500ac5e753fa34965782f7"
+    },
+    {
+      "id": "set03-span-075",
+      "decision": "REJECT",
+      "reason": "The span still directs scheduling operator working sessions and an orphan-name decision, so historical naming alone does not remove its instructional role.",
+      "declaration_digest": "a368a3c6e845a52e811a23c220e27e0720b54a993140954be5f3954d7321c7b2",
+      "raw_sha256": "f403f85c56bdddc3a70a0899d2c34770acd669e30f72f946bf6e67f0df1ace2a"
+    },
+    {
+      "id": "set03-span-076",
+      "decision": "ACCEPT",
+      "reason": "The decision-table row records the original unresolved D-4b subject and cohort assignment without selecting an action or invoking a workflow.",
+      "declaration_digest": "426dd866b727b8d9b263bf6bdb7b79c8440490e02e46f7934ee48efbf2a6e4ec",
+      "raw_sha256": "7a927d2e9e1e5345f3cdc841d22264eeadbb0fffa5ba8c3f1333d7d0690adb24"
+    },
+    {
+      "id": "set03-span-077",
+      "decision": "ACCEPT",
+      "reason": "The single generated-by line attributes the original design session and does not request a current cycle.",
+      "declaration_digest": "f12f5efb3b965c124428a40d2e831a56ce5b7e6f3db474eddc155cbd4e8496a6",
+      "raw_sha256": "cb23caa2c43d12b043696956f944c4a65c9be209d00f39d835a907ff2a3f35e2"
+    },
+    {
+      "id": "set03-span-078",
+      "decision": "ACCEPT",
+      "reason": "The rows preserve historical keep/orphan dispositions and an internal reference within a proposal explicitly superseded for command choices.",
+      "declaration_digest": "4785bb6d2db522d514f8a9adf31c46073020dff3d97aa75fd509915505e87eef",
+      "raw_sha256": "2126d561d01ede03111aea1394ae1e3ecdfb9a517ade1d5c74158ac5354cd6e4"
+    },
+    {
+      "id": "set03-span-079",
+      "decision": "ACCEPT",
+      "reason": "The fenced landing-report recommendation is a source-time naming proposal with decision fields, not a current alias or invocation policy.",
+      "declaration_digest": "d2fbbc1353960179a397d54af998b0e7161d310d70846274e6b0e5c9fa70aef8",
+      "raw_sha256": "727fa1b8450db231441fb71cf9f0992bd2ef469b8bf5d04c23ff90807f4f547c"
+    },
+    {
+      "id": "set03-span-080",
+      "decision": "ACCEPT",
+      "reason": "The inventory cell records why document-generate was classified mixed-voice in the original investigation.",
+      "declaration_digest": "44329f42ef685c1ea859b9cc1b4a9dffc629f0fe22a006dc4fde26f75b81b2d0",
+      "raw_sha256": "f14d528451e34d00e0abe211fc6c2c72c3a455bd4e35ffdc8303e0799c46a323"
+    },
+    {
+      "id": "set03-span-081",
+      "decision": "ACCEPT",
+      "reason": "The inventory cell records the original landing-report voice capability rather than recommending a current command.",
+      "declaration_digest": "d67667a0e74853b92ce74ac48e79fa16ca2e0625ca049390db4cbd7a9722c1b2",
+      "raw_sha256": "e44a12032788a4f505824d9fc6a2c8a1a5506290dc520b17acf8099c0bec8a6e"
+    },
+    {
+      "id": "set03-span-082",
+      "decision": "ACCEPT",
+      "reason": "The two rows record original mixed-voice classifications for the composite and role-load components, not present routing.",
+      "declaration_digest": "5a1a99711d355b4c0c1f46d44695fd0606cb7c543aff6688b036968da3b0bf44",
+      "raw_sha256": "3679d46345b57e82095ecce23d596825f604b998d33d5dfab1c39e0fed652708"
+    },
+    {
+      "id": "set03-span-083",
+      "decision": "ACCEPT",
+      "reason": "The edge-case list records the investigation rationale for existing voice tags without invoking those skills.",
+      "declaration_digest": "ae6c53854f46dec0e4640f8b70849c1420645d0c03f309f67b1a2918b1d20eec",
+      "raw_sha256": "50de688fefbfd55837ba146b0540cebb49b734691f85a95b1a9341fe2ed81a24"
+    },
+    {
+      "id": "set03-span-084",
+      "decision": "ACCEPT",
+      "reason": "The paragraph and fenced directory listing document the original role-validation question and inspection result rather than issuing a new shell command.",
+      "declaration_digest": "bb4ae6efc520643edf99b289acd5c864137c91a3ca7d4468ef0e866d485e838d",
+      "raw_sha256": "ae841f79f528c3b995f0e70d55b7db0b7e37b1e2b7da88eaa582d2f8e00c1e3e"
+    },
+    {
+      "id": "set03-span-085",
+      "decision": "ACCEPT",
+      "reason": "The paragraph records empirical reasons behind the original role-expansion recommendation, not permission to add or invoke a role now.",
+      "declaration_digest": "bf4b8d635e96abc6ed8e4f101f58350c12e14eaac05760ab9a408b822183b1d4",
+      "raw_sha256": "d51abf7490a0ad8a46e180201e191f26aa1441e3fed775d440260f2bab3b5b01"
+    },
+    {
+      "id": "set03-span-086",
+      "decision": "ACCEPT",
+      "reason": "The conditional list describes predicted integration effects of the original role-expansion proposal rather than a current role command.",
+      "declaration_digest": "3d7fbdc7adccc6049229c289c62aa5ddd42380a2d3a305c3b4635c66245fdee8",
+      "raw_sha256": "fb2ab272b2b61b993e4f824116bc8f1031bc6bb2766746d4eaf4538a34df03c5"
+    },
+    {
+      "id": "set03-span-087",
+      "decision": "REJECT",
+      "reason": "The span mixes active constraint and gate instructions with editorially current preservation rules, including customer-share workflow selection, so it is not solely historical observation.",
+      "declaration_digest": "7e97199173b36d238272fc79bbedb60a349e0b180b5a744e2479fa47fce99395",
+      "raw_sha256": "506df771c5d0afe832659487011c3e49883dab7f5a1915d6a79c45cb2a1048c6"
+    },
+    {
+      "id": "set03-span-088",
+      "decision": "ACCEPT",
+      "reason": "The fenced tree is the original proposed frontend-agent inventory, not current discovery or dispatch evidence.",
+      "declaration_digest": "248c4c2622bf5e6c5cd1aabe19555478eec7906d41ccb9d56fe7f713138598b4",
+      "raw_sha256": "0c2a12458e230642b9e271773131bc82ac22ef3257d1cca5e6fd82823951178f"
+    },
+    {
+      "id": "set03-span-089",
+      "decision": "ACCEPT",
+      "reason": "The section records original frontend acceptance scenarios and timing targets rather than reporting them passed or directing a present execution.",
+      "declaration_digest": "9c810d67a35a113c5558f1a7e49035bff9ddbee4a0d730bf0237e92d425cd36a",
+      "raw_sha256": "44180728214fe65fc9f692c1fb0524ac3d14b2ae91018cf92736fb4a60a12eb0"
+    },
+    {
+      "id": "set03-span-090",
+      "decision": "REJECT",
+      "reason": "The dependency section includes a direct instruction to document current sibling boundaries and unqualified gate routing, not only a recorded dependency observation.",
+      "declaration_digest": "3cb5c6efbceb927089b7e9106eb8f34deb3c5a474c72ab5fd819be4d819fe993",
+      "raw_sha256": "c7fe1e383c86dfc5475601deeb82fa797942af1a3bfec485e2c6607a83037515"
+    },
+    {
+      "id": "set03-span-091",
+      "decision": "REJECT",
+      "reason": "The A2 block remains a concrete implementation and test worklist with documentation and dogfood actions rather than completed or quoted observation.",
+      "declaration_digest": "f39f8337f44f1b3f492b925082cb403295a02067f2863af890ea683376608aad",
+      "raw_sha256": "e950152138065b0faab1af25f946fc94701e251220b95bbaf59c37d693806bab"
+    },
+    {
+      "id": "set03-span-092",
+      "decision": "ACCEPT",
+      "reason": "The span is explicitly the historical engineering reviewer split recommendation and original artifact inventory, not a newly assigned implementation card.",
+      "declaration_digest": "7c9e62eb13c29e5989b5660d82c4b6a8ae6b417075bf4f71fc3aea928ce79502",
+      "raw_sha256": "1a18e7534728e6076fea5c384ec12499230aa031db71cfdd14fce8375f1963b7"
+    },
+    {
+      "id": "set03-span-093",
+      "decision": "REJECT",
+      "reason": "The first selected row explicitly supplies the current ta single --action route, so the following original proposals cannot justify masking the complete mixed span.",
+      "declaration_digest": "868891e516df1123b59de1bb52f3067c72ebe8dddae97293c32185d97a088d9d",
+      "raw_sha256": "c051a39c72dd91612894d69d2913306bb2c7f990f28dadae5dc187ccdd3dfe63"
+    },
+    {
+      "id": "set03-span-094",
+      "decision": "REJECT",
+      "reason": "The first selected row explicitly supplies the current da single --action route alongside original proposals and checkpoints.",
+      "declaration_digest": "5df4a6390733722bc8dab062ae444a15b93b8b24bfde17c9695ca38a3ebd13db",
+      "raw_sha256": "550d2efadbb62d280963cbf56e432b5271781ad4ca188a43bb98fdf287672c57"
+    },
+    {
+      "id": "set03-span-095",
+      "decision": "REJECT",
+      "reason": "The selected tq row is explicitly a current targeted route and cannot be hidden together with the separately labelled original sub-skill proposals.",
+      "declaration_digest": "99527c7b04987012be3714f1333485b28bd33f1099ea5c30c250129e6a36294f",
+      "raw_sha256": "017a882c5e8965c0c1ae76303729648343b50acd8c1a56fd21c4630e298c9bbf"
+    },
+    {
+      "id": "set03-span-096",
+      "decision": "ACCEPT",
+      "reason": "The complete conditional criteria are explicitly separated from current navigation and retained as unrun original targets, not current API promises or executable guarantees.",
+      "declaration_digest": "62cfe99e0cc4e386c9771ba5e1599f21c11dce73a15ec87935012be1f786ca47",
+      "raw_sha256": "83a3bbedc6ad9f58e5b23798d701f8333f84dea52049721967369f0d2c471da2"
+    },
+    {
+      "id": "set03-span-097",
+      "decision": "ACCEPT",
+      "reason": "The section records a specific historical engineering-review finding and proposed scope remedy, not current permission to remove modules.",
+      "declaration_digest": "1aa1bb3be7a8eb42e95e0fb819137bab6173f5a79fbbf8296fe6dafb5c63970d",
+      "raw_sha256": "93efa85435934a87a9255cd3b7bc011fe87d4af524c588768237a3eaeee490dc"
+    },
+    {
+      "id": "set03-span-098",
+      "decision": "ACCEPT",
+      "reason": "Both numbered findings preserve the historical reviewer evidence and replacement proposals, not current validation results or new work authority.",
+      "declaration_digest": "85402fa70bbd71005b74ed0f1ecd09e74e286c862539252b30c9dfb9265f1314",
+      "raw_sha256": "53f4942b46370585f49d2b76c9bc5e4bfd400adc6fc9f1e93c54b9e3d895e670"
+    },
+    {
+      "id": "set03-span-099",
+      "decision": "ACCEPT",
+      "reason": "The evolution subsection records the original addition of v4-migrate as a transition tool, not a current migration route.",
+      "declaration_digest": "3229279f62e86e70eb48c56acefd2323a69c9f7eec6dee8c7500c87987abb84f",
+      "raw_sha256": "e62b63f161cd9524f17220545dd398cf05825673cfdbfd5a7853321b2c105134"
+    },
+    {
+      "id": "set03-span-100",
+      "decision": "ACCEPT",
+      "reason": "The inventory row records the original pack-bound classification and inherited proposed extraction action, not current role invocation.",
+      "declaration_digest": "c7c6322e9ac1c376623310d9b48f98550f8977c1395ae2b7f5975f046672e7f6",
+      "raw_sha256": "3a517dd2310678567d44b74c8430d240c878117c356cccad520d7c25b30da88d"
+    },
+    {
+      "id": "set03-span-101",
+      "decision": "ACCEPT",
+      "reason": "The row records the original voice-path extraction proposal in the initial source inventory rather than invoking the retired voice check.",
+      "declaration_digest": "2c31ab6c018f2b0a21227a311b62d6cfd45e7d5281ae759649caf5b7827df9e7",
+      "raw_sha256": "cffed86de64beabba734f02a7073054f4bff4f1d801ac6a61c33b2b26778b2a8"
+    },
+    {
+      "id": "set03-span-102",
+      "decision": "ACCEPT",
+      "reason": "The bucket row records source-era document-generator bias locations and their planned pack-resolution disposition.",
+      "declaration_digest": "19f5e9c956bfec2ab5c04ab51b224f85785f24173bcc0298d893346e7abb594a",
+      "raw_sha256": "0cabd1e5c73a6919488808ff0674f168a462716f57bed05594be714c88c77d27"
+    },
+    {
+      "id": "set03-span-103",
+      "decision": "ACCEPT",
+      "reason": "The frontmatter fields preserve the launch-polish changed-path inventory and recorded risk flags, including an explicitly removed skill.",
+      "declaration_digest": "fa69fada65d96df38d5a628bbb6c418219121f884875163620ee04b0ad8f3943",
+      "raw_sha256": "f3485ed60e641fd973bfa0e3215ad8edd79889b1fac42cfa52129f92f918658c"
+    },
+    {
+      "id": "set03-span-104",
+      "decision": "ACCEPT",
+      "reason": "The complete What changed section reports the original fail-closed runner change and completed budgetwatch removal rather than extending alias grace or current routing.",
+      "declaration_digest": "23da8aa7c7eae400736377870a3292c76b6e303dc6bf41c253fd5cc616f35e8a",
+      "raw_sha256": "932c34c529f51de4fecc9e8df58e375cd70d6433e5da4ebde3383aecb8bca303"
+    },
+    {
+      "id": "set03-span-105",
+      "decision": "ACCEPT",
+      "reason": "The frontmatter is the original remediation change inventory and recorded risk metadata, not a present edit assignment.",
+      "declaration_digest": "3c8ecba6545a16b4263d3f30a8c41788cacbba4a63a80dc41128767f9f0ce1ca",
+      "raw_sha256": "846db377a424f61a188fffefa290d6d79e8557ab5b5795f70f84b4178db2b763"
+    },
+    {
+      "id": "set03-span-106",
+      "decision": "ACCEPT",
+      "reason": "The frontmatter records the memory-v2 changed paths, removed aliases and historical risk classification without current alias authorization.",
+      "declaration_digest": "75fcd71b9f8af0e156ae95149c42cc499e217b4e8897a5ec601ab25ac0e2642b",
+      "raw_sha256": "60ba46a00fe7225c0b61d065dee030863bf38b30b542238ffd8ffaae5918cd0f"
+    },
+    {
+      "id": "set03-span-107",
+      "decision": "ACCEPT",
+      "reason": "The continuation identifies an explicitly historical discovery failure, leaving the current non-destructive continuation requirement outside the span.",
+      "declaration_digest": "db9f1b087fc9677cdbcaf371286dde63ae7606caea92c6d644bca114034d8ac8",
+      "raw_sha256": "0a5f4abd92cd0288d4cbfc66579dc13f19471e21dbf126d19ae38242ea0b331a"
+    },
+    {
+      "id": "set03-span-108",
+      "decision": "ACCEPT",
+      "reason": "The frontmatter records the original design-dna change set and risk metadata rather than selecting current design-review callers.",
+      "declaration_digest": "80003a59d1ecab44d4a1d2265279fa69513e9436806b591bb2d08ec47b2eec0e",
+      "raw_sha256": "a1791dc2b2f04708aeca8f13e80835e43a2f2fd8d8282d84d88ff248d0e1ed88"
+    },
+    {
+      "id": "set03-span-109",
+      "decision": "ACCEPT",
+      "reason": "The frontmatter preserves the original launch-readiness affected paths and reverted-move notation without new publication or implementation authority.",
+      "declaration_digest": "5e28f26f799249df15422efe04811940d7ade0addb57899c6b51cb33f5d9ec8d",
+      "raw_sha256": "9d8a985f61524d757e50f4d83f22723f31131fbf12f92799a19220895da67f51"
+    },
+    {
+      "id": "set03-span-110",
+      "decision": "REJECT",
+      "reason": "This is the active cleanup specification constraint block, including current prohibitions and integration instructions; the expired ownership freeze does not make the whole block historical.",
+      "declaration_digest": "5259b70b31efbf3663237ddc2cf4c626deaa0d26d1b9403392d3628420a4ee3c",
+      "raw_sha256": "451d64d1c7041e40e5d8cbe0a0ac59aa0fefff02a94b167a5583a03d6fb9eb6a"
+    },
+    {
+      "id": "set03-span-111",
+      "decision": "REJECT",
+      "reason": "The original worker brief line still contains unquoted no-reader and keep-bridge instructions, not an observation or completed result field.",
+      "declaration_digest": "c3d1dd7977edf6144435fd28bd11f98ebeb0634b85794933ee265c9361061694",
+      "raw_sha256": "9666f05ac6bb3350e1e0b43297d99e5b62a2ae10b60651988517b88ed20e92fa"
+    },
+    {
+      "id": "set03-span-112",
+      "decision": "ACCEPT",
+      "reason": "The continuation reports the worker-owned consolidation changes and retired helper names as implementation results, not fresh routing instructions.",
+      "declaration_digest": "fd752643fa9277107aa823ecfde3647eb8258ff273f53e2795ebb809d0938855",
+      "raw_sha256": "0cec6682aea8fb6e5bf94f82674311845498f36e0486915ce3e6644d32ab3d8c"
+    },
+    {
+      "id": "set03-span-113",
+      "decision": "ACCEPT",
+      "reason": "The line completes the worker report inventory of changed consumers rather than invoking the removed make-pdf route.",
+      "declaration_digest": "1ea3ebf261e0e2b2e2be9c0263f15d9ee66b0d0e20a8481dfb97f7a45da9c975",
+      "raw_sha256": "aaf6ee3cdc176150f1cfe9feebeebde5f114e10cfa191869f7bf57dcb8b9822f"
+    },
+    {
+      "id": "set03-span-114",
+      "decision": "ACCEPT",
+      "reason": "The three paths are the original worker-reported compatibility resource inventory corroborated by its stated module-identity check, not current installation guidance.",
+      "declaration_digest": "698d0bd8bf26f2255ac768ca848f6d08a803437f45353274633f308723874514",
+      "raw_sha256": "acb4a07080b18b712e3ea7f3149bd868e6d215e4d8475aafc67f11970dfdf290"
+    },
+    {
+      "id": "set03-span-115",
+      "decision": "REJECT",
+      "reason": "Keep make-pdf until generate-pdf accepts remains an explicit deferred integration instruction rather than a bounded original observation.",
+      "declaration_digest": "9a3f7813f20c90d7f5b450c062cdd3218672193958172b5e3d2e5bd7bf7d4855",
+      "raw_sha256": "698be8721176904479e4b9a33b51acad03a0dd9e4e323a09bddbacdabd7a82cc"
+    },
+    {
+      "id": "set03-span-116",
+      "decision": "ACCEPT",
+      "reason": "The line identifies original foreign-consumer ownership at the worker handoff without itself issuing a command or edit instruction.",
+      "declaration_digest": "83353391191985bf0a72c64b2cc5b762cbc9d84832eb8958b5c155ba74f8e92e",
+      "raw_sha256": "8b16d77b469b29eef67a87b59505295d226eb9b8824fee84d50a4061ce33f6da"
+    },
+    {
+      "id": "set03-span-117",
+      "decision": "ACCEPT",
+      "reason": "The continuation completes the original foreign-consumer ownership inventory and excludes the later signature-use instruction.",
+      "declaration_digest": "82faa06532fc2e88740f92a146d584c50c166b874b750b4086cd9f6c5a748bb1",
+      "raw_sha256": "c6b837fa98b85de5198bce161c3036ba8ec8288b80d746c285f4ddb7223192b2"
+    },
+    {
+      "id": "set03-span-118",
+      "decision": "REJECT",
+      "reason": "The opening words complete the preceding imperative to use exact replacement signatures and preserve the design-review distinction, so clipping the verb outside does not make this whole span observational.",
+      "declaration_digest": "399353d83fee22b1f32bb4d9a1b055d5169ae17535f44e10b30236d4c08d103f",
+      "raw_sha256": "d3e73ca9a7a38b26607168188d0f3f938cb0f0cc117b76cf4cab74f08856bddd"
+    },
+    {
+      "id": "set03-span-119",
+      "decision": "REJECT",
+      "reason": "The Wave 0 block is an unchecked implementation, validation and PR worklist rather than the claimed completed checklist record.",
+      "declaration_digest": "4af283f3f45a2dd1c7bc9f930306e8e080ae004809d7bd9de60f12b24ec9b688",
+      "raw_sha256": "4df6336d51a06a1fc464e6bfe808840695944ff2049dff9191f05417e678dad9"
+    },
+    {
+      "id": "set03-span-120",
+      "decision": "ACCEPT",
+      "reason": "The bounded historical work section records its original scope and completed J1-J6 fixes with a retained validation outcome, not the active cleanup scope.",
+      "declaration_digest": "f9b0b78b2c323b796ef505b0f505208c2d1894b9c9f2b5632ea42beedb8e6fef",
+      "raw_sha256": "973d41904b3424f850eb955127292ab2fdbdc6d1b505ad285348bea82d93a5ef"
+    },
+    {
+      "id": "set03-span-121",
+      "decision": "ACCEPT",
+      "reason": "The continuation recounts defects found and corrected during the original completed review sequence without new workflow direction.",
+      "declaration_digest": "2b7f2cdaf10cb5de2e628d9b11f84e6cf0440321849d04affeb8efc6ae362b3b",
+      "raw_sha256": "18a43c85cb9dadddecd40b8f77fe080dbfcfb89b92ce4187a7a32ffe0fe1a326"
+    },
+    {
+      "id": "set03-span-122",
+      "decision": "ACCEPT",
+      "reason": "The span records untouched scope and completed de-heritage/checklist outcomes of the identified old branch rather than current reservations or alias grace.",
+      "declaration_digest": "3844ffc21f4436a78bb2419c8a59eccb1783bba0b0f8a80c81de1b930ed2520b",
+      "raw_sha256": "09127276d9370fd3794e709c73caa25ebc9489a88c2194f0925d8b3efdd9faf1"
+    },
+    {
+      "id": "set03-span-123",
+      "decision": "ACCEPT",
+      "reason": "The sentence records an original deviation flagged to the operator, not permission to run the external design binary.",
+      "declaration_digest": "88433fe0b28cc9dd0753e3eb9e8b64e716b364f3975d5dec54d0c59e1f6a98e8",
+      "raw_sha256": "c5250bd3a9c06e757572879bb86edcb4d2f8afe0f788dac8c529ffb4809ce623"
+    },
+    {
+      "id": "set03-span-124",
+      "decision": "REJECT",
+      "reason": "The selected A13 write contract gives operative allocation, locking, replacement and audit instructions, not a historical lesson-store observation.",
+      "declaration_digest": "f27ada0f2565376e69a9385f043b3305e310c7466e3944ff8fae42f492ed7150",
+      "raw_sha256": "a73b51ef4517cc86a9cfd429e3f518611a27a5f7348f7fcc4cba11d63b3d49ff"
+    },
+    {
+      "id": "set03-span-125",
+      "decision": "REJECT",
+      "reason": "The A13 freeze block explicitly commands Keep and Fix and selects a code-unfreeze message as a required live correction.",
+      "declaration_digest": "fb22bba693af300d616a19040a15e77bf9763db2e8d61bfe5243d22d67d89cb7",
+      "raw_sha256": "e5684fdaa5f5303234104c4ce2f0912e762e0c79374160b759dfca0521479313"
+    },
+    {
+      "id": "set03-span-126",
+      "decision": "REJECT",
+      "reason": "The span is an explicit coordinated write authorization with required amendment boundaries and commit/review duties, not observation-only evidence.",
+      "declaration_digest": "f4303ead689d518aa680b816cf166de65cbe45d5c4d89b838dfc428975e3dfce",
+      "raw_sha256": "7c67931da57dee12a4ea12fa2c2b90c09af87ad015c5e113961575d504053f1f"
+    },
+    {
+      "id": "set03-span-127",
+      "decision": "REJECT",
+      "reason": "This continuation belongs to the P05 Own instruction and selects the work scope of a normative package contract rather than a recorded changed-path field.",
+      "declaration_digest": "6bd8f3ce58183841cfea81f6451aaafb34362bf5edccba2f6fa54e5ce3fa98a3",
+      "raw_sha256": "bb1673212c9d62d65a6588d215327e53bea5e97921a98f3bce5954efe05e7ffa"
+    },
+    {
+      "id": "set03-span-128",
+      "decision": "REJECT",
+      "reason": "The selected skill list is the continuation of the P06 ownership assignment, not an original execution-result inventory.",
+      "declaration_digest": "d1fb071b128c2fcce70cddeac1f6c0b6faf55ffa0260c241827ec5628db85686",
+      "raw_sha256": "4e5fe92d44ec25a4a7e68cb470c0b56e2700d9b36cee1622de2cb0782aa4761d"
+    },
+    {
+      "id": "set03-span-129",
+      "decision": "REJECT",
+      "reason": "The named workflows continue the P08 ownership instructions and must not be hidden as completed observations solely because the initiative is historical.",
+      "declaration_digest": "f7eb34a0f32dc5651721b5b9d038d28c5973ec091069e4ad749123c4efb9e74f",
+      "raw_sha256": "e134626e89102f637357dc19242fb7ef61180460f444dc8cb27b048b36cf798b"
+    },
+    {
+      "id": "set03-span-130",
+      "decision": "REJECT",
+      "reason": "The selected continuation expressly assigns owned skills, docs and tests in the package contract rather than reporting a completed change set.",
+      "declaration_digest": "afdb5f96829a7657e6e36eee7db777744695cda7ba607d068b4bb2dc86e784ba",
+      "raw_sha256": "f62e2daa11e8323789762e819ce3457c4cbe3af9ab749f2fdeedfd3fddb04ab8"
+    },
+    {
+      "id": "set03-span-131",
+      "decision": "REJECT",
+      "reason": "The A10.4 row is an original acceptance requirement governing dormancy, not an observation that the obligation passed.",
+      "declaration_digest": "bb6a70540da5a8b9db8111f8991b2f60618e4e3c7e7fcc082f6c65d4742b7df4",
+      "raw_sha256": "838431d19bf8dbb2b9c810bc850e5612d9e54e6ab77834b54bc402a0927b624a"
+    },
+    {
+      "id": "set03-span-132",
+      "decision": "REJECT",
+      "reason": "The line completes an explicit Execute direction selecting the real review-and-ship composition for a required refusal test.",
+      "declaration_digest": "d5b6aa10ef5e11ad14d68cb88176a0129e4075eedd98db0f8c0eab94ecefa69e",
+      "raw_sha256": "e01f37de05a39448bad26b0f28f589e11cf54da1906329225ba26a95600266fc"
+    },
+    {
+      "id": "set03-span-133",
+      "decision": "REJECT",
+      "reason": "All three selected packages prescribe preparation, mutations, invocation and observation duties; they are instructions even though actual execution remains gated.",
+      "declaration_digest": "9765ba5106c3b4261a698c957a1da54d4c3fa8d397734ef4dd19523b328dac62",
+      "raw_sha256": "dd99dffd8238e23e0b48b7c044d93461a1a963218759dade506b02d7bdff122d"
+    },
+    {
+      "id": "set03-span-134",
+      "decision": "ACCEPT",
+      "reason": "The span describes concrete merge-tree conflict observations and the identified coordinator port without authorizing a new merge or edit.",
+      "declaration_digest": "a1da24c9f2ce885ac617e9aa4ac8b4ab91c8d52cb9412022abc6f4ce00b22a98",
+      "raw_sha256": "ebaf8d4dd9fae57ab5582466398e285ed8562e182f70c97bf6f3300207037aa2"
+    },
+    {
+      "id": "set03-span-135",
+      "decision": "REJECT",
+      "reason": "The selected continuation defines a currently phrased module-consumer release scope, not an implementation-result inventory.",
+      "declaration_digest": "b1a51dba324599152104fe02dd5149f3515a58323564c46ccfa1a36468c645e3",
+      "raw_sha256": "47dc78a91e301268821cf7449803f59d270c2c8ba87afb629aab2f98bb6916c3"
+    },
+    {
+      "id": "set03-span-136",
+      "decision": "REJECT",
+      "reason": "The list continues the Own instruction and preservation constraints of the P09 package contract.",
+      "declaration_digest": "b8a529db3663a558486c4364fe28fb085a3af4c069f71a885b6c37008f238e39",
+      "raw_sha256": "562bc219e79606d06662fcea30d3eb2d3fb37cd4874d2dee44878ff9c2d05e24"
+    },
+    {
+      "id": "set03-span-137",
+      "decision": "REJECT",
+      "reason": "The selected names are part of the P10 normative ownership assignment rather than a completed changed-path record.",
+      "declaration_digest": "b6f05c8bc8f4edf2ae355e9baae6859850599f90704728e8a5870a6932c40057",
+      "raw_sha256": "f477d819bdaaaa551840d0aa27da2ae97e8d20f73d41096bee4f12379423d30b"
+    },
+    {
+      "id": "set03-span-138",
+      "decision": "REJECT",
+      "reason": "The list continues an explicit browser-unit release and Own only instruction, not an observed consumer inventory.",
+      "declaration_digest": "c9ff3233fc201d32879ead301ab504fab241844678fe8e89da4e9ead55fbdbd2",
+      "raw_sha256": "f88ffb5eaa2c56cedf48bc1f8975892f2db8f9062639e3120c1ca366a6f66ad2"
+    },
+    {
+      "id": "set03-span-139",
+      "decision": "REJECT",
+      "reason": "These design entries are targets of the unquoted Own design/frontend/browser skills instruction.",
+      "declaration_digest": "b8d88ebbe851ec1cc0beeac20d80ca5f9782b5f756d9c755e159dc52abfb66df",
+      "raw_sha256": "4a91042e7d43a0b35ad8c322402bb116770d9d8cfb2230eb961fd146656e4ec7"
+    },
+    {
+      "id": "set03-span-140",
+      "decision": "REJECT",
+      "reason": "The selected lists continue the package ownership direction and do not by themselves constitute original observation evidence.",
+      "declaration_digest": "aad5e19f7c2e071fc904e021f5b3045a55631c5dd0df4c36030f29bf91aa7168",
+      "raw_sha256": "793794f1aecee71f4a19e7d490eaff7e20b91da95014990adcfddb5825063812"
+    },
+    {
+      "id": "set03-span-141",
+      "decision": "REJECT",
+      "reason": "The fragment completes a Do not take prohibition over document renderers and shared contracts, which must remain visible.",
+      "declaration_digest": "a098416d3c1c4d495080b0ad96e20b676ceaa0f6a8c3b30462fc1607f01d97f5",
+      "raw_sha256": "4cbf33becc8edaa48dd410c8a4848d9773790bb8676122ee5b8c26202112f73a"
+    },
+    {
+      "id": "set03-span-142",
+      "decision": "REJECT",
+      "reason": "The original owner may now correct is an explicit scope release, not a historical repair result.",
+      "declaration_digest": "cf71648e2e0b0620097f552aaea2cda63e981b08939c4fb866a0a2abeec18653",
+      "raw_sha256": "4cbcb87c0ed8e0d8407e171f2e549ae79ce5263a9ab17040736dad58cf0fe734"
+    },
+    {
+      "id": "set03-span-143",
+      "decision": "REJECT",
+      "reason": "Own skills/generate-pdf and coupled make-pdf corrections is an unquoted implementation assignment.",
+      "declaration_digest": "435df62d5546a7ccd682ad037b82038ab433db2a66fe3ac28649c92ea853334b",
+      "raw_sha256": "dca4e5bdf1f6384f9a30e8e471cceb9038534e98e479bb94b898f0580ca59e9a"
+    },
+    {
+      "id": "set03-span-144",
+      "decision": "REJECT",
+      "reason": "These names continue the P12 ownership and value contract rather than report the delivered files.",
+      "declaration_digest": "d18faa2e2cf1978928721f55363f38bd47f3a79e807f03b234e9bbcb8ad17099",
+      "raw_sha256": "9724c75863922feee5732dff274404fe518d72e4071e13e37d903e815b807a84"
+    },
+    {
+      "id": "set03-span-145",
+      "decision": "REJECT",
+      "reason": "The selected catalog paths continue the explicit Own only release in the P13 package contract.",
+      "declaration_digest": "28427c8c5b49219af47ed847ad7745249682df71ce135fc211134b53248dc9d2",
+      "raw_sha256": "466f50a01d3b36ddc5d37310933b4df5e67eb545d4744318c91d01fbb6ebcdc4"
+    },
+    {
+      "id": "set03-span-146",
+      "decision": "REJECT",
+      "reason": "The row allocates current task-source ownership and dependency constraints to P05 rather than recording an observed change set.",
+      "declaration_digest": "0ae158a7471b071d97f224525a06aa70097f6fe1691bfa6e63954f98e8fb078a",
+      "raw_sha256": "16bd4f05e0db3a49cfca246249d035f4d72379b73b55ffb227b52e4e2360bf2a"
+    },
+    {
+      "id": "set03-span-147",
+      "decision": "ACCEPT",
+      "reason": "The complete A10 section records completed leaves and explicitly sequenced original refusal/review histories through closure, without transferring those results to current cleanup acceptance.",
+      "declaration_digest": "db3118cc9488a53d9eb9570227ea9864799701a87ada436e3eaa6927d25947a1",
+      "raw_sha256": "81d1873a810a65f519d4bec495dfb0757700592b5c578cad643e232ca80a05ce"
+    },
+    {
+      "id": "set03-span-148",
+      "decision": "ACCEPT",
+      "reason": "The line is part of the exact seven-file inventory for a named original repair commit.",
+      "declaration_digest": "b6d0e3598c7965e361fb43ef445b0d7b4c78f3bcd5a2a9d7067e3a3bec8b02a8",
+      "raw_sha256": "d44b4cf4a94b8b3a72b95e8dc177763709ed208e467744754d0b2744cb513f68"
+    },
+    {
+      "id": "set03-span-149",
+      "decision": "ACCEPT",
+      "reason": "The line is part of the exact ten-file inventory for the named original v2 repair.",
+      "declaration_digest": "9003c3b1bedae8908a744c29ddf242bb35b3f3f883b64cd245d6ee1b5b932224",
+      "raw_sha256": "e0051a99ffc4fe9c0e323908b714a38f52be852eb153dac8741c7a602f29bd77"
+    },
+    {
+      "id": "set03-span-150",
+      "decision": "ACCEPT",
+      "reason": "The bounded signatures document the implemented helper API as reference data and defer annotations to source, without invoking a workflow or performing review.",
+      "declaration_digest": "4416f6fc556492944fdd66d661a569c4e3d95f6da4524f0c4a93e3b32749c647",
+      "raw_sha256": "875429e065618e907ca1f43fbd5a459c85a1b67e364126e902254c6c75aa56a2"
+    },
+    {
+      "id": "set03-span-151",
+      "decision": "ACCEPT",
+      "reason": "The span reports actual archived-source reproduction observations, explicitly distinguished from passing product acceptance.",
+      "declaration_digest": "98b5288aa615811c6d7939a12c0a1c5ace599721273a591bf8a0c4d69125a229",
+      "raw_sha256": "6f0edd3057ae4f3548fe04af88497203ed7bc14c34068e993e8532268fb77271"
+    },
+    {
+      "id": "set03-span-152",
+      "decision": "ACCEPT",
+      "reason": "The subsection records the implemented A13 freeze-document corrections at the original report revision, not a new code-unfreeze instruction.",
+      "declaration_digest": "b05c7ee7c6883b97bc0c6ff9ed691c10f43298d3f1013dcc266e1ed8489d8902",
+      "raw_sha256": "bc3380c3bb2e5e326d3500fe5d0bc3cc7b44804a1b39b7fcd0d4d42e87f74042"
+    },
+    {
+      "id": "set03-span-153",
+      "decision": "ACCEPT",
+      "reason": "The complete deviations section explains original test edits, accepted catalog choices and implemented behaviors rather than directing fresh execution.",
+      "declaration_digest": "08d166e365bace37911dcbf036f961636e892c9cac70565245ebd5356eadaf3a",
+      "raw_sha256": "13932a8a074568700a382c8fe300a9af0509a960aaa462ef6dbff1dd0aaa4cec"
+    },
+    {
+      "id": "set03-span-154",
+      "decision": "REJECT",
+      "reason": "The comparison table specifies how a future original-proof execution must use the alternate workflows and current review evidence, not what a completed run observed.",
+      "declaration_digest": "49b6bbd11a47d4565c984b77d6abfab896e99e141dd0e585115e285a05272225",
+      "raw_sha256": "80b289e275b0486d7b9f199757316e7bcddaa42fa790f1a63e64cd0af403cd9e"
+    },
+    {
+      "id": "set03-span-155",
+      "decision": "REJECT",
+      "reason": "Compare the applicable canonical PLAN lenses is an explicit future verification direction inside an unreleased execution proposal.",
+      "declaration_digest": "ebf64ce6e7cf5f9c849ec81e68fe9300fb85c5c06de6f4cf967c78d3672a8dd8",
+      "raw_sha256": "8d77370759710c1b36584e9a7bdde8c866c5e63aeb85316d0eaf7dd68b74ad20"
+    },
+    {
+      "id": "set03-span-156",
+      "decision": "REJECT",
+      "reason": "The fragment continues an execution authorization and required separate-target review-and-ship obligations, not an actual run observation.",
+      "declaration_digest": "95d72df228b7b4bfbb91dee013440cafb6168f9e91e78619b77d52b749367fc8",
+      "raw_sha256": "49928582c652a2d9d3bac07d111b6596c997ddc1f6dbb38d1cfef642b5d03f47"
+    },
+    {
+      "id": "set03-span-157",
+      "decision": "ACCEPT",
+      "reason": "The sentence reports the actually executed original alias case and points to its specific immutable handoff packet.",
+      "declaration_digest": "66d538f92e086c9eafd2817ed08f5885beb2682249ded81c70e53dd3d692c7df",
+      "raw_sha256": "113576e0d2c5ad230cba4f647e64add8f14e7ca9cad704f0e157ea497418af68"
+    },
+    {
+      "id": "set03-span-158",
+      "decision": "ACCEPT",
+      "reason": "The continuation describes the observed finite-pair preflight difference in a read-only comparison, not a new alias invocation.",
+      "declaration_digest": "a595184204e8405916ffeb1d4ef61df50ccdda8601fcfaff9962beb2a227f53c",
+      "raw_sha256": "fda9f92bd00ff6fb9cb402d5dfa58734cfc45c011b44dfd4e4e5ee0e5d17f37b"
+    },
+    {
+      "id": "set03-span-159",
+      "decision": "ACCEPT",
+      "reason": "The row records the observed frozen plan-tune dormancy and its unclaimed capabilities without activating settings or directing an invocation.",
+      "declaration_digest": "636a185371b7c0e45954a97958a52558d6fdc4ff161b95c5ac7e279a2638d894",
+      "raw_sha256": "fcd8f17472e513757103a3e54ab1a6782e09fe16e6104d1388f0ead5813d812a"
+    },
+    {
+      "id": "set03-span-160",
+      "decision": "ACCEPT",
+      "reason": "The fenced path list identifies the exact owned product change set of the reported module-consumer implementation.",
+      "declaration_digest": "72a2f7e04a138f1fd2f4b4469ed49009b7f4e79e36b85110e6feb48756a14af2",
+      "raw_sha256": "b2228525ae70400dd2f06a31367536383794dfcbed810ab00b381c493791ff7a"
+    },
+    {
+      "id": "set03-span-161",
+      "decision": "ACCEPT",
+      "reason": "The span is the reported changed-path inventory for an exact immutable commit pair, not an instruction to edit those historical paths.",
+      "declaration_digest": "b7c72c3d01224c87cef500602d4a4851562d039b7ff7d6b00c6ec18014d8b5cb",
+      "raw_sha256": "4fbf6a369786425d1b019f331430a4f921dfd84af8d70274faeea8be4b5cb063"
+    },
+    {
+      "id": "set03-span-162",
+      "decision": "ACCEPT",
+      "reason": "The code citation describes an implemented endpoint-readiness extraction at the original source revision.",
+      "declaration_digest": "ba6f3baea83bfd93428b1b36c1bbf1d8bbadddeaa1993fbe6c78232303e64cfe",
+      "raw_sha256": "6a044266bbaa2eaa7c9e9c2f3263b0e004fcb656e51697a87a6cb147be2d3810"
+    },
+    {
+      "id": "set03-span-163",
+      "decision": "ACCEPT",
+      "reason": "The statement records the exact three-file Q1 repair inventory and measured diff size.",
+      "declaration_digest": "7f3c9f09fb781788e3a45959441235446eeb9bcce1d9a01ae4bf6cac66b2cb06",
+      "raw_sha256": "b7b4567d1cd1b1c34d3956107fbb423aa074bfc106c866d01add73ca22edc98e"
+    },
+    {
+      "id": "set03-span-164",
+      "decision": "ACCEPT",
+      "reason": "The statement records the exact three-file Q2 repair inventory and measured diff size.",
+      "declaration_digest": "39ab64fbb687014608ff54b303f4cb97f0e3a30cc30993eb190181a4f992b569",
+      "raw_sha256": "4bb14bf00d57d907a99a00cbc5613aeaf3bc64fab212fc29078ed2553ebc0df2"
+    },
+    {
+      "id": "set03-span-165",
+      "decision": "ACCEPT",
+      "reason": "The continuation reports implemented consumer wiring coverage and preserves the surrounding unchanged-role limitation.",
+      "declaration_digest": "ebd34a87ba6499a3a378678572eb3426fddb6caa697cb8c7901ce30ff8cf4feb",
+      "raw_sha256": "d6802975477b422846e95b439fb207a7b97943941541e50c90f1d60dfc3599eb"
+    },
+    {
+      "id": "set03-span-166",
+      "decision": "ACCEPT",
+      "reason": "The five paths are the exact original PDF repair change inventory; retaining the removed reader here does not restore it or claim inspection passed.",
+      "declaration_digest": "665717a5fcdefc21dfa23606d66857f397066027ea9904c2031a29cf6bc46df7",
+      "raw_sha256": "dba9ca3fb41c19af99ec595ddaa9edd2b8e06327ec455411e66fda51a5f07353"
+    },
+    {
+      "id": "set03-span-167",
+      "decision": "ACCEPT",
+      "reason": "The eight paths identify the original frozen PDF product and tests, not a present installation or reader requirement.",
+      "declaration_digest": "11105ebd360ef2c9d9dd1c00d9f688034ba618c6539f14ec18b5b6b30404e77c",
+      "raw_sha256": "4fc0172e85d6d7f285c2edc73951a71a5848f52c69929555d2ba2c6062c3f5bd"
+    },
+    {
+      "id": "set03-span-168",
+      "decision": "REJECT",
+      "reason": "The Current evidence and disposition keys repeatedly instruct Keep, Retain, Preserve and Use under live preservation contracts, so this is not solely original observation.",
+      "declaration_digest": "14cf5529b222fd0caa560c13583a2cbff5b18f57cafbdc8e1d5676d325738aaf",
+      "raw_sha256": "7456fc3a7a5adc9fe37d5dc1b46dcc18ffcec1940ab84f55eeb48712dcc3d4c3"
+    },
+    {
+      "id": "set03-span-169",
+      "decision": "ACCEPT",
+      "reason": "The row is an original product path-to-byte-digest identity record.",
+      "declaration_digest": "23be43450b6ca7b5e299bdd7948a410b284a870910218201be95d66fe17cee18",
+      "raw_sha256": "1c39ac2d439d60523441ac85813d95e7abd2c67b517d437d09f08cb0c3833218"
+    },
+    {
+      "id": "set03-span-170",
+      "decision": "ACCEPT",
+      "reason": "The row is a Git-byte identity entry for the original discovery-consumer change set.",
+      "declaration_digest": "fd46297bad131621e87bdd3dd71f7a752b606818988dc0a4156e16607fa8ca71",
+      "raw_sha256": "da4efdb223ce0cbf82851c1595bc7717b386dcdbd315951a003e846162657ebc"
+    },
+    {
+      "id": "set03-span-171",
+      "decision": "ACCEPT",
+      "reason": "The row records the original skillify source digest as evidence rather than invoking it.",
+      "declaration_digest": "e5e597d822d81210ee6d7ec822e77d8a37306e6975603fe0c5bb5fcc996b1c63",
+      "raw_sha256": "6fc73f891a6d659a55d84f8e7033e0c4edbde4d387600ea4601c6a75e28c5b08"
+    },
+    {
+      "id": "set03-span-172",
+      "decision": "ACCEPT",
+      "reason": "The row binds the original skillify repair bytes in an exact correction inventory.",
+      "declaration_digest": "3c3d341cec85d649e4630852d0cb29bc09e7d025bebf084f7d587f43d564c0e3",
+      "raw_sha256": "1363089f062433938e6b0faed219629e7568cfca7354c7d342824c1375b1d38e"
+    },
+    {
+      "id": "set03-span-173",
+      "decision": "ACCEPT",
+      "reason": "The sentence records eight deliberately unchanged source identities and expressly avoids treating them as semantic PASS counts.",
+      "declaration_digest": "21579260f22ffcaf50d2f738fe046e3e5d844f72ab7a684abb42fcd88d5d34c2",
+      "raw_sha256": "48f7914b2dd7245b200c4bc583e973c1356b9dc0acbc0ad0b8f6c7f157280aa1"
+    },
+    {
+      "id": "set03-span-174",
+      "decision": "ACCEPT",
+      "reason": "The section records the actual operator scope-removal decision and remaining unverified writer boundaries without restoring the removed reader.",
+      "declaration_digest": "69877538bc0ab1df83c3f0344495c14b31bc48b267420283f9f800a6d3020174",
+      "raw_sha256": "56caa088f8c38a93f3daa265dbc9c90c5bc7d11c173e372c6186e9017bac5fd7"
+    },
+    {
+      "id": "set03-span-175",
+      "decision": "ACCEPT",
+      "reason": "The complete list preserves original platform limits, invalid evidence and carried advisories, including now-reported fix-forward items, without asserting current gate clearance.",
+      "declaration_digest": "54ead3c12ebfff066b8acf14146810fac259d6da4741faa24594dd14b351edab",
+      "raw_sha256": "d0d1b05af6b7653d1f8d3a5c3ee5f7a644978e5a3a0bfd2ea7a97e5611682412"
+    },
+    {
+      "id": "set03-span-176",
+      "decision": "ACCEPT",
+      "reason": "The span records the independent final review exact-content closure evidence and its explicitly unexecuted matrix rows rather than new acceptance.",
+      "declaration_digest": "85505e1c9d40b593a54858e0030604ce78a697620d558dc8f65ef97515b95d08",
+      "raw_sha256": "7ff5dcf2baeb02feed9551a23c5c60dcbe3954ffdd721726a4a6227d9982ef28"
+    },
+    {
+      "id": "set03-span-177",
+      "decision": "ACCEPT",
+      "reason": "The span reports original immutable merge/hash traceability and its then-pending Phase 2 check, whose later S4 closure is separately recorded in the selected final review.",
+      "declaration_digest": "8f8dc0621a94c8ec365dd0beb5560ab75fcbbd02dd8b066059675cc299ba1e45",
+      "raw_sha256": "a1b36bf223de9aad08e1cea987aeda61857add07e1f0b5e235ca0b6858b9bbdd"
+    },
+    {
+      "id": "set03-span-178",
+      "decision": "ACCEPT",
+      "reason": "The review table records the exact direct-documentation scope and its non-guarantees as inspected evidence.",
+      "declaration_digest": "ce19d97939db353a754bbb66cdeb4f93eb725048dae45071f59cc131770cd7fc",
+      "raw_sha256": "579c3587edf59d7c6feb802addaef58b2b3b9fadb487545924f4dfd650707c46"
+    },
+    {
+      "id": "set03-span-179",
+      "decision": "ACCEPT",
+      "reason": "The path is the original source citation for a reproduced detached-checkpoint defect, not current checkpoint instructions.",
+      "declaration_digest": "df32db4dac9a9a52b647e20caa80d6e1211cdaf93e5a1a5d8132cd28402e158c",
+      "raw_sha256": "4a5ee28537c580999d3eb13dc64a39e693600dd4e1a900aa13a5c0c44ffe7d3f"
+    },
+    {
+      "id": "set03-span-180",
+      "decision": "ACCEPT",
+      "reason": "The skill paths continue the reviewer account of the complete delta actually read and rechecked, not an implementation assignment.",
+      "declaration_digest": "73b0d5e29c5c80cf9bccc4a643796221068b0b36f0f928554e3729ed908a3bdd",
+      "raw_sha256": "a9c711027d11ee564f16148b699a2838b1e7f5ee3ae67f9c49f92e9922f5a38e"
+    },
+    {
+      "id": "set03-span-181",
+      "decision": "ACCEPT",
+      "reason": "The continuation enumerates the surface actually covered by the original quality inspection without clearing its recorded failure.",
+      "declaration_digest": "bd75a43cbbfd9ad190111bd23865fd11f5d147025152d0972bbec7ac110fce48",
+      "raw_sha256": "21b4199a5435a5cae5f5e15b527e1a5a139d5a460e2f0912e44211e3c4b403c0"
+    },
+    {
+      "id": "set03-span-182",
+      "decision": "ACCEPT",
+      "reason": "The row is the independent review immutable-scope inventory of six assigned skill files, not a live ownership release.",
+      "declaration_digest": "5f8a0f0abadd30517070d64de026a7aca266610f9ac23897c1ed19b3747258e3",
+      "raw_sha256": "7baf8590d3169d69ac6d70b723db6a059fbf33b75c893918034ffd8df1bd9cb8"
+    },
+    {
+      "id": "set03-span-183",
+      "decision": "ACCEPT",
+      "reason": "The complete Markdown and HTML specimens are explicitly the exact source replayed in the historical parser review.",
+      "declaration_digest": "6e6998394bd9035c5d66e3485960ebb5085fffdff3b29cc46466e341d724437a",
+      "raw_sha256": "94f77384f7ad514be85699511742b9df98649eb22b430e3c03ebc886cd76349d"
+    },
+    {
+      "id": "set03-span-184",
+      "decision": "ACCEPT",
+      "reason": "The rows preserve exact literal-link fixtures and their measured original outcomes, not current resource imports.",
+      "declaration_digest": "fac2407539988ba59352555b4f76a98ccfc91e59ca15fee1ba3be1bd70ee4e3a",
+      "raw_sha256": "afde0496a851140f0bbf065656a6bd0bf1d7be3502e9c04a61f0cb3622787bf8"
+    },
+    {
+      "id": "set03-span-185",
+      "decision": "ACCEPT",
+      "reason": "Both representations are explicitly the exact original appended fixture bytes, while the later imperative to create a file is outside the span.",
+      "declaration_digest": "8f9551b0282c9518b502b316c74bd7a7455c13ec56f404d21af7f5e2bbf627ee",
+      "raw_sha256": "cba25f4e506fd508e8e3ac0b6cea0dca1b0e62c60c130af9e465fa6345c10a1f"
+    },
+    {
+      "id": "set03-span-186",
+      "decision": "ACCEPT",
+      "reason": "This narrowed continuation names the unchanged original workflows and excludes the prospective quality-scope instruction rejected in the earlier broader declaration.",
+      "declaration_digest": "9404e07d41c2d639fee0c63141ba6b51677f958b80c6a8a8a71b7914d4e73baf",
+      "raw_sha256": "b0985384cc3f6cba6f1e797a9535f952392f7d4f8281738074c0d2a47c969506"
+    },
+    {
+      "id": "set03-span-187",
+      "decision": "ACCEPT",
+      "reason": "The fenced string is explicitly the exact rejected parser fixture and does not import its HTML resources.",
+      "declaration_digest": "4e622a56d1ef28f1d01935c0983ff091327bd5230b3a2dad93bebd66cd25c85f",
+      "raw_sha256": "c96014a18abbae2e580e18c00f0548c4dabf2a64ee73424e4cee996a9e746ca7"
+    },
+    {
+      "id": "set03-span-188",
+      "decision": "ACCEPT",
+      "reason": "The sentence describes the retained method verified in the original component review, not a current Codex invocation requirement.",
+      "declaration_digest": "05b60607e136136a2d5bc1e4862abdcf9e4a9f1308bcd4a066cb745c738256ef",
+      "raw_sha256": "57891f114df029170b8f1511734fca15251ad3c9d0588e37c7cc0d71a10f46dc"
+    },
+    {
+      "id": "set03-span-189",
+      "decision": "ACCEPT",
+      "reason": "The table records original literal Markdown inputs, source setup and actual failures as completed review observations.",
+      "declaration_digest": "5481a50b91ddec0ece0eda156d7ee78054c6c9fc820d631b3e846199c60f57e5",
+      "raw_sha256": "9e61f564f526548a40690666c5dafd03bb0c967f03e2766a79d69ecc8b52d197"
+    },
+    {
+      "id": "set03-span-190",
+      "decision": "ACCEPT",
+      "reason": "The row records closure of the original literal-code fixture with exact reader outcomes, not permission to import its absent example resource.",
+      "declaration_digest": "abf50a4ab2feb78ec0d9da3cdab532dfd28d9c392cf9edac195064b235befce0",
+      "raw_sha256": "319d8ecc12103fb6d89202e29ba911448d742f5e6a5f8d05a07cf27ec5b1a665"
+    },
+    {
+      "id": "set03-span-191",
+      "decision": "ACCEPT",
+      "reason": "The CRLF-preserved section records the original merge reproduction and measured losing-side line survival rather than instructing a new merge.",
+      "declaration_digest": "8843d227c43d319c990d49c68936ba4487f0dbb6e1688a7f8f54da55ac447f1f",
+      "raw_sha256": "7a4429c3b1c4bb91e182622050494d59c9bb05a3eb926bac10d6c970226da61b"
+    },
+    {
+      "id": "set03-span-192",
+      "decision": "ACCEPT",
+      "reason": "The CRLF-preserved section reports exact integrated A13 byte identities and original check outcomes without refreshing their acceptance.",
+      "declaration_digest": "e6fad3bc68a55ddfbbaf64aab6e8e0000416b3ace19d50b9fc4556fa9ac925ec",
+      "raw_sha256": "4b21982aea90b662e4851506dc8f076c245e6613868bffb903441434b08374e3"
+    },
+    {
+      "id": "set03-span-193",
+      "decision": "ACCEPT",
+      "reason": "The Actual entry table row records the two executed delivery paths in the original finite comparison, not a current alias menu.",
+      "declaration_digest": "3a10a739021f9e6b15efe880a591167dfb6fe73f95a71a6f094e581f4b3dc1da",
+      "raw_sha256": "d2ec8568d1bad54372698ff71c3a714b973785425e3c70d63edb899aa6913f80"
+    },
+    {
+      "id": "set03-span-194",
+      "decision": "ACCEPT",
+      "reason": "The row is the independent review selected-surface inventory for sixteen original skill bodies.",
+      "declaration_digest": "49ddf446cbec6d5425653a19cbb1b79f864629cf123147728fd5ec62fb0f3af4",
+      "raw_sha256": "107d219fa1955f831b1575bb1540ad3da2f6df4bce87043e37c9fe691a837fb2"
+    },
+    {
+      "id": "set03-span-195",
+      "decision": "ACCEPT",
+      "reason": "The row records the original immutable review scope, not a current command-selection or ownership instruction.",
+      "declaration_digest": "314d446ee09da3b31c68b06b94e113812e032a89894a71d8255b0f5d6a3591ec",
+      "raw_sha256": "3012459d35d6237141cc7a1225680141af0cd58ebff528de390a89a0b06081fe"
+    },
+    {
+      "id": "set03-span-196",
+      "decision": "ACCEPT",
+      "reason": "The complete fenced list identifies the eleven original product paths selected, read and sealed by the browser reviewer.",
+      "declaration_digest": "33065c98de1a04440c3caed25d6f1fc404514c2821e8838b5b56dfbbb024fa65",
+      "raw_sha256": "71f3ab6cb9a925df2f7fc2074f1e70e50d32f14189e04811409dee10ddbf098c"
+    },
+    {
+      "id": "set03-span-197",
+      "decision": "ACCEPT",
+      "reason": "The sentence records the exact three-file repair scope actually read and preserves the unchanged-dependency boundary.",
+      "declaration_digest": "4ba7d7d9eb5a33d48af324554a64d49bee5f06158fdbc11171a53a99bfd10d58",
+      "raw_sha256": "17ba30f15eb1f8e08b44c09326199c40951340baf8f43aae403cd47b7176d5ae"
+    },
+    {
+      "id": "set03-span-198",
+      "decision": "ACCEPT",
+      "reason": "The removed reader path is an original reviewed-file citation retained for source-correction provenance, not a request to restore or run it.",
+      "declaration_digest": "cf4a73f937d0043c808b3a0b1bee7183625ad58656a6b28741a5231869544ff5",
+      "raw_sha256": "ca3d80c677c0587b53f9c24e552d123be7d56394a0092cabe44e072e76f5217c"
+    },
+    {
+      "id": "set03-span-199",
+      "decision": "ACCEPT",
+      "reason": "The line completes the exact historical PDF source-correction review inventory rather than current writer routing.",
+      "declaration_digest": "d9af8b00fe9d340990826764d5ec2c9942275f49d63b729334acbcde8ab874b3",
+      "raw_sha256": "cdf9b9bf1b8a9ae0cba5664dba6add8c94f78aa34505bbfc8ab8ba20ae168dd6"
+    },
+    {
+      "id": "set03-span-200",
+      "decision": "ACCEPT",
+      "reason": "The line belongs to the exact eight-file original PDF review selection and does not imply current file availability.",
+      "declaration_digest": "43ade5df6710c07dd98d18cef42f0e036c5da04e58c9ac96497b84773af0e7db",
+      "raw_sha256": "e5ef6a3eccc03ff7b4b3c287ffff4847c17034c7238cb15f88fdb3a9c3ea94d1"
+    },
+    {
+      "id": "set03-span-201",
+      "decision": "ACCEPT",
+      "reason": "The row binds the original skillify correction path to its verified Git-byte digest as review evidence.",
+      "declaration_digest": "61d87d9a5b5c9a11f5d7ca5793388c1bd9858f46feb3962e5f78bf02d8317d1b",
+      "raw_sha256": "1363089f062433938e6b0faed219629e7568cfca7354c7d342824c1375b1d38e"
+    },
+    {
+      "id": "set03-span-202",
+      "decision": "ACCEPT",
+      "reason": "The S04 row records the exact original destination-refusal repair and observed test coverage without reasserting a new acceptance result.",
+      "declaration_digest": "d1e4d741323f44a2de6e0387e2b967c11cc439e2582f4f0c45b621ffbf29d94a",
+      "raw_sha256": "4c4389374eff276b40b8012b74ee69c9441d5c7420066fb41228cfa13e852283"
+    },
+    {
+      "id": "set03-span-203",
+      "decision": "ACCEPT",
+      "reason": "The sentence reports the original duplicate-name catalog defect and measured exit behavior, not instructions to invoke alpha.",
+      "declaration_digest": "d4909d94bc81ec03a067ef1c8b0dcf19482909d9eafbf2baa84db439df6f6fd3",
+      "raw_sha256": "539755480cdc8c22946d799090f8ee453319e645032b67ef7c859ad4507bb334"
+    },
+    {
+      "id": "set03-span-204",
+      "decision": "ACCEPT",
+      "reason": "The line is part of the immutable eight-path first-unit review inventory rather than current navigation.",
+      "declaration_digest": "bcc981541c849e2cf76e9ab43c952343f66cc8351d805b3f4bf738d9e1b91db0",
+      "raw_sha256": "94daec6e7894ab09f2050f713dbf25fbcadda8ea7db0d12e0ef906bab507ea15"
+    },
+    {
+      "id": "set03-span-205",
+      "decision": "ACCEPT",
+      "reason": "The row records original preservation-map and installed-test observations with explicit finite-execution limits, not current alias authorization.",
+      "declaration_digest": "f6b978f96d8d566929e53622f9e1e87c110d260e3add9759ea630d016e7c9243",
+      "raw_sha256": "ca75eb431417b5712d7fcf4ebde46e7882f75f392947518ba1e4dcc2e70f0cef"
+    }
+  ]
+}

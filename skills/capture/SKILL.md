@@ -14,15 +14,17 @@ You are the CAPTURE skill — Phase 8 (final) of the Lintel cycle.
 
 ## What this skill does
 
-Closes the cycle by capturing what's durable. The work is shipped; CAPTURE makes sure the NEXT operator (could be you in 6 months, or a teammate, or a fresh cold session) can pick up where this ended without re-deriving everything.
+Preserve durable outcomes and unresolved work so another session can continue without
+re-deriving the task. A capture can follow delivery, an unfinished cycle or an explicitly
+requested retrospective; none of those implies publication or review clearance.
 
-Five artifact categories:
+Four core artifact categories:
 1. **Lessons** — corrections from BUILD/REVIEW → the project lessons store resolved by `lintel_lessons_file` (`.claude/memory/lessons.md` on the v5 layout; filtered, durable patterns only)
 2. **ADR** — non-trivial decisions → `.claude/decisions/NNNN-<slug>.md`
 3. **EVOLUTION-LOG** — CLAUDE.md changes → log entry
 4. **Cold-executor handoff trio** — reaffirm `spec.md` + `plan.md` + `prompt.md` against build evidence (trio BORN in PLAN per v3.8 Feature 2.2; CAPTURE only annotates with actual-build outcomes)
 
-Plus role-debrief (if role active) and retro (optional).
+Plus role debrief when applicable, an optional retrospective and a release summary.
 
 ## When to use
 
@@ -36,6 +38,27 @@ Plus role-debrief (if role active) and retro (optional).
 - Mid-cycle (premature)
 - For trivial single-file edits (no lessons/ADR worth capturing)
 - intent=research-only ended (light capture only — retro + maybe lessons)
+
+## Inputs and report-only modes
+
+Normal cycle CAPTURE follows the full workflow below. Two standalone views retain the
+reflection and release-report methods without silently running the mutation steps:
+
+- `--retrospective`: session/day/week reflection (Step 8). Accept `--since <ref|time>`,
+  `--scope <session|day|week>`, `--emit-lessons` and `--out <owned-path>`.
+- `--release-summary`: delivered-work report (Step 8b). Accept `--since <ref|time>`,
+  `--until <ref|time>`, `--scope <area>`, `--voice <internal|customer>`,
+  `--include-stats` and `--out <owned-path>`.
+
+Choose one report mode. Output defaults to the conversation, not a new file. `--out`
+requires an authorized destination and preservation of existing content. Report-only
+requests do not append cycle completion, change a work map, create/tag a release, commit,
+publish a file or distribute a customer draft. Return after the selected report. With
+`--emit-lessons`, propose individual add/update/supersede/no-op classifications; write
+only the specifically authorized lessons through Step 2.
+
+All modes keep selected-work/profile precedence and original task IDs. Respect frozen
+memory/decision paths: report proposed captures for their owner instead of writing there.
 
 ## Workflow
 
@@ -93,7 +116,7 @@ The estimator's `scale_calibrated_prior <size>` reads exactly this log: it takes
 
 ### Step 2 — Lessons capture (filtered)
 
-Invoke `/li:learn` (or inline):
+Invoke `/li:lessons-add` (or inline):
 
 For each correction operator made during the cycle:
 - Was this correction GENERAL (would apply to future work) or SPECIFIC (one-time)?
@@ -349,9 +372,39 @@ else
 fi
 ```
 
-### Step 8 — Retro (optional, light)
+### Step 8 — Retrospective (--retrospective)
 
-Append to `.claude/memory/retros/<date>-<cycle-id>.md`:
+Reflect on a concrete window using actual observations. Explicit `--since` wins; otherwise
+`--scope day` means the prior 24 hours, `week` seven days, and `session` uses the latest
+owned checkpoint timestamp when available, else a labelled 24-hour fallback. Validate
+checkpoint provenance through `context_latest` / `context_checkpoint`, not a raw home scan.
+A supplied revision is resolved to a real commit/time before reading history.
+
+Gather only signals relevant to the selected work/window:
+
+- Git commits and current task status, without calling local commits deployed or merged.
+- Audit files named by `audit_read_files <category>` and read through `bin/li-events.py`
+  with `--since`; retain diagnostics and name any additional legacy source not read.
+- Recorded skill invocations in `usage-*.jsonl` under `audit_dir usage-skill`, when
+  authorized and available. Recording is optional; absence is unobserved, not disuse.
+- `state_cycle_segment` for the selected original cycle, not an unrelated ledger segment.
+
+Report **delivered**, **stuck**, **surprises**, **what worked**, **friction** and
+**patterns worth recording**, each with its actual evidence or uncertainty. Keep ledger
+`BLOCKED`/`INCOMPLETE`/`UNTRUSTED` separate from a hook decision (`tier=BLOCK`,
+`blocked="true"`, `check=performed|not_performed`). A hook block record is not evidence
+of host enforcement. No commits does not mean no work; include observed uncommitted
+progress without inventing delivery.
+
+`--emit-lessons` proposes one to three useful patterns, with an existing-ID deduplication
+check and explicit authorization per candidate before a write. Respect already explicit
+approval of named candidates; do not demand a second approval for the same scope.
+No durable pattern is a valid result. Audit failure leaves a degraded report with the
+remaining real signals, not a healthy empty history.
+
+During normal cycle CAPTURE, an authorized retrospective may be stored at
+`.claude/memory/retros/<date>-<cycle-id>.md`. For standalone `--retrospective`, persist
+only when `--out` was selected. Retain the compact observation shape:
 ```yaml
 cycle_id: <id>
 duration_human: <hours>
@@ -370,6 +423,52 @@ next_time:
 ```
 
 Not always written — only if cycle was substantial enough that retro adds value (operator-driven).
+
+### Step 8b — Release report (--release-summary)
+
+Use the actual commit/tag window and delivery evidence to brief teammates or draft release
+notes. Explicit `--since`/`--until` win; otherwise use the latest reachable tag to HEAD,
+or a labelled seven-day window when no tag exists. Resolve revisions with
+`git rev-parse --verify --end-of-options "<ref>^{commit}"`; pass the resulting full IDs
+as quoted Git arguments. Pass time filters and optional literal path scope as separate
+arguments too. Never evaluate report input as shell code, assume a `main` branch or
+invent a release tag.
+
+Gather commit subjects, scopes and actual changes. Local Git is sufficient for a local
+change summary, not for claiming a merged PR or deployment. Read selected PR/delivery
+evidence only through available authorized tools; absent authorization or tools means a
+Git-only report with that limitation. No automatic network query follows from this mode.
+
+Group Conventional Commits by feature/fix/docs/refactor/chore and area; keep other history
+in an explicitly labelled uncategorized group rather than dropping it. Preserve these
+sections when applicable:
+
+- **Delivered work**: what verifiably landed, with commits/tags/PR evidence.
+- **Features and fixes**: capabilities and corrected behavior, not just renamed files.
+- **Migration notes**: replaced entry points, retained data/flags and operator actions.
+- **Limitations and not shipped**: open original cards, unrun checks and unmet gates.
+- **Statistics** (`--include-stats`): actual commit/file/change/contributor counts over
+  the same window/scope; no invented PR count or personal contact details.
+
+Default `--voice internal` is a concise engineering report. `--voice customer` produces
+a **DRAFT**, preserving source fidelity and using the active pack's configured voice
+policy and corpus. Missing corpus is uncalibrated; unavailable required review stays
+unverified. The draft is not approved for distribution merely because it was rendered.
+Before rendering, apply the actual applicable sensitive-data checks to ingested commit
+and PR text. On a hit, name the source without repeating the sensitive payload and stop
+that output; do not rewrite history or sanitize-and-publish as a workaround.
+
+An empty selected window is reported as empty. Missing history, denied reads or unknown
+delivery are limitations, not success. The report can feed SHIP's existing PR/release
+documentation, but it creates no release, tag, commit, publication or approval.
+
+Examples:
+
+```text
+/li:capture --retrospective --scope day --emit-lessons
+/li:capture --release-summary --since <verified-tag> --until HEAD --include-stats
+/li:capture --release-summary --scope skills --voice customer --out <authorized-draft>
+```
 
 ### Step 9 — (removed in v5, ADR-0006)
 
@@ -460,7 +559,8 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - Mapped `tasks` (original IDs and evidence-backed status; unresolved work stays open)
 - Mapped `prompt` (reaffirmed, not recreated)
 - swarm work map and evidence artifacts (reaffirmed when the execution profile was selected)
-- `.claude/memory/retros/<date>-<cycle-id>.md` (optional)
+- `.claude/memory/retros/<date>-<cycle-id>.md` (optional normal-cycle retrospective)
+- Explicit `--out` report destination (standalone views only when authorized)
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
 - `.claude/runtime/state/00-state.md` (CAPTURE final entry)
 - `.claude/runtime/audit/cycle-completion.jsonl`
@@ -500,7 +600,9 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 
 ## Voice tier behavior
 
-`voice: internal`. CAPTURE artifacts are mostly engineering-internal. Customer-facing release notes (if shipped from CAPTURE) follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal).
+`voice: internal`. CAPTURE artifacts are mostly engineering-internal. Customer-facing release notes are drafts until their required gates and distribution
+authority are satisfied. `--voice customer` follows the active pack's configured policy;
+the default release-summary voice remains internal.
 
 ## Cycle-position footer
 

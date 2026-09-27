@@ -49,8 +49,29 @@ For the v5 layout, first run source-owned `bin/li-migrate-claude-home --dry-run 
 receipt, and use its explicit recovery path if interrupted. Never substitute a shell
 move/copy recipe, publish a marker over stranded data, or delete stubs by date.
 
-For v3-to-v4 identity history, retain [v4-migrate](../v4-migrate/SKILL.md) as an opt-in
-inspection and explicit pack-switch route. It is not an automatic current bootstrap.
+### Historical identity migration
+
+Use this same reader with `migrations --all` and `profile-status` to inspect the
+explicitly selected target. Relevant signals include a local preference file with
+old `workprofile`/compliance fields, authorized old voice/hook declarations, retained
+`.lintel/state/` or pre-v5 knowledge paths, and the availability of the operator's
+chosen company pack. Record the concrete signal source, not private contents.
+Do not scan personal audit archives or infer a neutral pack from absent signals.
+Old preference fields cannot override repository-required policy.
+
+Applying an identity change requires the selected pack and a nonempty reason:
+
+```bash
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+  pack-switch "$selected_pack" --reason "$migration_reason"
+```
+
+Follow [pack-switch](../pack-switch/SKILL.md) for validation, interruption recovery,
+generation-bound references and explicit rebind. Missing/invalid required policy
+remains blocked. Pack identity does not install a plugin or activate hooks. Keep
+old logs, preferences, backups and redirect stubs readable; layout migration remains
+the separate owned operation above, never a side effect of changing identity.
 
 Report every surfaced row's evidence, action and limitation. No audit/schema mutation,
 private-home search, network operation or automatic migration is needed to list status.

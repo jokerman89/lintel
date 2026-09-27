@@ -1,5 +1,9 @@
 # Master prompt — Lintel system-wide uniformity audit
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/audits/lintel-uniformity-audit-prompt.md) remains at that immutable revision.
+> Original cohort IDs, counts and audit requirements remain; no old audit was rerun.
+
 **Purpose:** Run a deep, structured audit of every Lintel component (skills, agents, workflows, phases, hooks, packs) against a single uniform standard. Find where depth is uneven, where the framework breaks its own promises, and where one concept lives in one section but not in another. Produce a findings register and a prioritized recommendation set the operator can vote on, compare, and integrate.
 
 **Critical operator directive — read first:**
@@ -49,11 +53,11 @@ Every component — skill, agent, workflow, phase, hook, pack — must be evalua
 
 You will work in **eight cohorts**, in this order. After each cohort, checkpoint findings to `.claude/engineering/audits/lintel-uniformity-findings-<cohort>.md`, then move to the next.
 
-**Cohort 1 — Phase-core skills.** The 8 phase skills (sense, define, discover, plan, build, review, ship, capture) plus their composites (cycle, fix, research, plan-and-build, review-and-ship).
+**Cohort 1 — Phase-core skills.** Cover the original 8 phase skills (sense, define, discover, plan, build, review, ship, capture) plus orchestration, hotfix, research-only, planning/build and review/delivery compositions. For current navigation use the canonical phase entries and supported `/li:cycle` presets/ranges; do not attribute those entry names to predecessor code.
 
-**Cohort 2 — Planner sub-chain.** office-hours, plan-ceo-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan.
+**Cohort 2 — Planner sub-chain.** Cover idea intake, strategy challenge, engineering/design/developer-experience plan inspection and automatic plan composition, including each predecessor implementation. Current owners are DEFINE, lens-aware inspection and cycle planning; consolidation must not hide a predecessor's requirement or finding.
 
-**Cohort 3 — Brief Forge / hand-off / envelope candidates.** Every skill currently doing hand-off-like work informally (pair-agent, codex, all context-warm-* skills, all context-save/restore/snapshot/dump/cool skills). This is where you find the most fragmentation.
+**Cohort 3 — Brief Forge / hand-off / envelope candidates.** Cover interactive paired delegation, independent second review, every context-warming mode, checkpoint writing/reading, snapshots, dumps and cooling, including their predecessor implementations. Examine each producer/consumer boundary rather than relying on a removed wrapper name. This is where you find the most fragmentation.
 
 **Cohort 4 — Domain-specialist agents in cycle phases.** The 73 agents. Map each agent to which phase(s) call it. Find agents that should be called but aren't, and the inverse.
 
@@ -103,7 +107,7 @@ Before writing a `proposed` field, you must internally answer all of:
 
 1. **What are we trying to achieve here?** State the architectural goal in one sentence.
 2. **Is there a more elegant way?** Consider at least one alternative to the obvious fix.
-3. **Does someone else do this better?** Reference gstack, superpowers, speckit, ECC, Architect-bilden — does any of them have a pattern we should steal?
+3. **Does someone else do this better?** Reference retired-provider, superpowers, speckit, ECC, Architect-bilden — does any of them have a pattern we should steal?
 4. **Why this specifically?** Justify the chosen approach over the alternative.
 
 If you cannot answer all four, the recommendation is not ready. Mark it `needs-more-thought` and move on.
@@ -120,7 +124,7 @@ After cohorts 1-8 are done, run these cross-cutting passes:
 
 **X3 — Operator-relation vs repo-relation evolution.** The motto says the system learns and grows in both the operator-relation (lessons accumulate, voice calibrates, packs evolve) and the repo-relation (ADRs accumulate, knowhow grows, packaged lessons ship). Verify both threads are *active* — that data flows in both directions and is consulted, not just written.
 
-**X4 — Entry-point coverage matrix.** Build a matrix: rows = every documented entry-point (/li-cycle, /li-fix, /li-research, /li-resume, /li-<phase>, /li-pack-new, etc.), columns = every cross-cutting layer (jobs, brief forge, knowledge, hooks, packs, voice, provenance). Cell = "fires", "skipped", "should-fire-doesn't", "fires-shouldn't". Anywhere "should-fire-doesn't" appears is a finding.
+**X4 — Entry-point coverage matrix.** Build a matrix: rows = every documented entry-point (current examples: `/li:cycle`, `/li:fix`, `/li:cycle --mode research-dive`, `/li:resume`, each canonical phase and `/li:pack-create <name> --scope repo`), columns = every cross-cutting layer (jobs, brief forge, knowledge, hooks, packs, voice, provenance). Cell = "fires", "skipped", "should-fire-doesn't", "fires-shouldn't". Anywhere "should-fire-doesn't" appears is a finding. Keep predecessor observations attributed to their original entrypoints; current examples do not prove discovery or execution.
 
 **X5 — Necessity + gap-if-skipped coverage.** Architect declares per-section. We don't yet. List every component where a `necessity` and `gap_if_skipped` field would be load-bearing if added.
 

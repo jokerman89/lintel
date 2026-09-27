@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "host",
+  "source": "Copilot App separate-session reply observed by integration coordinator",
+  "reference": "ghapp://sessions/8b0c4a2f-3e1b-4c3d-8237-74d02ff29710; finalLFset01 report; source-spec session1742f900 independently agrees",
+  "record_digest": "efe4a8fa42e1accaf0268a5345abedf874747c0023a1c2461b23dcc4cc40030d",
+  "attempt_id": "legacy-cleanup-span-set01-lf",
+  "builder": {
+    "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+    "id": "cleanup-integration"
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  }
+}

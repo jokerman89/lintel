@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "description": "Exact internal records whose former workflow references are reported as HISTORICAL observations by tests/shape/native-command-surface.py. Each count is exact: a new reference in a declared record fails. Current routes elsewhere still fail.",
+  "records": [
+    {
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "count": 1,
+      "from_heading": "### Proposed bounded original-proof execution, not yet released or run",
+      "to_heading": "### Limits, prevention and frozen handoff",
+      "reason": "Proposed A10.3 paired case in the P08 report: the former office-hours entry names the comparison input of a case that was never run, and A10.3 was later closed through F06 (plan.md, packages/P08.md), so the proposal cannot be released. Span reviewers rejected it as an original observation (set03-span-154); it is declared as a non-live proposal because the report is context-bound (remaining-source-record-28) and cannot be edited. Not a current route (ADR-0034). Override accepted by the independent spec review of 0cd1dbd8; path, headings, count, reason or P08 bytes changing needs a new independent decision."
+    }
+  ]
+}

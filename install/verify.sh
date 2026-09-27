@@ -243,14 +243,14 @@ cmd_portability() {
   done
   [ -n "$SCHEMA" ] && ok "CLI-SUPPORT-V2-SCHEMA.md present" || warn "CLI-SUPPORT-V2-SCHEMA.md missing (v2 doc, optional in v3)"
 
-  # v3: skill at skills/li:cli-fingerprint/SKILL.md
+  # Canonical source folders are bare names, not invocation spellings.
   CLI_FINGERPRINT=""
   for candidate in \
-    "$REPO_ROOT/skills/li:cli-fingerprint/SKILL.md" \
-    "$REPO_ROOT/scaffolding/01-foundation/skills/li:cli-fingerprint/SKILL.md"; do
+    "$REPO_ROOT/skills/cli-fingerprint/SKILL.md" \
+    "$REPO_ROOT/scaffolding/01-foundation/skills/cli-fingerprint/SKILL.md"; do
     [ -f "$candidate" ] && { CLI_FINGERPRINT="$candidate"; break; }
   done
-  [ -n "$CLI_FINGERPRINT" ] && ok "skill: li-cli-fingerprint" || warn "skill missing: li-cli-fingerprint (use bin/li:doctor for v3 runtime)"
+  [ -n "$CLI_FINGERPRINT" ] && ok "skill: cli-fingerprint" || warn "skill missing: cli-fingerprint (use bin/li-doctor for runtime diagnostics)"
 
   # Validate cli_support fields on skills (v3 path + v2 fallback)
   with_cli_support=0

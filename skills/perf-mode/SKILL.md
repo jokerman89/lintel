@@ -72,4 +72,4 @@ phase engine or decay control is implicitly enabled.
 Report the selected sources, local advisory preferences, observation provenance, unknowns
 and checkpoint recommendation. `host_settings_changed` is false; `--off` cannot restore
 a fictional "default 200k" limit. `/li:context-cool` affects future reads only, while
-`/li:context-save` and selective restore retain useful continuity.
+`/li:pause` and selected checkpoint reads retain useful continuity.

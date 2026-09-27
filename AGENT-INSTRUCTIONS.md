@@ -86,7 +86,7 @@ Voice is supplied by the active pack. The neutral `_default` pack uses `voice: i
 
 If this session generates customer-facing or official-communication content: the agent declares its voice tier in frontmatter, and output is checked against the active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) and voice corpus (`resolve_pack_field voice.corpus`).
 
-If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder.
+If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct engineering prose focused on decisions, evidence and risks.
 
 Voice tier is the per-agent honest split between external voice (for customers) and engineering voice (for the team). A company pack supplies its own calibrated corpus.
 
@@ -99,7 +99,7 @@ If activated (operator symlinks from `~/.lintel/hooks/` to `~/.claude/hooks/`), 
 - Token count hits 50k (warn) or 80k (escalate)
 - Tool-call count hits 80 (warn) or 130 (escalate)
 
-The watchers do NOT auto-compact — Claude can't compact its own conversation. They surface the right move (`/context-save` + restart in a fresh session) before bloat hits productivity.
+The watchers do NOT auto-compact — Claude can't compact its own conversation. They surface the right move (`/li:pause` + restart in a fresh session) before bloat hits productivity.
 
 Configure thresholds in `~/.lintel/config.yaml` (the layer config the bare installer writes; operator identity lives in `~/.lintel/profile.yaml`).
 
@@ -191,17 +191,17 @@ For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 c
 - `/li:cycle --from <phase> --to <phase>` — custom subset
 - `/li:resume` — pick up at next phase based on `.claude/runtime/state/00-state.md`
 
-**Composite shortcuts:**
+**Shorter routes:**
 - `/li:fix` — SENSE+BUILD+REVIEW+SHIP (hotfix)
-- `/li:research` — SENSE+DEFINE+DISCOVER (no build)
-- `/li:plan-and-build` — PLAN+BUILD (split-session)
-- `/li:review-and-ship` — REVIEW+SHIP+CAPTURE (close out)
+- `/li:cycle --mode research-dive` — SENSE+DEFINE+DISCOVER (no build)
+- `/li:cycle --from PLAN --to BUILD` — PLAN+BUILD (split-session)
+- `/li:cycle --from REVIEW --to CAPTURE` — REVIEW+SHIP+CAPTURE (close out)
 
 **Individual phase invocation:** `/li:sense`, `/li:define`, etc. Each phase has hop-in support.
 
 **Phase gates (always enforced):**
 - Cost-estimate gate before BUILD (token-heavy phase)
-- Founder approval gate at end of PLAN (MANDATORY pause)
+- Operator approval gate at end of PLAN (MANDATORY pause; preserve existing explicit approval)
 - 3-stage review in REVIEW (spec compliance → quality → compliance)
 - Compliance hard-stop in SHIP (if the active pack's compliance mode is `hard`)
 - Two-stage review per BUILD work package (spec then quality), covering every short leaf (ADR-0026)
@@ -233,15 +233,15 @@ Expert personas as lightweight session context layers. Voice + outcome-lens + de
 
 On-demand 1M-context utilization beyond session-start. Default session-start stays lightweight (~5-15k tokens); operator explicitly warms when work benefits.
 
-- `/li:context-warm <files-or-globs>` — explicit file load with budget tracking
-- `/li:context-warm-related <topic>` — heuristic load by keyword
-- `/li:context-warm-sessions [N]` — load last N session saves on branch
-- `/li:context-warm-adrs <topic>` — load topic-relevant ADRs
+- `/li:context-warm --path <file>` / `--glob <pattern>` / `--pattern` — explicit file selection with budget tracking
+- `/li:context-warm --related <topic>` — topic search within explicit bounded selectors
+- `/li:context-warm --sessions [N]` — load 1–5 recent session saves on branch (default 3)
+- `/li:context-warm --adrs <topic>` — load topic-relevant ADRs; select accepted or deprecated records explicitly
 - `/li:context-warm-customer <engagement>` — customer-repo state (audit-logged)
 - `/li:context-warm-from-url <url>` — WebFetch + dump (URL gate when pack compliance mode is `hard`)
 - `/li:context-budget` — utilization visibility
-- `/li:context-save [--label <name>]` — checkpoint (named saves covered by --label; the former snapshot/dump skills are aliases since v5, ADR-0006)
-- `/li:context-restore [path]` — load latest or specific prior session save
+- `/li:pause [--label <name>]` — checkpoint; existing filenames and saved data remain compatible
+- `/li:resume --from <checkpoint-path>` — load a selected prior save; recognized phases/selected-job step IDs retain the existing `--from <step>` override, and ordinary resume keeps selected-work, ledger and job precedence
 - `/li:context-cool` — selective IGNORE marker
 
 For >20k token loads: explicit budget confirmation required.

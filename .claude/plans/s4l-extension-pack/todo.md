@@ -37,7 +37,7 @@
   - [ ] `packs/_default/pack.yaml`: document the optional `extension:` block (null/false default).
   - [ ] `lib/pack-resolver.sh`: resolve + validate `extension.*` (tolerant; identity packs unaffected).
   - [ ] `/li:pack-switch`: activating an extension pack surfaces its provided workflow + knowhow.
-  - [ ] `/li:catalog` · `/li:doctor` · `/li:help`: recognize pack-shipped surface (awareness, no dup).
+  - [ ] `/li:catalog` · `/li:doctor` · `/li:welcome`: recognize pack-shipped surface (awareness, no dup).
   - [ ] scaffolder: `bin/li-pack-scaffold` (or extend `pack-create`) → extension-pack skeleton.
 - [ ] M1 structure-changes doc · M2 `li-compat-audit` · M3 shape test `extension-pack-contract.sh`
       · M4 migration/clarity note. Backward-compat: purely additive.

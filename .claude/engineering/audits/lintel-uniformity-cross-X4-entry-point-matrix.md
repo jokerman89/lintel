@@ -1,5 +1,9 @@
 # Cross-cutting pass X4 — entry-point × cross-cutting-layer coverage matrix
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Pass:** X4 (entry-point coverage matrix)
 **Date:** 2026-05-29
 **Branch:** v4.0-phase1-meta-infra-spine (mid v4.0 reframe; Phase 1 of 3)
@@ -115,7 +119,7 @@ Designed-not-built columns are shaded by suffix: `SHOULD·dnb` = the entry-point
 44. role-activate writes a `00-state` event but **no usage-log line** like pack-resolver does (Cohort 7 D13: "operator can see role activated in 00-state but not in a queryable usage log"). `SHOULD`.
 45. autoplan's step-8 aggregation ("read all review-log entries from this run") is the **#1 Brief Forge call site in the planner cohort** (Cohort 2 autoplan D9). `SHOULD·dnb`.
 46. autoplan doesn't consult lessons to decide default chain composition (Cohort 2 autoplan D10). `SHOULD`.
-47. autoplan READS member review-logs but emits **no own run-level record** — an autoplan run is invisible to its own aggregator (Cohort 2 autoplan D13); members route through a **gstack-owned bin** (`~/.claude/skills/gstack/bin/gstack-review-log`, not Lintel's) (Cohort 2 fn). `SHOULD`.
+47. autoplan READS member review-logs but emits **no own run-level record** — an autoplan run is invisible to its own aggregator (Cohort 2 autoplan D13); members route through a **retired-provider-owned bin** (`~/.claude/skills/retired-provider/bin/retired-provider-review-log`, not Lintel's) (Cohort 2 fn). `SHOULD`.
 
 ---
 
