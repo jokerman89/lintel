@@ -34,34 +34,12 @@
     "cursor-skills": {"url": "https://cursor.com/docs/skills", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Project .cursor/skills and .agents/skills; remote sessions do not inherit arbitrary personal skills."},
     "cursor-ide": {"url": "https://cursor.com/docs/agent/overview", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Editor question/browser/rule tools; inspect actual active harness."},
     "cursor-cli": {"url": "https://cursor.com/docs/cli/overview", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "CLI interactive/print, Plan/Ask and resume; do not copy editor flags."},
-    "cursor-agents": {"url": "https://prod.cursor.com/docs/subagents", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Subagents across surfaces have different execution environments and isolation."},
-    "gemini-skills": {"url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/cli/skills.md", "checked": "2026-09-20", "version": "main branch documentation, not a pinned release", "conditions": "Workspace .gemini/skills or .agents/skills; activation may require consent."},
-    "gemini-agents": {"url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/core/subagents.md", "checked": "2026-09-20", "version": "main branch documentation, not a pinned release", "conditions": "No nested subagents; browser agent opt-in and worktrees experimental."},
-    "opencode-skills": {"url": "https://opencode.ai/docs/skills/", "checked": "2026-09-20", "version": "Rolling documentation; CLI/TUI path, exact version not tested", "conditions": "Project .opencode/skills; skill tool permission can deny discovery."},
-    "opencode-agents": {"url": "https://opencode.ai/docs/agents/", "checked": "2026-09-20", "version": "Rolling documentation; CLI/TUI path, exact version not tested", "conditions": "Primary/subagents, Build/Plan and question permission; Plan is not unconditional no-write enforcement."},
-    "opencode-surfaces": {"url": "https://opencode.ai/en/", "checked": "2026-09-20", "version": "Product overview, not API verification", "conditions": "Desktop and IDE products exist; do not inherit CLI-specific APIs."},
-    "factory-skills": {"url": "https://docs.factory.ai/harness/skills", "checked": "2026-09-20", "version": "Rolling Droid documentation; exact version not tested", "conditions": "Repository .factory/skills; enabled status is controlled by host frontmatter/settings, not marker files."},
-    "factory-agents": {"url": "https://docs.factory.ai/harness/subagents", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Task/custom droids cannot AskUser or nest Task."},
-    "factory-surfaces": {"url": "https://docs.factory.ai/", "checked": "2026-09-20", "version": "Product overview, not API verification", "conditions": "Desktop/web are separate surfaces; no Lintel live or API parity validation."},
-    "antigravity-skills": {"url": "https://www.antigravity.google/docs/skills?tab=ide", "checked": "2026-09-20", "version": "Antigravity 2.0/CLI/standalone IDE documentation; no live test", "conditions": "All three name workspace .agents/skills; CLI plugin APIs do not establish IDE plugin control."},
-    "kiro-skills": {"url": "https://kiro.dev/docs/skills/", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "CLI/IDE/web workspace .kiro/skills; argument substitution CLI-only; custom agents may need resource selection."},
-    "kiro-agents": {"url": "https://kiro.dev/docs/custom-agents/subagents/", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Permissions and custom agents vary; shared workspace does not imply safe parallel writes."},
-    "devin-cascade": {"url": "https://docs.devin.ai/desktop/cascade/skills", "checked": "2026-09-20", "version": "Cascade in Devin Desktop, formerly Windsurf; no live test", "conditions": "Repository .windsurf/skills; automatic or @ invocation. Not Devin Local/CLI."},
-    "devin-cli": {"url": "https://docs.devin.ai/cli/extensibility/skills/overview", "checked": "2026-09-20", "version": "Rolling Devin CLI documentation; no live test", "conditions": "Repository .devin/skills or .agents/skills; do not transfer CLI permissions/model overrides to Cascade."},
-    "junie-skills": {"url": "https://junie.jetbrains.com/docs/agent-skills.html", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Skills on CLI and IDE; documented project .junie/skills discovery specifically for CLI."},
-    "cline-skills": {"url": "https://docs.cline.bot/customization/skills.md", "checked": "2026-09-20", "version": "Editor documentation; exact version not tested", "conditions": "Workspace .cline/skills; global skills may override project names."},
-    "cline-agents": {"url": "https://docs.cline.bot/features/subagents", "checked": "2026-09-20", "version": "Experimental research subagents", "conditions": "Read-only: no edits, browser, MCP or nested subagents."},
-    "cline-cli": {"url": "https://docs.cline.bot/usage/cli-overview.md", "checked": "2026-09-20", "version": "Rolling CLI documentation; no live test", "conditions": "Interactive/headless, Plan and ask/say outputs; editor discovery not assumed."},
-    "continue-ide": {"url": "https://docs.continue.dev/ide-extensions/agent/quick-start", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Chat/Plan/Agent and model-dependent tools; no inferred subagent or skill API."},
-    "continue-cli": {"url": "https://docs.continue.dev/cli/quickstart", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Interactive/headless/read-only/resume and profiles; profile is not subagent delegation."},
-    "aider-cli": {"url": "https://aider.chat/docs/usage/commands.html", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Ask/read-only/load/save and architect/editor are not independent subagent review; scraping is not browser control."}
+    "cursor-agents": {"url": "https://prod.cursor.com/docs/subagents", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Subagents across surfaces have different execution environments and isolation."}
   },
   "aliases": {
     "claude": "claude-code", "codex": "codex-cli", "codex-app": "codex-desktop",
     "copilot": "copilot-cli", "copilot-coding-agent": "copilot-cloud",
-    "cursor": "cursor-ide", "gemini": "gemini-cli", "opencode": "opencode-cli",
-    "droid": "droid-cli", "factory-droid": "droid-cli", "windsurf": "devin-desktop",
-    "cline": "cline-ide", "continue": "continue-ide", "aider": "aider-cli"
+    "cursor": "cursor-ide"
   },
   "surfaces": {
     "claude-code": {
@@ -150,120 +128,6 @@
       "label": "Cursor cloud", "family": "cursor", "surface": "cloud",
       "discovery": {"kind": "skills", "root": ".cursor/skills", "source": "cursor-skills"}, "preserved": [],
       "vendor": {"skills": {"status": "conditional", "source": "cursor-skills"}, "delegate": {"status": "conditional", "source": "cursor-agents"}}
-    },
-    "gemini-cli": {
-      "label": "Gemini CLI", "family": "gemini", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".gemini/skills", "source": "gemini-skills"}, "preserved": ["gemini-extension.json"],
-      "vendor": {"skills": {"status": "documented", "source": "gemini-skills"}, "delegate": {"status": "conditional", "source": "gemini-agents"}, "browser": {"status": "conditional", "source": "gemini-agents"}, "isolate": {"status": "conditional", "source": "gemini-agents"}}
-    },
-    "opencode-cli": {
-      "label": "OpenCode CLI/TUI", "family": "opencode", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".opencode/skills", "source": "opencode-skills"}, "preserved": [".opencode/INSTALL.md"],
-      "vendor": {"skills": {"status": "documented", "source": "opencode-skills"}, "question": {"status": "conditional", "source": "opencode-agents"}, "plan": {"status": "conditional", "source": "opencode-agents"}, "delegate": {"status": "documented", "source": "opencode-agents"}}
-    },
-    "opencode-desktop": {
-      "label": "OpenCode desktop", "family": "opencode", "surface": "desktop",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}, "sources": ["opencode-surfaces"]
-    },
-    "opencode-ide": {
-      "label": "OpenCode IDE", "family": "opencode", "surface": "ide",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}, "sources": ["opencode-surfaces"]
-    },
-    "droid-cli": {
-      "label": "Factory Droid CLI", "family": "factory", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".factory/skills", "source": "factory-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "factory-skills"}, "delegate": {"status": "conditional", "source": "factory-agents"}}
-    },
-    "factory-desktop": {
-      "label": "Factory desktop", "family": "factory", "surface": "desktop",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}, "sources": ["factory-surfaces"]
-    },
-    "factory-cloud": {
-      "label": "Factory web/cloud", "family": "factory", "surface": "cloud",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}, "sources": ["factory-surfaces"]
-    },
-    "antigravity-cli": {
-      "label": "Antigravity CLI", "family": "antigravity", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".agents/skills", "source": "antigravity-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "antigravity-skills"}, "plugin_control": {"status": "documented", "source": "antigravity-skills"}}
-    },
-    "antigravity-desktop": {
-      "label": "Antigravity desktop", "family": "antigravity", "surface": "desktop",
-      "discovery": {"kind": "skills", "root": ".agents/skills", "source": "antigravity-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "antigravity-skills"}}
-    },
-    "antigravity-ide": {
-      "label": "Antigravity IDE", "family": "antigravity", "surface": "ide",
-      "discovery": {"kind": "skills", "root": ".agents/skills", "source": "antigravity-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "antigravity-skills"}}
-    },
-    "kiro-cli": {
-      "label": "Kiro CLI", "family": "kiro", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".kiro/skills", "source": "kiro-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "kiro-skills"}, "delegate": {"status": "conditional", "source": "kiro-agents"}}
-    },
-    "kiro-ide": {
-      "label": "Kiro IDE", "family": "kiro", "surface": "ide",
-      "discovery": {"kind": "skills", "root": ".kiro/skills", "source": "kiro-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "kiro-skills"}, "delegate": {"status": "conditional", "source": "kiro-agents"}}
-    },
-    "kiro-web": {
-      "label": "Kiro web", "family": "kiro", "surface": "cloud",
-      "discovery": {"kind": "skills", "root": ".kiro/skills", "source": "kiro-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "kiro-skills"}}
-    },
-    "devin-desktop": {
-      "label": "Devin Desktop Cascade / Windsurf", "family": "devin", "surface": "desktop",
-      "discovery": {"kind": "skills", "root": ".windsurf/skills", "source": "devin-cascade"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "devin-cascade"}}
-    },
-    "devin-cli": {
-      "label": "Devin CLI", "family": "devin", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".devin/skills", "source": "devin-cli"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "devin-cli"}, "delegate": {"status": "conditional", "source": "devin-cli"}, "model_control": {"status": "documented", "source": "devin-cli"}}
-    },
-    "devin-local": {
-      "label": "Devin Local", "family": "devin", "surface": "desktop",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}, "sources": ["devin-cascade"]
-    },
-    "devin-cloud": {
-      "label": "Devin cloud", "family": "devin", "surface": "cloud",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [], "vendor": {}
-    },
-    "junie-cli": {
-      "label": "JetBrains Junie CLI", "family": "junie", "surface": "cli",
-      "discovery": {"kind": "skills", "root": ".junie/skills", "source": "junie-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "junie-skills"}}
-    },
-    "junie-ide": {
-      "label": "JetBrains Junie IDE", "family": "junie", "surface": "ide",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "junie-skills"}}
-    },
-    "cline-ide": {
-      "label": "Cline editor", "family": "cline", "surface": "ide",
-      "discovery": {"kind": "skills", "root": ".cline/skills", "source": "cline-skills"}, "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "cline-skills"}, "delegate": {"status": "conditional", "source": "cline-agents"}}
-    },
-    "cline-cli": {
-      "label": "Cline CLI", "family": "cline", "surface": "cli",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [],
-      "vendor": {"plan": {"status": "documented", "source": "cline-cli"}, "question": {"status": "conditional", "source": "cline-cli"}, "delegate": {"status": "conditional", "source": "cline-agents"}}
-    },
-    "continue-ide": {
-      "label": "Continue IDE", "family": "continue", "surface": "ide",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [],
-      "vendor": {"plan": {"status": "documented", "source": "continue-ide"}, "shell": {"status": "conditional", "source": "continue-ide"}, "edit": {"status": "conditional", "source": "continue-ide"}}
-    },
-    "continue-cli": {
-      "label": "Continue CLI", "family": "continue", "surface": "cli",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [],
-      "vendor": {"resume": {"status": "documented", "source": "continue-cli"}}
-    },
-    "aider-cli": {
-      "label": "Aider CLI", "family": "aider", "surface": "cli",
-      "discovery": {"kind": "manual", "root": null, "source": null}, "preserved": [],
-      "vendor": {"question": {"status": "documented", "source": "aider-cli"}, "read": {"status": "documented", "source": "aider-cli"}, "edit": {"status": "documented", "source": "aider-cli"}, "resume": {"status": "documented", "source": "aider-cli"}}
     },
     "other": {
       "label": "Unidentified host (explicit manual route)", "family": "other", "surface": "manual",

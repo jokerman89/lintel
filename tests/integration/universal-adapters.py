@@ -95,7 +95,7 @@ class UniversalAdapters(unittest.TestCase):
         self.run_cli(client="copilot-cli")
         copilot = (self.target / ".github/skills/li-plan/SKILL.md").read_bytes()
         self.run_cli(client="codex-cli")
-        self.run_cli(client="gemini-cli")
+        self.run_cli(client="cursor-cli")
         before = self.snapshot()
         self.run_cli(client="codex-cli")
         self.assertEqual(before, self.snapshot())
@@ -104,10 +104,10 @@ class UniversalAdapters(unittest.TestCase):
         self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(), "Existing team policy.\n")
         self.assertTrue((self.target / "AGENTS.md").read_bytes().startswith(b"# Existing rules\r\n"))
         manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text())
-        self.assertEqual(manifest["clients"], ["codex-cli", "copilot-cli", "gemini-cli"])
+        self.assertEqual(manifest["clients"], ["codex-cli", "copilot-cli", "cursor-cli"])
 
     def test_same_native_root_is_shared_without_surface_alias_collapse(self):
-        for client in ("codex-cli", "codex-desktop", "antigravity-ide"):
+        for client in ("codex-cli", "codex-desktop", "codex-ide"):
             self.run_cli(client=client)
         self.run_cli("check")
         manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text())
@@ -115,14 +115,14 @@ class UniversalAdapters(unittest.TestCase):
         self.assertEqual(sum(p == ".agents/skills/li-plan/SKILL.md" for p in manifest["files"]), 1)
 
     def test_managed_and_unmanaged_native_collisions_refuse_all_writes(self):
-        collision = self.target / ".gemini/skills/li-plan/SKILL.md"
+        collision = self.target / ".cursor/skills/li-plan/SKILL.md"
         collision.parent.mkdir(parents=True)
         collision.write_text("Project-owned plan.\n")
         before = self.snapshot()
-        self.assertIn("Unmanaged collision", self.run_cli(client="gemini-cli", success=False).stderr)
+        self.assertIn("Unmanaged collision", self.run_cli(client="cursor-cli", success=False).stderr)
         self.assertEqual(before, self.snapshot())
         collision.unlink()
-        self.run_cli(client="gemini-cli")
+        self.run_cli(client="cursor-cli")
         collision.write_text(collision.read_text() + "\nLocal customization.\n")
         before = self.snapshot()
         self.assertIn("Modified managed file", self.run_cli(client="copilot-app", success=False).stderr)
@@ -566,10 +566,10 @@ class UniversalAdapters(unittest.TestCase):
     def test_spaces_metacharacters_and_user_home_boundary(self):
         project = self.target / "project with spaces & brackets[1]"
         project.mkdir()
-        self.run_cli(client="junie-cli", target=project)
+        self.run_cli(client="claude-code", target=project)
         self.run_cli("check", target=project)
-        self.assertTrue((project / ".junie/skills/li-plan/SKILL.md").is_file())
-        refused = self.run_cli(client="junie-cli", target=self.home, success=False)
+        self.assertTrue((project / ".claude/skills/li-plan/SKILL.md").is_file())
+        refused = self.run_cli(client="claude-code", target=self.home, success=False)
         self.assertIn("user-home root", refused.stderr)
         self.assertEqual(list(self.home.iterdir()), [])
 

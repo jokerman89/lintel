@@ -1,8 +1,10 @@
 # Client adapters
 
-Choose the exact surface, not just its vendor. Every listed route preserves canonical
-planning, build, review and resume resources. Native-format wrappers are generated only
-where the project discovery root is documented. Other routes are plainly manual.
+Lintel supports GitHub Copilot, Claude, Codex and Cursor (ADR-0035); any other host uses
+the manual `other` route. Choose the exact surface, not just its vendor. Every listed route
+preserves canonical planning, build, review and resume resources. Native-format wrappers
+are generated only where the project discovery root is documented. Other routes are
+plainly manual.
 
 ## Install and inspect one surface
 
@@ -54,47 +56,9 @@ according to the skills documentation. Repository skills are not personal skill 
 The existing `.cursor-plugin/plugin.json` remains; inspect the installed host's plugin UI
 instead of assuming an old `/add-plugin` command or universal settings contract.
 
-**Gemini:** `gemini-cli` selects `.gemini/skills`; the existing `gemini-extension.json`
-context route remains. Skills, consent, subagent restrictions and experimental features
-follow the exact version, not the obsolete assumption that Gemini has no native skills.
-
-**OpenCode:** `opencode-cli` selects `.opencode/skills`. `opencode-desktop` and `opencode-ide`
-use manual handoff until their specific discovery/API contracts are established. The
-existing `.opencode/INSTALL.md` route is preserved, not proof of desktop parity.
-
-**Factory:** `droid-cli` selects `.factory/skills`. `factory-desktop` and `factory-cloud`
-are separate manual routes. Custom droids' restrictions, including question/nesting limits,
-are not inherited from the main CLI's tool list.
-
-**Antigravity:** `antigravity-cli`, `antigravity-desktop`, `antigravity-ide` select the
-documented project `.agents/skills` root. Sharing that root does not mean sharing plugin
-controls, permissions or Gemini's extension API.
-
-**Kiro:** `kiro-cli`, `kiro-ide`, `kiro-web` select documented workspace `.kiro/skills`.
-Custom-agent resource selection and argument substitution vary; no settings are changed.
-Existing specifications remain authoritative.
-
-**Devin/Cascade:** `devin-desktop` is Cascade (formerly Windsurf), using `.windsurf/skills`;
-`devin-cli` uses `.devin/skills`. `devin-local` and `devin-cloud` remain separate manual
-routes. Do not treat old Windsurf naming or CLI model/permission settings as Cascade parity.
-
-**Junie:** `junie-cli` selects documented `.junie/skills`. `junie-ide` records documented
-skill capability but keeps a manual route because the precise IDE discovery binding was
-not established by the CLI location contract.
-
-**Cline:** `cline-ide` selects `.cline/skills`; `cline-cli` remains manual pending a precise
-discovery binding. Experimental research subagents are read-only and are not parallel
-implementers or a browser/MCP workaround.
-
-**Continue:** `continue-ide` and `continue-cli` retain distinct manual routes. Plan/Agent
-modes, model-dependent tools and CLI profile selection are not subagent delegation.
-
-**Aider:** `aider-cli` uses explicit canonical-file handoff. Ask/read-only/load/save and
-architect/editor methods remain useful but do not establish independent review or browser
-automation.
-
-**Unidentified:** `other` installs the same manual entry without claiming native discovery.
-Unknown IDs are refused rather than silently choosing a different client.
+**Other hosts:** `other` installs the same manual entry without claiming native discovery.
+Use it for any host outside the four supported families. Unknown IDs, including the
+families removed by ADR-0035, are refused rather than silently choosing a different client.
 
 ## Manual does not mean discarded
 

@@ -42,7 +42,9 @@ Roughly in order of usefulness:
 4. **Copilot pilot reports.** Include the exact client/version, kit or plugin installation route, skill discovery, task execution and fresh-session resume. Lintel does not port Claude hooks to Copilot; report the actual integration against [docs/copilot.md](docs/copilot.md).
 5. **A skill, agent, or hook that fills a genuine gap** — open an issue first, so we can agree the
    gap is real before you build.
-6. **New CLI support**, following [adding a new CLI](docs/multi-cli.md#adding-a-new-cli).
+6. **A new surface for a supported client** (Copilot, Claude, Codex or Cursor), following
+   [adding a surface](docs/multi-cli.md#adding-a-new-cli). A new client family needs an agreed
+   ADR before any code (ADR-0035).
 7. **Subtraction.** Removing a skill, flag, or code path that nothing uses is a welcome change, with
    evidence that nothing uses it.
 
@@ -121,7 +123,7 @@ CI configuration lives in [.github/workflows/ci.yml](.github/workflows/ci.yml). 
 ```
 feat(skills): add /<skill-name> for <use case>
 fix(agents): correct <category>/<AgentName> frontmatter
-docs(multi-cli): document Factory Droid install
+docs(multi-cli): document Cursor CLI discovery
 chore(lib): tidy pack-resolver error message
 ```
 

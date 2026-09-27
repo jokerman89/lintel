@@ -1,9 +1,10 @@
-# Universal client support
+# Client support
 
-Lintel keeps one shared workflow in `skills/`, specialist roles in `agents/`, and reusable
+Lintel supports four client families: GitHub Copilot, Claude, Codex and Cursor (ADR-0035).
+It keeps one shared workflow in `skills/`, specialist roles in `agents/`, and reusable
 helpers/templates in `lib/` and `scaffolding/`. Thin adapters expose documented native
-discovery formats or a useful explicit file handoff. Universal means continuity of intent,
-work, policy and evidence, not identical client tools or blanket support.
+discovery formats; any other host can use an explicit file handoff. Universal means
+continuity of intent, work, policy and evidence, not identical client tools or blanket support.
 
 ## Three separate facts
 
@@ -19,8 +20,8 @@ and generated [README view](../README.md#multi-cli-support).
 
 Unknown vendor capability remains `unknown`. Unrun observation remains `not_run`. Partial
 session observations cannot become complete client acceptance. CLI, desktop, IDE and cloud
-are separate records, including Copilot, Codex, Cursor, OpenCode, Factory and newer clients.
-Use the [adapter guide](client-adapters.md) and registry output rather than another support matrix.
+are separate records within each family. Use the [adapter guide](client-adapters.md) and
+registry output rather than another support matrix.
 
 ```bash
 python3 bin/li-client-capabilities.py show --client copilot-app
@@ -102,13 +103,20 @@ The `.claude-plugin/` route, canonical skills, agents and optional hooks remain.
 repository-only `.claude/skills/li-*` route is additive and deliberately hook-free.
 Desktop Code local is separate from CLI, Chat, Cowork and cloud. See [Claude Code](claude-code.md).
 
-### Other clients
+### Codex and Cursor
 
-Codex and Cursor manifests, the Gemini extension and OpenCode manual guide are retained.
-The [client adapter guide](client-adapters.md) identifies native-format and manual routes for
-those clients and Antigravity, Kiro, Devin/Cascade, Junie, Factory, Cline, Continue and Aider.
-Do not use a retired install incantation or a neighboring surface's settings API without
-checking the intended host's current documentation and available commands.
+The `.codex-plugin/` and `.cursor-plugin/` manifests remain. Codex CLI, desktop and IDE use
+`.agents/skills`; Codex cloud is a manual handoff. Cursor CLI, editor and cloud use
+`.cursor/skills`. The [client adapter guide](client-adapters.md) lists each route. Do not use
+a retired install incantation or a neighboring surface's settings API without checking the
+intended host's current documentation and available commands.
+
+### Other hosts
+
+Hosts outside these four families are not supported integrations. They can still use the
+`other` route: the same bundled canonical files with an explicit `START.md` handoff and no
+native discovery claim. The client families registered before ADR-0035 and their removal
+are listed in the [migration index](migrations/_INDEX.md).
 
 ## Swarm compatibility
 
@@ -128,8 +136,10 @@ The [swarm guide](concepts/swarming-work.md) retains the complete artifact and r
 
 ## Adding or verifying a surface
 
-Add a distinct record with official sources, version conditions and a documented discovery
-root, or keep an explicit manual route. The shared validator and generator must consume it;
+A new client family outside Copilot, Claude, Codex and Cursor is a product decision that
+needs its own ADR first. Within a supported family, add a distinct record with official
+sources, version conditions and a documented discovery root, or keep an explicit manual
+route. The shared validator and generator must consume it;
 add behavioral selection and consumer installation cases. Regenerate shared outputs through
 their owner. Then run a real client pilot with exact version/revision, discovery, permitted
 plan/build/review and cold resume. Do not mark source research or fixture tests as that pilot.
