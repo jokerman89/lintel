@@ -9,8 +9,8 @@ there is no hosted Lintel service. See [architecture](architecture.md).
 
 ## Which coding clients does it support?
 
-Claude Code, GitHub Copilot (CLI, app and cloud agent), Codex, Gemini CLI, Cursor, OpenCode and
-any other agent through the Universal adapter's explicit file handoff. No client is the default.
+Claude Code, GitHub Copilot (CLI, app and cloud agent), Codex and Cursor, plus any
+other agent through the Universal adapter's explicit file handoff. No client is the default.
 The [repository adapter](client-adapters.md) installs `li-*` wrappers where a client documents
 native discovery; see [Copilot](copilot.md) and [Claude Code](claude-code.md) for their preserved
 routes. Start with [getting started](getting-started.md). Client discovery and enterprise policies
@@ -134,7 +134,7 @@ retained upstream license terms still apply. Spec Kit is not bundled by this wor
 
 Start with `welcome`, `plan`, `build`, `review` and `resume`, then `cycle` for the broader workflow.
 Invocation follows the client: `/li:<skill>` in the Claude Code plugin, the discovered `li-<skill>`
-wrapper on adapter routes such as Copilot, Codex and Gemini, or an explicit read of the canonical
+wrapper on adapter routes such as Copilot, Codex and Cursor, or an explicit read of the canonical
 skill through the Universal adapter. Use `verify` for read-only testing (repairs need `--repair`),
 `diagnose` for a failure, and `pause`/`resume` to hand work to a fresh session. Explore the
 [full catalog](../skills/CATALOG.md) when you need specialist depth.

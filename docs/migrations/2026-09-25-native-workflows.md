@@ -18,7 +18,7 @@ promises of executable aliases. Counts and historical removal schedules are not 
 
 Commands use the canonical `/li:<name>` notation. Use the actual host's native `li-*`
 wrapper when discovered, or read the canonical skill from the trusted source bundle.
-The notation is the Claude Code plugin form; on Copilot, Codex, Gemini, Cursor, OpenCode or
+The notation is the Claude Code plugin form; on Copilot, Codex, Cursor or
 another client, use that host's discovered wrapper or the Universal adapter's explicit file read.
 An installed file is not evidence of native discovery or a completed client test.
 
