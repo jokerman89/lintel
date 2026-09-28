@@ -8,10 +8,10 @@ description: Use to add, list or lift advisory session freeze paths; preserves p
 > - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
->   `scripts/`, `references/`, `data/` or `${LINTEL_SKILLS_DIR:-skills}/…`) mean
->   `../../../skills/code-freeze/` in the Lintel source, not this generated folder. `bin/li-run` exports
->   `LINTEL_SKILLS_DIR` for shell steps.
+> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+>   `../../../skills/code-freeze/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/code-freeze/` there.
 > - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
 >   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
 >   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
