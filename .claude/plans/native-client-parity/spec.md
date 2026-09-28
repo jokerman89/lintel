@@ -54,10 +54,10 @@ generation error that names the canonical file (review finding L5).
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
->   `scripts/`, `references/`, `data/` or `${LINTEL_SKILLS_DIR:-skills}/…`) mean
->   `{root}/skills/{name}/` in the Lintel source, not this generated folder. `bin/li-run` exports
->   `LINTEL_SKILLS_DIR` for shell steps.
+> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `{root}/skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
 > - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
 >   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
 >   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
@@ -69,8 +69,14 @@ generation error that names the canonical file (review finding L5).
 >   files. Named roles such as `CodeReviewer` are custom agents.
 ```
 
-The skill-relative paths bullet was added after review finding M2. `bin/li-run` sets
-`LINTEL_SKILLS_DIR` to `<resource root>/skills` unless the variable is already set.
+The skill-relative paths bullet comes from review findings M2 and N1.
+- `bin/li-run` always exports `LINTEL_SKILLS_DIR="$LINTEL_SOURCE_ROOT/skills"` and ignores an
+  inherited value, exactly as it ignores an inherited `LINTEL_SOURCE_ROOT`. The reason: the variable
+  selects scripts that canonical steps execute, and a relative value would resolve inside the working
+  repository after `li-run` changes into it.
+- To use another checkout's skills, run that checkout's own `bin/li-run`.
+- No line of the bullet may exceed 100 characters, even for the longest skill name with the vendored
+  root.
 
 The agent preamble has no skill folder, so it omits the skill-relative paths bullet. The agent file's
 directory is `.github/agents`, so `{root}` is `../..` locally or `../lintel` vendored. This is its exact
@@ -136,6 +142,8 @@ The camelCase `preToolUse`/`postToolUse` shapes below were **recorded live** (pr
     - a link's query string and fragment are kept (`intake.md?plain=1#L3`; review finding L2);
     - a link ending in `/` may name an existing directory, and verification accepts it the same way
       (review finding L1);
+    - a link that names an existing directory without a trailing `/` is a generation error with a
+      clear message (review finding N2);
     - a missing target is still an error.
 - **Normalization:** one blank line separates the preamble from the body, and trailing whitespace at
   the end of the file becomes exactly one final newline. Reviewed and accepted as is.
