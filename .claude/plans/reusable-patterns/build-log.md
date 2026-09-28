@@ -1066,6 +1066,57 @@ adjudication sha256 `fca066e8…e472d`):
 
 The entries above stay verbatim as history; only the plan's status annotations changed.
 
+## V18 at RN-14 and the direct-entry fix (`18489982`)
+
+Reviewer 24bf5df0 reviewed `82e97d74` (`v18-rn14-82e97d74.md`, sha256 `d10a528f…659d`):
+
+- 4.3.c is MET at source level, with 0 blocking and three Low findings.
+- 5.2.a is NOT MET. M-1 (Medium): a direct `generate-web --mode mockup` entry relied on a lock
+  that only the frontend-design route hands over. L-4: the plain `--brief` route had the same
+  shape.
+
+The fix, `18489982`, is bounded to the owner-approved D2 join scope and changes no resolver,
+schema, provider or runtime:
+
+- generate-web's "Reusable patterns" section adds one direct-entry rule for both routes:
+  - resolve before the first design choice;
+  - on `ready`, rerun with `--lock` inside the repository run and confirm the same
+    `selection_digest`;
+  - `empty` changes nothing;
+  - every other status, and a run with no JSON report, blocks;
+  - `project_visual` writes the final spec before its binding;
+  - `load_design` and `validate_visual` run before rendering;
+  - a handed-over lock goes through `verify-lock` first.
+- `mockup.md` step 2 applies the rule before its decision method, and step 3 validates.
+- L-1: a required section missing from the readable source or prepared HTML is failed at the
+  source; presence in the produced PDF stays unverified.
+- L-2: Visio DONE needs no failed or unverified mandatory clause, and the slot is never promoted.
+- L-3 and I-2: the V09 docstring and the V11 deferral labels now follow RN-14 (supplemental, not
+  V17 gates).
+- New V11 `DirectEntryTests`, helper and source-wiring evidence only (not an executed model
+  route, browser render or host cell):
+  - a cold required max-width;
+  - empty with no forced lock;
+  - profile error, pack fallback, unevidenced fact and needs-context refusals;
+  - stale, edited and changed-source locks;
+  - mockup and plain-brief parity, and parity with a cycle lock.
+
+Checks, synthetic HOME/TEMP, Windows:
+
+| Check | Result |
+|---|---|
+| V11 `pattern-visual-roundtrip.py` | 23 OK |
+| V09 `pattern-workflows.py` | 31 OK |
+| `document-pdf.sh` | 16 OK + 6 node pass |
+| `generate-skills-present.sh` | PASSED |
+| `pattern-contract.sh` | ALL PASS |
+| `frontmatter-lint-all.sh` | PASSED |
+| `native-command-surface` | PASS, 0 findings |
+| `li-copilot.py check` | 22 managed files |
+| catalog check | clean |
+
+The re-review is pending; 5.2.a and 4.3.c stay unticked.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
