@@ -93,10 +93,11 @@ build it, review the result, ship within the authorized scope, and capture what 
 Small fixes can use a shorter route. A larger change can span multiple sessions and build cards.
 
 Every client reaches the same skills; only the invocation form differs. The Claude plugin uses
-`/li:<skill>`, portable adapter wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review`
-and related skills where the host discovers them, and the Universal adapter uses explicit file
-handoff. The Copilot kit also installs `lintel-planner`, `lintel-builder` and `lintel-reviewer`
-agent profiles.
+`/li:<skill>`. GitHub Copilot gets a complete native `li-<skill>` skill for every workflow and a
+custom agent for every Lintel role, plus the `lintel-planner`, `lintel-builder` and
+`lintel-reviewer` profiles. Other portable adapter wrappers expose `li-cycle`, `li-plan`,
+`li-build`, `li-review` and related skills where the host discovers them, and the Universal
+adapter uses explicit file handoff.
 Common entrypoints include `define` to shape a request, `inspect` for plan or repository
 lenses, `verify` for read-only checks, `diagnose` for bugs, `cross-check` for an independent
 second review, and `pause`/`resume` for continuity. The full catalog contains architecture, data,
