@@ -61,15 +61,16 @@
       "role": "lintel-builder",
       "isolation": "git-worktree",
       "write_scope": [
-        "lib/profile_context.py",
         "lib/pack-resolver.sh",
         "lib/paths.sh",
         "bin/li-pattern",
         "packs/_default/pack.yaml",
         "lib/pack-schema.yaml",
         "tests/unit/pattern-pack-origins.sh",
-        "tests/unit/pattern-roots.py",
-        "tests/unit/pattern-roots.sh"
+        "tests/unit/pattern-pack-origins.py",
+        "tests/unit/pattern-launcher-roots.sh",
+        "tests/unit/pattern-launcher-roots.py",
+        "tests/unit/pattern_pack_harness.py"
       ],
       "brief": ".claude/plans/reusable-patterns/swarm/briefs/PACK.md",
       "report": ".claude/plans/reusable-patterns/swarm/reports/PACK.md",
