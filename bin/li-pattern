@@ -69,7 +69,8 @@ for candidate in python3 python; do
     break
   fi
 done
-[ -n "$python" ] || _fail 2 'reusable-pattern operations require Python 3.10+; no operation was performed.'
+# A missing runtime is "pattern check unavailable" (exit 5), never "no patterns" and never a report.
+[ -n "$python" ] || _fail 5 'pattern check unavailable: reusable-pattern operations need Python 3.10+, which was not found; no operation was performed and this is not a "no patterns" result.'
 
 repo_arg="" repo_set=0
 while [ "$#" -gt 0 ]; do
