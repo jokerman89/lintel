@@ -131,9 +131,16 @@ Two representational tensions remain, surfaced rather than worked around:
 
 1. The command-surface guard refuses nonexistent workflow paths in plans, while the swarm package
    boundary needs literal, possibly not-yet-created paths. The WF boundary
-   `references/` directory under the pattern skill therefore reports one `missing-path` finding until the WF lane's
-   consumer reference is integrated.
+   `references/` directory under the pattern skill reported three `missing-path` findings at 8aa1f89e and d82b2919 (in plan.md, build-log.md and
+   this file); prose rewrites in c92ae4dc reduced them to one (the plan.md boundary), which remains until
+   the WF lane's consumer reference is integrated.
 2. `skills/CATALOG.md` drifts from the new canonical pattern skill until the coordinator
    regenerates the shared reducers at integration (card 6.1.b).
 
 Neither validator is weakened.
+
+**RN-12 Strict continuation baseline (R5, 2026-09-28).** Following the parent's decision on the
+independent review of `d82b2919`, `verify_lock` treats every binding-driven change to the selected
+baseline, including added or removed defaults, as a conflict that requires re-planning.
+`parse_lock` re-derives settings with the resolver's own settling logic. This is stricter than the
+spec requires, within spec 4.4's latitude. Leaf IDs, requirements and acceptance are unchanged.

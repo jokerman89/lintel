@@ -453,6 +453,48 @@ Results:
 The pattern skill documents the delivered operations. Contract: "Maintenance, attestations,
 sharing and review".
 
+## Review revision R5 (re-review of `d82b2919`: CONDITIONAL SPEC PASS, QUALITY PASS; 1 P2, 2 P3)
+
+Reviewer c3015de8 report `review-r4-d82b2919.md`, read only. Parent decision: the simple strict
+alternative. An unmodified copy of `repro-r4.py` (SHA256 `E0C458CD5F5330D3…`) was run against the
+fixed tree. The discriminator module came from `git show f1918e12:lib/patterns.py` in the synthetic
+TEMP and was removed afterwards. Output is in this session's artifacts.
+
+| Repro | Before (`d82b2919`) | After |
+| --- | --- | --- |
+| D1 resealed omission of a default record, repo and catalog binding | `ok` + warnings | `conflict` `selection_changed`, both locations |
+| D2 omission + forged winner value | `ok` | `invalid_lock` (internally inconsistent), both locations |
+| D3 forged required record's default setting | `ok` | `invalid_lock` |
+| D3b / D3c | conflict | `invalid_lock` (caught earlier, at parse) |
+| D4 deprecated-at-lock resealed as approved | `ok` + warning | `conflict`; the genuine lock is `ok` + `pinned_deprecated` |
+| G1/G2/G3 genuine later default add, default remove, required add | G1 `ok` + warnings | all `conflict` (re-plan) |
+| G5 re-scope with the same selection | `ok` | `ok` (unchanged) |
+| E, B, O, N | as reported | unchanged; E's parse-only resealed lock still reads assets, which the documented precondition now forbids |
+
+New `StrictBaselineTests` (6 cases), plus an updated `ResealedLockTests` legitimate-change case:
+
+- D1 on repository and catalog bindings;
+- D2, D3 and a plain value edit, each giving `invalid_lock`;
+- a dropped recommendation clause gives `invalid_lock`, and a clause dropped from both the record
+  and its requirements gives `lock_content_mismatch`;
+- genuine later default add and remove give conflict, while an unbound catalog addition gives `ok`;
+- P3-R4-1: a deprecated-at-lock pin resealed as approved;
+- legitimate cases still verify: an override winner, a waiver, an empty lock, map, verify and project.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 105 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each reverted guarantee failed
+  at least one test: fresh-only records, the settle re-derivation, the settings comparison, the
+  unchanged-catalog deprecation rule, and the record/requirement invariant. The probe first
+  exposed an uncaught gap, the invariant; it was added and its regression written before this
+  commit.
+
+Truthful guard counts: at `8aa1f89e` and `d82b2919` the command-surface guard reported 3
+`missing-path` findings, not the 1 that reconciliation RN-11 stated. RN-11 is corrected. After
+`c92ae4dc` it reports 1, the WF-owned plan boundary, pending join. That later cleanup is not
+retroactive evidence for R4.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

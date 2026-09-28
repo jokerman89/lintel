@@ -2026,18 +2026,21 @@ class ResealedLockTests(unittest.TestCase):
         self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]}),
                                binding("soft", [ref("repo.main", self.soft)], role="default")])
         report = self.verify(self.lock)
-        self.assertEqual(report["status"], "ok", "an added default binding only warns")
-        self.assertIn("default_baseline_changed", codes(report, "warning"))
+        self.assertEqual(report["status"], "conflict", "R5: an added default binding changes the baseline; re-plan")
+        self.assertIn("selection_changed", codes(report, "error"))
         self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
-        entry = next(item for item in self.fx.publish(self.fx.repo_patterns, "repo.main",
-                                                      [self.rules, self.other, self.soft])["entries"]
-                     if item["id"] == "example.rules")
-        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft], lifecycle=[
+        self.assertEqual(self.verify(self.lock)["status"], "ok")
+        unrelated = make_pattern("example.unrelated", applies_to={"artifact": ["api"]})
+        catalog = self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft, unrelated])
+        self.assertEqual(self.verify(self.lock)["status"], "ok", "an unbound catalog addition leaves the pin valid")
+        entry = next(item for item in catalog["entries"] if item["id"] == "example.rules")
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft, unrelated], lifecycle=[
             {**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated", "reason": "r",
              "reference": "ADR", "at": TS}])
         report = self.verify(self.lock)
         self.assertEqual(report["status"], "ok", "deprecation after locking warns, never conflicts")
         self.assertIn("pinned_deprecated", codes(report, "warning"))
+        self.assertEqual(report["checked"][0]["effective_status"], "deprecated", "checked[] reports the current status")
 
     def test_waived_lock_and_empty_lock_still_verify(self):
         exception = p.parse_exceptions({"schema_version": 1, "items": [{
@@ -2606,6 +2609,158 @@ class ReviewCoverageTests(unittest.TestCase):
                                               "--context", context, "--evidence", evidence)
         self.assertEqual((code, report["status"]), (7, "review-unmet"))
         self.assertIn("mandatory_unmet", stderr)
+
+
+class StrictBaselineTests(unittest.TestCase):
+    """Regressions for independent review of d82b2919 (P2-R4-1, P3-R4-1): omission, laundering, status."""
+
+    def build(self, where):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must", "ui.theme", "dark"),
+                                                            clause("DEF-1", "default", "ui.density", "compact"),
+                                                            clause("REC-1", "recommendation")])
+        soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif"),
+                                                          clause("S-2", "default", "ui.density", "compact")])
+        bindings = [binding("req", [ref("repo.main", rules)]), binding("soft", [ref("repo.main", soft)], role="default")]
+        if where == "catalog":
+            fx.publish(fx.repo_patterns, "repo.main", [rules, soft], bindings=bindings)
+        else:
+            fx.publish(fx.repo_patterns, "repo.main", [rules, soft])
+            fx.repo_bindings(bindings)
+        report, _ = fx.resolve(ctx())
+        self.assertEqual({item["ref"]["id"] for item in report["selected"]}, {"example.rules", "example.soft"})
+        return fx, p.build_lock(report, p.parse_context(ctx()))
+
+    def reseal(self, lock, change):
+        forged = copy.deepcopy(lock)
+        change(forged)
+        forged["asset_pins"] = p.asset_refs(forged)
+        forged["status"] = "ready" if forged["selected"] else "empty"
+        forged["selection_digest"] = p.selection_digest(forged)
+        return forged
+
+    def outcome(self, fx, lock):
+        try:
+            return p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"]
+        except p.PatternError as error:
+            return error.status
+
+    @staticmethod
+    def drop_soft(value, keep_settings=False):
+        value["selected"] = [item for item in value["selected"] if item["ref"]["id"] != "example.soft"]
+        value["requirements"] = [item for item in value["requirements"] if not item["clause"].startswith("example.soft")]
+        if not keep_settings:
+            value["settings"].pop("ui.font")
+            value["settings"]["ui.density"]["clauses"] = [
+                item for item in value["settings"]["ui.density"]["clauses"] if not item.startswith("example.soft")]
+
+    def test_d1_whole_default_record_omission_on_unchanged_sources(self):
+        for where in ("repo", "catalog"):
+            with self.subTest(binding_location=where):
+                fx, lock = self.build(where)
+                self.assertEqual(self.outcome(fx, lock), "ok")
+                forged = self.reseal(lock, self.drop_soft)
+                self.assertEqual(self.outcome(fx, forged), "conflict")
+                report = p.verify_lock(fx.roots(), forged, p.parse_context(ctx()), today=TODAY)
+                self.assertIn("selection_changed", codes(report, "error"))
+                self.assertNotIn("default_baseline_changed", codes(report))
+
+    def test_d2_d3_setting_laundering_is_internally_inconsistent(self):
+        for where in ("repo", "catalog"):
+            fx, lock = self.build(where)
+            forged_winner = self.reseal(lock, lambda v: (self.drop_soft(v, keep_settings=True),
+                                                         v["settings"]["ui.font"].update(value="FORGED")))
+            forged_required_default = self.reseal(lock, lambda v: (self.drop_soft(v),
+                                                                   v["settings"]["ui.density"].update(value="FORGED")))
+            forged_value_only = self.reseal(lock, lambda v: v["settings"]["ui.font"].update(value="FORGED"))
+            for name, forged in (("D2 winner outside the lock", forged_winner),
+                                 ("D3 required record's default", forged_required_default),
+                                 ("value edit with no omission", forged_value_only)):
+                with self.subTest(binding_location=where, case=name):
+                    with self.assertRaises(p.PatternError) as caught:
+                        p.parse_lock(forged)
+                    self.assertEqual((caught.exception.code, caught.exception.status), ("invalid_lock", "invalid"))
+                    self.assertIn("internally inconsistent", caught.exception.message)
+
+    def test_dropped_clause_without_a_setting_is_detected(self):
+        fx, lock = self.build("repo")
+        forged = self.reseal(lock, lambda v: v["requirements"].remove(
+            next(item for item in v["requirements"] if item["clause"].endswith("#REC-1"))))
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(forged)
+        self.assertIn("exactly the clauses", caught.exception.message)
+        both = self.reseal(lock, lambda v: (v["requirements"].remove(
+            next(item for item in v["requirements"] if item["clause"].endswith("#REC-1"))),
+            v["selected"][0]["clauses"].remove("example.rules@1.0.0#REC-1")))
+        self.assertEqual(self.outcome(fx, both), "invalid", "also dropping it from the record contradicts the pinned body")
+
+    def test_genuine_later_default_addition_and_removal_force_a_replan(self):
+        fx, lock = self.build("repo")
+        rules = json.loads((fx.repo_patterns / "example.rules" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        fx.repo_bindings([binding("req", [ref("repo.main", rules)])])
+        self.assertEqual(self.outcome(fx, lock), "conflict", "a removed default binding is a re-plan")
+        fx2 = Fixture(self)
+        fx2.publish(fx2.repo_patterns, "repo.main", [rules])
+        fx2.repo_bindings([binding("req", [ref("repo.main", rules)])])
+        report, _ = fx2.resolve(ctx())
+        small = p.build_lock(report, p.parse_context(ctx()))
+        soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif")])
+        fx2.publish(fx2.repo_patterns, "repo.main", [rules, soft])
+        self.assertEqual(p.verify_lock(fx2.roots(), small, p.parse_context(ctx()), today=TODAY)["status"], "ok",
+                         "an unbound catalog addition does not disturb the pin")
+        fx2.repo_bindings([binding("req", [ref("repo.main", rules)]), binding("soft", [ref("repo.main", soft)],
+                                                                             role="default")])
+        self.assertEqual(p.verify_lock(fx2.roots(), small, p.parse_context(ctx()), today=TODAY)["status"], "conflict",
+                         "a genuine later default binding is a re-plan, not a silent change")
+
+    def test_p3_r4_1_deprecated_at_lock_resealed_as_approved(self):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules")
+        catalog = fx.publish(fx.repo_patterns, "repo.main", [rules])
+        entry = catalog["entries"][0]
+        fx.publish(fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])],
+                   lifecycle=[{**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated",
+                               "reason": "r", "reference": "ADR", "at": TS}])
+        report, _ = fx.resolve(ctx())
+        lock = p.build_lock(report, p.parse_context(ctx()))
+        self.assertEqual(lock["selected"][0]["effective_status"], "deprecated")
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        forged = self.reseal(lock, lambda v: v["selected"][0].update(effective_status="approved"))
+        verified = p.verify_lock(fx.roots(), forged, p.parse_context(ctx()), today=TODAY)
+        self.assertEqual(verified["status"], "conflict", "unchanged catalog: the lock cannot claim it was approved")
+        self.assertIn("selection_provenance_changed", codes(verified, "error"))
+
+    def test_override_waiver_empty_map_and_project_still_verify(self):
+        fx, lock = self.build("repo")
+        context = p.parse_context(ctx())
+        overrides = p.parse_overrides({"schema_version": 1, "items": [{
+            "setting": "ui.font", "value": "mono", "reason": "brief", "approval_ref": "brief.md",
+            "replaces": ["example.soft@1.0.0#S-1"]}]})
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = fx.resolve(ctx(), overrides=overrides, exceptions=exceptions)
+        self.assertEqual(report["settings"]["ui.font"]["winner"], "override")
+        special = p.build_lock(report, context)
+        self.assertEqual(p.parse_lock(special)["settings"]["ui.font"]["value"], "mono",
+                         "a legitimate override winner passes the settle re-derivation")
+        verified = p.verify_lock(fx.roots(), special, context, today=TODAY)
+        self.assertEqual(verified["status"], "ok")
+        empty_report, _ = fx.resolve(ctx(artifact="x"), refs=())
+        fx3 = Fixture(self)
+        empty_report, _ = fx3.resolve(ctx())
+        empty = p.build_lock(empty_report, p.parse_context(ctx()))
+        self.assertEqual(p.verify_lock(fx3.roots(), empty, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        path = fx.repo / "l.lock.json"
+        p.write_lock(fx.roots(), path, lock)
+        task_map = {"schema_version": 1, "selection_digest": lock["selection_digest"], "tasks": ["T1"],
+                    "packages": [{"id": "P1", "tasks": ["T1"]}],
+                    "clauses": [{"clause": item["clause"], "tasks": ["T1"]} for item in lock["requirements"]
+                                if item["state"] in ("mandatory", "default")]}
+        p.map_lock(fx.roots(), path, task_map, expected_lock_digest=p.content_digest(lock), write=True)
+        mapped = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), mapped, context, today=TODAY)["status"], "ok")
+        self.assertEqual(len(p.project_package(mapped, task_map, "P1")["clauses"]), len(task_map["clauses"]))
 
 
 if __name__ == "__main__":

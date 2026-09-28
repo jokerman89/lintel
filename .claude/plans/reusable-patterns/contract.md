@@ -230,9 +230,9 @@ No names changed. Two optional parameters were added to `read_asset`, and digest
     waived without its exception fails;
   - settings, overrides and exceptions.
 
-  Only two differences verify with a warning (`default_baseline_changed`,
-  `default_setting_changed`): a default-role record that was added later (with its own clauses),
-  and a pin that was deprecated later. Everything else is a conflict that forces a re-plan:
+  In R4, two differences verified with a warning (`default_baseline_changed`,
+  `default_setting_changed`): a default-role record added later (with its own clauses), and a pin
+  deprecated later. R5 removes the added-default warning: see "Revision R5". Everything else is a conflict that forces a re-plan:
   - a record or clause the lock claims but resolution does not produce (`selection_changed`,
     `requirement_changed`);
   - a changed field (`selection_provenance_changed`, `requirement_changed`, `setting_changed`);
@@ -258,6 +258,44 @@ No names changed. Two optional parameters were added to `read_asset`, and digest
 - **P3-R3-3** Locks built before R4 (for example by R2 or R3 heads) fail with `invalid_lock`, and
   the message says to regenerate. This is pre-release: re-run `resolve --lock` for any cached lock.
   No lock file is tracked in the repository.
+
+## Revision R5 (2026-09-28, independent review of `d82b2919`: P2-R4-1, P3-R4-1, P3-R4-2)
+
+This revision chooses the parent's simple strict alternative: no new snapshot or authentication
+subsystem. It adds no names and changes no shapes; digest values are unchanged.
+
+- **R4's "unchanged sources never bless a discrepancy" was false for omitted default records.** R5
+  closes the gap: any difference between the lock and a fresh resolution of its own inputs is a
+  conflict that forces a re-plan. This covers:
+  - a selected record present only in the lock or only in the resolution, whatever its role;
+  - a clause present on one side only;
+  - a changed record, requirement or setting;
+  - changed overrides or exceptions.
+
+  The R4 warning bypass for added defaults (`default_baseline_changed`, `default_setting_changed`)
+  is removed. A genuine later addition or removal of a default binding is therefore a re-plan, not a
+  warning. This is the bounded stricter behavior allowed by spec 4.4's "no silent change". A catalog
+  addition that nothing binds does not change the resolution and still passes.
+- **Internal consistency is checked in `parse_lock`.**
+  - The lock's requirement states and settings must be exactly what `_settle`, the same function
+    resolution uses, derives from the lock's own clauses, overrides and exceptions. Exception
+    expiry is evaluated at the lock's `created_at`. Legitimate override winners and waivers pass.
+  - The `requirements` must list exactly the clauses of the selected records.
+  - A setting whose winner or value is not produced by the lock's own clauses is `invalid_lock`.
+    This holds even when another default was omitted, so a setting mismatch can never become
+    success.
+- **`effective_status` is historical.** In the lock it is the status at locking time;
+  `verify_lock`'s `checked[].effective_status` is the current status.
+  - approved (lock) -> deprecated (now) is a `pinned_deprecated` warning only when that pin's
+    catalog changed since locking. Otherwise the deprecation already existed, the lock's claim is
+    wrong, and the result is a `selection_provenance_changed` conflict.
+  - Catalog identity is compared per source through `source_snapshots`. No catalog-wide identity is
+    required.
+- **`read_asset` precondition.** The docstring states that a persisted or cross-process lock MUST
+  first pass `verify_lock` with status `ok`. Parsing proves internal consistency, not agreement with
+  current sources. Reports remain in-process only.
+- **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
+  re-resolution detects resealed edits relative to current inputs.
 
 ## Maintenance, attestations, sharing and review (additive, 3.2-3.3, 4.2.b.core)
 

@@ -2081,6 +2081,10 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
             _object(asset, f"{at}.assets[{asset_index}]", ("path", "kind", "sha256"), ("phases", "domains"))
     if value["asset_pins"] != asset_refs(value):
         _fail("invalid_lock", "asset_pins must equal the assets declared by the selected records", where)
+    declared = sorted(clause for item in value["selected"] for clause in item["clauses"])
+    recorded = sorted(item["clause"] for item in value["requirements"] if isinstance(item, dict))
+    if declared != recorded:
+        _fail("invalid_lock", "requirements must list exactly the clauses of the selected records", where)
     clause_ids = set()
     for index, item in enumerate(_array(value["requirements"], f"{where}.requirements")):
         at = f"{where}.requirements[{index}]"
@@ -2093,6 +2097,7 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
     parse_refs(value["invocation_refs"], f"{where}.invocation_refs")
     if type(value["context_budget"]) is not int or value["context_budget"] < 1:
         _fail("invalid_lock", "context_budget must be a positive integer", where)
+    _check_lock_settings(value, where)
     if value["selection_digest"] != selection_digest(value):
         _fail("invalid_lock", "selection_digest does not match the lock content: it was edited or corrupted, or was "
               "produced before contract revision R4 (pre-release); regenerate the lock with resolve --lock", where)
@@ -2180,7 +2185,10 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
                 problem("conflict", "mandatory_baseline_changed",
                         "current bindings change the mandatory clauses for this context; re-plan with a new lock",
                         added=baseline["added"], removed=baseline["removed"])
-            _compare_selection(lock, current, problem, diagnostics)
+            now_digests = {item.catalog.source_id: item.catalog.digest for item in sources.catalogs}
+            unchanged = {item["source_id"] for item in lock["source_snapshots"]
+                         if now_digests.get(item["source_id"]) == item["catalog_sha256"]}
+            _compare_selection(lock, current, problem, diagnostics, unchanged)
     statuses = [item["status"] for item in diagnostics if item.get("severity") == "error" and item.get("status")]
     status = _worst(statuses, "ok")
     mapping = lock["requirement_tasks"]
@@ -2200,75 +2208,98 @@ def _identity_of(record: Mapping[str, Any]) -> tuple[str, str, str]:
 _SELECTED_COMPARED = ("ref", "role", "scope", "summary", "reasons", "preview", "clauses", "assets", "equivalent_refs")
 
 
-def _compare_selection(lock: Mapping[str, Any], current: Mapping[str, Any], problem, diagnostics: list) -> None:
-    """Full comparison of the locked selection with a fresh resolution of the same inputs (P2-R3-1).
+def _compare_selection(lock: Mapping[str, Any], current: Mapping[str, Any], problem, diagnostics: list,
+                       unchanged_sources: set) -> None:
+    """Strict comparison of the locked selection with a fresh resolution of the same inputs (R5).
 
-    The only differences that verify with a warning are those a later legitimate change produces
-    for a lock that is otherwise intact: additional default-role records or non-mandatory clauses
-    (a newly added default binding), and a pin that became deprecated. Everything else, including
-    any record or clause the lock claims but the resolution does not produce, is a conflict that
-    forces a re-plan. Unchanged sources never bless a discrepancy.
+    Any difference in the selected set, a record, a requirement record or a setting is a conflict
+    that forces a re-plan, including added or removed defaults: spec 4.4 permits no silent change,
+    and an unkeyed lock cannot tell a later binding change from a resealed omission. Unbound catalog
+    additions do not change the resolution and pass. The only tolerated difference is a pin that is
+    deprecated now but was approved in the lock, and only when that pin's catalog changed since
+    locking (a real later deprecation, reported as `pinned_deprecated`). The lock's
+    `effective_status` is historical; `checked[].effective_status` is the current status.
     """
     locked = {_identity_of(item): item for item in lock["selected"]}
     fresh = {_identity_of(item): item for item in current["selected"]}
     for key in sorted(locked.keys() - fresh.keys()):
         problem("conflict", "selection_changed", f"{key[0]}@{key[1]} is in the lock but not in the current "
                 "selection; re-plan with a new lock", ref=locked[key]["ref"])
-    added_defaults = []
     for key in sorted(fresh.keys() - locked.keys()):
-        if fresh[key]["role"] == "required":
-            problem("conflict", "selection_changed", f"{key[0]}@{key[1]} is now required but absent from the lock; "
-                    "re-plan with a new lock", ref=fresh[key]["ref"])
-        else:
-            added_defaults.append(fresh[key]["ref"])
+        problem("conflict", "selection_changed", f"{key[0]}@{key[1]} ({fresh[key]['role']}) is selected now but "
+                "absent from the lock; re-plan with a new lock", ref=fresh[key]["ref"])
     for key in sorted(locked.keys() & fresh.keys()):
         old, new = locked[key], fresh[key]
         changed = sorted(field for field in _SELECTED_COMPARED if canonical_json(old[field]) != canonical_json(new[field]))
-        if old["effective_status"] != new["effective_status"] and not (
-                old["effective_status"] == "approved" and new["effective_status"] == "deprecated"):
+        later_deprecation = (old["effective_status"] == "approved" and new["effective_status"] == "deprecated"
+                             and new["ref"]["source"] not in unchanged_sources)
+        if old["effective_status"] != new["effective_status"] and not later_deprecation:
             changed.append("effective_status")
         if changed:
             problem("conflict", "selection_provenance_changed",
-                    f"{key[0]}@{key[1]} is now selected with different {', '.join(changed)}; re-plan",
-                    ref=old["ref"], fields=changed)
+                    f"{key[0]}@{key[1]} is now selected with different {', '.join(sorted(changed))}; re-plan",
+                    ref=old["ref"], fields=sorted(changed))
     old_clauses = {item["clause"]: item for item in lock["requirements"]}
     new_clauses = {item["clause"]: item for item in current["requirements"]}
-    for clause in sorted(old_clauses.keys() - new_clauses.keys()):
-        problem("conflict", "requirement_changed", f"{clause} is in the lock but not in the current resolution",
+    for clause in sorted(old_clauses.keys() ^ new_clauses.keys()):
+        where = "lock" if clause in old_clauses else "current resolution"
+        problem("conflict", "requirement_changed", f"{clause} is only in the {where}; re-plan with a new lock",
                 clause=clause)
-    extra = []
-    added_keys = {(item["id"], item["version"], item["sha256"]) for item in added_defaults}
-    for clause in sorted(new_clauses.keys() - old_clauses.keys()):
-        record = new_clauses[clause]
-        from_added = (record["pattern"]["id"], record["pattern"]["version"], record["pattern"]["sha256"]) in added_keys
-        if (record["level"] == "must" and record["state"] in _EFFECTIVE_MANDATORY) or not from_added:
-            problem("conflict", "requirement_changed", f"{clause} is not in the lock", clause=clause)
-        else:
-            extra.append(clause)
     for clause in sorted(old_clauses.keys() & new_clauses.keys()):
         if canonical_json(old_clauses[clause]) != canonical_json(new_clauses[clause]):
             fields = sorted(key for key in set(old_clauses[clause]) | set(new_clauses[clause])
                             if canonical_json(old_clauses[clause].get(key)) != canonical_json(new_clauses[clause].get(key)))
             problem("conflict", "requirement_changed", f"{clause} differs from the current resolution ({', '.join(fields)})",
                     clause=clause, fields=fields)
-    explained = {name for name, value in current["settings"].items() if set(value.get("clauses", [])) & set(extra)}
     for name in sorted(set(lock["settings"]) | set(current["settings"])):
         if canonical_json(lock["settings"].get(name)) != canonical_json(current["settings"].get(name)):
-            if name in explained and name in current["settings"] and \
-                    current["settings"][name].get("state") != "mandatory":
-                diagnostics.append(_note("default_setting_changed", f"{name} changed because of added defaults",
-                                         "warning", setting=name))
-            else:
-                problem("conflict", "setting_changed", f"setting {name} differs from the current resolution",
-                        setting=name)
+            problem("conflict", "setting_changed", f"setting {name} differs from the current resolution",
+                    setting=name)
     for field in ("overrides", "exceptions"):
         if canonical_json(lock[field]) != canonical_json(current[field]):
             problem("conflict", "selection_changed", f"locked {field} differ from the current resolution")
-    if added_defaults or extra:
-        diagnostics.append(_note("default_baseline_changed", "defaults were added since locking; the lock keeps "
-                                 "its own defaults until it is re-planned", "warning",
-                                 added_refs=added_defaults, added_clauses=extra))
 
+
+class _SettleCheck:
+    """Minimal resolution stand-in so a lock's settings are re-derived by the same `_settle` logic."""
+
+    def __init__(self, context_digest: str, today: _dt.date):
+        self.context = type("LockContext", (), {"digest": context_digest})()
+        self.today = today
+        self.conflicts: list[str] = []
+
+    def problem(self, status, code, message, **_details):
+        self.conflicts.append(f"{code}: {message}")
+
+
+def _check_lock_settings(value: Mapping[str, Any], where: str) -> None:
+    """A lock's requirement states and settings must be exactly what `_settle` derives from its own
+    clauses, overrides and exceptions (evaluated at the lock's own creation date)."""
+    pristine = []
+    for item in value["requirements"]:
+        record = {key: item[key] for key in item if key not in ("state", "reason", "exception")}
+        if item["level"] == "must":
+            if item.get("role") != "required":
+                _fail("invalid_lock", f"{item['clause']} is a must clause without a required role", where)
+            record["state"] = "mandatory"
+        else:
+            record["state"] = item["level"]
+        pristine.append(record)
+    check = _SettleCheck(value["context_digest"], _instant(value["created_at"]).date())
+    try:
+        settings, overrides, exceptions = _settle(
+            check, pristine, parse_overrides({"schema_version": 1, "items": value["overrides"]}),
+            parse_exceptions({"schema_version": 1, "items": value["exceptions"]}))
+    except PatternError as error:
+        _fail("invalid_lock", f"the lock's overrides or exceptions do not settle: {error.message}", where)
+    if check.conflicts:
+        _fail("invalid_lock", f"the lock's own clauses conflict: {'; '.join(check.conflicts)}", where)
+    if canonical_json(pristine) != canonical_json(value["requirements"]) or \
+            canonical_json(settings) != canonical_json(value["settings"]) or \
+            canonical_json(overrides) != canonical_json(value["overrides"]) or \
+            canonical_json(exceptions) != canonical_json(value["exceptions"]):
+        _fail("invalid_lock", "the lock's requirement states or settings are not what its own clauses, overrides "
+              "and exceptions produce (internally inconsistent)", where)
 
 # ---------------------------------------------------------------- task mapping (spec 4.6, card 2.2.c)
 
@@ -2714,9 +2745,16 @@ def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[st
                refs: Sequence[InvocationRef] = ()) -> bytes:
     """Read one declared asset: contained, listed by its verified pattern and digest-checked before use.
 
-    Workflow consumers pass `selection` (a lock, or a ready/empty report) so only assets of selected
-    patterns can be activated. Without it, this is standalone inspection of any registered approved
-    or deprecated pattern (like `show`); it never implies selection.
+    Workflow consumers pass `selection` so only assets of selected patterns can be activated:
+
+    - A persisted or cross-process lock MUST first pass `verify_lock` with status `ok`; this function
+      only parses it. Parsing proves internal consistency, not that the lock matches the current
+      sources and bindings (a resealed lock can parse).
+    - A report is accepted only in-process, with the `context` and `refs` it was resolved from.
+
+    Without `selection`, this is standalone inspection of any registered approved or deprecated
+    pattern (like `show`); it never implies selection. Digests are unkeyed: none of this
+    authenticates who produced a lock or report.
     """
     if not isinstance(asset_ref, Mapping):
         _fail("invalid_asset_ref", "asset reference must be an object")
