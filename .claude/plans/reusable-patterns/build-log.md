@@ -683,6 +683,19 @@ Results:
   - The evolution migration section now says there is no data migration, but an explicit context
     rebind is required.
 
+## Main reconciliation and R9 acceptance
+
+- **R9 review.** Reviewer c3015de8 reviewed `1575a90a`: SPEC PASS and QUALITY PASS with zero
+  findings at every severity. This is milestone acceptance only, not native ADR-0028 v2
+  clearance. A final joined review is still required.
+- **Main merge.** `b33fe3f0` is an ordinary merge of settled `main` at `49f2d152`, which contains
+  #109 and only touches `docs/GLOSSARY.md` and `docs/faq.md`, into `1575a90a`. There were no
+  conflicts. After it:
+  - `tests/unit/patterns.sh` passes, 126 OK;
+  - the map validator exits 0;
+  - `li-swarm validate` is ok;
+  - the guard reports only the known pending WF finding.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
