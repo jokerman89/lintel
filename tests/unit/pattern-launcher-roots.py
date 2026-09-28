@@ -14,7 +14,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pattern_pack_harness import Harness, codes, make_pattern, posix_spelling, tree_digest  # noqa: E402
+from pattern_pack_harness import Harness, codes, make_pattern, tree_digest  # noqa: E402
 
 
 def native(path: Path) -> str:
@@ -127,7 +127,7 @@ class HardeningTests(unittest.TestCase):
         decoy = h.root / "cdpath" / "work repo"
         decoy.mkdir(parents=True)
         code, envelope, err = h.launch("--repo", "work repo", "roots", cwd=h.root,
-                                       CDPATH=posix_spelling(decoy.parent))
+                                       CDPATH=h.posix_spelling(decoy.parent))
         self.assertEqual((code, envelope["repository"]), (0, native(h.repo)), "CDPATH never redirects the root")
         code, _, err = h.launch("--repo", "-dash repo", "roots", cwd=h.inputs)
         self.assertEqual(code, 2)
@@ -135,14 +135,14 @@ class HardeningTests(unittest.TestCase):
 
     def test_posix_spellings_of_awkward_input_paths_reach_the_core(self):
         h = Harness(self)
-        context = posix_spelling(h.context())
+        context = h.posix_spelling(h.context())
         for args in (("resolve", "--context", context), ("resolve", f"--context={context}"),
-                     ("explain", "--context", context, "--refs", posix_spelling(h.write_input("refs.json", [])))):
+                     ("explain", "--context", context, "--refs", h.posix_spelling(h.write_input("refs.json", [])))):
             code, report, err = h.launch(*args)
             self.assertEqual((code, report["status"]), (0, "empty"), (args, err))
-        pattern = posix_spelling(h.write_input("pattern.json", make_pattern("example.checked")))
+        pattern = h.posix_spelling(h.write_input("pattern.json", make_pattern("example.checked")))
         self.assertEqual(h.launch("check", "--path", pattern)[0], 0, "pass-through commands convert too")
-        draft = posix_spelling(h.write_input("draft.json", make_pattern("example.mine", version="0.1.0",
+        draft = h.posix_spelling(h.write_input("draft.json", make_pattern("example.mine", version="0.1.0",
                                                                         status="draft")))
         code, report, err = h.launch("capture", "--input", draft, "--scope", "personal", "--name", "example.mine",
                                      "--source-id", "me.personal")
@@ -163,35 +163,48 @@ class HardeningTests(unittest.TestCase):
                 self.assertEqual((code, envelope["pack_context"]["diagnostics"][0]["message"]), (0, opaque), err)
         draft = h.write_input("draft.json", make_pattern("example.mine", version="0.1.0", status="draft"))
         for spelling in (("--name", "/etc/x"), ("--name=/etc/x",)):
-            code, report, err = h.launch("capture", "--input", posix_spelling(draft), "--scope", "personal",
+            code, report, err = h.launch("capture", "--input", h.posix_spelling(draft), "--scope", "personal",
                                          *spelling, "--source-id", "me.personal")
             self.assertNotEqual(code, 0, err)
             text = json.dumps(report)
             self.assertIn("/etc/x", text, "the core sees and reports the raw name")
             self.assertNotIn("Program Files", text)
         self.assertFalse((h.home / "patterns").exists(), "a refused name writes nothing")
-        context = posix_spelling(h.context())
+        context_path = h.context()
+        context = h.posix_spelling(context_path)
+        if h.shell("command -v cygpath >/dev/null 2>&1")[0] == 0:
+            # Any mount alias (including a shared /tmp) is valid if it names this exact file in the
+            # launcher's own environment; a forbidden prefix would reject legitimate hosts.
+            self.assertTrue(context.startswith("/"), context)
+            self.assertNotEqual(context, native(context_path), "a real POSIX spelling, not the native path")
+            code, back, err = h.shell('cygpath -m -- "$2"', context)
+            self.assertEqual(code, 0, err)
+            back = back.rstrip("\n")
+            self.assertEqual(os.path.normcase(os.path.normpath(back)),
+                             os.path.normcase(os.path.normpath(native(context_path))), (context, back))
+            self.assertTrue(os.path.samefile(back, context_path), (context, back))
         for args in (("resolve", "--context", context), ("resolve", f"--context={context}")):
             code, report, err = h.launch(*args)
             self.assertEqual((code, report["status"]), (0, "empty"), (args, err))
-        pattern = posix_spelling(h.write_input("pattern.json", make_pattern("example.checked")))
+        pattern = h.posix_spelling(h.write_input("pattern.json", make_pattern("example.checked")))
         for args in (("check", "--path", pattern), ("check", f"--path={pattern}")):
             self.assertEqual(h.launch(*args)[0], 0, args)
         roots = h.launch("roots")[1]
-        roots_file = posix_spelling(h.write_input("roots.json", roots))
+        roots_file = h.posix_spelling(h.write_input("roots.json", roots))
         for args in (("list", "--roots-file", roots_file), ("list", f"--roots-file={roots_file}")):
             code, listed, err = h.launch(*args)
             self.assertEqual((code, listed["sources"]), (0, []), (args, err))
         assets = h.inputs / "assets"
         assets.mkdir()
-        code, report, err = h.launch("capture", "--input", posix_spelling(draft), "--scope", "personal",
+        code, report, err = h.launch("capture", "--input", h.posix_spelling(draft), "--scope", "personal",
                                      "--name", "example.mine", "--source-id", "me.personal",
-                                     f"--files-from={posix_spelling(assets)}")
+                                     f"--files-from={h.posix_spelling(assets)}")
         self.assertEqual(code, 0, (err, report))
         self.assertTrue((h.home / "patterns" / "catalog.json").is_file())
-        script = posix_spelling(h.source / "bin" / "li-pattern")
+        script = h.posix_spelling(h.source / "bin" / "li-pattern")
         code, out, err = h.shell('exec bash "$2" roots', script)
         self.assertEqual((code, json.loads(out)["personal"]), (0, native(h.home)), err)
+
     def test_outside_git_home_is_the_profile_context_not_a_repository(self):
         h = Harness(self, git=False)
         outside = h.root / "outside"
@@ -214,7 +227,7 @@ class RunIdTests(unittest.TestCase):
         # The ID travels in the environment: Windows argv transport would split "x\ny".
         body = 'source "$1/lib/paths.sh"; if [ -n "${RUN_ID+set}" ]; then lintel_pattern_runtime_dir "$RUN_ID"; ' \
                'else lintel_pattern_runtime_dir; fi'
-        base = f"{posix_spelling(h.repo)}/.claude/runtime/patterns"
+        base = f"{h.posix_spelling(h.repo)}/.claude/runtime/patterns"
         for value in ("ok-1.2_x", "a" * 128, "CONSOLE", "com10", "nul_x"):
             code, out, err = h.shell(body, RUN_ID=value)
             self.assertEqual((code, out, err), (0, f"{base}/{value}", ""), value)

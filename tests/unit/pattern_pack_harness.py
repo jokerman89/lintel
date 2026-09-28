@@ -96,13 +96,6 @@ def _remove_tree(path: Path) -> None:
             time.sleep(0.25)
 
 
-def posix_spelling(path: Path) -> str:
-    """The launcher shell's own spelling: /c/... under MSYS, else native (asked of that bash, not PATH)."""
-    body = 'if command -v cygpath >/dev/null 2>&1; then cygpath -u -- "$1"; else printf "%s\\n" "$1"; fi'
-    return subprocess.run([bash_executable(), "-c", body, "spelling", str(path)], capture_output=True, check=True,
-                          timeout=30, stdin=subprocess.DEVNULL).stdout.decode("utf-8").rstrip("\n")
-
-
 class Harness:
     def __init__(self, testcase, *, git=True, root_name=AWKWARD):
         base = Path(tempfile.mkdtemp(prefix="lintel-pack-lane-")).resolve()
@@ -229,3 +222,12 @@ class Harness:
                                 env=self.env(LINTEL_SOURCE_ROOT=self.source.as_posix(),
                                              LINTEL_REPO_ROOT=(repo or self.repo).as_posix(), **env))
         return result.returncode, result.stdout.decode("utf-8"), result.stderr.decode("utf-8", "replace")
+
+    def posix_spelling(self, path) -> str:
+        """The launcher shell's own spelling (/c/... under MSYS, else native), computed in the same
+        synthetic environment as launch(): Git for Windows mounts /tmp from that process's TEMP."""
+        code, out, err = self.shell(
+            'if command -v cygpath >/dev/null 2>&1; then cygpath -u -- "$2"; else printf "%s\\n" "$2"; fi', path)
+        if code != 0:
+            raise RuntimeError(f"cannot spell {path}: {err}")
+        return out.rstrip("\n")
