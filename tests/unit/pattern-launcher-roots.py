@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import sys
 import unittest
@@ -190,6 +191,48 @@ class RunIdTests(unittest.TestCase):
                                'lintel_pattern_runtime_dir x; echo "rc=$?"; lintel_patterns_dir; echo "rc=$?"',
                                h.inputs.as_posix(), repo=h.inputs)
         self.assertEqual(out.split(), ["rc=1", "rc=1"], "outside a repository: no path, never /")
+
+
+def link_directory(testcase, link: Path, target: Path) -> None:
+    """A junction on Windows (no privilege needed), else a symlink; removed as a link only."""
+    if os.name == "nt":
+        import _winapi
+        _winapi.CreateJunction(str(target), str(link))
+    else:
+        os.symlink(target, link, target_is_directory=True)
+    testcase.addCleanup(lambda: os.rmdir(link) if os.name == "nt" else os.unlink(link))
+
+
+class AnchorTests(unittest.TestCase):
+    """R7 F2 through the real launcher: a linked anchor is refused; its real path is the remedy."""
+
+    def test_linked_repository_and_home_are_refused_and_real_paths_work(self):
+        h = Harness(self)
+        linked_repo = h.root / "linked repo"
+        link_directory(self, linked_repo, h.repo)
+        code, report, err = h.launch("--repo", linked_repo, "roots", cwd=h.root)
+        self.assertEqual(code, 2, err)
+        self.assertIn("invalid_roots", codes(report, "error"))
+        self.assertIn("real path", err)
+        code, envelope, err = h.launch("--repo", h.repo, "roots", cwd=h.root)
+        self.assertEqual((code, envelope["repository"]), (0, native(h.repo)), err)
+        real_home = h.user / "real lintel"
+        real_home.mkdir()
+        linked_home = h.user / "linked lintel"
+        link_directory(self, linked_home, real_home)
+        code, report, err = h.launch("list", LINTEL_HOME=str(linked_home))
+        self.assertEqual(code, 2, err)
+        self.assertIn("invalid_roots", codes(report, "error"))
+        code, envelope, err = h.launch("roots", LINTEL_HOME=str(real_home))
+        self.assertEqual((code, envelope["personal"]), (0, native(real_home)), err)
+
+    def test_git_physical_top_level_through_a_linked_working_directory(self):
+        h = Harness(self)
+        linked_repo = h.root / "linked repo"
+        link_directory(self, linked_repo, h.repo)
+        code, envelope, err = h.launch("roots", cwd=linked_repo)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(envelope["repository"], native(h.repo), "Git reports the physical top level")
 
 
 class NeutralTests(unittest.TestCase):
