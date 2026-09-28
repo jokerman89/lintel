@@ -244,11 +244,12 @@ Full report: $out
 ## Reusable patterns
 
 Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
-With a selected baseline, run `lib/pattern_visual.py` `validate_visual` on the reviewed spec:
-each mechanical mismatch is a finding by clause ID, and unverified settings and prose clauses
-are assessed from evidence of the built UI. The result feeds the clause review evidence; it is
-never review clearance. A schema-only check is not rendering proof. Legacy `--baseline <name>`
-comparison keeps its existing behavior.
+With a selected baseline, run `$LINTEL_SOURCE_ROOT/lib/pattern_visual.py` `validate_visual` on
+the reviewed spec against the verified lock (never a stored report): each mechanical mismatch,
+including a wrongly typed winner, is a finding by clause ID, and unverified settings and prose
+clauses are assessed from evidence of the built UI. The result feeds the clause review evidence;
+it is never review clearance. A schema-only check is not rendering proof. Legacy `--baseline
+<name>` comparison keeps its existing behavior.
 
 ## Status protocol
 

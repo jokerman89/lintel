@@ -179,10 +179,10 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). In
 from-frontend-design mode and `--mode mockup`, check the spec's `pattern_context` with
-`validate_visual` against the current resolution or verified lock before rendering; a stale
-context or a mismatched setting blocks the render instead of being corrected here. Render the
-projected values; generate-web still makes no design decisions. With no patterns, rendering is
-unchanged.
+`validate_visual` against the verified lock handed over by the design step (never a stored
+report) before rendering; a stale context, a mismatched setting or an unusable selection blocks
+the render instead of being corrected here. Render the projected values; generate-web still
+makes no design decisions. When the runtime reports no patterns, rendering is unchanged.
 
 ## Report format
 

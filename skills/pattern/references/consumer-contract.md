@@ -29,28 +29,35 @@ enterprise controls, branch protection or required independent review.
 
 ## No configured patterns
 
-When the repository has no `.claude/patterns/` catalog or bindings, the active pack has no
-`patterns.source`, and the task names no explicit reference, resolution is `empty` (exit 0)
-with zero pattern body and asset reads. Then behavior is unchanged:
+"No patterns" is a result of the runtime, never a guess from the file system. It holds only when
+the launcher's metadata call (`list`, or `resolve` when a context is known) reports `ok`/`empty`
+under a `resolved` or `neutral` ADR-0029 profile context, and the task has no explicit reference
+and no persisted lock. Then resolution reads zero pattern bodies and assets, and behavior is
+unchanged:
 
 - no new question, prompt, approval or confirmation;
 - no required lock, task map, evidence file or attachment;
 - existing design precedence stays exactly brief > Design DNA profile > corpus (ADR-0016);
 - an optional empty report may be mentioned in one line; it is never a blocker.
 
-A consumer may skip invoking the runtime entirely when it can see none of those sources exist.
-Personal catalogs under `$LINTEL_HOME/patterns/` never activate on their own.
+Do not skip the runtime because no `.claude/patterns/` directory is visible or because
+`resolve_pack_field patterns.source` printed nothing: under an optional-pack fallback that
+accessor returns the neutral value, while the launcher reports `unavailable`
+(`pack_context_fallback`). A `fallback` or `error` profile context, `unavailable`, or any
+`invalid` result blocks pattern-dependent work even when no source appears to exist. Personal
+catalogs under `$LINTEL_HOME/patterns/` never activate on their own.
 
 Refused roots are never "no patterns". A repository or `LINTEL_HOME` that is a link or junction
-is `invalid_roots` (exit 2): report it and rerun with the real physical path. Never treat that
-refusal, or any other `invalid` result, as an empty selection that lets work continue unchanged.
+is `invalid_roots` (exit 2): report it and rerun with the real physical path.
 
 ## Invocation
 
-Call the launcher with explicit inputs. It resolves roots from the working repository,
-`LINTEL_HOME` and the ADR-0029 profile context record, and passes them to the Python CLI as a
-JSON envelope on stdin. Never interpolate pattern data into shell code, never build the envelope
-by string concatenation, and never source pattern content.
+Call the launcher from the trusted source root with its interpreter, never a relative
+`bin/li-pattern` of the working tree (an installed target repository does not contain it). It
+resolves roots from the working repository, `LINTEL_HOME` and the ADR-0029 profile context
+record, and passes them to the Python CLI as a JSON envelope on stdin. Never interpolate pattern
+data into shell code, never build the envelope by string concatenation, and never source pattern
+content. In the phase sections, `li-pattern <command>` means this invocation:
 
 ```bash
 bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" resolve --context "$ctx" [--refs F] [--overrides F] \
@@ -61,6 +68,10 @@ bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" map --lock "$lock" --task-map "$map" \
 bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" project --lock "$lock" --task-map "$map" --package P1
 bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" review --lock "$lock" --context "$ctx" --evidence F
 ```
+
+The design-spec adapter is a Python module, imported from the same trusted root:
+`python3 -c 'import sys; sys.path.insert(0, sys.argv[1] + "/lib"); import pattern_visual' "$LINTEL_SOURCE_ROOT"`
+(or the equivalent import inside an existing helper). It is never copied into the working tree.
 
 `list` and `show --ref <source>:<id>@<version>` inspect metadata and one body; `explain`
 reports the same resolution with binding evaluations. A non-Git working directory must supply
@@ -75,7 +86,10 @@ with prose inspection, a hand-written lock or a mock result.
 Scratch output goes under `.claude/runtime/patterns/<run-id>/` with an explicit run ID, never
 the latest-modified directory. The durable lock is `<selected-initiative>/patterns.lock.json`
 beside the existing work artifacts; the companion task map is a separate file supplied with
-`--task-map`. The work-map v1 schema is not changed.
+`--task-map`. The work-map v1 schema is not changed. A lock is always written inside the
+repository (the initiative, or the run's `.claude/runtime/patterns/<run-id>/` state directory for
+a direct document or design run), even when that run's documents are written elsewhere; the
+runtime refuses a lock path outside the repository.
 
 ## Inputs
 
@@ -132,7 +146,7 @@ command with the same inputs and therefore produce the same `selection_digest`.
 
 | Phase | Obligation | Never |
 | --- | --- | --- |
-| SENSE | Note whether pattern sources exist (catalog/bindings/`patterns.source`) from metadata; `list` reads summaries only | Read pattern bodies or assets at startup |
+| SENSE | Run the launcher's metadata-only `list`; record its status and catalog summaries (zero bodies/assets). `unavailable`/`invalid` are reported, never read as "no patterns" | Read pattern bodies or assets at startup, or infer "no patterns" from missing files or the pack accessor |
 | SCOPE | Record which context facts are unknown (target, audience, environment) and their evidence needs | Fill an unknown target from defaults |
 | DEFINE | Resolve before design choices; carry mandatory clauses into acceptance criteria and show defaults with their reasons | Treat an unresolved or `needs-context` target as a baseline |
 | DISCOVER | Verify cited local sources and flag URL-only or overdue mandatory sources as needing attestation | Fetch URLs or claim external sources were verified |
@@ -175,11 +189,14 @@ shared `design_contract` validator accepts them as additional fields. An attachm
 reference, not proof of resolution: consumers verify it before use.
 
 - Pipeline `design-spec.json`: `pattern_context = {schema_version:1, selection_digest,
-  lock_ref, clause_ids}`, with `lock_ref` a safe run-relative path. Build it with
+  lock_ref, clause_ids}`. `lock_ref` is a safe path relative to the run's pattern-state
+  directory in the repository (`.claude/runtime/patterns/<run-id>/`, which is the run directory
+  itself when the run lives there); document outputs may be elsewhere. Build it with
   `pattern_visual.design_attachment(lock, lock_ref)` and verify it with
-  `pattern_visual.verify_design_attachment(roots, run_dir, attachment, context)`, which reads the
-  lock contained under the run, checks its digest and clause IDs, then runs core `verify_lock`.
-  A missing, stale or mismatched attachment is `unavailable`, never a pass.
+  `pattern_visual.verify_design_attachment(roots, lock_root, attachment, context)`, which refuses a
+  lock root outside the repository, reads the contained lock, checks its digest and clause IDs,
+  then runs core `verify_lock`. A missing, stale or mismatched attachment is `unavailable`, never
+  a pass.
 - `frontend-design-spec.json`: `pattern_context = {schema_version:1, selection_digest, clauses,
   asset_refs}` written only by `pattern_visual.project_visual(base_spec, resolution)`. It
   applies the final structured-setting winners of a `ready` resolution to the fixed v1 table
@@ -187,7 +204,15 @@ reference, not proof of resolution: consumers verify it before use.
   `.hover-intent`, `.page-transitions`; `visual.palette.<token>`), preserves every other field
   and records old and new values per clause. Unknown visual settings are returned as
   `unverified_settings` and stay open review obligations. `validate_visual(spec, resolution)`
-  reports each mechanical mismatch by clause; prose clauses need ordinary evidence review.
+  reports each mechanical mismatch by clause, including a winner whose own value has the wrong
+  type; prose clauses need ordinary evidence review. An `empty` resolution leaves a no-pattern
+  spec unchanged but refuses a spec that still carries a `pattern_context` (`stale_pattern_context`,
+  conflict): re-plan rather than keep or silently drop it.
+- The `resolution` given to either function is a lock that `verify-lock` accepted, or, only
+  inside the process that resolved it, the fresh report together with its `context=` and
+  `refs=`; the core then rechecks the report's digest against those inputs. A bare, stored or
+  edited report is `selection_not_usable`. Separate entries (design, render, review) exchange
+  the lock, never a report.
 
 ## Review evidence
 
@@ -217,20 +242,22 @@ prove accessibility, exact fonts, dependencies or licensing; record those as unk
 copy proprietary source code, shaders or assets without permission. Approval is a separate,
 explicit `approve` with a reviewed approval record and a strictly newer version; inference is
 never approval. CAPTURE and the specialist style routes propose changes; they do not publish
-over, approve or re-bind existing patterns.
+over, approve or re-bind existing patterns. Provenance labels written into a draft (such as the
+original location of a legacy visual pattern) are https URLs or portable relative vault labels,
+never absolute, drive, UNC or home paths; the adapter refuses those.
 
 ## Assets
 
 `asset_refs(report_or_lock, kind=..., phase=..., domain=...)` returns metadata references with
 zero reads. Read an asset only when the consumer explicitly needs that kind, with
-`read_asset(roots, ref, phase=..., domain=..., selection=<ready/empty report or verified lock>)`,
+`read_asset(roots, ref, phase=..., domain=..., selection=<verified lock>)`,
 which verifies containment, declaration, lifecycle, selection membership and bytes before
 returning them. Workflow and design consumers always pass `selection`; an asset of a foreign
 or unselected pattern is `asset_not_selected` (unavailable). Omitting it is only for standalone
-inspection. A fresh report is a selection only inside the process that resolved it; anything
-persisted or handed across processes, sessions or lanes uses a lock that `verify-lock` accepted,
-never a stored raw report. The same applies to the resolution given to `project_visual` and
-`validate_visual`. Selecting a pattern is not a reason to load its
+inspection. A fresh report is a selection only inside the process that resolved it, and only with
+its original `context=`/`refs=`; anything persisted or handed across processes, sessions or
+lanes uses a lock that `verify-lock` accepted, never a stored raw report. Selecting a pattern is
+not a reason to load its
 assets; an unrelated task (for example a backend change) reads zero visual assets. Examples and
 diagrams are never executed or treated as verified cloud state. Do not derive integrity from
 `selected[].assets` metadata alone.

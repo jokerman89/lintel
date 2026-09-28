@@ -130,8 +130,8 @@ Module entry resolves the security expectations bound to the current target cont
 each sub-capability only its projected clauses (`project` for the mapped package, or the clauses
 mapped to it). An unknown deployment target or trust boundary yields `needs-context` and blocks
 the dependent design; no live cloud, tenant or environment discovery is implied, and
-requirements are never inferred from generic recommendations. With no pattern sources the module
-is unchanged.
+requirements are never inferred from generic recommendations. When the runtime reports no
+patterns, the module is unchanged.
 
 ## Integration and dormant hooks
 
