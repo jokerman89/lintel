@@ -1,10 +1,15 @@
 # Work index — current initiative and historical plans
 
-Current initiative: [Removing legacy skills and agents](legacy-cleanup/work.json),
-coordinated by host session `e9c20b62-f877-4242-82cd-b5002d452da8`. Its
-[integration state](legacy-cleanup/integration-state.md), original-ID plan and
-swarm evidence own the active cleanup. Implementation is in progress; final review,
-strict hosted CI and delivery remain open.
+Current initiative: [Native client parity](native-client-parity/work.json) (cycle
+`native-client-parity-20260928`, ADR-0038). Increment 1 delivers GitHub Copilot to `main`, and
+increment 2 covers Codex, Cursor and Claude. The [plan](native-client-parity/plan.md),
+[spec](native-client-parity/spec.md) and [handoff prompt](native-client-parity/prompt.md) own the
+tasks, and the [reviews](native-client-parity/review.md) record design and plan review.
+
+Previous initiative: [Removing legacy skills and agents](legacy-cleanup/work.json),
+coordinated by host session `e9c20b62-f877-4242-82cd-b5002d452da8`, merged through PR #104.
+Its [integration state](legacy-cleanup/integration-state.md), original-ID plan and
+swarm evidence remain that initiative's records.
 
 ## Upstream implementation record follow-up
 
