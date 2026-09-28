@@ -68,12 +68,16 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--exceptions")
             command.add_argument("--preview-draft", action="store_true")
             command.add_argument("--context-budget-chars", type=int, default=p.LIMITS.context_budget)
+            command.add_argument("--attestations")
         if name == "resolve":
             command.add_argument("--lock", help="write a new lock file (inside the repository) for ready/empty only")
     verify = commands.add_parser("verify-lock")
     _add_roots(verify)
     verify.add_argument("--lock", required=True)
     verify.add_argument("--context", required=True)
+    verify.add_argument("--attestations")
+    verify.add_argument("--write", action="store_true", help="install validated attestations in the lock (CAS)")
+    verify.add_argument("--expected-lock-digest")
     mapping = commands.add_parser("map")
     _add_roots(mapping)
     mapping.add_argument("--lock", required=True)
@@ -102,7 +106,58 @@ def build_parser() -> argparse.ArgumentParser:
     approve.add_argument("--approval", required=True, help="JSON {by, reference, at}")
     approve.add_argument("--expected-digest", required=True, help="content digest of the reviewed draft")
     approve.add_argument("--expected-catalog-digest", help="optional CAS on the catalog the caller reviewed")
+    update = commands.add_parser("update", help="preview or publish a strictly newer draft version")
+    _add_roots(update)
+    update.add_argument("--path", required=True)
+    update.add_argument("--input", required=True)
+    update.add_argument("--expected-digest", required=True)
+    update.add_argument("--expected-catalog-digest")
+    update.add_argument("--write", action="store_true")
+    for action in p.LIFECYCLE_ACTIONS:
+        event = commands.add_parser(action, help=f"preview or record a {action} event with its impact")
+        _add_roots(event)
+        event.add_argument("--ref", required=True)
+        event.add_argument("--record", required=True)
+        event.add_argument("--expected-catalog-digest")
+        event.add_argument("--write", action="store_true")
+    remove = commands.add_parser("remove", help="preview or unregister one unreferenced entry; files are kept")
+    _add_roots(remove)
+    remove.add_argument("--ref", required=True)
+    remove.add_argument("--expected-catalog-digest")
+    remove.add_argument("--write", action="store_true")
+    apply = commands.add_parser("apply", help="preview or write one repository binding change")
+    _add_roots(apply)
+    apply.add_argument("--change", required=True)
+    apply.add_argument("--expected-digest")
+    apply.add_argument("--write", action="store_true")
+    export = commands.add_parser("export", help="write a local bundle of exact refs and their closure")
+    _add_roots(export)
+    export.add_argument("--refs", required=True, help="JSON array of exact references")
+    export.add_argument("--out", required=True)
+    importer = commands.add_parser("import", help="validate and preview a bundle; --write stages drafts")
+    _add_roots(importer)
+    importer.add_argument("--bundle", required=True)
+    importer.add_argument("--scope", required=True, choices=("repo", "personal"))
+    importer.add_argument("--destination-source", required=True)
+    importer.add_argument("--version-map", required=True)
+    importer.add_argument("--expected-catalog-digest")
+    importer.add_argument("--write", action="store_true")
+    review = commands.add_parser("review", help="verify the lock, then per-clause evidence coverage")
+    _add_roots(review)
+    review.add_argument("--lock", required=True)
+    review.add_argument("--context", required=True)
+    review.add_argument("--evidence", required=True)
+    review.add_argument("--attestations")
     return parser
+
+
+def _attestations(args, reader: p.Reader):
+    return p.parse_attestations(_input(args.attestations, "attestations", reader)) if args.attestations else ()
+
+
+def _pattern_input(path: str, reader: p.Reader):
+    return p.parse_json(reader.read(Path(path), kind="input", limit=p.LIMITS.pattern_bytes),
+                        limit=p.LIMITS.pattern_bytes, what="pattern input")
 
 
 def _lock_input(path: str, reader: p.Reader):
@@ -137,8 +192,41 @@ def run(argv) -> tuple[dict, int]:
     elif args.command == "check":
         report = p.check_sources(roots, reader)
     elif args.command == "verify-lock":
-        report = p.verify_lock(roots, _lock_input(args.lock, reader),
-                               p.parse_context(_input(args.context, "context", reader)), reader=reader)
+        attestations = _attestations(args, reader)
+        context = p.parse_context(_input(args.context, "context", reader))
+        if args.write:
+            if not args.expected_lock_digest or not attestations:
+                raise p.PatternError("invalid_arguments", "--write needs --attestations and --expected-lock-digest")
+            report = p.record_attestations(roots, Path(args.lock), attestations, context,
+                                           expected_lock_digest=args.expected_lock_digest, reader=reader)
+        else:
+            report = p.verify_lock(roots, _lock_input(args.lock, reader), context, reader=reader,
+                                   attestations=attestations)
+    elif args.command == "update":
+        report = p.update(roots, Path(args.path), _pattern_input(args.input, reader), expected_digest=args.expected_digest,
+                          write=args.write, expected_catalog_digest=args.expected_catalog_digest, reader=reader)
+    elif args.command in p.LIFECYCLE_ACTIONS:
+        report = p.record_lifecycle(roots, args.ref, action=args.command, record_value=_input(args.record, "record", reader),
+                                    expected_catalog_digest=args.expected_catalog_digest, write=args.write,
+                                    reader=reader)
+    elif args.command == "remove":
+        report = p.remove(roots, args.ref, expected_catalog_digest=args.expected_catalog_digest, write=args.write,
+                          reader=reader)
+    elif args.command == "apply":
+        report = p.apply_change(roots, _input(args.change, "change", reader), expected_digest=args.expected_digest,
+                                write=args.write, reader=reader)
+    elif args.command == "export":
+        refs = [p.parse_exact_ref(item, "refs") for item in _input(args.refs, "refs", reader)]
+        report = p.export_bundle(roots, refs, Path(args.out), reader=reader)
+    elif args.command == "import":
+        report = p.import_bundle(roots, Path(args.bundle), scope=args.scope, destination_source=args.destination_source,
+                                 version_map_value=_input(args.version_map, "version map", reader), write=args.write,
+                                 expected_catalog_digest=args.expected_catalog_digest, reader=reader)
+    elif args.command == "review":
+        report = p.review_coverage(roots, _lock_input(args.lock, reader),
+                                   p.parse_context(_input(args.context, "context", reader)),
+                                   _input(args.evidence, "evidence", reader), attestations=_attestations(args, reader),
+                                   reader=reader)
     elif args.command == "map":
         report = p.map_lock(roots, Path(args.lock), _input(args.task_map, "task map", reader),
                             expected_lock_digest=args.expected_lock_digest, write=args.write, reader=reader)
@@ -162,7 +250,7 @@ def run(argv) -> tuple[dict, int]:
         exceptions = p.parse_exceptions(_input(args.exceptions, "exceptions", reader)) if args.exceptions else ()
         report = p.resolve(roots, context, refs=refs, overrides=overrides, exceptions=exceptions,
                            preview_draft=args.preview_draft, context_budget=args.context_budget_chars,
-                           reader=reader, explain=args.command == "explain")
+                           reader=reader, explain=args.command == "explain", attestations=_attestations(args, reader))
         if args.command == "resolve" and args.lock:
             if report["status"] not in ("ready", "empty"):
                 report["diagnostics"].append({"code": "lock_not_written", "severity": "info",

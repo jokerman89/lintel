@@ -101,11 +101,16 @@ reported status; do not only check whether the exit code is zero:
 | `capture --input --scope repo\|personal --name` | Register a new draft | Drafts are never selected for execution |
 | `index --source-root` | Re-check registered entries and regenerate their metadata | Never discovers or blesses unregistered files |
 | `approve --path --version --approval --expected-digest` | Publish a reviewed, strictly newer approved version | The draft stays unchanged, and every dependency must be approved |
+| `update --path --input --expected-digest [--write]` | Create a strictly newer draft of the same pattern | Previews the clause diff and dependents; the old version and current pins stay unchanged |
+| `deprecate`, `retire`, `revoke --ref --record [--write]` | Record a lifecycle event with its impact | Deprecated pins warn; retired and revoked pins block; there is no un-revoke |
+| `apply --change [--write]` | Add, replace or remove one repository binding | Shows the reduced mandatory baseline before a required binding is weakened |
+| `remove --ref [--write]` | Unregister an entry nothing references | Files and history are never deleted |
+| `resolve`/`verify-lock --attestations` | Supply reviewed source attestations | Needed for URL sources of required patterns and for overdue patterns; renewal never changes the selection |
+| `export --refs --out`, `import --bundle --scope --destination-source --version-map [--write]` | Share patterns as a local bundle | Import stages drafts with inert provenance; approve children first after review |
+| `review --lock --context --evidence` | Check per-clause evidence coverage after verifying the lock | Exit 7 on unmet mandatory coverage; never a pass or release clearance |
 
-The remaining lifecycle and sharing operations are documented here as they are delivered:
-`update`, `apply`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` and `review`.
-They follow the same rules: explicit inputs, previews before writes, compare-and-swap digests,
-and no silent change to active work.
+Every write follows the same rules: explicit inputs, previews before writes, compare-and-swap
+digests, and no silent change to active work.
 
 ## Capture procedure
 

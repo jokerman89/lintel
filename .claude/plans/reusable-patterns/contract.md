@@ -259,6 +259,33 @@ No names changed. Two optional parameters were added to `read_asset`, and digest
   the message says to regenerate. This is pre-release: re-run `resolve --lock` for any cached lock.
   No lock file is tracked in the repository.
 
+## Maintenance, attestations, sharing and review (additive, 3.2-3.3, 4.2.b.core)
+
+| Function | Signature | Result |
+| --- | --- | --- |
+| `dependents` | `(roots, targets, *, reader=None, sources=None) -> dict` | Includes, bindings and `*.lock.json` pins under `<repository>/.claude/plans` only; reports `inventory_scope` and unreadable items |
+| `update` | `(roots, path, input, *, expected_digest, write=False, expected_catalog_digest=None) -> dict` | Strictly newer draft of the same id; clause diff and impact; the old version stays intact |
+| `record_lifecycle` | `(roots, ref_text, *, action, record_value, expected_catalog_digest, write=False) -> dict` | `deprecate`/`retire`/`revoke`; monotonic timestamps; no un-revoke; pack sources are read-only |
+| `apply_change` | `(roots, change, *, expected_digest=None, write=False) -> dict` | Repository `bindings.json` add/replace/remove; old/new/reduced required clause sets; CAS and exclusive lock |
+| `remove` | `(roots, ref_text, *, expected_catalog_digest, write=False) -> dict` | Unregisters one entry that has no references and no lifecycle history; never deletes files |
+| `parse_attestations` / `merge_attestations` | `(value)` / `(saved, supplied)` | Spec 4.5 records; renewal replaces the same pattern/source |
+| `record_attestations` | `(roots, lock_path, attestations, context, *, expected_lock_digest, today=None) -> dict` | Verifies, then installs attestations under CAS; `selection_digest` unchanged |
+| `export_bundle` | `(roots, refs, out) -> dict` | New directory with the exact closure and declared assets; no catalogs, bindings, source documents or absolute roots; refuses retired/revoked |
+| `import_bundle` | `(roots, bundle, *, scope, destination_source, version_map_value, write=False, expected_catalog_digest=None) -> dict` | Whole-bundle preflight; children-first drafts with re-hashed includes; `extensions["lintel.imported"]` provenance |
+| `review_coverage` | `(roots, lock, context, evidence, *, attestations=(), today=None) -> dict` | `verify_lock` first, then per-clause verdicts; `review-unmet` (exit 7); `release_clearance: false` |
+
+`resolve`, `explain` and `verify_lock` accept `attestations=` / `--attestations`. A required
+pattern with an external URL source needs a `source-verification`/`both` attestation. An overdue
+required pattern (`review_after` in the past) needs a `freshness`/`both` attestation for every
+source, reviewed on or after `review_after`. A rejected attestation is reported
+(`attestation_rejected`) and does not count. Applied attestations appear in the report's
+`source_attestations`, not in `REPORT_KEYS`, and `build_lock` stores them in the lock, outside
+`selection_digest`.
+
+Maintenance commands preview by default; `--write` performs the change with the stated CAS.
+`remove` refuses (`remove_refused`, conflict) when anything in the inventory references the entry,
+when it has history, or when the inventory is incomplete.
+
 ## Locks, verification and task maps (additive, 2.2.b/2.2.c)
 
 | Function | Signature | Result |
@@ -313,15 +340,20 @@ Publication decisions within the spec's latitude (3.1):
 | `list` | roots | Implemented (exit 0 even with zero entries) |
 | `show` | roots, `--ref <source:id@version>` | Implemented |
 | `check` | `--path P [--kind K]` or roots | Implemented |
-| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]`; `resolve` also `[--lock PATH]` | Implemented. `--lock` writes only ready/empty and never overwrites; `--attestations` arrives with 3.2.b |
-| `verify-lock` | roots, `--lock F --context F` | Implemented (2.2.b); `--attestations` with 3.2.b |
+| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]`; `resolve` also `[--lock PATH]` | Implemented. `--lock` writes only ready/empty and never overwrites; `--attestations F` (3.2.b) |
+| `verify-lock` | roots, `--lock F --context F [--attestations F] [--write --expected-lock-digest SHA]` | Implemented (2.2.b, 3.2.b); `--write` installs validated attestations under CAS |
 | `map` | roots, `--lock F --task-map F --expected-lock-digest SHA [--write]` | Implemented (2.2.c) |
 | `project` | `--lock F --task-map F --package ID` (no roots) | Implemented (2.2.c) |
-| `review` | spec section 7 | Planned, core owner (4.2.b-core) |
+| `review` | roots, `--lock F --context F --evidence F [--attestations F]` | Implemented (4.2.b.core); verifies the lock first, exit 7 on unmet mandatory coverage, `release_clearance: false` |
 | `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA]` | Implemented (3.1.a) |
 | `index` | roots, `--source-root DIR [--expected-catalog-digest SHA]` | Implemented (3.1.b) |
 | `approve` | roots, `--path F --version V --approval F --expected-digest SHA [--expected-catalog-digest SHA]` | Implemented (3.1.c; catalog CAS optional per spec 7, R3) |
-| `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (3.2, 3.3) |
+| `update` | roots, `--path F --input F --expected-digest SHA [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.a); preview by default |
+| `deprecate`, `retire`, `revoke` | roots, `--ref <source:id@version> --record F [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.a); preview by default, CAS required to write |
+| `apply` | roots, `--change F [--expected-digest SHA] [--write]` | Implemented (3.2.b); preview by default |
+| `remove` | roots, `--ref <source:id@version> [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.c); unregisters only, keeps files |
+| `export` | roots, `--refs F --out DIR` | Implemented (3.3.a); new local directory only |
+| `import` | roots, `--bundle DIR --scope repo\|personal --destination-source SRC --version-map F [--expected-catalog-digest SHA] [--write]` | Implemented (3.3.b); preview by default, stages drafts |
 
 Roots are `--roots-stdin` or `--roots-file F` (exactly one). Reports go to stdout as
 `emit_json`; each error diagnostic is also printed to stderr as

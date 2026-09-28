@@ -344,7 +344,7 @@ Results:
   coordinator and CORE paths. The pack and workflow lanes have their own worktrees and branches;
   their check-scope runs before each join.
 - Command-surface guard: 1 finding, `missing-path` for the WF-owned planned path
-  `skills/pattern/references` in the package boundary. It is pending join (RN-11). The
+  `references/` directory under the pattern skill in the package boundary. It is pending join (RN-11). The
   `catalog-regenerates-clean` shape test reports drift for the new `pattern` skill; this is
   pending INT 6.1.b. `frontmatter-lint-all` and `skill-descriptions-trigger` pass.
 
@@ -394,6 +394,64 @@ confirmed literal inventory. `lib/profile_context.py` is removed (conditional, u
 guessed `pattern-roots.*` entries are replaced by `pattern-launcher-roots.*` and
 `pattern_pack_harness.py`. The plan records 48 original IDs and 50 executable leaves.
 `li-swarm.py validate` reports ok, and the map validator exits 0.
+
+## 3.2.a-3.3.b and 4.2.b.core (CORE lane; implemented, unticked pending independent review)
+
+New code: `dependents`, `update`, `record_lifecycle`, `apply_change`, `remove`, the spec 4.5
+attestations (`parse_attestations`, `merge_attestations`, checks inside `resolve`, and
+`record_attestations`), `export_bundle`/`import_bundle`, `review_coverage`, and the CLI commands
+`update`, `deprecate`, `retire`, `revoke`, `remove`, `apply`, `export`, `import`, `review`,
+`verify-lock --attestations/--write` and `resolve --attestations`.
+
+`python -I -B tests\unit\patterns.py MaintenanceTests BundleTests ReviewCoverageTests` -> exit 0, 21 tests OK:
+
+- **MaintenanceTests** (V07, 10 tests):
+  - update: diff, includes and lock impact, a preserved old version, 3 refusals and a stale digest;
+  - lifecycle: preview, CAS, the monotonic rule, revoked pins blocking verify-lock, no un-revoke;
+  - pack sources are read-only;
+  - apply: add/replace/remove with the reduced baseline, CAS and 4 refusals;
+  - URL and overdue attestations: 4 rejection reasons, and another content digest does not count;
+  - statement and local-file attestations, including changed bytes that need recapture;
+  - renewal: saved attestations are used, expiry blocks, a renewal under CAS keeps the selection digest;
+  - remove: refused for a referenced entry, files kept, remove->index stays removed;
+  - the lock scan is bounded to the repository plan root;
+  - CLI exit codes.
+- **BundleTests** (V08, 6 tests):
+  - the exact closure with an asset, with no catalogs or absolute roots and no staging residue;
+  - revoked members are refused;
+  - preview, then children-first drafts with inert provenance and re-hashed includes; imports
+    are not eligible until local approval;
+  - hostile bundles are rejected with nothing written: a stray script, a tampered asset, a
+    partial or duplicate version map, an external dependency, a retired member, an existing
+    destination version, a source mismatch;
+  - a junction inside the bundle is refused;
+  - CLI.
+- **ReviewCoverageTests** (4.2.b.core, 5 tests):
+  - complete evidence gives `ok` with `release_clearance: false`;
+  - seven unmet mandatory forms each give exit 7, and a missing default only warns;
+  - a waived clause needs the exception recorded in the lock;
+  - stale mapping, invalid items or selection, and failed source verification before coverage;
+  - an unmapped lock is refused;
+  - CLI exit 7.
+
+Results:
+
+- Full file: `python -I -B tests\unit\patterns.py` -> exit 0, 99 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each of these reverted
+  guarantees failed at least one of these tests:
+  - update same version;
+  - lifecycle monotonicity;
+  - apply CAS;
+  - attestation expiry;
+  - local source bytes;
+  - remove references;
+  - import stray files;
+  - import dropping approval;
+  - review passed without refs;
+  - review skipping verification.
+
+The pattern skill documents the delivered operations. Contract: "Maintenance, attestations,
+sharing and review".
 
 ## Pending
 

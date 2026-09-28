@@ -131,7 +131,7 @@ Two representational tensions remain, surfaced rather than worked around:
 
 1. The command-surface guard refuses nonexistent workflow paths in plans, while the swarm package
    boundary needs literal, possibly not-yet-created paths. The WF boundary
-   `skills/pattern/references` therefore reports one `missing-path` finding until the WF lane's
+   `references/` directory under the pattern skill therefore reports one `missing-path` finding until the WF lane's
    consumer reference is integrated.
 2. `skills/CATALOG.md` drifts from the new canonical pattern skill until the coordinator
    regenerates the shared reducers at integration (card 6.1.b).
