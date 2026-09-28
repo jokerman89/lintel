@@ -297,6 +297,28 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R7 (2026-09-28, independent PACK-lane review: coupled F1, F2, F3, F6)
+
+- **F2** `build_envelope` checks each anchor (repository, personal) for a link or junction on the
+  caller's spelling, before resolving it (`invalid_roots`, exit 2). `parse_roots` also refuses a
+  linked personal root. The direct `envelope` command, the launcher's route and `--roots-file` now
+  agree. Only the given spelling is seen: a physical path produced upstream, such as Git's resolved
+  top level, carries no alias to detect, and is accepted as the real path. The remedy is unchanged:
+  pass the real path.
+- **F1** No code change. After the PACK join, the neutral `_default` declares
+  `patterns.source: null`, and a child whose `patterns` block lacks `source` gets
+  `{"state": "null", "origin": "<neutral>/pack.yaml"}` (ADR-0029 defaults filling). With a legacy
+  neutral manifest the same child is `absent`. Both are tested with explicit fixture baselines.
+- **F3** The upgrade notice lives in ADR-0038 and the evolution entry. Every bound profile context
+  must be rebound explicitly, with a reason, after the neutral manifest changes. INT's public docs
+  repeat it (card 6.1.a).
+- **F6** Outside Git, the launcher gives the ADR-0029 profile provider `LINTEL_HOME` as its working
+  root. That provider therefore honors `$LINTEL_HOME/.claude/profile-requirements.json` and uses
+  `$LINTEL_HOME/.claude/runtime/profiles/selected.json` as its selection record. This is existing
+  provider behavior and is retained. It is not a repository pattern root: the envelope's
+  `repository` stays `null`, and no repository catalog or bindings are read. INT's public docs
+  describe it.
+
 ## Revision R6 (2026-09-28, independent review of `c92ae4dc`: P1-C92-1, P3-C92-1..9; R5 review P3-R5-1)
 
 These changes add two optional parameters and one optional CLI flag; no name or shape changed.

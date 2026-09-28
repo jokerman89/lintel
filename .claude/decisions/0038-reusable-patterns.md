@@ -40,6 +40,19 @@ Authority is bounded and additive:
 - Nothing in a pattern is executed, fetched or used as shell input. Declared URLs are
   provenance only. A repository can forge a binding, so this is not enterprise enforcement.
 
+## Upgrade notice
+
+The neutral pack gains the optional field `patterns.source: null`. Under ADR-0029, that changes
+the neutral manifest digest. Every existing bound profile context, including one used only by
+unrelated callers such as `resolve_pack_field`, therefore reports `PROFILE_DRIFT` until an explicit,
+reason-bearing rebind (`rebind_profile_context "<reason>"`). This is intended fail-closed
+behavior:
+
+- Nothing rebinds automatically.
+- Snapshot drift is never ignored.
+- Work planned against the old context is re-planned after the rebind.
+- One-shot reads without a bound context are unaffected.
+
 ## Alternatives
 
 1. Keep expectations in instructions and memory. Rejected: no relevance selection,

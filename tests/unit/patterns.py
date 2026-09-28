@@ -372,6 +372,9 @@ class SchemaTests(unittest.TestCase):
             config = profile.ProfileConfig(ROOT, fixture.repo, fixture.home, packs, pointer)
             return p.pack_context_from_profile(profile.resolve_profile(config))
 
+        # The neutral baseline is explicit here (the fixture store outranks the installed source), so the
+        # outcome does not depend on whether the installed _default declares patterns.source.
+        pack("_default", base_required)
         pack("base", base_required + "patterns:\n  source: patterns/catalog.json\n")
         pack("team", "extends: base\n")
         inherited = record("team")
@@ -386,7 +389,16 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(explicit_null["source"]["state"], "null")
         self.assertEqual(Path(explicit_null["source"]["origin"]), (packs / "team" / "pack.yaml").resolve())
         pack("team", "extends: base\npatterns:\n  other: x\n")
-        self.assertEqual(record("team")["source"], {"state": "absent", "value": None, "origin": None})
+        self.assertEqual(record("team")["source"], {"state": "absent", "value": None, "origin": None},
+                         "legacy neutral baseline without patterns.source: whole-block replacement leaves it absent")
+        pack("_default", base_required + "patterns:\n  source: null\n")
+        filled = record("team")["source"]
+        self.assertEqual((filled["state"], filled["value"], Path(filled["origin"])),
+                         ("null", None, (packs / "_default" / "pack.yaml").resolve()),
+                         "new neutral baseline: ADR-0029 fills the missing field with its neutral-origin null")
+        pack("team", "extends: base\n")
+        self.assertEqual(record("team")["source"]["state"], "value", "an inherited value still wins over the default")
+        pack("_default", base_required)
         fallback = record("missing-pack")
         self.assertEqual(fallback["status"], "fallback")
         self.assertTrue(fallback["diagnostics"])
@@ -497,6 +509,46 @@ class PathTests(unittest.TestCase):
         with self.assertRaises(p.PatternError) as caught:
             fixture.resolve(ctx())
         self.assertEqual(caught.exception.code, "resource_limit")
+
+    def test_linked_anchors_are_refused_on_every_route(self):
+        """PACK review F2: a junctioned repository or personal root is refused before resolution erases it."""
+        fixture = Fixture(self)
+        outside = fixture.root / "outside"
+        (outside / ".claude" / "patterns").mkdir(parents=True)
+        secret = make_pattern("example.outside")
+        fixture.publish(outside / ".claude" / "patterns", "repo.outside", [secret],
+                        bindings=[binding("b", [ref("repo.outside", secret)])])
+        home_target = fixture.root / "home-target"
+        home_target.mkdir()
+        links = {"repository": fixture.root / "repo-link", "personal": fixture.root / "home-link"}
+        for name, target in (("repository", outside), ("personal", home_target)):
+            link = links[name]
+            if os.name == "nt":
+                import _winapi
+                _winapi.CreateJunction(str(target), str(link))
+            else:
+                os.symlink(target, link, target_is_directory=True)
+            self.addCleanup(lambda path=link: os.rmdir(path) if os.name == "nt" else os.unlink(path))
+        before = tree_digest(outside)
+        for repository, personal in ((links["repository"], fixture.home), (fixture.repo, links["personal"])):
+            with self.subTest(repository=repository.name, personal=personal.name):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.build_envelope(repository, personal, fixture.pack_context)
+                self.assertEqual((caught.exception.code, caught.exception.status), ("invalid_roots", "invalid"))
+                raw = {"schema_version": 1, "repository": str(repository), "personal": str(personal),
+                       "pack_context": fixture.pack_context, "diagnostics": []}
+                with self.assertRaises(p.PatternError):
+                    p.parse_roots(raw)
+                roots_file = fixture.write_json("linked-roots.json", raw)
+                code, report, _ = fixture.cli("list", "--roots-file", roots_file)
+                self.assertEqual((code, report["status"]), (2, "invalid"))
+        code, report, stderr = fixture.cli("envelope", "--personal", fixture.home, "--repository", links["repository"],
+                                           "--profile-error", "PROFILE_REQUIRED")
+        self.assertEqual((code, report["status"]), (2, "invalid"))
+        self.assertIn("real path", stderr)
+        self.assertEqual(tree_digest(outside), before, "nothing was written through the link")
+        self.assertEqual(p.build_envelope(outside, fixture.home, fixture.pack_context)["repository"],
+                         outside.resolve().as_posix(), "the real path is accepted")
 
     def test_roots_envelope_validation(self):
         fixture = Fixture(self)
