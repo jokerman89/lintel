@@ -771,6 +771,40 @@ failure.
 - The metadata commit that follows reserves `design-contract.py` in `coordinator_paths`.
   `li-swarm validate` is ok and the map validator exits 0.
 
+## PACK join (serial join 1 of 2)
+
+- **Authorization.** Integration reviewer 24bf5df0 approved `44c6b176` for serial join (report
+  `pack-44c6-closure-review.md`; F1-F7 closed). One new non-blocking low finding, opaque MSYS
+  conversion, is assigned to PACK as a separate later ordinary merge.
+- **Merge.** `075a797d60a77c8244c39fddd9f24692c3702362` is an ordinary `--no-ff` merge with
+  parents `a8ef0ae3` (integration head) and `44c6b176` (PACK). The tree was clean before and after.
+- **PACK history.**
+  - `7b0b246c` sits on `ae9d6df7`.
+  - `d15d8664` merges `7b0b246c` with `2fd07f00`. This moves PACK's authorized dependency base from
+    `ae9d6df7` to R7 `2fd07f00`, recorded here explicitly.
+  - `44c6b176` is a test-only follow-up on top of `d15d8664`.
+  - The review-only object `db7f6df1` was never promoted.
+- **Join delta.** `a8ef0ae3..075a797d` is exactly the 9 PACK files: `bin/li-pattern` (100755),
+  `lib/pack-schema.yaml`, `lib/paths.sh`, `packs/_default/pack.yaml` and the five pattern
+  pack/launcher tests. `li-swarm check-scope --task PACK --actor worker` over the complete list
+  reports `ok: true`. `ae9d6df7..7b0b246c` and `2fd07f00..44c6b176` are the same 9 files, and no
+  inherited CORE file differs.
+- **Joined checks** (synthetic HOME and TEMP, Windows, Python 3.11.9):
+
+  | Check | Result |
+  | --- | --- |
+  | `bash tests/unit/patterns.sh` | 132 OK |
+  | `bash tests/unit/pattern-pack-origins.sh` | 13 OK |
+  | `bash tests/unit/pattern-launcher-roots.sh` | 12 OK |
+  | `enterprise-pack-resolution`, `pack-inheritance-depth-3`, `pack-source-target-resolution`, `claude-home-paths`, `memory-v2`, `bin-scripts-executable` | all pass |
+  | Map validator | exit 0 |
+  | `li-swarm validate` | ok |
+  | Command-surface guard | 1 finding: the pending WF consumer reference (`plan.md:82`). It is pending the WF join, not a pass and not faked |
+
+- **Leaves.** 2.1.a-2.1.d are ticked on the PACK review approval plus these joined results. V05 and
+  V14 run on the joined tree. The launcher-dependent parts of V09, V11 and V12 remain pending the
+  WF join and INT.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

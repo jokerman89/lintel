@@ -155,10 +155,10 @@ Milestone: deterministic local resolution with explicit uncertainty and no dropp
 
 ### 2.1 Integrate existing pack resolution
 
-- [ ] 2.1.a Add path helpers and roots-envelope parser; personal-only inspection works, repository operations require explicit valid root when outside Git. No writes to source tree. Files: `lib/paths.sh`, launcher, core, Unit. Req: R02. Verify: V02, V12. (depends 1.3.c)
-- [ ] 2.1.b Exact same-snapshot context/ancestry transport; inherited/null/fallback origins correct; pointer change and missing cached origin explicit. Existing accessors unchanged. Files: `lib/pack-resolver.sh` (adapter only; RN-01), `tests/unit/pattern-pack-origins.sh`. Req: R02,R03. Verify: V05, V14. (depends 2.1.a)
-- [ ] 2.1.c Optional `patterns.source: null`, source-aware pack/ancestry registry, JSON stdin bridge safely handles spaces and quoting. Declared absent catalog is not neutral success. Files: launcher, `packs/_default/pack.yaml`, `lib/pack-schema.yaml`, origin tests. Req: R02,R03. Verify: V05. (depends 2.1.b)
-- [ ] 2.1.d Unconfigured roots preserve old workflow behavior; active enterprise fallback remains visible/unavailable for dependent use. No automatic personal activation. Files: core, launcher, Unit. Req: R02,R15. Verify: V05, V12, V14. (depends 2.1.c)
+- [x] 2.1.a Add path helpers and roots-envelope parser; personal-only inspection works, repository operations require explicit valid root when outside Git. No writes to source tree. Files: `lib/paths.sh`, launcher, core, Unit. Req: R02. Verify: V02, V12. (depends 1.3.c)
+- [x] 2.1.b Exact same-snapshot context/ancestry transport; inherited/null/fallback origins correct; pointer change and missing cached origin explicit. Existing accessors unchanged. Files: `lib/pack-resolver.sh` (adapter only; RN-01), `tests/unit/pattern-pack-origins.sh`. Req: R02,R03. Verify: V05, V14. (depends 2.1.a)
+- [x] 2.1.c Optional `patterns.source: null`, source-aware pack/ancestry registry, JSON stdin bridge safely handles spaces and quoting. Declared absent catalog is not neutral success. Files: launcher, `packs/_default/pack.yaml`, `lib/pack-schema.yaml`, origin tests. Req: R02,R03. Verify: V05. (depends 2.1.b)
+- [x] 2.1.d Unconfigured roots preserve old workflow behavior; active enterprise fallback remains visible/unavailable for dependent use. No automatic personal activation. Files: core, launcher, Unit. Req: R02,R15. Verify: V05, V12, V14. (depends 2.1.c)
 
 ### 2.2 Bind and freeze a reproducible selection
 
