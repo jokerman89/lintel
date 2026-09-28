@@ -629,6 +629,23 @@ Results:
 
 Contract R8 records the compatibility notice for the stricter `check`.
 
+## Supplementary POSIX run (parent-owned) and R7 doc corrections
+
+- **POSIX (parent-provided, supplementary).** The parent ran the exact R7 archive of `2fd07f00`,
+  taken with `core.autocrlf=false` (archive SHA256 `0190a2fd…8070`), on an existing WSL Ubuntu
+  24.04 host. It used native `/tmp` fixtures and `env -i` with a synthetic HOME, TEMP and Git
+  config. `python3 -I -B tests/unit/patterns.py` gave 116/116 OK with no skips; the log is in the
+  parent's session artifacts.
+  - Toolchain: Python 3.12.3, Bash 5.2.21, Git 2.43. The existing PyYAML is 6.0.1, below the
+    declared 6.0.3 floor.
+  - This is supplementary POSIX behavior evidence only. It is not supported-toolchain, full-suite
+    or host acceptance, and it does not validate Python 3.10 or a native client.
+- **R7 non-blocking doc corrections** (the reviewed targets are unchanged):
+  - The contract now says the anchor check covers only the final component, that linked ancestors
+    resolve normally, and that consumers must surface `invalid_roots` rather than neutral success.
+  - The evolution migration section now says there is no data migration, but an explicit context
+    rebind is required.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

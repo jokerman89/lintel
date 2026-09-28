@@ -324,9 +324,12 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **F2** `build_envelope` checks each anchor (repository, personal) for a link or junction on the
   caller's spelling, before resolving it (`invalid_roots`, exit 2). `parse_roots` also refuses a
   linked personal root. The direct `envelope` command, the launcher's route and `--roots-file` now
-  agree. Only the given spelling is seen: a physical path produced upstream, such as Git's resolved
-  top level, carries no alias to detect, and is accepted as the real path. The remedy is unchanged:
-  pass the real path.
+  agree. The check covers only the anchor's final component. Linked ancestors (for example a
+  junctioned profile directory above the repository) resolve normally, and a physical path produced
+  upstream, such as Git's resolved top level, carries no alias to detect and is accepted as the real
+  path. The remedy is unchanged: pass the real path. Consumers, including no-pattern WF and INT
+  paths, must surface `invalid_roots` for a junctioned repository or `LINTEL_HOME` with the
+  real-path remedy, and never treat it as a neutral success.
 - **F1** No code change. After the PACK join, the neutral `_default` declares
   `patterns.source: null`, and a child whose `patterns` block lacks `source` gets
   `{"state": "null", "origin": "<neutral>/pack.yaml"}` (ADR-0029 defaults filling). With a legacy
