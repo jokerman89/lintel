@@ -89,6 +89,44 @@ the leaves split as follows:
   (P1 `1ac56994`, P2 `ff10758e`, preparation `497430ea`). Recovery follows the committed and
   on-disk evidence recorded in `build-log.md`. It resumes only the unfinished leaves, with no
   duplicate lane and no discarded work.
+- **Verification-host re-plan (MasterCoordinator, 2026-09-28 21:28):**
+  - After the P1 review fix batch, local validation is limited to one run each of: the new-fix unit
+    coverage, the `li-run` and source-root checks, `li-copilot check` with the 1.6.g size gates, and the
+    LF-clone guard.
+  - The seven vendored installation cases and the complete `copilot-kit.py` (52) and
+    `universal-adapters.py` (17) suites run on the FINAL candidate in the hosted CI matrix before any
+    merge.
+  - Results on `4bfc4e73` stay recorded as that head's results and are not relabeled.
+  - Local Windows results count only for the PowerShell 7 route (ADR-0032).
+- **Verification candidate:** the coordinator freezes a source-complete PR-1a candidate once no source
+  findings are unresolved and the local cheap checks, P6A live acceptance and the strict M3 run all pass.
+  MasterCoordinator publishes it for test-only CI. Final P1 clearance, shared QA, corroboration and
+  aggregate clearance follow the actual hosted results. A failure goes back for fixes and is never
+  waived.
+- **PR-1b amendments (MasterCoordinator, 2026-09-28):**
+  - The P2 review's canonical pre-check finding (F1) becomes a separately reviewable defensive fix.
+    - It lives on its own branch from `main` and is owned by the P2 implementer.
+    - It carries only the shared helper and the tests it needs.
+    - It may land after an accepted PR-1a and ahead of the rest of PR-1b, taking its own version at
+      its SHIP.
+  - Registration (package P3) is BLOCKED until all of the following are accepted:
+    - the F1-F4 fixes;
+    - explicit refusal behavior for malformed, unknown, oversized or unparseable protected inputs,
+      audited and redacted, in the host format;
+    - bounded runtime;
+    - an independent re-review.
+  - Validation uses classification and protocol unit tests with inert fixtures, plus timing against the
+    declared budget.
+  - The F5 finding is an architectural limit of command-text inspection: state that persists inside a
+    shell session. It is documented as unsupported and never claimed as enforced.
+  - Versions: PR-1a is 0.13.0, the F1 fix takes the next free version, and PR-1b comes after it.
+- **The P2 lane is paused (2026-09-28 22:47):**
+  - The P2 continuation's turns ended at a host content-filter boundary.
+  - Its fix commits through `a003d922` are historical implementation evidence only: not reviewed, not
+    accepted coverage and not publishable.
+  - The lane resumes only on a supported host resolution, or on a materially restricted task defined by
+    MasterCoordinator, who tracks the boundary.
+  - This pause does not complete PR-1b, and no control is weakened.
 
 ---
 
