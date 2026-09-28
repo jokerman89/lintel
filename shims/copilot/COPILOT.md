@@ -74,16 +74,20 @@ by name.
 
 A generated skill is the canonical body with deterministic transforms: `/li:<name>`
 becomes `/li-<name>`, `AskUserQuestion` becomes `ask_user`, and relative links are
-rebased to the generated location. A short preamble states the resource root, the
-shell-step runner, the tool map and native invocation. Agents receive the same body
-transforms and a shorter preamble. Edit the canonical file, then run `li-copilot init`;
-`li-copilot check` fails on drift, and CI runs it.
+rebased to the generated location. A short preamble states the resource root, where
+skill-relative paths resolve, the shell-step runner, the tool map and native invocation.
+Agents receive the same body transforms and a shorter preamble without the skill-relative
+paths bullet. Edit the canonical file, then run `li-copilot init`; `li-copilot check` fails
+on drift, and CI runs it.
 
-Skill-relative paths in a native skill's body (`<base>`, `scripts/`, `references/`,
-`data/` and `${LINTEL_SKILLS_DIR:-skills}/…`) refer to the Lintel source's
-`skills/<name>/` under the resource root, not to the generated `.github/skills/li-<name>/`
-folder, which holds only `SKILL.md`; `bin/li-run` exports `LINTEL_SKILLS_DIR` for shell
-steps.
+Skill-relative paths in a native skill's body refer to the Lintel source under the
+resource root, not to the generated `.github/skills/li-<name>/` folder, which holds only
+`SKILL.md`. The skill's own `scripts/`, `references/` and `data/` folders, and a `<base>`
+that the workflow defines as its own directory, mean `skills/<name>/` there; a `<base>`
+with another meaning, such as a Git base ref in code review, keeps it.
+`${LINTEL_SKILLS_DIR:-skills}` names the skills root, `<resource-root>/skills`. `bin/li-run`
+always sets `LINTEL_SKILLS_DIR` to its own source's `skills/` folder and ignores an
+inherited value, so a shell step uses `$LINTEL_SKILLS_DIR/<name>/`.
 
 In a vendored kit, a link from a native file to a repository-only file that the bundle
 does not carry, for example under `.claude/`, points to the public GitHub source on
@@ -152,7 +156,8 @@ bind the tool the host actually offers.
 to a temporary `.sh` file and run `bash "<resource-root>/bin/li-run" <file>`, or pass `-`
 to read the step from standard input. `--repo <dir>` selects the working repository;
 the default is `LINTEL_REPO_ROOT`, then the current directory. The runner sets
-`LINTEL_SOURCE_ROOT` to its own source tree, prepares `LINTEL_REPO_ROOT` and the profile
+`LINTEL_SOURCE_ROOT` to its own source tree and `LINTEL_SKILLS_DIR` to that tree's `skills/`
+folder, ignoring inherited values of both, prepares `LINTEL_REPO_ROOT` and the profile
 context through `lib/copilot-env.sh`, runs the step in the working repository and exits
 with the step's status. It exits 2 for a usage error or a missing script and 1 when the
 environment cannot be prepared. It changes no host permissions.
