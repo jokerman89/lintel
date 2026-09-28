@@ -101,6 +101,7 @@ def build_parser() -> argparse.ArgumentParser:
     approve.add_argument("--version", required=True)
     approve.add_argument("--approval", required=True, help="JSON {by, reference, at}")
     approve.add_argument("--expected-digest", required=True, help="content digest of the reviewed draft")
+    approve.add_argument("--expected-catalog-digest", help="optional CAS on the catalog the caller reviewed")
     return parser
 
 
@@ -152,7 +153,8 @@ def run(argv) -> tuple[dict, int]:
     elif args.command == "approve":
         report = p.approve(roots, Path(args.path), version=args.version,
                            approval_value=_input(args.approval, "approval", reader),
-                           expected_digest=args.expected_digest, reader=reader)
+                           expected_digest=args.expected_digest,
+                           expected_catalog_digest=args.expected_catalog_digest, reader=reader)
     else:
         context = p.parse_context(_input(args.context, "context", reader))
         refs = p.parse_refs(_input(args.refs, "refs", reader)) if args.refs else ()

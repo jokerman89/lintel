@@ -150,7 +150,7 @@ Interface additions (F6, F7). These are frozen for the visual adapter:
 | report `selection_digest` | 64-hex or `null` | Set for `ready`/`empty` (non-preview) resolutions. It is computed by the same `_lock_material` definition the lock uses, so `build_lock(report, context, refs=same refs)["selection_digest"]` equals it. `build_lock` refuses a report whose digest does not match its content or its refs. `null` for any other status |
 | `selected[].assets` | `[{path, kind, sha256[, phases][, domains]}]` | Declared metadata only; no asset read |
 | `asset_refs` | `(report_or_lock, *, kind=None, phase=None, domain=None) -> list[dict]` | Stable metadata-only refs `{pattern: <exact ref>, path, kind, sha256[, phases][, domains]}`, the same shape as the lock's `asset_pins`. Absent phase/domain filters on an asset match any task; a present empty filter matches none; zero reads |
-| `read_asset` | `(roots, asset_ref, *, phase=None, domain=None, reader=None) -> bytes` | Re-resolves the exact pattern ref: registered, digest-verified body, and effective status approved/deprecated. The asset must be declared with an identical path/kind/digest and pass the filters. It is read contained under the pattern directory with a 4 MiB limit, and the bytes are SHA-256-verified before return. Errors: `asset_not_declared`/`asset_digest_mismatch` (unavailable), `asset_not_applicable`/`unsafe_path` (invalid) |
+| `read_asset` | `(roots, asset_ref, *, phase=None, domain=None, reader=None, selection=None) -> bytes` (`selection` added in R3) | Re-resolves the exact pattern ref: registered, digest-verified body, and effective status approved/deprecated. The asset must be declared with an identical path/kind/digest and pass the filters. It is read contained under the pattern directory with a 4 MiB limit, and the bytes are SHA-256-verified before return. Errors: `asset_not_declared`/`asset_digest_mismatch` (unavailable), `asset_not_applicable`/`unsafe_path` (invalid) |
 
 Lock and projection shapes are those of "Locks, verification and task maps" above; they are now
 frozen. Visual consumers read `settings`, `requirements`, `selected`, `selection_digest` and
@@ -172,6 +172,51 @@ characters, JSON depth 64, dotted namespaces, a 64-character version cap, 128-ch
 selector keys/values, duplicate-record rejection, and (R2) a linked `LINTEL_HOME` or
 repository root refused as a pattern anchor.
 
+## Revision R3 (2026-09-28, independent review of `ae9d6df7`: P2-1, P3-1..P3-4)
+
+No frozen name or signature changed. Digest values change (the opaque interface does not);
+there are two additive optional parameters.
+
+- **P2-1** `selection_digest` now covers complete `selected[]` records (`ref`, `role`, `scope`,
+  `effective_status`, `summary`, `reasons`, `preview`, `clauses`, `assets`, `equivalent_refs`).
+  The same definition is used for reports and locks, so there is one source of truth and no
+  second digest policy. Mechanical rules:
+  - `asset_pins` must equal `asset_refs(lock)`, which is derived from `selected[].assets`;
+    otherwise `invalid_lock`.
+  - Every selected record needs its reasons and an `equivalent_refs` list of identical content
+    that includes the primary ref.
+  - `build_lock` refuses a report whose selected records were edited.
+  - Against a forger who also recomputes the digest, `verify_lock` re-derives from the pinned
+    bytes and from re-resolution:
+    - summary, clause IDs and declared assets must equal the pinned pattern body
+      (`lock_content_mismatch`, invalid);
+    - every `equivalent_refs` pin is checked like the primary;
+    - `ref`, `role`, `scope`, `reasons` and `equivalent_refs` must equal the current resolution
+      (`selection_provenance_changed`, conflict, re-plan).
+  - Consumers may now treat a verified lock's `selected[].assets` and `asset_pins` as
+    integrity-bearing metadata. Bytes still come only from `read_asset`.
+- **P3-1** `read_asset(..., selection=<lock | ready/empty report>)`, optional and recommended for
+  workflow consumers:
+  - the ref must be one of `asset_refs(selection)` (`asset_not_selected`, unavailable);
+  - a lock argument is fully parsed first;
+  - a report must be ready/empty with a `selection_digest` (`selection_not_usable`).
+  - Without `selection`, the call is standalone inspection of a registered approved/deprecated
+    pattern, as `show` is, and never implies selection.
+- **P3-2** `approve` reads its dependency and lifecycle state inside the owned per-root lock and
+  checks that this snapshot equals the in-lock catalog preimage. A revocation committed before
+  the lock blocks approval (`dependency_not_approved`). A lock-honouring writer that races it is
+  held off (`write_locked`). An optional `expected_catalog_digest` / `--expected-catalog-digest`
+  adds caller CAS. Dependencies registered in another source root are checked at the in-lock
+  instant; a later revocation there is caught by `resolve`/`verify-lock`, not by this approval.
+- **P3-3 remedy** A linked (junction/symlink) `LINTEL_HOME`, repository root, `.claude`,
+  `.claude/patterns` or pack root is refused with `unsafe_path`. If your home or checkout lives
+  behind a link, pass the real path, i.e. the fully resolved target directory, as the root.
+- **P3-4** Scope follows the declaring locator (F4). A repository catalog may explicitly include
+  any pack-ancestry catalog (`pack:<name>/<path>` with a pinned digest). That included catalog is
+  active, and its own bindings activate at **pack** scope, even when it is not the declared
+  `patterns.source`. The pack lane must not assume only `patterns.source` bindings can be active.
+  This is an explicit repository decision recorded by the pinned include.
+
 ## Locks, verification and task maps (additive, 2.2.b/2.2.c)
 
 | Function | Signature | Result |
@@ -179,8 +224,8 @@ repository root refused as a pattern anchor.
 | `build_lock` | `(report, context, *, refs=(), context_budget=24000, now=None) -> dict` | Ready/empty only; refuses previews |
 | `write_lock` | `(roots, path, lock) -> {path, lock_sha256, selection_digest}` | Inside repository; atomic; never overwrites; refuses local absolute roots in content |
 | `parse_lock` | `(value) -> dict` | Structure + recomputed `selection_digest` and `mapping_digest` (edits are invalid) |
-| `selection_digest` | `(lock) -> str` | Over context, source snapshots, selected ref/role/scope, requirements, settings, overrides, exceptions, invocation refs |
-| `verify_lock` | `(roots, lock, context, *, today=None, reader=None) -> dict` | `ok|conflict|unavailable|needs-context`; never rewrites the lock |
+| `selection_digest` | `(lock) -> str` | Over context, source snapshots, complete `selected[]` records (R3), requirements, settings, overrides, exceptions, invocation refs |
+| `verify_lock` | `(roots, lock, context, *, today=None, reader=None) -> dict` | `ok|conflict|unavailable|needs-context`; never rewrites the lock; verifies every `equivalent_refs` pin (R3) |
 | `parse_task_map` | `(value, lock) -> dict` | Spec 4.6 validation against the lock |
 | `map_lock` | `(roots, lock_path, task_map, *, expected_lock_digest, write=False) -> dict` | Preview or CAS + exclusive-lock install |
 | `project_package` | `(lock, task_map, package) -> dict` | Package clauses with `task_ids`, settings subset |
@@ -204,8 +249,11 @@ differs no longer counts. Write collisions and stale digests exit 6.
 Publication decisions within the spec's latitude (3.1):
 
 - `capture --name` must equal the draft's `id`, as an explicit confirmation of what is registered.
-- Every write to an existing catalog requires `--expected-catalog-digest` (spec: "Writes require
-  compare-and-swap"). The first capture in a scope requires `--source-id` and must omit it.
+- Every capture/index write to an existing catalog requires `--expected-catalog-digest` (spec:
+  "Writes require compare-and-swap"). The first capture in a scope requires `--source-id` and
+  must omit it. `approve` follows spec 7's row: `--expected-digest` pins the reviewed draft and
+  `--expected-catalog-digest` is an optional whole-catalog CAS. Without it, every dependency and
+  lifecycle check uses catalogs read inside the owned lock (R3), never a pre-lock snapshot.
 - The per-source-root exclusive lock is `<root>/catalog.json.lock`. It is created exclusively
   and removed only by its owner; a held lock exits 6 and is never stolen.
 - Content is staged at `<root>/<id>/<version>/pattern.json` (no-overwrite) before the catalog
@@ -230,7 +278,7 @@ Publication decisions within the spec's latitude (3.1):
 | `review` | spec section 7 | Planned, core owner (4.2.b-core) |
 | `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA]` | Implemented (3.1.a) |
 | `index` | roots, `--source-root DIR [--expected-catalog-digest SHA]` | Implemented (3.1.b) |
-| `approve` | roots, `--path F --version V --approval F --expected-digest SHA` | Implemented (3.1.c) |
+| `approve` | roots, `--path F --version V --approval F --expected-digest SHA [--expected-catalog-digest SHA]` | Implemented (3.1.c; catalog CAS optional per spec 7, R3) |
 | `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (3.2, 3.3) |
 
 Roots are `--roots-stdin` or `--roots-file F` (exactly one). Reports go to stdout as
