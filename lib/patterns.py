@@ -2026,6 +2026,11 @@ def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[In
     lock["selection_digest"] = selection_digest(lock)
     if report.get("selection_digest") != lock["selection_digest"]:
         _fail("lock_refused", "the report's selection_digest does not match its content or invocation refs")
+    try:
+        parse_lock(lock)
+    except PatternError as error:
+        _fail("lock_refused", f"the lock would be invalid at its creation time {lock['created_at']}: {error.message}; "
+              "re-resolve at that time (for example, an exception has expired)")
     return lock
 
 

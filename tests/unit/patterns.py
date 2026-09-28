@@ -26,6 +26,13 @@ import patterns as p  # noqa: E402
 CLI = ROOT / "bin" / "li-pattern.py"
 TODAY = dt.date(2026, 9, 28)
 TS = "2026-09-01T00:00:00Z"
+NOW = dt.datetime(2026, 9, 28, 12, 0, 0, tzinfo=dt.timezone.utc)
+
+
+def lock_of(report, context, **kwargs):
+    """Every test lock is built at a fixed instant, so date-sensitive cases never depend on the wall clock."""
+    kwargs.setdefault("now", NOW)
+    return p.build_lock(report, context, **kwargs)
 
 
 def statement(text="The operator stated this expectation."):
@@ -980,7 +987,7 @@ class LockFixture:
     def lock(self, now=dt.datetime(2026, 9, 28, 1, 2, 3, tzinfo=dt.timezone.utc)):
         report, _ = self.fx.resolve(self.context)
         self.t.assertEqual(report["status"], "ready")
-        return p.build_lock(report, p.parse_context(self.context), now=now)
+        return lock_of(report, p.parse_context(self.context), now=now)
 
     def write(self):
         lock = self.lock()
@@ -1042,7 +1049,7 @@ class _LockCases:
         report, _ = lf.fx.resolve(ctx())
         self.assertEqual(report["status"], "needs-context")
         with self.assertRaises(p.PatternError) as caught:
-            p.build_lock(report, p.parse_context(ctx()))
+            lock_of(report, p.parse_context(ctx()))
         self.assertEqual((caught.exception.code, caught.exception.status), ("lock_refused", "needs-context"))
         p.write_lock(lf.fx.roots(), lf.lock_path, lock)
         before = lf.lock_path.read_bytes()
@@ -1687,14 +1694,14 @@ class ReviewRegressionTests(unittest.TestCase):
         with self.assertRaises(p.PatternError) as caught:
             p.read_asset(fx.roots(), ref_guide, phase="build")
         self.assertEqual((caught.exception.code, caught.exception.status), ("asset_digest_mismatch", "unavailable"))
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         self.assertEqual(lock["asset_pins"], p.asset_refs(report), "lock pins use the same stable shape")
 
     def test_f7_report_selection_digest_matches_lock(self):
         lf = LockFixture(self)
         report, _ = lf.fx.resolve(lf.context)
         self.assertRegex(report["selection_digest"], r"^[0-9a-f]{64}$")
-        self.assertEqual(p.build_lock(report, p.parse_context(lf.context))["selection_digest"], report["selection_digest"])
+        self.assertEqual(lock_of(report, p.parse_context(lf.context))["selection_digest"], report["selection_digest"])
         needs, _ = lf.fx.resolve(ctx())
         self.assertIsNone(needs["selection_digest"], "no digest for unresolved work")
         empty, _ = lf.fx.resolve(ctx(artifact="api"))
@@ -1704,15 +1711,15 @@ class ReviewRegressionTests(unittest.TestCase):
                               "approval_ref": "task"}])
         with_ref, _ = lf.fx.resolve(lf.context, refs=refs)
         self.assertNotEqual(with_ref["selection_digest"], report["selection_digest"])
-        self.assertEqual(p.build_lock(with_ref, p.parse_context(lf.context), refs=refs)["selection_digest"],
+        self.assertEqual(lock_of(with_ref, p.parse_context(lf.context), refs=refs)["selection_digest"],
                          with_ref["selection_digest"])
         with self.assertRaises(p.PatternError) as caught:
-            p.build_lock(with_ref, p.parse_context(lf.context))
+            lock_of(with_ref, p.parse_context(lf.context))
         self.assertEqual(caught.exception.code, "lock_refused", "refs omitted from the lock are detected")
         tampered = copy.deepcopy(report)
         tampered["requirements"][0]["text"] = "edited"
         with self.assertRaises(p.PatternError):
-            p.build_lock(tampered, p.parse_context(lf.context))
+            lock_of(tampered, p.parse_context(lf.context))
 
     def test_advisories_input_profile_and_timestamps(self):
         fx = Fixture(self)
@@ -1791,7 +1798,7 @@ class MilestoneReviewTests(unittest.TestCase):
         (fx.repo_patterns / "example.unselected" / "1.0.0" / "guide.md").write_bytes(guide)
         report, _ = fx.resolve(ctx())
         self.assertEqual(report["status"], "ready")
-        return fx, report, p.build_lock(report, p.parse_context(ctx()))
+        return fx, report, lock_of(report, p.parse_context(ctx()))
 
     def test_p2_1_lock_edits_outside_the_old_digest_are_detected(self):
         fx, report, lock = self._visual_lock()
@@ -1838,7 +1845,7 @@ class MilestoneReviewTests(unittest.TestCase):
                 tampered = copy.deepcopy(report)
                 tampered["selected"][0][field] = value
                 with self.assertRaises(p.PatternError) as caught:
-                    p.build_lock(tampered, p.parse_context(ctx()))
+                    lock_of(tampered, p.parse_context(ctx()))
                 self.assertEqual(caught.exception.code, "lock_refused")
 
     def test_p2_1_real_provenance_change_is_a_replan(self):
@@ -1967,7 +1974,7 @@ class ResealedLockTests(unittest.TestCase):
         self.context = p.parse_context(ctx(artifact="dashboard"))
         report, _ = self.fx.resolve(ctx(artifact="dashboard"))
         self.report = report
-        self.lock = p.build_lock(report, self.context)
+        self.lock = lock_of(report, self.context)
 
     def verify(self, lock):
         return p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
@@ -2047,12 +2054,12 @@ class ResealedLockTests(unittest.TestCase):
             "clause": "example.rules@1.0.0#MUST-1", "context_digest": self.context.digest, "reason": "pilot",
             "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
         report, _ = self.fx.resolve(ctx(artifact="dashboard"), exceptions=exception)
-        lock = p.build_lock(report, self.context)
+        lock = lock_of(report, self.context)
         verified = p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
         self.assertEqual(verified["status"], "ok", "a genuine exception keeps its waiver")
         empty_report, _ = self.fx.resolve(ctx(artifact="none"))
         empty_context = p.parse_context(ctx(artifact="none"))
-        empty = p.build_lock(empty_report, empty_context)
+        empty = lock_of(empty_report, empty_context)
         self.assertEqual((empty["status"], p.verify_lock(self.fx.roots(), empty, empty_context, today=TODAY)["status"]),
                          ("empty", "ok"))
 
@@ -2070,7 +2077,7 @@ class ResealedLockTests(unittest.TestCase):
                     p.parse_lock(edited)
                 self.assertIn("selection_digest", caught.exception.message)
         with self.assertRaises(p.PatternError) as caught:
-            p.build_lock(self.report, self.context, context_budget=40000)
+            lock_of(self.report, self.context, context_budget=40000)
         self.assertEqual(caught.exception.code, "lock_refused")
 
     def test_edited_report_selection_is_refused_by_the_shared_digest(self):
@@ -2120,7 +2127,7 @@ class MaintenanceTests(unittest.TestCase):
 
     def lock_at(self, name="demo"):
         report, _ = self.fx.resolve(ctx())
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         path = self.fx.repo / ".claude" / "plans" / name / "patterns.lock.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         p.write_lock(self.fx.roots(), path, lock)
@@ -2300,7 +2307,7 @@ class MaintenanceTests(unittest.TestCase):
         pattern = self._attested(url)
         first = self.attestation(pattern, "a" * 64, valid_until="2026-10-31")
         report, _ = self.fx.resolve(ctx(), attestations=first)
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         path = self.fx.repo / ".claude" / "plans" / "att" / "patterns.lock.json"
         path.parent.mkdir(parents=True)
         p.write_lock(self.fx.roots(), path, lock)
@@ -2574,7 +2581,7 @@ class ReviewCoverageTests(unittest.TestCase):
             "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
             "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
         report, _ = self.lf.fx.resolve(self.lf.context, exceptions=exception)
-        lock = p.build_lock(report, context)
+        lock = lock_of(report, context)
         path = self.lf.lock_path.with_name("waived.lock.json")
         p.write_lock(self.lf.fx.roots(), path, lock)
         task_map = dict(self.lf.task_map(), selection_digest=lock["selection_digest"])
@@ -2620,6 +2627,28 @@ class ReviewCoverageTests(unittest.TestCase):
         self.assertIn("mandatory_unmet", stderr)
 
 
+class LockTimeTests(unittest.TestCase):
+    """P3-R5-1: a lock is validated at its own creation time before it is returned or written."""
+
+    def test_k1_build_across_exception_expiry_is_refused_and_resume_expiry_still_blocks(self):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must")])
+        fx.publish(fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
+        context = p.parse_context(ctx())
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = fx.resolve(ctx(), exceptions=exceptions, today=dt.date(2026, 9, 28))
+        with self.assertRaises(p.PatternError) as caught:
+            p.build_lock(report, context, now=dt.datetime(2027, 1, 1, tzinfo=dt.timezone.utc))
+        self.assertEqual(caught.exception.code, "lock_refused")
+        lock = p.build_lock(report, context, now=dt.datetime(2026, 9, 28, tzinfo=dt.timezone.utc))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, context, today=dt.date(2026, 10, 1))["status"], "ok")
+        expired = p.verify_lock(fx.roots(), lock, context, today=dt.date(2027, 1, 1))
+        self.assertEqual(expired["status"], "conflict", "a genuinely expired exception still blocks continuation")
+        self.assertIn("replan_required", codes(expired, "error"))
+
+
 class StrictBaselineTests(unittest.TestCase):
     """Regressions for independent review of d82b2919 (P2-R4-1, P3-R4-1): omission, laundering, status."""
 
@@ -2638,7 +2667,7 @@ class StrictBaselineTests(unittest.TestCase):
             fx.repo_bindings(bindings)
         report, _ = fx.resolve(ctx())
         self.assertEqual({item["ref"]["id"] for item in report["selected"]}, {"example.rules", "example.soft"})
-        return fx, p.build_lock(report, p.parse_context(ctx()))
+        return fx, lock_of(report, p.parse_context(ctx()))
 
     def reseal(self, lock, change):
         forged = copy.deepcopy(lock)
@@ -2712,7 +2741,7 @@ class StrictBaselineTests(unittest.TestCase):
         fx2.publish(fx2.repo_patterns, "repo.main", [rules])
         fx2.repo_bindings([binding("req", [ref("repo.main", rules)])])
         report, _ = fx2.resolve(ctx())
-        small = p.build_lock(report, p.parse_context(ctx()))
+        small = lock_of(report, p.parse_context(ctx()))
         soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif")])
         fx2.publish(fx2.repo_patterns, "repo.main", [rules, soft])
         self.assertEqual(p.verify_lock(fx2.roots(), small, p.parse_context(ctx()), today=TODAY)["status"], "ok",
@@ -2731,7 +2760,7 @@ class StrictBaselineTests(unittest.TestCase):
                    lifecycle=[{**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated",
                                "reason": "r", "reference": "ADR", "at": TS}])
         report, _ = fx.resolve(ctx())
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         self.assertEqual(lock["selected"][0]["effective_status"], "deprecated")
         self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
         forged = self.reseal(lock, lambda v: v["selected"][0].update(effective_status="approved"))
@@ -2750,7 +2779,7 @@ class StrictBaselineTests(unittest.TestCase):
             "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
         report, _ = fx.resolve(ctx(), overrides=overrides, exceptions=exceptions)
         self.assertEqual(report["settings"]["ui.font"]["winner"], "override")
-        special = p.build_lock(report, context)
+        special = lock_of(report, context)
         self.assertEqual(p.parse_lock(special)["settings"]["ui.font"]["value"], "mono",
                          "a legitimate override winner passes the settle re-derivation")
         verified = p.verify_lock(fx.roots(), special, context, today=TODAY)
@@ -2758,7 +2787,7 @@ class StrictBaselineTests(unittest.TestCase):
         empty_report, _ = fx.resolve(ctx(artifact="x"), refs=())
         fx3 = Fixture(self)
         empty_report, _ = fx3.resolve(ctx())
-        empty = p.build_lock(empty_report, p.parse_context(ctx()))
+        empty = lock_of(empty_report, p.parse_context(ctx()))
         self.assertEqual(p.verify_lock(fx3.roots(), empty, p.parse_context(ctx()), today=TODAY)["status"], "ok")
         path = fx.repo / "l.lock.json"
         p.write_lock(fx.roots(), path, lock)
@@ -2816,7 +2845,7 @@ class CoreReviewTests(unittest.TestCase):
         self.fx.repo_bindings([binding("b", [parent_ok["ref"]])])
         report, _ = self.fx.resolve(ctx())
         self.assertEqual(report["status"], "ready")
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         self.assertEqual(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
         guide = p.asset_refs(lock)[0]
         self.assertEqual(p.read_asset(self.fx.roots(), guide, selection=lock), self.GUIDE)
@@ -2952,7 +2981,7 @@ class CoreReviewTests(unittest.TestCase):
         rules = make_pattern("example.rules")
         self.fx.publish(self.fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
         report, _ = self.fx.resolve(ctx())
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         good = {"ref": ref("repo.main", rules), "source_index": 0, "source_ref": rules["sources"][0]["ref"],
                 "source_digest": "a" * 64, "reviewed_by": "r", "review_ref": "R",
                 "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}

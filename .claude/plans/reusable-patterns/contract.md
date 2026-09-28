@@ -297,6 +297,54 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R6 (2026-09-28, independent review of `c92ae4dc`: P1-C92-1, P3-C92-1..9; R5 review P3-R5-1)
+
+These changes add two optional parameters and one optional CLI flag; no name or shape changed.
+
+- **P1-C92-1 Declared file closure.** Every new version carries its exact local file closure:
+  - declared `assets[]`, whose sha256 is verified;
+  - `root: "pattern"` sources, verified against any pinned sha256.
+
+  Nothing else is copied (no unrelated files, no repository or external sources). Files are read
+  contained with the asset limit and staged through the existing no-overwrite staging before the
+  catalog-last replace.
+  - `approve` copies the closure from the draft's own version directory.
+  - `update(..., files_from=None)` reads new or changed files from `files_from` and unchanged ones
+    from the previous version.
+  - `capture(..., files_from=None)` reads from `files_from`.
+  - The CLI `capture` and `update` default `--files-from` to the input file's directory.
+  - A missing or changed file fails with `declared_file_missing` or `declared_file_changed`
+    (unavailable) before any write, leaving the tree and catalog unchanged.
+  - `check`/`check_sources` verify each registered entry's closure. `list` and ordinary
+    resolution stay metadata-only.
+  - Export still carries assets only, never source documents. An imported pattern with a
+    `root: pattern` source therefore needs that file supplied (`update --files-from`) before
+    approval.
+- **P3-C92-8** `_publish` preflights every pattern and file destination before the first write.
+  A collision leaves no orphan.
+- **P3-C92-1** Lifecycle previews apply the same event rules as the write: transitions,
+  monotonic time and no un-revoke. Previews of `deprecate`, `retire`, `revoke` and `remove` return
+  `catalog_sha256` for the `--write` CAS.
+- **P3-C92-2** A default-role URL source warns (`source_unverified_default`).
+- **P3-C92-3 / -4** The attestation entry points validate raw input with the same parser and
+  raise `PatternError`, never `KeyError`. This covers `resolve`, `explain`, `verify_lock`,
+  `review_coverage`, `record_attestations` and `merge_attestations`. Duplicate identities are
+  rejected. `parse_lock` validates saved `source_attestations`.
+- **P3-C92-5** `apply` add/replace refuses a binding whose ref is unregistered, draft, retired,
+  revoked or unreadable (`binding_ref_unavailable`). An existing binding with unreachable refs is
+  reported (`binding_had_unavailable_refs`).
+- **P3-C92-6** The first `apply` creates a missing `.claude/patterns` with contained, link-checked
+  mkdir.
+- **P3-C92-7** Bindings CAS diagnostics name `bindings` and `--expected-digest`
+  (`stale_bindings_digest`). Catalog CAS codes are unchanged.
+- **P3-C92-9** The import-derived effective status comes from the bundle's lifecycle events:
+  revocation, else the latest lifecycle status, else the publication status. A declared
+  `effective_status` that contradicts its events is `invalid_bundle`.
+- **P3-R5-1** `build_lock` validates its own output with `parse_lock` at `created_at` and refuses
+  (`lock_refused`) a lock that would be invalid, for example because an exception expired between
+  resolution and locking. Resume-time expiry still blocks (`replan_required`). Tests build locks
+  at a fixed instant.
+
 ## Maintenance, attestations, sharing and review (additive, 3.2-3.3, 4.2.b.core)
 
 | Function | Signature | Result |
@@ -383,10 +431,10 @@ Publication decisions within the spec's latitude (3.1):
 | `map` | roots, `--lock F --task-map F --expected-lock-digest SHA [--write]` | Implemented (2.2.c) |
 | `project` | `--lock F --task-map F --package ID` (no roots) | Implemented (2.2.c) |
 | `review` | roots, `--lock F --context F --evidence F [--attestations F]` | Implemented (4.2.b.core); verifies the lock first, exit 7 on unmet mandatory coverage, `release_clearance: false` |
-| `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA]` | Implemented (3.1.a) |
+| `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA] [--files-from DIR]` | Implemented (3.1.a) |
 | `index` | roots, `--source-root DIR [--expected-catalog-digest SHA]` | Implemented (3.1.b) |
 | `approve` | roots, `--path F --version V --approval F --expected-digest SHA [--expected-catalog-digest SHA]` | Implemented (3.1.c; catalog CAS optional per spec 7, R3) |
-| `update` | roots, `--path F --input F --expected-digest SHA [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.a); preview by default |
+| `update` | roots, `--path F --input F --expected-digest SHA [--expected-catalog-digest SHA] [--files-from DIR] [--write]` | Implemented (3.2.a); preview by default |
 | `deprecate`, `retire`, `revoke` | roots, `--ref <source:id@version> --record F [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.a); preview by default, CAS required to write |
 | `apply` | roots, `--change F [--expected-digest SHA] [--write]` | Implemented (3.2.b); preview by default |
 | `remove` | roots, `--ref <source:id@version> [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.c); unregisters only, keeps files |

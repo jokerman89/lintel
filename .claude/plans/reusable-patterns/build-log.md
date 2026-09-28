@@ -495,6 +495,71 @@ Truthful guard counts: at `8aa1f89e` and `d82b2919` the command-surface guard re
 `c92ae4dc` it reports 1, the WF-owned plan boundary, pending join. That later cleanup is not
 retroactive evidence for R4.
 
+## Review revision R6 (review of `c92ae4dc`: FAIL, 1 P1 and 9 P3; R5 review P3-R5-1)
+
+Reviewer c3015de8 reports `review-core-c92ae4dc.md` and `review-r5-c177509b.md`, read only. The
+R5 review passed with 0 P0/P1/P2 and closed P2-R4-1, P3-R4-1 and P3-R4-2.
+
+An unmodified copy of `repro-c92.py` (SHA256 `6C68E3872CADBE7B…`) was run against the fix. Its
+output is in this session's artifacts.
+
+| Repro | Before (`c92ae4dc`) | After |
+| --- | --- | --- |
+| A1 import -> approve child -> read_asset / export | only `pattern.json`; `source_missing` | `guide.md` + `pattern.json`; read ok; export ok; check ok |
+| A2 update -> approve -> read_asset | `source_missing` | ok |
+| A3 approve with a pattern-root source | `pattern.json` only | `evidence.md` + `pattern.json` |
+| B1/B2 preview of an invalid transition | `ok` | `invalid_schema` transition (same as the write) |
+| C2 default URL source | no warning | `source_unverified_default` |
+| C3 raw attestations | `KeyError`/`TypeError` | `invalid_schema` |
+| C7b malformed saved attestation | conflict | `invalid_schema` at parse |
+| D1 apply binding to a ghost | written | `binding_ref_unavailable`. The repro's unwrapped D section stops at this intended exception, so D2/D3 are covered by unit tests instead |
+| F1 orphan after collision | `guide.md` written | no files written |
+| F3 revoked events, approved status | imports | `invalid_bundle` |
+
+New `CoreReviewTests` (10 cases, real flows):
+
+1. export -> import -> children-first approve -> update the parent's includes -> approve ->
+   resolve -> lock -> verify -> `read_asset(selection=lock)` -> `check_sources` -> re-export.
+2. update -> approve, carrying an asset and a pinned pattern-root source; unrelated files are not
+   copied, and the local-source attestation still applies.
+3. A missing, a tampered, or an edited-after-capture file fails before publication, with the tree
+   unchanged.
+4. capture: `files_from` is required; `check` detects a deleted asset while `list` reads zero
+   assets; the CLI default directory works.
+5. P3-1 preview rules and the returned `catalog_sha256`.
+6. P3-2.
+7. P3-3 and P3-4, covering 5 malformed inputs on resolve and verify_lock, and junk saved
+   attestations.
+8. P3-5, P3-6 and P3-7: ghost refs refused; the first apply creates `.claude`; the CAS message
+   names bindings and `--expected-digest`.
+9. P3-8.
+10. P3-9 is in `BundleTests`: an inconsistent retired status and laundered revocation events are
+    refused.
+
+`LockTimeTests` covers P3-R5-1 (reviewer K1):
+
+- building at 2027-01-01 across the expiry gives `lock_refused`;
+- building on the resolution day gives `ok`;
+- resume after expiry is still a conflict.
+
+Every test lock is now built at a fixed `NOW`.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 115 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each reverted fix failed at
+  least one test. The reverted fixes were:
+  - approve drops files;
+  - update drops files;
+  - check ignores files;
+  - no preflight;
+  - preview skips the rules;
+  - no default URL warning;
+  - raw attestations unchecked;
+  - apply accepts ghost refs;
+  - bundle status trusted;
+  - build_lock not self-validated.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
