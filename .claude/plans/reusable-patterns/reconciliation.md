@@ -144,3 +144,27 @@ independent review of `d82b2919`, `verify_lock` treats every binding-driven chan
 baseline, including added or removed defaults, as a conflict that requires re-planning.
 `parse_lock` re-derives settings with the resolver's own settling logic. This is stricter than the
 spec requires, within spec 4.4's latitude. Leaf IDs, requirements and acceptance are unchanged.
+
+**RN-13 Raw asset bytes through Git (P6 acceptance addition, 2026-09-28).** The parent found this in an
+owned Git fixture. The repository `.gitattributes` forces `*.json` and `*.md` to LF, so a
+committed CRLF legacy visual asset changed bytes, and therefore its declared sha256, after a fresh
+clone. A source-local `.claude/patterns/.gitattributes` containing `* -text` preserved the exact
+bytes. That result is Git transport evidence, not pattern CLI acceptance.
+
+Cards 6.1.a, 6.1.c and 6.2.a therefore add the following acceptance, without changing leaf IDs:
+
+- **Real round trip with a CRLF asset.** Capture, approve, `git commit`, fresh clone, then `check`
+  and `read_asset`. This must work on the repository scope and on a pack source layout.
+- **Byte preservation in the template, skill and docs.** The authoring template and the
+  skill/docs provide source-scoped byte preservation, for example a source-local `.gitattributes`
+  with `* -text`, and explicit instructions for Git-hosted sources.
+- **Limits.**
+  - Original assets are never normalized.
+  - Hashes are never weakened.
+  - Existing user attributes are never overwritten.
+  - Git is not made a runtime or bare-install prerequisite.
+- **Precedence.** A conflict with an authoritative repository attribute policy is surfaced, not
+  overridden.
+
+The canonical JSON digest protects the pattern record only. Raw asset bytes need this transport
+guarantee.

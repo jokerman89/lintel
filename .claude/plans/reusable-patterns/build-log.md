@@ -849,6 +849,25 @@ Results:
   - `pattern-launcher-roots.sh`: 13 OK;
   - `li-swarm validate`: ok.
 
+## WF final candidate pre-check (read-only; not joined)
+
+Candidate:
+- `14492a49` has parent `35937372`.
+- `35937372` is the merge of `0364a664` and exact R11 `56d750d6`.
+
+Delta `56d750d6..14492a49`:
+- 45 WF files, +2919.
+- `li-swarm check-scope --task WF --actor worker` over the complete list returns `ok: true`.
+- WF changed no core or PACK path. Three PACK files differ from the integration head only
+  because that head already carries PACK L-P1 (`5e2ba144`); WF did not touch them.
+
+The join waits for integration reviewer 24bf5df0's verdict. At the join, WF's dependency base
+update to `56d750d6` will be recorded explicitly.
+
+Pending PACK follow-ups: L-P2 `660d7a32` is not merged; a replacement assertion was requested.
+
+P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
