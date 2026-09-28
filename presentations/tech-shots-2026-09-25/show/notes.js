@@ -14,6 +14,7 @@ function sync(){
   if(!api?.getPresenterNotes)throw new Error('Presentation unavailable');
   if(api!==registeredApi){api.registerPresenter(window);registeredApi=api;}
   const note=api.getPresenterNotes();
+  if(window.LINTEL_LANGUAGE&&note.language!==window.LINTEL_LANGUAGE.language)window.LINTEL_LANGUAGE.setLanguage(note.language,false);
   connection('Connected · follows your presentation');
   $('position').textContent='SLIDE '+String(note.index+1).padStart(2,'0')+' / '+note.total;
   $('timing').textContent=note.timing;

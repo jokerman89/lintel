@@ -2,13 +2,13 @@
 
 [Open the website](https://jokerman89.github.io/lintel/) · [Presentation](https://jokerman89.github.io/lintel/show/index.html) · [Technical reference](https://jokerman89.github.io/lintel/show/technical-reference.html)
 
-A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, three themes (Neon, Paper and Fluent), 50 screens: an untimed welcome, a 50-minute main story in six sections, and two separate optional modules, and a three-arm kitchen-test guide.
+A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English and Swedish slides and speaker notes, three themes (Neon, Paper and Fluent), 50 screens: an untimed welcome, a 50-minute main story in six sections, and two separate optional modules, and a three-arm kitchen-test guide.
 
 ## Use it
 
 Open `index.html` in a browser, or run `python -m http.server 8000` from this directory and visit http://127.0.0.1:8000. The Pages site also offers a downloadable offline kit. Slides and the protocol guide need no backend. The kitchen guide is a protocol walkthrough. A separate local harness is required for measured runs; no completed controlled three-arm comparison is published. External source links require internet access.
 
-Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscreen. The Neon/Paper/Fluent preference is stored in the browser. The kitchen guide uses all three themes. Presenter notes follow the current slide; the overview groups the main story into six sections.
+Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscreen. The discreet UK/Sweden flags select English (the default) or Swedish for the homepage, slides and synchronized popup notes. The language preference stays in this browser; a shared `?lang=en` or `?lang=sv` link takes precedence. Switching preserves the current slide and interaction state. Code, commands, archived evidence, technical reference and standalone presenter guides retain their original English content. No translation service is contacted. The Neon/Paper/Fluent preference is stored in the browser. The kitchen guide uses all three themes. Presenter notes follow the current slide; the overview groups the main story into six sections.
 
 ## Edit and publish
 
@@ -18,6 +18,7 @@ Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscr
 - `show/app.js`, `show/opening.js`, `show/refresh.js`, `show/technical.js`, `show/products.js`: navigation, diagrams and interactions. `show/story.css` holds the current story layouts.
 - `assets/products/`: four standalone motifs in Neon and Paper variants. Click any artwork on the product-family slide to open that individual image.
 - `site/portal.css`, `site/theme.css`, `site/theme.js`: homepage and themes.
+- `site/language.js`, `site/language.css`, `site/language-sv.js`: local language control and authored Swedish catalogue. Exact English rendered text is the translation key; update both when changing copy. Preserve technical identifiers and verify both languages in all themes. The catalogue loads as a local script so the offline kit works without a network request.
 - `show/technical-reference.html`: source-backed inventory and reader.
 - `show/field-guide.html`, `show/story-map.html`: beginner orientation and the six-section story map.
 - `presenter/`: public delivery guides. Keep script/timings aligned when changing slides.
@@ -73,3 +74,5 @@ Presenter integration check (requires Playwright and Chromium): serve `_site/`, 
 ## Story structure
 
 The main story moves through **Meet Lintel → The method → Make it last → Scale the work → Test the value → Make it yours**. Deeper detail lives in the technical module and reference, without a duplicate Backup section. Twelve retired slide anchors resolve to their current equivalent in `show/app.js` so previously shared links keep working. Product and technical timing are separate from the 50-minute main session. The holding screen is untimed.
+
+Language integration check (same Playwright setup): `node tools/verify-language.mjs`. It checks the default, keyboard flags, Swedish content, exact English restoration, interactive state, stored/link preferences, storage failure and the actual notes popup. Also inspect translated slides in all themes and narrow viewports after copy changes.

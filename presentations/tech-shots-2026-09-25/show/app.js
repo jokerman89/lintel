@@ -139,6 +139,7 @@ notesHtml='<p class="note-time">'+esc(s.chapter)+' · '+(s.holding?'BEFORE START
 document.title=(state.index+1)+' · '+s.title.replace(/\n/g,' ')+' · Lintel';
 $('#stage').setAttribute('aria-label','Slide '+(state.index+1)+': '+s.title.replace(/\n/g,' '));
 document.querySelectorAll('#overviewGrid button').forEach((b,i)=>b.classList.toggle('active',i===state.index));
+window.LINTEL_LANGUAGE?.refresh();
 fit();
 }
 function go(i){const leaving=slides[state.index].type;if(leaving==='swarmreveal')state.swarmReveal=false;if(leaving==='stateflow')state.trail=0;if(leaving==='primer')state.later=false;if(leaving==='cyclemap')state.cyclePhase=undefined;if(leaving==='routes')state.route=0;state.index=Math.max(0,Math.min(slides.length-1,i));history.replaceState(null,'','#'+slides[state.index].id);render();window.scrollTo(0,0);}
@@ -197,7 +198,7 @@ const initial=slides.findIndex(s=>s.id===resolveSlideId(location.hash.slice(1)))
 // Presenter API: one same-origin snapshot contract, consumed by notes.js.
 // Reading on a short interval also reconnects a notes window after this page reloads.
 window.DECK_API={go,state,slides,registerPresenter:popup=>{if(popup.opener===window&&popup.location.href===new URL('notes.html',location.href).href)notesWindow=popup;},getPresenterNotes:()=>({
- index:state.index,total:slides.length,id:slides[state.index].id,
+ index:state.index,total:slides.length,id:slides[state.index].id,language:window.LINTEL_LANGUAGE?.language||'en',
  title:slides[state.index].title,html:notesHtml,timing:$('#clock').textContent,
  nextTitle:slides[state.index+1]?.title||'End of presentation'
 })};
