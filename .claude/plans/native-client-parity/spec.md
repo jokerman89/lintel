@@ -138,13 +138,19 @@ The camelCase `preToolUse`/`postToolUse` shapes below were **recorded live** (pr
     fragment, following `bundle_documentation`. Native skill and agent files that carry such a
     public URL get no separate source note. `shims/copilot/COPILOT.md` documents the policy (review
     finding L7).
-  - **Both modes:**
-    - a link's query string and fragment are kept (`intake.md?plain=1#L3`; review finding L2);
+  - **Both modes:** a link's query string and fragment are kept (`intake.md?plain=1#L3`; review
+    finding L2).
+  - **Local mode, and bundled targets in vendored mode:**
     - a link ending in `/` may name an existing directory, and verification accepts it the same way
       (review finding L1);
     - a link that names an existing directory without a trailing `/` is a generation error with a
-      clear message (review finding N2);
-    - a missing target is still an error.
+      clear message (review finding N2); vendored mode reports a bundled component directory linked
+      without the `/` as a missing bundled source target;
+    - a missing target is an error.
+  - **Vendored targets outside the bundle** become public URLs without a source check. The source
+    repository's own local-mode generation and its CI drift check (`li-copilot check --target .
+    --source .`) have already refused missing targets and directory links without a trailing `/`
+    in those same canonical files.
 - **Normalization:** one blank line separates the preamble from the body, and trailing whitespace at
   the end of the file becomes exactly one final newline. Reviewed and accepted as is.
 - **Degradations recorded in docs:**
