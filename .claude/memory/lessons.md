@@ -1183,3 +1183,29 @@ recovery decision.
 profile or an already-authorized workspace. When a budget still cannot be met there, record the
 refusal honestly and ask, rather than choosing a system-level location. Never plan cleanup of an
 unauthorized path without authorization; preserve it and report it.
+
+## L-063 - Keep supplemental and artifact observations out of feature acceptance
+
+**Date:** 2026-09-28
+
+**Context:** In the reusable-patterns initiative, coordinator ledger wording, a P05 request, and
+review wording turned three things into "required" feature gates:
+
+- Word and PDF rendered-page artifact QA;
+- produced-PDF clause preservation;
+- six per-consumer host cells.
+
+The original cards (4.3.c: V09/V18; 5.2.a: V11/V18) and spec section 10 never required them, and
+RN-05 makes produced PDF content unverifiable. An independent adjudication and an owner decision
+(RN-14) restored the original scope.
+
+**Rule:**
+
+- Classify every acceptance row against the original card's Verify column and the spec before
+  marking it mandatory:
+  - (A) original feature acceptance;
+  - (B) pre-existing artifact QA;
+  - (C) disclosed deferral.
+- Record genuine unobserved facts honestly, but do not enlarge acceptance through status wording
+  or QA inventories. Enlarging it needs an explicit owner decision.
+- Never drop an original criterion either.

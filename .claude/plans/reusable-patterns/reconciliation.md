@@ -168,3 +168,73 @@ Cards 6.1.a, 6.1.c and 6.2.a therefore add the following acceptance, without cha
 
 The canonical JSON digest protects the pattern record only. Raw asset bytes need this transport
 guarantee.
+
+**RN-14 Host obligations restored to the original scope (owner decision, 2026-09-28).**
+MasterCoordinator `9854860c` chose Option 1, D1 and D2 of the independent spec adjudication
+(reviewer `24bf5df0`, `spec-adjudication/host-obligations.md` sha256
+`fca066e8c1e603fc30336dda5a5d879a3f3380f394c0288a07aab61afb7e472d`, JSON
+`6c302715e81bf861b6b914acbb1471bfa323bf13442b756ea14424406025ee6d`).
+
+This restores the scope the original cards defined; it is not a waiver or a downgrade. The
+authorities are:
+
+- the original cards at `2d750892` (with `eaffeb6c`);
+- spec sections 8 to 10 (`spec.md:624`, `:632-636`, `:703-707`, `:721-731`);
+- `implementation-release.md:21,76` (leaf acceptance is never dropped, and never silently
+  enlarged);
+- RN-05 and ADR-0033 (produced PDF text and pages stay unverified; no reader);
+- ADR-0038 (host acceptance is a separate category, deferred when unavailable).
+
+Leaf IDs and original leaf text are unchanged. Only later status annotations are corrected.
+
+- **D1, card 4.3.c.** Acceptance is:
+  - the original V09;
+  - a V18 source and record review, not yet performed, of the PDF, workbook and Visio
+    at-invocation contracts. It checks that required clauses are handed to the conversion input,
+    that status and errors stay transparent and renderer status is never promoted, and that
+    existing provider behavior is preserved;
+  - the existing provider and preparation compatibility tests (`spec.md:636`) passing in the
+    strict suite.
+
+  Successful PDF text or page inspection is **not** a 4.3.c criterion; RN-05 keeps it
+  unverified. No reader, restoration or new PDF requirement is added. 4.3.c stays unticked until
+  its V18 record exists.
+- **D2, card 5.2.a.** Acceptance is:
+  - the original V11 (the `CONSUMER_ACCEPTANCE` mapped rows);
+  - a V18 mapped-case review, including a new bounded source review of the `generate-web --mode
+    mockup` route (RN-04), not yet performed.
+
+  The six per-consumer model/render/host cells are supplemental and remain DEFERRED and
+  unobserved. They cover `generate-web`, `design-dna`, `frontend-typography`, `frontend-motion`,
+  `frontend-shader` and `generate-app`. No automatic behavior is claimed for them, and they are
+  not V17 feature gates. 5.2.a stays unticked until that review exists.
+- **Classification of the three later rows** in the `9e56dc79` diagnostic P05 request:
+  - `document-page-render` is pre-existing generate-word and generate-pdf **artifact** QA. It
+    blocks a produced artifact's DONE and is never N/A, but it is not a feature row.
+  - `pdf-conversion-preservation` "in the produced PDF" is an expansion that RN-05 makes
+    unsatisfiable. Its original part is D1 above.
+  - `visual-consumer-host-cells` is a supplemental deferral (D2).
+
+  The four V17 rows (dashboard, backend exclusion, required document section, cold resume) match
+  the original acceptance.
+- **Unchanged and still real:**
+  - 6.2.a: a valid Windows strict verdict, or blocked-toolchain evidence. Linux passed 169/169 on
+    `fdb9f27b`.
+  - 6.2.b: the final independent aggregate review with actual ADR-0028 v2 context, QA and
+    corroboration.
+  - 6.2.c.
+- **History stays verbatim:**
+  - the `9e56dc79` request and its null profile;
+  - the actor records (the WF review is non-clearing);
+  - the C-PDF provider failure (no DevTools endpoint, no PDF);
+  - Word pages unverified;
+  - the six unobserved cells;
+  - the `C:\lp` deviation.
+
+  Old QA is not edited to PASS or N/A, and no actor verdict is rebound. A reconciled feature QA
+  inventory may be declared only in a new context at the correct post-native-integration head,
+  with artifact (B) and deferral (C) limits listed separately.
+- **Provenance.** Coordinator ledger wording (`64c0091e`, `ebd087ec`, `64338b6c`), the P05
+  request, and review wording (reviewer 24's WF and INT notes, and the WF test's "deferred: V17"
+  label) expanded these rows to "required". The rows record genuine unobserved facts; only their
+  mandatory classification was the expansion. See lesson L-063.

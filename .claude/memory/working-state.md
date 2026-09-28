@@ -15,8 +15,9 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
   `9e56dc79` (swarm records).
 - Linux strict full suite: 169/169 PASS on `fdb9f27b`. Windows: no valid verdict; the parallel
   runs were not CI-equivalent (inherited environment and load).
-- WF 4.3.c and 5.2.a host gates remain unmet. The shared Swarm profile stays null, so shared lane
-  acceptance is blocked.
+- RN-14 (owner decision `9854860c`) restores the original scope: 4.3.c and 5.2.a each await
+  their V18 review. PDF/Word pages are artifact QA and the six per-consumer cells are disclosed
+  deferrals. A genuine neutral P07 reference now exists; verify it is current before use.
 - No P05 review, QA or release record exists. Not pushed (403).
 - The CORE owner created `C:\lp` against L-050. It was stopped and preserved untouched pending
   the operator's recovery decision.

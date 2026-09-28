@@ -12,7 +12,10 @@ corroboration or SHIP result exists. Nothing is pushed and no pull request exist
   wording, build-log). No product file changed from `fdb9f27b`.
 - `9e56dc7944acb91fb4a1c44f81958e0348ad4953`: the six actor swarm records only. No product file
   changed from `fdb9f27b`.
-- This handoff, the working-state entry and a lessons recurrence are one later docs commit.
+- `64338b6c`: this handoff, the working-state entry and lesson L-062 (docs only).
+- The RN-14 scope reconciliation commit follows `64338b6c` (docs, plan annotations and lesson
+  L-063 only). Its plan annotations change the lane acceptance digests, so the `ebd087ec`-bound
+  actor records are verbatim history for that acceptance and are not rebound.
 
 ## Swarm lane records (published in `9e56dc79`)
 
@@ -93,24 +96,39 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
 
 ## Blockers
 
-1. **Operator recovery decision** on `C:\lp` and on any further Windows validation.
-2. **Windows strict suite** has no valid verdict. A rerun needs an authorized host/root. The
-   path-budget test needs an honest classification, not a workaround.
-3. **WF host gates** (required, unverified; not downgraded):
-   - 4.3.c PDF conversion is BLOCKED: the existing provider gave no DevTools endpoint and no PDF.
-   - Word page rendering is unavailable in the host.
-   - 5.2.a per-consumer model/render/host cells are unobserved for `generate-web`, `design-dna`,
-     `frontend-typography`, `frontend-motion`, `frontend-shader` and `generate-app`.
-4. **Shared Swarm profile:** decision (a). Profile stays null, so shared lane acceptance is
-   explicitly blocked (`_verify_profile` requires a P07 reference). Do not create or bind a
-   profile to turn it green.
+1. **`C:\lp`** stays untouched. No recovery or cleanup decision has been made.
+2. **Windows strict suite** has no valid verdict. The master authorized bounded focused reruns
+   under `C:\Users\jokerman\lm9854`:
+   - The launcher starts the parent process from a positive allowlist (`run-clean-parent.ps1`).
+   - `domain-installed-consumers.sh --work-dir C:/Users/jokerman/lm9854/d`: rc 1. The path budget
+     held (fixture 227, kit 128). The installed worker hit the test's own 240 s timeout after 5 of
+     8 methods passed, on a host at 87-94% CPU from other work. It stays red; no retry and no
+     longer timeout.
+   - The other focused files ran one at a time. Their logs are
+     `files\final-suite\lm-*.log`, reported separately.
+   - One authorized baseline attribution run on main `49f2d152` follows. A baseline timeout would
+     be a counterexample, not a feature PASS.
+3. **WF acceptance, restored to the original scope by RN-14** (owner decision `9854860c`):
+   - 4.3.c needs its V18 source/record review. It is not yet performed; reviewer 24 is to review
+     at the RN-14 head.
+   - 5.2.a needs its V18 mapped-case review, including a bounded source review of the
+     `generate-web --mode mockup` route. Not yet performed.
+   - These stay separate and are not feature gates:
+     - artifact QA: produced PDF text/pages (RN-05) and Word rendered pages stay unverified, and
+       the C-PDF provider failure is history;
+     - disclosed deferrals: the six per-consumer model/render/host cells stay unobserved.
+4. **Shared Swarm profile.** The `9e56dc79` null profile is history. The parent later performed
+   one genuine neutral P07 bootstrap: reference `sha256:adcea18a…fe3a`, generation 1,
+   `_default` 1.0.0, bound to this worktree at `64338b6c`. Verify it is current before use, and do
+   not bootstrap a second one. Swarm shared lanes still block on missing P05 review, QA and
+   corroboration.
 5. **Final integrated REVIEW and SHIP** stay blocked by 1-4. At most an explicitly labelled
    non-clearing inspection or status record is allowed.
 6. **GitHub write access** for the feature PR (403, unresolved; no credential changes).
 
 ## Next safe actions
 
-- Wait for the operator's `C:\lp` and Windows host decision. Do not touch `C:\lp` until then.
+- Do not touch `C:\lp`.
 - If a Windows rerun is authorized:
   - use `run-isolated.py` on fresh LF clones of `fdb9f27b` under the approved roots;
   - run u1 and u2 alone, integration parts one or two at a time, and `other` alone;
@@ -118,4 +136,5 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
     finding.
 - After an authorized final head exists, prepare fresh P05 contexts there. The reviewers author
   their own P05 JSON; the coordinator supplies corroboration only after actual review.
-- Keep 4.3.c, 5.2.a and 6.2.a-c unticked until genuinely observed.
+- Keep 4.3.c and 5.2.a unticked until their actual V18 reviews exist, and 6.2.a-c until
+  genuinely observed.

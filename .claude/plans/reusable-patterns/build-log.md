@@ -1055,12 +1055,23 @@ on a real generated document) is observed in C1/C2; page rendering stays a separ
 shared control. 4.3.c remains unticked and blocked. 5.2.a remains unticked. 6.2.b's host part is
 recorded, but it remains unticked until the final independent aggregate review.
 
+## RN-14 scope reconciliation (owner decision, 2026-09-28)
+
+MasterCoordinator `9854860c` restored the original host obligations (reconciliation RN-14,
+adjudication sha256 `fca066e8…e472d`):
+
+- 4.3.c closes at V09 plus a V18 review, which is still missing.
+- 5.2.a closes at V11 plus a V18 mapped-case review, which is still missing.
+- PDF/Word pages are artifact QA, and the six per-consumer cells are disclosed deferrals.
+
+The entries above stay verbatim as history; only the plan's status annotations changed.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
 - 6.2.b: final independent aggregate review and actual ADR-0028 v2 context/QA/corroboration.
 - 6.2.c: final diff and baseline record.
-- 4.3.c: blocked (provider). 5.2.a: per-consumer host cells.
+- 4.3.c and 5.2.a: V18 reviews (RN-14).
 - GitHub write access for the feature PR (403, unresolved).
 - No release clearance is claimed.
 
