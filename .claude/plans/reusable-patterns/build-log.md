@@ -1275,6 +1275,36 @@ working state. It has zero product, code or test delta against `d4acf3e7`.
 
 Artifact PDF/Word DONE stays blocked or unverified.
 
+## Generated wiki drift found by hosted CI (run 36482607306)
+
+Hosted CI run `36482607306` at exact `0b5aaaf3` failed on Ubuntu job `109131739557` (part
+`other`) at one step only, "Verify generated wiki and capability table". There,
+`bash bin/li-wiki-gen --check` reported three stale paths:
+
+- `docs/wiki/README.md`
+- `docs/wiki/skills.md`
+- `docs/showcase/lintel-the-harness.html`
+
+The generated outputs had not been refreshed for the new `pattern` skill and
+`docs/concepts/patterns.md`. The parent keeps the raw log (`ci-36482607306-job-109131739557-raw.log`,
+sha256 `147c72be…59b7`). `0b5aaaf3` itself did not pass this step.
+
+**Fix.** The canonical generator `bash bin/li-wiki-gen` was run, with no hand edits, both here and
+in an owned LF clone of `0b5aaaf3`. Both produce identical blobs, and the committed diff is
+exactly those three files:
+
+- the README concept link to `patterns`;
+- the skills row for `pattern`;
+- the showcase skill count, 96 to 97.
+
+`bash bin/li-wiki-gen --check` was rc 1 before and rc 0 after, in both places.
+
+On Windows the generator also rewrites `docs/wiki/schemas.md` with some CRLF line endings. That
+is a working-copy line-ending artifact only: the content is identical after normalization and
+there is no Git diff, so it is not committed.
+
+No other generated output changed. No full suite was run, and there was no push or CI dispatch.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
