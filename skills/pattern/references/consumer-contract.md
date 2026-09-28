@@ -76,8 +76,20 @@ The design-spec adapter is a Python module, imported from the same trusted root:
 `list` and `show --ref <source>:<id>@<version>` inspect metadata and one body; `explain`
 reports the same resolution with binding evaluations. A non-Git working directory must supply
 an explicit repository root; the launcher never falls back to the filesystem root or the
-installed source tree. Runtime pattern operations require the optional Python 3.10+ toolchain;
-report its absence instead of guessing. Bare installation has no Python prerequisite.
+installed source tree. Runtime pattern operations require the optional Python 3.10+ toolchain.
+Bare installation has no Python prerequisite and never installs Python.
+
+**Missing runtime.** If Python, Bash or the helper cannot run, report "pattern check unavailable"
+once. It is never "no patterns" and never a verified neutral result; do not synthesize JSON.
+
+- Ordinary unrelated or unconfigured Lintel work may continue with that limitation stated, but only
+  when no known pattern or policy obligation depends on the check.
+- These block their dependent action until the runtime and policy validation are available:
+  - an existing lock;
+  - explicit pattern references;
+  - known configured pattern-dependent work;
+  - a required, or unknown-requirement, policy control.
+- A degraded run grants no pattern evidence and no shared release clearance.
 
 If the installed CLI rejects a command or option (exit 2, `invalid_arguments`), that phase
 obligation is **unavailable** in this installation. Report it; never replace a missing command

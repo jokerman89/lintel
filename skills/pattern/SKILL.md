@@ -21,7 +21,8 @@ Patterns complement accepted policy. They grant no authority and never execute, 
 anything.
 
 This skill drives the reasoning: which sources to read, what the operator actually confirmed, and
-what needs review. The deterministic work is done only by `bin/li-pattern.py` over
+what needs review. The deterministic work is done only by the launcher `bin/li-pattern` and its
+CLI `bin/li-pattern.py` over
 `lib/patterns.py`: validation, resolution, locking and safe persistence. Never re-implement
 validation, hashing or precedence in prose or in another script. The frozen interface is
 `.claude/plans/reusable-patterns/contract.md` in the Lintel source; the decision is ADR-0038.
@@ -66,15 +67,21 @@ real path instead.
 
 ## Running the helper
 
-The launcher builds a roots envelope from the ADR-0029 profile record and passes it on stdin.
-Without the launcher, build the envelope explicitly:
+Call the launcher from the trusted source root with its interpreter; never run a relative
+`bin/li-pattern` from the working tree, which an installed target repository does not contain.
+The launcher resolves the repository root, `LINTEL_HOME` and the ADR-0029 profile record, and
+passes them to the Python CLI as a JSON envelope on stdin:
 
 ```bash
-source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
-profile_context_json | python3 "$LINTEL_SOURCE_ROOT/bin/li-pattern.py" envelope \
-  --personal "$LINTEL_HOME" --repository "$LINTEL_REPO_ROOT" --profile-record - > "$envelope"
-python3 "$LINTEL_SOURCE_ROOT/bin/li-pattern.py" list --roots-file "$envelope"
+bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" list
+bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" --repo "$LINTEL_REPO_ROOT" resolve --context "$ctx"
 ```
+
+Use `--repo DIR` outside a Git checkout. Runtime operations need the optional Python 3.10+
+toolchain. If Python, Bash or the helper is missing, report "pattern check unavailable" once; that
+is never "no patterns". See the [consumer contract](references/consumer-contract.md) for which work
+may continue and which must stop. The exact invocations, status handling, phase obligations and
+evidence rules consumers follow are all in that [consumer contract](references/consumer-contract.md).
 
 Every command prints one JSON report on stdout and its error diagnostics on stderr. Act on the
 reported status; do not only check whether the exit code is zero:
@@ -134,8 +141,8 @@ digests, and no silent change to active work.
 
 ## Workflow consumers
 
-Phase and generation workflows consume patterns through the shared consumer contract in this
-skill's `references/` directory, which is delivered by the workflow integration.
+Phase and generation workflows consume patterns through the shared
+[consumer contract](references/consumer-contract.md).
 
 - Without configured patterns, those workflows behave exactly as before, and no prompts or files
   are added.

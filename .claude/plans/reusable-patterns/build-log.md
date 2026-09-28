@@ -868,6 +868,51 @@ Pending PACK follow-ups: L-P2 `660d7a32` is not merged; a replacement assertion 
 
 P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
 
+## WF join (serial join 2 of 2) and PACK L-P2 join
+
+- **WF approval.** Integration reviewer 24bf5df0 approved `14492a49` (report
+  `wf-14492-closure-review.md`). It closed M1-M4 and L1-L6 and retained I1. The only new finding
+  is a low one, L-N1, and the parent decided it: see the consumer contract's "Missing runtime".
+  - The reviewer ran V09 (31), V10 (26) and V11 (18) with no skips, using a real null-neutral
+    envelope and the P07 fallback.
+  - This is not native v2, feature or host clearance.
+- **WF join.** `ab47b7d8e21b57131435f1a6c5f7ce04c9c0689f` is an ordinary `--no-ff` merge of
+  `677aa38e` and `14492a49`.
+  - Delta `677aa38e..ab47b7d8`: exactly WF's 45 files. `check-scope --task WF --actor worker`
+    reports `ok`. The three PACK files carrying L-P1 are unchanged by the merge.
+  - WF's authorized dependency base moved from `ae9d6df7`, through R6 `8addc395`, to R11
+    `56d750d6` (through `35937372`). This is recorded explicitly.
+- **PACK L-P2 join.** `ba4944045b7ff858af57d4b95e45404fe1d67cbb` is an ordinary merge of
+  `ab47b7d8` and `118e3037`. The PACK chain is `660d7a32` then `118e3037`, on top of the
+  already-joined `5e2ba144`, and it was approved with no new findings (report
+  `pack-118e-lp2-closure.md`). The delta is 2 test files (+36/-21); production code is unchanged.
+  `check-scope --task PACK` reports `ok`.
+- **Joined tests** (synthetic HOME and TEMP; Windows; Python 3.11.9). None skipped, and the
+  launcher cases ran for real.
+
+  | Suite | Result |
+  | --- | --- |
+  | `patterns.sh` | 135 OK |
+  | `pattern-pack-origins.sh` | 13 OK |
+  | `pattern-launcher-roots.sh` | 13 OK (rerun after L-P2) |
+  | `pattern-visual.sh` (V10) | 26 OK |
+  | `pattern-workflows.sh` (V09) | 31 OK |
+  | `pattern-visual-roundtrip.sh` (V11) | 18 OK |
+  | `design-contract.sh` | 18 OK, exit 0 |
+
+  The map validator exits 0 and `li-swarm validate` reports ok.
+- **Guard.** The command-surface guard now reports PASS with 0 findings: the WF consumer reference
+  that was the pending path has arrived. After the SKILL link commit it still reports 0.
+- **Leaves ticked on the reviewed lane evidence plus these joined runs:**
+  - 3.2.a-3.3.b and 4.2.a/b, including their `.core` and `.wf` parts;
+  - 4.1.a-4.1.c;
+  - 4.2.c;
+  - 4.3.a, 4.3.b and 4.3.d;
+  - 5.1.a-5.2.b.
+- **4.3.c stays open.** Its acceptance needs real conversion, provider and host validation, which
+  INT must perform; a format-fact test is not that validation.
+- **Also still open:** real model/render V17 and host acceptance.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
