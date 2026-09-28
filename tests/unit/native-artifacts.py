@@ -35,6 +35,19 @@ SPEC_SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canoni
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 """
+# The spec's agent preamble: the same Resource root and Shell steps bullets (the root is relative
+# to the agent file's folder, so the skill-directory phrase names it), plus the delegation line.
+SPEC_AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
+>   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
+>   `.claude/` tree, never into the resource root.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+>
+> You were delegated by a Lintel workflow; stay inside the supplied task and report changed files,
+> checks run, findings by severity and limitations.
+"""
 CANONICAL_HEADER = """---
 name: {name}
 layer: foundation
@@ -213,10 +226,12 @@ class NativeArtifacts(unittest.TestCase):
                 text = data.decode("utf-8")
                 self.assertTrue(text.startswith("---\nname: CodeReviewer\ndescription: Reviews a change.\n"
                                                 "tools: Read, Grep, Glob, Bash\n---\n\n"))
-                preamble = adapter.AGENT_PREAMBLE.format(canonical="agents/engineering/CodeReviewer.md", root=root)
-                self.assertIn(f"> - **Resource root:** `{root}` from this agent's directory", preamble)
-                self.assertIn("bin/li-run", preamble)
-                self.assertIn("You were delegated by a Lintel workflow; stay inside the supplied task", preamble)
+                preamble = SPEC_AGENT_PREAMBLE.format(root=root)
+                self.assertEqual(adapter.AGENT_PREAMBLE.format(canonical="agents/engineering/CodeReviewer.md",
+                                                               root=root), preamble)
+                shell_steps = SPEC_SKILL_PREAMBLE[SPEC_SKILL_PREAMBLE.index("> - **Shell steps:**"):
+                                                  SPEC_SKILL_PREAMBLE.index("> - **Tools:**")]
+                self.assertIn(shell_steps, preamble)
                 _, body = adapter.split_frontmatter(text)
                 self.assertEqual(body, "\n" + preamble + "\nYou review.\nAsk with ask_user; run /li-review.\n"
                                  f"See [evidence]({link}).\n")

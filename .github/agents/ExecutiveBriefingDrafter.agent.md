@@ -4,8 +4,6 @@ description: Drafts 1-pager executive briefings for customer C-suite — outcome
 tools: Read, Bash, Grep, Glob
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/customer/ExecutiveBriefingDrafter.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

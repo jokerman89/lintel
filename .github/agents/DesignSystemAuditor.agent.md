@@ -4,8 +4,6 @@ description: "Quality-gate agent for the frontend-design-review skill. Runs 6-di
 tools: Read, Grep, Glob, Write, Bash
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/frontend/DesignSystemAuditor.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

@@ -138,10 +138,9 @@ SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 """
-# Agents have no skill base directory; the root is relative to the agent file's folder.
-AGENT_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`; edit the canonical file, then run
-> `li-copilot init`.
-> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
+# The spec's first two skill bullets; an agent has no skill base directory, so the root is
+# relative to the agent file's folder.
+AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.
 """ + SHELL_STEPS + """>

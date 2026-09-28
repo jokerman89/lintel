@@ -4,8 +4,6 @@ description: WebGL/GLSL specialist for the frontend-shader sub-skill. Picks Pape
 tools: Read, Grep, Glob, Write
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/frontend/ShaderEngineer.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

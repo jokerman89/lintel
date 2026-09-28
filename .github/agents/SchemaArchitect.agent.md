@@ -4,8 +4,6 @@ description: Cross-store schema reasoning. Polyglot persistence patterns, partit
 tools: Read, Grep, Glob
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/engineering/SchemaArchitect.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

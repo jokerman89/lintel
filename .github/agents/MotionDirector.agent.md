@@ -4,8 +4,6 @@ description: Motion-language curator for the frontend-motion sub-skill. Picks GS
 tools: Read, Grep, Glob, Write
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/frontend/MotionDirector.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

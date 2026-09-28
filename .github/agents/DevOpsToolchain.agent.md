@@ -4,8 +4,6 @@ description: Designs the build, ship, and run infrastructure — CI/CD, containe
 tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/devops/DevOpsToolchain.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

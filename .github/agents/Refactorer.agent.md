@@ -4,8 +4,6 @@ description: Performs structural refactoring that preserves behavior — verifie
 tools: Read, Grep, Glob, Edit, Bash
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/engineering/Refactorer.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

@@ -4,8 +4,6 @@ description: Drafts customer-facing emails — intro, follow-up, decision-ask, s
 tools: Read, Bash, Grep, Glob
 ---
 
-> **Lintel on GitHub Copilot.** Generated from `agents/communication/EmailCustomerDrafter.md`; edit the canonical file, then run
-> `li-copilot init`.
 > - **Resource root:** `../..` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.
