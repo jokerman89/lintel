@@ -19,7 +19,7 @@
   - the adapter normalizes a leading `$env:` override sequence into the canonical hook environment;
   - once-per-batch injection, duplicate-key rejection and full control-character escaping;
   - cross-origin dedupe removed (both routes run, and repository hooks never suppress the plugin);
-  - ADR-0038 accepted before BUILD, exact manifest paths listed, and a pre-merge version check;
+  - ADR-0039 accepted before BUILD, exact manifest paths listed, and a pre-merge version check;
   - a 48 KB discovery-metadata cap and a 2 MB bundle-growth gate.
 - **Status:** DEFINE is DONE_WITH_CONCERNS. The R2 remedies had no third design pass, so PLAN
   Stage 1 review re-verifies design coverage together with the plan.

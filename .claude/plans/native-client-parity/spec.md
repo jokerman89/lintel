@@ -4,7 +4,7 @@
 **Status:** APPROVED (2026-09-28; operator direction plus the plan review in review.md: Stage 1 GREEN, Stage 2 YELLOW resolved)
 **Design doc:** [design.md](design.md)
 **Plan:** [plan.md](plan.md)
-**Decision:** [ADR-0038](../../decisions/0038-native-client-artifacts.md)
+**Decision:** [ADR-0039](../../decisions/0039-native-client-artifacts.md)
 
 ## Architecture overview
 

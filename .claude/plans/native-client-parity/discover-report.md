@@ -85,7 +85,7 @@ The detailed consumer map, with `path:line` evidence for every assertion, is com
 - **ADR-0032/0037** CI shards and tiering (Accepted). Hook and bin changes trigger the full
   three-OS matrix, and Windows must avoid System32 WSL Bash.
 - **ADR-0034** native workflow consolidation (Accepted). No conflict.
-- Conflict with the approach: only ADR-0024, handled by the new ADR-0038.
+- Conflict with the approach: only ADR-0024, handled by the new ADR-0039.
 
 ## Lessons applied
 

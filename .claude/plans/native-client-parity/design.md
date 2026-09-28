@@ -321,7 +321,7 @@ the matchers, and report it.
 
   Host versions and the Lintel revision are recorded as registry observations. App, VS Code Local
   and cloud agent follow the acceptance matrix.
-- **AC7:** ADR-0038 is accepted before BUILD (done in DEFINE/PLAN). The adapter contract, docs,
+- **AC7:** ADR-0039 is accepted before BUILD (done in DEFINE/PLAN). The adapter contract, docs,
   CHANGELOG, migration guide and evolution entry are updated. The compatibility audit and shape
   tests are green.
 - **AC8:** the full CI matrix passes on the PR, and the PR is merged to `main`.
@@ -355,5 +355,5 @@ the matchers, and report it.
 | 6 | Event output and fail-open scope | yes | Event × surface table; fail-open scoped to post-launch; launcher and escape-hatch tests |
 | 7 | Prompt splice idempotency and parser | yes (host contract) | Top-level tokenizer, sentinel, size caps, batch/resume fixtures |
 | 8 | File-presence dedupe; behavior change | yes | Superseded in R2: no cross-origin suppression (both routes run). The evolution entry is marked behavior-changing, with a migration guide |
-| 9 | ADR and version timing | yes | ADR-0038 written and accepted in PLAN before BUILD; all four manifests bump to 0.13.0 together |
+| 9 | ADR and version timing | yes | ADR-0039 written and accepted in PLAN before BUILD; all four manifests bump to 0.13.0 together |
 | 10 | No measurement thresholds | partly (claim was unmeasured) | Measurement gates above |

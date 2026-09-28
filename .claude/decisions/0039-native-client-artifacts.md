@@ -1,4 +1,4 @@
-# ADR-0038: Self-contained native client artifacts and host hook adapters
+# ADR-0039: Self-contained native client artifacts and host hook adapters
 
 - **Status:** Accepted, 2026-09-28 (increment 1, GitHub Copilot). Increment 2 (Claude, Codex,
   Cursor) amends this record before it ships.

@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-09-08
 - **Scope:** Copilot enterprise launch
-- **Superseded by (in part):** ADR-0038, which replaces the small pointer entry surface with
+- **Superseded by (in part):** ADR-0039, which replaces the small pointer entry surface with
   complete generated native skills and agents, and ports the hook bundle through a Copilot host
   adapter. The canonical sources, managed inventory, vendored bundle, plugin manifest and Spec Kit
   reuse below still apply.

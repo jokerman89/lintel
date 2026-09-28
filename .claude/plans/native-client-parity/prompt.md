@@ -30,7 +30,7 @@ generator and adapter core.
 
 ## Constraints
 
-- **Must respect:** [spec.md](spec.md) §Constraints; ADR-0038; the plan's work-package boundaries
+- **Must respect:** [spec.md](spec.md) §Constraints; ADR-0039; the plan's work-package boundaries
   and the exact contracts in spec.md.
 - **Must NOT:** hand-edit generated files, change canonical skill or agent bodies, add packages,
   enable repository hooks by default, record environment values, rewrite Git history, or push
@@ -73,7 +73,7 @@ generator and adapter core.
    review (spec, then quality) by a separate reviewer.
 4. Verify without edits (`/li-verify`), then `/li-review`, `/li-ship` and `/li-capture`.
 5. Increment 2 is not built from this plan. Start a new cycle at DEFINE: reconcile `research/*.md`,
-   then DISCOVER and PLAN P7-P9 with their own reviews. Amend ADR-0038 before BUILD.
+   then DISCOVER and PLAN P7-P9 with their own reviews. Amend ADR-0039 before BUILD.
 
 ## What you DON'T need to know
 

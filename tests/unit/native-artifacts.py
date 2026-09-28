@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: native-artifact-tests
-# implements: ADR-0038
+# implements: ADR-0039
 # intent: .claude/plans/native-client-parity/spec.md
 # constraints: synthetic source trees only; stdlib unittest; no network, host session or model call
 # last_intent_review: 2026-09-28

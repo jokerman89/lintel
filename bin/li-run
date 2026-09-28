@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # component: lintel-shell-step-runner
-# implements: ADR-0038
+# implements: ADR-0039
 # intent: .claude/plans/native-client-parity/spec.md
 # constraints: trusted source helpers only; the step runs in the working repository with its own status
 # last_intent_review: 2026-09-28

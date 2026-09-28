@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # component: li-run-tests
-# implements: ADR-0038
+# implements: ADR-0039
 # intent: .claude/plans/native-client-parity/spec.md
 # constraints: synthetic repositories and temp directories only; no network or host session
 # last_intent_review: 2026-09-28

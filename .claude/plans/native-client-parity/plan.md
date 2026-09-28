@@ -5,7 +5,7 @@
 **Design doc:** [design.md](design.md) (DEFINE DONE_WITH_CONCERNS; design reviews R1 and R2)
 **Discover report:** [discover-report.md](discover-report.md), with [research/consumer-map.md](research/consumer-map.md)
 **Scope:** `.claude/runtime/state/scope.md` (XL, tree, route override none)
-**Decision:** [ADR-0038](../../decisions/0038-native-client-artifacts.md) (accepted before BUILD)
+**Decision:** [ADR-0039](../../decisions/0039-native-client-artifacts.md) (accepted before BUILD)
 
 ## Summary
 
@@ -466,7 +466,7 @@ Increment 2 is not built from this plan. After increment 1 merges, start a new c
    design.
 2. Run DISCOVER on the Codex, Cursor and Claude consumers.
 3. PLAN P7 (Codex), P8 (Cursor) and P9 (Claude) with their own reviews.
-4. Amend ADR-0038, then BUILD.
+4. Amend ADR-0039, then BUILD.
 
 The candidate scope, which is still a DRAFT:
 - **Codex:** `.agents/skills` full skills with short descriptions for the 8,000-character list budget;

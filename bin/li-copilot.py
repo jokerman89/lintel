@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: copilot-repository-adapter
-# implements: ADR-0024, ADR-0025, ADR-0027, ADR-0028, ADR-0038
+# implements: ADR-0024, ADR-0025, ADR-0027, ADR-0028, ADR-0039
 # intent: .claude/plans/universal-implementation/spec.md
 # constraints: stdlib only, no network, preserve project prose, preflight all writes
 # last_intent_review: 2026-09-28
@@ -106,7 +106,7 @@ AGENTS = {
     "builder": ("Implement an authorized build card and produce verification evidence with focused changes.", "build"),
     "reviewer": ("Review a change independently for specification compliance, correctness and missing evidence.", "review"),
 }
-# Declarative native host profiles (ADR-0038); increment 1 renders GitHub Copilot only.
+# Declarative native host profiles (ADR-0039); increment 1 renders GitHub Copilot only.
 NATIVE_HOSTS = {
     "copilot": {
         "skill_root": ".github/skills", "skill_name": "li-{name}",
@@ -965,7 +965,7 @@ def generate(source: Path, target: Path,
         if not local and files.get(f"{BUNDLE}/{relative}") != data:
             raise ValueError(f"Adapter resource was not bundled: {relative}")
     if copilot:
-        # Complete native skills and agents (ADR-0038); file-relative links keep working
+        # Complete native skills and agents (ADR-0039); file-relative links keep working
         # after copying and in clean cloud clones.
         files.update(native_files(source, files, local, NATIVE_HOSTS["copilot"]))
         bridge_instruction = "../shims/copilot/COPILOT.md" if local else "lintel/COPILOT.md"
