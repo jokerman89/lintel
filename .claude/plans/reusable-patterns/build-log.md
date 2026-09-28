@@ -326,6 +326,240 @@ Results:
   - the exact old approve behaviour;
   - no membership check.
 
+## Swarm reconciliation (RN-11)
+
+- `python -I -B bin\li-work-artifacts.py --repo . --map .claude\plans\reusable-patterns\work.json` -> exit 0.
+- `python -I -B bin\li-swarm.py validate --repo . --coord .claude/plans/reusable-patterns/swarm/coordination.json`
+  -> `ok: true`, no diagnostics.
+- `li-swarm.py wave --host-capability native` -> wave 1, with CORE, PACK and WF as the dispatch
+  candidates and no `blocked_by`. The P0P1 prerequisites were read as complete from the converted
+  checklist items. `release_clearance: false`.
+- `li-swarm.py check-scope --task CORE --actor worker` over the CORE subset of `ae9d6df7..777b4f6d`
+  (`bin/li-pattern.py`, `lib/patterns.py`, `skills/pattern/SKILL.md`, `tests/unit/patterns.py`)
+  -> `ok: true`. The same range's `.claude/plans/reusable-patterns/**` paths are coordinator
+  writes by the same session in its coordinator role, and `check-scope` correctly flags them as
+  outside the CORE worker scope.
+
+  Attribution: path-level only. The integration session plays both roles, and some commits mix
+  coordinator and CORE paths. The pack and workflow lanes have their own worktrees and branches;
+  their check-scope runs before each join.
+- Command-surface guard: 1 finding, `missing-path` for the WF-owned planned path
+  `references/` directory under the pattern skill in the package boundary. It is pending join (RN-11). The
+  `catalog-regenerates-clean` shape test reports drift for the new `pattern` skill; this is
+  pending INT 6.1.b. `frontmatter-lint-all` and `skill-descriptions-trigger` pass.
+
+## Review revision R4 (re-review of `f1918e12`: SPEC PASS, QUALITY PASS with 1 P2 and 3 P3)
+
+Reviewer c3015de8 report `review-r3-f1918e12.md`, read only. An unmodified copy of `repro-r3.py`
+(SHA256 `68CDD742…6ACD`) was run against the fixed tree, using a discriminator module from
+`git show ae9d6df7:lib/patterns.py` in the synthetic TEMP (removed afterwards). Output is kept in
+this session's artifacts.
+
+| Repro | Before (f1918e12, per report) | After |
+| --- | --- | --- |
+| R3 add an unselected record, resealed | verify `ok`; `read_asset(forged lock)` returned bytes | `conflict` `selection_changed` (the forged lock still carries its own asset ref, so consumers must verify first) |
+| R3b remove the only selected record, resealed | verify `ok` | `invalid_lock` (status/selection mismatch) |
+| R4 edit must `text`, resealed | `ok` | `conflict` `requirement_changed` |
+| R4b must state mandatory -> waived | `ok` | `conflict` `requirement_changed` |
+| R2 `effective_status` edited | `ok` | `conflict` `selection_provenance_changed` |
+| R6b edited report, stale digest | bytes returned | `selection_not_usable` |
+| R10 `status` empty / `context_budget` edited | parse ok | `invalid_lock` |
+| R9b ae9d6df7-built lock | `invalid_lock` (misleading message) | `invalid_lock`, and the message says to regenerate |
+| R0, R7, R8 and R9 known-good paths | as reported | unchanged: `ok`, `pinned_revoked`, `dependency_not_approved`/`write_locked`, empty lock `ok` |
+
+R6 `selection=report` without `context` now reports `selection_not_usable` by design, since
+report selections are in-process only.
+
+New `ResealedLockTests` (8 cases) cover:
+
+- a genuine lock;
+- a grafted record, with `read_asset(selection=genuine)` still refusing its asset;
+- seven resealed edits: record removed, must text, must -> waived, verify, setting,
+  effective_status, dropped default clause;
+- legitimate later changes that still verify: an added default binding (warning), and a
+  deprecation (warning);
+- a genuine waived lock and an empty lock both `ok`;
+- status and budget binding;
+- an edited report and a wrong-context report refused;
+- map/verify/project on a verified lock.
+
+`python -I -B tests\unit\patterns.py` -> exit 0, 78 tests OK.
+Mutation probe (run once, source restored byte-identical): each of seven reverted R4
+guarantees fails at least one `ResealedLockTests` case. The reverted guarantees were:
+lock-only records, requirement records, extra clauses, the status check, the budget
+digest, report recomputation and settings.
+
+Coordinator metadata (same session, coordinator role): PACK `write_scope` is now the lane's
+confirmed literal inventory. `lib/profile_context.py` is removed (conditional, unused), and the
+guessed `pattern-roots.*` entries are replaced by `pattern-launcher-roots.*` and
+`pattern_pack_harness.py`. The plan records 48 original IDs and 50 executable leaves.
+`li-swarm.py validate` reports ok, and the map validator exits 0.
+
+## 3.2.a-3.3.b and 4.2.b.core (CORE lane; implemented, unticked pending independent review)
+
+New code: `dependents`, `update`, `record_lifecycle`, `apply_change`, `remove`, the spec 4.5
+attestations (`parse_attestations`, `merge_attestations`, checks inside `resolve`, and
+`record_attestations`), `export_bundle`/`import_bundle`, `review_coverage`, and the CLI commands
+`update`, `deprecate`, `retire`, `revoke`, `remove`, `apply`, `export`, `import`, `review`,
+`verify-lock --attestations/--write` and `resolve --attestations`.
+
+`python -I -B tests\unit\patterns.py MaintenanceTests BundleTests ReviewCoverageTests` -> exit 0, 21 tests OK:
+
+- **MaintenanceTests** (V07, 10 tests):
+  - update: diff, includes and lock impact, a preserved old version, 3 refusals and a stale digest;
+  - lifecycle: preview, CAS, the monotonic rule, revoked pins blocking verify-lock, no un-revoke;
+  - pack sources are read-only;
+  - apply: add/replace/remove with the reduced baseline, CAS and 4 refusals;
+  - URL and overdue attestations: 4 rejection reasons, and another content digest does not count;
+  - statement and local-file attestations, including changed bytes that need recapture;
+  - renewal: saved attestations are used, expiry blocks, a renewal under CAS keeps the selection digest;
+  - remove: refused for a referenced entry, files kept, remove->index stays removed;
+  - the lock scan is bounded to the repository plan root;
+  - CLI exit codes.
+- **BundleTests** (V08, 6 tests):
+  - the exact closure with an asset, with no catalogs or absolute roots and no staging residue;
+  - revoked members are refused;
+  - preview, then children-first drafts with inert provenance and re-hashed includes; imports
+    are not eligible until local approval;
+  - hostile bundles are rejected with nothing written: a stray script, a tampered asset, a
+    partial or duplicate version map, an external dependency, a retired member, an existing
+    destination version, a source mismatch;
+  - a junction inside the bundle is refused;
+  - CLI.
+- **ReviewCoverageTests** (4.2.b.core, 5 tests):
+  - complete evidence gives `ok` with `release_clearance: false`;
+  - seven unmet mandatory forms each give exit 7, and a missing default only warns;
+  - a waived clause needs the exception recorded in the lock;
+  - stale mapping, invalid items or selection, and failed source verification before coverage;
+  - an unmapped lock is refused;
+  - CLI exit 7.
+
+Results:
+
+- Full file: `python -I -B tests\unit\patterns.py` -> exit 0, 99 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each of these reverted
+  guarantees failed at least one of these tests:
+  - update same version;
+  - lifecycle monotonicity;
+  - apply CAS;
+  - attestation expiry;
+  - local source bytes;
+  - remove references;
+  - import stray files;
+  - import dropping approval;
+  - review passed without refs;
+  - review skipping verification.
+
+The pattern skill documents the delivered operations. Contract: "Maintenance, attestations,
+sharing and review".
+
+## Review revision R5 (re-review of `d82b2919`: CONDITIONAL SPEC PASS, QUALITY PASS; 1 P2, 2 P3)
+
+Reviewer c3015de8 report `review-r4-d82b2919.md`, read only. Parent decision: the simple strict
+alternative. An unmodified copy of `repro-r4.py` (SHA256 `E0C458CD5F5330D3…`) was run against the
+fixed tree. The discriminator module came from `git show f1918e12:lib/patterns.py` in the synthetic
+TEMP and was removed afterwards. Output is in this session's artifacts.
+
+| Repro | Before (`d82b2919`) | After |
+| --- | --- | --- |
+| D1 resealed omission of a default record, repo and catalog binding | `ok` + warnings | `conflict` `selection_changed`, both locations |
+| D2 omission + forged winner value | `ok` | `invalid_lock` (internally inconsistent), both locations |
+| D3 forged required record's default setting | `ok` | `invalid_lock` |
+| D3b / D3c | conflict | `invalid_lock` (caught earlier, at parse) |
+| D4 deprecated-at-lock resealed as approved | `ok` + warning | `conflict`; the genuine lock is `ok` + `pinned_deprecated` |
+| G1/G2/G3 genuine later default add, default remove, required add | G1 `ok` + warnings | all `conflict` (re-plan) |
+| G5 re-scope with the same selection | `ok` | `ok` (unchanged) |
+| E, B, O, N | as reported | unchanged; E's parse-only resealed lock still reads assets, which the documented precondition now forbids |
+
+New `StrictBaselineTests` (6 cases), plus an updated `ResealedLockTests` legitimate-change case:
+
+- D1 on repository and catalog bindings;
+- D2, D3 and a plain value edit, each giving `invalid_lock`;
+- a dropped recommendation clause gives `invalid_lock`, and a clause dropped from both the record
+  and its requirements gives `lock_content_mismatch`;
+- genuine later default add and remove give conflict, while an unbound catalog addition gives `ok`;
+- P3-R4-1: a deprecated-at-lock pin resealed as approved;
+- legitimate cases still verify: an override winner, a waiver, an empty lock, map, verify and project.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 105 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each reverted guarantee failed
+  at least one test: fresh-only records, the settle re-derivation, the settings comparison, the
+  unchanged-catalog deprecation rule, and the record/requirement invariant. The probe first
+  exposed an uncaught gap, the invariant; it was added and its regression written before this
+  commit.
+
+Truthful guard counts: at `8aa1f89e` and `d82b2919` the command-surface guard reported 3
+`missing-path` findings, not the 1 that reconciliation RN-11 stated. RN-11 is corrected. After
+`c92ae4dc` it reports 1, the WF-owned plan boundary, pending join. That later cleanup is not
+retroactive evidence for R4.
+
+## Review revision R6 (review of `c92ae4dc`: FAIL, 1 P1 and 9 P3; R5 review P3-R5-1)
+
+Reviewer c3015de8 reports `review-core-c92ae4dc.md` and `review-r5-c177509b.md`, read only. The
+R5 review passed with 0 P0/P1/P2 and closed P2-R4-1, P3-R4-1 and P3-R4-2.
+
+An unmodified copy of `repro-c92.py` (SHA256 `6C68E3872CADBE7B…`) was run against the fix. Its
+output is in this session's artifacts.
+
+| Repro | Before (`c92ae4dc`) | After |
+| --- | --- | --- |
+| A1 import -> approve child -> read_asset / export | only `pattern.json`; `source_missing` | `guide.md` + `pattern.json`; read ok; export ok; check ok |
+| A2 update -> approve -> read_asset | `source_missing` | ok |
+| A3 approve with a pattern-root source | `pattern.json` only | `evidence.md` + `pattern.json` |
+| B1/B2 preview of an invalid transition | `ok` | `invalid_schema` transition (same as the write) |
+| C2 default URL source | no warning | `source_unverified_default` |
+| C3 raw attestations | `KeyError`/`TypeError` | `invalid_schema` |
+| C7b malformed saved attestation | conflict | `invalid_schema` at parse |
+| D1 apply binding to a ghost | written | `binding_ref_unavailable`. The repro's unwrapped D section stops at this intended exception, so D2/D3 are covered by unit tests instead |
+| F1 orphan after collision | `guide.md` written | no files written |
+| F3 revoked events, approved status | imports | `invalid_bundle` |
+
+New `CoreReviewTests` (10 cases, real flows):
+
+1. export -> import -> children-first approve -> update the parent's includes -> approve ->
+   resolve -> lock -> verify -> `read_asset(selection=lock)` -> `check_sources` -> re-export.
+2. update -> approve, carrying an asset and a pinned pattern-root source; unrelated files are not
+   copied, and the local-source attestation still applies.
+3. A missing, a tampered, or an edited-after-capture file fails before publication, with the tree
+   unchanged.
+4. capture: `files_from` is required; `check` detects a deleted asset while `list` reads zero
+   assets; the CLI default directory works.
+5. P3-1 preview rules and the returned `catalog_sha256`.
+6. P3-2.
+7. P3-3 and P3-4, covering 5 malformed inputs on resolve and verify_lock, and junk saved
+   attestations.
+8. P3-5, P3-6 and P3-7: ghost refs refused; the first apply creates `.claude`; the CAS message
+   names bindings and `--expected-digest`.
+9. P3-8.
+10. P3-9 is in `BundleTests`: an inconsistent retired status and laundered revocation events are
+    refused.
+
+`LockTimeTests` covers P3-R5-1 (reviewer K1):
+
+- building at 2027-01-01 across the expiry gives `lock_refused`;
+- building on the resolution day gives `ok`;
+- resume after expiry is still a conflict.
+
+Every test lock is now built at a fixed `NOW`.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 115 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each reverted fix failed at
+  least one test. The reverted fixes were:
+  - approve drops files;
+  - update drops files;
+  - check ignores files;
+  - no preflight;
+  - preview skips the rules;
+  - no default URL warning;
+  - raw attestations unchecked;
+  - apply accepts ghost refs;
+  - bundle status trusted;
+  - build_lock not self-validated.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

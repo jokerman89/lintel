@@ -217,6 +217,161 @@ there are two additive optional parameters.
   `patterns.source`. The pack lane must not assume only `patterns.source` bindings can be active.
   This is an explicit repository decision recorded by the pinned include.
 
+## Revision R4 (2026-09-28, independent review of `f1918e12`: P2-R3-1, P3-R3-1..3)
+
+No names changed. Two optional parameters were added to `read_asset`, and digest values change.
+
+- **P2-R3-1** `verify_lock` compares the whole locked selection with a fresh resolution of the
+  locked inputs (context, invocation refs, overrides, exceptions and budget):
+  - the selected set, and per record `ref`, `role`, `scope`, `summary`, `reasons`, `preview`,
+    `clauses`, `assets` and `equivalent_refs`;
+  - `effective_status`, except that approved -> deprecated after locking only warns;
+  - canonical requirement records, including `text`, `verify` and `state`, so a must changed to
+    waived without its exception fails;
+  - settings, overrides and exceptions.
+
+  In R4, two differences verified with a warning (`default_baseline_changed`,
+  `default_setting_changed`): a default-role record added later (with its own clauses), and a pin
+  deprecated later. R5 removes the added-default warning: see "Revision R5". Everything else is a conflict that forces a re-plan:
+  - a record or clause the lock claims but resolution does not produce (`selection_changed`,
+    `requirement_changed`);
+  - a changed field (`selection_provenance_changed`, `requirement_changed`, `setting_changed`);
+  - a clause that is missing from the lock for a record the lock does contain.
+
+  Unchanged sources never bless a discrepancy. A verified lock's `selected[]` set, requirement
+  text, state and assets can therefore be relied on, as long as its inputs still resolve the
+  same way. Removing a default binding after locking is now a conflict (formerly a warning),
+  because a removed record is indistinguishable from a forged one.
+- **P3-R3-2**
+  - `parse_lock` requires `status == "ready"` exactly when records are selected, else `"empty"`.
+  - `context_budget` is part of `selection_digest`, for reports and locks alike.
+  - `build_lock(context_budget=...)` must equal the budget the report was resolved with, so a
+    changed budget can neither suppress rules nor be edited later.
+- **P3-R3-1** `read_asset(..., selection=<report>)` now also requires `context=` (and `refs=` when
+  the report was resolved with explicit refs). It recomputes the shared `selection_digest` and
+  refuses an edited report (`selection_not_usable`).
+  - A report selection is for **in-process use only**: the caller's own freshly resolved report.
+  - Anything persisted or passed between processes or lanes must be a lock, checked with
+    `verify_lock`.
+  - The digest is unkeyed. It detects edits relative to content, and re-resolution detects
+    resealed edits; neither authenticates an actor.
+- **P3-R3-3** Locks built before R4 (for example by R2 or R3 heads) fail with `invalid_lock`, and
+  the message says to regenerate. This is pre-release: re-run `resolve --lock` for any cached lock.
+  No lock file is tracked in the repository.
+
+## Revision R5 (2026-09-28, independent review of `d82b2919`: P2-R4-1, P3-R4-1, P3-R4-2)
+
+This revision chooses the parent's simple strict alternative: no new snapshot or authentication
+subsystem. It adds no names and changes no shapes; digest values are unchanged.
+
+- **R4's "unchanged sources never bless a discrepancy" was false for omitted default records.** R5
+  closes the gap: any difference between the lock and a fresh resolution of its own inputs is a
+  conflict that forces a re-plan. This covers:
+  - a selected record present only in the lock or only in the resolution, whatever its role;
+  - a clause present on one side only;
+  - a changed record, requirement or setting;
+  - changed overrides or exceptions.
+
+  The R4 warning bypass for added defaults (`default_baseline_changed`, `default_setting_changed`)
+  is removed. A genuine later addition or removal of a default binding is therefore a re-plan, not a
+  warning. This is the bounded stricter behavior allowed by spec 4.4's "no silent change". A catalog
+  addition that nothing binds does not change the resolution and still passes.
+- **Internal consistency is checked in `parse_lock`.**
+  - The lock's requirement states and settings must be exactly what `_settle`, the same function
+    resolution uses, derives from the lock's own clauses, overrides and exceptions. Exception
+    expiry is evaluated at the lock's `created_at`. Legitimate override winners and waivers pass.
+  - The `requirements` must list exactly the clauses of the selected records.
+  - A setting whose winner or value is not produced by the lock's own clauses is `invalid_lock`.
+    This holds even when another default was omitted, so a setting mismatch can never become
+    success.
+- **`effective_status` is historical.** In the lock it is the status at locking time;
+  `verify_lock`'s `checked[].effective_status` is the current status.
+  - approved (lock) -> deprecated (now) is a `pinned_deprecated` warning only when that pin's
+    catalog changed since locking. Otherwise the deprecation already existed, the lock's claim is
+    wrong, and the result is a `selection_provenance_changed` conflict.
+  - Catalog identity is compared per source through `source_snapshots`. No catalog-wide identity is
+    required.
+- **`read_asset` precondition.** The docstring states that a persisted or cross-process lock MUST
+  first pass `verify_lock` with status `ok`. Parsing proves internal consistency, not agreement with
+  current sources. Reports remain in-process only.
+- **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
+  re-resolution detects resealed edits relative to current inputs.
+
+## Revision R6 (2026-09-28, independent review of `c92ae4dc`: P1-C92-1, P3-C92-1..9; R5 review P3-R5-1)
+
+These changes add two optional parameters and one optional CLI flag; no name or shape changed.
+
+- **P1-C92-1 Declared file closure.** Every new version carries its exact local file closure:
+  - declared `assets[]`, whose sha256 is verified;
+  - `root: "pattern"` sources, verified against any pinned sha256.
+
+  Nothing else is copied (no unrelated files, no repository or external sources). Files are read
+  contained with the asset limit and staged through the existing no-overwrite staging before the
+  catalog-last replace.
+  - `approve` copies the closure from the draft's own version directory.
+  - `update(..., files_from=None)` reads new or changed files from `files_from` and unchanged ones
+    from the previous version.
+  - `capture(..., files_from=None)` reads from `files_from`.
+  - The CLI `capture` and `update` default `--files-from` to the input file's directory.
+  - A missing or changed file fails with `declared_file_missing` or `declared_file_changed`
+    (unavailable) before any write, leaving the tree and catalog unchanged.
+  - `check`/`check_sources` verify each registered entry's closure. `list` and ordinary
+    resolution stay metadata-only.
+  - Export still carries assets only, never source documents. An imported pattern with a
+    `root: pattern` source therefore needs that file supplied (`update --files-from`) before
+    approval.
+- **P3-C92-8** `_publish` preflights every pattern and file destination before the first write.
+  A collision leaves no orphan.
+- **P3-C92-1** Lifecycle previews apply the same event rules as the write: transitions,
+  monotonic time and no un-revoke. Previews of `deprecate`, `retire`, `revoke` and `remove` return
+  `catalog_sha256` for the `--write` CAS.
+- **P3-C92-2** A default-role URL source warns (`source_unverified_default`).
+- **P3-C92-3 / -4** The attestation entry points validate raw input with the same parser and
+  raise `PatternError`, never `KeyError`. This covers `resolve`, `explain`, `verify_lock`,
+  `review_coverage`, `record_attestations` and `merge_attestations`. Duplicate identities are
+  rejected. `parse_lock` validates saved `source_attestations`.
+- **P3-C92-5** `apply` add/replace refuses a binding whose ref is unregistered, draft, retired,
+  revoked or unreadable (`binding_ref_unavailable`). An existing binding with unreachable refs is
+  reported (`binding_had_unavailable_refs`).
+- **P3-C92-6** The first `apply` creates a missing `.claude/patterns` with contained, link-checked
+  mkdir.
+- **P3-C92-7** Bindings CAS diagnostics name `bindings` and `--expected-digest`
+  (`stale_bindings_digest`). Catalog CAS codes are unchanged.
+- **P3-C92-9** The import-derived effective status comes from the bundle's lifecycle events:
+  revocation, else the latest lifecycle status, else the publication status. A declared
+  `effective_status` that contradicts its events is `invalid_bundle`.
+- **P3-R5-1** `build_lock` validates its own output with `parse_lock` at `created_at` and refuses
+  (`lock_refused`) a lock that would be invalid, for example because an exception expired between
+  resolution and locking. Resume-time expiry still blocks (`replan_required`). Tests build locks
+  at a fixed instant.
+
+## Maintenance, attestations, sharing and review (additive, 3.2-3.3, 4.2.b.core)
+
+| Function | Signature | Result |
+| --- | --- | --- |
+| `dependents` | `(roots, targets, *, reader=None, sources=None) -> dict` | Includes, bindings and `*.lock.json` pins under `<repository>/.claude/plans` only; reports `inventory_scope` and unreadable items |
+| `update` | `(roots, path, input, *, expected_digest, write=False, expected_catalog_digest=None) -> dict` | Strictly newer draft of the same id; clause diff and impact; the old version stays intact |
+| `record_lifecycle` | `(roots, ref_text, *, action, record_value, expected_catalog_digest, write=False) -> dict` | `deprecate`/`retire`/`revoke`; monotonic timestamps; no un-revoke; pack sources are read-only |
+| `apply_change` | `(roots, change, *, expected_digest=None, write=False) -> dict` | Repository `bindings.json` add/replace/remove; old/new/reduced required clause sets; CAS and exclusive lock |
+| `remove` | `(roots, ref_text, *, expected_catalog_digest, write=False) -> dict` | Unregisters one entry that has no references and no lifecycle history; never deletes files |
+| `parse_attestations` / `merge_attestations` | `(value)` / `(saved, supplied)` | Spec 4.5 records; renewal replaces the same pattern/source |
+| `record_attestations` | `(roots, lock_path, attestations, context, *, expected_lock_digest, today=None) -> dict` | Verifies, then installs attestations under CAS; `selection_digest` unchanged |
+| `export_bundle` | `(roots, refs, out) -> dict` | New directory with the exact closure and declared assets; no catalogs, bindings, source documents or absolute roots; refuses retired/revoked |
+| `import_bundle` | `(roots, bundle, *, scope, destination_source, version_map_value, write=False, expected_catalog_digest=None) -> dict` | Whole-bundle preflight; children-first drafts with re-hashed includes; `extensions["lintel.imported"]` provenance |
+| `review_coverage` | `(roots, lock, context, evidence, *, attestations=(), today=None) -> dict` | `verify_lock` first, then per-clause verdicts; `review-unmet` (exit 7); `release_clearance: false` |
+
+`resolve`, `explain` and `verify_lock` accept `attestations=` / `--attestations`. A required
+pattern with an external URL source needs a `source-verification`/`both` attestation. An overdue
+required pattern (`review_after` in the past) needs a `freshness`/`both` attestation for every
+source, reviewed on or after `review_after`. A rejected attestation is reported
+(`attestation_rejected`) and does not count. Applied attestations appear in the report's
+`source_attestations`, not in `REPORT_KEYS`, and `build_lock` stores them in the lock, outside
+`selection_digest`.
+
+Maintenance commands preview by default; `--write` performs the change with the stated CAS.
+`remove` refuses (`remove_refused`, conflict) when anything in the inventory references the entry,
+when it has history, or when the inventory is incomplete.
+
 ## Locks, verification and task maps (additive, 2.2.b/2.2.c)
 
 | Function | Signature | Result |
@@ -271,15 +426,20 @@ Publication decisions within the spec's latitude (3.1):
 | `list` | roots | Implemented (exit 0 even with zero entries) |
 | `show` | roots, `--ref <source:id@version>` | Implemented |
 | `check` | `--path P [--kind K]` or roots | Implemented |
-| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]`; `resolve` also `[--lock PATH]` | Implemented. `--lock` writes only ready/empty and never overwrites; `--attestations` arrives with 3.2.b |
-| `verify-lock` | roots, `--lock F --context F` | Implemented (2.2.b); `--attestations` with 3.2.b |
+| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]`; `resolve` also `[--lock PATH]` | Implemented. `--lock` writes only ready/empty and never overwrites; `--attestations F` (3.2.b) |
+| `verify-lock` | roots, `--lock F --context F [--attestations F] [--write --expected-lock-digest SHA]` | Implemented (2.2.b, 3.2.b); `--write` installs validated attestations under CAS |
 | `map` | roots, `--lock F --task-map F --expected-lock-digest SHA [--write]` | Implemented (2.2.c) |
 | `project` | `--lock F --task-map F --package ID` (no roots) | Implemented (2.2.c) |
-| `review` | spec section 7 | Planned, core owner (4.2.b-core) |
-| `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA]` | Implemented (3.1.a) |
+| `review` | roots, `--lock F --context F --evidence F [--attestations F]` | Implemented (4.2.b.core); verifies the lock first, exit 7 on unmet mandatory coverage, `release_clearance: false` |
+| `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA] [--files-from DIR]` | Implemented (3.1.a) |
 | `index` | roots, `--source-root DIR [--expected-catalog-digest SHA]` | Implemented (3.1.b) |
 | `approve` | roots, `--path F --version V --approval F --expected-digest SHA [--expected-catalog-digest SHA]` | Implemented (3.1.c; catalog CAS optional per spec 7, R3) |
-| `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (3.2, 3.3) |
+| `update` | roots, `--path F --input F --expected-digest SHA [--expected-catalog-digest SHA] [--files-from DIR] [--write]` | Implemented (3.2.a); preview by default |
+| `deprecate`, `retire`, `revoke` | roots, `--ref <source:id@version> --record F [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.a); preview by default, CAS required to write |
+| `apply` | roots, `--change F [--expected-digest SHA] [--write]` | Implemented (3.2.b); preview by default |
+| `remove` | roots, `--ref <source:id@version> [--expected-catalog-digest SHA] [--write]` | Implemented (3.2.c); unregisters only, keeps files |
+| `export` | roots, `--refs F --out DIR` | Implemented (3.3.a); new local directory only |
+| `import` | roots, `--bundle DIR --scope repo\|personal --destination-source SRC --version-map F [--expected-catalog-digest SHA] [--write]` | Implemented (3.3.b); preview by default, stages drafts |
 
 Roots are `--roots-stdin` or `--roots-file F` (exactly one). Reports go to stdout as
 `emit_json`; each error diagnostic is also printed to stderr as

@@ -26,6 +26,13 @@ import patterns as p  # noqa: E402
 CLI = ROOT / "bin" / "li-pattern.py"
 TODAY = dt.date(2026, 9, 28)
 TS = "2026-09-01T00:00:00Z"
+NOW = dt.datetime(2026, 9, 28, 12, 0, 0, tzinfo=dt.timezone.utc)
+
+
+def lock_of(report, context, **kwargs):
+    """Every test lock is built at a fixed instant, so date-sensitive cases never depend on the wall clock."""
+    kwargs.setdefault("now", NOW)
+    return p.build_lock(report, context, **kwargs)
 
 
 def statement(text="The operator stated this expectation."):
@@ -980,7 +987,7 @@ class LockFixture:
     def lock(self, now=dt.datetime(2026, 9, 28, 1, 2, 3, tzinfo=dt.timezone.utc)):
         report, _ = self.fx.resolve(self.context)
         self.t.assertEqual(report["status"], "ready")
-        return p.build_lock(report, p.parse_context(self.context), now=now)
+        return lock_of(report, p.parse_context(self.context), now=now)
 
     def write(self):
         lock = self.lock()
@@ -1042,7 +1049,7 @@ class _LockCases:
         report, _ = lf.fx.resolve(ctx())
         self.assertEqual(report["status"], "needs-context")
         with self.assertRaises(p.PatternError) as caught:
-            p.build_lock(report, p.parse_context(ctx()))
+            lock_of(report, p.parse_context(ctx()))
         self.assertEqual((caught.exception.code, caught.exception.status), ("lock_refused", "needs-context"))
         p.write_lock(lf.fx.roots(), lf.lock_path, lock)
         before = lf.lock_path.read_bytes()
@@ -1687,14 +1694,14 @@ class ReviewRegressionTests(unittest.TestCase):
         with self.assertRaises(p.PatternError) as caught:
             p.read_asset(fx.roots(), ref_guide, phase="build")
         self.assertEqual((caught.exception.code, caught.exception.status), ("asset_digest_mismatch", "unavailable"))
-        lock = p.build_lock(report, p.parse_context(ctx()))
+        lock = lock_of(report, p.parse_context(ctx()))
         self.assertEqual(lock["asset_pins"], p.asset_refs(report), "lock pins use the same stable shape")
 
     def test_f7_report_selection_digest_matches_lock(self):
         lf = LockFixture(self)
         report, _ = lf.fx.resolve(lf.context)
         self.assertRegex(report["selection_digest"], r"^[0-9a-f]{64}$")
-        self.assertEqual(p.build_lock(report, p.parse_context(lf.context))["selection_digest"], report["selection_digest"])
+        self.assertEqual(lock_of(report, p.parse_context(lf.context))["selection_digest"], report["selection_digest"])
         needs, _ = lf.fx.resolve(ctx())
         self.assertIsNone(needs["selection_digest"], "no digest for unresolved work")
         empty, _ = lf.fx.resolve(ctx(artifact="api"))
@@ -1704,15 +1711,15 @@ class ReviewRegressionTests(unittest.TestCase):
                               "approval_ref": "task"}])
         with_ref, _ = lf.fx.resolve(lf.context, refs=refs)
         self.assertNotEqual(with_ref["selection_digest"], report["selection_digest"])
-        self.assertEqual(p.build_lock(with_ref, p.parse_context(lf.context), refs=refs)["selection_digest"],
+        self.assertEqual(lock_of(with_ref, p.parse_context(lf.context), refs=refs)["selection_digest"],
                          with_ref["selection_digest"])
         with self.assertRaises(p.PatternError) as caught:
-            p.build_lock(with_ref, p.parse_context(lf.context))
+            lock_of(with_ref, p.parse_context(lf.context))
         self.assertEqual(caught.exception.code, "lock_refused", "refs omitted from the lock are detected")
         tampered = copy.deepcopy(report)
         tampered["requirements"][0]["text"] = "edited"
         with self.assertRaises(p.PatternError):
-            p.build_lock(tampered, p.parse_context(lf.context))
+            lock_of(tampered, p.parse_context(lf.context))
 
     def test_advisories_input_profile_and_timestamps(self):
         fx = Fixture(self)
@@ -1791,7 +1798,7 @@ class MilestoneReviewTests(unittest.TestCase):
         (fx.repo_patterns / "example.unselected" / "1.0.0" / "guide.md").write_bytes(guide)
         report, _ = fx.resolve(ctx())
         self.assertEqual(report["status"], "ready")
-        return fx, report, p.build_lock(report, p.parse_context(ctx()))
+        return fx, report, lock_of(report, p.parse_context(ctx()))
 
     def test_p2_1_lock_edits_outside_the_old_digest_are_detected(self):
         fx, report, lock = self._visual_lock()
@@ -1838,7 +1845,7 @@ class MilestoneReviewTests(unittest.TestCase):
                 tampered = copy.deepcopy(report)
                 tampered["selected"][0][field] = value
                 with self.assertRaises(p.PatternError) as caught:
-                    p.build_lock(tampered, p.parse_context(ctx()))
+                    lock_of(tampered, p.parse_context(ctx()))
                 self.assertEqual(caught.exception.code, "lock_refused")
 
     def test_p2_1_real_provenance_change_is_a_replan(self):
@@ -1858,7 +1865,11 @@ class MilestoneReviewTests(unittest.TestCase):
         fx, report, lock = self._visual_lock()
         selected_ref = p.asset_refs(lock)[0]
         self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=lock), b"# guide\n")
-        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=report), b"# guide\n")
+        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=report, context=p.parse_context(ctx())),
+                         b"# guide\n")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), selected_ref, selection=report)
+        self.assertEqual(caught.exception.code, "selection_not_usable", "a report needs its in-process context")
         unselected = json.loads((fx.repo_patterns / "example.unselected" / "1.0.0" / "pattern.json")
                                 .read_text(encoding="utf-8"))
         other = dict(selected_ref, pattern=ref("repo.main", unselected))
@@ -1942,6 +1953,1088 @@ class MilestoneReviewTests(unittest.TestCase):
         report = p.approve(fx.roots(), path, version="1.0.0", approval_value=APPROVAL,
                            expected_digest=p.content_digest(parent), expected_catalog_digest=p.content_digest(catalog()))
         self.assertTrue(report["written"])
+
+
+class ResealedLockTests(unittest.TestCase):
+    """Regressions for independent review of f1918e12 (P2-R3-1, P3-R3-1..3): resealed forgeries."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        guide = b"# guide\n"
+        asset = [{"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(guide).hexdigest()}]
+        self.rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must", "ui.theme", "dark"),
+                                                                 clause("DEF-1", "default", "ui.density", "compact")],
+                                  assets=asset)
+        self.other = make_pattern("example.other", applies_to={"artifact": ["api"]}, assets=asset)
+        self.soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft])
+        for pattern in ("example.rules", "example.other"):
+            (self.fx.repo_patterns / pattern / "1.0.0" / "guide.md").write_bytes(guide)
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
+        self.context = p.parse_context(ctx(artifact="dashboard"))
+        report, _ = self.fx.resolve(ctx(artifact="dashboard"))
+        self.report = report
+        self.lock = lock_of(report, self.context)
+
+    def verify(self, lock):
+        return p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
+
+    def reseal(self, change):
+        forged = copy.deepcopy(self.lock)
+        change(forged)
+        forged["asset_pins"] = p.asset_refs(forged)
+        forged["status"] = "ready" if forged["selected"] else "empty"
+        forged["selection_digest"] = p.selection_digest(forged)
+        return forged
+
+    def assert_rejected(self, forged, *codes_expected):
+        try:
+            report = self.verify(forged)
+        except p.PatternError as error:
+            self.assertEqual(error.status, "invalid")
+            return
+        self.assertEqual(report["status"], "conflict", report["diagnostics"])
+        self.assertTrue(set(codes_expected) & set(codes(report, "error")), codes(report, "error"))
+
+    def test_genuine_lock_verifies(self):
+        self.assertEqual(self.verify(self.lock)["status"], "ok")
+
+    def test_added_selected_record_is_a_conflict_and_cannot_unlock_assets(self):
+        api_report, _ = self.fx.resolve(ctx(artifact="api"), refs=p.parse_refs([{"ref": ref("repo.main", self.other),
+            "role": "default", "approved_by": "me", "approval_ref": "task"}]))
+        grafted = api_report["selected"][0]
+        forged = self.reseal(lambda value: value["selected"].append(grafted))
+        self.assert_rejected(forged, "selection_changed")
+        other_asset = next(item for item in p.asset_refs(forged) if item["pattern"]["id"] == "example.other")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), other_asset, selection=self.lock)
+        self.assertEqual(caught.exception.code, "asset_not_selected")
+
+    def test_removed_record_edited_text_state_and_status_are_rejected(self):
+        cases = {
+            "remove only record": (lambda v: (v["selected"].clear(), v["requirements"].clear(), v["settings"].clear()),
+                                   ("selection_changed", "requirement_changed", "mandatory_baseline_changed")),
+            "edit must text": (lambda v: next(i for i in v["requirements"] if i["clause"].endswith("MUST-1"))
+                               .update(text="weakened"), ("requirement_changed",)),
+            "must to waived": (lambda v: next(i for i in v["requirements"] if i["clause"].endswith("MUST-1"))
+                               .update(state="waived"), ("requirement_changed",)),
+            "edit verify": (lambda v: v["requirements"][0].update(verify="trust me"), ("requirement_changed",)),
+            "edit setting": (lambda v: v["settings"]["ui.theme"].update(value="light"), ("setting_changed",)),
+            "effective status": (lambda v: v["selected"][0].update(effective_status="deprecated"),
+                                 ("selection_provenance_changed",)),
+            "drop default clause": (lambda v: v["requirements"].remove(
+                next(i for i in v["requirements"] if i["clause"].endswith("DEF-1"))), ("requirement_changed",)),
+        }
+        for name, (change, expected) in cases.items():
+            with self.subTest(name=name):
+                self.assert_rejected(self.reseal(change), *expected)
+
+    def test_legitimate_later_changes_keep_their_documented_outcomes(self):
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]}),
+                               binding("soft", [ref("repo.main", self.soft)], role="default")])
+        report = self.verify(self.lock)
+        self.assertEqual(report["status"], "conflict", "R5: an added default binding changes the baseline; re-plan")
+        self.assertIn("selection_changed", codes(report, "error"))
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
+        self.assertEqual(self.verify(self.lock)["status"], "ok")
+        unrelated = make_pattern("example.unrelated", applies_to={"artifact": ["api"]})
+        catalog = self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft, unrelated])
+        self.assertEqual(self.verify(self.lock)["status"], "ok", "an unbound catalog addition leaves the pin valid")
+        entry = next(item for item in catalog["entries"] if item["id"] == "example.rules")
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft, unrelated], lifecycle=[
+            {**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated", "reason": "r",
+             "reference": "ADR", "at": TS}])
+        report = self.verify(self.lock)
+        self.assertEqual(report["status"], "ok", "deprecation after locking warns, never conflicts")
+        self.assertIn("pinned_deprecated", codes(report, "warning"))
+        self.assertEqual(report["checked"][0]["effective_status"], "deprecated", "checked[] reports the current status")
+
+    def test_waived_lock_and_empty_lock_still_verify(self):
+        exception = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": self.context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = self.fx.resolve(ctx(artifact="dashboard"), exceptions=exception)
+        lock = lock_of(report, self.context)
+        verified = p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
+        self.assertEqual(verified["status"], "ok", "a genuine exception keeps its waiver")
+        empty_report, _ = self.fx.resolve(ctx(artifact="none"))
+        empty_context = p.parse_context(ctx(artifact="none"))
+        empty = lock_of(empty_report, empty_context)
+        self.assertEqual((empty["status"], p.verify_lock(self.fx.roots(), empty, empty_context, today=TODAY)["status"]),
+                         ("empty", "ok"))
+
+    def test_status_and_budget_are_bound(self):
+        wrong_status = copy.deepcopy(self.lock)
+        wrong_status["status"] = "empty"
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(wrong_status)
+        self.assertEqual(caught.exception.code, "invalid_lock")
+        for budget in (1_000_000, 50):
+            with self.subTest(budget=budget):
+                edited = copy.deepcopy(self.lock)
+                edited["context_budget"] = budget
+                with self.assertRaises(p.PatternError) as caught:
+                    p.parse_lock(edited)
+                self.assertIn("selection_digest", caught.exception.message)
+        with self.assertRaises(p.PatternError) as caught:
+            lock_of(self.report, self.context, context_budget=40000)
+        self.assertEqual(caught.exception.code, "lock_refused")
+
+    def test_edited_report_selection_is_refused_by_the_shared_digest(self):
+        asset = p.asset_refs(self.report)[0]
+        self.assertEqual(p.read_asset(self.fx.roots(), asset, selection=self.report, context=self.context), b"# guide\n")
+        edited = copy.deepcopy(self.report)
+        other = json.loads((self.fx.repo_patterns / "example.other" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        edited["selected"][0]["assets"] = [dict(asset_item) for asset_item in edited["selected"][0]["assets"]]
+        forged_ref = dict(asset, pattern=ref("repo.main", other))
+        edited["selected"].append(dict(copy.deepcopy(edited["selected"][0]), ref=ref("repo.main", other),
+                                       equivalent_refs=[ref("repo.main", other)]))
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), forged_ref, selection=edited, context=self.context)
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), asset, selection=self.report, context=p.parse_context(ctx(artifact="x")))
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+
+    def test_projection_still_works_on_a_verified_lock(self):
+        lock_path = self.fx.repo / "plan.lock.json"
+        p.write_lock(self.fx.roots(), lock_path, self.lock)
+        task_map = {"schema_version": 1, "selection_digest": self.lock["selection_digest"], "tasks": ["T1"],
+                    "packages": [{"id": "P1", "tasks": ["T1"]}],
+                    "clauses": [{"clause": "example.rules@1.0.0#MUST-1", "tasks": ["T1"]},
+                                {"clause": "example.rules@1.0.0#DEF-1", "tasks": ["T1"]}]}
+        p.map_lock(self.fx.roots(), lock_path, task_map, expected_lock_digest=p.content_digest(self.lock), write=True)
+        mapped = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(self.verify(mapped)["status"], "ok")
+        self.assertEqual(len(p.project_package(mapped, task_map, "P1")["clauses"]), 2)
+
+
+class MaintenanceTests(unittest.TestCase):
+    """V07 (cards 3.2.a-3.2.c): update, lifecycle events, bindings, attestations and removal."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.root = self.fx.repo_patterns
+        self.child = make_pattern("example.child", requirements=[clause("C-1", "must")])
+        self.parent = make_pattern("example.parent", requirements=[clause("P-1", "must", "ui.theme", "dark")],
+                                   includes=[ref("repo.main", self.child)])
+        self.unused = make_pattern("example.unused")
+        self.fx.publish(self.root, "repo.main", [self.child, self.parent, self.unused])
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.parent)])])
+
+    def digest(self):
+        return p.content_digest(json.loads((self.root / "catalog.json").read_text(encoding="utf-8")))
+
+    def lock_at(self, name="demo"):
+        report, _ = self.fx.resolve(ctx())
+        lock = lock_of(report, p.parse_context(ctx()))
+        path = self.fx.repo / ".claude" / "plans" / name / "patterns.lock.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        p.write_lock(self.fx.roots(), path, lock)
+        return lock, path
+
+    def test_update_previews_diff_and_impact_then_publishes_a_new_draft(self):
+        self.lock_at()
+        path = self.root / "example.child" / "1.0.0" / "pattern.json"
+        newer = dict(copy.deepcopy(self.child), version="1.1.0", status="draft",
+                     requirements=[clause("C-1", "must", text="stricter"), clause("C-2", "default")])
+        newer.pop("approval")
+        preview = p.update(self.fx.roots(), path, newer, expected_digest=p.content_digest(self.child))
+        self.assertEqual((preview["written"], preview["clause_diff"]["added"], preview["clause_diff"]["changed"]),
+                         (False, ["C-2"], ["C-1"]))
+        self.assertEqual([item["pattern"]["id"] for item in preview["impact"]["includes"]], ["example.parent"])
+        self.assertEqual([item["lock"] for item in preview["impact"]["locks"]], [".claude/plans/demo/patterns.lock.json"])
+        self.assertIn("cannot prove", preview["impact"]["inventory_scope"])
+        before = path.read_bytes()
+        written = p.update(self.fx.roots(), path, newer, expected_digest=p.content_digest(self.child), write=True)
+        self.assertEqual(written["published"][0]["version"], "1.1.0")
+        self.assertEqual(path.read_bytes(), before, "the old version is intact")
+        self.assertEqual(self.fx.resolve(ctx())[0]["status"], "ready", "current pins are unchanged by an update")
+        for change, code in (({"version": "1.0.0"}, "version_not_newer"), ({"id": "example.other"}, "update_id_mismatch"),
+                             ({"status": "approved", "approval": APPROVAL}, "update_not_draft")):
+            with self.subTest(code=code):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.update(self.fx.roots(), path, {**newer, "version": "1.2.0", **change},
+                             expected_digest=p.content_digest(self.child))
+                self.assertEqual(caught.exception.code, code)
+        with self.assertRaises(p.PatternError) as caught:
+            p.update(self.fx.roots(), path, dict(newer, version="1.2.0"), expected_digest="0" * 64)
+        self.assertEqual(caught.exception.code, "stale_pattern_digest")
+
+    def test_lifecycle_events_preview_record_and_monotonic_rules(self):
+        lock, _ = self.lock_at()
+        record = {"reason": "superseded", "reference": "ADR-9", "at": "2026-09-10T00:00:00Z"}
+        preview = p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="deprecate",
+                                     record_value=record, expected_catalog_digest=self.digest())
+        self.assertEqual((preview["written"], preview["effective_status"]), (False, {"before": "approved",
+                                                                                     "after": "deprecated"}))
+        self.assertEqual(preview["impact"]["locks"][0]["pins"], ["example.child@1.0.0"])
+        before = self.digest()
+        with self.assertRaises(p.PatternError) as caught:
+            p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="deprecate",
+                               record_value=record, expected_catalog_digest=None, write=True)
+        self.assertEqual(caught.exception.code, "expected_digest_required")
+        p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="deprecate", record_value=record,
+                           expected_catalog_digest=before, write=True)
+        self.assertIn("pinned_deprecated", codes(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()),
+                                                                today=TODAY), "warning"))
+        with self.assertRaises(p.PatternError) as caught:
+            p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="retire",
+                               record_value=dict(record, at="2026-09-09T00:00:00Z"),
+                               expected_catalog_digest=self.digest(), write=True)
+        self.assertEqual(caught.exception.code, "event_not_monotonic")
+        p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="revoke",
+                           record_value=dict(record, at="2026-09-11T00:00:00Z"),
+                           expected_catalog_digest=self.digest(), write=True)
+        verified = p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=TODAY)
+        self.assertEqual((verified["status"], codes(verified, "error")), ("unavailable", ["pinned_revoked"]))
+        with self.assertRaises(p.PatternError) as caught:
+            p.record_lifecycle(self.fx.roots(), "repo.main:example.child@1.0.0", action="revoke",
+                               record_value=dict(record, at="2026-09-12T00:00:00Z"),
+                               expected_catalog_digest=self.digest(), write=True)
+        self.assertEqual(caught.exception.code, "already_revoked")
+        with self.assertRaises(p.PatternError):
+            p.record_lifecycle(self.fx.roots(), "repo.main:example.unused@1.0.0", action="revoke",
+                               record_value=dict(record, replaced_by=ref("repo.main", self.child)),
+                               expected_catalog_digest=self.digest())
+
+    def test_pack_sources_are_read_only(self):
+        pack_root = self.fx.pack_chain()
+        pack_rule = make_pattern("example.pack-rule")
+        self.fx.publish(pack_root / "patterns", "team.patterns", [pack_rule])
+        with self.assertRaises(p.PatternError) as caught:
+            p.record_lifecycle(self.fx.roots(), "team.patterns:example.pack-rule@1.0.0", action="deprecate",
+                               record_value={"reason": "r", "reference": "x", "at": TS}, expected_catalog_digest=None)
+        self.assertEqual(caught.exception.code, "read_only_source")
+
+    def test_apply_add_replace_remove_with_reduced_baseline(self):
+        bindings = self.root / "bindings.json"
+        current = lambda: p.content_digest(json.loads(bindings.read_text(encoding="utf-8")))
+        change = {"schema_version": 1, "operation": "add", "id": "extra",
+                  "binding": binding("extra", [ref("repo.main", self.unused)]), "reason": "team decision",
+                  "approved_by": "lead", "approval_ref": "DEC-7"}
+        preview = p.apply_change(self.fx.roots(), change)
+        self.assertEqual((preview["written"], preview["required_clauses"]["added"]), (False, ["example.unused@1.0.0#R-1"]))
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(self.fx.roots(), change, write=True)
+        self.assertEqual(caught.exception.code, "expected_digest_required")
+        p.apply_change(self.fx.roots(), change, expected_digest=current(), write=True)
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(self.fx.roots(), change, expected_digest=current(), write=True)
+        self.assertEqual(caught.exception.code, "binding_exists")
+        removal = dict(change, operation="remove", id="req", binding=None)
+        preview = p.apply_change(self.fx.roots(), removal)
+        self.assertEqual(preview["required_clauses"]["reduced"],
+                         ["example.child@1.0.0#C-1", "example.parent@1.0.0#P-1"])
+        self.assertIn("mandatory_baseline_reduced", codes(preview, "warning"))
+        before = bindings.read_bytes()
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(self.fx.roots(), removal, expected_digest="0" * 64, write=True)
+        self.assertEqual(caught.exception.code, "stale_bindings_digest")
+        self.assertIn("bindings", caught.exception.message)
+        self.assertEqual(bindings.read_bytes(), before)
+        for bad, code in ((dict(removal, id="nope"), "binding_missing"),
+                          (dict(change, operation="replace", id="extra", binding=binding("other", [ref("repo.main", self.unused)])),
+                           "invalid_schema"),
+                          (dict(removal, binding=binding("req", [ref("repo.main", self.unused)])), "invalid_schema"),
+                          (dict(change, reason=""), "invalid_schema")):
+            with self.subTest(code=code):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.apply_change(self.fx.roots(), bad)
+                self.assertEqual(caught.exception.code, code)
+        replaced = p.apply_change(self.fx.roots(), dict(change, operation="replace", binding=dict(
+            binding("extra", [ref("repo.main", self.unused)]), role="default")), expected_digest=current(), write=True)
+        self.assertEqual(replaced["required_clauses"]["reduced"], ["example.unused@1.0.0#R-1"])
+
+    def _attested(self, source, **extra):
+        pattern = make_pattern("example.attested", sources=[source], **extra)
+        self.fx.publish(self.root, "repo.main", [self.child, self.parent, self.unused, pattern])
+        self.fx.repo_bindings([binding("att", [ref("repo.main", pattern)])])
+        return pattern
+
+    def attestation(self, pattern, source_digest, **change):
+        item = {"ref": ref("repo.main", pattern), "source_index": 0, "source_ref": pattern["sources"][0]["ref"],
+                "source_digest": source_digest, "reviewed_by": "reviewer", "review_ref": "REV-1",
+                "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}
+        item.update(change)
+        return p.parse_attestations({"schema_version": 1, "items": [item]})
+
+    def test_url_and_overdue_sources_need_valid_attestations(self):
+        url = dict(statement(), root="external", kind="approved-standard", ref="https://standards.example/doc")
+        pattern = self._attested(url)
+        self.assertIn("source_attestation_required", codes(self.fx.resolve(ctx())[0], "error"))
+        report, _ = self.fx.resolve(ctx(), attestations=self.attestation(pattern, "a" * 64))
+        self.assertEqual(report["status"], "ready")
+        self.assertEqual(len(report["source_attestations"]), 1)
+        for change, reason in (({"valid_until": "2026-09-01"}, "expired"),
+                               ({"reviewed_at": "2026-10-01T00:00:00Z"}, "future"),
+                               ({"source_ref": "https://other.example"}, "source_ref"),
+                               ({"purpose": "freshness"}, None)):
+            with self.subTest(change=change):
+                report, _ = self.fx.resolve(ctx(), attestations=self.attestation(pattern, "a" * 64, **change))
+                self.assertEqual(report["status"], "unavailable")
+                if reason:
+                    self.assertIn(reason, next(item["message"] for item in report["diagnostics"]
+                                               if item["code"] == "attestation_rejected"))
+        wrong_digest_ref = self.attestation(pattern, "a" * 64, ref=dict(ref("repo.main", pattern), sha256="b" * 64))
+        self.assertEqual(self.fx.resolve(ctx(), attestations=wrong_digest_ref)[0]["status"], "unavailable",
+                         "an attestation for other content does not count")
+
+    def test_overdue_statement_and_local_file_sources(self):
+        text = "The operator stated this expectation."
+        pattern = self._attested(statement(text), review_after="2026-06-01")
+        self.assertIn("review_overdue", codes(self.fx.resolve(ctx())[0], "error"))
+        good = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        self.assertEqual(self.fx.resolve(ctx(), attestations=self.attestation(pattern, good))[0]["status"], "ready")
+        self.assertEqual(self.fx.resolve(ctx(), attestations=self.attestation(pattern, "c" * 64))[0]["status"],
+                         "unavailable", "a statement digest must hash the statement text")
+        old_review = self.attestation(pattern, good, reviewed_at="2026-05-01T00:00:00Z")
+        self.assertIn("review_overdue", codes(self.fx.resolve(ctx(), attestations=old_review)[0], "error"),
+                      "freshness needs a review on or after review_after")
+        doc = self.fx.repo / "docs" / "standard.md"
+        doc.parent.mkdir()
+        doc.write_bytes(b"standard v1\n")
+        local = dict(statement(), root="repository", kind="approved-standard", ref="docs/standard.md")
+        pattern = self._attested(local, review_after="2026-06-01")
+        attested = self.attestation(pattern, hashlib.sha256(b"standard v1\n").hexdigest())
+        self.assertEqual(self.fx.resolve(ctx(), attestations=attested)[0]["status"], "ready")
+        doc.write_bytes(b"standard v2\n")
+        report, _ = self.fx.resolve(ctx(), attestations=attested)
+        self.assertEqual(report["status"], "unavailable", "changed local bytes need recapture, not re-attestation")
+
+    def test_attestation_renewal_preserves_selection_digest(self):
+        url = dict(statement(), root="external", kind="approved-standard", ref="https://standards.example/doc")
+        pattern = self._attested(url)
+        first = self.attestation(pattern, "a" * 64, valid_until="2026-10-31")
+        report, _ = self.fx.resolve(ctx(), attestations=first)
+        lock = lock_of(report, p.parse_context(ctx()))
+        path = self.fx.repo / ".claude" / "plans" / "att" / "patterns.lock.json"
+        path.parent.mkdir(parents=True)
+        p.write_lock(self.fx.roots(), path, lock)
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok",
+                         "saved attestations are used when none are supplied")
+        later = dt.date(2026, 11, 15)
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=later)["status"],
+                         "unavailable", "an expired saved attestation blocks continuation")
+        renewal = self.attestation(pattern, "a" * 64, reviewed_at="2026-09-27T00:00:00Z", valid_until="2027-06-30")
+        written = p.record_attestations(self.fx.roots(), path, renewal, p.parse_context(ctx()),
+                                        expected_lock_digest=p.content_digest(lock), today=TODAY)
+        renewed = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual((written["written"], renewed["selection_digest"]), (True, lock["selection_digest"]))
+        self.assertEqual(renewed["source_attestations"][0]["valid_until"], "2027-06-30")
+        self.assertEqual(p.verify_lock(self.fx.roots(), renewed, p.parse_context(ctx()), today=later)["status"], "ok")
+
+    def test_remove_refuses_referenced_or_historic_entries_and_keeps_files(self):
+        self.lock_at()
+        for target in ("example.child", "example.parent"):
+            with self.subTest(target=target):
+                preview = p.remove(self.fx.roots(), f"repo.main:{target}@1.0.0", expected_catalog_digest=self.digest())
+                self.assertFalse(preview["removable"])
+                with self.assertRaises(p.PatternError) as caught:
+                    p.remove(self.fx.roots(), f"repo.main:{target}@1.0.0", expected_catalog_digest=self.digest(),
+                             write=True)
+                self.assertEqual((caught.exception.code, caught.exception.status), ("remove_refused", "conflict"))
+        preview = p.remove(self.fx.roots(), "repo.main:example.unused@1.0.0", expected_catalog_digest=self.digest())
+        self.assertTrue(preview["removable"])
+        self.assertIn("external_consumers_unknown", codes(preview, "warning"))
+        path = self.root / "example.unused" / "1.0.0" / "pattern.json"
+        p.remove(self.fx.roots(), "repo.main:example.unused@1.0.0", expected_catalog_digest=self.digest(), write=True)
+        self.assertTrue(path.is_file(), "no file or history is deleted")
+        self.assertNotIn("example.unused", [item["id"] for item in p.list_catalogs(self.fx.roots())["entries"]])
+        p.index_source(self.fx.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertNotIn("example.unused", [item["id"] for item in p.list_catalogs(self.fx.roots())["entries"]],
+                         "remove->index stays removed")
+
+    def test_lock_scan_is_bounded_to_the_repository_plan_root(self):
+        self.lock_at()
+        outside = self.fx.root / "other-repo" / ".claude" / "plans" / "x"
+        outside.mkdir(parents=True)
+        (outside / "patterns.lock.json").write_text("{}", encoding="utf-8")
+        (self.fx.repo / ".claude" / "plans" / "broken.lock.json").write_text("{", encoding="utf-8")
+        impact = p.dependents(self.fx.roots(), [p.parse_exact_ref(ref("repo.main", self.child), "t")])
+        self.assertEqual([item["lock"] for item in impact["locks"]], [".claude/plans/demo/patterns.lock.json"])
+        self.assertEqual([item["path"] for item in impact["unreadable_locks"]], [".claude/plans/broken.lock.json"])
+
+    def test_cli_lifecycle_apply_remove(self):
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        record = self.fx.write_json("record.json", {"reason": "r", "reference": "ADR", "at": TS})
+        code, report, _ = self.fx.cli("deprecate", "--roots-file", envelope, "--ref", "repo.main:example.unused@1.0.0",
+                                      "--record", record)
+        self.assertEqual((code, report["written"]), (0, False))
+        code, report, _ = self.fx.cli("deprecate", "--roots-file", envelope, "--ref", "repo.main:example.unused@1.0.0",
+                                      "--record", record, "--expected-catalog-digest", self.digest(), "--write")
+        self.assertEqual((code, report["written"]), (0, True))
+        code, report, _ = self.fx.cli("remove", "--roots-file", envelope, "--ref", "repo.main:example.child@1.0.0",
+                                      "--expected-catalog-digest", self.digest(), "--write")
+        self.assertEqual(code, 4)
+        change = self.fx.write_json("change.json", {"schema_version": 1, "operation": "remove", "id": "req",
+                                                    "binding": None, "reason": "r", "approved_by": "a",
+                                                    "approval_ref": "b"})
+        code, report, _ = self.fx.cli("apply", "--roots-file", envelope, "--change", change)
+        self.assertEqual((code, report["written"]), (0, False))
+
+
+class BundleTests(unittest.TestCase):
+    """V08 (cards 3.3.a-3.3.b): exact closure export, whole-bundle import preflight and transformation."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.guide = b"# guide\n"
+        self.child = make_pattern("example.child", assets=[{"path": "guide.md", "kind": "guide",
+                                                            "sha256": hashlib.sha256(self.guide).hexdigest()}],
+                                  sources=[dict(statement(), root="repository", ref="docs/private-policy.md")])
+        self.parent = make_pattern("example.parent", requirements=[], includes=[ref("team.src", self.child)])
+        self.fx.publish(self.fx.personal_patterns, "team.src", [self.child, self.parent])
+        (self.fx.personal_patterns / "example.child" / "1.0.0" / "guide.md").write_bytes(self.guide)
+        self.out = self.fx.root / "exports" / "bundle-1"
+        self.out.parent.mkdir()
+
+    def export(self, refs=None):
+        return p.export_bundle(self.fx.roots(), refs or [p.parse_exact_ref(ref("team.src", self.parent), "r")], self.out)
+
+    def version_map(self):
+        return [{"original": ref("team.src", self.child), "id": "local.child", "version": "0.1.0"},
+                {"original": ref("team.src", self.parent), "id": "local.parent", "version": "0.1.0"}]
+
+    def test_export_writes_exact_closure_without_catalogs_or_absolute_roots(self):
+        report = self.export()
+        self.assertEqual(sorted(item["id"] for item in report["patterns"]), ["example.child", "example.parent"])
+        files = sorted(path.relative_to(self.out).as_posix() for path in self.out.rglob("*") if path.is_file())
+        self.assertEqual(files, ["bundle.json", "patterns/team.src/example.child/1.0.0/guide.md",
+                                 "patterns/team.src/example.child/1.0.0/pattern.json",
+                                 "patterns/team.src/example.parent/1.0.0/pattern.json"])
+        blob = b"".join(path.read_bytes() for path in self.out.rglob("*") if path.is_file())
+        for root in (self.fx.home, self.fx.repo, self.fx.root):
+            self.assertNotIn(root.as_posix().encode(), blob)
+        self.assertNotIn(b"catalog", b"".join(path.name.encode() for path in self.out.rglob("*")))
+        with self.assertRaises(p.PatternError) as caught:
+            self.export()
+        self.assertEqual(caught.exception.code, "destination_exists")
+        self.assertEqual(sorted(path.name for path in self.out.parent.iterdir()), ["bundle-1"], "no staging residue")
+
+    def test_export_refuses_revoked_members(self):
+        catalog = json.loads((self.fx.personal_patterns / "catalog.json").read_text(encoding="utf-8"))
+        entry = next(item for item in catalog["entries"] if item["id"] == "example.child")
+        catalog["revocations"] = [{**{k: entry[k] for k in ("id", "version", "sha256")}, "reason": "r",
+                                   "reference": "S", "at": TS}]
+        (self.fx.personal_patterns / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+        with self.assertRaises(p.PatternError) as caught:
+            self.export()
+        self.assertEqual(caught.exception.code, "pattern_revoked")
+        self.assertFalse(self.out.exists())
+
+    def test_import_preview_then_children_first_drafts_with_inert_provenance(self):
+        self.export()
+        roots = self.fx.roots()
+        preview = p.import_bundle(roots, self.out, scope="repo", destination_source="repo.local",
+                                  version_map_value=self.version_map())
+        self.assertEqual((preview["written"], [item["destination"]["id"] for item in preview["mapping"]]),
+                         (False, ["local.child", "local.parent"]))
+        self.assertFalse((self.fx.repo_patterns / "catalog.json").exists())
+        written = p.import_bundle(roots, self.out, scope="repo", destination_source="repo.local",
+                                  version_map_value=self.version_map(), write=True)
+        parent = json.loads((self.fx.repo_patterns / "local.parent" / "0.1.0" / "pattern.json").read_text(encoding="utf-8"))
+        child_ref = next(item["destination"] for item in written["mapping"] if item["destination"]["id"] == "local.child")
+        self.assertEqual((parent["status"], "approval" in parent, parent["includes"]), ("draft", False, [child_ref]))
+        provenance = parent["extensions"]["lintel.imported"]
+        self.assertEqual((provenance["original"]["id"], provenance["publication_status"], provenance["lifecycle_status"]),
+                         ("example.parent", "approved", "approved"))
+        self.assertEqual((self.fx.repo_patterns / "local.child" / "0.1.0" / "guide.md").read_bytes(), self.guide)
+        self.assertEqual(p.check_sources(roots)["status"], "ok")
+        self.fx.repo_bindings([binding("b", [child_ref])])
+        self.assertIn("draft_not_eligible", codes(self.fx.resolve(ctx())[0], "error"), "import does not import trust")
+        approved = p.approve(roots, self.fx.repo_patterns / "local.child" / "0.1.0" / "pattern.json", version="1.0.0",
+                             approval_value=APPROVAL, expected_digest=child_ref["sha256"])
+        self.assertEqual(approved["ref"]["id"], "local.child", "local approval is children-first")
+
+    def test_import_rejects_hostile_or_incomplete_bundles_without_writing(self):
+        self.export()
+        roots = self.fx.roots()
+        manifest_path = self.out / "bundle.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+        def attempt(expected_code, version_map=None, **kwargs):
+            with self.assertRaises(p.PatternError) as caught:
+                p.import_bundle(roots, self.out, scope="repo", destination_source=kwargs.get("source", "repo.local"),
+                                version_map_value=version_map or self.version_map(), write=True)
+            self.assertEqual(caught.exception.code, expected_code)
+            self.assertFalse((self.fx.repo_patterns / "catalog.json").exists())
+
+        stray = self.out / "patterns" / "extra.sh"
+        stray.write_text("rm -rf /\n", encoding="utf-8")
+        attempt("invalid_bundle")
+        stray.unlink()
+        guide = self.out / "patterns/team.src/example.child/1.0.0/guide.md"
+        guide.write_bytes(b"tampered\n")
+        attempt("invalid_bundle")
+        guide.write_bytes(self.guide)
+        attempt("invalid_version_map", version_map=self.version_map()[:1])
+        attempt("invalid_version_map", version_map=[dict(item, id="local.same", version="0.1.0") for item in self.version_map()])
+        truncated = dict(manifest, patterns=[item for item in manifest["patterns"] if item["ref"]["id"] == "example.parent"],
+                         lifecycle=[item for item in manifest["lifecycle"] if item["ref"]["id"] == "example.parent"],
+                         files=[item for item in manifest["files"] if "example.parent" in item["path"]])
+        for member in ("guide.md", "pattern.json"):
+            (self.out / "patterns/team.src/example.child/1.0.0" / member).rename(self.fx.root / f"held-{member}")
+        manifest_path.write_text(json.dumps(truncated), encoding="utf-8")
+        attempt("external_dependency", version_map=self.version_map()[1:])
+        for member in ("guide.md", "pattern.json"):
+            (self.fx.root / f"held-{member}").rename(self.out / "patterns/team.src/example.child/1.0.0" / member)
+        retired = copy.deepcopy(manifest)
+        retired["lifecycle"][0]["effective_status"] = "retired"
+        manifest_path.write_text(json.dumps(retired), encoding="utf-8")
+        attempt("invalid_bundle")
+        retired["lifecycle"][0]["events"] = [{"kind": "lifecycle", "status": "retired", "reason": "r",
+                                              "reference": "ADR", "at": TS}]
+        manifest_path.write_text(json.dumps(retired), encoding="utf-8")
+        attempt("bundle_contains_retired")
+        laundered = copy.deepcopy(manifest)
+        laundered["lifecycle"][0]["events"] = [{"kind": "revocation", "reason": "r", "reference": "SEC", "at": TS}]
+        manifest_path.write_text(json.dumps(laundered), encoding="utf-8")
+        attempt("invalid_bundle")
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        p.capture(roots, draft("local.child", version="0.1.0"), scope="repo", name="local.child", source_id="repo.local")
+        with self.assertRaises(p.PatternError) as caught:
+            p.import_bundle(roots, self.out, scope="repo", destination_source="repo.local",
+                            version_map_value=self.version_map())
+        self.assertEqual((caught.exception.code, caught.exception.status), ("version_exists", "collision"))
+        with self.assertRaises(p.PatternError) as caught:
+            p.import_bundle(roots, self.out, scope="repo", destination_source="repo.other",
+                            version_map_value=self.version_map())
+        self.assertEqual(caught.exception.code, "source_id_mismatch")
+
+    def test_import_refuses_links_inside_the_bundle(self):
+        self.export()
+        outside = self.fx.root / "outside"
+        outside.mkdir()
+        link = self.out / "patterns" / "linked"
+        if os.name == "nt":
+            import _winapi
+            _winapi.CreateJunction(str(outside), str(link))
+        else:
+            os.symlink(outside, link, target_is_directory=True)
+        self.addCleanup(lambda: os.rmdir(link) if os.name == "nt" else os.unlink(link))
+        with self.assertRaises(p.PatternError) as caught:
+            p.import_bundle(self.fx.roots(), self.out, scope="repo", destination_source="repo.local",
+                            version_map_value=self.version_map())
+        self.assertEqual(caught.exception.code, "unsafe_path")
+
+    def test_cli_export_import(self):
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        refs = self.fx.write_json("refs.json", [ref("team.src", self.parent)])
+        code, report, _ = self.fx.cli("export", "--roots-file", envelope, "--refs", refs, "--out", self.out)
+        self.assertEqual((code, report["files"]), (0, 3))
+        mapping = self.fx.write_json("map.json", self.version_map())
+        code, report, _ = self.fx.cli("import", "--roots-file", envelope, "--bundle", self.out, "--scope", "repo",
+                                      "--destination-source", "repo.local", "--version-map", mapping)
+        self.assertEqual((code, report["written"]), (0, False))
+
+
+class ReviewCoverageTests(unittest.TestCase):
+    """Card 4.2.b.core: review verifies the lock first, then per-clause coverage; never a PASS."""
+
+    def setUp(self):
+        self.lf = LockFixture(self)
+        self.lf.write()
+        p.map_lock(self.lf.fx.roots(), self.lf.lock_path, self.lf.task_map(),
+                   expected_lock_digest=p.content_digest(self.lf.read()), write=True)
+        self.lock = self.lf.read()
+
+    def evidence(self, **items):
+        base = {"example.rules@1.0.0#MUST-1": {"task_ids": ["T1"], "status": "passed", "evidence_refs": ["test.log#12"],
+                                               "explanation": "Reviewer ran the check."},
+                "example.rules@1.0.0#DEF-1": {"task_ids": ["T2"], "status": "passed", "evidence_refs": ["pr#4"],
+                                              "explanation": "Default applied."}}
+        for clause, change in items.items():
+            if change is None:
+                base.pop(clause)
+            else:
+                base[clause] = dict(base[clause], **change)
+        return {"schema_version": 1, "selection_digest": self.lock["selection_digest"],
+                "mapping_digest": self.lock["requirement_tasks"]["mapping_digest"],
+                "items": [dict(value, clause=clause) for clause, value in base.items()]}
+
+    def review(self, evidence, lock=None):
+        return p.review_coverage(self.lf.fx.roots(), lock or self.lock, p.parse_context(self.lf.context), evidence,
+                                 today=TODAY)
+
+    def test_complete_evidence_is_ok_but_never_a_clearance(self):
+        report = self.review(self.evidence())
+        self.assertEqual((report["status"], report["release_clearance"]), ("ok", False))
+        self.assertEqual(report["counts"].get("passed"), 2)
+        self.assertIn("never a PASS", report["limits"])
+
+    def test_missing_failed_unverified_or_skipped_mandatory_exits_7(self):
+        must = "example.rules@1.0.0#MUST-1"
+        for name, change in (("missing", None), ("failed", {"status": "failed"}), ("unverified", {"status": "unverified"}),
+                             ("not-applicable", {"status": "not-applicable"}), ("waived without exception", {"status": "waived"}),
+                             ("passed without refs", {"evidence_refs": []}), ("passed without explanation", {"explanation": " "})):
+            with self.subTest(name=name):
+                report = self.review(self.evidence(**{must: change}))
+                self.assertEqual((report["status"], p.exit_code(report["status"])), ("review-unmet", 7))
+        report = self.review(self.evidence(**{"example.rules@1.0.0#DEF-1": None}))
+        self.assertEqual(report["status"], "ok")
+        self.assertIn("default_unverified", codes(report, "warning"))
+
+    def test_waived_clause_needs_the_locked_exception(self):
+        context = p.parse_context(self.lf.context)
+        exception = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = self.lf.fx.resolve(self.lf.context, exceptions=exception)
+        lock = lock_of(report, context)
+        path = self.lf.lock_path.with_name("waived.lock.json")
+        p.write_lock(self.lf.fx.roots(), path, lock)
+        task_map = dict(self.lf.task_map(), selection_digest=lock["selection_digest"])
+        p.map_lock(self.lf.fx.roots(), path, task_map, expected_lock_digest=p.content_digest(lock), write=True)
+        waived_lock = json.loads(path.read_text(encoding="utf-8"))
+        evidence = dict(self.evidence(**{"example.rules@1.0.0#MUST-1": {"status": "waived", "evidence_refs": ["EX-1"]}}),
+                        selection_digest=waived_lock["selection_digest"],
+                        mapping_digest=waived_lock["requirement_tasks"]["mapping_digest"])
+        result = self.review(evidence, lock=waived_lock)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(next(item for item in result["clauses"] if item["clause"].endswith("MUST-1"))["verdict"], "waived")
+
+    def test_stale_mapping_invalid_items_and_failed_verification(self):
+        stale = dict(self.evidence(), mapping_digest="0" * 64)
+        self.assertEqual(self.review(stale)["status"], "review-unmet")
+        for change, code in (({"task_ids": ["T3"]}, "invalid_evidence"), ({"status": "great"}, "invalid_evidence")):
+            with self.subTest(code=code):
+                with self.assertRaises(p.PatternError) as caught:
+                    self.review(self.evidence(**{"example.rules@1.0.0#DEF-1": change}))
+                self.assertEqual(caught.exception.code, code)
+        with self.assertRaises(p.PatternError) as caught:
+            self.review(dict(self.evidence(), selection_digest="0" * 64))
+        self.assertEqual(caught.exception.code, "evidence_selection_mismatch")
+        entry = next(item for item in self.lf.publish()["entries"] if item["id"] == "example.rules")
+        self.lf.publish(revocations=[{**{k: entry[k] for k in ("id", "version", "sha256")}, "reason": "r",
+                                      "reference": "SEC", "at": TS}])
+        report = self.review(self.evidence())
+        self.assertEqual((report["status"], report["clauses"]), ("unavailable", []),
+                         "sources are verified before any coverage is counted")
+
+    def test_unmapped_lock_is_refused_and_cli_exit_code(self):
+        unmapped = json.loads(json.dumps(self.lock))
+        unmapped["requirement_tasks"] = None
+        with self.assertRaises(p.PatternError) as caught:
+            self.review(self.evidence(), lock=unmapped)
+        self.assertEqual(caught.exception.code, "mapping_required")
+        envelope = self.lf.fx.write_json("roots.json", self.lf.fx.envelope())
+        context = self.lf.fx.write_json("context.json", self.lf.context)
+        evidence = self.lf.fx.write_json("evidence.json", self.evidence(**{"example.rules@1.0.0#MUST-1": None}))
+        code, report, stderr = self.lf.fx.cli("review", "--roots-file", envelope, "--lock", self.lf.lock_path,
+                                              "--context", context, "--evidence", evidence)
+        self.assertEqual((code, report["status"]), (7, "review-unmet"))
+        self.assertIn("mandatory_unmet", stderr)
+
+
+class LockTimeTests(unittest.TestCase):
+    """P3-R5-1: a lock is validated at its own creation time before it is returned or written."""
+
+    def test_k1_build_across_exception_expiry_is_refused_and_resume_expiry_still_blocks(self):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must")])
+        fx.publish(fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
+        context = p.parse_context(ctx())
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = fx.resolve(ctx(), exceptions=exceptions, today=dt.date(2026, 9, 28))
+        with self.assertRaises(p.PatternError) as caught:
+            p.build_lock(report, context, now=dt.datetime(2027, 1, 1, tzinfo=dt.timezone.utc))
+        self.assertEqual(caught.exception.code, "lock_refused")
+        lock = p.build_lock(report, context, now=dt.datetime(2026, 9, 28, tzinfo=dt.timezone.utc))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, context, today=dt.date(2026, 10, 1))["status"], "ok")
+        expired = p.verify_lock(fx.roots(), lock, context, today=dt.date(2027, 1, 1))
+        self.assertEqual(expired["status"], "conflict", "a genuinely expired exception still blocks continuation")
+        self.assertIn("replan_required", codes(expired, "error"))
+
+
+class StrictBaselineTests(unittest.TestCase):
+    """Regressions for independent review of d82b2919 (P2-R4-1, P3-R4-1): omission, laundering, status."""
+
+    def build(self, where):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must", "ui.theme", "dark"),
+                                                            clause("DEF-1", "default", "ui.density", "compact"),
+                                                            clause("REC-1", "recommendation")])
+        soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif"),
+                                                          clause("S-2", "default", "ui.density", "compact")])
+        bindings = [binding("req", [ref("repo.main", rules)]), binding("soft", [ref("repo.main", soft)], role="default")]
+        if where == "catalog":
+            fx.publish(fx.repo_patterns, "repo.main", [rules, soft], bindings=bindings)
+        else:
+            fx.publish(fx.repo_patterns, "repo.main", [rules, soft])
+            fx.repo_bindings(bindings)
+        report, _ = fx.resolve(ctx())
+        self.assertEqual({item["ref"]["id"] for item in report["selected"]}, {"example.rules", "example.soft"})
+        return fx, lock_of(report, p.parse_context(ctx()))
+
+    def reseal(self, lock, change):
+        forged = copy.deepcopy(lock)
+        change(forged)
+        forged["asset_pins"] = p.asset_refs(forged)
+        forged["status"] = "ready" if forged["selected"] else "empty"
+        forged["selection_digest"] = p.selection_digest(forged)
+        return forged
+
+    def outcome(self, fx, lock):
+        try:
+            return p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"]
+        except p.PatternError as error:
+            return error.status
+
+    @staticmethod
+    def drop_soft(value, keep_settings=False):
+        value["selected"] = [item for item in value["selected"] if item["ref"]["id"] != "example.soft"]
+        value["requirements"] = [item for item in value["requirements"] if not item["clause"].startswith("example.soft")]
+        if not keep_settings:
+            value["settings"].pop("ui.font")
+            value["settings"]["ui.density"]["clauses"] = [
+                item for item in value["settings"]["ui.density"]["clauses"] if not item.startswith("example.soft")]
+
+    def test_d1_whole_default_record_omission_on_unchanged_sources(self):
+        for where in ("repo", "catalog"):
+            with self.subTest(binding_location=where):
+                fx, lock = self.build(where)
+                self.assertEqual(self.outcome(fx, lock), "ok")
+                forged = self.reseal(lock, self.drop_soft)
+                self.assertEqual(self.outcome(fx, forged), "conflict")
+                report = p.verify_lock(fx.roots(), forged, p.parse_context(ctx()), today=TODAY)
+                self.assertIn("selection_changed", codes(report, "error"))
+                self.assertNotIn("default_baseline_changed", codes(report))
+
+    def test_d2_d3_setting_laundering_is_internally_inconsistent(self):
+        for where in ("repo", "catalog"):
+            fx, lock = self.build(where)
+            forged_winner = self.reseal(lock, lambda v: (self.drop_soft(v, keep_settings=True),
+                                                         v["settings"]["ui.font"].update(value="FORGED")))
+            forged_required_default = self.reseal(lock, lambda v: (self.drop_soft(v),
+                                                                   v["settings"]["ui.density"].update(value="FORGED")))
+            forged_value_only = self.reseal(lock, lambda v: v["settings"]["ui.font"].update(value="FORGED"))
+            for name, forged in (("D2 winner outside the lock", forged_winner),
+                                 ("D3 required record's default", forged_required_default),
+                                 ("value edit with no omission", forged_value_only)):
+                with self.subTest(binding_location=where, case=name):
+                    with self.assertRaises(p.PatternError) as caught:
+                        p.parse_lock(forged)
+                    self.assertEqual((caught.exception.code, caught.exception.status), ("invalid_lock", "invalid"))
+                    self.assertIn("internally inconsistent", caught.exception.message)
+
+    def test_dropped_clause_without_a_setting_is_detected(self):
+        fx, lock = self.build("repo")
+        forged = self.reseal(lock, lambda v: v["requirements"].remove(
+            next(item for item in v["requirements"] if item["clause"].endswith("#REC-1"))))
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(forged)
+        self.assertIn("exactly the clauses", caught.exception.message)
+        both = self.reseal(lock, lambda v: (v["requirements"].remove(
+            next(item for item in v["requirements"] if item["clause"].endswith("#REC-1"))),
+            v["selected"][0]["clauses"].remove("example.rules@1.0.0#REC-1")))
+        self.assertEqual(self.outcome(fx, both), "invalid", "also dropping it from the record contradicts the pinned body")
+
+    def test_genuine_later_default_addition_and_removal_force_a_replan(self):
+        fx, lock = self.build("repo")
+        rules = json.loads((fx.repo_patterns / "example.rules" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        fx.repo_bindings([binding("req", [ref("repo.main", rules)])])
+        self.assertEqual(self.outcome(fx, lock), "conflict", "a removed default binding is a re-plan")
+        fx2 = Fixture(self)
+        fx2.publish(fx2.repo_patterns, "repo.main", [rules])
+        fx2.repo_bindings([binding("req", [ref("repo.main", rules)])])
+        report, _ = fx2.resolve(ctx())
+        small = lock_of(report, p.parse_context(ctx()))
+        soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif")])
+        fx2.publish(fx2.repo_patterns, "repo.main", [rules, soft])
+        self.assertEqual(p.verify_lock(fx2.roots(), small, p.parse_context(ctx()), today=TODAY)["status"], "ok",
+                         "an unbound catalog addition does not disturb the pin")
+        fx2.repo_bindings([binding("req", [ref("repo.main", rules)]), binding("soft", [ref("repo.main", soft)],
+                                                                             role="default")])
+        self.assertEqual(p.verify_lock(fx2.roots(), small, p.parse_context(ctx()), today=TODAY)["status"], "conflict",
+                         "a genuine later default binding is a re-plan, not a silent change")
+
+    def test_p3_r4_1_deprecated_at_lock_resealed_as_approved(self):
+        fx = Fixture(self)
+        rules = make_pattern("example.rules")
+        catalog = fx.publish(fx.repo_patterns, "repo.main", [rules])
+        entry = catalog["entries"][0]
+        fx.publish(fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])],
+                   lifecycle=[{**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated",
+                               "reason": "r", "reference": "ADR", "at": TS}])
+        report, _ = fx.resolve(ctx())
+        lock = lock_of(report, p.parse_context(ctx()))
+        self.assertEqual(lock["selected"][0]["effective_status"], "deprecated")
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        forged = self.reseal(lock, lambda v: v["selected"][0].update(effective_status="approved"))
+        verified = p.verify_lock(fx.roots(), forged, p.parse_context(ctx()), today=TODAY)
+        self.assertEqual(verified["status"], "conflict", "unchanged catalog: the lock cannot claim it was approved")
+        self.assertIn("selection_provenance_changed", codes(verified, "error"))
+
+    def test_override_waiver_empty_map_and_project_still_verify(self):
+        fx, lock = self.build("repo")
+        context = p.parse_context(ctx())
+        overrides = p.parse_overrides({"schema_version": 1, "items": [{
+            "setting": "ui.font", "value": "mono", "reason": "brief", "approval_ref": "brief.md",
+            "replaces": ["example.soft@1.0.0#S-1"]}]})
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = fx.resolve(ctx(), overrides=overrides, exceptions=exceptions)
+        self.assertEqual(report["settings"]["ui.font"]["winner"], "override")
+        special = lock_of(report, context)
+        self.assertEqual(p.parse_lock(special)["settings"]["ui.font"]["value"], "mono",
+                         "a legitimate override winner passes the settle re-derivation")
+        verified = p.verify_lock(fx.roots(), special, context, today=TODAY)
+        self.assertEqual(verified["status"], "ok")
+        empty_report, _ = fx.resolve(ctx(artifact="x"), refs=())
+        fx3 = Fixture(self)
+        empty_report, _ = fx3.resolve(ctx())
+        empty = lock_of(empty_report, p.parse_context(ctx()))
+        self.assertEqual(p.verify_lock(fx3.roots(), empty, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        path = fx.repo / "l.lock.json"
+        p.write_lock(fx.roots(), path, lock)
+        task_map = {"schema_version": 1, "selection_digest": lock["selection_digest"], "tasks": ["T1"],
+                    "packages": [{"id": "P1", "tasks": ["T1"]}],
+                    "clauses": [{"clause": item["clause"], "tasks": ["T1"]} for item in lock["requirements"]
+                                if item["state"] in ("mandatory", "default")]}
+        p.map_lock(fx.roots(), path, task_map, expected_lock_digest=p.content_digest(lock), write=True)
+        mapped = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), mapped, context, today=TODAY)["status"], "ok")
+        self.assertEqual(len(p.project_package(mapped, task_map, "P1")["clauses"]), len(task_map["clauses"]))
+
+
+class CoreReviewTests(unittest.TestCase):
+    """Regressions for independent review of c92ae4dc (P1-C92-1, P3-C92-1..9), using real flows."""
+
+    GUIDE = b"# dashboard guide\n"
+    EVIDENCE = b"approved policy excerpt\n"
+
+    def setUp(self):
+        self.fx = Fixture(self)
+
+    def asset(self, path="guide.md", data=GUIDE):
+        return {"path": path, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()}
+
+    def version_dir(self, root, pid, version):
+        return root / pid / version
+
+    def files(self, root, pid, version):
+        return sorted(item.name for item in self.version_dir(root, pid, version).iterdir())
+
+    def test_p1_import_children_first_approve_then_read_asset_and_re_export(self):
+        src_root = self.fx.personal_patterns
+        child = make_pattern("example.child", assets=[self.asset()])
+        parent = make_pattern("example.parent", requirements=[], includes=[ref("team.src", child)])
+        self.fx.publish(src_root, "team.src", [child, parent])
+        (src_root / "example.child" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        bundle = self.fx.root / "bundle"
+        p.export_bundle(self.fx.roots(), [p.parse_exact_ref(ref("team.src", parent), "r")], bundle)
+        mapping = [{"original": ref("team.src", child), "id": "local.child", "version": "0.1.0"},
+                   {"original": ref("team.src", parent), "id": "local.parent", "version": "0.1.0"}]
+        imported = p.import_bundle(self.fx.roots(), bundle, scope="repo", destination_source="repo.local",
+                                   version_map_value=mapping, write=True)
+        child_draft = next(item["destination"] for item in imported["mapping"] if item["destination"]["id"] == "local.child")
+        root = self.fx.repo_patterns
+        child_ok = p.approve(self.fx.roots(), root / "local.child" / "0.1.0" / "pattern.json", version="1.0.0",
+                             approval_value=APPROVAL, expected_digest=child_draft["sha256"])
+        self.assertEqual(self.files(root, "local.child", "1.0.0"), ["guide.md", "pattern.json"])
+        parent_draft = json.loads((root / "local.parent" / "0.1.0" / "pattern.json").read_text(encoding="utf-8"))
+        updated = dict(copy.deepcopy(parent_draft), version="0.2.0", includes=[child_ok["ref"]])
+        p.update(self.fx.roots(), root / "local.parent" / "0.1.0" / "pattern.json", updated,
+                 expected_digest=p.content_digest(parent_draft), write=True)
+        parent_ok = p.approve(self.fx.roots(), root / "local.parent" / "0.2.0" / "pattern.json", version="1.0.0",
+                              approval_value=APPROVAL, expected_digest=p.content_digest(updated))
+        self.fx.repo_bindings([binding("b", [parent_ok["ref"]])])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        lock = lock_of(report, p.parse_context(ctx()))
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        guide = p.asset_refs(lock)[0]
+        self.assertEqual(p.read_asset(self.fx.roots(), guide, selection=lock), self.GUIDE)
+        self.assertEqual(p.check_sources(self.fx.roots())["status"], "ok")
+        again = p.export_bundle(self.fx.roots(), [p.parse_exact_ref(parent_ok["ref"], "r")], self.fx.root / "bundle-2")
+        self.assertEqual(again["files"], 3, "re-export carries pattern, child and its asset")
+
+    def test_p1_update_then_approve_carries_assets_and_pattern_sources(self):
+        root = self.fx.repo_patterns
+        source = dict(statement(), root="pattern", ref="evidence.md",
+                      sha256=hashlib.sha256(self.EVIDENCE).hexdigest())
+        base = make_pattern("example.visual", assets=[self.asset()], sources=[source])
+        self.fx.publish(root, "repo.main", [base])
+        (root / "example.visual" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        (root / "example.visual" / "1.0.0" / "evidence.md").write_bytes(self.EVIDENCE)
+        (root / "example.visual" / "1.0.0" / "unrelated-private.md").write_bytes(b"do not copy\n")
+        newer = dict(copy.deepcopy(base), version="1.1.0", status="draft")
+        newer.pop("approval")
+        p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", newer,
+                 expected_digest=p.content_digest(base), write=True)
+        self.assertEqual(self.files(root, "example.visual", "1.1.0"), ["evidence.md", "guide.md", "pattern.json"],
+                         "unchanged declared files come from the previous version; nothing else is copied")
+        approved = p.approve(self.fx.roots(), root / "example.visual" / "1.1.0" / "pattern.json", version="1.2.0",
+                             approval_value=APPROVAL, expected_digest=p.content_digest(newer))
+        self.assertEqual(self.files(root, "example.visual", "1.2.0"), ["evidence.md", "guide.md", "pattern.json"])
+        self.fx.repo_bindings([binding("b", [approved["ref"]])])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(p.read_asset(self.fx.roots(), p.asset_refs(report)[0], selection=report,
+                                      context=p.parse_context(ctx())), self.GUIDE)
+        attestation = p.parse_attestations({"schema_version": 1, "items": [{
+            "ref": approved["ref"], "source_index": 0, "source_ref": "evidence.md",
+            "source_digest": hashlib.sha256(self.EVIDENCE).hexdigest(), "reviewed_by": "r", "review_ref": "R",
+            "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}]})
+        self.assertEqual(self.fx.resolve(ctx(), attestations=attestation)[0]["status"], "ready",
+                         "the carried pattern-root source still attests")
+
+    def test_p1_missing_or_tampered_files_fail_before_publication(self):
+        root = self.fx.repo_patterns
+        base = make_pattern("example.visual", assets=[self.asset()])
+        self.fx.publish(root, "repo.main", [base])
+        (root / "example.visual" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        changed = dict(copy.deepcopy(base), version="1.1.0", status="draft",
+                       assets=[self.asset("new.md", b"new asset\n")])
+        changed.pop("approval")
+        before = tree_digest(root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                     expected_digest=p.content_digest(base), write=True)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("declared_file_missing", "unavailable"))
+        self.assertEqual(tree_digest(root), before)
+        incoming = self.fx.root / "incoming"
+        incoming.mkdir()
+        (incoming / "new.md").write_bytes(b"tampered\n")
+        with self.assertRaises(p.PatternError) as caught:
+            p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                     expected_digest=p.content_digest(base), write=True, files_from=incoming)
+        self.assertEqual(caught.exception.code, "declared_file_changed")
+        self.assertEqual(tree_digest(root), before)
+        (incoming / "new.md").write_bytes(b"new asset\n")
+        p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                 expected_digest=p.content_digest(base), write=True, files_from=incoming)
+        self.assertEqual(self.files(root, "example.visual", "1.1.0"), ["new.md", "pattern.json"])
+        draft_file = root / "example.visual" / "1.1.0" / "new.md"
+        draft_file.write_bytes(b"edited after capture\n")
+        before = tree_digest(root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.fx.roots(), root / "example.visual" / "1.1.0" / "pattern.json", version="1.2.0",
+                      approval_value=APPROVAL, expected_digest=p.content_digest(changed))
+        self.assertEqual(caught.exception.code, "declared_file_changed")
+        self.assertEqual(tree_digest(root), before, "old tree and catalog unchanged")
+
+    def test_p1_capture_carries_declared_files_and_check_detects_missing_ones(self):
+        work = self.fx.root / "authoring"
+        work.mkdir()
+        (work / "guide.md").write_bytes(self.GUIDE)
+        value = draft("example.captured", assets=[self.asset()])
+        with self.assertRaises(p.PatternError) as caught:
+            p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main")
+        self.assertEqual(caught.exception.code, "declared_file_missing")
+        self.assertFalse((self.fx.repo_patterns / "catalog.json").exists())
+        p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=work)
+        self.assertEqual(self.files(self.fx.repo_patterns, "example.captured", "0.1.0"), ["guide.md", "pattern.json"])
+        self.assertEqual(p.check_sources(self.fx.roots())["status"], "ok")
+        (self.fx.repo_patterns / "example.captured" / "0.1.0" / "guide.md").unlink()
+        reader = p.Reader()
+        listed = p.list_catalogs(self.fx.roots(), reader)
+        self.assertEqual((listed["status"], reader.count("asset")), ("ok", 0), "list stays metadata-only")
+        checked = p.check_sources(self.fx.roots())
+        self.assertEqual((checked["status"], checked["checked"][0]["status"]), ("unavailable", "unavailable"))
+        self.assertIn("declared_file_missing", codes(checked, "error"))
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        source = work / "second.json"
+        second = draft("example.second", assets=[self.asset()])
+        source.write_text(json.dumps(second), encoding="utf-8")
+        code, report, _ = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                      "--name", "example.second", "--expected-catalog-digest",
+                                      p.content_digest(json.loads((self.fx.repo_patterns / "catalog.json")
+                                                                  .read_text(encoding="utf-8"))))
+        self.assertEqual(code, 0, "the CLI takes declared files from the input file's directory")
+        self.assertEqual(self.files(self.fx.repo_patterns, "example.second", "0.1.0"), ["guide.md", "pattern.json"])
+
+    def test_p3_1_lifecycle_preview_applies_the_write_rules(self):
+        retired = make_pattern("example.retired")
+        drafty = draft("example.drafty")
+        catalog = self.fx.publish(self.fx.repo_patterns, "repo.main", [retired, drafty])
+        entry = catalog["entries"][0]
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [retired, drafty], lifecycle=[
+            {**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "retired", "reason": "r",
+             "reference": "ADR", "at": TS}])
+        record = {"reason": "r", "reference": "x", "at": "2026-09-20T00:00:00Z"}
+        for ref_text, action in (("repo.main:example.retired@1.0.0", "deprecate"),
+                                 ("repo.main:example.drafty@0.1.0", "deprecate")):
+            with self.subTest(ref=ref_text):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.record_lifecycle(self.fx.roots(), ref_text, action=action, record_value=record,
+                                       expected_catalog_digest=None)
+                self.assertIn("transition", caught.exception.message)
+        preview = p.record_lifecycle(self.fx.roots(), "repo.main:example.retired@1.0.0", action="revoke",
+                                     record_value=record, expected_catalog_digest=None)
+        self.assertEqual(preview["catalog_sha256"], p.content_digest(json.loads(
+            (self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8"))), "preview returns the CAS digest")
+
+    def test_p3_2_default_url_source_warns(self):
+        url = make_pattern("example.url", requirements=[clause("D-1", "default")],
+                           sources=[dict(statement(), root="external", ref="https://standards.example/doc")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [url],
+                        bindings=[binding("d", [ref("repo.main", url)], role="default")])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        self.assertIn("source_unverified_default", codes(report, "warning"))
+
+    def test_p3_3_p3_4_attestation_inputs_are_validated(self):
+        rules = make_pattern("example.rules")
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
+        report, _ = self.fx.resolve(ctx())
+        lock = lock_of(report, p.parse_context(ctx()))
+        good = {"ref": ref("repo.main", rules), "source_index": 0, "source_ref": rules["sources"][0]["ref"],
+                "source_digest": "a" * 64, "reviewed_by": "r", "review_ref": "R",
+                "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}
+        for raw in ([{}], ["x"], "x", [good, good], [dict(good, source_index=-1)]):
+            with self.subTest(raw=str(raw)[:30]):
+                with self.assertRaises(p.PatternError):
+                    self.fx.resolve(ctx(), attestations=raw)
+                with self.assertRaises(p.PatternError):
+                    p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), attestations=raw, today=TODAY)
+        self.assertEqual(self.fx.resolve(ctx(), attestations=[good])[0]["status"], "ready", "raw valid items work")
+        junk = dict(copy.deepcopy(lock), source_attestations=[{"junk": 1}])
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(junk)
+        self.assertEqual(caught.exception.status, "invalid")
+
+    def test_p3_5_p3_6_p3_7_apply_refuses_unavailable_refs_and_creates_parents(self):
+        fx = Fixture(self)
+        shutil.rmtree(fx.repo / ".claude")
+        rules = make_pattern("example.rules")
+        ghost = {"source": "repo.main", "id": "example.ghost", "version": "1.0.0", "sha256": "0" * 64}
+        change = {"schema_version": 1, "operation": "add", "id": "g", "binding": binding("g", [ghost]),
+                  "reason": "r", "approved_by": "a", "approval_ref": "b"}
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(fx.roots(), change)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("binding_ref_unavailable", "unavailable"))
+        self.assertFalse((fx.repo / ".claude").exists())
+        pack_root = fx.pack_chain()
+        fx.publish(pack_root / "patterns", "team.patterns", [rules])
+        real = dict(change, binding=binding("g", [ref("team.patterns", rules)]))
+        written = p.apply_change(fx.roots(), real, write=True)
+        self.assertTrue(written["written"])
+        self.assertTrue((fx.repo / ".claude" / "patterns" / "bindings.json").is_file(), "missing parents are created")
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(fx.roots(), dict(real, operation="replace"), write=True)
+        self.assertIn("--expected-digest", caught.exception.message)
+        self.assertIn("bindings", caught.exception.message)
+
+    def test_p3_8_import_preflights_every_destination(self):
+        src_root = self.fx.personal_patterns
+        child = make_pattern("example.child", assets=[self.asset()])
+        self.fx.publish(src_root, "team.src", [child])
+        (src_root / "example.child" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        bundle = self.fx.root / "bundle"
+        p.export_bundle(self.fx.roots(), [p.parse_exact_ref(ref("team.src", child), "r")], bundle)
+        blocked = self.fx.repo_patterns / "local.child" / "0.1.0"
+        blocked.mkdir(parents=True)
+        (blocked / "pattern.json").write_text("{}", encoding="utf-8")
+        with self.assertRaises(p.PatternError) as caught:
+            p.import_bundle(self.fx.roots(), bundle, scope="repo", destination_source="repo.local",
+                            version_map_value=[{"original": ref("team.src", child), "id": "local.child",
+                                                "version": "0.1.0"}], write=True)
+        self.assertEqual(caught.exception.code, "unregistered_staging_conflict")
+        self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["pattern.json"], "no orphaned asset")
 
 
 if __name__ == "__main__":
