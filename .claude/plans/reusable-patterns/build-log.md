@@ -725,6 +725,19 @@ by design; the digest catches them.
 
 ## Authorized harness correction: `tests/integration/design-contract.py` (inherited failure)
 
+Attribution: `tests/integration/design-contract.py` is added ONLY to the coordinator/INT reserved
+paths (`coordinator_paths`, and the INT package boundary in plan.md). It is not in the CORE worker
+`write_scope`, and `tests/` as a whole is not reserved. This is an explicitly authorized early
+validation-harness correction, not the start of INT generators or docs.
+
+The commits are separate and attributed:
+- `67cb2ef4` is the harness fix, a coordinator/INT write.
+- `1f7784e5` is the CORE worker's public helper.
+
+The recorded acceptance is the actual 18-case runner, with its exact `source_revision`, under the
+controlled synthetic empty setting. The parent's `--git-dir` repro only diagnosed the configuration
+failure.
+
 - **Scope extension.** The parent authorized one directly coupled correction to
   `tests/integration/design-contract.py`, which the integration coordinator owns (not WF).
 - **Inherited failure.** The design-contract epilogue failed with exit 128 before any pattern
@@ -746,6 +759,17 @@ by design; the digest catches them.
 
   The before run used a temporary `git stash push`/`pop` of this one file in my own worktree. No
   history was changed.
+
+## Attribution of `132bb9bb..67cb2ef4` (complete, unfiltered)
+
+- **`1f7784e5`:** `lib/patterns.py` and `tests/unit/patterns.py` are CORE worker paths.
+  `.claude/plans/reusable-patterns/contract.md` and `build-log.md` are coordinator writes by the
+  same session. `li-swarm check-scope --task CORE --actor worker` over all four paths reports the
+  two plan files as outside CORE scope, correctly, and passes the other two.
+- **`67cb2ef4`:** `tests/integration/design-contract.py` is a coordinator/INT reserved path, plus
+  the coordinator's `build-log.md`.
+- The metadata commit that follows reserves `design-contract.py` in `coordinator_paths`.
+  `li-swarm validate` is ok and the map validator exits 0.
 
 ## Pending
 

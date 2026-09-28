@@ -23,7 +23,8 @@
     "skills/pack-validate",
     "tests/integration/pattern-portability.py",
     "tests/integration/pattern-portability.sh",
-    "tests/shape/pattern-contract.sh"
+    "tests/shape/pattern-contract.sh",
+    "tests/integration/design-contract.py"
   ],
   "scope_rules": {
     "worker": "write_scope+own_report",
