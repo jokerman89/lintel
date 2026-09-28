@@ -41,7 +41,7 @@ __all__ = (
     "parse_task_map", "map_lock", "project_package", "capture", "index_source", "approve",
     "asset_refs", "read_asset", "dependents", "record_lifecycle", "update",
     "parse_attestations", "merge_attestations", "apply_change", "record_attestations", "remove",
-    "parse_review_evidence", "review_coverage", "export_bundle", "import_bundle",
+    "parse_review_evidence", "review_coverage", "export_bundle", "import_bundle", "validate_selection_report",
 )
 
 SCHEMA_VERSION = 1
@@ -2907,6 +2907,41 @@ def asset_refs(report: Mapping[str, Any], *, kind: Optional[str] = None, phase: 
                                             item["pattern"]["version"], item["path"]))
 
 
+def validate_selection_report(report: Mapping[str, Any], *, context: Optional[Context],
+                              refs: Sequence[Any] = ()) -> Mapping[str, Any]:
+    """Accept a fresh, in-process resolution report as a selection, or raise PatternError.
+
+    The report must be `ready` or `empty` with a `selection_digest`, carry no draft preview, have been
+    resolved for `context` (its `context_digest`), and its `selection_digest` must still equal the
+    digest recomputed from its own content, `context` and `refs` (the invocation refs it was resolved
+    with; parsed `InvocationRef`s or raw `--refs` items). This is the same shared digest definition the
+    lock uses. It detects edits relative to that content; it does not authenticate who produced the
+    report. Anything persisted or passed between processes or lanes must instead be a lock that passed
+    `verify_lock`. No file is read. Returns the same report on success.
+    """
+    if not isinstance(report, Mapping) or "created_at" in report:
+        _fail("selection_not_usable", "expected a resolution report; persisted selections are locks (verify_lock)")
+    if report.get("status") not in ("ready", "empty") or not isinstance(report.get("selection_digest"), str):
+        _fail("selection_not_usable", "a report selection must be a ready or empty resolution with a selection_digest")
+    if any(key not in report for key in REPORT_KEYS):
+        _fail("selection_not_usable", "the report lacks resolution report fields")
+    if any(not isinstance(item, Mapping) or item.get("preview") for item in report["selected"]):
+        _fail("selection_not_usable", "a draft preview is never a selection")
+    if not isinstance(context, Context):
+        _fail("selection_not_usable", "a report selection needs the parsed context it was resolved from")
+    parsed = parse_refs([item for item in refs]) if refs and not all(isinstance(item, InvocationRef) for item in refs) \
+        else tuple(refs)
+    try:
+        recomputed = selection_digest(_lock_material(report, context, parsed))
+    except (KeyError, TypeError) as error:
+        _fail("selection_not_usable", f"the report is malformed ({type(error).__name__}: {error})")
+    if report.get("context_digest") != context.digest or recomputed != report["selection_digest"]:
+        _fail("selection_not_usable", "a report selection is accepted only in-process with the context and refs it "
+              "was resolved from, and only when its selection_digest still matches its content; use a lock for "
+              "anything persisted or passed between processes")
+    return report
+
+
 def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[str] = None,
                domain: Optional[str] = None, reader: Optional[Reader] = None,
                selection: Optional[Mapping[str, Any]] = None, context: Optional[Context] = None,
@@ -2930,14 +2965,8 @@ def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[st
     if selection is not None:
         if "created_at" in selection:
             selection = parse_lock(selection)
-        elif selection.get("status") not in ("ready", "empty") or selection.get("selection_digest") is None:
-            _fail("selection_not_usable", "asset selection requires a lock or a ready/empty report with a "
-                  "selection_digest")
-        elif context is None or selection.get("context_digest") != context.digest or \
-                selection_digest(_lock_material(selection, context, refs)) != selection["selection_digest"]:
-            _fail("selection_not_usable", "a report selection is accepted only in-process with the context and "
-                  "refs it was resolved from, and only when its selection_digest still matches its content; "
-                  "use a lock for anything persisted or passed between processes")
+        else:
+            selection = validate_selection_report(selection, context=context, refs=refs)
         if dict(asset_ref) not in asset_refs(selection):
             _fail("asset_not_selected", f"{asset_ref.get('path')} is not an asset of the supplied selection",
                   status="unavailable")

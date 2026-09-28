@@ -297,6 +297,31 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R10 (2026-09-28, WF review M2: shared fresh-report validation)
+
+The check `read_asset` already applied to a report selection is now one public helper that
+`read_asset` and the visual adapter both call:
+
+`validate_selection_report(report, *, context, refs=()) -> report`
+
+It raises `PatternError` `selection_not_usable` (invalid) in any of these cases:
+- the input is a lock or not a report;
+- the status is not `ready` or `empty`;
+- there is no `selection_digest`;
+- report fields are missing;
+- a record is a draft preview;
+- the context is missing, or differs from the report's `context_digest`;
+- the `selection_digest` does not equal the digest recomputed from the report's own content,
+  `context` and `refs`, using the same `_lock_material` definition as the lock.
+
+`refs` may be parsed `InvocationRef`s or raw `--refs` items, which are parsed with the same parser.
+The helper reads no file and returns the same report.
+
+Scope of the guarantee: it detects edits relative to the report's own content; it does not
+authenticate the producer. Fresh reports are in-process only. Anything persisted, or passed
+between entries, processes or lanes, must be a lock that passed `verify_lock`. The context and
+preview checks duplicate what the digest already covers, and give clearer messages.
+
 ## Revision R9 (2026-09-28, independent review of `445e3ad9`: P3-R8-1, P3-R8-2)
 
 The shared namespace check compares every planned file key and every proper directory prefix of

@@ -696,6 +696,33 @@ Results:
   - `li-swarm validate` is ok;
   - the guard reports only the known pending WF finding.
 
+## Revision R10 (WF review M2: public report validation helper)
+
+The parent authorized this core interface action. The WF review report
+(`wf-visual-independent-review.md`, reviewer 24bf5df0) was read only. M2: the visual adapter
+trusted a raw report after checking only its key and digest format, while `read_asset` already
+recomputed the digest.
+
+The fix extracts that existing check as `validate_selection_report`, and `read_asset` now calls it.
+There is no new digest policy, parser, cache or authority. The WF adapter adopts the helper in its
+own lane.
+
+`SelectionReportTests` (6 cases):
+- a fresh ready or empty report is accepted with file reads forbidden, both `Reader.read` and
+  `open` monkeypatched to raise;
+- missing or wrong context, missing refs, raw versus parsed refs, and invalid raw refs;
+- edits with an unchanged digest are refused: the M2 repro (setting value `9999px`), requirement
+  text and state, selected assets, an added record, and exceptions;
+- invalid states: needs-context, no digest, a lock, missing keys, a preview, a non-mapping, and a
+  status edited to `conflict` or `needs-context`;
+- legitimate overrides and waivers pass;
+- `read_asset` refuses the M2 tampered report through the same helper.
+
+`python -I -B tests\unit\patterns.py` -> exit 0, 132 tests OK. Mutation probe (restored
+byte-identical): removing the digest recompute, the status check, or `read_asset`'s use of the
+helper each fails at least one test. The context and preview checks are redundant with the digest
+by design; the digest catches them.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

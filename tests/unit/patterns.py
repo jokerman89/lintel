@@ -2701,6 +2701,107 @@ class LockTimeTests(unittest.TestCase):
         self.assertIn("replan_required", codes(expired, "error"))
 
 
+class SelectionReportTests(unittest.TestCase):
+    """WF review M2: one public helper validates fresh in-process reports (the read_asset floor)."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.rules = make_pattern("example.rules", requirements=[
+            clause("MUST-1", "must", "ui.theme", "dark"), clause("DEF-1", "default", "visual.layout.max-width", "72ch")],
+            assets=[{"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(b"g\n").hexdigest()}])
+        self.extra = make_pattern("example.extra", requirements=[clause("E-1", "default", "ui.font", "serif")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.extra])
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)])])
+        self.context = p.parse_context(ctx())
+        self.report, _ = self.fx.resolve(ctx())
+
+    def refused(self, report, **kwargs):
+        kwargs.setdefault("context", self.context)
+        with self.assertRaises(p.PatternError) as caught:
+            p.validate_selection_report(report, **kwargs)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("selection_not_usable", "invalid"))
+
+    def test_fresh_report_is_accepted_without_reading_files(self):
+        empty, _ = Fixture(self).resolve(ctx())
+        original_read, original_open = p.Reader.read, open
+
+        def forbidden(*_args, **_kwargs):
+            raise AssertionError("validate_selection_report must not read files")
+
+        p.Reader.read = forbidden
+        self.addCleanup(setattr, p.Reader, "read", original_read)
+        import builtins
+        builtins.open = forbidden
+        try:
+            self.assertIs(p.validate_selection_report(self.report, context=self.context), self.report)
+            self.assertEqual(p.validate_selection_report(empty, context=self.context)["status"], "empty")
+        finally:
+            builtins.open = original_open
+            p.Reader.read = original_read
+
+    def test_missing_or_wrong_context_and_refs(self):
+        self.refused(self.report, context=None)
+        self.refused(self.report, context=p.parse_context(ctx(artifact="other")))
+        refs_raw = [{"ref": ref("repo.main", self.extra), "role": "default", "approved_by": "me", "approval_ref": "task"}]
+        with_refs, _ = self.fx.resolve(ctx(), refs=p.parse_refs(refs_raw))
+        self.refused(with_refs)
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=p.parse_refs(refs_raw)), with_refs)
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=refs_raw), with_refs,
+                      "raw --refs items are parsed with the same parser")
+        with self.assertRaises(p.PatternError):
+            p.validate_selection_report(with_refs, context=self.context, refs=[{"bad": 1}])
+
+    def test_edits_with_unchanged_digest_are_refused(self):
+        edits = {
+            "setting value (M2 repro)": lambda r: r["settings"]["visual.layout.max-width"].update(value="9999px"),
+            "requirement text": lambda r: r["requirements"][0].update(text="weakened"),
+            "requirement state": lambda r: r["requirements"][0].update(state="waived"),
+            "selected assets": lambda r: r["selected"][0].update(assets=[]),
+            "selected record added": lambda r: r["selected"].append(dict(copy.deepcopy(r["selected"][0]),
+                                                                         ref=ref("repo.main", self.extra))),
+            "exceptions": lambda r: r["exceptions"].append({"clause": "x"}),
+        }
+        for name, change in edits.items():
+            with self.subTest(name=name):
+                edited = copy.deepcopy(self.report)
+                change(edited)
+                self.refused(edited)
+
+    def test_invalid_states_and_shapes(self):
+        needs, _ = self.fx.resolve(ctx(), refs=p.parse_refs([{"ref": ref("repo.main", make_pattern(
+            "example.scoped", applies_to={"target": ["prod"]})), "role": "required", "approved_by": "m",
+            "approval_ref": "t"}]))
+        for label, value in (("needs-context", needs), ("no digest", dict(self.report, selection_digest=None)),
+                             ("lock", p.build_lock(self.report, self.context, now=NOW)),
+                             ("missing keys", {"status": "ready", "selection_digest": "0" * 64}),
+                             ("preview", dict(copy.deepcopy(self.report), selected=[
+                                 dict(self.report["selected"][0], preview=True)])),
+                             ("not a mapping", ["x"]),
+                             ("status edited to conflict", dict(self.report, status="conflict")),
+                             ("status edited to empty", dict(self.report, status="needs-context"))):
+            with self.subTest(label=label):
+                self.refused(value)
+
+    def test_legitimate_overrides_and_waivers_pass(self):
+        overrides = p.parse_overrides({"schema_version": 1, "items": [{
+            "setting": "visual.layout.max-width", "value": "80ch", "reason": "brief", "approval_ref": "b",
+            "replaces": ["example.rules@1.0.0#DEF-1"]}]})
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": self.context.digest, "reason": "pilot",
+            "approval_ref": "EX", "approved_by": "sec", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = self.fx.resolve(ctx(), overrides=overrides, exceptions=exceptions)
+        self.assertEqual(report["settings"]["visual.layout.max-width"]["value"], "80ch")
+        self.assertIs(p.validate_selection_report(report, context=self.context), report)
+
+    def test_read_asset_uses_the_same_helper(self):
+        tampered = copy.deepcopy(self.report)
+        tampered["settings"]["visual.layout.max-width"]["value"] = "9999px"
+        asset = p.asset_refs(self.report)[0]
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), asset, selection=tampered, context=self.context)
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+
+
 class StrictBaselineTests(unittest.TestCase):
     """Regressions for independent review of d82b2919 (P2-R4-1, P3-R4-1): omission, laundering, status."""
 
