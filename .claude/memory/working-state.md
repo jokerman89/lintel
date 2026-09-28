@@ -8,6 +8,26 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Reusable patterns (2026-09-28)
+
+**Status:** INCOMPLETE and BLOCKED on branch `jokerman-microsoft-patterns-core-integration`.
+- Product bytes are frozen at `fdb9f27b`. Record heads are `ebd087ec` (ledger corrections) and
+  `9e56dc79` (swarm records).
+- Linux strict full suite: 169/169 PASS on `fdb9f27b`. Windows: no valid verdict; the parallel
+  runs were not CI-equivalent (inherited environment and load).
+- WF 4.3.c and 5.2.a host gates remain unmet. The shared Swarm profile stays null, so shared lane
+  acceptance is blocked.
+- No P05 review, QA or release record exists. Not pushed (403).
+- The CORE owner created `C:\lp` against L-050. It was stopped and preserved untouched pending
+  the operator's recovery decision.
+
+**What's pending:** see [handoff](../plans/reusable-patterns/handoff.md):
+- the operator's recovery decision;
+- an authorized Windows rerun;
+- WF host observations;
+- final independent review/QA/corroboration;
+- GitHub write access.
+
 ## Active - Supported clients narrowed to four families (2026-09-25)
 
 **Status:** delivered. After converging onto #104 with ordinary merge `66b56aa4` of `22d502be`,

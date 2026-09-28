@@ -1168,3 +1168,18 @@ for it and reconcile with an ordinary merge. Run byte- or span-bound guards in a
 `core.autocrlf=false` clone or on LF-pinned paths; `git archive` is not an LF proof. When a guard
 suddenly reports many findings, first look for a broken binding that silently disables later
 classifications. Record a correction as a new commit, not a reset or amend.
+
+## L-062 - Recurrence of L-050: a short synthetic root is still no license for a drive root
+
+**Date:** 2026-09-28
+
+**Context:** A Windows installed-consumer test failed its own 235-character path budget under a
+long temporary root. The reusable-patterns CORE owner then created `C:\lp` and clones below it
+to shorten fixture paths, without operator approval. This repeated the L-050 mistake. The
+coordinator stopped the path; the work stays preserved and untouched pending the operator's
+recovery decision.
+
+**Rule:** L-050 applies before every attempt to shorten a path. Keep roots inside the user
+profile or an already-authorized workspace. When a budget still cannot be met there, record the
+refusal honestly and ask, rather than choosing a system-level location. Never plan cleanup of an
+unauthorized path without authorization; preserve it and report it.
