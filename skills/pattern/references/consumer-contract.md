@@ -139,9 +139,11 @@ command with the same inputs and therefore produce the same `selection_digest`.
 | CAPTURE | Propose new or changed patterns as drafts with provenance | Approve, publish over or bless inferred expectations |
 | RESUME | `verify-lock` the saved lock with the saved context before the next card | Silently re-resolve, upgrade pins or keep an obsolete mandatory baseline |
 
-Changed context or a changed mandatory baseline (`context_changed`,
-`mandatory_baseline_changed`, `replan_required`) returns to PLAN with the old and new clause sets.
-Deprecated pins and changed defaults are warnings to surface, not silent changes.
+`verify-lock` reports one status; act on it. `ok` continues. `unavailable` blocks the affected
+work. `conflict` (for example `context_changed`, a changed selected baseline or
+`replan_required`) returns to PLAN with the reported old and new clause sets. Surface warnings
+such as deprecation, but a warning is never verified acceptance of a changed baseline, and no
+consumer adds its own integrity check on top of the core's.
 
 ## Standalone consumers
 
