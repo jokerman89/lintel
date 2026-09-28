@@ -20,7 +20,9 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
   required before main.
 - PDF/Word pages are artifact QA, and the six per-consumer cells are disclosed deferrals.
 - A genuine neutral P07 reference exists; verify it is current before use.
-- No P05 review, QA or release record exists. Not pushed (403).
+- No P05 review, QA or release record exists. Not pushed: the branch awaits the accepted
+  integration and CI stage. Master owns the working Git/API/CI transport; the app PR tool's EMU
+  403 on the separate L-053-only attempt leaves the final feature PR route centrally unresolved.
 - The CORE owner created `C:\lp` against L-050. It was stopped and preserved untouched pending
   the operator's recovery decision.
 

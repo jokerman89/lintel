@@ -27,11 +27,15 @@ and no pull request exists.
   - A spec that omits both `pattern_context` and the lock is undetectable by the loader.
 
 
-## Heads and byte identity
+## Historical baseline and evidence heads
+
+This section and "Test evidence" below are historical. The current frozen, reviewed runtime is
+`99de0741`, reviewed at `d4acf3e7` (see the top of this file). Later targeted tests ran on those
+later heads. The records below are not rewritten.
 
 - Branch `jokerman-microsoft-patterns-core-integration`; base (settled main) `49f2d15260f096213086f02dfeb1fae6cbe62d45`.
-- Frozen product and docs head `fdb9f27b65359d64b343aac5b0aa0e78dc73b536`. All test evidence
-  below ran on these product bytes.
+- Historical frozen product and docs head `fdb9f27b65359d64b343aac5b0aa0e78dc73b536`. The full
+  suites and focused runs below ran on these product bytes.
 - `ebd087eca0358acde8e3cfc47703e220ec5c30f3`: ledger/plan truth corrections only (plan.md 5.2.a
   wording, build-log). No product file changed from `fdb9f27b`.
 - `9e56dc7944acb91fb4a1c44f81958e0348ad4953`: the six actor swarm records only. No product file
@@ -68,7 +72,7 @@ acceptance at `ebd087ec`. Raw digests are the actors' delivered bytes.
   - `verify`: `ok: false`, release clearance false. CORE and PACK are `awaiting_shared_evidence`.
   - Correct result; do not edit statuses to PASS.
 
-## Test evidence (product bytes `fdb9f27b`)
+## Test evidence (historical, product bytes `fdb9f27b`)
 
 - **Linux:** strict full suite PASS, run by the coordinator. `bash tests/runner/run-all.sh
   --require-all` exit 0, 169/169 suite files, 0 skip, 0 fail, 0 partial, and 23 windows-only
@@ -150,18 +154,23 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
    corroboration.
    - The actor records bound at `ebd087ec` stay verbatim history. Later plan annotations changed
      lane acceptance, and those records are not rebound.
-5. **Final integrated REVIEW and SHIP** stay blocked by 1-4. At most an explicitly labelled
-   non-clearing inspection or status record is allowed.
-6. **GitHub write access** for the feature PR (403, unresolved; no credential changes).
+5. **Final integrated REVIEW and SHIP** stay blocked by the remaining gates, not by WF (closed):
+   - 6.2.a: Windows strict or hosted Windows CI verdict.
+   - 6.2.b: final integrated P05 context, aggregate review, QA and corroboration.
+   - 6.2.c.
+   - Native 1a integration and current main.
+   - The P07 profile, verified current at that head.
+   - Evidence binding at the final head.
+   At most an explicitly labelled non-clearing inspection or status record is allowed until then.
+6. **Publication.** Master owns the working stored-account Git/API/CI transport. The required app PR tool still selected the EMU account and failed with 403 on the separate L-053-only attempt, so no PR was created. The final feature PR route is centrally unresolved, and no workaround is authorized. The patterns branch is not pushed because it awaits the accepted integration and CI stage, not because of a blanket Git write failure. Historical 403 logs stay verbatim.
 
 ## Next safe actions
 
-- Do not touch `C:\lp`.
-- If a Windows rerun is authorized:
-  - use `run-isolated.py` on fresh LF clones of `fdb9f27b` under the approved roots;
-  - run u1 and u2 alone, integration parts one or two at a time, and `other` alone;
-  - classify any persistent failure against settled main `49f2d152` before calling it a feature
-    finding.
+- Do not touch `C:\lp`. No cleanup or recovery is authorized.
+- There are no additional local full, stress or retry runs (Master's settled decision).
+  - Windows verification is the required hosted Windows CI on the proper integrated candidate.
+  - The completed one-shot main `49f2d152` baseline (rc 0) stays recorded; it is not a template
+    for another local run.
 - After an authorized final head exists, prepare fresh P05 contexts there. The reviewers author
   their own P05 JSON; the coordinator supplies corroboration only after actual review.
 - The next steps are:

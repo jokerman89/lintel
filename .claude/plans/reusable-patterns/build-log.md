@@ -1251,7 +1251,7 @@ Parent Linux at `d4acf3e7`: design-contract 29/29 and document-pipeline-binding 
 skips (`posix-d4acf3e7-d1-compound.log`, sha256
 `f03081549d9a4b1c2f025f88058f3bc31254e971766e34094b2d6b05737a538f`).
 
-**Delta.** The product delta `b484e2d7..99de0741` is 11 files, +322/-24. `d4acf3e7` adds the
+**Delta.** The product delta `b484e2d7..99de0741` is 11 files, +323/-24 (reviewer range note `d1-m1-d4acf3e7-range-note.md`, sha256 `f25e606e…13e9ed`). `d4acf3e7` adds the
 ledger only.
 
 **Closure batch.** This batch is metadata only. It changes the plan (4.3.c and 5.2.a ticked with
@@ -1281,7 +1281,7 @@ Artifact PDF/Word DONE stays blocked or unverified.
 - 6.2.b: final independent aggregate review and actual ADR-0028 v2 context/QA/corroboration.
 - 6.2.c: final diff and baseline record.
 - 4.3.c and 5.2.a: closed at source/helper level (reviewed at `d4acf3e7`).
-- GitHub write access for the feature PR (403, unresolved).
+- Publication: Master owns the working stored-account Git/API/CI transport. The required app PR tool still selected the EMU account and failed with 403 on the separate L-053-only attempt, so no PR was created. The final feature PR route is centrally unresolved, and no workaround is authorized. The patterns branch is not pushed because it awaits the accepted integration and CI stage, not because of a blanket Git write failure.
 - No release clearance is claimed.
 
 ## Milestone integration with main
