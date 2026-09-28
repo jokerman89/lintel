@@ -268,3 +268,43 @@ coordinator integration delta, authorized by the owner decision. The `lib/patter
 
 **Unchanged:** leaf IDs, R12 text, ADR-0038, P05/P07 schemas, policy, profile and corpus files.
 Typography is not projected by the v1 adapter and is unchanged.
+
+**RN-15 clarification (2026-09-28, reviewer 24bf5df0 `r4-fix-b02b10cc.md` L-2; RN-15 text above
+is unchanged).** The loader's pattern admission is palette-only. It accepts a frontend
+`validate_visual` of `passed` or `incomplete` with no failed check. `incomplete` only leaves
+unmapped settings as open review items. That is not render or review clearance: generate-web and
+generate-app still require `passed` before rendering. Mandatory clauses keep their own QA evidence,
+and incomplete or unknown mandatory coverage never becomes a pass. The loader also re-runs
+`verify_lock` just before it returns. `pipeline_inputs` refuses the pattern flags for a
+document-only design; its stages verify their `pattern_context` attachment.
+
+**RN-16 External pattern inputs: supported binding and currentness at use (owner decision
+(a), 2026-09-28).** The decision is on D-1 of reviewer `24bf5df0`'s `r4-fix-b02b10cc.md`
+(sha256 `432754e441f7c36f47b0989794a0cbd71ed788bb4c2c5c36b092e3b38a4bd182`).
+MasterCoordinator `9854860c` chose option (a). This is the explicit supported-binding
+interpretation for A6; RN-15 and every earlier report are unchanged.
+
+- **Repository inputs.** The repository lock, the current context and the relevant repository
+  sources and evidence (`.claude/patterns`, the brief and other bound inputs) are in the actual
+  P05 selection.
+- **External inputs.** The pack and personal closure is content-addressed through that selected
+  lock: pinned reference digests, catalog digests and the selection digest. It is not claimed
+  to be repository-snapshotted. Standalone P05 remains repository-only.
+- **Compound guarantee.** Every pattern-dependent consumer re-runs the core `verify_lock` on the
+  actual current roots and context at use. That covers REVIEW, QA, render, SHIP and RESUME. It
+  rejects changed, missing, revoked, conflicting or unavailable input before output. Only then
+  does it take the same current P05, P07, QA, latest-review and corroboration gates.
+  - A stored verification output is not enough.
+  - Re-run after intervening work, and before dependent output or release.
+  - Pattern success never grants release, and P05 success never skips the pattern check.
+  - The rule is stated in the consumer contract ("Currentness at use") and the SHIP obligation.
+- **In code.** `design_contract.load_design` (and so `renderer-args`, `review` and
+  `pipeline_inputs`) verifies the lock at admission and again just before returning. It does so
+  before its final P05/P07 rechecks, and `review_result` then applies QA.
+- **Regression.** Committed tests take a positive pack or personal selection through the same
+  review consumer. They mutate only the external source, leaving the repository lock and P05
+  files byte-identical. P05 and QA alone still accept; the same consumer refuses before output;
+  restoring the external content is admissible again.
+- **Limits.** The loader cannot detect a spec that omits both `pattern_context` and the lock. That
+  remains a workflow obligation (direct entry, `validate_visual` before render, REVIEW coverage).
+  No P05/P07 schema, policy or release-authority change.

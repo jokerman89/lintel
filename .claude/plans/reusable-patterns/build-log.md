@@ -1176,6 +1176,64 @@ resolve/build_lock/write_lock, `project_visual` and `load_design`):
 
 5.2.a stays unticked until reviewer 24 has reviewed `23e8e194`.
 
+## R12 review follow-up and D1 currentness at use (`99de0741`, RN-15 clarification, RN-16)
+
+Reviewer 24bf5df0 reviewed `b02b10cc` (`r4-fix-b02b10cc.md`, sha256 `432754e4…d182`):
+
+- SPEC was MET, with D-1 left for the owner to decide.
+- QUALITY found 1 Medium and 5 Low.
+
+MasterCoordinator `9854860c` released those fixes and chose D-1 option (a), which requires the
+compound guarantee. The fix, `99de0741`, is limited to CORE and INT consumer plumbing:
+
+| Finding | Fix |
+|---|---|
+| M-1 | Committed patterned `pipeline_inputs` API and CLI cases. Both flags are needed, and omission, lock only, context only, mismatched context, repeated flag and edited lock are refused. The pipeline commands in `generate/SKILL.md` and `fidelity-and-evidence.md` now carry the flags |
+| L-1 | `pipeline_inputs` refuses pattern flags for a document-only design. The ordinary path is unchanged |
+| L-2 | Palette-only admission wording in `design-contract.md` and the loader docstring. RN-15 gains an appended clarification, and its accepted text is unchanged |
+| L-3, L-4 | `assertRaisesRegex` with the actual reasons: the verified-selection mismatch, `pattern_context` mismatch, `unusable (invalid)`, `Unsafe relative path`, `pinned_revoked` and `reference_digest_mismatch`. A pack negative plus a pack-drift case in which P05 and P07 still verify but the loader refuses |
+| L-5 | The `review` CLI with the flags: accepted, omission gives exit 2, and drift gives exit 2 with no stdout |
+| I-2 | `verify_lock` re-runs just before the loader returns |
+| D-1 (a) | Consumer contract "Currentness at use". SHIP re-runs `li-pattern review` before the SHIP gate. frontend-design-review and generate-app verify at use. RN-16. The compound-consumer regression is below |
+
+**Compound-consumer regression** (`test_compound_consumer_refuses_old_clearance_after_pack_drift` /
+`..._personal_drift`):
+
+- A real selected lock, bound spec and bound passing QA go through the same
+  `design_contract.review_result`, which accepts.
+- Only the pack or personal source is mutated. The repository lock, context, spec and evidence
+  hashes are unchanged.
+- P05 `verify_context` and QA still accept, but the same consumer refuses with
+  `reference_digest_mismatch`.
+- Restoring the external content makes it admissible again.
+
+**Checks** (Windows, synthetic HOME/TEMP):
+
+| Suite | Result |
+|---|---|
+| `design-contract.sh` | 29 tests, 0 failures/errors/skips |
+| `document-pipeline-binding.sh` | 36 OK |
+| V11 | 23 OK |
+| V09 | 31 OK |
+| V10 | 26 OK |
+| `frontend-design-roundtrip.sh` | pass |
+| `design-validator.sh` | all pass |
+| `generate-skills-present.sh` | pass |
+| `pattern-contract.sh` | pass |
+| `frontmatter-lint-all.sh` | pass |
+| `native-command-surface` | 0 findings |
+| `li-copilot.py check` | 22 managed files |
+| catalog check | clean |
+
+**Limits:**
+
+- Standalone P05 remains repository-only.
+- The compound guarantee is enforced in the design loader and its callers, and in `li-pattern
+  review`/`verify-lock`. Other consumers carry it as the contract's workflow obligation.
+- A spec that omits both `pattern_context` and the lock is still undetectable by the loader.
+
+5.2.a stays unticked until reviewer 24 re-checks the fixed head.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
