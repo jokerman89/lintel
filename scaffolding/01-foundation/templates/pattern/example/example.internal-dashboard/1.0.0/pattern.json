@@ -1,0 +1,82 @@
+{
+  "applies_to": {
+    "artifact": [
+      "dashboard"
+    ],
+    "audience": [
+      "internal"
+    ]
+  },
+  "approval": {
+    "at": "2026-09-28T00:00:00Z",
+    "by": "example reviewer",
+    "reference": "example approval record"
+  },
+  "assets": [
+    {
+      "kind": "guide",
+      "path": "guide.md",
+      "phases": [
+        "define",
+        "build",
+        "review"
+      ],
+      "sha256": "acd5629a56e9652a42561e6d7695be72f736cc4ca7fc3dd0b3556b7cfba1d5ed"
+    }
+  ],
+  "guidance": "A synthetic, neutral example. Copy it, then replace the owner, sources, selector and clauses with your team's confirmed expectations.",
+  "id": "example.internal-dashboard",
+  "includes": [],
+  "owner": "example dashboard owners",
+  "requirements": [
+    {
+      "id": "DASH-01",
+      "level": "must",
+      "text": "Show a filter bar above the first chart that stays visible while scrolling.",
+      "verify": "Scroll the dashboard; the filter bar remains visible and controls every chart."
+    },
+    {
+      "id": "DASH-02",
+      "level": "must",
+      "text": "Every table and chart offers a CSV export of exactly the rows currently shown, respecting active filters.",
+      "verify": "Apply a filter, export each table and chart, and compare the exported rows with the visible rows."
+    },
+    {
+      "id": "DASH-03",
+      "level": "default",
+      "setting": "visual.layout.max-width",
+      "text": "Limit the content width for readability.",
+      "value": "1280px",
+      "verify": "Inspect the rendered layout at 1920px wide."
+    },
+    {
+      "id": "DASH-04",
+      "level": "default",
+      "setting": "visual.palette.accent",
+      "text": "Use the restrained primary accent.",
+      "value": "#1f6feb",
+      "verify": "Compare the primary accent with the setting."
+    },
+    {
+      "id": "DASH-05",
+      "level": "recommendation",
+      "text": "Show the data freshness timestamp next to the dashboard title.",
+      "verify": "Check the header for a last-updated timestamp."
+    }
+  ],
+  "schema_version": 1,
+  "sources": [
+    {
+      "confidence": "confirmed",
+      "kind": "operator-statement",
+      "observed_at": "2026-09-28T00:00:00Z",
+      "ref": "Example operator statement: internal dashboards need visible filters and CSV export of the filtered rows.",
+      "reuse": "Synthetic example text; free to copy.",
+      "root": "statement",
+      "section": ""
+    }
+  ],
+  "status": "approved",
+  "summary": "Synthetic example: internal analytics dashboards with persistent filters, CSV export and a restrained palette.",
+  "version": "1.0.0"
+}

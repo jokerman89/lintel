@@ -1,0 +1,35 @@
+{
+  "applies_to": {
+    "artifact": [
+      "replace-me"
+    ]
+  },
+  "assets": [],
+  "guidance": "",
+  "id": "team.replace-me",
+  "includes": [],
+  "owner": "the owning team or role (never a secret)",
+  "requirements": [
+    {
+      "id": "REQ-01",
+      "level": "default",
+      "text": "The expectation, in one sentence.",
+      "verify": "How a reviewer checks it."
+    }
+  ],
+  "schema_version": 1,
+  "sources": [
+    {
+      "confidence": "confirmed",
+      "kind": "operator-statement",
+      "observed_at": "2026-01-01T00:00:00Z",
+      "ref": "Quote or summarize the confirmed statement.",
+      "reuse": "State any reuse limits.",
+      "root": "statement",
+      "section": ""
+    }
+  ],
+  "status": "draft",
+  "summary": "One sentence: what this pattern expects and where it applies.",
+  "version": "0.1.0"
+}
