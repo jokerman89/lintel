@@ -1041,6 +1041,8 @@ def parse_roots(value: Any, where: str = "roots") -> Roots:
         if not repository.is_dir() or _is_link(repository):
             _fail("invalid_roots", "repository root must be an existing, unlinked directory", f"{where}.repository")
     personal = _absolute(value["personal"], f"{where}.personal")
+    if _is_link(personal):
+        _fail("invalid_roots", "the personal root must not be a link or junction", f"{where}.personal")
     return Roots(repository, personal, parse_pack_context(value["pack_context"], f"{where}.pack_context"),
                  _diagnostic_list(value["diagnostics"], f"{where}.diagnostics"))
 
@@ -1138,10 +1140,23 @@ def pack_context_from_profile(record: Optional[Mapping[str, Any]] = None, *, err
 
 def build_envelope(repository: Optional[Path], personal: Path, pack_context: Mapping[str, Any],
                    diagnostics: Sequence[Mapping[str, str]] = ()) -> dict:
-    """Serialize the roots envelope with JSON (never shell interpolation) and validate it."""
+    """Serialize the roots envelope with JSON (never shell interpolation) and validate it.
+
+    Each anchor is checked for a link or junction on the spelling the caller supplied, before
+    resolution could erase that evidence (the same refusal `parse_roots` applies to an envelope).
+    This sees only the given spelling: a physical path already produced upstream, such as Git's
+    resolved top level, carries no alias to detect.
+    """
+    def anchor(value: Path, where: str) -> str:
+        logical = Path(value)
+        logical = logical if logical.is_absolute() else Path.cwd() / logical
+        if _is_link(logical):
+            _fail("invalid_roots", f"{where} must not be a link or junction; pass its real path", where)
+        return logical.resolve().as_posix()
+
     envelope = {"schema_version": 1,
-                "repository": None if repository is None else Path(repository).resolve().as_posix(),
-                "personal": Path(personal).resolve().as_posix(), "pack_context": dict(pack_context),
+                "repository": None if repository is None else anchor(repository, "repository"),
+                "personal": anchor(personal, "personal"), "pack_context": dict(pack_context),
                 "diagnostics": [dict(item) for item in diagnostics]}
     parse_roots(envelope)
     return envelope

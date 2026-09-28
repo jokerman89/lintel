@@ -560,6 +560,36 @@ Results:
   - bundle status trusted;
   - build_lock not self-validated.
 
+## Review revision R7 (independent PACK review of snapshot `db7f6df1`: coupled core fixes)
+
+The report is `pack-lane-independent-review.md`, from a separate integration reviewer; I read it
+only. No pack-owned file was changed.
+
+- **F1.** `SchemaTests.test_pack_context_reuses_profile_record` now pins an explicit fixture
+  neutral baseline and asserts both outcomes:
+  - legacy neutral (no `patterns` block): the child `{other: x}` stays `absent`;
+  - new neutral (`patterns.source: null`): the missing field is filled, giving `null` with the
+    neutral origin, while an inherited value still wins.
+
+  Probe: I overlaid db7's `packs/_default/pack.yaml` and `lib/pack-schema.yaml` onto a scratch
+  copy of this tree, in session artifacts, and removed it afterwards. `patterns.py` ran 116/116
+  OK. Before the fix, the same overlay failed exactly that test (115 run, 1 FAIL).
+- **F2.** `build_envelope` refuses a linked anchor before resolving it, and `parse_roots` refuses
+  a linked personal root. `PathTests.test_linked_anchors_are_refused_on_every_route` covers
+  junctioned repository and personal roots through:
+  - the API envelope;
+  - raw `parse_roots`;
+  - `--roots-file`;
+  - the CLI `envelope`.
+
+  The outside tree is byte-identical afterwards, and the real path is accepted. The launcher
+  route is PACK's; its tests run at the join.
+- **F3.** Upgrade and rebind notice added to ADR-0038 and the evolution entry. INT public docs
+  are pending.
+- **F6.** The existing provider behavior is described in contract R7. No new root was added.
+
+`python -I -B tests\unit\patterns.py` -> exit 0, 116 tests OK.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
