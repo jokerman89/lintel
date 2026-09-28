@@ -47,6 +47,49 @@ package gets one fresh implementer and one dedicated two-stage review (spec, the
 separate reviewer. The review covers every leaf, is bound under the shared evidence contract and is
 corroborated by the actual host agent invocation IDs.
 
+## Landing split and execution boundaries (MasterCoordinator decision B, 2026-09-28)
+
+MasterCoordinator `9854860c` ("Lintel master merge") decided to land this increment in two pull
+requests. This is a landing order, not a scope removal. Every leaf ID and status is preserved, and
+the leaves split as follows:
+
+- **PR-1a (lands first, version 0.13.0, ADR-0039):**
+  - all P1 leaves (1.1.a through 1.6.g) and all P4 leaves (4.1.a through 4.3.b);
+  - from P5: 5.1.a, 5.2.a, 5.2.c, 5.3.a, 5.3.b, 5.3.d, 5.4.a, 5.4.b and 5.4.c;
+  - from P6: 6.1.a, 6.1.b, 6.2.a, 6.2.b, 6.4.a and 6.4.b, covering skill and agent evidence only.
+  In PR-1a, every existing "installs no hooks" statement stays true.
+- **PR-1b (next, next free version at its own SHIP):**
+  - all P2 leaves (2.1.a through 2.5.f) and all P3 leaves (3.1.a through 3.4.e);
+  - from P5: 5.1.b, 5.1.c, 5.2.b and 5.3.c;
+  - from P6: 6.2.c, 6.2.d and 6.2.e.
+  The SHIP version-collision control loops back to 5.4.a, 5.4.b and 5.4.c for the PR-1b bump.
+- **Completed across both:** 5.5.a, 5.5.b, 5.5.c, 6.3.a and 6.3.b run their skill and agent part
+  for PR-1a and their hook part for PR-1b. They are marked done only after PR-1b.
+- **Parallel lanes (authorized bounded parallelism, each in its own attributable worktree and
+  branch):**
+  - The P2 lane on `jokerman-microsoft-copilot-hook-adapter` (base `0015416a`).
+  - A preparation lane on `jokerman-microsoft-copilot-1a-prep` (base `d58ac2b1`), limited to P4's
+    `cli_support` frontmatter and the PR-1a P5 documentation and registry-source leaves. It excludes
+    the generator, generated `.github` outputs, hooks, P1 test files, shared plan and runtime
+    ledgers, and version manifests.
+
+  The coordinator integrates the prepared patch only after P1's return, reconciliation with current
+  `main`, the ADR-0039 renumber and P1's review. It then regenerates once from the reconciled source
+  and never imports a stale generated union.
+- **Test policy (machine under shared CPU load):**
+  - locally, targeted suites for the changed areas plus one
+    `bash tests/runner/run-all.sh --shape-only --require-all` pass at the freeze;
+  - the full hosted CI matrix is a required gate before merge, never deferred past landing;
+  - timing and toolchain failures are recorded explicitly;
+  - an original run that is still alive is never re-run.
+- **Remote delivery:** MasterCoordinator `9854860c` performs the push, pull request, CI and merge
+  through the verified `jokerman89` identity. This initiative hands over the exact accepted local
+  candidate with its review and test evidence. The SHIP controls below apply to that handover.
+- **Interruption (2026-09-28, about 18:14):** a runtime restart cleared all three implementer agents
+  (P1 `1ac56994`, P2 `ff10758e`, preparation `497430ea`). Recovery follows the committed and
+  on-disk evidence recorded in `build-log.md`. It resumes only the unfinished leaves, with no
+  duplicate lane and no discarded work.
+
 ---
 
 ## Phase 1: Native skills and agents   [milestone-checkpoint: `li-copilot check` passes with every native skill and agent generated]
@@ -381,8 +424,13 @@ corroborated by the actual host agent invocation IDs.
 - 6.2.a Headless CLI session in a temporary kit repository (no `--hooks`) with
   `--plugin-dir <worktree>`. Accept: `copilot skill list --json` shows 96 `li-*` skills and 72
   agents are discoverable (exact counts). Verify: the evidence file.
-- 6.2.b `li-cycle` invocation. Accept: the `skill.invoked` content is at least the canonical body
-  bytes. Verify: an event-log extract.
+- 6.2.b `li-cycle` invocation, requiring complete delivery and not just size (refined 2026-09-28 by
+  MasterCoordinator `9854860c`). Accept: the `skill.invoked` content equals the exact generated
+  `.github/skills/li-cycle/SKILL.md` body. The only allowed differences are the documented host
+  envelope (frontmatter removed) and newline normalization, proved by a SHA-256 match. If the host
+  normalizes something undocumented, show ordered full-body coverage through the final line instead.
+  Byte count alone does not pass. Verify: record both hashes, the normalization applied, the exact
+  client and version, and the Lintel revision in the evidence file. Raw event logs stay local.
 - 6.2.c Digest. Accept: a marker lesson in the temporary repository is visible to the model. Verify:
   the model transcript.
 - 6.2.d Secret commit (PowerShell tool). Accept: denied with Lintel's reason. `$env:` override:
