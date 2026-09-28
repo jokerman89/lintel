@@ -63,7 +63,7 @@ DOCS = ("README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDU
         "docs/GLOSSARY.md", "docs/spec-kit.md", "docs/getting-started.md", "docs/copilot.md",
         "docs/claude-code.md", "docs/multi-cli.md", "docs/client-adapters.md", "docs/enterprise-adoption.md",
         "docs/concepts/planner-as-module.md", "docs/concepts/agent-dispatch-rules.md", "docs/concepts/orientator.md",
-        "docs/concepts/swarming-work.md")
+        "docs/concepts/swarming-work.md", "docs/concepts/patterns.md")
 PUBLIC_ROOT_DOCS = frozenset(path for path in DOCS if "/" not in path)
 PUBLIC_DOC_SUFFIXES = frozenset((".md", ".html", ".htm", ".css", ".js", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"))
 PUBLIC_SOURCE_NOTE = (
@@ -98,6 +98,7 @@ WORKFLOWS = {
     "spec-kit": "Use when a project uses GitHub Spec Kit to connect its requirements and tasks to Lintel build and review evidence.",
     "swarm": "Use when an approved mapped plan opts in to coordinated multi-agent execution with explicit ownership, attributable isolation and durable evidence.",
     "mars": "Use when a problem, plan, spec, implementation or review needs a deliberate multi-model adversarial review with bounded rounds and preserved dissent.",
+    "pattern": "Use when recurring expectations should be captured, reviewed, versioned, shared or applied to named work as data-only patterns with explicit applicability, provenance and review traceability.",
 }
 AGENTS = {
     "planner": ("Plan requirements, specifications and executable build cards for a scoped initiative.", "plan"),
@@ -147,6 +148,28 @@ MARS_RESOURCES = (
     "lib/review_method.py",
     "lib/review-method-schema.json",
     "lib/review-questions.json",
+)
+# Reusable patterns (ADR-0038): the workflow, its consumer contract, runtime, launcher, visual
+# adapter, profile provider and authoring template. The runtime needs optional Python 3.10+.
+PATTERN_RESOURCES = (
+    "skills/pattern/SKILL.md",
+    "skills/pattern/references/consumer-contract.md",
+    "bin/li-pattern",
+    "bin/li-pattern.py",
+    "lib/patterns.py",
+    "lib/pattern_visual.py",
+    "lib/profile_context.py",
+    "lib/native_paths.py",
+    "lib/pack-resolver.sh",
+    "lib/paths.sh",
+    "lib/pack-schema.yaml",
+    "packs/_default/pack.yaml",
+    "scaffolding/01-foundation/templates/pattern/README.md",
+    "scaffolding/01-foundation/templates/pattern/pattern.template.json",
+    "scaffolding/01-foundation/templates/pattern/example/.gitattributes",
+    "scaffolding/01-foundation/templates/pattern/example/catalog.json",
+    "scaffolding/01-foundation/templates/pattern/example/example.internal-dashboard/1.0.0/pattern.json",
+    "scaffolding/01-foundation/templates/pattern/example/example.internal-dashboard/1.0.0/guide.md",
 )
 ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
@@ -713,6 +736,10 @@ def generate(source: Path, target: Path,
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:
             raise ValueError(f"MARS resource was not bundled: {relative}")
+    for relative in PATTERN_RESOURCES:
+        data = read_file(source, relative)
+        if not local and files.get(f"{BUNDLE}/{relative}") != data:
+            raise ValueError(f"Pattern resource was not bundled: {relative}")
     for relative in ADAPTER_RESOURCES:
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:

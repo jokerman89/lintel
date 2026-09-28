@@ -5,9 +5,9 @@ CI checks this file for drift; edit the source SKILL.md to change a description.
 
 Use `/li:<name>` in a Lintel plugin, or ask Copilot to run the named Lintel skill.
 
-Total skills: 96
+Total skills: 97
 
-## foundation layer (96 skills)
+## foundation layer (97 skills)
 
 | Skill | Description |
 |---|---|
@@ -76,6 +76,7 @@ Total skills: 96
 | [`/li:pack-list`](pack-list/SKILL.md) | List configured-store, repository and installed-source packs with resolver precedence, validation results and the actua… |
 | [`/li:pack-switch`](pack-switch/SKILL.md) | Use to explicitly switch the effective pack through the structured profile lifecycle, preserving required policy, confi… |
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
+| [`/li:pattern`](pattern/SKILL.md) | Use when recurring expectations (deployment baselines, dashboard behavior, document structure, visual language) should … |
 | [`/li:pause`](pause/SKILL.md) | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
 | [`/li:perf-mode`](perf-mode/SKILL.md) | Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capa… |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
