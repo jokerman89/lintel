@@ -18,10 +18,11 @@ plans, memory, specs and build evidence into the working repository's `.claude/`
 tree. Never write project output into the bundled source directory.
 
 Canonical workflows may refer to another `/li:<skill>` or to `skills/<skill>/SKILL.md`.
-Read that file from the resource root and execute it using these same adaptations.
-Only load the relevant workflow and references. The portable kit includes canonical
-resources, but only the `li-*` skills in `.github/skills/` are native entry points.
-Do not claim every catalog workflow has been validated in every Copilot client.
+On Copilot that workflow is a native `/li-<skill>` skill (see "Native skills and agents"):
+invoke it instead of reading its file. Where a surface does not discover it, read the
+canonical file from the resource root and execute it using these same adaptations.
+Only load the relevant workflow and references. Delivered files are not validation:
+do not claim every catalog workflow has been validated in every Copilot client.
 
 For task routing, use `define` for requirements, `inspect` for plan/repository inspection,
 `verify` for checks, `diagnose` for investigation and `cross-check` for a separately
@@ -29,10 +30,10 @@ attributable review. `verify` is read-only unless repair is explicitly authorize
 Use `pause` and `resume --from <checkpoint-path>` for saved context. Existing
 `resume --from <phase|job-step>` overrides remain supported; use an explicit path
 such as `./BUILD` for a checkpoint whose name matches a phase or selected step.
-These are canonical
-workflow names, not a claim that a native wrapper exists on every host; use the
-canonical-file fallback above when discovery is unavailable. Consolidation preserves
-the selected work map, profile reference and shared review/QA evidence contracts.
+These are canonical workflow names; on Copilot each is also a native skill, such as
+`/li-verify`. Use the canonical-file fallback above when discovery is unavailable.
+Consolidation preserves the selected work map, profile reference and shared review/QA
+evidence contracts.
 
 If a shell helper is necessary, use Bash (Git Bash on Windows), keep the current
 directory at the working repository, and set LINTEL_REPO_ROOT to that repository.
@@ -58,7 +59,48 @@ source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
 When developing Lintel itself, source `lib/copilot-env.sh` instead. The helper keeps
 canonical source lookup separate from project output, uses local gitignored runtime
 storage by default and respects explicit operator configuration. `LINTEL_SOURCE_ROOT`
-locates bundled helpers; `LINTEL_REPO_ROOT` locates the working project.
+locates bundled helpers; `LINTEL_REPO_ROOT` locates the working project. A native
+skill's Bash step gets the same preparation from `bin/li-run` (see the tool map below).
+
+## Native skills and agents
+
+`li-copilot init` generates a complete, self-contained native skill for every canonical
+skill at `.github/skills/li-<name>/SKILL.md`. It also generates a custom agent for every
+canonical agent at `.github/agents/<Name>.agent.md`, plus the `lintel-planner`,
+`lintel-builder` and `lintel-reviewer` role profiles. The Copilot plugin manifest
+`.github/plugin/plugin.json` points at the same two roots. Every workflow is a native
+`/li-<name>` skill; named roles such as `CodeReviewer` are custom agents, delegated to
+by name.
+
+A generated skill is the canonical body with deterministic transforms: `/li:<name>`
+becomes `/li-<name>`, `AskUserQuestion` becomes `ask_user`, and relative links are
+rebased to the generated location. In a vendored kit, a link to a file outside the
+bundle becomes a public GitHub URL. A short preamble states the resource root, the
+shell-step runner, the tool map and native invocation. Agents receive the same body
+transforms and a shorter preamble. Edit the canonical file, then run `li-copilot init`;
+`li-copilot check` fails on drift, and CI runs it.
+
+Generated frontmatter keeps only the fields Copilot reads. Every dropped field is a
+recorded degradation, not a silent loss:
+
+- Skills keep `name` and `description` (curated text for the core workflows, at most
+  1024 characters). They drop `layer`, `color`, `tools`, `voice`, `cli_support`,
+  `necessity`, `gap_if_skipped` and `navigation`, so a skill does not narrow the
+  session's tools.
+- Agents keep `name`, `description` and `tools`. They drop `memory`, `model`, `color`,
+  `tier`, `voice`, `category` and `cli_support`. GitHub documents no agent memory
+  property, so prior findings do not carry over between runs; agents whose method
+  recalls them declare `level: degraded` with an `AgentMemory` degradation in their
+  `cli_support` hint. Without `model`, the host's configured model applies.
+- Pack-resolved identity (voice, compliance, brand) still comes from the active pack at
+  runtime; only the catalog metadata is absent from the generated file.
+
+Tool scope: each generated canonical agent profile carries that agent's declared `tools`
+subset, such as `Read, Grep, Glob, Bash`. GitHub documents these names as tool aliases;
+Copilot enforces the list where the surface honors the field and ignores unrecognized
+names. The three `lintel-*` role profiles declare no `tools` field and therefore receive
+all tools. Independent review means a separate context, not read-only enforcement: keep
+a review brief report-only, and never treat an agent's name as a permission boundary.
 
 ## Tool and workflow adaptation
 
@@ -68,23 +110,39 @@ or `ADAPTER.md` beside this file in an installed bundle. The canonical registry
 actual tools and permissions; `bin/li-client-capabilities.py resolve` selects declared
 bindings but never executes tools or clears independent review.
 
-- `Read`, `Grep`, `Glob`: use available file-reading and search tools.
-- `Write`, `Edit`: use the host's file editing tools.
-- `Bash`: use an approved terminal tool; identify missing Bash/Python dependencies.
+The generated preamble maps canonical tool names to the Copilot CLI runtime tools that
+GitHub's hooks reference documents. Other surfaces can name their tools differently;
+bind the tool the host actually offers.
+
+- `Read`=`view`, `Write`=`create`, `Edit`=`edit`, `Grep`=`grep`, `Glob`=`glob`: the
+  host's file-reading, editing and search tools.
+- `Bash`=`bash` or `powershell`: an approved terminal tool; identify missing Bash/Python
+  dependencies. Run a skill's Bash snippet through `bin/li-run`, described below.
 - `TodoWrite`: keep checkboxes and status in `.claude/plans/todo.md` and the initiative plan.
-- `AskUserQuestion`: use the host's actual question tool (for example `ask_user`) only
-  when information or authorization is missing. Use conversation only when no question
-  tool exists; never route around a denied permission.
-- `Task` or named agents: use available native subagent delegation. Copilot CLI, VS Code
-  and cloud have different capabilities; never invent a tool or claim a delegated run
-  happened. Without attributable parallel isolation, serialize. Without delegation,
-  preserve a usable external/manual brief and label self-review accurately; required
-  independent review stays outstanding.
-- `/li:<name>`: invoke `/li-<name>` when a native wrapper exists, otherwise read the
-  canonical skill file. Native skill names contain hyphens, not a colon namespace.
+- `AskUserQuestion`=`ask_user`: the host's actual question tool, only when information
+  or authorization is missing. Use conversation only when no question tool exists;
+  never route around a denied permission.
+- `Task` or a named role=`task` with that custom agent: use available native subagent
+  delegation. Copilot CLI, VS Code and cloud have different capabilities; never invent a
+  tool or claim a delegated run happened. Without attributable parallel isolation,
+  serialize. Without delegation, preserve a usable external/manual brief and label
+  self-review accurately; required independent review stays outstanding.
+- `WebFetch`=`web_fetch`: fetch only what the task authorizes.
+- `/li:<name>`: invoke the native `/li-<name>` skill; generated bodies already use that
+  spelling. Read the canonical skill file only when the surface does not discover the
+  skill. Native skill names contain hyphens, not a colon namespace.
 - Claude-specific model names, context commands, plugin syntax, `voice` metadata,
   hook APIs and Codex-only operations are host-specific examples. Use available
   equivalents and report unsupported behavior. Do not force a particular model.
+
+`bin/li-run` runs one Bash step with the Lintel environment prepared. Save the snippet
+to a temporary `.sh` file and run `bash "<resource-root>/bin/li-run" <file>`, or pass `-`
+to read the step from standard input. `--repo <dir>` selects the working repository;
+the default is `LINTEL_REPO_ROOT`, then the current directory. The runner sets
+`LINTEL_SOURCE_ROOT` to its own source tree, prepares `LINTEL_REPO_ROOT` and the profile
+context through `lib/copilot-env.sh`, runs the step in the working repository and exits
+with the step's status. It exits 2 for a usage error or a missing script and 1 when the
+environment cannot be prepared. It changes no host permissions.
 
 PLAN produces the cold-executor trio under `.claude/plans/<initiative>/`: plan.md,
 spec.md and prompt.md. Use the templates under `scaffolding/01-foundation/templates/plan/`
@@ -114,8 +172,9 @@ and enterprise access controls as independently managed controls.
 ## Session acceptance check
 
 1. Start a new session in the repository root after installation or update.
-2. Inspect discovered instructions and skills in the host UI (CLI: `/instructions`,
-   `/skills reload`, `/skills info li-plan`). Ensure project instructions also load.
+2. Inspect discovered instructions, skills and custom agents in the host UI (CLI:
+   `/instructions`, `/skills reload`, `/skills info li-plan`). Ensure project
+   instructions also load.
 3. Ask `li-plan` for a small change and verify the trio, requirements and build cards.
 4. Execute one authorized card with `li-build`; verify tests and a review record.
 5. Resume in a fresh session and verify the next card is identified from saved state.
