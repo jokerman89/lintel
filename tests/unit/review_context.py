@@ -256,6 +256,30 @@ class ReadContext(unittest.TestCase):
         with self.assertRaises(rc.ContextError):
             rc.read_context(self.write(" " * (rc.MAX_CONTEXT_BYTES + 1)))
 
+    def test_hook_messages_are_preserved(self):
+        with self.assertRaisesRegex(rc.ContextError, "^duplicate JSON key: schema_version$"):
+            rc.read_context(self.write('{"schema_version": 1, "schema_version": 1}'))
+        with self.assertRaisesRegex(rc.ContextError, "^non-finite JSON number refused: NaN$"):
+            rc.read_context(self.write('{"x": NaN}'))
+
+    def test_deep_nesting_within_size_limit_is_context_error(self):
+        depth = 10000
+        for opener, closer in (("[", "]"), ('{"a":', "}")):
+            text = '{"x": ' + opener * depth + "0" + closer * depth + "}"
+            self.assertLessEqual(len(text.encode("utf-8")), rc.MAX_CONTEXT_BYTES)
+            with self.subTest(opener=opener), self.assertRaisesRegex(rc.ContextError, "nested too deeply"):
+                rc.read_context(self.write(text))
+
+    def test_integer_digit_limit_is_context_error(self):
+        text = '{"x": ' + "9" * 5000 + "}"
+        self.assertLessEqual(len(text), rc.MAX_CONTEXT_BYTES)
+        if hasattr(sys, "get_int_max_str_digits") and 0 < sys.get_int_max_str_digits() < 5000:
+            with self.assertRaisesRegex(rc.ContextError, "^context file is not valid JSON: "):
+                rc.read_context(self.write(text))
+        else:
+            # Interpreters without the digit limit parse it; the value is still subject to assess_depth.
+            self.assertEqual(len(str(rc.read_context(self.write(text))["x"])), 5000)
+
 
 class SourceShape(unittest.TestCase):
     SOURCE = (ROOT / "lib" / "review_context.py").read_text(encoding="utf-8")

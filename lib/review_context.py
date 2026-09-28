@@ -114,9 +114,16 @@ def read_context(path: Path) -> Dict[str, Any]:
     _require(len(data) <= MAX_CONTEXT_BYTES, f"context file exceeds {MAX_CONTEXT_BYTES} bytes")
     try:
         value = json.loads(data.decode("utf-8"), object_pairs_hook=_unique_pairs, parse_constant=_no_constant)
+    except ContextError:
+        raise
     except UnicodeDecodeError as error:
         raise ContextError(f"context file is not UTF-8: {error}") from error
     except json.JSONDecodeError as error:
+        raise ContextError(f"context file is not valid JSON: {error}") from error
+    except RecursionError as error:
+        raise ContextError("context file JSON is nested too deeply") from error
+    except ValueError as error:
+        # Python 3.11+ refuses integer literals beyond sys.get_int_max_str_digits().
         raise ContextError(f"context file is not valid JSON: {error}") from error
     _require(isinstance(value, dict), "context must be a JSON object")
     return value
