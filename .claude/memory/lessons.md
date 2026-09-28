@@ -991,6 +991,26 @@ killing other sessions' processes. Probe Bash stderr before granting a native
 invocation, and treat host warnings as shared-state defects to diagnose, not as
 noise to tolerate.
 
+**Amended 2026-09-28 (cleanup ownership):**
+
+*Incident 1.* An independent reviewer's scratch cleanup ran a filter-and-age delete in the shared
+`%TEMP%` root. It removed host spill files (`*-copilot-tool-output-*.txt`) changed in the previous
+three hours. These may have included other sessions' saved tool output, and no list of removed paths
+was recorded.
+
+*Incident 2.* Separately, a preparation lane ran a filter delete inside its own scratch folder and
+deleted its own spill file. Its scope was narrower, but the list of matched paths is also unknown.
+
+**Added rule:**
+- Clean up only exact literal paths that the actor created and recorded when it created them, using
+  `Remove-Item -LiteralPath` or an equivalent exact-path call.
+- In shared locations such as `%TEMP%`, never delete by pattern, wildcard, filter or age.
+- Never recurse over contents you did not record.
+- Never delete host spill files.
+- When ownership is uncertain, leave the item in place and report it.
+- Missing shared output is no reason to rerun a mutation, a paid job or a full suite. Use durable logs
+  and receipts first, and label any repeat as a new observation.
+
 ## L-050 - Do not create drive-root directories without authorization
 
 **Date:** 2026-09-24
