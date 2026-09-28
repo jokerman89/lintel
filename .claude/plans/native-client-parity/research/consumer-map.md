@@ -1,6 +1,6 @@
 # Consumer map for the current Copilot adapter behavior
 
-All paths below are absolute under `C:\Users\jokerman\reference-repos\copilot-worktrees\jokerman-session-setup\jokerman-microsoft-literate-fortnight`. No files were modified.
+All paths below are relative to the repository root of the working tree that was mapped. No files were modified.
 
 ## 1. Tests
 
