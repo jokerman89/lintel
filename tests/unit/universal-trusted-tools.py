@@ -157,8 +157,10 @@ class Fixture(unittest.TestCase):
         paths = [
             *RESOLVER_RESOURCES,
             "bin/li-adr-new",
+            "bin/li-run",
             "bin/li-update",
             "bin/li-vault-init",
+            "lib/copilot-env.sh",
             "templates/obsidian/sessions.base",
             "hooks/shared/_input.sh",
             "hooks/hooks.json",
@@ -793,6 +795,24 @@ class Vault(Fixture):
         self.assertIn("vault sessions dir not found", missing.stderr)
         self.assertFalse(self.marker.exists())
         self.assertEqual(snapshot(self.vault), {})
+
+
+class ShellStepRunner(Fixture):
+    def test_step_runner_uses_its_own_source_and_never_target_code(self) -> None:
+        write(self.target / "AGENTS.md", "# Target project\n")
+        write(self.target / "lib/copilot-env.sh", HOSTILE_RESOLVER)
+        write(self.target / "bin/_audit.sh", HOSTILE_RESOLVER)
+        write(self.source / "origin.txt", "trusted source\n")
+        write(self.target / "origin.txt", "target project\n")
+        step = self.base / "step.sh"
+        write(step, 'printf "%s|%s|%s\\n" "$(cat "$LINTEL_SOURCE_ROOT/origin.txt")" '
+                    '"$(cat origin.txt)" "$(resolve_pack_field compliance.mode)"\n')
+        # A stale source environment pointing at the target must not select its helpers.
+        result = self.bash(self.source / "bin/li-run", step.as_posix(), cwd=self.base,
+                           extra={"LINTEL_SOURCE_ROOT": self.target.as_posix()})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.marker.exists(), "li-run executed target code")
+        self.assertEqual(result.stdout.strip(), "trusted source|target project|advisory")
 
 
 class Adr(Fixture):
