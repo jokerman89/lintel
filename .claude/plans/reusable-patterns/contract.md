@@ -297,6 +297,20 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R11 (2026-09-28, independent review of R10: P3-R10-1, P3-R10-2)
+
+The signature of `validate_selection_report` is unchanged. It now also refuses, with
+`selection_not_usable`:
+- A report whose `status` disagrees with its selection: `ready` exactly when records are selected,
+  otherwise `empty`. This is the same rule `parse_lock` applies. `status` is outside the digest.
+- A `selected` field that is not an array of records. This is checked before any field of those
+  records is read.
+- `refs` that is not a list or tuple, so generators and other one-shot iterables are refused, not
+  silently consumed. Lists and tuples of parsed `InvocationRef`s or raw items still work, and mixed
+  or invalid raw items keep the existing parser's `invalid_schema`.
+- Content that cannot be serialized for the digest, such as NaN or a cyclic value. The
+  `ValueError` is converted at that same narrow boundary; there is no blanket catch.
+
 ## Revision R10 (2026-09-28, WF review M2: shared fresh-report validation)
 
 The check `read_asset` already applied to a report selection is now one public helper that

@@ -2778,9 +2778,43 @@ class SelectionReportTests(unittest.TestCase):
                                  dict(self.report["selected"][0], preview=True)])),
                              ("not a mapping", ["x"]),
                              ("status edited to conflict", dict(self.report, status="conflict")),
-                             ("status edited to empty", dict(self.report, status="needs-context"))):
+                             ("status edited to needs-context", dict(self.report, status="needs-context"))):
             with self.subTest(label=label):
                 self.refused(value)
+
+    def test_status_must_agree_with_the_selection(self):
+        self.assertTrue(self.report["selected"] and any(item["state"] == "mandatory" for item in self.report["requirements"]))
+        self.assertTrue(p.asset_refs(self.report), "the flipped report carries required clauses and assets")
+        self.refused(dict(self.report, status="empty"))
+        empty, _ = Fixture(self).resolve(ctx())
+        self.assertEqual(empty["status"], "empty")
+        self.refused(dict(empty, status="ready"))
+
+    def test_malformed_shapes_raise_pattern_error_not_python_errors(self):
+        cyclic = copy.deepcopy(self.report)
+        loop = {}
+        loop["self"] = loop
+        cyclic["settings"]["visual.layout.max-width"]["value"] = loop
+        nan = copy.deepcopy(self.report)
+        nan["settings"]["visual.layout.max-width"]["value"] = float("nan")
+        for label, value in (("selected None", dict(self.report, selected=None)),
+                             ("selected string", dict(self.report, selected="abc")),
+                             ("selected with a non-record", dict(self.report, selected=[self.report["selected"][0], 7])),
+                             ("NaN setting", nan), ("cyclic setting", cyclic)):
+            with self.subTest(label=label):
+                self.refused(value)
+
+    def test_refs_must_be_a_list_or_tuple(self):
+        refs_raw = [{"ref": ref("repo.main", self.extra), "role": "default", "approved_by": "me", "approval_ref": "task"}]
+        with_refs, _ = self.fx.resolve(ctx(), refs=p.parse_refs(refs_raw))
+        generator = (item for item in p.parse_refs(refs_raw))
+        self.refused(with_refs, refs=generator)
+        self.refused(with_refs, refs="not refs")
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=tuple(p.parse_refs(refs_raw))),
+                      with_refs)
+        with self.assertRaises(p.PatternError) as caught:
+            p.validate_selection_report(with_refs, context=self.context, refs=[refs_raw[0], p.parse_refs(refs_raw)[0]])
+        self.assertEqual(caught.exception.code, "invalid_schema", "mixed items go through the existing parser")
 
     def test_legitimate_overrides_and_waivers_pass(self):
         overrides = p.parse_overrides({"schema_version": 1, "items": [{

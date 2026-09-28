@@ -2925,15 +2925,21 @@ def validate_selection_report(report: Mapping[str, Any], *, context: Optional[Co
         _fail("selection_not_usable", "a report selection must be a ready or empty resolution with a selection_digest")
     if any(key not in report for key in REPORT_KEYS):
         _fail("selection_not_usable", "the report lacks resolution report fields")
-    if any(not isinstance(item, Mapping) or item.get("preview") for item in report["selected"]):
+    selected = report["selected"]
+    if not isinstance(selected, (list, tuple)) or not all(isinstance(item, Mapping) for item in selected):
+        _fail("selection_not_usable", "the report's selected field must be an array of selection records")
+    if any(item.get("preview") for item in selected):
         _fail("selection_not_usable", "a draft preview is never a selection")
+    if report["status"] != ("ready" if selected else "empty"):
+        _fail("selection_not_usable", "status must be ready exactly when patterns are selected (as for locks)")
     if not isinstance(context, Context):
         _fail("selection_not_usable", "a report selection needs the parsed context it was resolved from")
-    parsed = parse_refs([item for item in refs]) if refs and not all(isinstance(item, InvocationRef) for item in refs) \
-        else tuple(refs)
+    if not isinstance(refs, (list, tuple)):
+        _fail("selection_not_usable", "refs must be a list or tuple of the invocation refs the report was resolved with")
+    parsed = tuple(refs) if all(isinstance(item, InvocationRef) for item in refs) else parse_refs(list(refs))
     try:
         recomputed = selection_digest(_lock_material(report, context, parsed))
-    except (KeyError, TypeError) as error:
+    except (KeyError, TypeError, ValueError) as error:
         _fail("selection_not_usable", f"the report is malformed ({type(error).__name__}: {error})")
     if report.get("context_digest") != context.digest or recomputed != report["selection_digest"]:
         _fail("selection_not_usable", "a report selection is accepted only in-process with the context and refs it "

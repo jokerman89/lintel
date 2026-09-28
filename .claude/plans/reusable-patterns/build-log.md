@@ -771,6 +771,27 @@ failure.
 - The metadata commit that follows reserves `design-contract.py` in `coordinator_paths`.
   `li-swarm validate` is ok and the map validator exits 0.
 
+## Review revision R11 (R10 review of `132bb9bb..67cb2ef4`: SPEC/QUALITY PASS, 2 P3)
+
+Report: `review-core-r10-67cb2ef4.md`, read only. The harness fix was proven on committed
+`67cb2ef4` (18 of 18 pass, exit 0, exact revision) and the old control fails with exit 128, so the
+harness fix is closed.
+
+This revision fixes P3-R10-1 and P3-R10-2 (contract R11). `SelectionReportTests` now has 9 cases:
+- The mislabeled case is renamed from "edited to empty" to "status edited to needs-context".
+- Both genuine flips are now tested: a ready report carrying required clauses and assets relabelled
+  `empty`, and a genuinely empty report relabelled `ready`.
+- `selected` as `None`, a string, or an array with a non-record element; NaN and cyclic settings.
+  All raise `PatternError`, never a Python error.
+- Generator and string refs are refused; a tuple of parsed refs passes; mixed raw and parsed refs
+  keep the parser's `invalid_schema`.
+
+Results:
+- `bash tests/unit/patterns.sh` -> 135 OK.
+- Mutation probe (source restored byte-identical): removing any of the four new checks fails at
+  least one test. The four are status agreement with selection, the `selected` shape, `ValueError`
+  conversion and the refs-type check.
+
 ## PACK join (serial join 1 of 2)
 
 - **Authorization.** Integration reviewer 24bf5df0 approved `44c6b176` for serial join (report
