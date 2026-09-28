@@ -33,10 +33,10 @@ separate file.
   Every other catalog workflow, such as `verify` or `inspect`, is now a native `/li-<name>`
   skill instead of a canonical file to read on demand.
 - Frontmatter that Copilot does not read is dropped as a recorded degradation. Skills lose
-  `layer`, `color`, `tools`, `voice`, `cli_support`, `necessity`, `gap_if_skipped` and
-  `navigation`; agents lose `memory`, `model`, `color`, `tier`, `voice`, `category` and
-  `cli_support`. The adapter contract `shims/copilot/COPILOT.md` records each loss and the
-  agents' tool scope.
+  `layer`, `color`, `tools`, `voice`, `cli_support`, `necessity`, `gap_if_skipped`,
+  `navigation`, `workflow_root`, `domain`, `license_note` and `hop_in`; agents lose
+  `memory`, `model`, `color`, `tier`, `voice`, `category` and `cli_support`. The adapter
+  contract `shims/copilot/COPILOT.md` records each loss and the agents' tool scope.
 - `cli_support` hints declare native Copilot delivery on every skill and agent. Agents whose
   method recalls prior findings from Claude Code agent memory declare `level: degraded` with
   an `AgentMemory` degradation.

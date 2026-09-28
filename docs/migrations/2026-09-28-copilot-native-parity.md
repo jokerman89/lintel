@@ -36,23 +36,70 @@ and forks that edit canonical skills or agents.
    bash bin/li-copilot check --target ../your-repo
    ```
 
-   Until `init` runs, `check` reports the new and changed managed files as missing or outdated
-   and names the missing `.gitattributes` rules.
-2. Review the diff. `init` rewrites the managed pointer skills and the three role profiles,
+   Until `init` succeeds, `check` reports the new and changed managed files as missing or
+   outdated and names the missing `.gitattributes` rules.
+2. Resolve any refusal. `init` checks every path before it writes, and one refusal stops the
+   whole update: it preserves your files, writes nothing and names each path. A managed
+   pointer you edited is a modified managed file; move your edits into project-owned files.
+   A project file at a new generated path is an unmanaged collision, most likely a custom
+   agent of yours with a generated name; see
+   [custom agents with a generated name](#custom-agents-with-a-generated-name). Run `init`
+   again after each fix.
+3. Review the diff. `init` rewrites the managed pointer skills and the three role profiles,
    adds a skill directory for every other canonical skill and an `.agent.md` file for every
    canonical agent, and refreshes the `.github/lintel/` bundle (which includes `bin/li-run`),
    the instruction files it owns and the inventory `.github/lintel/manifest.json`. It appends
-   missing line-ending rules to `.gitattributes`. Two of those rules name hook registration
-   paths that this release does not create; the inventory records `hooks_installed: false`.
-3. Resolve refusals. A project file already at a new generated path, such as your own
-   `.github/agents/CodeReviewer.agent.md`, is an unmanaged collision, and a managed pointer
-   you edited is a modified managed file. `init` preserves both and writes nothing. Rename or
-   remove the project file, or move your edits into project-owned files, in a reviewed
-   change, then run `init` again.
+   missing line-ending rules to `.gitattributes`, one of which also covers your own agent
+   files; see [line endings of agent files](#line-endings-of-agent-files). Two of those rules
+   name hook registration paths that this release does not create; the inventory records
+   `hooks_installed: false`.
 4. Commit the regenerated files and start a new Copilot session. Verify discovery as described
    in the [Copilot guide](../copilot.md#verify-discovery), then repeat your pilot task.
 
 Project-owned files, lessons, plans and decisions are not touched.
+
+## Custom agents with a generated name
+
+The update adds a custom agent for every canonical agent at `.github/agents/<Name>.agent.md`,
+for example `Planner.agent.md`, `Explorer.agent.md` and `CodeReviewer.agent.md`. If your
+repository already has a custom agent at one of those paths, `li-copilot init` refuses the
+whole update as an unmanaged collision. It writes nothing and reports each such file, for
+example `Unmanaged collision (preserved): .github/agents/Planner.agent.md`; `check` from the
+same revision lists the same collisions without writing. This also applies when you install
+the kit for the first time.
+
+To resolve a collision:
+
+1. In a reviewed change, rename your agent, giving both its file and its `name` field a name
+   that no generated agent uses so the two stay distinguishable, or remove it if the generated
+   agent replaces it.
+2. Update any prompt or instruction that selects your agent by its old name.
+3. Run `init` again, then `check`.
+
+A skill directory of yours at a new generated `.github/skills/li-<name>/` path collides the
+same way; rename or remove it before you run `init` again. GitHub also documents that a
+repository-level custom agent takes precedence over an organization- or enterprise-level
+agent with the same file name
+([custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration)).
+In this repository, a generated agent therefore takes precedence over such an agent, so check
+those levels for the generated names before you roll out.
+
+## Line endings of agent files
+
+`init` appends the rule `.github/agents/*.agent.md text eol=lf` when it is missing. It
+matches every agent file directly in that folder, including agents your project owns, not
+only the generated ones. Git then normalizes those files to LF when they are added and checks
+them out with LF, whatever `core.autocrlf` says
+([gitattributes](https://git-scm.com/docs/gitattributes)). `init` only appends rules, so an
+earlier `.github/agents/lintel-*.agent.md` line stays; it is harmless.
+
+If your own agent files were committed with CRLF line endings, normalize them in a reviewed
+commit of their own, as Git's documentation describes:
+
+```bash
+git add --renormalize .github/agents
+git status
+```
 
 ## Update a plugin installation
 
@@ -70,7 +117,7 @@ degradation:
 
 - **Skills** keep `name` and `description` (curated for the core workflows, at most 1024
   characters). They lose `layer`, `color`, `tools`, `voice`, `cli_support`, `necessity`,
-  `gap_if_skipped` and `navigation`.
+  `gap_if_skipped`, `navigation`, `workflow_root`, `domain`, `license_note` and `hop_in`.
 - **Agents** keep `name`, `description` and `tools`. They lose `memory`, `model`, `color`,
   `tier`, `voice`, `category` and `cli_support`. Without memory, an agent that recalls prior
   findings starts fresh on every run; those agents declare `level: degraded` in their
