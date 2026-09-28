@@ -143,6 +143,10 @@ def main(argv=None) -> int:
             result = _context_library().prepare_pattern_review(
                 roots=args.roots, lock=args.lock, context=args.context, task_map=args.task_map,
                 package=args.package, coverage=args.coverage, attestations=args.attestations)
+            projection = result.get("projection")
+            result["question_tags"] = ["pattern-context"] if result["status"] in (
+                "ok", "ready", "review-unmet") and projection and (
+                projection.get("clauses") or projection.get("settings")) else []
             codes = {"ok": 0, "ready": 0, "empty": 0, "invalid": 2, "needs-context": 3,
                      "conflict": 4, "unavailable": 5, "write-collision": 6, "review-unmet": 7}
             rm.require(result["status"] in codes, f"unknown pattern-provider status: {result['status']}")

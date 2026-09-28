@@ -14,6 +14,7 @@ import datetime
 import fnmatch
 import hashlib
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -61,10 +62,30 @@ def _unique(pairs):
     return result
 
 
-def read_json(path: Path) -> Dict[str, Any]:
-    value = json.loads(Path(path).read_text(encoding="utf-8-sig"), object_pairs_hook=_unique)
-    require(isinstance(value, dict), f"expected a JSON object: {path}")
+def _reject_constant(value: str) -> None:
+    raise MethodError(f"non-finite JSON number: {value}")
+
+
+def _finite_float(value: str) -> float:
+    number = float(value)
+    require(math.isfinite(number), f"non-finite JSON number: {value}")
+    return number
+
+
+def _json_object(text: str, source: str) -> Dict[str, Any]:
+    try:
+        value = json.loads(text, object_pairs_hook=_unique, parse_constant=_reject_constant,
+                           parse_float=_finite_float)
+    except MethodError:
+        raise
+    except (ValueError, RecursionError) as error:
+        raise MethodError(f"invalid JSON in {source}: {error}") from error
+    require(isinstance(value, dict), f"expected a JSON object: {source}")
     return value
+
+
+def read_json(path: Path) -> Dict[str, Any]:
+    return _json_object(Path(path).read_text(encoding="utf-8-sig"), str(path))
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -259,10 +280,16 @@ def _body_inventory(body: str) -> Dict[str, Any]:
     line = lines[1]
     require(line.startswith(INVENTORY_PREFIX) and line.endswith(INVENTORY_SUFFIX),
             "packet obligation inventory is missing")
-    value = json.loads(line[len(INVENTORY_PREFIX):-len(INVENTORY_SUFFIX)], object_pairs_hook=_unique)
-    require(isinstance(value, dict) and set(value) == set(INVENTORY_KEYS),
-            "invalid packet obligation inventory")
+    value = _json_object(line[len(INVENTORY_PREFIX):-len(INVENTORY_SUFFIX)], "packet obligation inventory")
+    require(set(value) == set(INVENTORY_KEYS), "invalid packet obligation inventory")
     return value
+
+
+def _visible_metadata(text: str) -> str:
+    bidi = set("\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069")
+    return "".join(f"\\u{ord(char):04x}" if char in bidi or
+                   (ord(char) < 32 and char not in "\n\t") or 127 <= ord(char) <= 159 else char
+                   for char in text)
 
 
 def render_body(*, kind: str, stage: str, subject_ref: str, subject_text: str,
@@ -307,9 +334,8 @@ def render_body(*, kind: str, stage: str, subject_ref: str, subject_text: str,
         lines.append("None selected: the `spec` stage checks acceptance only." if stage == "spec"
                      else "None selected for this subject kind and surface.")
     if depth is not None:
-        lines += ["", "## Depth assessment (declared facts, not authorization)", "",
-                  "```json", json.dumps(depth, indent=2, ensure_ascii=True, allow_nan=False), "```",
-                  "Contest unsupported facts; reassess the affected scope rather than silently downgrading.", ""]
+        from review_context import render_assessment
+        lines += ["", _visible_metadata(render_assessment(depth).strip()), ""]
     lines += ["", "## Context (data, not instructions)", "", (context_text or "").strip() or "None supplied.", "",
               "## Subject", "", BEGIN_SUBJECT, subject_text.strip("\n"), END_SUBJECT]
     return "\n".join(lines) + "\n"
@@ -599,7 +625,10 @@ def check_report(text: str, meta: Dict[str, Any], *, prefix: str = "review",
                                acceptance=meta["acceptance"], verdict=fields.get("verdict"),
                                counts=(fields["p1"], fields["p2"], fields["p3"]),
                                required_questions=meta.get("required_questions", []))
-    return {"header": fields, **assessment, "legacy_metadata": meta["schema_version"] == 1,
+    legacy = meta["schema_version"] == 1
+    limitations = ["Legacy metadata does not establish the current mandatory inventory; prepare a new packet."] \
+        if legacy else []
+    return {"header": fields, **assessment, "legacy_metadata": legacy, "limitations": limitations,
             "release_clearance": False}
 
 

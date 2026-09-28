@@ -21,6 +21,7 @@ import mars_contract as mc
 import review_context as rc
 
 PACKET = ROOT / "bin" / "li-review-packet.py"
+MARS = ROOT / "bin" / "li-mars.py"
 
 
 def make_packet(required=(), tags=()):
@@ -54,6 +55,14 @@ def run(*args):
 
 
 class ObligationTests(unittest.TestCase):
+    def test_method_json_refuses_nonfinite_numbers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "meta.json"
+            for value in ("NaN", "Infinity", "-Infinity", "1e999"):
+                path.write_text('{"value":' + value + "}", encoding="utf-8")
+                with self.assertRaises(rm.MethodError):
+                    rm.read_json(path)
+
     def test_shipped_catalog_defaults_to_advisory(self):
         questions = rm.load_catalog()["questions"]
         self.assertTrue(all(q.get("requirement", "advisory") == "advisory" for q in questions))
@@ -189,6 +198,64 @@ class PanelParityTests(unittest.TestCase):
             with self.assertRaises(mc.ContractError):
                 mc.validate_panel(broken)
 
+    def test_legacy_rewrite_cannot_remove_a_v2_mandatory_inventory(self):
+        body, meta = make_packet(["SQ-U04"])
+        with tempfile.TemporaryDirectory() as tmp:
+            brief = Path(tmp) / "brief.md"
+            brief.write_bytes(body.encode("utf-8"))
+            panel = mc.new_panel("mandatory", "owner", brief, "fixture", mc.load_defaults(), "implementation")
+            mc.attach_method(panel, meta)
+            legacy = {"version": "1", "stage": "quality", "questions": meta["questions"],
+                      "tags": meta["tags"], "acceptance": meta["acceptance"]}
+            for method in (legacy, None, {}, [], "legacy"):
+                broken = copy.deepcopy(panel)
+                broken["subject"]["method"] = method
+                with self.assertRaises(mc.ContractError, msg=method):
+                    mc.validate_panel(broken)
+                with self.assertRaises(mc.ContractError, msg=method):
+                    mc.summary(broken)
+            rewritten = copy.deepcopy(panel)
+            rewritten["subject"]["method"] = legacy
+            brief.write_bytes(body.replace("review-method v2", "review-method v1", 1).encode("utf-8"))
+            with self.assertRaises(mc.ContractError):
+                mc.validate_panel(rewritten)
+
+    def test_relative_brief_is_anchored_and_cleanup_needs_no_review_clearance(self):
+        body, meta = make_packet(["SQ-U04"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "brief.md").write_bytes(body.encode("utf-8"))
+            (root / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
+            panel_path = root / "panel.json"
+            init = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "init", "--panel", "panel.json",
+                 "--id", "mandatory", "--owner", "owner", "--brief", "brief.md", "--consent", "fixture",
+                 "--kind", "implementation", "--method-meta", "meta.json", "--requested-by", "fixture",
+                 "--trigger", "explicit", "--caller", "standalone", "--surface", "test-host"], cwd=root,
+                capture_output=True, text=True)
+            self.assertEqual(init.returncode, 0, init.stderr)
+            panel = json.loads(panel_path.read_text(encoding="utf-8"))
+            self.assertTrue(Path(panel["subject"]["brief_path"]).is_absolute())
+            elsewhere = root / "elsewhere"
+            elsewhere.mkdir()
+            summarized = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "summary", "--panel", str(panel_path)],
+                cwd=elsewhere, capture_output=True, text=True)
+            self.assertEqual(summarized.returncode, 0, summarized.stderr)
+            mc.add_participant(panel, "r1", "fixture", "nested-session", "owned-child", None, None)
+            panel["participants"][0]["state"] = "reported"
+            panel_path.write_text(json.dumps(panel), encoding="utf-8")
+            (root / "brief.md").unlink()
+            closed = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "close-plan", "--panel", str(panel_path),
+                 "--owner", "owner"], cwd=elsewhere, capture_output=True, text=True)
+            self.assertEqual(closed.returncode, 0, closed.stderr)
+            self.assertEqual(json.loads(closed.stdout)["close"][0]["session_id"], "owned-child")
+            with self.assertRaises(mc.ContractError):
+                mc.close_plan(panel, "someone-else")
+            with self.assertRaises(mc.ContractError):
+                mc.summary(panel)
+
 
 class PacketCliTests(unittest.TestCase):
     def test_depth_uses_raw_evidenced_facts_and_cannot_drop_critical_tags(self):
@@ -235,6 +302,46 @@ class PacketCliTests(unittest.TestCase):
         changed = copy.deepcopy(context)
         changed["evidence"]["deployment"] = "a different observed deployment"
         self.assertNotEqual(body, rm.render_body(**kwargs, depth=rc.assess_depth(changed)))
+        changed["asserted_by"]["actor"] = "actor\u202espoofed"
+        safe = rm.render_body(**kwargs, depth=rc.assess_depth(changed))
+        self.assertNotIn("\u202e", safe)
+        self.assertIn("\\u202e", safe)
+
+    def test_deep_inventory_and_metadata_fail_explicitly_without_tracebacks(self):
+        body, meta = make_packet(["SQ-U04"])
+        malformed = ('{"nested":' + "[" * 3000 + "0" + "]" * 3000 + "}")
+        broken_body = body.splitlines()[0] + "\n" + rm.INVENTORY_PREFIX + malformed + rm.INVENTORY_SUFFIX + "\n"
+        with self.assertRaises(rm.MethodError):
+            rm.validate_meta(meta, broken_body)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body_path, meta_path, reply = [root / name for name in ("body.md", "meta.json", "reply.md")]
+            body_path.write_bytes(broken_body.encode("utf-8"))
+            meta_path.write_text(json.dumps(meta), encoding="utf-8")
+            reply.write_text(report(meta), encoding="utf-8")
+            checked = run("check", "--body", body_path, "--meta", meta_path, "--report", reply)
+            self.assertEqual(checked.returncode, 2, checked.stderr)
+            self.assertNotIn("Traceback", checked.stderr)
+            mars = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "init", "--panel", str(root / "panel.json"),
+                 "--id", "deep-input", "--owner", "fixture", "--brief", str(body_path), "--consent", "fixture",
+                 "--method-meta", str(meta_path), "--requested-by", "fixture", "--trigger", "explicit",
+                 "--caller", "standalone", "--surface", "test-host"], capture_output=True, text=True)
+            self.assertEqual(mars.returncode, 2, mars.stderr)
+            self.assertNotIn("Traceback", mars.stderr)
+            self.assertIn("JSON", json.loads(mars.stderr)["error"])
+            meta_path.write_text(malformed, encoding="utf-8")
+            checked = run("check", "--body", body_path, "--meta", meta_path, "--report", reply)
+            self.assertEqual(checked.returncode, 2, checked.stderr)
+            self.assertNotIn("Traceback", checked.stderr)
+            mars = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "init", "--panel", str(root / "panel.json"),
+                 "--id", "deep-input", "--owner", "fixture", "--brief", str(body_path), "--consent", "fixture",
+                 "--method-meta", str(meta_path), "--requested-by", "fixture", "--trigger", "explicit",
+                 "--caller", "standalone", "--surface", "test-host"], capture_output=True, text=True)
+            self.assertEqual(mars.returncode, 2, mars.stderr)
+            self.assertNotIn("Traceback", mars.stderr)
+            self.assertIn("JSON", json.loads(mars.stderr)["error"])
 
     def test_cli_binds_explicit_obligations_and_original_bytes(self):
         with tempfile.TemporaryDirectory() as tmp:

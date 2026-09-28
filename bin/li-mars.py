@@ -159,6 +159,7 @@ def main(argv=None) -> int:
                                  origin_from(args), args.subject_ref)
             if args.method_meta:
                 mc.attach_method(value, mc.read_json(args.method_meta))
+            mc.validate_panel(value)
             mc.attach_profile(value, args.repo, args.profile_ref)
             if args.select:
                 mc.bind_input(value, args.repo, args.base, args.select,
@@ -166,7 +167,7 @@ def main(argv=None) -> int:
             mc.write_json(args.panel, value)
             return emit(value)
         value = mc.read_json(args.panel)
-        mc.validate_panel(value)
+        mc.validate_panel(value, verify_method=args.action not in ("close-plan", "mark-closed"))
         if args.action == "verify-input":
             result = mc.verify_input(value, args.repo)
             return emit(result, 3 if result["status"] == "changed" else 0)

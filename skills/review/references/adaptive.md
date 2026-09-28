@@ -109,7 +109,7 @@ MARS remains opt-in and its adjudication preserves dissent.
 ## Established company and repository patterns
 
 Do not build another policy lookup. When the installed source includes reusable
-patterns, follow its `skills/pattern/references/consumer-contract.md`. Preserve the
+patterns, follow that installed pattern skill's consumer contract. Preserve the
 original artifact/target/audience facts and selected lock. An absent lock or empty
 old pack accessor is not proof that no patterns apply.
 
@@ -130,7 +130,10 @@ use that provider's `asset_refs` and `read_asset` for the selected review-domain
 asset after verification; never load a whole company knowledge base, fetch a
 private URL automatically or execute asset contents.
 
-Include the result as data in the packet's existing `--context-file`, and bind
+Include the result as data in the packet's existing `--context-file`. Pass its
+returned `question_tags` with the confirmed surface tags (`--tags pattern-context,...`)
+when applicable clauses or settings were projected; this selects SQ-CONTEXT-01.
+Bind
 the actual lock, context, mapping, profile and evidence inputs in ADR-0028.
 The provider's coverage result remains a supplemental control, always
 `release_clearance: false`; it cannot clear the main review by itself.

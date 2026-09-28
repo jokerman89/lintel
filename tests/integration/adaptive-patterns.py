@@ -151,6 +151,18 @@ if PROVIDER.is_file() and sys.version_info >= (3, 10):
             self.assertEqual(result["asset_refs"], self.lock["asset_pins"])
             self.assertTrue(any(d["code"] == "default_unverified" for d in result["diagnostics"]))
             self.assertEqual(result["metrics"].get("asset_reads"), 0, result["metrics"])
+            projected = subprocess.run(
+                [sys.executable, "-B", str(PACKET), "pattern-context", "--roots", str(self.inputs["roots"]),
+                 "--lock", str(self.lock_path), "--context", str(self.inputs["context"]),
+                 "--task-map", str(self.inputs["task_map"]), "--package", "P1",
+                 "--coverage", str(self.inputs["coverage"])], capture_output=True, text=True)
+            self.assertEqual(projected.returncode, 0, projected.stderr)
+            tags = json.loads(projected.stdout)["question_tags"]
+            selected = subprocess.run(
+                [sys.executable, "-B", str(PACKET), "questions", "--kind", "implementation",
+                 "--stage", "quality", "--tags", ",".join(tags)], capture_output=True, text=True)
+            self.assertEqual(selected.returncode, 0, selected.stderr)
+            self.assertIn("SQ-CONTEXT-01", [item["id"] for item in json.loads(selected.stdout)["questions"]])
 
         def test_missing_mandatory_coverage_is_not_pass(self):
             missing = {**self.evidence, "items": []}
@@ -165,6 +177,7 @@ if PROVIDER.is_file() and sys.version_info >= (3, 10):
                  "--coverage", str(self.inputs["coverage"])], capture_output=True, text=True)
             self.assertEqual(completed.returncode, 7, completed.stderr)
             self.assertEqual(json.loads(completed.stdout)["status"], "review-unmet")
+            self.assertEqual(json.loads(completed.stdout)["question_tags"], ["pattern-context"])
 
         def test_revoked_source_stops_before_projection(self):
             self.catalog["revocations"] = [{

@@ -49,7 +49,12 @@ def _unique(pairs):
 
 
 def read_json(path: Path) -> Dict[str, Any]:
-    value = json.loads(Path(path).read_text(encoding="utf-8-sig"), object_pairs_hook=_unique)
+    try:
+        value = json.loads(Path(path).read_text(encoding="utf-8-sig"), object_pairs_hook=_unique)
+    except ContractError:
+        raise
+    except (ValueError, RecursionError) as error:
+        raise ContractError(f"invalid JSON in {path}: {error}") from error
     require(isinstance(value, dict), f"expected a JSON object: {path}")
     return value
 
@@ -276,22 +281,40 @@ def new_panel(panel_id: str, owner: str, brief: Path, consent_ref: str,
             "owner_session_id": owner, "created_at": now(), "status": "collecting",
             "origin": {key: origin.get(key) for key in ORIGIN_FIELDS},
             "subject": {"kind": subject_kind, "ref": subject_ref or Path(brief).as_posix(),
-                        "brief_path": Path(brief).as_posix(), "brief_sha256": sha256_file(brief)},
+                        "brief_path": Path(brief).resolve().as_posix(), "brief_sha256": sha256_file(brief)},
             "limits": limits, "word_limit": defaults["protocol"]["report_word_limit"],
             "consent": {"reference": consent_ref, "roster": []},
             "participants": []}
 
 
-def validate_panel(panel: Dict[str, Any]) -> None:
-    require(panel.get("kind") == "mars-panel" and panel.get("schema_version") == 1, "not a MARS panel")
-    method = panel.get("subject", {}).get("method")
-    if method and (method.get("schema_version") is not None or method.get("version") == "2"):
+def _validate_panel_method(panel: Dict[str, Any]) -> None:
+    subject = panel.get("subject")
+    require(isinstance(subject, dict), "panel subject must be an object")
+    method = subject.get("method")
+    require(method is None or isinstance(method, dict), "panel method must be an object")
+    try:
+        body = Path(subject["brief_path"]).read_bytes().decode("utf-8")
+    except (OSError, UnicodeError, KeyError, TypeError) as error:
+        raise ContractError(f"original panel brief unavailable: {error}") from error
+    require(hashlib.sha256(body.encode("utf-8")).hexdigest() == subject.get("brief_sha256"),
+            "original panel brief differs from its frozen digest")
+    if body.startswith("<!-- lintel review-method v2 -->"):
+        require(method is not None and method.get("schema_version") == 2 and method.get("version") == "2",
+                "a version-2 brief requires its version-2 method inventory; legacy rewriting is refused")
+    if method is not None and (method.get("schema_version") is not None or method.get("version") == "2"):
         rm = _lib_module("review_method")
         try:
-            rm.validate_meta(method, Path(panel["subject"]["brief_path"]).read_bytes().decode("utf-8"))
+            rm.validate_meta(method, body)
             require(method["version"] == method["method_version"], "panel method versions disagree")
-        except (rm.MethodError, OSError, UnicodeError) as error:
+            require(method["brief_sha256"] == subject["brief_sha256"], "panel method describes a different brief")
+        except (rm.MethodError, KeyError) as error:
             raise ContractError(f"invalid panel method inventory: {error}") from error
+
+
+def validate_panel(panel: Dict[str, Any], *, verify_method: bool = True) -> None:
+    require(panel.get("kind") == "mars-panel" and panel.get("schema_version") == 1, "not a MARS panel")
+    if verify_method:
+        _validate_panel_method(panel)
     seen_slots, seen_sessions = set(), set()
     parts = panel.get("participants", [])
     require(len(parts) <= panel["limits"]["max_participants"], "too many participants")
@@ -436,7 +459,7 @@ def observe_identity(panel: Dict[str, Any], slot: str, model: str, evidence: str
 
 def close_plan(panel: Dict[str, Any], owner: str, include_incomplete: bool = False) -> Dict[str, Any]:
     """List ONLY this owner's spawned, collected nested sessions. Never anything else."""
-    validate_panel(panel)
+    validate_panel(panel, verify_method=False)
     require(owner == panel["owner_session_id"], "caller does not own this panel; refusing to close anything")
     close, keep = [], []
     for part in panel["participants"]:

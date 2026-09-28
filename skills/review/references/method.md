@@ -173,6 +173,9 @@ Method metadata v2 requires its obligation inventory and the original `--body`.
 The helper checks inventory and exact UTF-8 bytes together; MARS checks the same
 body when attaching metadata. Header syntax remains v1. Legacy method metadata
 is readable and labeled, but cannot consume a v2 body or establish new coverage.
+Panels also refuse replacing v2 metadata with the legacy shape. Owned-session
+cleanup can still produce a close plan if a brief is lost; that housekeeping
+operation does not assess findings or clear review.
 
 Use [adaptive depth](adaptive.md) for consequence facts and explicit commands,
 [security evidence](security.md) for targeted assurance, and
