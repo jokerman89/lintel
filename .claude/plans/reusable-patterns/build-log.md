@@ -271,6 +271,61 @@ New tests: `ReviewRegressionTests`, 10 cases:
   its own regression test fail, and no other test.
 - Not observed: Python 3.10 (none on the host; downloading one would write the real user cache).
 
+## Milestone acceptance and review revision R3 (`ae9d6df7` re-review)
+
+Reviewer c3015de8 report `review-milestone-ae9d6df7.md`, read only through the parent's authorization:
+
+- SPEC PASS and QUALITY PASS; findings P0 0, P1 0, P2 1, P3 4.
+- Accepted for dependent dispatch. The parent approved the topology reordering.
+- Leaves 2.2.a-2.2.c and 3.1.a-3.1.c are ticked on that reviewed milestone evidence. The whole
+  feature is still pending: this is not ADR-0028 v2 clearance or ship readiness.
+
+Fixes (contract R3):
+
+- **P2-1** `selection_digest` now covers complete selected records.
+  - `parse_lock` checks `asset_pins == asset_refs(lock)`, the reasons and the equivalent-ref
+    shape.
+  - `build_lock` refuses edited reports.
+  - `verify_lock` re-derives summary, clauses and assets from the pinned bytes, verifies every
+    equivalent pin, and compares role, scope, reasons and equivalents with the current
+    resolution.
+- **P3-1** `read_asset(selection=)` enforces selected-asset membership.
+- **P3-2** `approve` takes its dependency snapshot inside the owned lock, checked against the
+  in-lock preimage, with an optional caller catalog CAS.
+- **P3-3 / P3-4** Documented.
+
+Tests: `MilestoneReviewTests`, 5 cases:
+
+- **Lock edits.** Five lock edits are rejected in two ways:
+  - with the stale digest (invalid_lock);
+  - with a forger-recomputed digest (invalid_lock, lock_content_mismatch, or
+    selection_provenance_changed).
+- **Report edits.** Three report-field edits give lock_refused.
+- **Provenance change.** A real pinned-equivalent removal gives unavailable, and an added
+  binding gives a conflict on `reasons`.
+- **Asset selection.**
+  - `read_asset` with a selection succeeds;
+  - an unselected pattern's asset is refused with a selection but allowed without one;
+  - a needs-context report gives selection_not_usable;
+  - a tampered lock gives invalid_lock.
+- **Concurrent revoke.** A lock-honouring revoker firing at the first `load_sources` is held
+  off (`write_locked`), and the approval never co-exists with a revoked dependency.
+- **Revoke before approval.** This gives dependency_not_approved with the tree unchanged. A
+  stale catalog CAS gives a collision, and a correct CAS writes.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 70 tests OK.
+- Mutation probe (run once, source restored byte-identical): each of seven reverted guarantees
+  failed at least one of these tests. The reversions were:
+  - the digest stripped to ref/role/scope;
+  - no asset_pins check;
+  - no body re-derivation;
+  - no provenance compare;
+  - a pre-lock snapshot with the in-lock check kept;
+  - the exact old approve behaviour;
+  - no membership check.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

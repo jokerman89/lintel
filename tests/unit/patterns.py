@@ -1764,5 +1764,185 @@ class ReviewRegressionTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "invalid_pack_context")
 
 
+def _revoke_under_lock(root: Path, entry: dict) -> None:
+    """A concurrent writer that honours the per-root lock (as every Lintel writer does)."""
+    with p._WriteLock(root / "catalog.json"):
+        value = json.loads((root / "catalog.json").read_text(encoding="utf-8"))
+        value.setdefault("revocations", []).append({**{k: entry[k] for k in ("id", "version", "sha256")},
+                                                    "reason": "unsafe", "reference": "SEC-9", "at": TS})
+        p._atomic_write(root / "catalog.json", p.emit_json(value).encode("utf-8"), replace=True)
+
+
+class MilestoneReviewTests(unittest.TestCase):
+    """Regressions for independent review of ae9d6df7 (P2-1, P3-1, P3-2)."""
+
+    def _visual_lock(self):
+        fx = Fixture(self)
+        guide = b"# guide\n"
+        shared = make_pattern("example.visual", assets=[{"path": "guide.md", "kind": "guide",
+                                                         "sha256": hashlib.sha256(guide).hexdigest()}])
+        pack_root = fx.pack_chain()
+        fx.publish(pack_root / "patterns", "pack.base", [shared], bindings=[binding("p", [ref("pack.base", shared)])])
+        fx.publish(fx.repo_patterns, "repo.main", [shared, make_pattern("example.unselected", assets=[
+            {"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(guide).hexdigest()}])],
+            bindings=[binding("r", [ref("repo.main", shared)])])
+        for root in (pack_root / "patterns", fx.repo_patterns):
+            (root / "example.visual" / "1.0.0" / "guide.md").write_bytes(guide)
+        (fx.repo_patterns / "example.unselected" / "1.0.0" / "guide.md").write_bytes(guide)
+        report, _ = fx.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        return fx, report, p.build_lock(report, p.parse_context(ctx()))
+
+    def test_p2_1_lock_edits_outside_the_old_digest_are_detected(self):
+        fx, report, lock = self._visual_lock()
+        self.assertEqual(len(p.asset_refs(lock)), 1)
+        self.assertEqual(len(lock["selected"][0]["equivalent_refs"]), 2)
+
+        def edited(change):
+            value = copy.deepcopy(lock)
+            change(value)
+            return value
+
+        forged_asset = {"path": "evil.md", "kind": "guide", "sha256": "e" * 64}
+        edits = {
+            "assets dropped": lambda v: v["selected"][0].update(assets=[]),
+            "asset_pins dropped": lambda v: v.update(asset_pins=[]),
+            "assets forged": lambda v: (v["selected"][0].update(assets=[forged_asset]),
+                                        v.update(asset_pins=[dict(forged_asset, pattern=v["selected"][0]["ref"])])),
+            "equivalents dropped": lambda v: v["selected"][0].update(equivalent_refs=[]),
+            "reasons forged": lambda v: v["selected"][0].update(reasons=[{"kind": "binding", "binding": "forged"}]),
+        }
+        for name, change in edits.items():
+            with self.subTest(name=name, digest="stale"):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.parse_lock(edited(change))
+                self.assertEqual((caught.exception.code, caught.exception.status), ("invalid_lock", "invalid"))
+            with self.subTest(name=name, digest="recomputed by the forger"):
+                value = edited(change)
+                value["selection_digest"] = p.selection_digest(value)
+                try:
+                    p.parse_lock(value)
+                except p.PatternError as error:
+                    self.assertEqual(error.code, "invalid_lock")
+                    continue
+                try:
+                    verified = p.verify_lock(fx.roots(), value, p.parse_context(ctx()), today=TODAY)
+                except p.PatternError as error:
+                    self.assertEqual((error.code, error.status), ("lock_content_mismatch", "invalid"))
+                    continue
+                self.assertEqual(verified["status"], "conflict")
+                self.assertIn("selection_provenance_changed", codes(verified, "error"))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        for field, value in (("equivalent_refs", []), ("assets", []), ("reasons", [{"kind": "explicit"}])):
+            with self.subTest(report_field=field):
+                tampered = copy.deepcopy(report)
+                tampered["selected"][0][field] = value
+                with self.assertRaises(p.PatternError) as caught:
+                    p.build_lock(tampered, p.parse_context(ctx()))
+                self.assertEqual(caught.exception.code, "lock_refused")
+
+    def test_p2_1_real_provenance_change_is_a_replan(self):
+        fx, _, lock = self._visual_lock()
+        fx.publish(fx.packs / "base" / "patterns", "pack.base", [], bindings=[])
+        report = p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)
+        self.assertEqual(report["status"], "unavailable", "the pinned equivalent disappeared")
+        fx, _, lock = self._visual_lock()
+        visual = json.loads((fx.repo_patterns / "example.visual" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        fx.repo_bindings([binding("extra", [ref("repo.main", visual)])])
+        report = p.verify_lock(fx.roots(), lock, p.parse_context(ctx()), today=TODAY)
+        self.assertEqual(report["status"], "conflict")
+        self.assertEqual(next(item for item in report["diagnostics"]
+                              if item["code"] == "selection_provenance_changed")["fields"], ["reasons"])
+
+    def test_p3_1_read_asset_bound_to_a_selection(self):
+        fx, report, lock = self._visual_lock()
+        selected_ref = p.asset_refs(lock)[0]
+        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=lock), b"# guide\n")
+        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=report), b"# guide\n")
+        unselected = json.loads((fx.repo_patterns / "example.unselected" / "1.0.0" / "pattern.json")
+                                .read_text(encoding="utf-8"))
+        other = dict(selected_ref, pattern=ref("repo.main", unselected))
+        self.assertEqual(p.read_asset(fx.roots(), other), b"# guide\n", "standalone inspection stays honest")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), other, selection=lock)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("asset_not_selected", "unavailable"))
+        needs, _ = fx.resolve(ctx(), refs=p.parse_refs([{"ref": ref("repo.main", make_pattern(
+            "example.scoped", applies_to={"target": ["prod"]})), "role": "required", "approved_by": "me",
+            "approval_ref": "task"}]))
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), selected_ref, selection=needs)
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+        tampered = copy.deepcopy(lock)
+        tampered["asset_pins"] = []
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), selected_ref, selection=tampered)
+        self.assertEqual(caught.exception.code, "invalid_lock")
+
+    def _approve_setup(self):
+        fx = Fixture(self)
+        root = fx.repo_patterns
+        child = draft("example.child")
+        p.capture(fx.roots(), child, scope="repo", name=child["id"], source_id="team.repo")
+        catalog = lambda: json.loads((root / "catalog.json").read_text(encoding="utf-8"))
+        approved = p.approve(fx.roots(), root / "example.child" / "0.1.0" / "pattern.json", version="1.0.0",
+                             approval_value=APPROVAL, expected_digest=p.content_digest(child))
+        parent = draft("example.parent", requirements=[], includes=[approved["ref"]])
+        p.capture(fx.roots(), parent, scope="repo", name=parent["id"], expected_catalog_digest=p.content_digest(catalog()))
+        child_entry = next(item for item in catalog()["entries"] if item["id"] == "example.child" and
+                           item["version"] == "1.0.0")
+        return fx, root, parent, child_entry, catalog
+
+    def test_p3_2_approve_never_blesses_a_concurrent_revocation(self):
+        fx, root, parent, child_entry, catalog = self._approve_setup()
+        original = p.load_sources
+        writer = {"result": None}
+
+        def racing_load_sources(*args, **kwargs):
+            result = original(*args, **kwargs)
+            if writer["result"] is None:
+                try:
+                    _revoke_under_lock(root, child_entry)
+                    writer["result"] = "revoked"
+                except p.PatternError as error:
+                    writer["result"] = error.code
+            return result
+
+        p.load_sources = racing_load_sources
+        self.addCleanup(setattr, p, "load_sources", original)
+        try:
+            outcome = p.approve(fx.roots(), root / "example.parent" / "0.1.0" / "pattern.json", version="1.0.0",
+                                approval_value=APPROVAL, expected_digest=p.content_digest(parent))["written"]
+        except p.PatternError as error:
+            outcome = error.code
+        p.load_sources = original
+        revoked = any(item["id"] == "example.child" for item in catalog().get("revocations", []))
+        approved_parent = any(item["id"] == "example.parent" and item["status"] == "approved"
+                              for item in catalog()["entries"])
+        self.assertFalse(revoked and approved_parent,
+                         f"approval blessed a concurrently revoked dependency (writer={writer['result']}, "
+                         f"approve={outcome})")
+        self.assertEqual(writer["result"], "write_locked", "dependency checks run inside the owned lock")
+        self.assertTrue(approved_parent)
+
+    def test_p3_2_revocation_before_approval_blocks_and_catalog_cas(self):
+        fx, root, parent, child_entry, catalog = self._approve_setup()
+        _revoke_under_lock(root, child_entry)
+        path = root / "example.parent" / "0.1.0" / "pattern.json"
+        before = tree_digest(root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(fx.roots(), path, version="1.0.0", approval_value=APPROVAL, expected_digest=p.content_digest(parent))
+        self.assertEqual((caught.exception.code, caught.exception.status), ("dependency_not_approved", "unavailable"))
+        self.assertEqual(tree_digest(root), before)
+        fx, root, parent, _, catalog = self._approve_setup()
+        path = root / "example.parent" / "0.1.0" / "pattern.json"
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(fx.roots(), path, version="1.0.0", approval_value=APPROVAL,
+                      expected_digest=p.content_digest(parent), expected_catalog_digest="0" * 64)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("stale_catalog_digest", "collision"))
+        report = p.approve(fx.roots(), path, version="1.0.0", approval_value=APPROVAL,
+                           expected_digest=p.content_digest(parent), expected_catalog_digest=p.content_digest(catalog()))
+        self.assertTrue(report["written"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

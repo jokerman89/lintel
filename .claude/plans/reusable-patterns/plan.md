@@ -156,9 +156,9 @@ Milestone: deterministic local resolution with explicit uncertainty and no dropp
 
 | Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
 | --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 2.2.a | core, Unit | 2.1.d | R01,R08 | Exact pattern includes, catalog includes and cycle/depth/conflicting-digest detection; transitive dependencies inherit requiredness and must match context. | V06 |
-| [ ] | 2.2.b | core, CLI, Unit | 2.2.a | R03,R08 | resolve lock/verify-lock with stable digests, source snapshots and current lifecycle/revocations; pointer changes or missing source never silently upgrade pins. | V06 |
-| [ ] | 2.2.c | core, CLI, Unit | 2.2.b | R05,R11,R13 | map/project use section 4.6 schema/digests; unknown IDs and unmapped clauses block; mapping changes invalidate review coverage; budget overflow emits no partial lock. | V06 |
+| [x] | 2.2.a | core, Unit | 2.1.d | R01,R08 | Exact pattern includes, catalog includes and cycle/depth/conflicting-digest detection; transitive dependencies inherit requiredness and must match context. | V06 |
+| [x] | 2.2.b | core, CLI, Unit | 2.2.a | R03,R08 | resolve lock/verify-lock with stable digests, source snapshots and current lifecycle/revocations; pointer changes or missing source never silently upgrade pins. | V06 |
+| [x] | 2.2.c | core, CLI, Unit | 2.2.b | R05,R11,R13 | map/project use section 4.6 schema/digests; unknown IDs and unmapped clauses block; mapping changes invalidate review coverage; budget overflow emits no partial lock. | V06 |
 
 Milestone: reproducible selection across scopes with verified no-pattern compatibility.
 
@@ -168,9 +168,9 @@ Milestone: reproducible selection across scopes with verified no-pattern compati
 
 | Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
 | --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 3.1.a | core, CLI, Unit | 2.2.c | R06 | capture writes only a valid draft in explicit scope; source statements and observations distinguish inference; existing name/version refuses overwrite. | V07 |
-| [ ] | 3.1.b | core, CLI, Unit | 3.1.a | R06 | Exclusive source lock/CAS and catalog-last publication; index never discovers unregistered staging or removed entries and preserves lifecycle events. | V07 |
-| [ ] | 3.1.c | core, CLI, Unit | 3.1.b | R06 | approve requires explicit newer version and valid approved dependencies; source evidence rejects if missing. Deprecate->index/remove->index preserve effective state. | V07 |
+| [x] | 3.1.a | core, CLI, Unit | 2.2.c | R06 | capture writes only a valid draft in explicit scope; source statements and observations distinguish inference; existing name/version refuses overwrite. | V07 |
+| [x] | 3.1.b | core, CLI, Unit | 3.1.a | R06 | Exclusive source lock/CAS and catalog-last publication; index never discovers unregistered staging or removed entries and preserves lifecycle events. | V07 |
+| [x] | 3.1.c | core, CLI, Unit | 3.1.b | R06 | approve requires explicit newer version and valid approved dependencies; source evidence rejects if missing. Deprecate->index/remove->index preserve effective state. | V07 |
 
 ### 3.2 Maintain without silently changing active work
 

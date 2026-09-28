@@ -1944,6 +1944,8 @@ LOCK_ADDED_KEYS = ("context", "created_at", "source_snapshots", "asset_pins",
                    "requirement_tasks", "source_attestations", "review_evidence", "invocation_refs",
                    "context_budget")
 LOCK_KEYS = REPORT_KEYS + ("limits",) + LOCK_ADDED_KEYS
+SELECTED_KEYS = ("ref", "role", "scope", "effective_status", "summary", "reasons", "preview", "clauses", "assets",
+                 "equivalent_refs")
 _EFFECTIVE_MANDATORY = ("mandatory", "waived")
 
 
@@ -1952,9 +1954,13 @@ def _context_json(context: Context) -> dict:
 
 
 def _selection_material(lock: Mapping[str, Any]) -> dict:
-    """Digest input: excludes timestamps, metrics, diagnostics, attestations, mapping and evidence."""
+    """Digest input: complete selected records (refs, roles, scopes, reasons, equivalent refs, clause
+    IDs, declared assets), requirements, settings, overrides, exceptions, context, source snapshots
+    and invocation refs. Excludes timestamps, metrics, diagnostics, attestations, mapping and evidence.
+    `asset_pins` is derived from `selected[].assets` and checked for equality, not digested twice.
+    """
     return {"context": lock["context"], "source_snapshots": lock["source_snapshots"],
-            "selected": [{key: item[key] for key in ("ref", "role", "scope")} for item in lock["selected"]],
+            "selected": lock["selected"],
             "requirements": lock["requirements"], "settings": lock["settings"],
             "overrides": lock["overrides"], "exceptions": lock["exceptions"],
             "invocation_refs": lock["invocation_refs"]}
@@ -2052,9 +2058,22 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
         at = f"{where}.selected[{index}]"
         if not isinstance(item, dict) or item.get("preview") is not False:
             _fail("invalid_lock", "selected records must be non-preview selections", at)
-        parse_exact_ref(item.get("ref"), f"{at}.ref")
+        _object(item, at, SELECTED_KEYS)
+        ref = parse_exact_ref(item.get("ref"), f"{at}.ref")
         if item.get("role") not in ("required", "default") or item.get("scope") not in ("repo", "pack", "personal"):
             _fail("invalid_lock", "invalid selection role or scope", at)
+        equivalents = [parse_exact_ref(entry, f"{at}.equivalent_refs") for entry in _array(item["equivalent_refs"], at)]
+        if ref not in equivalents or any((entry.id, entry.version, entry.sha256) != (ref.id, ref.version, ref.sha256)
+                                         for entry in equivalents):
+            _fail("invalid_lock", "equivalent_refs must list the same content, including the primary ref", at)
+        if not _array(item["reasons"], f"{at}.reasons", nonempty=True) or \
+                not all(isinstance(reason, dict) and reason.get("kind") in ("binding", "explicit", "include")
+                        for reason in item["reasons"]):
+            _fail("invalid_lock", "each selection needs its binding, explicit or include reasons", at)
+        for asset_index, asset in enumerate(_array(item["assets"], f"{at}.assets")):
+            _object(asset, f"{at}.assets[{asset_index}]", ("path", "kind", "sha256"), ("phases", "domains"))
+    if value["asset_pins"] != asset_refs(value):
+        _fail("invalid_lock", "asset_pins must equal the assets declared by the selected records", where)
     clause_ids = set()
     for index, item in enumerate(_array(value["requirements"], f"{where}.requirements")):
         at = f"{where}.requirements[{index}]"
@@ -2102,14 +2121,20 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
     if context.digest != lock["context_digest"]:
         problem("conflict", "context_changed", "the current context differs from the locked context; re-plan",
                 locked=lock["context_digest"], current=context.digest)
-    for item in lock["selected"]:
-        ref = parse_exact_ref(item["ref"], "lock.selected.ref")
+    pinned = [(item, parse_exact_ref(equivalent, "lock.selected.equivalent_refs"))
+              for item in lock["selected"] for equivalent in item["equivalent_refs"]]
+    for item, ref in pinned:
         try:
             loaded, entry = _lookup(sources, ref)
             state, _ = effective_status(loaded, entry)
             if state in ("retired", "revoked"):
                 _fail(f"pinned_{state}", f"pinned {ref.text} is now {state}", status="unavailable")
-            _read_pattern(sources, loaded, entry)
+            body = _read_pattern(sources, loaded, entry)
+            derived = {"summary": body.summary, "clauses": [body.clause_ref(clause.id) for clause in body.requirements],
+                       "assets": [_asset_json(asset) for asset in body.assets]}
+            if {key: item[key] for key in derived} != derived:
+                _fail("lock_content_mismatch", f"the lock's record of {ref.text} does not match its pinned bytes "
+                      "(summary, clauses or assets); the lock was edited", "lock.selected")
             if state == "deprecated":
                 diagnostics.append(_note("pinned_deprecated", f"pinned {ref.text} is deprecated", "warning",
                                          ref=ref.to_json()))
@@ -2142,6 +2167,19 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
                 problem("conflict", "mandatory_baseline_changed",
                         "current bindings change the mandatory clauses for this context; re-plan with a new lock",
                         added=baseline["added"], removed=baseline["removed"])
+            now = {(entry["ref"]["id"], entry["ref"]["version"], entry["ref"]["sha256"]): entry
+                   for entry in current["selected"]}
+            for entry in lock["selected"]:
+                key = (entry["ref"]["id"], entry["ref"]["version"], entry["ref"]["sha256"])
+                fresh = now.get(key)
+                if fresh is None:
+                    continue
+                changed = sorted(field for field in ("ref", "role", "scope", "reasons", "equivalent_refs")
+                                 if canonical_json(fresh[field]) != canonical_json(entry[field]))
+                if changed:
+                    problem("conflict", "selection_provenance_changed",
+                            f"{key[0]}@{key[1]} is now selected with different {', '.join(changed)}; re-plan",
+                            ref=entry["ref"], fields=changed)
             locked_defaults = {item["clause"] for item in lock["requirements"] if item["state"] == "default"}
             current_defaults = {item["clause"] for item in current["requirements"] if item["state"] == "default"}
             if locked_defaults != current_defaults:
@@ -2360,14 +2398,20 @@ def _stage_pattern(root: Path, pattern: Pattern) -> tuple[str, bool]:
     return relative, False
 
 
-def _publish(root: Path, reader: Reader, *, expected: Optional[str], build) -> dict:
-    """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last."""
+def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_required: bool = True) -> dict:
+    """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last.
+
+    `build` receives the catalog read inside the lock; every check it makes uses that preimage.
+    With `cas_required=False` an omitted `expected` means the in-lock preimage is authoritative;
+    a supplied `expected` is always enforced.
+    """
     if _is_link(root):
         _fail("unsafe_path", "linked source root refused", str(root))
     root.mkdir(parents=True, exist_ok=True)
     with _WriteLock(root / "catalog.json"):
         value, digest = _read_catalog_value(root, reader)
-        _check_cas(digest, expected, "publication")
+        if cas_required or expected is not None:
+            _check_cas(digest, expected, "publication")
         catalog_value, patterns, details = build(value)
         for pattern in patterns:
             if any(item["id"] == pattern.id and item["version"] == pattern.version for item in catalog_value["entries"]):
@@ -2480,19 +2524,28 @@ def _version_key(version: str) -> tuple[int, int, int]:
 
 
 def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expected_digest: str,
-            reader: Optional[Reader] = None, today: Optional[_dt.date] = None) -> dict:
-    """Write a strictly newer approved version of a registered draft; the draft stays unchanged."""
+            expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None,
+            today: Optional[_dt.date] = None) -> dict:
+    """Write a strictly newer approved version of a registered draft; the draft stays unchanged.
+
+    `expected_digest` pins the reviewed draft. Dependency and lifecycle checks run on catalogs read
+    inside the owned source-root lock, so a revocation committed by another writer of this root
+    before the lock is visible and blocks approval. `expected_catalog_digest` optionally pins the
+    whole catalog the caller reviewed (spec 7 CAS).
+    """
     reader = reader or Reader()
     root, scope, relative = _root_for_path(roots, path)
     _matching(version, VERSION, "--version", "version", 64)
     approval = _object(approval_value, "approval", ("by", "reference", "at"))
     Approval(_string(approval["by"], "approval.by", limit=_FREE),
              _string(approval["reference"], "approval.reference", limit=_FREE), _timestamp(approval["at"], "approval.at"))
-    sources = load_sources(roots, reader)
-
     def build(value):
         if value is None:
             _fail("source_missing", "no catalog at this source root", status="unavailable")
+        sources = load_sources(roots, reader)
+        own = next((item for item in sources.catalogs if item.catalog.source_id == value["source_id"]), None)
+        if own is None or own.catalog.digest != content_digest(value):
+            _fail("snapshot_mismatch", "the in-lock catalog and the loaded source differ; retry", status="collision")
         entry = next((item for item in value["entries"] if item["path"] == relative), None)
         if entry is None:
             _fail("not_registered", f"{relative} is not a registered entry; capture it first", status="unavailable")
@@ -2522,8 +2575,7 @@ def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expe
         pattern = parse_pattern(approved, "approved")
         return copy_json(value), [pattern], _source_summary(pattern)
 
-    catalog_value, catalog_digest = _read_catalog_value(root, Reader())
-    report = _publish(root, reader, expected=catalog_digest, build=build)
+    report = _publish(root, reader, expected=expected_catalog_digest, build=build, cas_required=False)
     published = report["published"][0]
     report["ref"] = ExactRef(report["source_id"], published["id"], version, published["sha256"]).to_json()
     report["scope"] = scope
@@ -2561,11 +2613,26 @@ def asset_refs(report: Mapping[str, Any], *, kind: Optional[str] = None, phase: 
 
 
 def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[str] = None,
-               domain: Optional[str] = None, reader: Optional[Reader] = None) -> bytes:
-    """Read one declared asset: contained, listed by its verified pattern and digest-checked before use."""
+               domain: Optional[str] = None, reader: Optional[Reader] = None,
+               selection: Optional[Mapping[str, Any]] = None) -> bytes:
+    """Read one declared asset: contained, listed by its verified pattern and digest-checked before use.
+
+    Workflow consumers pass `selection` (a lock, or a ready/empty report) so only assets of selected
+    patterns can be activated. Without it, this is standalone inspection of any registered approved
+    or deprecated pattern (like `show`); it never implies selection.
+    """
     if not isinstance(asset_ref, Mapping):
         _fail("invalid_asset_ref", "asset reference must be an object")
     _object(dict(asset_ref), "asset_ref", ("pattern", "path", "kind", "sha256"), ("phases", "domains"))
+    if selection is not None:
+        if "created_at" in selection:
+            selection = parse_lock(selection)
+        elif selection.get("status") not in ("ready", "empty") or selection.get("selection_digest") is None:
+            _fail("selection_not_usable", "asset selection requires a lock or a ready/empty report with a "
+                  "selection_digest")
+        if dict(asset_ref) not in asset_refs(selection):
+            _fail("asset_not_selected", f"{asset_ref.get('path')} is not an asset of the supplied selection",
+                  status="unavailable")
     ref = parse_exact_ref(asset_ref["pattern"], "asset_ref.pattern")
     validate_relative_path(asset_ref["path"], "asset_ref.path")
     if phase is not None and phase not in PHASES:
