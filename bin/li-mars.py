@@ -176,7 +176,8 @@ def main(argv=None) -> int:
             for key, new in origin_from(args).items():
                 if new is not None and current.get(key) in (None, ""):
                     current[key] = new
-            if args.subject_ref and value["subject"].get("ref") in (None, value["subject"]["brief_path"]):
+            if args.subject_ref and value["subject"].get("ref") in (
+                    None, value["subject"]["brief_path"], value["subject"].get("brief_ref")):
                 value["subject"]["ref"] = args.subject_ref
             value["subject"].setdefault("ref", value["subject"]["brief_path"])
             value.setdefault("word_limit", defaults["protocol"]["report_word_limit"])

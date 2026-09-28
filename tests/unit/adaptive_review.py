@@ -242,6 +242,20 @@ class PanelParityTests(unittest.TestCase):
                 [sys.executable, "-B", str(MARS), "panel", "summary", "--panel", str(panel_path)],
                 cwd=elsewhere, capture_output=True, text=True)
             self.assertEqual(summarized.returncode, 0, summarized.stderr)
+            origin = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "origin", "--panel", str(panel_path),
+                 "--subject-ref", "docs/real-subject", "--requested-by", "fixture", "--trigger", "explicit",
+                 "--caller", "standalone", "--surface", "test-host"], cwd=elsewhere, capture_output=True, text=True)
+            self.assertEqual(origin.returncode, 0, origin.stderr)
+            panel = json.loads(panel_path.read_text(encoding="utf-8"))
+            self.assertEqual(panel["subject"]["ref"], "docs/real-subject")
+            explicit = subprocess.run(
+                [sys.executable, "-B", str(MARS), "panel", "origin", "--panel", str(panel_path),
+                 "--subject-ref", "docs/another-subject", "--requested-by", "fixture", "--trigger", "explicit",
+                 "--caller", "standalone", "--surface", "test-host"], cwd=elsewhere, capture_output=True, text=True)
+            self.assertEqual(explicit.returncode, 0, explicit.stderr)
+            self.assertEqual(json.loads(panel_path.read_text(encoding="utf-8"))["subject"]["ref"],
+                             "docs/real-subject", "origin must not overwrite an explicit subject")
             mc.add_participant(panel, "r1", "fixture", "nested-session", "owned-child", None, None)
             panel["participants"][0]["state"] = "reported"
             panel_path.write_text(json.dumps(panel), encoding="utf-8")
