@@ -41,6 +41,10 @@ with zero pattern body and asset reads. Then behavior is unchanged:
 A consumer may skip invoking the runtime entirely when it can see none of those sources exist.
 Personal catalogs under `$LINTEL_HOME/patterns/` never activate on their own.
 
+Refused roots are never "no patterns". A repository or `LINTEL_HOME` that is a link or junction
+is `invalid_roots` (exit 2): report it and rerun with the real physical path. Never treat that
+refusal, or any other `invalid` result, as an empty selection that lets work continue unchanged.
+
 ## Invocation
 
 Call the launcher with explicit inputs. It resolves roots from the working repository,
@@ -106,7 +110,7 @@ A waiver changes the verdict to `waived`, never to `passed`, and never changes p
 | `needs-context` | 3 | Ask for, or cite, the listed missing facts; do not guess them. `budget_exceeded` means split the work by task or component. No lock |
 | `conflict` | 4 | Stop the dependent decision; present the conflicting clauses/settings and the authoring or override correction. No lock |
 | `unavailable` | 5 | A configured, bound, pinned or required source is missing, drifted, retired, revoked, draft, unattested or past review. Block dependent use; never resolve from another source or from memory |
-| `invalid` | 2 | Fix the input file or source; visible, never an empty success |
+| `invalid` | 2 | Fix the input file or source; visible, never an empty success. `invalid_roots` means a linked or junctioned repository/`LINTEL_HOME`: rerun with the real path |
 | write collision | 6 | Re-read and retry with the current digest; never steal a lock |
 | unmet review | 7 | Mandatory clause evidence is missing, failed or unverified; REVIEW/SHIP cannot report it as passed |
 

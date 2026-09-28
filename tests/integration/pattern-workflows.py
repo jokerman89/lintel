@@ -14,14 +14,16 @@ branch provides them; host/model acceptance (V17) is a separate, fresh-session c
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pattern_consumer_fixtures import (  # noqa: E402
-    CONTRACT, NOW, ROOT, TODAY, Fixture, binding, cli_commands, clause, codes, ctx, load_design_contract, make_pattern, p,
+    CLI, CONTRACT, NOW, ROOT, TODAY, Fixture, binding, cli_commands, clause, codes, ctx, load_design_contract, make_pattern, p,
     pv, ref, tree_digest,
 )
 
@@ -136,6 +138,33 @@ class ConsumerContractTests(unittest.TestCase):
         code, report, stderr = ws.fx.cli("no-such-command")
         self.assertEqual((code, report["diagnostics"][0]["code"]), (2, "invalid_arguments"),
                          "a missing command is reported, never an empty success")
+
+    def test_linked_roots_are_invalid_never_an_empty_selection(self):
+        fx = Fixture(self)
+        linked_repo, linked_home = fx.root / "repo-link", fx.root / "home-link"
+        for link, target in ((linked_repo, fx.repo), (linked_home, fx.lintel_home)):
+            if os.name == "nt":
+                made = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)], capture_output=True)
+                if made.returncode:
+                    self.skipTest("platform: cannot create a directory junction here")
+            else:
+                os.symlink(target, link, target_is_directory=True)
+        context = fx.write_json("context.json", ctx(artifact="dashboard"))
+        for repository, personal in ((linked_repo, fx.lintel_home), (fx.repo, linked_home)):
+            envelope = {"schema_version": 1, "repository": repository.as_posix(), "personal": personal.as_posix(),
+                        "pack_context": fx.pack_context, "diagnostics": []}
+            roots = fx.write_json("linked-roots.json", envelope)
+            result = subprocess.run([sys.executable, "-I", "-B", str(CLI), "resolve", "--roots-file", str(roots),
+                                     "--context", str(context)], capture_output=True, env=fx.env(), cwd=fx.root,
+                                    timeout=120)
+            report = json.loads(result.stdout.decode("utf-8"))
+            self.assertEqual((result.returncode, report["status"]), (2, "invalid"))
+            self.assertIn(codes(report)[0], ("invalid_roots", "unsafe_path"))
+            self.assertNotEqual(report["status"], "empty")
+            with self.assertRaises(p.PatternError) as raised:
+                p.build_envelope(repository, personal, fx.pack_context)
+            self.assertEqual((raised.exception.code, raised.exception.status), ("invalid_roots", "invalid"))
+            self.assertIn("real path", raised.exception.message)
 
     def test_launcher_envelope_matches_direct_cli(self):
         ws = Workspace(self)
