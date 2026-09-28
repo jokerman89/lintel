@@ -297,6 +297,24 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R12 (2026-09-28, INT packaging: missing runtime and kit closure)
+
+- **Missing runtime.** When Python 3.10+ is missing, the launcher now exits **5**. Before, it
+  exited 2. It prints one stderr line starting `pattern check unavailable:` and writes no stdout
+  report. This follows the parent's L-N1 decision, which the consumer contract's "Missing runtime"
+  section states. The change applies only to that one branch of `bin/li-pattern`; the change is
+  owned by CORE/INT after the join.
+- **Kit closure.** `bin/li-copilot.py` exposes the `pattern` workflow (native wrapper
+  `.github/skills/li-pattern/`). It also verifies `PATTERN_RESOURCES`: the skill, the consumer
+  contract, the launcher and CLI, the core, visual and profile modules, the pack files and the
+  authoring template with its canonical example. It ships `docs/concepts/patterns.md`. The bare
+  native installer already copies these components and gains no Python prerequisite.
+- **Known limitation.** On Windows without long-path support, `lib/patterns.py` opens files with
+  ordinary spellings. It does not use `native_io_path` the way `profile_context.py` does, so a
+  pattern file whose full path exceeds 260 characters reports as missing: fail-closed, never
+  success. Keep pattern sources at ordinary path depths, or enable long paths. Hardening this is
+  outside this release.
+
 ## Revision R11 (2026-09-28, independent review of R10: P3-R10-1, P3-R10-2)
 
 The signature of `validate_selection_report` is unchanged. It now also refuses, with

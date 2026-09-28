@@ -913,6 +913,59 @@ P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
   INT must perform; a format-fact test is not that validation.
 - **Also still open:** real model/render V17 and host acceptance.
 
+## INT packaging milestone (6.1.a-6.1.c)
+
+- **Ownership.** The `bin/li-pattern` missing-runtime change is a coordinator/INT integration
+  delta. It is not retrospective PACK worker work, and it is authorized by the parent after the
+  accepted join. `tests/integration/pattern-portability.*` and `tests/shape/pattern-contract.sh`
+  are INT-reserved paths, per the INT package boundary.
+- **6.1.a.** Added:
+  - `scaffolding/01-foundation/templates/pattern/`, holding `README.md`, the draft
+    `pattern.template.json`, and the canonical neutral synthetic `example/`. The example has one
+    approved dashboard pattern generated through the core API (digest `ec1759e0…`), a guide asset,
+    a catalog with one required binding, and a source-local `.gitattributes` containing `* -text`.
+  - `docs/concepts/patterns.md`, carrying the limits, the optional runtime, linked roots, the
+    upgrade/rebind notice, the stricter-`check` compatibility notice and Git byte preservation.
+  - pattern sections in `docs/architecture.md`, `docs/the-cycle.md`, `docs/multi-cli.md` and
+    `docs/copilot.md` (the upgrade notice).
+  - `skills/pack-create` and `skills/pack-validate`: the optional `patterns.source`, shipped
+    files, and a separate pattern check.
+- **6.1.b.** `bin/li-copilot.py` gains the `pattern` workflow, the `PATTERN_RESOURCES` closure
+  check and `docs/concepts/patterns.md` in `DOCS`. I regenerated with the existing
+  `li-copilot.py init --client copilot-cli`, using a recovery store in session artifacts
+  (transaction `transaction-c406b06d…`). That created `.github/skills/li-pattern/SKILL.md` and
+  updated `.github/lintel/manifest.json`. `python bin/li-catalog.py` regenerated
+  `skills/CATALOG.md`. `tests/shape/skill-descriptions-trigger.sh` now lists `pattern`.
+- **6.1.c.** Added:
+  - `tests/integration/pattern-portability.py` with its wrapper, 6 tests. It generates a real kit
+    into a target whose path has spaces and metacharacters, then runs the kit's own launcher and
+    modules. It covers:
+    - the closure and the wrapper link, with `li-copilot check` on the target passing;
+    - a non-Git explicit root and a non-Git cwd, where the repository root is null;
+    - the missing runtime: with no Python on PATH, exit 5, `pattern check unavailable`, no stdout;
+    - the canonical example: `check` ok, then `resolve --lock`, `verify-lock`, and `read_asset`
+      with the verified lock through the kit module; an unrelated backend resolves `empty` with
+      0 pattern and 0 asset reads;
+    - RN-13 for a repository source. A CRLF asset goes through capture, approve, commit and a
+      fresh clone under a repository `*.md text eol=lf` policy. Without source attributes the
+      bytes are rewritten and `check` reports `declared_file_changed` (exit 5). With the
+      template's `* -text`, the bytes are exact, `check` is ok and `read_asset` returns the CRLF
+      bytes.
+    - RN-13 for a pack source. A pack declaring `patterns.source` with `* -text` goes through
+      commit and a fresh clone. With `LINTEL_PROFILE_PACK=team`, the launcher `check` is ok at
+      pack scope, and a real envelope, resolve and report-bound `read_asset` return the CRLF
+      bytes.
+  - `tests/shape/pattern-contract.sh`, 13 assertions.
+- **Results** (synthetic HOME and TEMP, Windows, Python 3.11.9):
+  - `pattern-portability.sh`: 6 OK.
+  - `pattern-contract.sh`: all pass.
+  - `native-command-surface`: 0 findings.
+  - `catalog-regenerates-clean`, `frontmatter-lint-all`, `skill-descriptions-trigger` and
+    `bin-scripts-executable`: all pass.
+  - `li-copilot.py check`: 22 managed files verified.
+- **Ledger.** 4.3.b and 5.2.a are unticked again. Their local helper acceptance is reviewed, but
+  their original real-document and per-consumer model/render/host acceptance remains V17.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
