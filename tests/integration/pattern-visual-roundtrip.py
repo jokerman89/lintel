@@ -8,8 +8,8 @@
 
 The resolution comes from the real `bin/li-pattern.py` process over synthetic catalogs; the spec
 is checked by the shared design validator and by `validate_visual` as frontend-design-review
-consumes it. This is local integration evidence, not rendering or host acceptance. Cases that
-need the pack-lane launcher or later core commands skip with an explicit PENDING reason.
+consumes it. This is local integration evidence, not rendering or host acceptance. The launcher
+case runs the real `bin/li-pattern` with the real neutral profile; nothing is skipped or mocked.
 """
 from __future__ import annotations
 
@@ -230,8 +230,7 @@ class VisualRoundtripTests(unittest.TestCase):
                          "original bytes are preserved")
 
     def test_legacy_capture_approve_roundtrip_reads_the_asset_after_approval(self):
-        if "--files-from" not in cli_options("capture"):
-            self.skipTest("PENDING join: asset-bearing capture/approve (core --files-from, 8addc395) is not in this CLI")
+        self.assertIn("--files-from", cli_options("capture"), "asset-bearing capture is part of the joined core")
         seed = Path(p.__file__).resolve().parents[1] / "seeds/brand/design-patterns/ultra-modern-lovable-style/pattern.json"
         data = seed.read_bytes()
         fx = Fixture(self)
@@ -266,12 +265,24 @@ class VisualRoundtripTests(unittest.TestCase):
         fx.publish(fx.repo_patterns, "repo.main", [self.rt.dashboard],
                    assets={"example.dashboard": {"tokens.json": TOKENS}})
         fx.repo_bindings([binding("dashboard", [ref("repo.main", self.rt.dashboard)], when=WEBSITE)])
+        fx.use_launcher_roots()
         context = fx.write_json("context.json", ctx(artifact="website"))
-        code, launched, _ = fx.launcher("resolve", "--context", context)
+        lock_path = fx.repo / ".claude" / "runtime" / "patterns" / "run-l" / "patterns.lock.json"
+        lock_path.parent.mkdir(parents=True)
+        code, launched, stderr = fx.launcher("resolve", "--context", context, "--lock", lock_path)
         _, direct, _ = fx.cli("resolve", "--context", context)
-        self.assertEqual((code, launched["status"]), (0, "ready"))
+        self.assertEqual((code, launched["status"]), (0, "ready"), stderr)
         self.assertEqual(launched["selection_digest"], direct["selection_digest"])
         self.assertEqual(launched["requirements"], direct["requirements"])
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, WEB, today=TODAY)["status"], "ok")
+        code, verified, _ = fx.launcher("verify-lock", "--lock", lock_path, "--context", context)
+        self.assertEqual((code, verified["status"]), (0, "ok"))
+        spec = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertEqual(spec["layout_grammar"]["max_width"], "1200px")
+        self.assertEqual(pv.validate_visual(spec, lock)["status"], "passed")
+        asset = p.asset_refs(lock, kind="tokens")[0]
+        self.assertEqual(p.read_asset(fx.roots(), asset, domain="frontend", selection=lock), TOKENS)
 
 
 # Card 5.2.a: one explicit acceptance case per frontend consumer. "helper" is what this suite

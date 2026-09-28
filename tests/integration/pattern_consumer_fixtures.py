@@ -34,7 +34,6 @@ CONTRACT = ROOT / "skills" / "pattern" / "references" / "consumer-contract.md"
 TODAY = dt.date(2026, 9, 28)
 NOW = dt.datetime(2026, 9, 28, 1, 2, 3, tzinfo=dt.timezone.utc)
 TS = "2026-09-01T00:00:00Z"
-PENDING_LAUNCHER = "PENDING join: bin/li-pattern launcher (card 2.1.c, pack lane) is not in this tree"
 
 
 def statement(text="The operator stated this expectation."):
@@ -125,6 +124,7 @@ class Fixture:
         self.packs = self.root / "packs"
         self.packs.mkdir()
         self.pack_context = self.neutral_context()
+        self.launched_envelope = None
 
     # ---- roots
     def manifest(self, name):
@@ -157,7 +157,22 @@ class Fixture:
         return self.lintel_home / "patterns"
 
     def envelope(self):
+        if self.launched_envelope is not None:
+            return self.launched_envelope
         return p.build_envelope(self.repo, self.lintel_home, self.pack_context)
+
+    def use_launcher_roots(self):
+        """Adopt the launcher's own envelope (the real ADR-0029 profile) for every later call.
+
+        Direct-CLI and API comparisons then use exactly the roots the launcher sends, so no
+        synthetic neutral record or digest is compared against the real one.
+        """
+        code, envelope, stderr = self.launcher("roots")
+        if code != 0:
+            raise AssertionError(f"launcher roots failed ({code}): {stderr}")
+        p.parse_roots(envelope)
+        self.launched_envelope = envelope
+        return envelope
 
     def roots(self):
         return p.parse_roots(self.envelope())
@@ -231,11 +246,14 @@ class Fixture:
         return result.returncode, json.loads(result.stdout.decode("utf-8")), result.stderr.decode("utf-8")
 
     def launcher(self, *args):
-        bash = shutil.which("bash")
-        if bash is None or not LAUNCHER.is_file():
-            raise unittest.SkipTest(PENDING_LAUNCHER)
-        result = subprocess.run([bash, str(LAUNCHER), *map(str, args)], capture_output=True, env=self.env(),
-                                cwd=self.repo, timeout=180)
+        """Run the real `bin/li-pattern` launcher (bash) with this fixture's synthetic environment."""
+        bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
+        if bash is None:
+            raise AssertionError("bash is required for launcher cases; it is a declared test prerequisite")
+        if not LAUNCHER.is_file():
+            raise AssertionError(f"{LAUNCHER} is missing; the launcher is part of the joined tree")
+        result = subprocess.run([bash, LAUNCHER.as_posix(), *map(str, args)], capture_output=True, env=self.env(),
+                                cwd=self.repo, timeout=180, stdin=subprocess.DEVNULL)
         return result.returncode, json.loads(result.stdout.decode("utf-8") or "{}"), result.stderr.decode("utf-8")
 
 

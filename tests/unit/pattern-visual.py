@@ -281,25 +281,29 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(pv.project_visual(visual_base_spec(), lock)["spec"],
                          pv.project_visual(visual_base_spec(), report, context=WEB)["spec"])
 
-    def test_report_validation_delegates_to_the_core_helper_when_present(self):
-        """R10 `validate_selection_report` is preferred; the build_lock route is only the pre-R10 fallback."""
+    def test_report_validation_is_the_core_helper(self):
+        """In-process reports go through the public core `validate_selection_report`."""
         from unittest import mock
         report = ProjectionFixture(self).resolve()
         calls = []
+        real = p.validate_selection_report
 
         def helper(value, *, context, refs=()):
             calls.append((value is report, context.digest, tuple(refs)))
-            return value
+            return real(value, context=context, refs=refs)
 
-        with mock.patch.object(p, "validate_selection_report", helper, create=True):
+        with mock.patch.object(p, "validate_selection_report", helper):
             pv.project_visual(visual_base_spec(), report, context=WEB)
         self.assertEqual(calls, [(True, WEB.digest, ())])
-        if hasattr(p, "validate_selection_report"):
+        for field, change in (("requirements", lambda r: r["requirements"][0].update(text="edited")),
+                              ("selected", lambda r: r["selected"][0]["assets"].append(
+                                  {"path": "x.json", "kind": "tokens", "sha256": "0" * 64})),
+                              ("status", lambda r: r.update(status="empty"))):
             tampered = copy.deepcopy(report)
-            tampered["requirements"][0]["text"] = "edited"
-            with self.assertRaises(p.PatternError) as raised:
+            change(tampered)
+            with self.assertRaises(p.PatternError, msg=field) as raised:
                 pv.validate_visual(visual_base_spec(), tampered, context=WEB)
-            self.assertEqual(raised.exception.code, "selection_not_usable")
+            self.assertEqual((raised.exception.code, raised.exception.status), ("selection_not_usable", "invalid"))
 
     def test_explicit_refs_are_part_of_the_bound_inputs(self):
         fx = Fixture(self)

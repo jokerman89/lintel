@@ -2,14 +2,14 @@
 # component: reusable-patterns-workflow-test
 # implements: ADR-0038, ADR-0028
 # intent: .claude/plans/reusable-patterns/plan.md
-# constraints: synthetic temporary roots only; real resolver/CLI/adapter processes; missing later commands skip as PENDING, never mocked
+# constraints: synthetic temporary roots only; real resolver/CLI/launcher/adapter processes; a missing command fails, never mocked
 # last_intent_review: 2026-09-28
 """V09: real helper outputs reach work IDs, continuation and review; missing evidence fails.
 
 Each class maps to a workflow-lane leaf. The phase skills link one consumer contract; these
-tests exercise the commands that contract names. Cases needing the pack-lane launcher (2.1.c)
-or the core `review` command (4.2.b-core) skip with a PENDING reason until the integrated
-branch provides them; host/model acceptance (V17) is a separate, fresh-session category.
+tests exercise the commands that contract names, including the real `bin/li-pattern` launcher
+and the core `review` command. A missing command is a failure, never a skip or a mock;
+host/model acceptance (V17) is a separate, fresh-session category.
 """
 from __future__ import annotations
 
@@ -28,7 +28,6 @@ from pattern_consumer_fixtures import (  # noqa: E402
 )
 
 COMMANDS = cli_commands()
-PENDING_REVIEW = "PENDING join: core `review` command (card 4.2.b-core) is not in this CLI"
 DASHBOARD = {"artifact": ["dashboard"]}
 CONSUMERS = (
     "sense", "scope", "define", "discover", "cycle", "plan", "build", "resume", "review", "ship", "capture",
@@ -41,7 +40,7 @@ CONSUMERS = (
 
 def require(command):
     if command not in COMMANDS:
-        raise unittest.SkipTest(PENDING_REVIEW if command == "review" else f"PENDING join: `{command}` command")
+        raise AssertionError(f"the joined CLI lacks `{command}`; this is a failure, not a skip")
 
 
 class Workspace:
@@ -168,9 +167,19 @@ class ConsumerContractTests(unittest.TestCase):
 
     def test_launcher_envelope_matches_direct_cli(self):
         ws = Workspace(self)
-        code, launched, _ = ws.fx.launcher("resolve", "--context", ws.context)
+        envelope = ws.fx.use_launcher_roots()
+        neutral = envelope["pack_context"]
+        self.assertEqual((neutral["status"], neutral["identity"]["name"]), ("neutral", "_default"))
+        self.assertEqual((neutral["source"]["state"], neutral["source"]["value"]), ("null", None),
+                         "the real neutral manifest declares patterns.source: null")
+        code, launched, stderr = ws.fx.launcher("resolve", "--context", ws.context)
+        self.assertEqual((code, launched["status"]), (0, "ready"), stderr)
         _, direct, _ = ws.resolve()
-        self.assertEqual((code, launched["selection_digest"]), (0, direct["selection_digest"]))
+        api, _ = ws.fx.resolve(ctx(artifact="dashboard"))
+        self.assertEqual(launched["selection_digest"], direct["selection_digest"])
+        self.assertEqual(launched["selection_digest"], api["selection_digest"])
+        self.assertEqual(launched["requirements"], direct["requirements"])
+        self.assertEqual(launched["sources"], direct["sources"])
 
     def test_fallback_or_error_profile_without_sources_is_never_no_patterns(self):
         """M3: an empty-looking repository under a fallback/error profile still surfaces unavailable."""
@@ -187,12 +196,21 @@ class ConsumerContractTests(unittest.TestCase):
                 self.assertNotEqual(report["status"], "empty")
 
     def test_launcher_surfaces_a_fallback_profile(self):
+        """P07 optional selection of a missing pack falls back to neutral; patterns must not proceed."""
         fx = Fixture(self)
         packs = fx.lintel_home / "packs"
         packs.mkdir(parents=True)
-        (packs / "active-pack").write_text("missing-team-pack\n", encoding="utf-8")
-        code, report, _ = fx.launcher("list")
-        self.assertEqual((code, report["status"]), (5, "unavailable"))
+        (packs / "active-pack").write_text("ghost\n", encoding="utf-8", newline="\n")
+        code, envelope, _ = fx.launcher("roots")
+        self.assertEqual(code, 0)
+        self.assertEqual((envelope["pack_context"]["status"], envelope["pack_context"]["identity"]["name"]),
+                         ("fallback", "_default"))
+        context = fx.write_json("context.json", ctx(artifact="dashboard"))
+        for command in (("list",), ("resolve", "--context", context)):
+            code, report, stderr = fx.launcher(*command)
+            self.assertEqual((code, report["status"]), (5, "unavailable"), (command, stderr))
+            self.assertIn("pack_context_fallback", codes(report, "error"))
+            self.assertIn("OPTIONAL_PROFILE_FALLBACK", stderr)
 
 
 class StartupTests(unittest.TestCase):
