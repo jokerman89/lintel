@@ -1117,6 +1117,65 @@ Checks, synthetic HOME/TEMP, Windows:
 
 The re-review is pending; 5.2.a and 4.3.c stay unticked.
 
+## R12 palette precedence join (`23e8e194`, RN-15)
+
+Reviewer 24's follow-up at `118d1c71` (`v18-m1-118d1c71.md`, sha256 `72dc0ae5…`) closed M-1, L-4
+and the earlier Lows. Its R-4 source clarification (`e8e08cb6…`) then showed that `load_design`
+could not admit a selected pattern palette winner over the pinned profile. MasterCoordinator
+`9854860c` authorized the bounded Option 1 fix, with seven acceptance cases.
+
+**Change (10 files, +473/-25):**
+
+- `design_contract.py`: a verified-pattern admission in `load_design`, plus
+  `--pattern-lock`/`--pattern-context` on `renderer-args` and `review`.
+- `pipeline_inputs.py`: the same plumbing.
+- `pattern_visual.palette_winners`.
+- Docs: design-contract reference, frontend-design, generate-web, mockup, consumer contract.
+- Reviewer R1: explicit `verify-lock` of a new direct-entry lock.
+- Reviewer R2: a test message no longer claims an `--out` observation.
+
+**Acceptance mapping** (new `tests/integration/design-contract.py` cases, real core
+resolve/build_lock/write_lock, `project_visual` and `load_design`):
+
+| # | Case |
+|---|---|
+| 1 | Repository default ink `#112233` loads over profile `#141413`, including the CLI; profile bytes unchanged. Pack default the same, selected scope `pack` |
+| 2 | Without a lock, a projected spec is refused. A bare differing ink is refused. A real brief override still loads |
+| 3 | Refused: a claimed winner, a forged `pattern_context` digest, an edited lock, an unselected lock, foreign lock paths, and a lock without its context |
+| 4 | Refused before output: context change (`context_changed`), revoked pin, changed pinned source, missing lock |
+| 5 | A brief override resolved through the core wins over a default. A brief against a `must` is a resolver conflict, and a brief colour against the mandatory lock is refused |
+| 6 | Unselected `.claude/patterns` and a source changed after selection are refused |
+| 7 | An empty selection leaves the spec and loading unchanged. A pipeline design-spec with a real attachment loads; without its lock it is refused, and with drifted ink it is refused |
+
+**Checks** (Windows, synthetic HOME/TEMP):
+
+| Suite | Result |
+|---|---|
+| `design-contract.sh` | 26 tests, 0 failures/errors/skips |
+| V11 | 23 OK |
+| V09 | 31 OK |
+| V10 | 26 OK |
+| `document-pipeline-binding.sh` | 33 OK |
+| `frontend-design-roundtrip.sh` | pass |
+| `design-validator.sh` | all pass |
+| `generate-skills-present.sh` | pass |
+| `pattern-contract.sh` | all pass |
+| `frontmatter-lint-all.sh` | pass |
+| `native-command-surface` | PASS, 0 findings |
+| `li-copilot.py check` | 22 managed files |
+| catalog check | clean |
+
+**Limits:**
+
+- A spec with no `pattern_context` and no supplied lock cannot be detected by the loader. The
+  direct-entry rule, `validate_visual` before render and REVIEW coverage remain those obligations.
+- Pack and personal pattern bytes are lock-pinned and re-read, not P05-selected (they are outside
+  the repository).
+- `pipeline_inputs` pattern plumbing is exercised through `load_design` tests, not a dedicated
+  pipeline-inputs case.
+
+5.2.a stays unticked until reviewer 24 has reviewed `23e8e194`.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).

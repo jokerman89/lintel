@@ -238,3 +238,33 @@ Leaf IDs and original leaf text are unchanged. Only later status annotations are
   request, and review wording (reviewer 24's WF and INT notes, and the WF test's "deferred: V17"
   label) expanded these rows to "required". The rows record genuine unobserved facts; only their
   mandatory classification was the expansion. See lesson L-063.
+
+**RN-15 Pattern palette precedence at the design loader (owner decision, 2026-09-28).**
+Reviewer `24bf5df0`'s source clarification of R-4 (`r4-clarification-118d1c71.md`, sha256
+`e8e08cb6d68dbfd617e0a64cf1a7c42e4f987f6b6fdf284fb1cc12ec78fc75b0`) established the gap. The
+original R12 precedence puts brief overrides above repository, pack and personal pattern defaults,
+then the Design DNA profile, then the corpus (`spec.md:692-696`). But
+`design_contract.load_design` refused any palette colour that differed from the pinned profile
+without a brief override. MasterCoordinator `9854860c` approved Option 1 as a bounded join fix
+within the original scope.
+
+`23e8e194` adds a verified-pattern admission. `load_design`, and its CLI and pipeline-loader
+callers, take an optional `pattern_lock` and `pattern_context`. Only a lock that the core
+`verify_lock` accepts admits a differing palette colour. Its conditions:
+
+- The roots come from this repository, the P07 home and the verified P07 pack context.
+- The lock, the context and `.claude/patterns` are P05-selected with their current bytes.
+- The spec's `pattern_context` matches.
+- `validate_visual`, or the pipeline attachment, passes.
+- Every palette winner equals the design's value.
+
+A spec with a `pattern_context` but no lock is refused; no-pattern loading is unchanged.
+
+**Ownership.** `skills/design-dna/scripts/design_contract.py`,
+`skills/design-dna/references/design-contract.md`, `skills/generate/scripts/pipeline_inputs.py`
+and `tests/integration/design-contract.py` are outside every lane scope. They are a CORE/INT
+coordinator integration delta, authorized by the owner decision. The `lib/pattern_visual.py`
+`palette_winners` helper is likewise a coordinator delta in the joined WF file.
+
+**Unchanged:** leaf IDs, R12 text, ADR-0038, P05/P07 schemas, policy, profile and corpus files.
+Typography is not projected by the v1 adapter and is unchanged.
