@@ -181,6 +181,15 @@ ts: <iso-8601>
 - **Default `internal`** — no invented customer voice rule; any applicable configured internal requirements still apply.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When pattern sources exist, the pipeline resolves once for the brief's
+context before OUTLINE, stores the lock in the run directory and attaches it to
+`design-spec.json` as `pattern_context` (`lib/pattern_visual.py` `design_attachment`). Every
+stage verifies that attachment (`verify_design_attachment`) before using clauses; a missing,
+stale or mismatched attachment is `unavailable`, never a pass. Mandatory clauses reach the
+format-builders and QA unchanged. With no pattern sources nothing is attached or asked.
+
 ## Status protocol
 
 - **DONE** — all formats produced + qa_pass=true + run_dir printed

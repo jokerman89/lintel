@@ -189,6 +189,13 @@ control outcomes. Report word count descriptively, never as proof of completenes
 
 If upstream `--customer-share`: voice_tier in content frontmatter is set to the active pack's customer-facing tier (signals to downstream that content was written for a customer-facing surface).
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Use the clauses of a verified run attachment; on direct entry without one,
+resolve for the brief's context. Annotate the content.md sections that satisfy a clause with its
+clause ID. Never drop or merge away a section that a mandatory clause requires; report a clause
+you could not satisfy as unmet instead.
+
 ## Status protocol
 
 - **DONE** — source retention verified and all applicable mandatory writing controls satisfied
