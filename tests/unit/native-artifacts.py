@@ -102,7 +102,7 @@ class NativeArtifacts(unittest.TestCase):
         self.write(f"agents/{category}/{name}.md", AGENT_HEADER.format(name=name, description=description) + body)
 
     def render(self, name: str, *, local: bool = True, files=None) -> str:
-        generated, data = adapter.native_skill(self.source, name, files or {}, local,
+        generated, data = adapter.native_skill_file(self.source, name, files or {}, local,
                                                None if local else REPOSITORY, HOST)
         self.assertEqual(generated, f".github/skills/li-{name}/SKILL.md")
         self.assertTrue(data.endswith(b"\n") and not data.endswith(b"\n\n") and b"\r" not in data)
@@ -219,7 +219,7 @@ class NativeArtifacts(unittest.TestCase):
         for local, root, link, files in ((True, "../..", "../../skills/define/references/intake.md", {}),
                                          (False, "../lintel", "../lintel/skills/define/references/intake.md", bundled)):
             with self.subTest(local=local):
-                name, generated, data = adapter.native_agent(self.source, "agents/engineering/CodeReviewer.md",
+                name, generated, data = adapter.native_agent_file(self.source, "agents/engineering/CodeReviewer.md",
                                                              files, local, None if local else REPOSITORY, HOST)
                 self.assertEqual((name, generated), ("CodeReviewer", ".github/agents/CodeReviewer.agent.md"))
                 self.assertEqual(frontmatter_keys(data), ["name", "description", "tools"])
@@ -241,15 +241,15 @@ class NativeArtifacts(unittest.TestCase):
         # The generated body is "\n" + preamble + "\n" + filler + "\n" after the frontmatter.
         filler = HOST["agent_body_limit"] - preamble - 3
         self.agent("engineering", "Big", "\n" + "x" * filler)
-        _, _, data = adapter.native_agent(self.source, "agents/engineering/Big.md", {}, True, None, HOST)
+        _, _, data = adapter.native_agent_file(self.source, "agents/engineering/Big.md", {}, True, None, HOST)
         self.assertEqual(len(adapter.split_frontmatter(data.decode("utf-8"))[1]), HOST["agent_body_limit"])
         self.agent("engineering", "Big", "\n" + "x" * (filler + 1))
         with self.assertRaisesRegex(ValueError, "Agent body exceeds 30000 characters: agents/engineering/Big.md"):
-            adapter.native_agent(self.source, "agents/engineering/Big.md", {}, True, None, HOST)
+            adapter.native_agent_file(self.source, "agents/engineering/Big.md", {}, True, None, HOST)
         (self.source / "agents/engineering/Big.md").unlink()
         self.write("agents/engineering/Renamed.md", AGENT_HEADER.format(name="Other", description="x") + "\n")
         with self.assertRaisesRegex(ValueError, "must match its file name"):
-            adapter.native_agent(self.source, "agents/engineering/Renamed.md", {}, True, None, HOST)
+            adapter.native_agent_file(self.source, "agents/engineering/Renamed.md", {}, True, None, HOST)
         (self.source / "agents/engineering/Renamed.md").unlink()
         self.agent("engineering", "Explorer", "\nFirst.\n")
         self.agent("security", "Explorer", "\nSecond.\n")

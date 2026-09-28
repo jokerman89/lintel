@@ -836,7 +836,7 @@ def native_document(source: Path, canonical: str, generated: str, files: dict[st
     return header, root, body
 
 
-def native_skill(source: Path, name: str, files: dict[str, bytes], local: bool,
+def native_skill_file(source: Path, name: str, files: dict[str, bytes], local: bool,
                  repository: Optional[str], host: dict) -> tuple[str, bytes]:
     canonical = f"skills/{name}/SKILL.md"
     skill = host["skill_name"].format(name=name)
@@ -857,7 +857,7 @@ def native_skill(source: Path, name: str, files: dict[str, bytes], local: bool,
     return generated, text_bytes(text)
 
 
-def native_agent(source: Path, canonical: str, files: dict[str, bytes], local: bool,
+def native_agent_file(source: Path, canonical: str, files: dict[str, bytes], local: bool,
                  repository: Optional[str], host: dict) -> tuple[str, str, bytes]:
     stem = PurePosixPath(canonical).stem
     generated = f"{host['agent_root']}/{host['agent_file'].format(name=stem)}"
@@ -886,7 +886,7 @@ def native_files(source: Path, files: dict[str, bytes], local: bool, host: dict)
     for name in names:
         if not NATIVE_SKILL_NAME.fullmatch(name):
             raise ValueError(f"Canonical skill folder is not a portable native name: skills/{name}")
-        generated, data = native_skill(source, name, files, local, repository, host)
+        generated, data = native_skill_file(source, name, files, local, repository, host)
         output[generated] = data
     for name in WORKFLOWS:
         if name not in names:
@@ -899,7 +899,7 @@ def native_files(source: Path, files: dict[str, bytes], local: bool, host: dict)
         if path.is_file() and path.suffix == ".md" and path.name != "README.md" and not path.name.startswith("_"))
     owners = {f"lintel-{role}".casefold(): f"Lintel {role} role" for role in AGENTS}
     for canonical in canonical_agents:
-        name, generated, data = native_agent(source, canonical, files, local, repository, host)
+        name, generated, data = native_agent_file(source, canonical, files, local, repository, host)
         if name.casefold() in owners:
             raise ValueError(f"Native agent name collision: {canonical} and {owners[name.casefold()]}")
         owners[name.casefold()] = canonical
