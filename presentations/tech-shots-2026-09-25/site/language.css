@@ -1,0 +1,22 @@
+/* The flags use their own SVG colours; theme palettes do not recolour national flags. */
+.language-picker{display:inline-flex;align-items:center;gap:2px;flex-shrink:0;margin-left:8px}
+.language-picker button,.toolbar .language-picker button{display:grid;place-items:center;width:32px;height:30px;min-height:30px;padding:5px!important;border:1px solid transparent!important;border-radius:4px;background:transparent!important;color:inherit;box-shadow:none!important;opacity:.62;cursor:pointer}
+.language-picker svg{display:block;width:21px;height:14px;border-radius:1px;overflow:hidden}
+.language-picker button:hover{opacity:1}
+.language-picker button[aria-pressed="true"]{opacity:1;border-color:var(--line,#7d718c)!important;background:color-mix(in srgb,currentColor 7%,transparent)!important}
+.language-picker button:focus-visible{opacity:1;outline:2px solid var(--purple,#b778ed)!important;outline-offset:2px}
+.site-header [data-theme-mount]{display:flex;align-items:center}
+@media(min-width:651px) and (max-width:1300px){.toolbar .location{display:none}.toolbar{gap:10px!important}.toolbar .language-picker{margin-left:2px}}
+@media(max-width:650px){
+ .toolbar .language-picker{grid-column:1;grid-row:2;justify-self:start;margin:0 0 0 36px;z-index:1}
+ .toolbar .language-picker button,:root[data-theme="fluent"] .toolbar .language-picker button{width:27px;height:34px;min-height:34px;padding:3px!important}
+ .toolbar #overview{width:32px!important}
+ .toolbar .theme-picker button{padding:7px 6px!important}
+ .site-header [data-theme-mount]{flex-wrap:wrap;gap:6px}
+ .site-header .language-picker{margin-left:2px}
+}
+@media print{.language-picker{display:none}}
+
+@media(max-width:450px){:root[lang="sv"] .cold-pointers{grid-template-columns:1fr}}
+
+@media(max-width:450px){:root[lang="sv"] .reference-middle{grid-template-columns:repeat(3,minmax(0,1fr))}:root[lang="sv"] .reference-middle a{min-width:0;padding-right:6px}:root[lang="sv"] .reference-middle a+a{padding-left:8px}:root[lang="sv"] .reference-middle b{overflow-wrap:anywhere}}
