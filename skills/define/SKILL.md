@@ -235,6 +235,16 @@ state_append DEFINE "${define_status:?set actual design status}" \
   "wedge=${wedge:?record the agreed useful outcome}"
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Before design choices, resolve the current context
+(`bin/li-pattern resolve --context <file>`); direct DEFINE entry resolves itself and never
+relies on a preceding SENSE. Carry every `mandatory` clause into the acceptance criteria by its
+fully qualified clause ID, show selected defaults with their reasons, and treat `candidates`
+as advisory only. `needs-context` asks for the missing facts instead of guessing them;
+`conflict` and `unavailable` stop the dependent design decision. With `empty`, DEFINE runs
+exactly as before and adds no prompt or artifact.
+
 ## Status and recovery
 
 - **DONE:** the selected design is approved and required review/evidence is complete.

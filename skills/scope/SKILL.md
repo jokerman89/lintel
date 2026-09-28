@@ -228,6 +228,14 @@ scope.md written: <path>
 Next: DEFINE (inherits chosen reading as the wedge)
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Record which context facts the work depends on (for example artifact,
+audience, deployment target, subscription or organization), which are known with evidence,
+and which are unknown. An unknown target stays unknown in the SCOPE report and later yields
+`needs-context`; never fill it from a default, the artifact type or a generic landing-zone
+recommendation. Without configured pattern sources, SCOPE is unchanged.
+
 ## Status protocol
 
 - **DONE** — scope.md written, size + depth_schema resolved (gate fired or silent)

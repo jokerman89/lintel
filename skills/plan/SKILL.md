@@ -576,6 +576,18 @@ state_append PLAN DONE next=BUILD "work_map_path=$LINTEL_WORK_MAP" \
   "mars_offer=${mars_offer:?accepted, declined or not-offered}"
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When the resolution is `ready`, write the lock beside the initiative with
+`bin/li-pattern resolve --context <file> --lock <initiative>/patterns.lock.json`; conflicts,
+drafts and unknown mandatory context are never locked. Map every selected must and default
+clause to existing task IDs from the authoritative spec, work map or Spec Kit `tasks.md` in a
+companion task map, preview it with `map`, then install it with `map --write` and the current
+`--expected-lock-digest`. Do not invent task IDs, add pattern fields to work-map v1 or rename
+Spec Kit tasks. Link the lock, task map and context file from plan.md and prompt.md so a cold
+executor can verify them. Direct PLAN and cycle PLAN use the same inputs and yield the same
+selection. Without pattern sources, PLAN adds no prompt or artifact.
+
 ## Status protocol
 
 - **DONE** — plan APPROVED with cost estimate accepted + adversarial review pass

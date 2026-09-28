@@ -495,6 +495,15 @@ state_append RESUME DONE "prior_last_phase=${prior_last_phase:?record original p
   "cross_machine=${cross_machine:?record actual source}"
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). If the saved plan links a pattern lock, `verify-lock` it with the saved
+context before choosing the next card. Deprecated pins and changed defaults are warnings to
+surface; changed bytes, retired or revoked pins and missing sources block the affected
+continuation; a changed context or mandatory baseline is a re-plan with the reported old and
+new clause sets. Never upgrade pins, rewrite the lock or substitute remembered clause text.
+A personal source that is unavailable on this machine blocks until it is supplied.
+
 ## Status protocol
 
 - **DONE** — operator chose, next phase invoked

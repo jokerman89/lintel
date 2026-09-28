@@ -346,6 +346,14 @@ Next options:
   • /li:skill-router "<intent>"    — semantic router if unsure
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). SENSE only records whether pattern sources exist: a repository
+`.claude/patterns/` catalog or bindings, the active pack's `patterns.source`, or explicit
+references named in the request. When they exist, `bin/li-pattern list` reports catalog
+metadata and reads no pattern body or asset. Do not resolve, rank or load patterns here and
+never infer a deployment target from the repository. With no sources, add no prompt or output.
+
 ## Status protocol
 
 - **DONE** — sense report written, recommended mode/phase surfaced
