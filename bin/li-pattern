@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+# component: reusable-patterns-launcher
+# implements: ADR-0038, ADR-0029, ADR-0005
+# intent: .claude/plans/reusable-patterns/contract.md
+# constraints: data-only; roots cross to Python as JSON on stdin, never as shell source or eval
+# last_intent_review: 2026-09-28
+#
+# Usage: li-pattern [--repo DIR] <command> [options...]
+#
+# Resolves the three pattern roots and hands them to bin/li-pattern.py:
+#   repository  --repo DIR, else LINTEL_REPO_ROOT, else the Git top level of the
+#               current directory, else none. Never the source bundle or "/".
+#   personal    $LINTEL_HOME (default ~/.lintel); may not exist yet.
+#   pack        the ADR-0029 profile record from profile_context_json, including
+#               a bound session context and its fail-closed drift checks. Outside
+#               a repository, LINTEL_HOME is only the profile's working context.
+# The envelope is built by `li-pattern.py envelope` with JSON serialization and is
+# piped to the command's --roots-stdin, so stdin is not available for other input.
+# Absolute POSIX spellings of known file/directory options are converted to the
+# native form under MSYS; every other argument is passed verbatim.
+# Commands that take no roots (envelope, project, check --path) and invocations
+# that already name --roots-stdin/--roots-file pass through unchanged. The
+# launcher-only `roots` command prints the envelope it would send and exits.
+set -euo pipefail
+
+SOURCE="$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+
+_fail() { # <exit-code> <message>
+  printf '[lintel/pattern] %s\n' "$2" >&2
+  exit "$1"
+}
+
+# Native form for the Python boundary; MSYS paths are converted explicitly.
+_native() {
+  if command -v cygpath >/dev/null 2>&1; then cygpath -m -- "$1"; else printf '%s' "$1"; fi
+}
+
+# MSYS skips its automatic conversion for POSIX spellings containing some
+# metacharacters. Only known file/directory option values are converted, and
+# only absolute POSIX spellings: "-", relative paths and other data are verbatim.
+_path_option() {
+  case "$1" in
+    --context|--refs|--overrides|--exceptions|--attestations|--lock|--path|--input|--files-from|\
+    --approval|--source-root|--task-map|--record|--change|--out|--bundle|--version-map|--evidence|\
+    --roots-file|--profile-record|--personal|--repository) return 0 ;;
+  esac
+  return 1
+}
+_opaque_option() {
+  case "$1" in
+    --ref|--name|--source-id|--scope|--kind|--version|--package|--destination-source|\
+    --expected-digest|--expected-catalog-digest|--expected-lock-digest|--context-budget-chars|\
+    --profile-error|--profile-error-message) return 0 ;;
+  esac
+  return 1
+}
+_native_value() {
+  case "$1" in
+    /*) if command -v cygpath >/dev/null 2>&1; then cygpath -m -- "$1"; return; fi ;;
+  esac
+  printf '%s' "$1"
+}
+
+python=""
+for candidate in python3 python; do
+  if command -v "$candidate" >/dev/null 2>&1 &&
+    "$candidate" -c 'import sys; assert sys.version_info >= (3, 10)' >/dev/null 2>&1; then
+    python="$candidate"
+    break
+  fi
+done
+[ -n "$python" ] || _fail 2 'reusable-pattern operations require Python 3.10+; no operation was performed.'
+
+repo_arg="" repo_set=0
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --repo) [ "$#" -ge 2 ] || _fail 2 '--repo requires a directory'; repo_arg="$2"; repo_set=1; shift 2 ;;
+    --repo=*) repo_arg="${1#--repo=}"; repo_set=1; shift ;;
+    --) shift; break ;;
+    *) break ;;
+  esac
+done
+[ "$#" -gt 0 ] || _fail 2 'usage: li-pattern [--repo DIR] <command> [options...]'
+
+normalized=() pending=""
+for argument in "$@"; do
+  case "$pending" in
+    path) normalized+=("$(_native_value "$argument")"); pending=""; continue ;;
+    opaque) normalized+=("$argument"); pending=""; continue ;;
+  esac
+  case "$argument" in
+    --*=*)
+      if _path_option "${argument%%=*}"; then
+        normalized+=("${argument%%=*}=$(_native_value "${argument#*=}")")
+      else
+        normalized+=("$argument")
+      fi ;;
+    *)
+      normalized+=("$argument")
+      if _path_option "$argument"; then pending=path; elif _opaque_option "$argument"; then pending=opaque; fi ;;
+  esac
+done
+set -- "${normalized[@]}"
+
+run_cli() { "$python" -I -B "$(_native "$SOURCE/bin/li-pattern.py")" "$@"; }
+
+command="$1"
+passthrough=0
+case "$command" in
+  envelope|project|-h|--help) passthrough=1 ;;
+esac
+for argument in "$@"; do
+  case "$argument" in
+    --roots-stdin|--roots-file|--roots-file=*) passthrough=1 ;;
+    --path|--path=*) [ "$command" = check ] && passthrough=1 ;;
+  esac
+done
+if [ "$passthrough" -eq 1 ]; then
+  [ "$repo_set" -eq 0 ] || _fail 2 "--repo does not apply to '$command'; it takes no derived roots"
+  run_cli "$@"
+  exit $?
+fi
+for argument in "${@:2}"; do
+  case "$argument" in
+    -|*=-) _fail 2 'stdin carries the roots envelope; pass input files instead of -' ;;
+  esac
+done
+
+if [ -z "${LINTEL_HOME:-}" ]; then
+  [ -n "${HOME:-}" ] || _fail 2 'set LINTEL_HOME or HOME to locate personal patterns'
+  LINTEL_HOME="$HOME/.lintel"
+fi
+case "$LINTEL_HOME" in
+  /*|[A-Za-z]:[\\/]*) ;;
+  *) _fail 2 "LINTEL_HOME must be an absolute path: $LINTEL_HOME" ;;
+esac
+export LINTEL_HOME
+
+# shellcheck source=../lib/paths.sh
+source "$SOURCE/lib/paths.sh"
+if [ "$repo_set" -eq 1 ]; then
+  [ -n "$repo_arg" ] || _fail 2 '--repo requires a nonempty directory'
+  LINTEL_REPO_ROOT="$repo_arg"
+fi
+repo="$(lintel_repo_root || true)"
+if [ -n "$repo" ]; then
+  [ -d "$repo" ] || _fail 2 "repository root is not a directory: $repo"
+  # CDPATH could redirect a relative name and makes cd print; "--" admits "-dir".
+  # The logical spelling is kept: whether a linked anchor is followed or refused
+  # is the core envelope contract's decision, not this launcher's.
+  repo="$(CDPATH='' cd -- "$repo" 2>/dev/null && pwd)" || _fail 2 'cannot enter the repository root'
+fi
+
+workdir="$(mktemp -d "${TMPDIR:-/tmp}/lintel-pattern.XXXXXX")"
+trap 'rm -rf -- "$workdir"' EXIT
+
+# Without a repository, LINTEL_HOME is the profile's working context (P07): its
+# .claude/profile-requirements.json and runtime selection apply to the pack
+# context. The envelope's repository stays null, so no repository catalog or
+# bindings under LINTEL_HOME are ever read or activated.
+profile_repo="${repo:-$LINTEL_HOME}"
+profile_rc=0
+record="$(
+  exec 2>"$workdir/profile.err"
+  # MSYS skips automatic argument conversion for some POSIX paths (quotes, "&"),
+  # so every root the shared helper receives is already native.
+  export LINTEL_SOURCE_ROOT="$(_native "$SOURCE")" LINTEL_REPO_ROOT="$(_native "$profile_repo")"
+  export LINTEL_HOME="$(_native "$LINTEL_HOME")" _LINTEL_PROFILE_PYTHON="$python" PYTHONDONTWRITEBYTECODE=1
+  for name in LINTEL_PACKS_DIR LINTEL_ACTIVE_PACK_FILE LINTEL_PROFILE_CONTEXT_FILE; do
+    if [ -n "${!name:-}" ]; then export "$name=$(_native "${!name}")"; fi
+  done
+  set +eu
+  # shellcheck source=../lib/pack-resolver.sh
+  source "$SOURCE/lib/pack-resolver.sh" && profile_context_json
+)" || profile_rc=$?
+cat "$workdir/profile.err" >&2 || true
+
+envelope_args=(envelope --personal "$(_native "$LINTEL_HOME")")
+[ -z "$repo" ] || envelope_args+=(--repository "$(_native "$repo")")
+envelope_rc=0
+if [ "$profile_rc" -eq 0 ]; then
+  envelope="$(printf '%s' "$record" | run_cli "${envelope_args[@]}" --profile-record -)" || envelope_rc=$?
+else
+  # The shared helper reports one JSON error record on stderr; keep its code/message.
+  code="" message=""
+  { IFS= read -r -d '' code && IFS= read -r -d '' message; } < <("$python" -I -B -c '
+import json, re, sys
+code, message = "PROFILE_UNAVAILABLE", "profile context unavailable (exit %s)" % sys.argv[2]
+with open(sys.argv[1], encoding="utf-8", errors="replace") as stream:
+    for line in stream:
+        try:
+            value = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(value, dict) and value.get("status") == "error":
+            if isinstance(value.get("code"), str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", value["code"]):
+                code = value["code"]
+            if isinstance(value.get("message"), str) and value["message"]:
+                message = value["message"]
+sys.stdout.write(code + "\0" + message + "\0")
+' "$(_native "$workdir/profile.err")" "$profile_rc") || true
+  [ -n "$code" ] || code=PROFILE_UNAVAILABLE
+  [ -n "$message" ] || message="profile context unavailable (exit $profile_rc)"
+  envelope="$(run_cli "${envelope_args[@]}" --profile-error "$code" --profile-error-message "$message")" ||
+    envelope_rc=$?
+fi
+if [ "$envelope_rc" -ne 0 ] || [ "$command" = roots ]; then
+  printf '%s\n' "$envelope"
+  exit "$envelope_rc"
+fi
+
+cli_rc=0
+printf '%s' "$envelope" | run_cli "$command" --roots-stdin "${@:2}" || cli_rc=$?
+exit "$cli_rc"

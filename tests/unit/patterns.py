@@ -2701,6 +2701,141 @@ class LockTimeTests(unittest.TestCase):
         self.assertIn("replan_required", codes(expired, "error"))
 
 
+class SelectionReportTests(unittest.TestCase):
+    """WF review M2: one public helper validates fresh in-process reports (the read_asset floor)."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.rules = make_pattern("example.rules", requirements=[
+            clause("MUST-1", "must", "ui.theme", "dark"), clause("DEF-1", "default", "visual.layout.max-width", "72ch")],
+            assets=[{"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(b"g\n").hexdigest()}])
+        self.extra = make_pattern("example.extra", requirements=[clause("E-1", "default", "ui.font", "serif")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.extra])
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)])])
+        self.context = p.parse_context(ctx())
+        self.report, _ = self.fx.resolve(ctx())
+
+    def refused(self, report, **kwargs):
+        kwargs.setdefault("context", self.context)
+        with self.assertRaises(p.PatternError) as caught:
+            p.validate_selection_report(report, **kwargs)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("selection_not_usable", "invalid"))
+
+    def test_fresh_report_is_accepted_without_reading_files(self):
+        empty, _ = Fixture(self).resolve(ctx())
+        original_read, original_open = p.Reader.read, open
+
+        def forbidden(*_args, **_kwargs):
+            raise AssertionError("validate_selection_report must not read files")
+
+        p.Reader.read = forbidden
+        self.addCleanup(setattr, p.Reader, "read", original_read)
+        import builtins
+        builtins.open = forbidden
+        try:
+            self.assertIs(p.validate_selection_report(self.report, context=self.context), self.report)
+            self.assertEqual(p.validate_selection_report(empty, context=self.context)["status"], "empty")
+        finally:
+            builtins.open = original_open
+            p.Reader.read = original_read
+
+    def test_missing_or_wrong_context_and_refs(self):
+        self.refused(self.report, context=None)
+        self.refused(self.report, context=p.parse_context(ctx(artifact="other")))
+        refs_raw = [{"ref": ref("repo.main", self.extra), "role": "default", "approved_by": "me", "approval_ref": "task"}]
+        with_refs, _ = self.fx.resolve(ctx(), refs=p.parse_refs(refs_raw))
+        self.refused(with_refs)
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=p.parse_refs(refs_raw)), with_refs)
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=refs_raw), with_refs,
+                      "raw --refs items are parsed with the same parser")
+        with self.assertRaises(p.PatternError):
+            p.validate_selection_report(with_refs, context=self.context, refs=[{"bad": 1}])
+
+    def test_edits_with_unchanged_digest_are_refused(self):
+        edits = {
+            "setting value (M2 repro)": lambda r: r["settings"]["visual.layout.max-width"].update(value="9999px"),
+            "requirement text": lambda r: r["requirements"][0].update(text="weakened"),
+            "requirement state": lambda r: r["requirements"][0].update(state="waived"),
+            "selected assets": lambda r: r["selected"][0].update(assets=[]),
+            "selected record added": lambda r: r["selected"].append(dict(copy.deepcopy(r["selected"][0]),
+                                                                         ref=ref("repo.main", self.extra))),
+            "exceptions": lambda r: r["exceptions"].append({"clause": "x"}),
+        }
+        for name, change in edits.items():
+            with self.subTest(name=name):
+                edited = copy.deepcopy(self.report)
+                change(edited)
+                self.refused(edited)
+
+    def test_invalid_states_and_shapes(self):
+        needs, _ = self.fx.resolve(ctx(), refs=p.parse_refs([{"ref": ref("repo.main", make_pattern(
+            "example.scoped", applies_to={"target": ["prod"]})), "role": "required", "approved_by": "m",
+            "approval_ref": "t"}]))
+        for label, value in (("needs-context", needs), ("no digest", dict(self.report, selection_digest=None)),
+                             ("lock", p.build_lock(self.report, self.context, now=NOW)),
+                             ("missing keys", {"status": "ready", "selection_digest": "0" * 64}),
+                             ("preview", dict(copy.deepcopy(self.report), selected=[
+                                 dict(self.report["selected"][0], preview=True)])),
+                             ("not a mapping", ["x"]),
+                             ("status edited to conflict", dict(self.report, status="conflict")),
+                             ("status edited to needs-context", dict(self.report, status="needs-context"))):
+            with self.subTest(label=label):
+                self.refused(value)
+
+    def test_status_must_agree_with_the_selection(self):
+        self.assertTrue(self.report["selected"] and any(item["state"] == "mandatory" for item in self.report["requirements"]))
+        self.assertTrue(p.asset_refs(self.report), "the flipped report carries required clauses and assets")
+        self.refused(dict(self.report, status="empty"))
+        empty, _ = Fixture(self).resolve(ctx())
+        self.assertEqual(empty["status"], "empty")
+        self.refused(dict(empty, status="ready"))
+
+    def test_malformed_shapes_raise_pattern_error_not_python_errors(self):
+        cyclic = copy.deepcopy(self.report)
+        loop = {}
+        loop["self"] = loop
+        cyclic["settings"]["visual.layout.max-width"]["value"] = loop
+        nan = copy.deepcopy(self.report)
+        nan["settings"]["visual.layout.max-width"]["value"] = float("nan")
+        for label, value in (("selected None", dict(self.report, selected=None)),
+                             ("selected string", dict(self.report, selected="abc")),
+                             ("selected with a non-record", dict(self.report, selected=[self.report["selected"][0], 7])),
+                             ("NaN setting", nan), ("cyclic setting", cyclic)):
+            with self.subTest(label=label):
+                self.refused(value)
+
+    def test_refs_must_be_a_list_or_tuple(self):
+        refs_raw = [{"ref": ref("repo.main", self.extra), "role": "default", "approved_by": "me", "approval_ref": "task"}]
+        with_refs, _ = self.fx.resolve(ctx(), refs=p.parse_refs(refs_raw))
+        generator = (item for item in p.parse_refs(refs_raw))
+        self.refused(with_refs, refs=generator)
+        self.refused(with_refs, refs="not refs")
+        self.assertIs(p.validate_selection_report(with_refs, context=self.context, refs=tuple(p.parse_refs(refs_raw))),
+                      with_refs)
+        with self.assertRaises(p.PatternError) as caught:
+            p.validate_selection_report(with_refs, context=self.context, refs=[refs_raw[0], p.parse_refs(refs_raw)[0]])
+        self.assertEqual(caught.exception.code, "invalid_schema", "mixed items go through the existing parser")
+
+    def test_legitimate_overrides_and_waivers_pass(self):
+        overrides = p.parse_overrides({"schema_version": 1, "items": [{
+            "setting": "visual.layout.max-width", "value": "80ch", "reason": "brief", "approval_ref": "b",
+            "replaces": ["example.rules@1.0.0#DEF-1"]}]})
+        exceptions = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": self.context.digest, "reason": "pilot",
+            "approval_ref": "EX", "approved_by": "sec", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = self.fx.resolve(ctx(), overrides=overrides, exceptions=exceptions)
+        self.assertEqual(report["settings"]["visual.layout.max-width"]["value"], "80ch")
+        self.assertIs(p.validate_selection_report(report, context=self.context), report)
+
+    def test_read_asset_uses_the_same_helper(self):
+        tampered = copy.deepcopy(self.report)
+        tampered["settings"]["visual.layout.max-width"]["value"] = "9999px"
+        asset = p.asset_refs(self.report)[0]
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), asset, selection=tampered, context=self.context)
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+
+
 class StrictBaselineTests(unittest.TestCase):
     """Regressions for independent review of d82b2919 (P2-R4-1, P3-R4-1): omission, laundering, status."""
 
@@ -3087,6 +3222,252 @@ class CoreReviewTests(unittest.TestCase):
                                                 "version": "0.1.0"}], write=True)
         self.assertEqual(caught.exception.code, "unregistered_staging_conflict")
         self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["pattern.json"], "no orphaned asset")
+
+
+class NamespaceTests(unittest.TestCase):
+    """Regressions for review of 8addc395 (P3-R6-1, P3-R6-2, note 2): one unambiguous destination namespace."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.work = self.fx.root / "work"
+        self.work.mkdir()
+
+    def asset(self, path, data):
+        return {"path": path, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()}
+
+    def write(self, name, data):
+        target = self.work / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+
+    def assert_refused_unchanged(self, action, code="destination_conflict"):
+        before = tree_digest(self.fx.root)
+        with self.assertRaises(p.PatternError) as caught:
+            action()
+        self.assertEqual(caught.exception.code, code, caught.exception.message)
+        self.assertEqual(tree_digest(self.fx.root), before, "nothing written anywhere")
+        return caught.exception
+
+    def capture(self, value, **kwargs):
+        kwargs.setdefault("source_id", None if (self.fx.repo_patterns / "catalog.json").exists() else "repo.main")
+        if kwargs["source_id"] is None:
+            kwargs.pop("source_id")
+            kwargs["expected_catalog_digest"] = p.content_digest(json.loads(
+                (self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8")))
+        return p.capture(self.fx.roots(), value, scope="repo", name=value["id"], files_from=self.work, **kwargs)
+
+    def test_reserved_body_name_is_refused_for_assets_and_pattern_sources(self):
+        self.write("pattern.json", b"{}")
+        asset_case = draft("example.pj", assets=[self.asset("pattern.json", b"{}")])
+        self.assert_refused_unchanged(lambda: self.capture(asset_case))
+        self.assert_refused_unchanged(lambda: self.capture(asset_case), "destination_conflict")
+        source_case = draft("example.src", sources=[dict(statement(), root="pattern", ref="Pattern.JSON")])
+        self.write("Pattern.JSON", b"{}")
+        self.assert_refused_unchanged(lambda: self.capture(source_case))
+        plain = draft("example.plain")
+        self.capture(plain)
+        clash = dict(plain, version="0.2.0", assets=[self.asset("pattern.json", b"{}")])
+        self.assert_refused_unchanged(lambda: p.update(
+            self.fx.roots(), self.fx.repo_patterns / "example.plain" / "0.1.0" / "pattern.json", clash,
+            expected_digest=p.content_digest(plain), files_from=self.work))
+        nested = draft("example.nested", assets=[self.asset("docs/pattern.json", b"nested\n")])
+        self.write("docs/pattern.json", b"nested\n")
+        self.capture(nested)
+        self.assertEqual(sorted(path.relative_to(self.fx.repo_patterns / "example.nested" / "0.1.0").as_posix()
+                                for path in (self.fx.repo_patterns / "example.nested" / "0.1.0").rglob("*")
+                                if path.is_file()), ["docs/pattern.json", "pattern.json"],
+                         "a nested file named pattern.json is not the body and is allowed")
+
+    def test_reserved_name_in_a_registered_draft_cannot_orphan_approval(self):
+        value = draft("example.approve")
+        self.capture(value)
+        root = self.fx.repo_patterns / "example.approve" / "0.1.0"
+        catalog = json.loads((self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8"))
+        hacked = dict(value, sources=[dict(statement(), root="pattern", ref="pattern.json")])
+        (root / "pattern.json").write_text(json.dumps(hacked), encoding="utf-8")
+        catalog["entries"][0]["sha256"] = p.content_digest(hacked)
+        (self.fx.repo_patterns / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+        for attempt in range(2):
+            with self.subTest(attempt=attempt):
+                self.assert_refused_unchanged(lambda: p.approve(self.fx.roots(), root / "pattern.json", version="1.0.0",
+                                                                approval_value=APPROVAL,
+                                                                expected_digest=p.content_digest(hacked)))
+        self.assertFalse((self.fx.repo_patterns / "example.approve" / "1.0.0").exists(), "no orphan, retry is clean")
+
+    def test_case_fold_and_prefix_collisions(self):
+        data = b"same\n"
+        self.write("Guide.md", data)
+        self.write("guide.md", data)
+        cases = {
+            "case variants": draft("example.case", assets=[self.asset("Guide.md", data), self.asset("guide.md", data)]),
+            "source vs asset case": draft("example.mixed", assets=[self.asset("guide.md", data)],
+                                          sources=[dict(statement(), root="pattern", ref="GUIDE.md")]),
+        }
+        for name, value in cases.items():
+            with self.subTest(name=name):
+                self.assert_refused_unchanged(lambda value=value: self.capture(value))
+        shared = draft("example.shared", assets=[self.asset("guide.md", data)],
+                       sources=[dict(statement(), root="pattern", ref="guide.md", sha256=hashlib.sha256(data).hexdigest())])
+        self.capture(shared)
+        self.assertEqual(sorted(path.name for path in (self.fx.repo_patterns / "example.shared" / "0.1.0").iterdir()),
+                         ["guide.md", "pattern.json"], "an asset and a source naming the same exact file coalesce")
+
+    def test_update_mixing_fallback_and_supplied_files_detects_prefix_collision(self):
+        nested_data, flat_data = b"nested\n", b"flat\n"
+        self.write("a/b", nested_data)
+        base = draft("example.ab", assets=[self.asset("a/b", nested_data)])
+        self.capture(base)
+        root = self.fx.repo_patterns / "example.ab" / "0.1.0"
+        supply = self.fx.root / "supply"
+        supply.mkdir()
+        (supply / "a").write_bytes(flat_data)
+        newer = dict(base, version="0.2.0", assets=[self.asset("a/b", nested_data), self.asset("a", flat_data)])
+        for write in (False, True):
+            with self.subTest(write=write):
+                self.assert_refused_unchanged(lambda write=write: p.update(
+                    self.fx.roots(), root / "pattern.json", newer, expected_digest=p.content_digest(base), write=write,
+                    files_from=supply))
+        valid = dict(base, version="0.2.0", assets=[self.asset("a/b", nested_data), self.asset("a/c", flat_data)])
+        (supply / "a").unlink()
+        (supply / "a").mkdir()
+        (supply / "a" / "c").write_bytes(flat_data)
+        p.update(self.fx.roots(), root / "pattern.json", valid, expected_digest=p.content_digest(base), write=True,
+                 files_from=supply)
+        self.assertEqual(sorted(path.relative_to(self.fx.repo_patterns / "example.ab" / "0.2.0").as_posix()
+                                for path in (self.fx.repo_patterns / "example.ab" / "0.2.0").rglob("*") if path.is_file()),
+                         ["a/b", "a/c", "pattern.json"], "valid nested paths from both sources are published")
+
+    def test_existing_disk_file_blocks_a_directory_destination_without_traceback(self):
+        value = draft("example.disk", assets=[self.asset("a/b", b"x\n")])
+        self.write("a/b", b"x\n")
+        blocked = self.fx.repo_patterns / "example.disk" / "0.1.0"
+        blocked.mkdir(parents=True)
+        (blocked / "a").write_bytes(b"stray\n")
+        (self.fx.repo_patterns / "catalog.json").unlink(missing_ok=True)
+        with self.assertRaises(p.PatternError) as caught:
+            p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=self.work)
+        self.assertEqual(caught.exception.code, "destination_conflict")
+        self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["a"])
+
+    def test_cli_reports_namespace_conflicts_as_invalid_input(self):
+        self.write("Guide.md", b"x\n")
+        self.write("guide.md", b"x\n")
+        source = self.work / "draft.json"
+        source.write_text(json.dumps(draft("example.cli", assets=[self.asset("Guide.md", b"x\n"),
+                                                                  self.asset("guide.md", b"x\n")])), encoding="utf-8")
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        code, report, stderr = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                           "--name", "example.cli", "--source-id", "repo.main")
+        self.assertEqual((code, report["status"]), (2, "invalid"))
+        self.assertIn("destination_conflict", stderr)
+        self.assertNotIn("Traceback", stderr)
+
+
+class NamespaceInvariantTests(unittest.TestCase):
+    """Review of 445e3ad9 (P3-R8-1, P3-R8-2): the whole namespace invariant, table-driven."""
+
+    REFUSED = [
+        ("file vs child, sibling '.'", ["a", "a.md", "a/b"]),
+        ("file vs child, sibling '-'", ["a", "a-b", "a/b"]),
+        ("file vs child, sibling ' '", ["a", "a b", "a/b"]),
+        ("file vs child, sibling '_'", ["a", "a_b", "a/b"]),
+        ("file vs grandchild", ["x", "x/y/z"]),
+        ("file vs deep child, siblings between", ["d/e", "d/e.txt", "d/e-1", "d/e/f/g"]),
+        ("case-varied file vs directory", ["A", "a/b"]),
+        ("file case collision", ["Guide.md", "guide.md"]),
+        ("directory spelled two ways", ["Docs/x", "docs/y"]),
+        ("multilevel ancestor case", ["top/Mid/x", "top/mid/y"]),
+        ("unicode casefold ancestor", ["Stra\u00dfe/a", "STRASSE/b"]),
+    ]
+    ALLOWED = [
+        ("similar siblings", ["a", "a.md", "a-b", "a b", "a_b", "ab"]),
+        ("nested siblings", ["a/b", "a/c", "a/d/e", "a/d/f"]),
+        ("same directory, same spelling", ["docs/x", "docs/y", "docs/sub/z"]),
+        ("file named like a sibling directory's prefix", ["a.md", "a/b"]),
+    ]
+
+    def keys(self, names):
+        return [(name, name.encode("utf-8")) for name in names]
+
+    def test_every_order_of_refused_sets_is_refused(self):
+        import itertools
+        for label, names in self.REFUSED:
+            for order in itertools.permutations(names):
+                with self.subTest(label=label, order=order):
+                    with self.assertRaises(p.PatternError) as caught:
+                        p._check_namespace(self.keys(order))
+                    self.assertEqual(caught.exception.code, "destination_conflict")
+
+    def test_every_order_of_allowed_sets_passes(self):
+        import itertools
+        for label, names in self.ALLOWED:
+            for order in itertools.permutations(names):
+                with self.subTest(label=label, order=order):
+                    self.assertEqual(len(p._check_namespace(self.keys(order))), len(names))
+        self.assertEqual(len(p._check_namespace([("docs/x", b"1"), ("docs/x", b"1")])), 1, "same bytes coalesce")
+        with self.assertRaises(p.PatternError):
+            p._check_namespace([("docs/x", b"1"), ("docs/x", b"2")])
+
+    CLI_CASES = [
+        (["a/b"], ["a", "a.md"]), (["a/b"], ["a", "a-b"]), (["a/b"], ["a", "a b"]), (["a/b"], ["A"]),
+        (["x/y/z"], ["x"]), (["d/e/f/g", "d/e.txt"], ["d/e", "d/e-1"]),
+        (["Docs/x"], ["docs/y"]), (["top/Mid/x"], ["top/mid/y"]),
+    ]
+
+    def test_cli_preview_write_and_retry_leave_zero_changes(self):
+        """A previous version's files (fallback) plus supplied files, through the real CLI update."""
+        for base_names, added in self.CLI_CASES:
+            with self.subTest(base=base_names, added=added):
+                fx = Fixture(self)
+
+                def put(root, names):
+                    records = []
+                    for name in names:
+                        data = f"{name}\n".encode("utf-8")
+                        target = root / name
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(data)
+                        records.append({"path": name, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()})
+                    return records
+
+                work, supply = fx.root / "work", fx.root / "supply"
+                base = draft("example.base", assets=put(work, base_names))
+                p.capture(fx.roots(), base, scope="repo", name="example.base", source_id="repo.main", files_from=work)
+                newer = dict(base, version="0.2.0", assets=base["assets"] + put(supply, added))
+                source = fx.root / "newer.json"
+                source.write_text(json.dumps(newer), encoding="utf-8")
+                envelope = fx.write_json("roots.json", fx.envelope())
+                before = tree_digest(fx.repo)
+                for attempt in ("preview", "write", "retry"):
+                    args = ["update", "--roots-file", envelope, "--path",
+                            fx.repo_patterns / "example.base" / "0.1.0" / "pattern.json", "--input", source,
+                            "--expected-digest", p.content_digest(base), "--files-from", supply]
+                    if attempt != "preview":
+                        args.append("--write")
+                    code, report, stderr = fx.cli(*args)
+                    self.assertEqual((attempt, code, report["status"]), (attempt, 2, "invalid"), stderr)
+                    self.assertIn("destination_conflict", stderr)
+                    self.assertNotIn("Traceback", stderr)
+                    self.assertEqual(tree_digest(fx.repo), before, f"{attempt} changed the tree")
+
+    def test_valid_names_still_publish_through_capture_and_approve(self):
+        fx = Fixture(self)
+        work = fx.root / "work"
+        names = ["a", "a.md", "a-b", "a b", "docs/x", "docs/sub/y"]
+        assets = []
+        for name in names:
+            data = f"{name}\n".encode("utf-8")
+            target = work / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            assets.append({"path": name, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()})
+        value = draft("example.names", assets=assets)
+        p.capture(fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=work)
+        p.approve(fx.roots(), fx.repo_patterns / "example.names" / "0.1.0" / "pattern.json", version="1.0.0",
+                  approval_value=APPROVAL, expected_digest=p.content_digest(value))
+        published = sorted(path.relative_to(fx.repo_patterns / "example.names" / "1.0.0").as_posix()
+                           for path in (fx.repo_patterns / "example.names" / "1.0.0").rglob("*") if path.is_file())
+        self.assertEqual(published, sorted(names + ["pattern.json"]))
 
 
 if __name__ == "__main__":

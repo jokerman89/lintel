@@ -41,7 +41,7 @@ __all__ = (
     "parse_task_map", "map_lock", "project_package", "capture", "index_source", "approve",
     "asset_refs", "read_asset", "dependents", "record_lifecycle", "update",
     "parse_attestations", "merge_attestations", "apply_change", "record_attestations", "remove",
-    "parse_review_evidence", "review_coverage", "export_bundle", "import_bundle",
+    "parse_review_evidence", "review_coverage", "export_bundle", "import_bundle", "validate_selection_report",
 )
 
 SCHEMA_VERSION = 1
@@ -355,7 +355,7 @@ class Reader:
                 if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                     _fail("unsafe_path", "only regular files are read", str(path))
                 data = stream.read(limit + 1)
-        except FileNotFoundError:
+        except (FileNotFoundError, NotADirectoryError):
             if optional:
                 return None
             if kind == "input":
@@ -2595,10 +2595,72 @@ def _declared_files(pattern: Pattern, source_dir: Optional[Path], *, fallback_di
     return result
 
 
-def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> None:
-    """Check every destination before the first write: absent, or identical bytes (a completed retry)."""
+def _check_namespace(files: Sequence[tuple[str, bytes]], where: str = "destination") -> list[tuple[str, bytes]]:
+    """One destination namespace must be unambiguous before anything is written.
+
+    Every planned file key and every proper directory prefix of every key are compared, independent
+    of order or siblings. Refused: two files that differ only by Unicode casefold; a file that is also
+    a directory of another file (`a` and `a/b`, at any depth); one directory spelled two ways
+    (`Docs/x` and `docs/y`). Exact duplicates with identical bytes coalesce; different bytes refuse.
+    This is a portable-safety restriction for case-insensitive filesystems. It does not model every
+    filesystem's normalization rules (for example Unicode NFC/NFD folding), which the path
+    validator does not attempt. Returns the coalesced list in the original order.
+    """
+    seen: dict[str, tuple[str, bytes]] = {}
+    result = []
+    for relative, data in files:
+        key = str(validate_relative_path(relative, where)).casefold()
+        if key in seen:
+            original, existing = seen[key]
+            if original != relative or existing != data:
+                _fail("destination_conflict", f"{relative} and {original} claim the same destination "
+                      f"{'with different spelling' if original != relative else 'with different bytes'}; rename one",
+                      where)
+            continue
+        seen[key] = (relative, data)
+        result.append((relative, data))
+    directories: dict[str, str] = {}
+    for key, (relative, _) in seen.items():
+        parts = relative.split("/")
+        for depth in range(1, len(parts)):
+            spelled = "/".join(parts[:depth])
+            folded = spelled.casefold()
+            if folded in seen:
+                _fail("destination_conflict", f"{seen[folded][0]} is a file and also a directory of {relative}", where)
+            previous = directories.setdefault(folded, spelled)
+            if previous != spelled:
+                _fail("destination_conflict", f"directory {spelled} (in {relative}) and {previous} differ only by "
+                      "case; use one spelling", where)
+    return result
+
+
+def _version_files(pattern_id: str, version: str, files: Sequence[tuple[str, bytes]], what: str) -> list[tuple[str, bytes]]:
+    """Closure files of one version, checked against each other and against the reserved body name."""
+    for name, _ in files:
+        if str(validate_relative_path(name, what)).casefold() == "pattern.json":
+            _fail("destination_conflict", f"{what}: {name} is reserved for the version body; rename the asset or source")
+    placed = [(f"{pattern_id}/{version}/{name}", data) for name, data in files]
+    _check_namespace(placed + [(f"{pattern_id}/{version}/pattern.json", b"")], what)
+    return placed
+
+
+def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> list[tuple[str, bytes]]:
+    """Check the complete destination list before the first write, then every existing destination.
+
+    The list must be an unambiguous namespace (see `_check_namespace`). On disk each destination is
+    absent, or holds identical bytes (a completed retry), and no ancestor is a file.
+    """
+    files = _check_namespace(files)
     for relative, data in files:
         target = contained_path(root, relative, "destination")
+        current = Path(root)
+        for part in PurePosixPath(relative).parts[:-1]:
+            current = current / part
+            if current.exists() and not current.is_dir():
+                _fail("destination_conflict", f"{relative}: {current.name} already exists as a file", str(current),
+                      status="collision")
+        if target.is_dir():
+            _fail("destination_conflict", f"{relative} already exists as a directory", str(target), status="collision")
         if target.exists():
             existing = Reader().read(target, kind="asset", limit=max(LIMITS.asset_bytes, LIMITS.pattern_bytes))
             same = existing == data
@@ -2611,7 +2673,7 @@ def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> None:
             if not same:
                 _fail("unregistered_staging_conflict", f"an unregistered file already occupies {relative}; inspect "
                       "it before publishing", str(target), status="collision")
-
+    return files
 
 def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_required: bool = True) -> dict:
     """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last.
@@ -2633,9 +2695,10 @@ def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_
         for pattern in patterns:
             if any(item["id"] == pattern.id and item["version"] == pattern.version for item in catalog_value["entries"]):
                 _fail("version_exists", f"{pattern.id}@{pattern.version} is already registered", status="collision")
-        _preflight(root, [(relative_file, data) for relative_file, data in extra_files] +
-                   [(f"{pattern.id}/{pattern.version}/pattern.json", emit_json(pattern.raw).encode("utf-8"))
-                    for pattern in patterns])
+        body_names = {f"{pattern.id}/{pattern.version}/pattern.json".casefold() for pattern in patterns}
+        extra_files = [item for item in _preflight(root, list(extra_files) + [
+            (f"{pattern.id}/{pattern.version}/pattern.json", emit_json(pattern.raw).encode("utf-8"))
+            for pattern in patterns]) if item[0].casefold() not in body_names]
         staged = []
         for relative_file, data in extra_files:
             _stage_file(root, relative_file, data)
@@ -2695,7 +2758,7 @@ def capture(roots: Roots, draft_value: Any, *, scope: str, name: str, source_id:
         elif source_id is not None and source_id != value["source_id"]:
             _fail("source_id_mismatch", f"this scope's source is {value['source_id']}, not {source_id}")
         files = _declared_files(pattern, files_from, reader=reader, what=f"{pattern.id}@{pattern.version}")
-        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        extra = _version_files(pattern.id, pattern.version, files, f"{pattern.id}@{pattern.version}")
         return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build)
@@ -2804,7 +2867,7 @@ def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expe
         pattern = parse_pattern(approved, "approved")
         draft_dir = loaded.directory / PurePosixPath(catalog_entry.path).parent
         files = _declared_files(pattern, draft_dir, reader=reader, what=f"{draft.id}@{draft.version}")
-        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        extra = _version_files(pattern.id, pattern.version, files, f"{pattern.id}@{pattern.version}")
         return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build, cas_required=False)
@@ -2844,6 +2907,47 @@ def asset_refs(report: Mapping[str, Any], *, kind: Optional[str] = None, phase: 
                                             item["pattern"]["version"], item["path"]))
 
 
+def validate_selection_report(report: Mapping[str, Any], *, context: Optional[Context],
+                              refs: Sequence[Any] = ()) -> Mapping[str, Any]:
+    """Accept a fresh, in-process resolution report as a selection, or raise PatternError.
+
+    The report must be `ready` or `empty` with a `selection_digest`, carry no draft preview, have been
+    resolved for `context` (its `context_digest`), and its `selection_digest` must still equal the
+    digest recomputed from its own content, `context` and `refs` (the invocation refs it was resolved
+    with; parsed `InvocationRef`s or raw `--refs` items). This is the same shared digest definition the
+    lock uses. It detects edits relative to that content; it does not authenticate who produced the
+    report. Anything persisted or passed between processes or lanes must instead be a lock that passed
+    `verify_lock`. No file is read. Returns the same report on success.
+    """
+    if not isinstance(report, Mapping) or "created_at" in report:
+        _fail("selection_not_usable", "expected a resolution report; persisted selections are locks (verify_lock)")
+    if report.get("status") not in ("ready", "empty") or not isinstance(report.get("selection_digest"), str):
+        _fail("selection_not_usable", "a report selection must be a ready or empty resolution with a selection_digest")
+    if any(key not in report for key in REPORT_KEYS):
+        _fail("selection_not_usable", "the report lacks resolution report fields")
+    selected = report["selected"]
+    if not isinstance(selected, (list, tuple)) or not all(isinstance(item, Mapping) for item in selected):
+        _fail("selection_not_usable", "the report's selected field must be an array of selection records")
+    if any(item.get("preview") for item in selected):
+        _fail("selection_not_usable", "a draft preview is never a selection")
+    if report["status"] != ("ready" if selected else "empty"):
+        _fail("selection_not_usable", "status must be ready exactly when patterns are selected (as for locks)")
+    if not isinstance(context, Context):
+        _fail("selection_not_usable", "a report selection needs the parsed context it was resolved from")
+    if not isinstance(refs, (list, tuple)):
+        _fail("selection_not_usable", "refs must be a list or tuple of the invocation refs the report was resolved with")
+    parsed = tuple(refs) if all(isinstance(item, InvocationRef) for item in refs) else parse_refs(list(refs))
+    try:
+        recomputed = selection_digest(_lock_material(report, context, parsed))
+    except (KeyError, TypeError, ValueError) as error:
+        _fail("selection_not_usable", f"the report is malformed ({type(error).__name__}: {error})")
+    if report.get("context_digest") != context.digest or recomputed != report["selection_digest"]:
+        _fail("selection_not_usable", "a report selection is accepted only in-process with the context and refs it "
+              "was resolved from, and only when its selection_digest still matches its content; use a lock for "
+              "anything persisted or passed between processes")
+    return report
+
+
 def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[str] = None,
                domain: Optional[str] = None, reader: Optional[Reader] = None,
                selection: Optional[Mapping[str, Any]] = None, context: Optional[Context] = None,
@@ -2867,14 +2971,8 @@ def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[st
     if selection is not None:
         if "created_at" in selection:
             selection = parse_lock(selection)
-        elif selection.get("status") not in ("ready", "empty") or selection.get("selection_digest") is None:
-            _fail("selection_not_usable", "asset selection requires a lock or a ready/empty report with a "
-                  "selection_digest")
-        elif context is None or selection.get("context_digest") != context.digest or \
-                selection_digest(_lock_material(selection, context, refs)) != selection["selection_digest"]:
-            _fail("selection_not_usable", "a report selection is accepted only in-process with the context and "
-                  "refs it was resolved from, and only when its selection_digest still matches its content; "
-                  "use a lock for anything persisted or passed between processes")
+        else:
+            selection = validate_selection_report(selection, context=context, refs=refs)
         if dict(asset_ref) not in asset_refs(selection):
             _fail("asset_not_selected", f"{asset_ref.get('path')} is not an asset of the supplied selection",
                   status="unavailable")
@@ -3106,7 +3204,7 @@ def update(roots: Roots, path: Path, input_value: Any, *, expected_digest: str, 
     old_ref = ExactRef(loaded.catalog.source_id, old.id, old.version, old.digest)
     files = _declared_files(new, files_from, fallback_dir=loaded.directory / PurePosixPath(entry.path).parent,
                             reader=reader, what=f"{new.id}@{new.version}")
-    extra = [(f"{new.id}/{new.version}/{name}", data) for name, data in files]
+    extra = _version_files(new.id, new.version, files, f"{new.id}@{new.version}")
     report = {"schema_version": 1, "status": "ok", "written": False, "scope": scope, "from": old_ref.to_json(),
               "to": ExactRef(loaded.catalog.source_id, new.id, new.version, new.digest).to_json(),
               "clause_diff": _clause_diff(old, new), "impact": dependents(roots, [old_ref], reader=reader, sources=sources),
@@ -3811,8 +3909,9 @@ def import_bundle(roots: Roots, bundle: Path, *, scope: str, destination_source:
                      "bindings": [], "lifecycle": []}
         elif value["source_id"] != destination_source:
             _fail("source_id_mismatch", "the destination source changed", status="collision")
-        extra = [(f"{transformed[key]['ref'].id}/{transformed[key]['ref'].version}/{path}", data)
-                 for key in order for path, data in transformed[key]["assets"]]
+        extra = [item for key in order for item in _version_files(
+            transformed[key]["ref"].id, transformed[key]["ref"].version, transformed[key]["assets"],
+            transformed[key]["ref"].text)]
         return copy_json(value), [transformed[key]["pattern"] for key in order], diagnostics, extra
 
     written = _publish(root, reader, expected=expected_catalog_digest, build=build)

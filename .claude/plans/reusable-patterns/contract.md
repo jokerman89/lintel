@@ -297,14 +297,90 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R11 (2026-09-28, independent review of R10: P3-R10-1, P3-R10-2)
+
+The signature of `validate_selection_report` is unchanged. It now also refuses, with
+`selection_not_usable`:
+- A report whose `status` disagrees with its selection: `ready` exactly when records are selected,
+  otherwise `empty`. This is the same rule `parse_lock` applies. `status` is outside the digest.
+- A `selected` field that is not an array of records. This is checked before any field of those
+  records is read.
+- `refs` that is not a list or tuple, so generators and other one-shot iterables are refused, not
+  silently consumed. Lists and tuples of parsed `InvocationRef`s or raw items still work, and mixed
+  or invalid raw items keep the existing parser's `invalid_schema`.
+- Content that cannot be serialized for the digest, such as NaN or a cyclic value. The
+  `ValueError` is converted at that same narrow boundary; there is no blanket catch.
+
+## Revision R10 (2026-09-28, WF review M2: shared fresh-report validation)
+
+The check `read_asset` already applied to a report selection is now one public helper that
+`read_asset` and the visual adapter both call:
+
+`validate_selection_report(report, *, context, refs=()) -> report`
+
+It raises `PatternError` `selection_not_usable` (invalid) in any of these cases:
+- the input is a lock or not a report;
+- the status is not `ready` or `empty`;
+- there is no `selection_digest`;
+- report fields are missing;
+- a record is a draft preview;
+- the context is missing, or differs from the report's `context_digest`;
+- the `selection_digest` does not equal the digest recomputed from the report's own content,
+  `context` and `refs`, using the same `_lock_material` definition as the lock.
+
+`refs` may be parsed `InvocationRef`s or raw `--refs` items, which are parsed with the same parser.
+The helper reads no file and returns the same report.
+
+Scope of the guarantee: it detects edits relative to the report's own content; it does not
+authenticate the producer. Fresh reports are in-process only. Anything persisted, or passed
+between entries, processes or lanes, must be a lock that passed `verify_lock`. The context and
+preview checks duplicate what the digest already covers, and give clearer messages.
+
+## Revision R9 (2026-09-28, independent review of `445e3ad9`: P3-R8-1, P3-R8-2)
+
+The shared namespace check compares every planned file key and every proper directory prefix of
+each key, whatever the order or the siblings. R8 compared sorted neighbors only, so `a`, `a.md`,
+`a/b` slipped through. The check refuses:
+- a file that is also a directory of another file, at any depth;
+- one directory spelled two ways (`Docs/x` and `docs/y`, including an asset and a source);
+- files that differ only by Unicode casefold.
+
+This is a portable-safety restriction for case-insensitive filesystems, not a model of every
+filesystem's normalization rules (NFC/NFD folding is not attempted). No name or shape changed.
+
+## Revision R8 (2026-09-28, independent review of `8addc395`: P3-R6-1, P3-R6-2, note 1, note 2)
+
+- **One destination namespace per publication.** The shared `_preflight` validates the complete
+  destination list before the first write, using the existing path validator, for capture,
+  update, approve and import alike. It refuses (`destination_conflict`, invalid) any of these:
+  - paths equal only by case;
+  - a path that is both a file and a directory prefix of another (`a` and `a/b`);
+  - the same path claimed with different bytes.
+
+  An exact duplicate with identical bytes coalesces, for example an asset and a `root: pattern`
+  source that name the same file. On disk, a destination whose ancestor is a file, or which is
+  itself a directory, is a collision. Each version's closure is also checked on its own, at
+  preview time, and a closure file may never take the version body name `pattern.json` at the
+  version root (a nested `docs/pattern.json` is fine). A refusal writes nothing, so a retry is
+  clean. A reader that meets a file where a directory is expected reports a missing file, never
+  an uncaught `NotADirectoryError`.
+- **Compatibility notice.** `check`/`check_sources` now verify every registered version's
+  declared file closure. An entry approved before R6 without its files, or a pack that declares a
+  `root: pattern` source it does not ship, now reports `unavailable` (`declared_file_missing`) in
+  `check`. Remedy: in a repository, run `update --files-from <dir>`, then `approve`; a pack must
+  ship the declared file. `list` and ordinary resolution stay metadata-first and are unaffected.
+
 ## Revision R7 (2026-09-28, independent PACK-lane review: coupled F1, F2, F3, F6)
 
 - **F2** `build_envelope` checks each anchor (repository, personal) for a link or junction on the
   caller's spelling, before resolving it (`invalid_roots`, exit 2). `parse_roots` also refuses a
   linked personal root. The direct `envelope` command, the launcher's route and `--roots-file` now
-  agree. Only the given spelling is seen: a physical path produced upstream, such as Git's resolved
-  top level, carries no alias to detect, and is accepted as the real path. The remedy is unchanged:
-  pass the real path.
+  agree. The check covers only the anchor's final component. Linked ancestors (for example a
+  junctioned profile directory above the repository) resolve normally, and a physical path produced
+  upstream, such as Git's resolved top level, carries no alias to detect and is accepted as the real
+  path. The remedy is unchanged: pass the real path. Consumers, including no-pattern WF and INT
+  paths, must surface `invalid_roots` for a junctioned repository or `LINTEL_HOME` with the
+  real-path remedy, and never treat it as a neutral success.
 - **F1** No code change. After the PACK join, the neutral `_default` declares
   `patterns.source: null`, and a child whose `patterns` block lacks `source` gets
   `{"state": "null", "origin": "<neutral>/pack.yaml"}` (ADR-0029 defaults filling). With a legacy

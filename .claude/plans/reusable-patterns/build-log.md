@@ -590,6 +590,242 @@ only. No pack-owned file was changed.
 
 `python -I -B tests\unit\patterns.py` -> exit 0, 116 tests OK.
 
+## Review revision R8 (review of `8addc395`: R6 closure accepted; P3-R6-1, P3-R6-2)
+
+Reviewer c3015de8's report is `review-core-closure-8addc395.md`, which I only read. SPEC and
+QUALITY both passed, with 115 tests and the clock shifted to 2027 and 2030; all prior findings
+are closed. This revision is applied on top of R7 (`2fd07f00`), whose target stays unchanged.
+
+The fix is one shared namespace check inside `_preflight`, applied to every destination before
+the first write. Each version's closure is also checked on its own by `_version_files`, at
+preview time.
+
+New `NamespaceTests` (6 cases):
+
+1. **Reserved body name.** The name `pattern.json` is refused, for an asset and for a
+   case-varied `root: pattern` source, on the first attempt and on retry. An update preview that
+   would create it is refused too. A nested `docs/pattern.json` publishes.
+2. **Resealed draft.** A registered draft resealed with a `root: pattern` source named
+   `pattern.json` cannot be approved, and two attempts leave no `1.0.0` directory.
+3. **Case collisions.** Case-variant assets are refused, and so is an asset colliding by case
+   with a source. An asset and a source naming the same exact file coalesce.
+4. **Update prefix collision.** Mixing a fallback `a/b` with a supplied `a` is refused in both
+   preview and write. Valid nested `a/b` plus `a/c` publish.
+5. **Existing disk file.** A file already on disk where a directory is needed gives
+   `destination_conflict`, not a traceback.
+6. **CLI.** A case collision exits 2 with no traceback.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 122 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each removal failed at least
+  one test:
+  - the casefold key;
+  - the prefix check;
+  - the on-disk ancestor check;
+  - update bypassing the version check;
+  - the version-level reserved check (caught by the preview case);
+  - the publish-level preflight.
+
+Contract R8 records the compatibility notice for the stricter `check`.
+
+## Review revision R9 (review of `445e3ad9`: SPEC/QUALITY PASS; P3-R8-1, P3-R8-2)
+
+Reviewer c3015de8's report is `review-core-closure-445e3ad9.md`, read only. I ran unmodified copies
+of `repro-r8.py` (`80B46DD9…`) and `repro-r8b.py` (`F296B80C…`).
+
+Repro results:
+
+- **S1** (a sibling `a.md`, `a-b` or `a b` between `a` and `a/b`): preview, write and retry each
+  give `destination_conflict`, and the CLI gives no traceback.
+- **S3**: the reserved body name is still refused, and nested `docs/pattern.json` still publishes,
+  approves and checks.
+- **T1**: CLI preview and write exit 2, the catalog is unchanged, and there is no orphan.
+- **T2** (`Docs/x` + `docs/y`, and an asset `docs/` + a source `DOCS/`): `destination_conflict`,
+  with nothing stored.
+- **T3**: a case collision is refused, a same-file pinned source coalesces, and a different
+  pinned sha gives `declared_file_conflict`.
+- **T4**: a valid nested approval publishes.
+
+New `NamespaceInvariantTests` (4 cases):
+
+- 11 refused sets, checked in every permutation. They cover the sibling separators `.`, `-`,
+  space and `_`, a grandchild, a deep child with siblings in between, a case-varied file versus a
+  directory, a file case collision, a directory spelled two ways, a multilevel ancestor, and a
+  Unicode casefold (`Straße`/`STRASSE`).
+- 4 allowed sets, checked in every permutation, plus same-bytes coalescing and a different-bytes
+  refusal.
+- 8 real CLI `update` cases that mix previous-version fallback files with supplied files. Each is
+  run as preview, write and retry, and each exits 2 with no traceback and no change to the tree.
+- Valid similar siblings and nested paths publish through capture and approve.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 126 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each of these failed at least
+  one test: the old R8 adjacency check, removing the directory-spelling check, and removing the
+  file-versus-ancestor check.
+
+## Supplementary POSIX run (parent-owned) and R7 doc corrections
+
+- **POSIX (parent-provided, supplementary).** The parent ran the exact R7 archive of `2fd07f00`,
+  taken with `core.autocrlf=false` (archive SHA256 `0190a2fd…8070`), on an existing WSL Ubuntu
+  24.04 host. It used native `/tmp` fixtures and `env -i` with a synthetic HOME, TEMP and Git
+  config. `python3 -I -B tests/unit/patterns.py` gave 116/116 OK with no skips; the log is in the
+  parent's session artifacts.
+  - Toolchain: Python 3.12.3, Bash 5.2.21, Git 2.43. The existing PyYAML is 6.0.1, below the
+    declared 6.0.3 floor.
+  - This is supplementary POSIX behavior evidence only. It is not supported-toolchain, full-suite
+    or host acceptance, and it does not validate Python 3.10 or a native client.
+- **R7 non-blocking doc corrections** (the reviewed targets are unchanged):
+  - The contract now says the anchor check covers only the final component, that linked ancestors
+    resolve normally, and that consumers must surface `invalid_roots` rather than neutral success.
+  - The evolution migration section now says there is no data migration, but an explicit context
+    rebind is required.
+
+## Main reconciliation and R9 acceptance
+
+- **R9 review.** Reviewer c3015de8 reviewed `1575a90a`: SPEC PASS and QUALITY PASS with zero
+  findings at every severity. This is milestone acceptance only, not native ADR-0028 v2
+  clearance. A final joined review is still required.
+- **Main merge.** `b33fe3f0` is an ordinary merge of settled `main` at `49f2d152`, which contains
+  #109 and only touches `docs/GLOSSARY.md` and `docs/faq.md`, into `1575a90a`. There were no
+  conflicts. After it:
+  - `tests/unit/patterns.sh` passes, 126 OK;
+  - the map validator exits 0;
+  - `li-swarm validate` is ok;
+  - the guard reports only the known pending WF finding.
+
+## Revision R10 (WF review M2: public report validation helper)
+
+The parent authorized this core interface action. The WF review report
+(`wf-visual-independent-review.md`, reviewer 24bf5df0) was read only. M2: the visual adapter
+trusted a raw report after checking only its key and digest format, while `read_asset` already
+recomputed the digest.
+
+The fix extracts that existing check as `validate_selection_report`, and `read_asset` now calls it.
+There is no new digest policy, parser, cache or authority. The WF adapter adopts the helper in its
+own lane.
+
+`SelectionReportTests` (6 cases):
+- a fresh ready or empty report is accepted with file reads forbidden, both `Reader.read` and
+  `open` monkeypatched to raise;
+- missing or wrong context, missing refs, raw versus parsed refs, and invalid raw refs;
+- edits with an unchanged digest are refused: the M2 repro (setting value `9999px`), requirement
+  text and state, selected assets, an added record, and exceptions;
+- invalid states: needs-context, no digest, a lock, missing keys, a preview, a non-mapping, and a
+  status edited to `conflict` or `needs-context`;
+- legitimate overrides and waivers pass;
+- `read_asset` refuses the M2 tampered report through the same helper.
+
+`python -I -B tests\unit\patterns.py` -> exit 0, 132 tests OK. Mutation probe (restored
+byte-identical): removing the digest recompute, the status check, or `read_asset`'s use of the
+helper each fails at least one test. The context and preview checks are redundant with the digest
+by design; the digest catches them.
+
+## Authorized harness correction: `tests/integration/design-contract.py` (inherited failure)
+
+Attribution: `tests/integration/design-contract.py` is added ONLY to the coordinator/INT reserved
+paths (`coordinator_paths`, and the INT package boundary in plan.md). It is not in the CORE worker
+`write_scope`, and `tests/` as a whole is not reserved. This is an explicitly authorized early
+validation-harness correction, not the start of INT generators or docs.
+
+The commits are separate and attributed:
+- `67cb2ef4` is the harness fix, a coordinator/INT write.
+- `1f7784e5` is the CORE worker's public helper.
+
+The recorded acceptance is the actual 18-case runner, with its exact `source_revision`, under the
+controlled synthetic empty setting. The parent's `--git-dir` repro only diagnosed the configuration
+failure.
+
+- **Scope extension.** The parent authorized one directly coupled correction to
+  `tests/integration/design-contract.py`, which the integration coordinator owns (not WF).
+- **Inherited failure.** The design-contract epilogue failed with exit 128 before any pattern
+  change. The parent's root-cause repro, which touched no real credentials or config:
+  - after `patch.dict(clear=True)` restores `os.environ`, a Windows child inheriting the native
+    environment loses `GIT_CONFIG_VALUE_0=''`;
+  - the counted `GIT_CONFIG_*` config then breaks, and `git rev-parse` exits 128;
+  - passing `env=os.environ` explicitly preserves the value.
+- **Change.** The final `source_revision` subprocess passes `env=os.environ`, with a why-comment.
+  No `GIT_CONFIG_*` scrubbing, no trust, auth or hook flags, and no hard-coded index.
+- **Evidence.** Synthetic HOME and TEMP, with the process-scoped synthetic config
+  `GIT_CONFIG_COUNT=1`, `KEY_0=core.fsmonitor`, `VALUE_0=''`:
+
+  | Run | Result |
+  | --- | --- |
+  | Before (HEAD `1f7784e5` file) | 18 tests ran; exit 1 from `CalledProcessError`, git exit status 128; no `source_revision` |
+  | After | exit 0; 18 tests; `source_revision` = `1f7784e5…` exactly |
+  | Without the synthetic config | exit 0; 18 tests; 0 failures, 0 skipped; exact `source_revision` |
+
+  The before run used a temporary `git stash push`/`pop` of this one file in my own worktree. No
+  history was changed.
+
+## Attribution of `132bb9bb..67cb2ef4` (complete, unfiltered)
+
+- **`1f7784e5`:** `lib/patterns.py` and `tests/unit/patterns.py` are CORE worker paths.
+  `.claude/plans/reusable-patterns/contract.md` and `build-log.md` are coordinator writes by the
+  same session. `li-swarm check-scope --task CORE --actor worker` over all four paths reports the
+  two plan files as outside CORE scope, correctly, and passes the other two.
+- **`67cb2ef4`:** `tests/integration/design-contract.py` is a coordinator/INT reserved path, plus
+  the coordinator's `build-log.md`.
+- The metadata commit that follows reserves `design-contract.py` in `coordinator_paths`.
+  `li-swarm validate` is ok and the map validator exits 0.
+
+## Review revision R11 (R10 review of `132bb9bb..67cb2ef4`: SPEC/QUALITY PASS, 2 P3)
+
+Report: `review-core-r10-67cb2ef4.md`, read only. The harness fix was proven on committed
+`67cb2ef4` (18 of 18 pass, exit 0, exact revision) and the old control fails with exit 128, so the
+harness fix is closed.
+
+This revision fixes P3-R10-1 and P3-R10-2 (contract R11). `SelectionReportTests` now has 9 cases:
+- The mislabeled case is renamed from "edited to empty" to "status edited to needs-context".
+- Both genuine flips are now tested: a ready report carrying required clauses and assets relabelled
+  `empty`, and a genuinely empty report relabelled `ready`.
+- `selected` as `None`, a string, or an array with a non-record element; NaN and cyclic settings.
+  All raise `PatternError`, never a Python error.
+- Generator and string refs are refused; a tuple of parsed refs passes; mixed raw and parsed refs
+  keep the parser's `invalid_schema`.
+
+Results:
+- `bash tests/unit/patterns.sh` -> 135 OK.
+- Mutation probe (source restored byte-identical): removing any of the four new checks fails at
+  least one test. The four are status agreement with selection, the `selected` shape, `ValueError`
+  conversion and the refs-type check.
+
+## PACK join (serial join 1 of 2)
+
+- **Authorization.** Integration reviewer 24bf5df0 approved `44c6b176` for serial join (report
+  `pack-44c6-closure-review.md`; F1-F7 closed). One new non-blocking low finding, opaque MSYS
+  conversion, is assigned to PACK as a separate later ordinary merge.
+- **Merge.** `075a797d60a77c8244c39fddd9f24692c3702362` is an ordinary `--no-ff` merge with
+  parents `a8ef0ae3` (integration head) and `44c6b176` (PACK). The tree was clean before and after.
+- **PACK history.**
+  - `7b0b246c` sits on `ae9d6df7`.
+  - `d15d8664` merges `7b0b246c` with `2fd07f00`. This moves PACK's authorized dependency base from
+    `ae9d6df7` to R7 `2fd07f00`, recorded here explicitly.
+  - `44c6b176` is a test-only follow-up on top of `d15d8664`.
+  - The review-only object `db7f6df1` was never promoted.
+- **Join delta.** `a8ef0ae3..075a797d` is exactly the 9 PACK files: `bin/li-pattern` (100755),
+  `lib/pack-schema.yaml`, `lib/paths.sh`, `packs/_default/pack.yaml` and the five pattern
+  pack/launcher tests. `li-swarm check-scope --task PACK --actor worker` over the complete list
+  reports `ok: true`. `ae9d6df7..7b0b246c` and `2fd07f00..44c6b176` are the same 9 files, and no
+  inherited CORE file differs.
+- **Joined checks** (synthetic HOME and TEMP, Windows, Python 3.11.9):
+
+  | Check | Result |
+  | --- | --- |
+  | `bash tests/unit/patterns.sh` | 132 OK |
+  | `bash tests/unit/pattern-pack-origins.sh` | 13 OK |
+  | `bash tests/unit/pattern-launcher-roots.sh` | 12 OK |
+  | `enterprise-pack-resolution`, `pack-inheritance-depth-3`, `pack-source-target-resolution`, `claude-home-paths`, `memory-v2`, `bin-scripts-executable` | all pass |
+  | Map validator | exit 0 |
+  | `li-swarm validate` | ok |
+  | Command-surface guard | 1 finding: the pending WF consumer reference (`plan.md:82`). It is pending the WF join, not a pass and not faked |
+
+- **Leaves.** 2.1.a-2.1.d are ticked on the PACK review approval plus these joined results. V05 and
+  V14 run on the joined tree. The launcher-dependent parts of V09, V11 and V12 remain pending the
+  WF join and INT.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

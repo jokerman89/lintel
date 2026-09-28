@@ -790,6 +790,10 @@ summary = {"tests": result.testsRun, "failures": len(result.failures), "errors":
            "source_revision": subprocess.run(
                [args.git, "--no-pager", "rev-parse", "HEAD"], cwd=SOURCE,
                capture_output=True, check=True, text=True,
+               # After patch.dict restores os.environ, an inherited child environment on Windows can
+               # drop entries whose value is empty (for example GIT_CONFIG_VALUE_n=''), which breaks
+               # Git's counted config. Passing the mapping explicitly preserves every entry.
+               env=os.environ,
            ).stdout.strip()}
 safety.native_io_path(RUN / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 print(json.dumps(summary, indent=2))

@@ -136,8 +136,9 @@ retained upstream license terms still apply. Spec Kit is not bundled by this wor
 
 Start with `welcome`, `plan`, `build`, `review` and `resume`, then `cycle` for the broader workflow.
 Invocation follows the client: `/li:<skill>` in the Claude Code plugin, the discovered `li-<skill>`
-wrapper on adapter routes such as Copilot, Codex and Cursor (generated only for the core workflows (welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars)),
-or an explicit read of the canonical skill file. Use `verify` for read-only testing (repairs need
+wrapper on adapter routes such as Copilot, Codex and Cursor (generated only for the core
+workflows: welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars), or an
+explicit read of the canonical skill file. Use `verify` for read-only testing (repairs need
 `--repair`), `diagnose` for a failure, and `pause`/`resume` to hand work to a fresh session; on
 adapter routes, read `verify`, `diagnose` and `pause` from their canonical `SKILL.md` files. Explore the
 [full catalog](../skills/CATALOG.md) when you need specialist depth.

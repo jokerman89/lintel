@@ -43,6 +43,7 @@ optional_fields:
   - lessons           # block (see lessons schema)
   - opinions          # block (see opinions schema)
   - brief_forge_handoffs   # block (see brief_forge_handoffs schema)
+  - patterns          # block (see patterns schema; ADR-0038)
   - description       # string: one-line operator-facing summary
   - maintainers       # list[string]: GitHub handles or contact pointers
   - extension         # optional executable-surface declaration (ADR-0018)
@@ -127,6 +128,12 @@ brief_forge_handoffs:
     - budget_tokens               # int: total budget per hand-off — default 5000
     - override_allowed            # bool — default true
     - override_requires_audit     # bool — default true
+
+patterns:
+  optional:
+    - source                      # string|null: catalog JSON relative to the declaring pack root.
+                                  # Read by lib/patterns.py from the same profile snapshot; a
+                                  # declared but missing catalog is unavailable, never empty.
 
 extension:
   optional:

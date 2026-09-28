@@ -40,8 +40,9 @@ Upgrading an installation replaces the neutral pack manifest, which invalidates 
 contexts (ADR-0029 drift). Rebind each active context explicitly with a reason, then re-plan
 dependent work. See ADR-0038 "Upgrade notice". No automatic rebind exists.
 
-None required. Repositories may add `.claude/patterns/catalog.json` and
-`.claude/patterns/bindings.json`; legacy visual `pattern.json` assets stay readable.
+There is no data migration. The only required action is that explicit, reason-bearing context
+rebind. Repositories may add `.claude/patterns/catalog.json` and `.claude/patterns/bindings.json`;
+legacy visual `pattern.json` assets stay readable.
 
 ## Forward-compat
 
