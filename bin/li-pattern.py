@@ -84,6 +84,23 @@ def build_parser() -> argparse.ArgumentParser:
     project.add_argument("--lock", required=True)
     project.add_argument("--task-map", required=True)
     project.add_argument("--package", required=True)
+    capture = commands.add_parser("capture", help="register a new draft (never approves or overwrites)")
+    _add_roots(capture)
+    capture.add_argument("--input", required=True)
+    capture.add_argument("--scope", required=True, choices=("repo", "personal"))
+    capture.add_argument("--name", required=True, help="the draft's pattern ID, confirmed explicitly")
+    capture.add_argument("--source-id", help="namespaced source ID; required on the first capture in a scope")
+    capture.add_argument("--expected-catalog-digest")
+    index = commands.add_parser("index", help="verify registered entries and regenerate derived metadata")
+    _add_roots(index)
+    index.add_argument("--source-root", required=True)
+    index.add_argument("--expected-catalog-digest")
+    approve = commands.add_parser("approve", help="publish a strictly newer approved version of a draft")
+    _add_roots(approve)
+    approve.add_argument("--path", required=True)
+    approve.add_argument("--version", required=True)
+    approve.add_argument("--approval", required=True, help="JSON {by, reference, at}")
+    approve.add_argument("--expected-digest", required=True, help="content digest of the reviewed draft")
     return parser
 
 
@@ -124,6 +141,18 @@ def run(argv) -> tuple[dict, int]:
     elif args.command == "map":
         report = p.map_lock(roots, Path(args.lock), _input(args.task_map, "task map", reader),
                             expected_lock_digest=args.expected_lock_digest, write=args.write, reader=reader)
+    elif args.command == "capture":
+        report = p.capture(roots, p.parse_json(reader.read(Path(args.input), kind="input", limit=p.LIMITS.pattern_bytes),
+                                               limit=p.LIMITS.pattern_bytes, what="draft"),
+                           scope=args.scope, name=args.name, source_id=args.source_id,
+                           expected_catalog_digest=args.expected_catalog_digest, reader=reader)
+    elif args.command == "index":
+        report = p.index_source(roots, Path(args.source_root), expected_catalog_digest=args.expected_catalog_digest,
+                                reader=reader)
+    elif args.command == "approve":
+        report = p.approve(roots, Path(args.path), version=args.version,
+                           approval_value=_input(args.approval, "approval", reader),
+                           expected_digest=args.expected_digest, reader=reader)
     else:
         context = p.parse_context(_input(args.context, "context", reader))
         refs = p.parse_refs(_input(args.refs, "refs", reader)) if args.refs else ()

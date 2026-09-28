@@ -142,6 +142,22 @@ differs no longer counts. Write collisions and stale digests exit 6.
 
 ## CLI (spec section 7)
 
+Publication decisions within the spec's latitude (3.1):
+
+- `capture --name` must equal the draft's `id`, as an explicit confirmation of what is registered.
+- Every write to an existing catalog requires `--expected-catalog-digest` (spec: "Writes require
+  compare-and-swap"). The first capture in a scope requires `--source-id` and must omit it.
+- The per-source-root exclusive lock is `<root>/catalog.json.lock`. It is created exclusively
+  and removed only by its owner; a held lock exits 6 and is never stolen.
+- Content is staged at `<root>/<id>/<version>/pattern.json` (no-overwrite) before the catalog
+  is replaced. An unregistered staged file with identical content is completed by the owning
+  retry (`recovered_staging: true`). Different content there is a collision.
+- `index` accepts only the repository or personal source root, writes only when derived
+  metadata changed, and never adds, removes or blesses entries.
+- `approve` writes a strictly newer `approved` version that includes the approval record in
+  its digest, leaves the draft byte-identical, and requires every include to be approved or
+  deprecated. Pack sources are never written; they publish through their own review.
+
 | Command | Arguments | Status in this milestone |
 | --- | --- | --- |
 | `envelope` | `--personal P [--repository R] (--profile-record FILE|- \| --profile-error CODE [--profile-error-message M])` | Implemented |
@@ -153,7 +169,10 @@ differs no longer counts. Write collisions and stale digests exit 6.
 | `map` | roots, `--lock F --task-map F --expected-lock-digest SHA [--write]` | Implemented (2.2.c) |
 | `project` | `--lock F --task-map F --package ID` (no roots) | Implemented (2.2.c) |
 | `review` | spec section 7 | Planned, core owner (4.2.b-core) |
-| `capture`, `approve`, `index`, `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (P3) |
+| `capture` | roots, `--input F --scope repo\|personal --name ID [--source-id SRC] [--expected-catalog-digest SHA]` | Implemented (3.1.a) |
+| `index` | roots, `--source-root DIR [--expected-catalog-digest SHA]` | Implemented (3.1.b) |
+| `approve` | roots, `--path F --version V --approval F --expected-digest SHA` | Implemented (3.1.c) |
+| `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (3.2, 3.3) |
 
 Roots are `--roots-stdin` or `--roots-file F` (exactly one). Reports go to stdout as
 `emit_json`; each error diagnostic is also printed to stderr as

@@ -189,6 +189,43 @@ CLI `resolve --lock`, `verify-lock`, `map`, `project`.
   failed 2.
 - Full file: `python -I -B tests\unit\patterns.py` -> exit 0, 46 tests OK.
 
+## 3.1.a / 3.1.b / 3.1.c (core lane; checkboxes pending P1 review acceptance)
+
+`capture`, `index_source`, `approve` plus CLI `capture`, `index`, `approve`. Publication runs
+under one per-root exclusive lock, with CAS on the catalog digest, immutable no-overwrite
+staging and catalog-last atomic replacement.
+
+- `python -I -B tests\unit\patterns.py LifecycleTests` -> exit 0, 9 tests OK:
+  - First capture requires `--source-id` and creates the catalog plus a draft; the
+    `inferred_sources_only` warning fires.
+  - Six refusals leave the tree byte-identical: non-draft, name mismatch, missing or stale
+    CAS, source-ID mismatch, existing version.
+  - Repo scope without a repository root is refused. Personal capture works without one and
+    is never active.
+  - A foreign lock blocks the write and is left intact.
+  - Interrupted staging:
+    - `index` never discovers it;
+    - identical bytes are recovered by the owning capture;
+    - different bytes are a collision;
+    - no `.lock`/`.tmp` residue remains.
+  - `index` rebuilds a hand-edited summary while preserving lifecycle, bindings, revocations,
+    includes, extensions and source ID. This covers the spec's explicit sequences:
+    deprecate->index keeps `deprecated`, and remove->index keeps the entry removed although
+    its directory remains.
+  - `index` refuses edited bytes, a missing registered file and a foreign root.
+  - `approve`:
+    - rejects equal or lower versions and a stale digest;
+    - publishes 1.0.0 with the approval inside the digest, leaving the draft byte-identical;
+    - the result resolves;
+    - re-approval collides, and approving a non-draft is refused.
+  - Children-first approval: a draft dependency blocks with the tree unchanged, a child
+    approval followed by the parent update succeeds, and a source-less draft is refused.
+  - CLI exit codes 0/6/0/0.
+- Mutation probe (run once, source restored byte-identical): each of six broken guarantees
+  failed at least one test. They were: CAS disabled, non-draft capture, dependency check
+  skipped, lock stealing, index blessing edits, and staging overwrite.
+- Full file: 55 tests (see the commit record).
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

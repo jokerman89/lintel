@@ -38,7 +38,7 @@ __all__ = (
     "pack_context_from_profile", "build_envelope", "load_sources",
     "list_catalogs", "show_pattern", "check_document", "check_sources", "resolve",
     "build_lock", "write_lock", "parse_lock", "selection_digest", "verify_lock",
-    "parse_task_map", "map_lock", "project_package",
+    "parse_task_map", "map_lock", "project_package", "capture", "index_source", "approve",
 )
 
 SCHEMA_VERSION = 1
@@ -2212,3 +2212,253 @@ def project_package(lock: Mapping[str, Any], task_map_value: Any, package: str) 
     return {"schema_version": 1, "status": "ok", "selection_digest": lock["selection_digest"],
             "mapping_digest": mapping_digest, "package": package, "tasks": sorted(members),
             "clauses": clauses, "settings": settings, "diagnostics": diagnostics}
+
+# ---------------------------------------------------------------- publication (spec 7, cards 3.1.a-3.1.c)
+
+def _scope_root(roots: Roots, scope: str) -> tuple[Path, str]:
+    if scope == "repo":
+        if roots.repository is None:
+            _fail("repository_required", "repository scope needs an explicit repository root")
+        base, parts = roots.repository, (".claude", "patterns")
+    elif scope == "personal":
+        base, parts = roots.personal, ("patterns",)
+    else:
+        _fail("invalid_scope", "scope must be repo or personal; packs publish through their own review")
+    return contained_path(base, "/".join(parts), f"{scope} source root"), scope
+
+
+def _root_for_path(roots: Roots, path: Path) -> tuple[Path, str, str]:
+    """Map an explicit file path to (source root, locator, portable relative path)."""
+    candidate = Path(path)
+    candidate = (candidate if candidate.is_absolute() else Path.cwd() / candidate).resolve()
+    for scope in ("repo", "personal"):
+        if scope == "repo" and roots.repository is None:
+            continue
+        root, _ = _scope_root(roots, scope)
+        try:
+            relative = candidate.relative_to(root.resolve()).as_posix()
+        except ValueError:
+            continue
+        contained_path(root, relative, "pattern path")
+        return root, scope, relative
+    _fail("unsafe_path", "path is not inside a repository or personal pattern source root", str(path))
+
+
+def _read_catalog_value(root: Path, reader: Reader) -> tuple[Optional[dict], Optional[str]]:
+    data = reader.read(contained_path(root, "catalog.json"), kind="catalog", limit=LIMITS.catalog_bytes,
+                       optional=True)
+    if data is None:
+        return None, None
+    value = parse_json(data, limit=LIMITS.catalog_bytes, what="catalog")
+    parse_catalog(value, str(root / "catalog.json"))
+    return value, content_digest(value)
+
+
+def _entry_for(pattern: Pattern, relative: str) -> dict:
+    return {"id": pattern.id, "version": pattern.version, "path": relative, "sha256": pattern.digest,
+            "summary": pattern.summary, "status": pattern.status, "applies_to": pattern.applies_to.to_json()}
+
+
+def _check_cas(current: Optional[str], expected: Optional[str], what: str) -> None:
+    if current is None and expected is not None:
+        _fail("stale_catalog_digest", f"{what}: no catalog exists yet; omit the expected digest", status="collision")
+    if current is not None and expected is None:
+        _fail("expected_digest_required", f"{what}: supply --expected-catalog-digest {current}", status="collision")
+    if current is not None and expected != current:
+        _fail("stale_catalog_digest", f"{what}: the catalog changed since it was read; re-read and retry",
+              status="collision")
+
+
+def _stage_pattern(root: Path, pattern: Pattern) -> tuple[str, bool]:
+    """Write immutable content before the catalog. Returns (relative path, recovered_staging)."""
+    relative = f"{pattern.id}/{pattern.version}/pattern.json"
+    target = contained_path(root, relative, "pattern destination")
+    data = emit_json(pattern.raw).encode("utf-8")
+    if target.exists():
+        existing = Reader().read(target, kind="pattern", limit=LIMITS.pattern_bytes)
+        try:
+            same = content_digest(parse_json(existing, limit=LIMITS.pattern_bytes, what="staged pattern")) == pattern.digest
+        except PatternError:
+            same = False
+        if not same:
+            _fail("unregistered_staging_conflict",
+                  f"an unregistered file already occupies {relative}; inspect it before publishing",
+                  str(target), status="collision")
+        return relative, True
+    for parent in (target.parent.parent, target.parent):
+        if _is_link(parent):
+            _fail("unsafe_path", "linked destination directory refused", str(parent))
+        parent.mkdir(exist_ok=True)
+    _atomic_write(target, data, replace=False)
+    return relative, False
+
+
+def _publish(root: Path, reader: Reader, *, expected: Optional[str], build) -> dict:
+    """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last."""
+    if _is_link(root):
+        _fail("unsafe_path", "linked source root refused", str(root))
+    root.mkdir(parents=True, exist_ok=True)
+    with _WriteLock(root / "catalog.json"):
+        value, digest = _read_catalog_value(root, reader)
+        _check_cas(digest, expected, "publication")
+        catalog_value, patterns, details = build(value)
+        for pattern in patterns:
+            if any(item["id"] == pattern.id and item["version"] == pattern.version for item in catalog_value["entries"]):
+                _fail("version_exists", f"{pattern.id}@{pattern.version} is already registered", status="collision")
+        staged = []
+        for pattern in patterns:
+            relative, recovered = _stage_pattern(root, pattern)
+            catalog_value["entries"].append(_entry_for(pattern, relative))
+            staged.append({"id": pattern.id, "version": pattern.version, "sha256": pattern.digest,
+                           "path": relative, "recovered_staging": recovered})
+        if len(catalog_value["entries"]) > LIMITS.catalog_entries:
+            _fail("resource_limit", f"catalog would exceed {LIMITS.catalog_entries} entries")
+        parse_catalog(catalog_value)
+        _atomic_write(contained_path(root, "catalog.json"), emit_json(catalog_value).encode("utf-8"), replace=True)
+    return {"schema_version": 1, "status": "ok", "written": True, "source_id": catalog_value["source_id"],
+            "published": staged, "previous_catalog_sha256": digest, "catalog_sha256": content_digest(catalog_value),
+            "diagnostics": details, "metrics": reader.metrics()}
+
+
+def _source_summary(pattern: Pattern) -> list[dict]:
+    notes = []
+    kinds = {(item.kind, item.confidence) for item in pattern.sources}
+    if pattern.sources and all(kind == "observation" or confidence != "confirmed" for kind, confidence in kinds):
+        notes.append(_note("inferred_sources_only",
+                           "every source is an observation or unconfirmed; review before treating this as policy",
+                           "warning"))
+    if any(clause.level == "must" for clause in pattern.requirements) and not pattern.sources:
+        notes.append(_note("must_without_source", "must clauses have no source yet; approval will require one",
+                           "warning"))
+    return notes
+
+
+def capture(roots: Roots, draft_value: Any, *, scope: str, name: str, source_id: Optional[str] = None,
+            expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None) -> dict:
+    """Register a new draft in an explicit repo/personal scope (never approves, never overwrites)."""
+    reader = reader or Reader()
+    pattern = parse_pattern(draft_value, "draft")
+    if pattern.status != "draft":
+        _fail("capture_not_draft", "capture accepts only status draft; approval is a separate reviewed step")
+    if pattern.id != name:
+        _fail("capture_name_mismatch", f"--name {name} does not match the draft id {pattern.id}")
+    root, _ = _scope_root(roots, scope)
+
+    def build(value):
+        if value is None:
+            if source_id is None:
+                _fail("source_id_required", "the first capture in a scope needs --source-id")
+            _matching(source_id, NAMESPACED_ID, "--source-id", "source ID")
+            loaded = load_sources(roots)
+            if any(item.catalog.source_id == source_id for item in loaded.catalogs):
+                _fail("source_id_collision", f"source ID {source_id} is already configured elsewhere")
+            value = {"schema_version": 1, "source_id": source_id, "entries": [], "includes": [], "bindings": [],
+                     "lifecycle": []}
+        elif source_id is not None and source_id != value["source_id"]:
+            _fail("source_id_mismatch", f"this scope's source is {value['source_id']}, not {source_id}")
+        return copy_json(value), [pattern], _source_summary(pattern)
+
+    report = _publish(root, reader, expected=expected_catalog_digest, build=build)
+    report["ref"] = ExactRef(report["source_id"], pattern.id, pattern.version, pattern.digest).to_json()
+    report["scope"] = scope
+    return report
+
+
+def index_source(roots: Roots, source_root: Path, *, expected_catalog_digest: Optional[str] = None,
+                 reader: Optional[Reader] = None) -> dict:
+    """Verify registered entries and regenerate their derived metadata; never discovers content."""
+    reader = reader or Reader()
+    root = None
+    for scope in ("repo", "personal"):
+        if scope == "repo" and roots.repository is None:
+            continue
+        candidate, _ = _scope_root(roots, scope)
+        if _same_path(candidate, source_root):
+            root = candidate
+    if root is None:
+        _fail("invalid_source_root", "index accepts only the repository or personal pattern source root")
+    with _WriteLock(root / "catalog.json"):
+        value, digest = _read_catalog_value(root, reader)
+        if value is None:
+            _fail("source_missing", "no catalog is registered at this source root", status="unavailable")
+        _check_cas(digest, expected_catalog_digest, "index")
+        rebuilt, diagnostics, changed = copy_json(value), [], []
+        for index, entry in enumerate(value["entries"]):
+            path = contained_path(root, entry["path"], f"entry {entry['id']}@{entry['version']}")
+            data = reader.read(path, kind="pattern", limit=LIMITS.pattern_bytes, optional=True)
+            if data is None:
+                _fail("registered_file_missing", f"{entry['id']}@{entry['version']} is registered but its file is "
+                      "missing; restore it or remove the entry explicitly", status="unavailable")
+            pattern = parse_pattern(parse_json(data, limit=LIMITS.pattern_bytes, what="pattern"), entry["path"])
+            if pattern.digest != entry["sha256"]:
+                _fail("pattern_digest_mismatch", f"{entry['id']}@{entry['version']} bytes differ from the registered "
+                      "digest; index never blesses edited content", status="unavailable")
+            if (pattern.id, pattern.version) != (entry["id"], entry["version"]):
+                _fail("stale_metadata", f"{entry['path']} declares {pattern.id}@{pattern.version}", status="unavailable")
+            fresh = _entry_for(pattern, entry["path"])
+            if fresh != entry:
+                changed.append({"id": entry["id"], "version": entry["version"],
+                                "fields": sorted(key for key in fresh if fresh[key] != entry.get(key))})
+                rebuilt["entries"][index] = fresh
+        parse_catalog(rebuilt)
+        if changed:
+            _atomic_write(contained_path(root, "catalog.json"), emit_json(rebuilt).encode("utf-8"), replace=True)
+    return {"schema_version": 1, "status": "ok", "written": bool(changed), "rebuilt": changed,
+            "previous_catalog_sha256": digest, "catalog_sha256": content_digest(rebuilt),
+            "diagnostics": diagnostics, "metrics": reader.metrics()}
+
+
+def _version_key(version: str) -> tuple[int, int, int]:
+    return tuple(int(part) for part in version.split("."))
+
+
+def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expected_digest: str,
+            reader: Optional[Reader] = None, today: Optional[_dt.date] = None) -> dict:
+    """Write a strictly newer approved version of a registered draft; the draft stays unchanged."""
+    reader = reader or Reader()
+    root, scope, relative = _root_for_path(roots, path)
+    _matching(version, VERSION, "--version", "version", 64)
+    approval = _object(approval_value, "approval", ("by", "reference", "at"))
+    Approval(_string(approval["by"], "approval.by", limit=_FREE),
+             _string(approval["reference"], "approval.reference", limit=_FREE), _timestamp(approval["at"], "approval.at"))
+    sources = load_sources(roots, reader)
+
+    def build(value):
+        if value is None:
+            _fail("source_missing", "no catalog at this source root", status="unavailable")
+        entry = next((item for item in value["entries"] if item["path"] == relative), None)
+        if entry is None:
+            _fail("not_registered", f"{relative} is not a registered entry; capture it first", status="unavailable")
+        loaded = next(item for item in sources.catalogs if item.catalog.source_id == value["source_id"])
+        catalog_entry = loaded.catalog.entry(entry["id"], entry["version"])
+        draft = _read_pattern(sources, loaded, catalog_entry)
+        if draft.digest != expected_digest:
+            _fail("stale_pattern_digest", "the draft changed since it was reviewed", status="collision")
+        state, _ = effective_status(loaded, catalog_entry)
+        if state != "draft":
+            _fail("approve_not_draft", f"only drafts are approved; {entry['id']}@{entry['version']} is {state}")
+        if _version_key(version) <= _version_key(draft.version):
+            _fail("version_not_newer", f"--version {version} must be greater than {draft.version}")
+        blockers = []
+        for child in draft.includes:
+            try:
+                child_loaded, child_entry = _lookup(sources, child)
+                child_state, _ = effective_status(child_loaded, child_entry)
+                if child_state not in ("approved", "deprecated"):
+                    _fail("dependency_not_approved", f"include {child.text} is {child_state}", status="unavailable")
+            except PatternError as error:
+                blockers.append(error.diagnostic())
+        if blockers:
+            raise PatternError("dependency_not_approved", "; ".join(item["message"] for item in blockers),
+                               status="unavailable")
+        approved = dict(copy_json(draft.raw), version=version, status="approved", approval=approval)
+        pattern = parse_pattern(approved, "approved")
+        return copy_json(value), [pattern], _source_summary(pattern)
+
+    catalog_value, catalog_digest = _read_catalog_value(root, Reader())
+    report = _publish(root, reader, expected=catalog_digest, build=build)
+    published = report["published"][0]
+    report["ref"] = ExactRef(report["source_id"], published["id"], version, published["sha256"]).to_json()
+    report["scope"] = scope
+    report["draft_left_unchanged"] = relative
+    return report

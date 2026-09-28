@@ -1240,5 +1240,239 @@ class PinTests(_IncludeCases, _LockCases, _MappingCases, unittest.TestCase):
     """V06: includes, digests, lifecycle and context changes detected; cold projection complete."""
 
 
+APPROVAL = {"by": "architecture board", "reference": "ADR-0038 review", "at": "2026-09-27T10:00:00Z"}
+
+
+def draft(pid="example.dashboard", version="0.1.0", **extra):
+    value = make_pattern(pid, version=version, status="draft", **extra)
+    value.pop("approval", None)
+    return value
+
+
+class LifecycleTests(unittest.TestCase):
+    """V07 (cards 3.1.a-3.1.c): capture, catalog-last publication, index and approve."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.root = self.fx.repo_patterns
+
+    def roots(self):
+        return self.fx.roots()
+
+    def catalog(self):
+        return json.loads((self.root / "catalog.json").read_text(encoding="utf-8"))
+
+    def digest(self):
+        return p.content_digest(self.catalog())
+
+    def capture(self, value=None, **kwargs):
+        value = value or draft()
+        kwargs.setdefault("scope", "repo")
+        kwargs.setdefault("name", value["id"])
+        return p.capture(self.roots(), value, **kwargs)
+
+    def test_first_capture_creates_source_and_draft(self):
+        with self.assertRaises(p.PatternError) as caught:
+            self.capture()
+        self.assertEqual(caught.exception.code, "source_id_required")
+        self.assertFalse((self.root / "catalog.json").exists())
+        report = self.capture(source_id="team.repo")
+        self.assertEqual((report["written"], report["ref"]["source"], report["published"][0]["recovered_staging"]),
+                         (True, "team.repo", False))
+        catalog = self.catalog()
+        self.assertEqual((catalog["source_id"], [item["status"] for item in catalog["entries"]]), ("team.repo", ["draft"]))
+        stored = self.root / "example.dashboard" / "0.1.0" / "pattern.json"
+        self.assertEqual(p.content_digest(json.loads(stored.read_text(encoding="utf-8"))), report["ref"]["sha256"])
+        listed = p.list_catalogs(self.roots())
+        self.assertEqual([(item["id"], item["effective_status"]) for item in listed["entries"]],
+                         [("example.dashboard", "draft")])
+        self.assertIn("inferred_sources_only", codes(self.capture(
+            draft("example.observed", sources=[dict(statement(), kind="observation", confidence="inferred")]),
+            expected_catalog_digest=self.digest()), "warning"))
+
+    def test_capture_refusals_write_nothing(self):
+        self.capture(source_id="team.repo")
+        before = tree_digest(self.root)
+        cases = [
+            (dict(draft(), status="approved", approval=APPROVAL), {"expected_catalog_digest": self.digest()},
+             "capture_not_draft"),
+            (draft(), {"name": "example.other", "expected_catalog_digest": self.digest()}, "capture_name_mismatch"),
+            (draft(), {}, "expected_digest_required"),
+            (draft(), {"expected_catalog_digest": "0" * 64}, "stale_catalog_digest"),
+            (draft("example.new"), {"source_id": "other.id", "expected_catalog_digest": self.digest()},
+             "source_id_mismatch"),
+            (draft(), {"expected_catalog_digest": self.digest()}, "version_exists"),
+        ]
+        for value, kwargs, code in cases:
+            with self.subTest(code=code):
+                with self.assertRaises(p.PatternError) as caught:
+                    self.capture(value, **kwargs)
+                self.assertEqual(caught.exception.code, code)
+        self.assertEqual(tree_digest(self.root), before, "refused captures leave every file unchanged")
+        with self.assertRaises(p.PatternError) as caught:
+            p.capture(p.parse_roots(self.fx.envelope(repository=False)), draft(), scope="repo", name="example.dashboard")
+        self.assertEqual(caught.exception.code, "repository_required")
+
+    def test_personal_capture_without_repository(self):
+        roots = p.parse_roots(self.fx.envelope(repository=False))
+        report = p.capture(roots, draft(), scope="personal", name="example.dashboard", source_id="me.personal")
+        self.assertEqual(report["scope"], "personal")
+        self.assertTrue((self.fx.home / "patterns" / "catalog.json").is_file())
+        self.assertEqual(p.list_catalogs(roots)["entries"][0]["active"], False, "personal content is never active")
+
+    def test_exclusive_lock_and_interrupted_staging(self):
+        self.capture(source_id="team.repo")
+        foreign = self.root / "catalog.json.lock"
+        foreign.write_text("someone-else", encoding="utf-8")
+        before = tree_digest(self.root)
+        with self.assertRaises(p.PatternError) as caught:
+            self.capture(draft("example.second"), expected_catalog_digest=self.digest())
+        self.assertEqual((caught.exception.code, caught.exception.status), ("write_locked", "collision"))
+        self.assertEqual(tree_digest(self.root), before, "a held lock blocks every write and is never stolen")
+        foreign.unlink()
+        staged = draft("example.crashed")
+        path = self.root / "example.crashed" / "0.1.0" / "pattern.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps(staged), encoding="utf-8")
+        indexed = p.index_source(self.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertEqual((indexed["written"], [item["id"] for item in self.catalog()["entries"]]),
+                         (False, ["example.dashboard"]), "interrupted staging is never discovered by index")
+        different = self.root / "example.other" / "0.1.0" / "pattern.json"
+        different.parent.mkdir(parents=True)
+        different.write_text(json.dumps(draft("example.other", guidance="stray")), encoding="utf-8")
+        with self.assertRaises(p.PatternError) as caught:
+            self.capture(draft("example.other"), expected_catalog_digest=self.digest())
+        self.assertEqual(caught.exception.code, "unregistered_staging_conflict")
+        recovered = self.capture(staged, expected_catalog_digest=self.digest())
+        self.assertTrue(recovered["published"][0]["recovered_staging"], "the owning operation completes its staging")
+        self.assertEqual([item["id"] for item in self.catalog()["entries"]], ["example.dashboard", "example.crashed"])
+        self.assertEqual(sorted(item.name for item in self.root.iterdir() if item.name.endswith((".lock", ".tmp"))), [])
+
+    def test_index_rebuilds_metadata_and_preserves_everything_else(self):
+        approved = make_pattern("example.live")
+        catalog = self.fx.publish(self.root, "team.repo", [approved, make_pattern("example.gone")])
+        entry = catalog["entries"][0]
+        catalog["lifecycle"] = [{**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated",
+                                 "reason": "superseded", "reference": "ADR", "at": TS}]
+        catalog["bindings"] = [binding("keep", [ref("team.repo", approved)])]
+        catalog["revocations"] = []
+        catalog["extensions"] = {"team.meta": {"owner": "x"}}
+        gone = catalog["entries"].pop()
+        catalog["entries"][0]["summary"] = "hand-edited summary"
+        (self.root / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+        self.assertTrue((self.root / gone["path"]).is_file(), "the removed entry's directory stays on disk")
+        report = p.index_source(self.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertEqual(report["rebuilt"], [{"id": "example.live", "version": "1.0.0", "fields": ["summary"]}])
+        rebuilt = self.catalog()
+        self.assertEqual(rebuilt["entries"][0]["summary"], approved["summary"])
+        for key in ("lifecycle", "bindings", "revocations", "includes", "extensions", "source_id"):
+            self.assertEqual(rebuilt[key], catalog[key], f"index preserves {key}")
+        self.assertEqual([item["id"] for item in rebuilt["entries"]], ["example.live"], "remove->index stays removed")
+        self.assertEqual(p.list_catalogs(self.roots())["entries"][0]["effective_status"], "deprecated",
+                         "deprecate->index keeps the effective state")
+        again = p.index_source(self.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertEqual((again["written"], again["rebuilt"]), (False, []))
+
+    def test_index_refuses_edited_or_missing_content(self):
+        pattern = make_pattern("example.live")
+        self.fx.publish(self.root, "team.repo", [pattern])
+        path = self.root / "example.live" / "1.0.0" / "pattern.json"
+        path.write_text(json.dumps(dict(pattern, guidance="edited")), encoding="utf-8")
+        before = (self.root / "catalog.json").read_bytes()
+        with self.assertRaises(p.PatternError) as caught:
+            p.index_source(self.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertEqual(caught.exception.code, "pattern_digest_mismatch")
+        path.unlink()
+        with self.assertRaises(p.PatternError) as caught:
+            p.index_source(self.roots(), self.root, expected_catalog_digest=self.digest())
+        self.assertEqual(caught.exception.code, "registered_file_missing")
+        self.assertEqual((self.root / "catalog.json").read_bytes(), before)
+        with self.assertRaises(p.PatternError) as caught:
+            p.index_source(self.roots(), self.fx.root)
+        self.assertEqual(caught.exception.code, "invalid_source_root")
+
+    def _draft_path(self, value):
+        return self.root / value["id"] / value["version"] / "pattern.json"
+
+    def test_approve_publishes_newer_version_and_keeps_draft(self):
+        value = draft()
+        self.capture(value, source_id="team.repo")
+        draft_bytes = self._draft_path(value).read_bytes()
+        args = {"approval_value": APPROVAL, "expected_digest": p.content_digest(value)}
+        for version, code in (("0.1.0", "version_not_newer"), ("0.0.9", "version_not_newer")):
+            with self.subTest(version=version):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.approve(self.roots(), self._draft_path(value), version=version, **args)
+                self.assertEqual(caught.exception.code, code)
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.roots(), self._draft_path(value), version="1.0.0", approval_value=APPROVAL,
+                      expected_digest="0" * 64)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("stale_pattern_digest", "collision"))
+        report = p.approve(self.roots(), self._draft_path(value), version="1.0.0", **args)
+        self.assertEqual(report["ref"]["version"], "1.0.0")
+        self.assertEqual(self._draft_path(value).read_bytes(), draft_bytes, "the draft is left unchanged")
+        published = json.loads((self.root / "example.dashboard" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        self.assertEqual((published["status"], published["approval"]), ("approved", APPROVAL))
+        self.assertEqual(p.content_digest(published), report["ref"]["sha256"], "approval is inside the digest")
+        self.assertEqual([(item["version"], item["status"]) for item in self.catalog()["entries"]],
+                         [("0.1.0", "draft"), ("1.0.0", "approved")])
+        self.fx.repo_bindings([binding("b", [report["ref"]])])
+        self.assertEqual(self.fx.resolve(ctx())[0]["status"], "ready")
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.roots(), self._draft_path(value), version="1.0.0", **args)
+        self.assertEqual(caught.exception.code, "version_exists")
+        approved_path = self.root / "example.dashboard" / "1.0.0" / "pattern.json"
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.roots(), approved_path, version="2.0.0", approval_value=APPROVAL,
+                      expected_digest=report["ref"]["sha256"])
+        self.assertEqual(caught.exception.code, "approve_not_draft")
+
+    def test_approve_requires_sources_and_approved_dependencies(self):
+        self.capture(draft("example.child"), source_id="team.repo")
+        child_ref = {"source": "team.repo", "id": "example.child", "version": "0.1.0",
+                     "sha256": p.content_digest(draft("example.child"))}
+        parent = draft("example.parent", requirements=[], includes=[child_ref])
+        self.capture(parent, expected_catalog_digest=self.digest())
+        before = tree_digest(self.root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.roots(), self._draft_path(parent), version="1.0.0", approval_value=APPROVAL,
+                      expected_digest=p.content_digest(parent))
+        self.assertEqual((caught.exception.code, caught.exception.status), ("dependency_not_approved", "unavailable"))
+        self.assertEqual(tree_digest(self.root), before)
+        child = p.approve(self.roots(), self._draft_path(draft("example.child")), version="1.0.0",
+                          approval_value=APPROVAL, expected_digest=child_ref["sha256"])
+        updated_parent = draft("example.parent", version="0.2.0", requirements=[], includes=[child["ref"]])
+        self.capture(updated_parent, expected_catalog_digest=self.digest())
+        report = p.approve(self.roots(), self._draft_path(updated_parent), version="1.0.0", approval_value=APPROVAL,
+                           expected_digest=p.content_digest(updated_parent))
+        self.assertEqual(report["ref"]["id"], "example.parent", "children-first approval succeeds")
+        unsourced = draft("example.unsourced", sources=[])
+        self.capture(unsourced, expected_catalog_digest=self.digest())
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.roots(), self._draft_path(unsourced), version="1.0.0", approval_value=APPROVAL,
+                      expected_digest=p.content_digest(unsourced))
+        self.assertIn("source", caught.exception.message)
+
+    def test_cli_capture_index_approve(self):
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        value = draft()
+        source = self.fx.write_json("draft.json", value)
+        code, report, _ = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                      "--name", "example.dashboard", "--source-id", "team.repo")
+        self.assertEqual((code, report["written"]), (0, True))
+        code, report, stderr = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                           "--name", "example.dashboard", "--expected-catalog-digest", self.digest())
+        self.assertEqual(code, 6)
+        self.assertIn("version_exists", stderr)
+        code, report, _ = self.fx.cli("index", "--roots-file", envelope, "--source-root", self.root,
+                                      "--expected-catalog-digest", self.digest())
+        self.assertEqual((code, report["written"]), (0, False))
+        approval = self.fx.write_json("approval.json", APPROVAL)
+        code, report, _ = self.fx.cli("approve", "--roots-file", envelope, "--path", self._draft_path(value),
+                                      "--version", "1.0.0", "--approval", approval,
+                                      "--expected-digest", p.content_digest(value))
+        self.assertEqual((code, report["ref"]["version"]), (0, "1.0.0"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
