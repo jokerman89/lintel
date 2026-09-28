@@ -131,5 +131,8 @@
   "assets/swarming/github-tab.png",
   "comparison/runtime-v2.md",
   "show/story-map.html",
-  "verification/story-refresh.json"
+  "verification/story-refresh.json",
+  "site/language.css",
+  "site/language.js",
+  "site/language-sv.js"
 ]
