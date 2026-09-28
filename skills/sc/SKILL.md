@@ -125,11 +125,13 @@ here is a receiver mode, not deletion of that role capability.
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Module entry resolves the security expectations bound to the current target
-context and passes each sub-capability only its projected clauses (`project` for the mapped
-package, or the clauses mapped to it). An unknown deployment target or trust boundary yields `needs-context` and blocks the
-dependent design; no live cloud, tenant or environment discovery is implied, and requirements are
-never inferred from generic recommendations. With no pattern sources the module is unchanged.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the security expectations bound to the current target context and passes
+each sub-capability only its projected clauses (`project` for the mapped package, or the clauses
+mapped to it). An unknown deployment target or trust boundary yields `needs-context` and blocks
+the dependent design; no live cloud, tenant or environment discovery is implied, and
+requirements are never inferred from generic recommendations. With no pattern sources the module
+is unchanged.
 
 ## Integration and dormant hooks
 

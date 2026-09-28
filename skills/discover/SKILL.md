@@ -245,11 +245,12 @@ state_append DISCOVER "${discover_status:?set actual discovery status}" next=PLA
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). For selected patterns, verify cited local sources (repository paths and
-`sha256` pins) and flag URL-only or overdue mandatory sources as needing a reviewed attestation;
-they remain `unavailable` until one is supplied. Never fetch a URL or describe an external
-source as verified. Record findings in the discover report. This is source verification, not
-pattern authoring or approval.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). For
+selected patterns, verify cited local sources (repository paths and `sha256` pins) and flag
+URL-only or overdue mandatory sources as needing a reviewed attestation; they remain
+`unavailable` until one is supplied. Never fetch a URL or describe an external source as
+verified. Record findings in the discover report. This is source verification, not pattern
+authoring or approval.
 
 ## Status protocol
 

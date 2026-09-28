@@ -182,10 +182,11 @@ Write to `--out`. Surface summary (per-format layout count, palette used, font b
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When the run has a lock, add the optional `pattern_context` attachment to
-design-spec.json with `design_attachment`; the outer `version: "1.0"` and existing fields are
-unchanged. Direct entry without a verified attachment resolves itself. Do not copy clause text
-into palette, fonts or per-format mappings as a second authoritative copy.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the run has a lock, add the optional `pattern_context` attachment to design-spec.json with
+`design_attachment`; the outer `version: "1.0"` and existing fields are unchanged. Direct entry
+without a verified attachment resolves itself. Do not copy clause text into palette, fonts or
+per-format mappings as a second authoritative copy.
 
 ## Status protocol
 

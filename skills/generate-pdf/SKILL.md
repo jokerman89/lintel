@@ -156,10 +156,11 @@ examples, not executed conversion or inspection evidence. Use
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). This remains the working PDF writer described above; patterns do not change
-its status or procedure. Resolve, or verify a supplied attachment, before preparing the HTML
-source. Conversion must preserve every section and clause required by the source document. No
-PDF reader is added: report required content not inspected in the produced PDF as unverified.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+This remains the working PDF writer described above; patterns do not change its status or
+procedure. Resolve, or verify a supplied attachment, before preparing the HTML source.
+Conversion must preserve every section and clause required by the source document. No PDF reader
+is added: report required content not inspected in the produced PDF as unverified.
 
 ## Roles, status and evidence
 

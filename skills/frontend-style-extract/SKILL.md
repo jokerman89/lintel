@@ -210,15 +210,16 @@ Next:
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The vault output above is unchanged. To propose it for reuse, convert the
-legacy `pattern.json` with `lib/pattern_visual.py` `legacy_to_draft`: it emits a universal draft of
-defaults only, with observation confidence (never confirmed) and the original bytes kept as a
-`visual-legacy` asset by digest; unrecognized fields stay in that asset. Stage the draft and that
-sidecar into a new scratch directory with `stage_draft`, then register it only through
-`bin/li-pattern capture --input <dir>/pattern.json`, which verifies and stages the declared
-files before registration; approval is separate. The legacy `schema_version: 1` is not the universal schema. Never copy proprietary
-code, shaders or assets without permission, and record fonts, accessibility and licensing as
-unknown unless evidenced.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+vault output above is unchanged. To propose it for reuse, convert the legacy `pattern.json` with
+`lib/pattern_visual.py` `legacy_to_draft`: it emits a universal draft of defaults only, with
+observation confidence (never confirmed) and the original bytes kept as a `visual-legacy` asset
+by digest; unrecognized fields stay in that asset. Stage the draft and that sidecar into a new
+scratch directory with `stage_draft`, then register it only through `bin/li-pattern capture
+--input <dir>/pattern.json`, which verifies and stages the declared files before registration;
+approval is separate. The legacy `schema_version: 1` is not the universal schema. Never copy
+proprietary code, shaders or assets without permission, and record fonts, accessibility and
+licensing as unknown unless evidenced.
 
 ## Status protocol
 

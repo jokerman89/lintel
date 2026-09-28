@@ -191,10 +191,11 @@ If upstream `--customer-share`: voice_tier in content frontmatter is set to the 
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Use the clauses of a verified run attachment; on direct entry without one,
-resolve for the brief's context. Annotate the content.md sections that satisfy a clause with its
-clause ID. Never drop or merge away a section that a mandatory clause requires; report a clause
-you could not satisfy as unmet instead.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Use
+the clauses of a verified run attachment; on direct entry without one, resolve for the brief's
+context. Annotate the content.md sections that satisfy a clause with its clause ID. Never drop
+or merge away a section that a mandatory clause requires; report a clause you could not satisfy
+as unmet instead.
 
 ## Status protocol
 

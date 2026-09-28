@@ -523,12 +523,13 @@ Next actions:
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). CAPTURE may propose new patterns or changes that emerged in the cycle. Write
-them as drafts with `bin/li-pattern capture --scope repo|personal`, keeping operator statements
-separate from observations and recording confidence, reuse rights and unknowns honestly. Never
-approve, publish over, re-bind or edit an existing pattern or lock; approval is a separate
-reviewed `approve` step. Handoff notes name the lock, task map and context files so a fresh
-session can reconstruct and verify the selection.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+CAPTURE may propose new patterns or changes that emerged in the cycle. Write them as drafts with
+`bin/li-pattern capture --scope repo|personal`, keeping operator statements separate from
+observations and recording confidence, reuse rights and unknowns honestly. Never approve,
+publish over, re-bind or edit an existing pattern or lock; approval is a separate reviewed
+`approve` step. Handoff notes name the lock, task map and context files so a fresh session can
+reconstruct and verify the selection.
 
 ## Status protocol
 

@@ -452,12 +452,12 @@ audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CO
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The cycle adds no separate pattern loader: each phase applies its own
-obligation, and cycle entry and direct phase entry run the same command with the same inputs,
-so they produce the same `selection_digest`. With no configured pattern sources the cycle adds
-no prompt, phase, lock or artifact, and the phase/approval protocol above is unchanged. When
-PLAN has written a lock, pass its path and the saved context file to BUILD, REVIEW, SHIP and
-RESUME instead of re-resolving.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+cycle adds no separate pattern loader: each phase applies its own obligation, and cycle entry
+and direct phase entry run the same command with the same inputs, so they produce the same
+`selection_digest`. With no configured pattern sources the cycle adds no prompt, phase, lock or
+artifact, and the phase/approval protocol above is unchanged. When PLAN has written a lock, pass
+its path and the saved context file to BUILD, REVIEW, SHIP and RESUME instead of re-resolving.
 
 ## Status protocol
 

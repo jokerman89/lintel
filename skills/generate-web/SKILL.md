@@ -177,11 +177,12 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). In from-frontend-design mode and `--mode mockup`, check the spec's
-`pattern_context` with `validate_visual` against the current resolution or verified lock before
-rendering; a stale context or a mismatched setting blocks the render instead of being corrected
-here. Render the projected values; generate-web still makes no design decisions. With no
-patterns, rendering is unchanged.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). In
+from-frontend-design mode and `--mode mockup`, check the spec's `pattern_context` with
+`validate_visual` against the current resolution or verified lock before rendering; a stale
+context or a mismatched setting blocks the render instead of being corrected here. Render the
+projected values; generate-web still makes no design decisions. With no patterns, rendering is
+unchanged.
 
 ## Report format
 

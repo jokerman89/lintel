@@ -219,10 +219,11 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When a design spec carries `pattern_context`, verify it first; then check
-each mandatory clause against the produced artifacts and report it by clause ID as passed,
-failed or unverified in qa-report.json. A missing required section is failed. These results
-feed the clause review evidence; QA never clears review, and an unverified clause is not passed.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When a design spec carries `pattern_context`, verify it first; then check each mandatory clause
+against the produced artifacts and report it by clause ID as passed, failed or unverified in
+qa-report.json. A missing required section is failed. These results feed the clause review
+evidence; QA never clears review, and an unverified clause is not passed.
 
 ## Status protocol
 

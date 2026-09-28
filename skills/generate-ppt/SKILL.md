@@ -201,8 +201,9 @@ words-per-minute target is not an observed rehearsal.
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Brief mode resolves for the brief's context; from-pipeline mode verifies the
-run's `pattern_context` attachment. Both receive the same clauses before the slide structure is
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Brief mode resolves for the brief's context; from-pipeline mode verifies the run's
+`pattern_context` attachment. Both receive the same clauses before the slide structure is
 chosen: required sections become slides or sections, and the clauses go to the existing
 narrative review and the QA report. A helper fixture proves only this integration, not a real
 generated deck.

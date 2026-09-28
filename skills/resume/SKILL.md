@@ -497,14 +497,15 @@ state_append RESUME DONE "prior_last_phase=${prior_last_phase:?record original p
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). If the saved plan links a pattern lock, `verify-lock` it with the saved
-context before choosing the next card. Act on the reported status, not on individual warnings:
-`ok` continues, `unavailable` (changed bytes, retired or revoked pins, missing sources) blocks the
-affected continuation, and `conflict` (changed context, or a changed selected baseline) is a
-re-plan with the reported old and new clause sets. Surface deprecation and other warnings, but
-never treat a warning as verified acceptance of a changed baseline. Never upgrade pins, rewrite
-the lock or substitute remembered clause text.
-A personal source that is unavailable on this machine blocks until it is supplied.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). If
+the saved plan links a pattern lock, `verify-lock` it with the saved context before choosing the
+next card. Act on the reported status, not on individual warnings: `ok` continues, `unavailable`
+(changed bytes, retired or revoked pins, missing sources) blocks the affected continuation, and
+`conflict` (changed context, or a changed selected baseline) is a re-plan with the reported old
+and new clause sets. Surface deprecation and other warnings, but never treat a warning as
+verified acceptance of a changed baseline. Never upgrade pins, rewrite the lock or substitute
+remembered clause text. A personal source that is unavailable on this machine blocks until it is
+supplied.
 
 ## Status protocol
 

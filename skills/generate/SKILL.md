@@ -183,12 +183,13 @@ ts: <iso-8601>
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When pattern sources exist, the pipeline resolves once for the brief's
-context before OUTLINE, stores the lock in the run directory and attaches it to
-`design-spec.json` as `pattern_context` (`lib/pattern_visual.py` `design_attachment`). Every
-stage verifies that attachment (`verify_design_attachment`) before using clauses; a missing,
-stale or mismatched attachment is `unavailable`, never a pass. Mandatory clauses reach the
-format-builders and QA unchanged. With no pattern sources nothing is attached or asked.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When pattern sources exist, the pipeline resolves once for the brief's context before OUTLINE,
+stores the lock in the run directory and attaches it to `design-spec.json` as `pattern_context`
+(`lib/pattern_visual.py` `design_attachment`). Every stage verifies that attachment
+(`verify_design_attachment`) before using clauses; a missing, stale or mismatched attachment is
+`unavailable`, never a pass. Mandatory clauses reach the format-builders and QA unchanged. With
+no pattern sources nothing is attached or asked.
 
 ## Status protocol
 

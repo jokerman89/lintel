@@ -294,15 +294,16 @@ state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> r
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). When the work has a pattern lock, assess clause evidence with
-`bin/li-pattern review --lock <lock> --context <file> --evidence <file>` using the
-[evidence input](../pattern/references/consumer-contract.md#review-evidence). `passed` needs
-referenced artifacts and an explanation; `waived` needs a valid exception and stays waived;
-omitted, failed or unverified mandatory clauses exit 7 and cannot be reported as passed. This
-coverage is supplemental content evidence inside the shared v2 review/QA evidence for the same
-work, task and profile binding (ADR-0028). It never records PASS, never clears stale or missing
-independent review and never overrides a later rejection; the reviewer still inspects the
-referenced artifacts. If the installed CLI lacks `review`, report the clause check unavailable.
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the work has a pattern lock, assess clause evidence with `bin/li-pattern review --lock
+<lock> --context <file> --evidence <file>` using the [evidence
+input](../pattern/references/consumer-contract.md#review-evidence). `passed` needs referenced
+artifacts and an explanation; `waived` needs a valid exception and stays waived; omitted, failed
+or unverified mandatory clauses exit 7 and cannot be reported as passed. This coverage is
+supplemental content evidence inside the shared v2 review/QA evidence for the same work, task
+and profile binding (ADR-0028). It never records PASS, never clears stale or missing independent
+review and never overrides a later rejection; the reviewer still inspects the referenced
+artifacts. If the installed CLI lacks `review`, report the clause check unavailable.
 
 ## Status protocol
 
