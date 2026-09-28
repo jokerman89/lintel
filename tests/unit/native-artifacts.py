@@ -25,10 +25,10 @@ SPEC_SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canoni
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
->   `scripts/`, `references/`, `data/` or `${{LINTEL_SKILLS_DIR:-skills}}/…`) mean
->   `{root}/skills/{name}/` in the Lintel source, not this generated folder. `bin/li-run` exports
->   `LINTEL_SKILLS_DIR` for shell steps.
+> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
+>   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
 > - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
 >   `System32\\bash.exe`). Save a snippet to a temporary `.sh` file and run
 >   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
@@ -187,17 +187,37 @@ class NativeArtifacts(unittest.TestCase):
                                                                name="plan"), preamble)
                 rendered = self.render("plan", local=local, files=files)
                 self.assertEqual(self.body(rendered, preamble), "\n# plan\n\nThe canonical plan method.\n")
-                # The skill-relative bullet follows Resource root and names this skill's canonical folder.
-                self.assertIn("never into the resource root.\n> - **Skill-relative paths:** paths relative to "
-                              "this skill's own folder (such as `<base>`,\n>   `scripts/`, `references/`, `data/` "
-                              "or `${LINTEL_SKILLS_DIR:-skills}/…`) mean\n"
-                              f">   `{root}/skills/plan/` in the Lintel source, not this generated folder. "
-                              "`bin/li-run` exports\n>   `LINTEL_SKILLS_DIR` for shell steps.\n> - **Shell steps:**",
-                              rendered)
+                # The skill-relative bullet follows Resource root: this skill's own folder, the skills
+                # root that ${LINTEL_SKILLS_DIR:-skills} names, and the pinned variable for li-run steps.
+                self.assertIn("never into the resource root.\n> - **Skill-relative paths:** `<base>` and "
+                              "this skill's `scripts/`, `references/` and `data/` mean\n"
+                              f">   `{root}/skills/plan/` in the Lintel source, not this generated folder.\n"
+                              f">   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. "
+                              "A `bin/li-run` step\n>   runs in the working repository, so use "
+                              "`$LINTEL_SKILLS_DIR/plan/` there.\n> - **Shell steps:**", rendered)
                 define = self.render("define", local=local, files=files)
                 self.assertEqual(self.body(define, skill_preamble(root, "define")),
                                  "\n# define\n\nThe canonical define method.\n")
                 self.assertIn(f"\n>   `{root}/skills/define/` in the Lintel source", define)
+                self.assertIn("so use `$LINTEL_SKILLS_DIR/define/` there.\n", define)
+
+    def test_skill_relative_bullet_fits_100_columns_for_the_longest_skill_name(self):  # N1
+        # The longest name comes from canonical discovery, so a longer future skill is measured too.
+        names = sorted(path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md"))
+        self.assertTrue(names, "no canonical skills discovered")
+        longest = max(names, key=len)
+        self.skill(longest, "The longest canonical skill name.", "\n# Longest\n")
+        bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        for local, root, files in ((True, "../../..", {}), (False, "../../lintel", bundled)):
+            with self.subTest(local=local, name=longest):
+                rendered = self.render(longest, local=local, files=files)
+                start = rendered.index("> - **Skill-relative paths:**")
+                bullet = rendered[start:rendered.index("> - **Shell steps:**", start)].splitlines()
+                self.assertEqual([(len(line), line) for line in bullet if len(line) > 100], [])
+                self.assertEqual(len(bullet), 4)
+                self.assertIn(f"`{root}/skills/{longest}/`", bullet[1])
+                self.assertIn(f"`$LINTEL_SKILLS_DIR/{longest}/`", bullet[3])
+                self.body(rendered, skill_preamble(root, longest))
 
     def test_invocation_and_tool_transforms_change_nothing_else(self):  # 1.1.e
         original = ("Run /li:plan, then /li:<phase> or `/li:build --resume`.\r\n"
