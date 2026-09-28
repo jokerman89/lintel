@@ -97,6 +97,59 @@ drift, declared missing catalog, origin outside ancestry).
 The plan's chain makes 2.2.a depend on 2.1.d (pack lane). The leaf stays unchecked until the
 parent approves the reordering in [topology.md](topology.md) or 2.1.d lands.
 
+## Publication access denial (preserved evidence)
+
+2026-09-28, after commit `eaffeb6c`, the integration session ran `git push -u origin HEAD`
+once. It ran under the host session's injected identity. Verbatim result, exit 128:
+
+```text
+remote: Permission to jokerman89/lintel.git denied to jokerman_microsoft.
+fatal: unable to access 'https://github.com/jokerman89/lintel.git/': The requested URL returned error: 403
+```
+
+The session followed L-053 and the parent's instruction of 2026-09-28. It did not retry,
+did not switch or unset accounts or tokens, did not inspect credentials and did not ask
+another actor to bypass the denial. Local branch milestones are used for nested review.
+Final publication is an open host-account access block. The parent surfaces it through the
+sanctioned UI at delivery. BUILD authorization does not cover an authentication bypass.
+
+## Review revision R1 (after parent note on `eaffeb6c`)
+
+The parent flagged that the milestone rejected null setting values, although spec 4.1 says
+"JSON scalar". An audit of all validators against the spec text found further unjustified
+narrowing. Each is now accepted as the spec permits:
+
+- Null setting/override values.
+- Clause IDs of any uppercase letters, digits and hyphens. The 64-character cap was lifted to 128.
+- Binding IDs as any nonempty string. The spec requires only uniqueness.
+- Free-text provenance fields: `owner`, approval `by`/`reference`, reasons, references and
+  evidence refs are bounded only by their document limit. `section` and `reuse` may be empty.
+- UTC RFC 3339 `Z`/`z`/`+00:00` timestamps and a lowercase `t`. Lifecycle ordering and
+  same-instant detection now compare instants, not strings.
+- Personal catalogs may include ancestry `pack:` locators (spec 4.2), still inactive.
+- Exactly 16 include edges is allowed and 17 fails. The first draft rejected 16.
+- `--context-budget-chars` has no upper cap. The spec lets it raise only the output ceiling.
+- Carriage return is allowed in text.
+
+Stricter-than-spec choices retained, with their justification, for the reviewer:
+
+- Other C0 control characters are rejected (R09 terminal/log injection).
+- JSON nesting is capped at 64, preventing recursion exhaustion. Real records nest at most 4 levels.
+- Settings, extension keys and source IDs must be dotted namespaces (spec says "namespaced").
+- Version strings are capped at 64 characters, and selector keys and fact values at 128.
+- Duplicate revocations, override settings and exception clauses are rejected as ambiguous.
+
+`topology.md` R1 records explicit lane membership: each of the 48 IDs is either completed or
+assigned once, with 4.2.a and 4.2.b suffix-split. It also records the accurate original
+graph: a declared total order in which 2.1.a already depends on 1.3.c.
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 36 tests OK. New cases:
+  `AuthorityTests.test_null_is_a_json_scalar_setting_value`,
+  `SchemaTests.test_spec_permitted_forms_are_accepted`,
+  `SchemaTests.test_lifecycle_order_uses_instants_not_spellings`, the 16/17-edge boundary in
+  `PinTests.test_cycles_depth_and_conflicting_digests`, and the personal-to-pack include case in
+  `SelectorTests.test_personal_scope_is_explicit_only`.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

@@ -223,7 +223,7 @@ class SchemaTests(unittest.TestCase):
             ({"requirements": [{"id": "A", "level": "must", "text": "t", "verify": "v", "setting": "x.y"}]},
              "invalid_schema"),
             ({"requirements": [clause("A", "must", "x.y", [1])]}, "invalid_schema"),
-            ({"requirements": [clause("A", "must", "x.y", None)]}, "invalid_schema"),
+            ({"requirements": [clause("A", "must", "x.y", {"k": 1})]}, "invalid_schema"),
             ({"requirements": [clause("a", "must")]}, "invalid_schema"),
             ({"requirements": [clause("A", "should")]}, "invalid_schema"),
             ({"applies_to": {"target": []}}, "invalid_schema"), ({"applies_to": {"Target": ["x"]}}, "invalid_schema"),
@@ -254,6 +254,34 @@ class SchemaTests(unittest.TestCase):
         blueprint = make_pattern("example.blueprint", requirements=[], includes=[
             {"source": "repo.main", "id": "example.dashboard", "version": "1.0.0", "sha256": "a" * 64}])
         self.assertEqual(len(p.parse_pattern(blueprint).includes), 1)
+
+    def test_spec_permitted_forms_are_accepted(self):
+        """Guard against narrowing the spec: forms it permits must validate (review note R1)."""
+        value = make_pattern("example.forms", requirements=[clause("A--B", "must"), clause("-9", "default")],
+                             sources=[dict(statement(), observed_at="2026-09-01t00:00:00.5+00:00", section="",
+                                           reuse="")],
+                             approval={"by": "b" * 300, "reference": "r" * 900, "at": "2026-09-01T00:00:00z"})
+        pattern = p.parse_pattern(value)
+        self.assertEqual([item.id for item in pattern.requirements], ["A--B", "-9"])
+        bound = p.parse_bindings({"schema_version": 1, "bindings": [dict(binding("Team Binding #1", [
+            {"source": "repo.main", "id": "example.a", "version": "1.0.0", "sha256": "0" * 64}]))]})
+        self.assertEqual(bound[0].id, "Team Binding #1")
+        self.assertEqual(p.parse_context({"schema_version": 1, "facts": {"k": "v"},
+                                          "evidence": {"k": "e" * 5000}}).facts, {"k": "v"})
+        for bad in ("2026-09-01T00:00:00+01:00", "2026-09-01T00:00:00", "2026-09-01 00:00:00Z"):
+            with self.subTest(bad=bad):
+                self.assertInvalid(p.parse_pattern, dict(value, approval=dict(value["approval"], at=bad)))
+
+    def test_lifecycle_order_uses_instants_not_spellings(self):
+        fixture = Fixture(self)
+        catalog = fixture.publish(fixture.repo_patterns, "repo.main", [make_pattern("example.dashboard")])
+        entry = catalog["entries"][0]
+        event = {"id": entry["id"], "version": "1.0.0", "sha256": entry["sha256"], "status": "deprecated",
+                 "reason": "r", "reference": "ADR", "at": "2026-09-02T00:00:00Z"}
+        same_instant = dict(event, status="retired", at="2026-09-02T00:00:00+00:00")
+        self.assertIn("timestamp", self.assertInvalid(p.parse_catalog, dict(catalog, lifecycle=[event, same_instant])).message)
+        later = dict(event, status="retired", at="2026-09-02t00:00:01z")
+        self.assertEqual(len(p.parse_catalog(dict(catalog, lifecycle=[later, event])).lifecycle), 2)
 
     def test_catalog_records_lifecycle_and_limits(self):
         fixture = Fixture(self)
@@ -576,11 +604,18 @@ class SelectorTests(unittest.TestCase):
 
     def test_personal_scope_is_explicit_only(self):
         fixture = Fixture(self)
+        pack_root = fixture.pack_chain()
+        pack_rule = make_pattern("example.pack-rule")
+        pack_catalog = fixture.publish(pack_root / "patterns", "team.patterns", [pack_rule])
         personal = make_pattern("example.dashboard", requirements=[clause("P-1", "must")])
         fixture.publish(fixture.personal_patterns, "me.personal", [personal],
-                        bindings=[binding("mine", [ref("me.personal", personal)])])
+                        bindings=[binding("mine", [ref("me.personal", personal)])],
+                        includes=[{"locator": "pack:base", "path": "patterns/catalog.json",
+                                   "sha256": p.content_digest(pack_catalog)}])
         report, reader = fixture.resolve(ctx())
-        self.assertEqual((report["status"], report["candidates"]["total"], reader.count("pattern")), ("empty", 0, 0))
+        self.assertEqual((report["status"], reader.count("pattern")), ("empty", 0))
+        self.assertEqual(report["candidates"]["total"], 1, "only the active pack entry is advisory")
+        self.assertEqual(report["candidates"]["items"][0]["ref"]["id"], "example.pack-rule")
         self.assertIn("personal_bindings_inactive", codes(report))
         explicit = [{"ref": ref("me.personal", personal), "role": "required", "approved_by": "me", "approval_ref": "task"}]
         report, _ = fixture.resolve(ctx(), refs=p.parse_refs(explicit))
@@ -665,6 +700,33 @@ class AuthorityTests(unittest.TestCase):
                          ("light", "repo"), "repository defaults outrank active-pack defaults")
         states = {item["clause"]: item["state"] for item in report["requirements"]}
         self.assertEqual(states["example.pack-dark@1.0.0#K"], "suppressed")
+
+    def test_null_is_a_json_scalar_setting_value(self):
+        """Spec 4.1/4.3: `value` is any JSON scalar, including null; not narrowed."""
+        fixture = Fixture(self)
+        pattern = p.parse_pattern(make_pattern("example.null", requirements=[clause("N", "must", "ui.banner", None)]))
+        self.assertEqual(pattern.requirements[0].to_json()["value"], None)
+        self.assertIn("value", pattern.requirements[0].to_json())
+        must_null = make_pattern("example.must-null", requirements=[clause("N", "must", "ui.banner", None)])
+        must_text = make_pattern("example.must-text", requirements=[clause("T", "must", "ui.banner", "hello")])
+        self._settings(fixture, [(must_null, "required")])
+        report, _ = fixture.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        self.assertEqual(report["settings"]["ui.banner"], {"state": "mandatory", "value": None,
+                                                           "winner": "example.must-null@1.0.0#N", "scope": "repo",
+                                                           "clauses": ["example.must-null@1.0.0#N"]})
+        fixture = Fixture(self)
+        self._settings(fixture, [(must_null, "required"), (must_text, "required")])
+        self.assertIn("must_setting_conflict", codes(fixture.resolve(ctx())[0], "error"),
+                      "null and a string are different values")
+        fixture = Fixture(self)
+        default_text = make_pattern("example.default-text", requirements=[clause("D", "default", "ui.banner", "hi")])
+        self._settings(fixture, [(default_text, "default")])
+        overrides = p.parse_overrides({"schema_version": 1, "items": [{
+            "setting": "ui.banner", "value": None, "reason": "brief removes the banner", "approval_ref": "brief.md",
+            "replaces": ["example.default-text@1.0.0#D"]}]})
+        report, _ = fixture.resolve(ctx(), overrides=overrides)
+        self.assertEqual((report["status"], report["settings"]["ui.banner"]["value"]), ("ready", None))
 
     def test_overrides_and_exceptions(self):
         fixture = Fixture(self)
@@ -840,12 +902,18 @@ class PinTests(unittest.TestCase):
         self.assertIn(caught.exception.code, ("include_cycle", "conflicting_digest"))
         fixture = Fixture(self)
         chain = [make_pattern("example.n0")]
-        for index in range(1, p.LIMITS.include_depth + 2):
+        for index in range(1, p.LIMITS.include_depth + 1):
             chain.append(make_pattern(f"example.n{index}", requirements=[], includes=[ref("repo.main", chain[-1])]))
+        fixture.publish(fixture.repo_patterns, "repo.main", chain, bindings=[binding("deep", [ref("repo.main", chain[-1])])])
+        report, _ = fixture.resolve(ctx())
+        self.assertEqual((report["status"], len(report["selected"])), ("ready", p.LIMITS.include_depth + 1),
+                         "exactly 16 include edges is within the limit")
+        chain.append(make_pattern(f"example.n{p.LIMITS.include_depth + 1}", requirements=[],
+                                  includes=[ref("repo.main", chain[-1])]))
         fixture.publish(fixture.repo_patterns, "repo.main", chain, bindings=[binding("deep", [ref("repo.main", chain[-1])])])
         with self.assertRaises(p.PatternError) as caught:
             fixture.resolve(ctx())
-        self.assertEqual(caught.exception.code, "resource_limit")
+        self.assertEqual(caught.exception.code, "resource_limit", "17 edges exceeds it")
 
     def test_catalog_includes_ancestry_locators_and_snapshots(self):
         fixture = Fixture(self)

@@ -104,9 +104,14 @@ Decisions within the spec's latitude (RN-09): explicit/required pattern whose ow
 rejects -> `conflict` (`applicability_mismatch`); missing facts -> `needs-context`; a default
 binding whose pattern does not apply is skipped with a diagnostic; a draft preview reports
 `unavailable` (`draft_preview_only`) and is never executable; personal catalogs never supply
-advisory candidates or active bindings; setting values are JSON strings, numbers or booleans
-(not null); until card 3.2.b a required pattern with an external URL source or a past
+advisory candidates or active bindings; setting and override values are any JSON scalar
+(string, number, boolean or null, per spec 4.1; null is compared as a distinct value);
+until card 3.2.b a required pattern with an external URL source or a past
 `review_after` is `unavailable`.
+
+Revision R1 (2026-09-28, parent review note): the P1 milestone `eaffeb6c` wrongly rejected
+null setting/override values, narrowing spec 4.1's "JSON scalar". Fixed to accept null;
+covered by `AuthorityTests.test_null_is_a_json_scalar_setting_value`.
 
 ## CLI (spec section 7)
 

@@ -58,7 +58,6 @@ class Limits:
     candidate_summary: int = 240
     advisory_summary_total: int = 1200
     context_budget: int = 24000
-    context_budget_max: int = 10_000_000
 
 
 LIMITS = Limits()
@@ -75,12 +74,11 @@ _STATUS_RANK = {"ready": 0, "empty": 0, "ok": 0, "needs-context": 1, "conflict":
 NAMESPACED_ID = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)+\Z")
 SETTING = re.compile(r"[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\Z")
 VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\Z")
-CLAUSE_ID = re.compile(r"[A-Z0-9]+(?:-[A-Z0-9]+)*\Z")
+CLAUSE_ID = re.compile(r"[A-Z0-9-]+\Z")
 SELECTOR_KEY = re.compile(r"[a-z][a-z0-9_.-]*\Z")
-BINDING_ID = re.compile(r"[a-z0-9][a-z0-9._-]*\Z")
 PACK_NAME = re.compile(r"[A-Za-z_][A-Za-z_0-9-]*\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
-TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z\Z")
+TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:[Zz]|\+00:00)\Z")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}\Z")
 FQ_CLAUSE = re.compile(r"(?P<id>[^@#\s]+)@(?P<version>[^@#\s]+)#(?P<clause>[^@#\s]+)\Z")
 REF_TEXT = re.compile(r"(?P<source>[^:@\s]+):(?P<id>[^:@\s]+)@(?P<version>[^:@\s]+)\Z")
@@ -90,6 +88,8 @@ PHASES = frozenset({"sense", "scope", "define", "discover", "plan", "build", "re
 _RESERVED = re.compile(r"(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?\Z", re.I)
 _REPARSE_POINT = 0x400
 SCOPES = ("explicit", "repo", "pack", "personal")
+# Free-text fields the spec leaves unbounded are limited only by their document byte limit.
+_FREE = LIMITS.input_bytes
 _SCOPE_RANK = {name: index for index, name in enumerate(SCOPES)}
 _MAX_TEXT = 2000
 
@@ -214,7 +214,7 @@ def _string(value: Any, where: str, *, limit: int = _MAX_TEXT, empty: bool = Fal
         _fail("invalid_schema", "expected a nonempty string", where)
     if len(value) > limit:
         _fail("resource_limit", f"string exceeds {limit} code points", where)
-    if any(ord(char) < 32 and char not in "\n\t" for char in value):
+    if any(ord(char) < 32 and char not in "\n\r\t" for char in value):
         _fail("invalid_schema", "control characters are not allowed", where)
     return value
 
@@ -234,13 +234,21 @@ def _array(value: Any, where: str, *, nonempty: bool = False) -> list:
 
 
 def _timestamp(value: Any, where: str) -> str:
+    """UTC RFC 3339: `Z`/`z` or `+00:00` offset, optional fraction (spec 4.1)."""
     if not isinstance(value, str) or not TIMESTAMP.fullmatch(value):
-        _fail("invalid_schema", "expected a UTC RFC3339 timestamp ending in Z", where)
+        _fail("invalid_schema", "expected a UTC RFC3339 timestamp (Z or +00:00)", where)
+    core = value[:-6] if value.endswith("+00:00") else value[:-1]
     try:
-        _dt.datetime.fromisoformat(value[:-1])
+        _dt.datetime.fromisoformat(core.replace("t", "T"))
     except ValueError:
         _fail("invalid_schema", "invalid timestamp", where)
     return value
+
+
+def _instant(value: str) -> _dt.datetime:
+    """Comparable instant for validated timestamps (ordering must not depend on spelling)."""
+    core = value[:-6] if value.endswith("+00:00") else value[:-1]
+    return _dt.datetime.fromisoformat(core.replace("t", "T")).replace(tzinfo=_dt.timezone.utc)
 
 
 def _date(value: Any, where: str) -> str:
@@ -254,13 +262,14 @@ def _date(value: Any, where: str) -> str:
 
 
 def _scalar(value: Any, where: str):
-    if isinstance(value, bool) or isinstance(value, str) or isinstance(value, int):
-        if isinstance(value, str) and len(value) > _MAX_TEXT:
+    """A JSON scalar: string, number, boolean or null (spec 4.1); never an array or object."""
+    if value is None or isinstance(value, (bool, int, float)):
+        return value
+    if isinstance(value, str):
+        if len(value) > _MAX_TEXT:
             _fail("resource_limit", "scalar value is too long", where)
         return value
-    if isinstance(value, float):
-        return value
-    _fail("invalid_schema", "value must be a JSON string, number or boolean", where)
+    _fail("invalid_schema", "value must be a JSON scalar (string, number, boolean or null)", where)
 
 
 def _extensions(value: Any, where: str) -> dict:
@@ -685,14 +694,14 @@ def parse_pattern(value: Any, where: str = "pattern") -> Pattern:
         if digest is not None:
             _matching(digest, HEX64, f"{at}.sha256", "sha256 digest", 64)
         sources.append(SourceRecord(item["kind"], ref, item["root"],
-                                    _string(item["section"], f"{at}.section", limit=240, empty=True),
+                                    _string(item["section"], f"{at}.section", limit=_FREE, empty=True),
                                     _timestamp(item["observed_at"], f"{at}.observed_at"), item["confidence"],
-                                    _string(item["reuse"], f"{at}.reuse", limit=500), digest))
+                                    _string(item["reuse"], f"{at}.reuse", limit=_FREE, empty=True), digest))
     clauses, seen = [], set()
     for index, item in enumerate(_array(value["requirements"], f"{where}.requirements")):
         at = f"{where}.requirements[{index}]"
         _object(item, at, ("id", "level", "text", "verify"), ("setting", "value"))
-        clause_id = _matching(item["id"], CLAUSE_ID, f"{at}.id", "clause ID", 64)
+        clause_id = _matching(item["id"], CLAUSE_ID, f"{at}.id", "clause ID", 128)
         if clause_id in seen:
             _fail("invalid_schema", f"duplicate clause ID {clause_id}", at)
         seen.add(clause_id)
@@ -730,8 +739,8 @@ def parse_pattern(value: Any, where: str = "pattern") -> Pattern:
     approval = None
     if "approval" in value:
         _object(value["approval"], f"{where}.approval", ("by", "reference", "at"))
-        approval = Approval(_string(value["approval"]["by"], f"{where}.approval.by", limit=200),
-                            _string(value["approval"]["reference"], f"{where}.approval.reference", limit=500),
+        approval = Approval(_string(value["approval"]["by"], f"{where}.approval.by", limit=_FREE),
+                            _string(value["approval"]["reference"], f"{where}.approval.reference", limit=_FREE),
                             _timestamp(value["approval"]["at"], f"{where}.approval.at"))
     if status == "draft" and approval is not None:
         _fail("invalid_schema", "a draft carries no operative approval", f"{where}.approval")
@@ -745,7 +754,7 @@ def parse_pattern(value: Any, where: str = "pattern") -> Pattern:
     replaced_by = parse_exact_ref(value["replaced_by"], f"{where}.replaced_by") if "replaced_by" in value else None
     return Pattern(
         pattern_id, version, status, _string(value["summary"], f"{where}.summary", limit=240),
-        _string(value["owner"], f"{where}.owner", limit=200), _selector(value["applies_to"], f"{where}.applies_to"),
+        _string(value["owner"], f"{where}.owner", limit=_FREE), _selector(value["applies_to"], f"{where}.applies_to"),
         includes, tuple(sources), tuple(clauses), _string(value["guidance"], f"{where}.guidance", limit=4000, empty=True),
         tuple(assets), _date(value["review_after"], f"{where}.review_after") if "review_after" in value else None,
         approval, replaced_by, _extensions(value.get("extensions", {}), f"{where}.extensions"),
@@ -757,11 +766,11 @@ def _binding(value: Any, where: str) -> Binding:
     _object(value, where, ("id", "when", "use", "role", "approved_by", "approval_ref"))
     if value["role"] not in ("required", "default"):
         _fail("invalid_schema", "binding role must be required or default", f"{where}.role")
-    return Binding(_matching(value["id"], BINDING_ID, f"{where}.id", "binding ID"),
+    return Binding(_string(value["id"], f"{where}.id", limit=_FREE),
                    _selector(value["when"], f"{where}.when"),
                    _unique_refs(_array(value["use"], f"{where}.use", nonempty=True), f"{where}.use"),
-                   value["role"], _string(value["approved_by"], f"{where}.approved_by", limit=500),
-                   _string(value["approval_ref"], f"{where}.approval_ref", limit=500))
+                   value["role"], _string(value["approved_by"], f"{where}.approved_by", limit=_FREE),
+                   _string(value["approval_ref"], f"{where}.approval_ref", limit=_FREE))
 
 
 def _binding_list(values: Any, where: str) -> tuple[Binding, ...]:
@@ -828,14 +837,14 @@ def parse_catalog(value: Any, where: str = "catalog") -> Catalog:
             _fail("invalid_schema", "lifecycle events record deprecated or retired only", f"{at}.status")
         lifecycle.append(LifecycleEvent(
             item["id"], item["version"], item["sha256"], item["status"],
-            _string(item["reason"], f"{at}.reason", limit=500), _string(item["reference"], f"{at}.reference", limit=500),
+            _string(item["reason"], f"{at}.reason", limit=_FREE), _string(item["reference"], f"{at}.reference", limit=_FREE),
             _timestamp(item["at"], f"{at}.at"),
             parse_exact_ref(item["replaced_by"], f"{at}.replaced_by") if "replaced_by" in item else None))
     for key, entry in by_key.items():
-        events = sorted((item for item in lifecycle if (item.id, item.version) == key), key=lambda item: item.at)
+        events = sorted((item for item in lifecycle if (item.id, item.version) == key), key=lambda item: _instant(item.at))
         state = entry.status
         for previous, current in zip([None] + events[:-1], events):
-            if previous is not None and previous.at == current.at:
+            if previous is not None and _instant(previous.at) == _instant(current.at):
                 _fail("invalid_schema", f"conflicting lifecycle events share a timestamp for {key[0]}@{key[1]}", where)
             if current.status not in _TRANSITIONS.get(state, set()):
                 _fail("invalid_schema", f"invalid lifecycle transition {state} -> {current.status} for {key[0]}@{key[1]}", where)
@@ -846,8 +855,8 @@ def parse_catalog(value: Any, where: str = "catalog") -> Catalog:
         _object(item, at, ("id", "version", "sha256", "reason", "reference", "at"))
         event_target(item, at)
         revocations.append(Revocation(item["id"], item["version"], item["sha256"],
-                                      _string(item["reason"], f"{at}.reason", limit=500),
-                                      _string(item["reference"], f"{at}.reference", limit=500),
+                                      _string(item["reason"], f"{at}.reason", limit=_FREE),
+                                      _string(item["reference"], f"{at}.reference", limit=_FREE),
                                       _timestamp(item["at"], f"{at}.at")))
     if len({(item.id, item.version) for item in revocations}) != len(revocations):
         _fail("invalid_schema", "duplicate revocations", f"{where}.revocations")
@@ -874,7 +883,7 @@ def parse_context(value: Any, where: str = "context") -> Context:
     if set(evidence) != set(facts):
         _fail("invalid_schema", "every fact needs exactly one evidence reference", f"{where}.evidence")
     for key, reference in evidence.items():
-        _string(reference, f"{where}.evidence.{key}", limit=1000)
+        _string(reference, f"{where}.evidence.{key}", limit=_FREE)
     return Context(dict(facts), dict(evidence), content_digest(value))
 
 
@@ -886,8 +895,8 @@ def parse_refs(value: Any, where: str = "refs") -> tuple[InvocationRef, ...]:
         if item["role"] not in ("required", "default"):
             _fail("invalid_schema", "explicit reference role must be required or default", f"{at}.role")
         items.append(InvocationRef(parse_exact_ref(item["ref"], f"{at}.ref"), item["role"],
-                                   _string(item["approved_by"], f"{at}.approved_by", limit=500),
-                                   _string(item["approval_ref"], f"{at}.approval_ref", limit=500)))
+                                   _string(item["approved_by"], f"{at}.approved_by", limit=_FREE),
+                                   _string(item["approval_ref"], f"{at}.approval_ref", limit=_FREE)))
     if len({item.ref.key for item in items}) != len(items):
         _fail("invalid_schema", "duplicate explicit references", where)
     return tuple(items)
@@ -913,8 +922,8 @@ def parse_overrides(value: Any, where: str = "overrides") -> tuple[Override, ...
         if len(set(replaces)) != len(replaces):
             _fail("invalid_schema", "duplicate replaced clauses", f"{at}.replaces")
         items.append(Override(_matching(item["setting"], SETTING, f"{at}.setting", "setting"),
-                              _scalar(item["value"], f"{at}.value"), _string(item["reason"], f"{at}.reason", limit=500),
-                              _string(item["approval_ref"], f"{at}.approval_ref", limit=500), replaces))
+                              _scalar(item["value"], f"{at}.value"), _string(item["reason"], f"{at}.reason", limit=_FREE),
+                              _string(item["approval_ref"], f"{at}.approval_ref", limit=_FREE), replaces))
     if len({item.setting for item in items}) != len(items):
         _fail("invalid_schema", "duplicate override settings", f"{where}.items")
     return tuple(items)
@@ -931,8 +940,8 @@ def parse_exceptions(value: Any, where: str = "exceptions") -> tuple[ExceptionRe
         items.append(ExceptionRecord(
             _fq_clause(item["clause"], f"{at}.clause"),
             _matching(item["context_digest"], HEX64, f"{at}.context_digest", "context digest", 64),
-            _string(item["reason"], f"{at}.reason", limit=500), _string(item["approval_ref"], f"{at}.approval_ref", limit=500),
-            _string(item["approved_by"], f"{at}.approved_by", limit=500), _date(item["expires"], f"{at}.expires"),
+            _string(item["reason"], f"{at}.reason", limit=_FREE), _string(item["approval_ref"], f"{at}.approval_ref", limit=_FREE),
+            _string(item["approved_by"], f"{at}.approved_by", limit=_FREE), _date(item["expires"], f"{at}.expires"),
             _string(item["verification"], f"{at}.verification")))
     if len({item.clause for item in items}) != len(items):
         _fail("invalid_schema", "duplicate exceptions for one clause", f"{where}.items")
@@ -1235,8 +1244,6 @@ def _load_catalog(sources: SourceSet, locator: str, relative: str, scope: str, a
             sources.notes.append(_note("personal_bindings_inactive",
                                        f"{catalog.source_id} bindings are not auto-applied in v1"))
     allowed = {locator} | {f"pack:{item.pack}" for item in sources.roots.pack_context.ancestry}
-    if scope == "personal":
-        allowed = {"personal"}
     for include in sorted(catalog.includes, key=lambda item: (item.locator, item.path)):
         if include.locator not in allowed:
             _fail("include_locator_refused", f"{catalog.source_id} cannot include from {include.locator}")
@@ -1299,7 +1306,7 @@ def effective_status(loaded: LoadedCatalog, entry: CatalogEntry) -> tuple[str, O
             return "revoked", None
     events = sorted((item for item in catalog.lifecycle
                      if (item.id, item.version, item.sha256) == (entry.id, entry.version, entry.sha256)),
-                    key=lambda item: item.at)
+                    key=lambda item: _instant(item.at))
     if events:
         return events[-1].status, events[-1].replaced_by
     return entry.status, None
@@ -1370,7 +1377,7 @@ class _Resolution:
     def expand(self, ref: ExactRef, role: str, scope: str, reason: dict, explicit: bool,
                stack: tuple = (), blocking: Optional[bool] = None) -> Optional[list[_Node]]:
         """Return the node closure, or None when this subtree is blocked (already diagnosed)."""
-        if len(stack) >= LIMITS.include_depth:
+        if len(stack) > LIMITS.include_depth:
             _fail("resource_limit", f"pattern includes exceed depth {LIMITS.include_depth}")
         if ref.key in stack:
             _fail("include_cycle", f"pattern include cycle at {ref.text}")
@@ -1597,7 +1604,7 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
             preview_draft: bool = False, context_budget: int = LIMITS.context_budget,
             today: Optional[_dt.date] = None, reader: Optional[Reader] = None, explain: bool = False) -> dict:
     """Metadata-first resolution (spec section 5). Invalid input raises PatternError."""
-    if type(context_budget) is not int or not 1 <= context_budget <= LIMITS.context_budget_max:
+    if type(context_budget) is not int or context_budget < 1:
         _fail("invalid_budget", "context budget must be a positive integer within the resource limit")
     today = today or _dt.datetime.now(_dt.timezone.utc).date()
     reader = reader or Reader()
