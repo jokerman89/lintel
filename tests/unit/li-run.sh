@@ -42,6 +42,7 @@ for helper in lib/pack-resolver.sh lib/copilot-env.sh bin/_audit.sh; do
 done
 cat > "$TEST_TMP/step.sh" <<'STEP'
 printf 'SOURCE=%s\nREPO=%s\nCWD=%s\n' "$LINTEL_SOURCE_ROOT" "$LINTEL_REPO_ROOT" "$PWD"
+printf 'SKILLS=%s\nCHILD_SKILLS=%s\n' "${LINTEL_SKILLS_DIR:-}" "$(bash -c 'printf %s "${LINTEL_SKILLS_DIR:-}"')"
 [ -n "${LINTEL_PROFILE_REFERENCE:-}" ] && echo "PROFILE=ready"
 false
 echo "after-false"
@@ -59,6 +60,15 @@ contains "the step runs in the working repository" "$out" "CWD=$FIXTURE"
 contains "the profile context is prepared" "$out" "PROFILE=ready"
 contains "the step keeps default shell options (no errexit)" "$out" "after-false"
 if [ -e "$TEST_TMP/hostile-ran" ]; then fail "an inherited source root executed"; else pass "inherited source root ignored"; fi
+contains "LINTEL_SKILLS_DIR defaults to the runner's skills folder" "$out" $'\n'"SKILLS=$REPO_ROOT/skills"$'\n'
+contains "LINTEL_SKILLS_DIR is exported to child processes" "$out" $'\n'"CHILD_SKILLS=$REPO_ROOT/skills"$'\n'
+
+# 1b. An explicit LINTEL_SKILLS_DIR is operator configuration and wins over the default.
+rc=0
+out=$(cd "$FIXTURE" && LINTEL_SKILLS_DIR="$TEST_TMP/operator skills" bash "$RUN" "$TEST_TMP/step.sh" 2>&1) || rc=$?
+check "explicit LINTEL_SKILLS_DIR step exit status" 3 "$rc"
+contains "an explicit LINTEL_SKILLS_DIR wins" "$out" $'\n'"SKILLS=$TEST_TMP/operator skills"$'\n'
+contains "the explicit LINTEL_SKILLS_DIR is exported" "$out" $'\n'"CHILD_SKILLS=$TEST_TMP/operator skills"$'\n'
 
 # 2. stdin (-) defaults to the current repository and removes its buffer.
 rc=0

@@ -7,13 +7,15 @@
 #
 # Runs one Bash step from a native workflow with the Lintel environment prepared:
 # LINTEL_SOURCE_ROOT is this runner's own source tree, LINTEL_REPO_ROOT the working
-# repository, and lib/copilot-env.sh bootstraps the profile context. No set -e/-u or
+# repository, LINTEL_SKILLS_DIR (unless already set) the source's skills folder, and
+# lib/copilot-env.sh bootstraps the profile context. No set -e/-u or
 # pipefail here: the sourced step keeps default Bash semantics, like `bash <file>`.
 
 _li_run_usage() {
   echo 'Usage: bash li-run [--repo <dir>] <script>|-'
   echo 'Sources <script> (or stdin for -) in the working repository after preparing'
-  echo 'LINTEL_SOURCE_ROOT, LINTEL_REPO_ROOT and the profile context; exits with its status.'
+  echo 'LINTEL_SOURCE_ROOT, LINTEL_REPO_ROOT, LINTEL_SKILLS_DIR and the profile context;'
+  echo 'exits with its status.'
   echo 'Exit 2: usage error or missing script; 1: environment preparation failed.'
 }
 
@@ -64,6 +66,9 @@ export LINTEL_SOURCE_ROOT="$_li_run_source"
 source "$_li_run_source/lib/copilot-env.sh" || { _li_run_discard; exit 1; }
 lintel_copilot_env "${_li_run_repo:-${LINTEL_REPO_ROOT:-$PWD}}" || { _li_run_discard; exit 1; }
 cd "$LINTEL_REPO_ROOT" || { _li_run_discard; exit 1; }
+# Canonical steps name sibling skills as ${LINTEL_SKILLS_DIR:-skills}/<name>, which a working
+# repository cannot resolve alone. Default to this source's skills; explicit configuration wins.
+export LINTEL_SKILLS_DIR="${LINTEL_SKILLS_DIR:-$LINTEL_SOURCE_ROOT/skills}"
 
 # A subshell keeps the step's own exit or traps from skipping the stdin cleanup.
 ( . "$_li_run_step" )
