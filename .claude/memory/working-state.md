@@ -824,6 +824,21 @@ L-011 captured (structural estimates are ceilings).
 
 **Last touched:** 2026-05-29
 
+## Active - Adaptive review (2026-09-28)
+
+**Status:** local source freeze `f01294db` on `jokerman-microsoft-adaptive-review`;
+final independent SPEC/QUALITY PASS with zero open P1/P2/P3. The unchanged P05
+regression entry was interrupted after 53 passing cases and has no full-suite verdict.
+The two isolated implementation lanes have independent spec/quality acceptance.
+**What's pending:** see [handoff](../plans/adaptive-review/handoff.md) and
+[verification](../plans/adaptive-review/verification.md). Landing remains
+native1a -> patterns -> adaptive through the portfolio coordinator. No new
+version, private pack, native-host acceptance or release clearance is claimed.
+T12 remains open for the current-tree join, full hosted matrix (all 117 P05
+cases required), shared evidence and publication; local source work is complete.
+The optional evaluator reads imported records only; the small live toy pilot
+showed no detection improvement over its generic-review baseline.
+
 ---
 
 ## v3.5-close — Generate-pipeline COMPLETE

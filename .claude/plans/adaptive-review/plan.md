@@ -43,17 +43,17 @@ pack or read private documents for research.
 
 ## Task list
 
-- [ ] T1 Define and implement the six-axis consequence decision.
-- [ ] T2 Test depth floors, uncertainty and explicit escalation/refusal.
-- [ ] T3 Implement a lazy, non-clearing adapter over the exact pattern provider.
-- [ ] T4 Test provider absence, status propagation and no eager asset/network reads.
-- [ ] T5 Implement imported review/benchmark metric contracts and CLI.
-- [ ] T6 Verify denominators, provenance compatibility, partial runs and invalid data.
-- [ ] T7 Wire depth and mandatory question inventory into the existing packet path.
-- [ ] T8 Add bounded source-attributed security questions and calibration guardrails.
-- [ ] T9 Verify mandatory/optional/N/A and single/MARS assessment parity.
-- [ ] T10 Add compact workflow joins and on-demand operating/research references.
-- [ ] T11 Verify exact frozen-pattern compatibility and integration boundaries.
+- [x] T1 Define and implement the six-axis consequence decision.
+- [x] T2 Test depth floors, uncertainty and explicit escalation/refusal.
+- [x] T3 Implement a lazy, non-clearing adapter over the exact pattern provider.
+- [x] T4 Test provider absence, status propagation and no eager asset/network reads.
+- [x] T5 Implement imported review/benchmark metric contracts and CLI.
+- [x] T6 Verify denominators, provenance compatibility, partial runs and invalid data.
+- [x] T7 Wire depth and mandatory question inventory into the existing packet path.
+- [x] T8 Add bounded source-attributed security questions and calibration guardrails.
+- [x] T9 Verify mandatory/optional/N/A and single/MARS assessment parity.
+- [x] T10 Add compact workflow joins and on-demand operating/research references.
+- [x] T11 Verify exact frozen-pattern compatibility and integration boundaries.
 - [ ] T12 Complete independent review, delivery evidence and cold continuation.
 
 ## Per-task detail

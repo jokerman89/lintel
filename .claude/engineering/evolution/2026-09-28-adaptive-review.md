@@ -34,10 +34,14 @@ separate explicitly checked integration dependencies.
 
 ## Verification
 
-Planned: depth truth table, positive/negative coverage, single/MARS parity,
-offline metric invalid/partial cases, provider absence and exact frozen-provider
-join, reference sizes and focused existing shape checks. Actual outcomes belong
-to the initiative's final review, not this prospective assessment.
+Verified locally: depth truth table, positive/negative coverage, single/MARS parity,
+offline invalid/partial metrics, provider absence and an exact frozen-provider
+join, reference sizes and focused shape checks. See the
+[verification record](../../plans/adaptive-review/verification.md) and
+[independent final review](../../plans/adaptive-review/final-review.md).
+Source freeze `f01294db` has SPEC/QUALITY PASS, zero open findings. Current-main,
+native1a/patterns integration and the complete hosted P05 gate remain required;
+the local 117-case entry was interrupted after 53 observed passes, not completed.
 
 ## Rollback
 
