@@ -129,6 +129,15 @@ the leaves split as follows:
   - The lane resumes only on a supported host resolution, or on a materially restricted task defined by
     MasterCoordinator, who tracks the boundary.
   - This pause does not complete PR-1b, and no control is weakened.
+- **Candidate branch (MasterCoordinator decision B, 2026-09-29):**
+  - The PR-1a verification candidate is `jokerman-microsoft-copilot-native-1a`.
+  - The original branch keeps one commit with an unintended author identity and is never pushed.
+- **Advisory and deferred items (recorded, not blocking):**
+  - Two advisory Lows from the final P1 delta review: literal `&` and `;` in rewritten queries, and
+    a placeholder filter that also covers the query and fragment. Neither has an instance today.
+  - Host-neutral wording for `LINTEL_SKILLS_DIR` in the canonical design-dna skill; the native
+    preamble already states the Copilot meaning.
+  - The agent resource root (review note L8), which host events do not expose.
 
 ---
 
