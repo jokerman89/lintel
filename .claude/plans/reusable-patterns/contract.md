@@ -217,6 +217,48 @@ there are two additive optional parameters.
   `patterns.source`. The pack lane must not assume only `patterns.source` bindings can be active.
   This is an explicit repository decision recorded by the pinned include.
 
+## Revision R4 (2026-09-28, independent review of `f1918e12`: P2-R3-1, P3-R3-1..3)
+
+No names changed. Two optional parameters were added to `read_asset`, and digest values change.
+
+- **P2-R3-1** `verify_lock` compares the whole locked selection with a fresh resolution of the
+  locked inputs (context, invocation refs, overrides, exceptions and budget):
+  - the selected set, and per record `ref`, `role`, `scope`, `summary`, `reasons`, `preview`,
+    `clauses`, `assets` and `equivalent_refs`;
+  - `effective_status`, except that approved -> deprecated after locking only warns;
+  - canonical requirement records, including `text`, `verify` and `state`, so a must changed to
+    waived without its exception fails;
+  - settings, overrides and exceptions.
+
+  Only two differences verify with a warning (`default_baseline_changed`,
+  `default_setting_changed`): a default-role record that was added later (with its own clauses),
+  and a pin that was deprecated later. Everything else is a conflict that forces a re-plan:
+  - a record or clause the lock claims but resolution does not produce (`selection_changed`,
+    `requirement_changed`);
+  - a changed field (`selection_provenance_changed`, `requirement_changed`, `setting_changed`);
+  - a clause that is missing from the lock for a record the lock does contain.
+
+  Unchanged sources never bless a discrepancy. A verified lock's `selected[]` set, requirement
+  text, state and assets can therefore be relied on, as long as its inputs still resolve the
+  same way. Removing a default binding after locking is now a conflict (formerly a warning),
+  because a removed record is indistinguishable from a forged one.
+- **P3-R3-2**
+  - `parse_lock` requires `status == "ready"` exactly when records are selected, else `"empty"`.
+  - `context_budget` is part of `selection_digest`, for reports and locks alike.
+  - `build_lock(context_budget=...)` must equal the budget the report was resolved with, so a
+    changed budget can neither suppress rules nor be edited later.
+- **P3-R3-1** `read_asset(..., selection=<report>)` now also requires `context=` (and `refs=` when
+  the report was resolved with explicit refs). It recomputes the shared `selection_digest` and
+  refuses an edited report (`selection_not_usable`).
+  - A report selection is for **in-process use only**: the caller's own freshly resolved report.
+  - Anything persisted or passed between processes or lanes must be a lock, checked with
+    `verify_lock`.
+  - The digest is unkeyed. It detects edits relative to content, and re-resolution detects
+    resealed edits; neither authenticates an actor.
+- **P3-R3-3** Locks built before R4 (for example by R2 or R3 heads) fail with `invalid_lock`, and
+  the message says to regenerate. This is pre-release: re-run `resolve --lock` for any cached lock.
+  No lock file is tracked in the repository.
+
 ## Locks, verification and task maps (additive, 2.2.b/2.2.c)
 
 | Function | Signature | Result |

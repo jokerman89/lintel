@@ -1858,7 +1858,11 @@ class MilestoneReviewTests(unittest.TestCase):
         fx, report, lock = self._visual_lock()
         selected_ref = p.asset_refs(lock)[0]
         self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=lock), b"# guide\n")
-        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=report), b"# guide\n")
+        self.assertEqual(p.read_asset(fx.roots(), selected_ref, selection=report, context=p.parse_context(ctx())),
+                         b"# guide\n")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), selected_ref, selection=report)
+        self.assertEqual(caught.exception.code, "selection_not_usable", "a report needs its in-process context")
         unselected = json.loads((fx.repo_patterns / "example.unselected" / "1.0.0" / "pattern.json")
                                 .read_text(encoding="utf-8"))
         other = dict(selected_ref, pattern=ref("repo.main", unselected))
@@ -1942,6 +1946,157 @@ class MilestoneReviewTests(unittest.TestCase):
         report = p.approve(fx.roots(), path, version="1.0.0", approval_value=APPROVAL,
                            expected_digest=p.content_digest(parent), expected_catalog_digest=p.content_digest(catalog()))
         self.assertTrue(report["written"])
+
+
+class ResealedLockTests(unittest.TestCase):
+    """Regressions for independent review of f1918e12 (P2-R3-1, P3-R3-1..3): resealed forgeries."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        guide = b"# guide\n"
+        asset = [{"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(guide).hexdigest()}]
+        self.rules = make_pattern("example.rules", requirements=[clause("MUST-1", "must", "ui.theme", "dark"),
+                                                                 clause("DEF-1", "default", "ui.density", "compact")],
+                                  assets=asset)
+        self.other = make_pattern("example.other", applies_to={"artifact": ["api"]}, assets=asset)
+        self.soft = make_pattern("example.soft", requirements=[clause("S-1", "default", "ui.font", "serif")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft])
+        for pattern in ("example.rules", "example.other"):
+            (self.fx.repo_patterns / pattern / "1.0.0" / "guide.md").write_bytes(guide)
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
+        self.context = p.parse_context(ctx(artifact="dashboard"))
+        report, _ = self.fx.resolve(ctx(artifact="dashboard"))
+        self.report = report
+        self.lock = p.build_lock(report, self.context)
+
+    def verify(self, lock):
+        return p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
+
+    def reseal(self, change):
+        forged = copy.deepcopy(self.lock)
+        change(forged)
+        forged["asset_pins"] = p.asset_refs(forged)
+        forged["status"] = "ready" if forged["selected"] else "empty"
+        forged["selection_digest"] = p.selection_digest(forged)
+        return forged
+
+    def assert_rejected(self, forged, *codes_expected):
+        try:
+            report = self.verify(forged)
+        except p.PatternError as error:
+            self.assertEqual(error.status, "invalid")
+            return
+        self.assertEqual(report["status"], "conflict", report["diagnostics"])
+        self.assertTrue(set(codes_expected) & set(codes(report, "error")), codes(report, "error"))
+
+    def test_genuine_lock_verifies(self):
+        self.assertEqual(self.verify(self.lock)["status"], "ok")
+
+    def test_added_selected_record_is_a_conflict_and_cannot_unlock_assets(self):
+        api_report, _ = self.fx.resolve(ctx(artifact="api"), refs=p.parse_refs([{"ref": ref("repo.main", self.other),
+            "role": "default", "approved_by": "me", "approval_ref": "task"}]))
+        grafted = api_report["selected"][0]
+        forged = self.reseal(lambda value: value["selected"].append(grafted))
+        self.assert_rejected(forged, "selection_changed")
+        other_asset = next(item for item in p.asset_refs(forged) if item["pattern"]["id"] == "example.other")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), other_asset, selection=self.lock)
+        self.assertEqual(caught.exception.code, "asset_not_selected")
+
+    def test_removed_record_edited_text_state_and_status_are_rejected(self):
+        cases = {
+            "remove only record": (lambda v: (v["selected"].clear(), v["requirements"].clear(), v["settings"].clear()),
+                                   ("selection_changed", "requirement_changed", "mandatory_baseline_changed")),
+            "edit must text": (lambda v: next(i for i in v["requirements"] if i["clause"].endswith("MUST-1"))
+                               .update(text="weakened"), ("requirement_changed",)),
+            "must to waived": (lambda v: next(i for i in v["requirements"] if i["clause"].endswith("MUST-1"))
+                               .update(state="waived"), ("requirement_changed",)),
+            "edit verify": (lambda v: v["requirements"][0].update(verify="trust me"), ("requirement_changed",)),
+            "edit setting": (lambda v: v["settings"]["ui.theme"].update(value="light"), ("setting_changed",)),
+            "effective status": (lambda v: v["selected"][0].update(effective_status="deprecated"),
+                                 ("selection_provenance_changed",)),
+            "drop default clause": (lambda v: v["requirements"].remove(
+                next(i for i in v["requirements"] if i["clause"].endswith("DEF-1"))), ("requirement_changed",)),
+        }
+        for name, (change, expected) in cases.items():
+            with self.subTest(name=name):
+                self.assert_rejected(self.reseal(change), *expected)
+
+    def test_legitimate_later_changes_keep_their_documented_outcomes(self):
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]}),
+                               binding("soft", [ref("repo.main", self.soft)], role="default")])
+        report = self.verify(self.lock)
+        self.assertEqual(report["status"], "ok", "an added default binding only warns")
+        self.assertIn("default_baseline_changed", codes(report, "warning"))
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
+        entry = next(item for item in self.fx.publish(self.fx.repo_patterns, "repo.main",
+                                                      [self.rules, self.other, self.soft])["entries"]
+                     if item["id"] == "example.rules")
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, self.soft], lifecycle=[
+            {**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "deprecated", "reason": "r",
+             "reference": "ADR", "at": TS}])
+        report = self.verify(self.lock)
+        self.assertEqual(report["status"], "ok", "deprecation after locking warns, never conflicts")
+        self.assertIn("pinned_deprecated", codes(report, "warning"))
+
+    def test_waived_lock_and_empty_lock_still_verify(self):
+        exception = p.parse_exceptions({"schema_version": 1, "items": [{
+            "clause": "example.rules@1.0.0#MUST-1", "context_digest": self.context.digest, "reason": "pilot",
+            "approval_ref": "EX-1", "approved_by": "security", "expires": "2026-12-31", "verification": "manual"}]})
+        report, _ = self.fx.resolve(ctx(artifact="dashboard"), exceptions=exception)
+        lock = p.build_lock(report, self.context)
+        verified = p.verify_lock(self.fx.roots(), lock, self.context, today=TODAY)
+        self.assertEqual(verified["status"], "ok", "a genuine exception keeps its waiver")
+        empty_report, _ = self.fx.resolve(ctx(artifact="none"))
+        empty_context = p.parse_context(ctx(artifact="none"))
+        empty = p.build_lock(empty_report, empty_context)
+        self.assertEqual((empty["status"], p.verify_lock(self.fx.roots(), empty, empty_context, today=TODAY)["status"]),
+                         ("empty", "ok"))
+
+    def test_status_and_budget_are_bound(self):
+        wrong_status = copy.deepcopy(self.lock)
+        wrong_status["status"] = "empty"
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(wrong_status)
+        self.assertEqual(caught.exception.code, "invalid_lock")
+        for budget in (1_000_000, 50):
+            with self.subTest(budget=budget):
+                edited = copy.deepcopy(self.lock)
+                edited["context_budget"] = budget
+                with self.assertRaises(p.PatternError) as caught:
+                    p.parse_lock(edited)
+                self.assertIn("selection_digest", caught.exception.message)
+        with self.assertRaises(p.PatternError) as caught:
+            p.build_lock(self.report, self.context, context_budget=40000)
+        self.assertEqual(caught.exception.code, "lock_refused")
+
+    def test_edited_report_selection_is_refused_by_the_shared_digest(self):
+        asset = p.asset_refs(self.report)[0]
+        self.assertEqual(p.read_asset(self.fx.roots(), asset, selection=self.report, context=self.context), b"# guide\n")
+        edited = copy.deepcopy(self.report)
+        other = json.loads((self.fx.repo_patterns / "example.other" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        edited["selected"][0]["assets"] = [dict(asset_item) for asset_item in edited["selected"][0]["assets"]]
+        forged_ref = dict(asset, pattern=ref("repo.main", other))
+        edited["selected"].append(dict(copy.deepcopy(edited["selected"][0]), ref=ref("repo.main", other),
+                                       equivalent_refs=[ref("repo.main", other)]))
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), forged_ref, selection=edited, context=self.context)
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(self.fx.roots(), asset, selection=self.report, context=p.parse_context(ctx(artifact="x")))
+        self.assertEqual(caught.exception.code, "selection_not_usable")
+
+    def test_projection_still_works_on_a_verified_lock(self):
+        lock_path = self.fx.repo / "plan.lock.json"
+        p.write_lock(self.fx.roots(), lock_path, self.lock)
+        task_map = {"schema_version": 1, "selection_digest": self.lock["selection_digest"], "tasks": ["T1"],
+                    "packages": [{"id": "P1", "tasks": ["T1"]}],
+                    "clauses": [{"clause": "example.rules@1.0.0#MUST-1", "tasks": ["T1"]},
+                                {"clause": "example.rules@1.0.0#DEF-1", "tasks": ["T1"]}]}
+        p.map_lock(self.fx.roots(), lock_path, task_map, expected_lock_digest=p.content_digest(self.lock), write=True)
+        mapped = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(self.verify(mapped)["status"], "ok")
+        self.assertEqual(len(p.project_package(mapped, task_map, "P1")["clauses"]), 2)
 
 
 if __name__ == "__main__":

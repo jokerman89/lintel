@@ -1963,7 +1963,7 @@ def _selection_material(lock: Mapping[str, Any]) -> dict:
             "selected": lock["selected"],
             "requirements": lock["requirements"], "settings": lock["settings"],
             "overrides": lock["overrides"], "exceptions": lock["exceptions"],
-            "invocation_refs": lock["invocation_refs"]}
+            "invocation_refs": lock["invocation_refs"], "context_budget": lock["context_budget"]}
 
 
 def selection_digest(lock: Mapping[str, Any]) -> str:
@@ -1985,7 +1985,8 @@ def _lock_material(report: Mapping[str, Any], context: Context, refs: Sequence[I
     return {"context": _context_json(context), "source_snapshots": _snapshots(report),
             "selected": report["selected"], "requirements": report["requirements"], "settings": report["settings"],
             "overrides": report["overrides"], "exceptions": report["exceptions"],
-            "invocation_refs": [_invocation_json(item) for item in refs]}
+            "invocation_refs": [_invocation_json(item) for item in refs],
+            "context_budget": report["metrics"]["context_budget"]}
 
 
 def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[InvocationRef] = (),
@@ -1998,6 +1999,8 @@ def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[In
         _fail("lock_refused", "a draft preview is never locked", status="unavailable")
     if report.get("context_digest") != context.digest:
         _fail("lock_refused", "the report was resolved for a different context")
+    if report.get("metrics", {}).get("context_budget") != context_budget:
+        _fail("lock_refused", "the lock's context budget must be the one the report was resolved with")
     now = now or _dt.datetime.now(_dt.timezone.utc)
     lock = {key: copy_json(report[key]) for key in REPORT_KEYS + ("limits",)}
     lock.update(
@@ -2045,6 +2048,8 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
     _schema_version(value, where)
     if value["status"] not in ("ready", "empty"):
         _fail("invalid_lock", "a lock records only a ready or empty resolution", where)
+    if value["status"] != ("ready" if _array(value["selected"], f"{where}.selected") else "empty"):
+        _fail("invalid_lock", "status must be ready exactly when patterns are selected", where)
     context = parse_context(value["context"], f"{where}.context")
     if context.digest != value["context_digest"]:
         _fail("invalid_lock", "context_digest does not match the stored context", where)
@@ -2087,7 +2092,8 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
     if type(value["context_budget"]) is not int or value["context_budget"] < 1:
         _fail("invalid_lock", "context_budget must be a positive integer", where)
     if value["selection_digest"] != selection_digest(value):
-        _fail("invalid_lock", "selection_digest does not match the lock content (edited or corrupted)", where)
+        _fail("invalid_lock", "selection_digest does not match the lock content: it was edited or corrupted, or was "
+              "produced before contract revision R4 (pre-release); regenerate the lock with resolve --lock", where)
     if value["requirement_tasks"] is not None:
         mapping = dict(value["requirement_tasks"])
         recorded = mapping.pop("mapping_digest", None)
@@ -2167,25 +2173,7 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
                 problem("conflict", "mandatory_baseline_changed",
                         "current bindings change the mandatory clauses for this context; re-plan with a new lock",
                         added=baseline["added"], removed=baseline["removed"])
-            now = {(entry["ref"]["id"], entry["ref"]["version"], entry["ref"]["sha256"]): entry
-                   for entry in current["selected"]}
-            for entry in lock["selected"]:
-                key = (entry["ref"]["id"], entry["ref"]["version"], entry["ref"]["sha256"])
-                fresh = now.get(key)
-                if fresh is None:
-                    continue
-                changed = sorted(field for field in ("ref", "role", "scope", "reasons", "equivalent_refs")
-                                 if canonical_json(fresh[field]) != canonical_json(entry[field]))
-                if changed:
-                    problem("conflict", "selection_provenance_changed",
-                            f"{key[0]}@{key[1]} is now selected with different {', '.join(changed)}; re-plan",
-                            ref=entry["ref"], fields=changed)
-            locked_defaults = {item["clause"] for item in lock["requirements"] if item["state"] == "default"}
-            current_defaults = {item["clause"] for item in current["requirements"] if item["state"] == "default"}
-            if locked_defaults != current_defaults:
-                diagnostics.append(_note("default_baseline_changed", "selected defaults changed since locking",
-                                         "warning", added=sorted(current_defaults - locked_defaults),
-                                         removed=sorted(locked_defaults - current_defaults)))
+            _compare_selection(lock, current, problem, diagnostics)
     statuses = [item["status"] for item in diagnostics if item.get("severity") == "error" and item.get("status")]
     status = _worst(statuses, "ok")
     mapping = lock["requirement_tasks"]
@@ -2194,6 +2182,84 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
             "context_digest": context.digest, "checked": checked, "baseline": baseline,
             "historical_sources": lock["source_snapshots"], "diagnostics": diagnostics,
             "metrics": reader.metrics()}
+
+
+
+def _identity_of(record: Mapping[str, Any]) -> tuple[str, str, str]:
+    return (record["ref"]["id"], record["ref"]["version"], record["ref"]["sha256"])
+
+
+_SELECTED_COMPARED = ("ref", "role", "scope", "summary", "reasons", "preview", "clauses", "assets", "equivalent_refs")
+
+
+def _compare_selection(lock: Mapping[str, Any], current: Mapping[str, Any], problem, diagnostics: list) -> None:
+    """Full comparison of the locked selection with a fresh resolution of the same inputs (P2-R3-1).
+
+    The only differences that verify with a warning are those a later legitimate change produces
+    for a lock that is otherwise intact: additional default-role records or non-mandatory clauses
+    (a newly added default binding), and a pin that became deprecated. Everything else, including
+    any record or clause the lock claims but the resolution does not produce, is a conflict that
+    forces a re-plan. Unchanged sources never bless a discrepancy.
+    """
+    locked = {_identity_of(item): item for item in lock["selected"]}
+    fresh = {_identity_of(item): item for item in current["selected"]}
+    for key in sorted(locked.keys() - fresh.keys()):
+        problem("conflict", "selection_changed", f"{key[0]}@{key[1]} is in the lock but not in the current "
+                "selection; re-plan with a new lock", ref=locked[key]["ref"])
+    added_defaults = []
+    for key in sorted(fresh.keys() - locked.keys()):
+        if fresh[key]["role"] == "required":
+            problem("conflict", "selection_changed", f"{key[0]}@{key[1]} is now required but absent from the lock; "
+                    "re-plan with a new lock", ref=fresh[key]["ref"])
+        else:
+            added_defaults.append(fresh[key]["ref"])
+    for key in sorted(locked.keys() & fresh.keys()):
+        old, new = locked[key], fresh[key]
+        changed = sorted(field for field in _SELECTED_COMPARED if canonical_json(old[field]) != canonical_json(new[field]))
+        if old["effective_status"] != new["effective_status"] and not (
+                old["effective_status"] == "approved" and new["effective_status"] == "deprecated"):
+            changed.append("effective_status")
+        if changed:
+            problem("conflict", "selection_provenance_changed",
+                    f"{key[0]}@{key[1]} is now selected with different {', '.join(changed)}; re-plan",
+                    ref=old["ref"], fields=changed)
+    old_clauses = {item["clause"]: item for item in lock["requirements"]}
+    new_clauses = {item["clause"]: item for item in current["requirements"]}
+    for clause in sorted(old_clauses.keys() - new_clauses.keys()):
+        problem("conflict", "requirement_changed", f"{clause} is in the lock but not in the current resolution",
+                clause=clause)
+    extra = []
+    added_keys = {(item["id"], item["version"], item["sha256"]) for item in added_defaults}
+    for clause in sorted(new_clauses.keys() - old_clauses.keys()):
+        record = new_clauses[clause]
+        from_added = (record["pattern"]["id"], record["pattern"]["version"], record["pattern"]["sha256"]) in added_keys
+        if (record["level"] == "must" and record["state"] in _EFFECTIVE_MANDATORY) or not from_added:
+            problem("conflict", "requirement_changed", f"{clause} is not in the lock", clause=clause)
+        else:
+            extra.append(clause)
+    for clause in sorted(old_clauses.keys() & new_clauses.keys()):
+        if canonical_json(old_clauses[clause]) != canonical_json(new_clauses[clause]):
+            fields = sorted(key for key in set(old_clauses[clause]) | set(new_clauses[clause])
+                            if canonical_json(old_clauses[clause].get(key)) != canonical_json(new_clauses[clause].get(key)))
+            problem("conflict", "requirement_changed", f"{clause} differs from the current resolution ({', '.join(fields)})",
+                    clause=clause, fields=fields)
+    explained = {name for name, value in current["settings"].items() if set(value.get("clauses", [])) & set(extra)}
+    for name in sorted(set(lock["settings"]) | set(current["settings"])):
+        if canonical_json(lock["settings"].get(name)) != canonical_json(current["settings"].get(name)):
+            if name in explained and name in current["settings"] and \
+                    current["settings"][name].get("state") != "mandatory":
+                diagnostics.append(_note("default_setting_changed", f"{name} changed because of added defaults",
+                                         "warning", setting=name))
+            else:
+                problem("conflict", "setting_changed", f"setting {name} differs from the current resolution",
+                        setting=name)
+    for field in ("overrides", "exceptions"):
+        if canonical_json(lock[field]) != canonical_json(current[field]):
+            problem("conflict", "selection_changed", f"locked {field} differ from the current resolution")
+    if added_defaults or extra:
+        diagnostics.append(_note("default_baseline_changed", "defaults were added since locking; the lock keeps "
+                                 "its own defaults until it is re-planned", "warning",
+                                 added_refs=added_defaults, added_clauses=extra))
 
 
 # ---------------------------------------------------------------- task mapping (spec 4.6, card 2.2.c)
@@ -2614,7 +2680,8 @@ def asset_refs(report: Mapping[str, Any], *, kind: Optional[str] = None, phase: 
 
 def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[str] = None,
                domain: Optional[str] = None, reader: Optional[Reader] = None,
-               selection: Optional[Mapping[str, Any]] = None) -> bytes:
+               selection: Optional[Mapping[str, Any]] = None, context: Optional[Context] = None,
+               refs: Sequence[InvocationRef] = ()) -> bytes:
     """Read one declared asset: contained, listed by its verified pattern and digest-checked before use.
 
     Workflow consumers pass `selection` (a lock, or a ready/empty report) so only assets of selected
@@ -2630,6 +2697,11 @@ def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[st
         elif selection.get("status") not in ("ready", "empty") or selection.get("selection_digest") is None:
             _fail("selection_not_usable", "asset selection requires a lock or a ready/empty report with a "
                   "selection_digest")
+        elif context is None or selection.get("context_digest") != context.digest or \
+                selection_digest(_lock_material(selection, context, refs)) != selection["selection_digest"]:
+            _fail("selection_not_usable", "a report selection is accepted only in-process with the context and "
+                  "refs it was resolved from, and only when its selection_digest still matches its content; "
+                  "use a lock for anything persisted or passed between processes")
         if dict(asset_ref) not in asset_refs(selection):
             _fail("asset_not_selected", f"{asset_ref.get('path')} is not an asset of the supplied selection",
                   status="unavailable")

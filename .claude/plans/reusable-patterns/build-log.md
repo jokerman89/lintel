@@ -348,6 +348,53 @@ Results:
   `catalog-regenerates-clean` shape test reports drift for the new `pattern` skill; this is
   pending INT 6.1.b. `frontmatter-lint-all` and `skill-descriptions-trigger` pass.
 
+## Review revision R4 (re-review of `f1918e12`: SPEC PASS, QUALITY PASS with 1 P2 and 3 P3)
+
+Reviewer c3015de8 report `review-r3-f1918e12.md`, read only. An unmodified copy of `repro-r3.py`
+(SHA256 `68CDD742…6ACD`) was run against the fixed tree, using a discriminator module from
+`git show ae9d6df7:lib/patterns.py` in the synthetic TEMP (removed afterwards). Output is kept in
+this session's artifacts.
+
+| Repro | Before (f1918e12, per report) | After |
+| --- | --- | --- |
+| R3 add an unselected record, resealed | verify `ok`; `read_asset(forged lock)` returned bytes | `conflict` `selection_changed` (the forged lock still carries its own asset ref, so consumers must verify first) |
+| R3b remove the only selected record, resealed | verify `ok` | `invalid_lock` (status/selection mismatch) |
+| R4 edit must `text`, resealed | `ok` | `conflict` `requirement_changed` |
+| R4b must state mandatory -> waived | `ok` | `conflict` `requirement_changed` |
+| R2 `effective_status` edited | `ok` | `conflict` `selection_provenance_changed` |
+| R6b edited report, stale digest | bytes returned | `selection_not_usable` |
+| R10 `status` empty / `context_budget` edited | parse ok | `invalid_lock` |
+| R9b ae9d6df7-built lock | `invalid_lock` (misleading message) | `invalid_lock`, and the message says to regenerate |
+| R0, R7, R8 and R9 known-good paths | as reported | unchanged: `ok`, `pinned_revoked`, `dependency_not_approved`/`write_locked`, empty lock `ok` |
+
+R6 `selection=report` without `context` now reports `selection_not_usable` by design, since
+report selections are in-process only.
+
+New `ResealedLockTests` (8 cases) cover:
+
+- a genuine lock;
+- a grafted record, with `read_asset(selection=genuine)` still refusing its asset;
+- seven resealed edits: record removed, must text, must -> waived, verify, setting,
+  effective_status, dropped default clause;
+- legitimate later changes that still verify: an added default binding (warning), and a
+  deprecation (warning);
+- a genuine waived lock and an empty lock both `ok`;
+- status and budget binding;
+- an edited report and a wrong-context report refused;
+- map/verify/project on a verified lock.
+
+`python -I -B tests\unit\patterns.py` -> exit 0, 78 tests OK.
+Mutation probe (run once, source restored byte-identical): each of seven reverted R4
+guarantees fails at least one `ResealedLockTests` case. The reverted guarantees were:
+lock-only records, requirement records, extra clauses, the status check, the budget
+digest, report recomputation and settings.
+
+Coordinator metadata (same session, coordinator role): PACK `write_scope` is now the lane's
+confirmed literal inventory. `lib/profile_context.py` is removed (conditional, unused), and the
+guessed `pattern-roots.*` entries are replaced by `pattern-launcher-roots.*` and
+`pattern_pack_harness.py`. The plan records 48 original IDs and 50 executable leaves.
+`li-swarm.py validate` reports ok, and the map validator exits 0.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
