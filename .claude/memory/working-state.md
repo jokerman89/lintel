@@ -10,24 +10,29 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Reusable patterns (2026-09-28)
 
-**Status:** INCOMPLETE and BLOCKED on branch `jokerman-microsoft-patterns-core-integration`.
-- Product bytes are frozen at `fdb9f27b`. Record heads are `ebd087ec` (ledger corrections) and
-  `9e56dc79` (swarm records).
-- Linux strict full suite: 169/169 PASS on `fdb9f27b`. Windows: no valid verdict; the parallel
-  runs were not CI-equivalent (inherited environment and load).
-- RN-14 (owner decision `9854860c`) restores the original scope: 4.3.c and 5.2.a each await
-  their V18 review. PDF/Word pages are artifact QA and the six per-consumer cells are disclosed
-  deferrals. A genuine neutral P07 reference now exists; verify it is current before use.
+**Status:** local source candidate FROZEN, not released, on branch
+`jokerman-microsoft-patterns-core-integration`.
+- Source head `99de0741`, reviewed at `d4acf3e7` by reviewer 24bf5df0: SPEC MET for A1-A7,
+  QUALITY acceptable.
+- 4.3.c and 5.2.a are ticked; 6.2.a-c are open.
+- Linux: strict full suite 169/169 on `fdb9f27b`, and targeted 29+36 on `d4acf3e7`.
+- Windows: no valid strict verdict. The local focused reds are recorded, and hosted CI is
+  required before main.
+- PDF/Word pages are artifact QA, and the six per-consumer cells are disclosed deferrals.
+- A genuine neutral P07 reference exists; verify it is current before use.
 - No P05 review, QA or release record exists. Not pushed (403).
 - The CORE owner created `C:\lp` against L-050. It was stopped and preserved untouched pending
   the operator's recovery decision.
 
 **What's pending:** see [handoff](../plans/reusable-patterns/handoff.md):
-- the operator's recovery decision;
-- an authorized Windows rerun;
-- WF host observations;
-- final independent review/QA/corroboration;
-- GitHub write access.
+- the native 1a SHA grant and current-main merge;
+- `ef48d7a0`;
+- regeneration;
+- a fresh final P05 context;
+- the aggregate review;
+- hosted Windows CI;
+- Master-owned publication;
+- the `C:\lp` decision.
 
 ## Active - Supported clients narrowed to four families (2026-09-25)
 

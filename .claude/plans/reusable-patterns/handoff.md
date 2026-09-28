@@ -1,7 +1,31 @@
 # Reusable patterns: cold handoff (2026-09-28)
 
-**Status: INCOMPLETE and BLOCKED.** No release clearance, native ADR-0028 v2 review, QA,
-corroboration or SHIP result exists. Nothing is pushed and no pull request exists.
+**Status: local source candidate FROZEN pending the remaining gates; not released.** No release
+clearance, native ADR-0028 v2 review, QA, corroboration or SHIP result exists. Nothing is pushed
+and no pull request exists.
+
+## Current frozen candidate (2026-09-28)
+
+- Source head: `99de0741a2d338cec0a088fd35d6b5357ccfda7d`. Its runtime and test bytes are the
+  ones reviewed at `d4acf3e7`.
+- Reviewed head: `d4acf3e7e4557f7abd95611cff3e73c1a043dc17`.
+- Reviewer 24bf5df0's `d1-m1-d4acf3e7.md` (sha256 `ecae2489…f0f1`, JSON `9b316e3b…1dd5`) found:
+  - SPEC MET for A1-A7;
+  - QUALITY acceptable, with no Medium or High;
+  - D-1, M-1, L-1 to L-5 and I-2 closed.
+- Parent Linux at `d4acf3e7`: design-contract 29/29 and document-pipeline-binding 36/36
+  (`posix-d4acf3e7-d1-compound.log`, sha256 `f0308154…538f`).
+- The closure commit after `d4acf3e7` is metadata only. It has no product, code or test change,
+  and ticks 4.3.c and 5.2.a. It also appends the RN-16 L-6 clarification and refreshes this
+  handoff and the working state.
+- Open leaves: 6.2.a, 6.2.b and 6.2.c only.
+- Non-blocking recorded limits:
+  - I-4: the final `verify_lock` recheck is not isolated by a test.
+  - I-5: the CLI edited-lock case asserts only exit code and empty stdout.
+  - I-6: document-only stage checks are prose.
+  - Standalone P05 is repository-only.
+  - A spec that omits both `pattern_context` and the lock is undetectable by the loader.
+
 
 ## Heads and byte identity
 
@@ -97,23 +121,25 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
 ## Blockers
 
 1. **`C:\lp`** stays untouched. No recovery or cleanup decision has been made.
-2. **Windows strict suite** has no valid verdict. The master authorized bounded focused reruns
-   under `C:\Users\jokerman\lm9854`:
+2. **Windows strict suite** has no valid verdict (6.2.a). Full hosted Windows CI is required
+   before main. The master authorized bounded focused reruns under `C:\Users\jokerman\lm9854`,
+   with these recorded results on `fdb9f27b`:
+   - `cycle-footer` rc 1 (5 s hang guard).
+   - `frontend-design-surface-hook` rc 1 (3471 ms).
+   - `managed-transaction` rc 0.
+   - `review-evidence` interrupted, 57 ok and 0 fail, not a verdict.
+   - The single main `49f2d152` baseline `domain-installed-consumers` run passed with rc 0
+     (8 methods in 167 s). Attribution of the feature-head timeout stays open.
+
+   Details:
    - The launcher starts the parent process from a positive allowlist (`run-clean-parent.ps1`).
    - `domain-installed-consumers.sh --work-dir C:/Users/jokerman/lm9854/d`: rc 1. The path budget
      held (fixture 227, kit 128). The installed worker hit the test's own 240 s timeout after 5 of
      8 methods passed, on a host at 87-94% CPU from other work. It stays red; no retry and no
      longer timeout.
-   - The other focused files ran one at a time. Their logs are
-     `files\final-suite\lm-*.log`, reported separately.
-   - One authorized baseline attribution run on main `49f2d152` follows. A baseline timeout would
-     be a counterexample, not a feature PASS.
-3. **WF acceptance, restored to the original scope by RN-14** (owner decision `9854860c`):
-   - 4.3.c needs its V18 source/record review. It is not yet performed; reviewer 24 is to review
-     at the RN-14 head.
-   - 5.2.a needs its V18 mapped-case review, including a bounded source review of the
-     `generate-web --mode mockup` route. Not yet performed.
-   - These stay separate and are not feature gates:
+   - The other focused files ran one at a time. Their logs are `files\final-suite\lm-*.log`.
+3. **WF acceptance** (RN-14, RN-15, RN-16) is now closed at source/helper level, and 4.3.c and
+   5.2.a are ticked. These remain separate and are not feature gates:
      - artifact QA: produced PDF text/pages (RN-05) and Word rendered pages stay unverified, and
        the C-PDF provider failure is history;
      - disclosed deferrals: the six per-consumer model/render/host cells stay unobserved.
@@ -122,6 +148,8 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
    `_default` 1.0.0, bound to this worktree at `64338b6c`. Verify it is current before use, and do
    not bootstrap a second one. Swarm shared lanes still block on missing P05 review, QA and
    corroboration.
+   - The actor records bound at `ebd087ec` stay verbatim history. Later plan annotations changed
+     lane acceptance, and those records are not rebound.
 5. **Final integrated REVIEW and SHIP** stay blocked by 1-4. At most an explicitly labelled
    non-clearing inspection or status record is allowed.
 6. **GitHub write access** for the feature PR (403, unresolved; no credential changes).
@@ -136,5 +164,14 @@ It holds fresh LF clones in `C:\lp\{pre,u1,u2,i1,i2,i3,i4,o}\r` (detached at `fd
     finding.
 - After an authorized final head exists, prepare fresh P05 contexts there. The reviewers author
   their own P05 JSON; the coordinator supplies corroboration only after actual review.
-- Keep 4.3.c and 5.2.a unticked until their actual V18 reviews exist, and 6.2.a-c until
-  genuinely observed.
+- The next steps are:
+  - the native 1a preparation grant (a concrete SHA, still unissued), then an ordinary merge
+    with current main;
+  - `ef48d7a0` (L-053);
+  - regenerating the managed outputs from source;
+  - a fresh final P05 context at that head. It selects the changed `references/mockup.md` and
+    the regenerated outputs, binds `plan.md` only through the work map, and freezes non-checkbox
+    wording first.
+- Then come the final independent aggregate review, hosted Windows CI and Master-owned
+  publication.
+- Keep 6.2.a-c unticked until genuinely observed.

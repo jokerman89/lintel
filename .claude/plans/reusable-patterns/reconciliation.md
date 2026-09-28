@@ -308,3 +308,23 @@ interpretation for A6; RN-15 and every earlier report are unchanged.
 - **Limits.** The loader cannot detect a spec that omits both `pattern_context` and the lock. That
   remains a workflow obligation (direct entry, `validate_visual` before render, REVIEW coverage).
   No P05/P07 schema, policy or release-authority change.
+
+**RN-16 clarification (2026-09-28, reviewer 24bf5df0 `d1-m1-d4acf3e7.md` L-6; RN-16 text above is
+unchanged).** This is the same settled D1 interpretation, stated precisely; it is not a scope
+waiver.
+
+**Mechanical currentness.** Fresh pattern currentness at use is enforced in code only in:
+
+- `design_contract.load_design` and its `renderer-args` and `review` CLI;
+- the mixed-design `pipeline_inputs` path;
+- core `li-pattern review` and `verify-lock`.
+
+**Workflow obligations.** Everything else is a host-followed workflow obligation stated in the
+consumer contract, not mechanical enforcement:
+
+- the SHIP, RESUME, REVIEW, generate-qa and document-stage checks;
+- the ordering of the pattern check before the shared latest-review and corroboration gates.
+
+Specifically, there is no code composite of `verify_lock` with `verify_review`, and no universal
+enforcement is claimed. No alternate release authority exists: pattern success never grants
+release, and P05 success never skips the pattern check.

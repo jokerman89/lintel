@@ -1234,12 +1234,53 @@ compound guarantee. The fix, `99de0741`, is limited to CORE and INT consumer plu
 
 5.2.a stays unticked until reviewer 24 re-checks the fixed head.
 
+## D1/M1 re-review and source freeze (reviewed head `d4acf3e7`)
+
+Reviewer 24bf5df0 re-checked exact `d4acf3e7` (`d1-m1-d4acf3e7.md`, sha256
+`ecae248974c10cb2e9611e529ef0cc8015a49fb47395a199bd94581def70f0f1`; JSON
+`9b316e3b0bd003974f5bc708098d6bd22f7be6efff52fc88c58af85b220a1dd5`):
+
+- SPEC MET for A1-A7; QUALITY acceptable, with no Medium or High.
+- D-1, M-1, L-1 to L-5 and I-2 are closed.
+- L-6 is addressed by the appended RN-16 clarification: mechanical currentness applies only in
+  `design_contract` / `pipeline_inputs` / `li-pattern`, and the other consumers carry it as a
+  workflow obligation.
+- The reviewer independently ran design-contract (29) and four pipeline selectors.
+
+Parent Linux at `d4acf3e7`: design-contract 29/29 and document-pipeline-binding 36/36, exit 0, no
+skips (`posix-d4acf3e7-d1-compound.log`, sha256
+`f03081549d9a4b1c2f025f88058f3bc31254e971766e34094b2d6b05737a538f`).
+
+**Delta.** The product delta `b484e2d7..99de0741` is 11 files, +322/-24. `d4acf3e7` adds the
+ledger only.
+
+**Closure batch.** This batch is metadata only. It changes the plan (4.3.c and 5.2.a ticked with
+annotations, 48 leaves kept), reconciliation (RN-16 clarification), this log, the handoff and the
+working state. It has zero product, code or test delta against `d4acf3e7`.
+
+**Recorded, non-blocking:**
+
+- I-4: the final recheck is not isolated by a test.
+- I-5: the CLI edited-lock case asserts only exit code and empty stdout.
+- I-6: document-only stage checks are prose.
+
+**Still open:**
+
+- 6.2.a: Windows strict verdict, and hosted CI before main;
+- 6.2.b: the final integrated P05 context, aggregate review, QA and corroboration;
+- 6.2.c;
+- native 1a and current main;
+- `ef48d7a0`;
+- publication.
+
+Artifact PDF/Word DONE stays blocked or unverified.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
 - 6.2.b: final independent aggregate review and actual ADR-0028 v2 context/QA/corroboration.
 - 6.2.c: final diff and baseline record.
-- 4.3.c and 5.2.a: V18 reviews (RN-14).
+- 4.3.c and 5.2.a: closed at source/helper level (reviewed at `d4acf3e7`).
 - GitHub write access for the feature PR (403, unresolved).
 - No release clearance is claimed.
 
