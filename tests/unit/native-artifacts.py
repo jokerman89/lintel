@@ -313,6 +313,16 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Native agent name collision"):
             adapter.native_files(self.source, {}, True, HOST)
 
+    def test_agent_description_limit_is_an_error(self):  # L5
+        self.agent("engineering", "Long", "\nReviews.\n", description="d" * 1024)
+        _, _, data = adapter.native_agent_file(self.source, "agents/engineering/Long.md", {}, True, None, HOST)
+        self.assertIn(b"\ndescription: " + b"d" * 1024 + b"\n", data)
+        self.agent("engineering", "Long", "\nReviews.\n", description="d" * 1025)
+        with self.assertRaisesRegex(ValueError, "Agent description exceeds 1024 characters: agents/engineering/Long.md"):
+            adapter.native_agent_file(self.source, "agents/engineering/Long.md", {}, True, None, HOST)
+        with self.assertRaisesRegex(ValueError, "Agent description exceeds 1024 characters"):
+            adapter.native_files(self.source, {}, True, HOST)
+
     def test_every_canonical_skill_and_agent_is_rendered_with_role_agents(self):  # 1.3.a, 1.3.b, 1.3.c
         self.skill("verify", "Verifies.", "\n# Verify\n")
         self.agent("engineering", "CodeReviewer", "\nReviews.\n")

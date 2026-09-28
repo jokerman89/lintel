@@ -875,7 +875,8 @@ def native_agent_file(source: Path, canonical: str, files: dict[str, bytes], loc
         raise ValueError(f"Canonical agent name must match its file name: {canonical}")
     values = {"name": name, "description": native_text(frontmatter_value(header, "description", canonical), host),
               "tools": frontmatter_value(header, "tools", canonical, required=False)}
-    scalar_value(values["description"], "description", canonical)
+    if len(scalar_value(values["description"], "description", canonical)) > host["description_limit"]:
+        raise ValueError(f"Agent description exceeds {host['description_limit']} characters: {canonical}")
     data = text_bytes(render_frontmatter(values, host["agent_frontmatter"]) + "\n"
                       + AGENT_PREAMBLE.format(canonical=canonical, root=root) + body)
     # The limit applies to everything Copilot reads after the frontmatter, preamble included.
