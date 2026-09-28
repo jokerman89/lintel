@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "review-eval-run",
+  "run_id": "synthetic-baseline-run",
+  "inventory_id": "synthetic-scorer-checks",
+  "inventory_sha256": "94d531edc5656d713df9ebcde50f2ed9a25d079009e4c3f370c8a8ec2c6cd15d",
+  "synthetic": true,
+  "source": {"reference": "hand-written synthetic observations for scorer tests; no reviewer or model was run"},
+  "identity": {
+    "method": "synthetic-method-a",
+    "model": "synthetic-model",
+    "tools": ["synthetic-read-only-tool"],
+    "environment": "synthetic-offline",
+    "budget": {"max_minutes": 30, "attempts": 1}
+  },
+  "observations": [
+    {"case_id": "SYN-PAGINATION", "status": "completed", "latency_ms": 1200, "input_tokens": 900, "output_tokens": 150,
+     "findings": [{"finding_id": "A-1", "matches": "SYN-D-OFF-BY-ONE"}, {"finding_id": "A-2", "matches": null}]},
+    {"case_id": "SYN-RETRY", "status": "completed", "latency_ms": 800, "input_tokens": 700, "output_tokens": 90,
+     "findings": [{"finding_id": "A-3", "matches": "SYN-D-UNBOUNDED-RETRY"}, {"finding_id": "A-4", "matches": "SYN-D-UNBOUNDED-RETRY"}]},
+    {"case_id": "SYN-TENANT", "status": "error", "reason": "synthetic reviewer error", "latency_ms": 30000},
+    {"case_id": "SYN-RENAME", "status": "completed", "findings": []}
+  ]
+}

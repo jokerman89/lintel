@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "benchmark-receipts",
+  "run_id": "synthetic-receipts-b",
+  "plan_id": "synthetic-cybergym-subset",
+  "plan_sha256": "9322b70cbee3358c14c2cc29bb0fb1e5f9db9b929c36940088e75b7cb3ebbe39",
+  "synthetic": true,
+  "verification_source": {"reference": "hand-written synthetic exit records in the upstream export shape; nothing was submitted or verified"},
+  "identity": {
+    "method": "synthetic-method-b",
+    "model": "synthetic-model",
+    "tools": ["synthetic-read-only-tool"],
+    "environment": "synthetic-offline",
+    "budget": {"max_minutes": 30}
+  },
+  "settings": {"network": "none", "dynamic_environment": false, "cross_task_memory": false},
+  "records": [
+    {"agent_id": "synthetic-agent-b", "task_id": "synthetic:task-1", "poc_id": "syn-b-1", "poc_hash": "c627ec3707e313e9a2b020e7fe602dce17be47e1f69159ed2f9d069e54e9bb94", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 0, "created_at": "2026-09-28T11:00:00Z", "updated_at": "2026-09-28T11:01:00Z"},
+    {"agent_id": "synthetic-agent-b", "task_id": "synthetic:task-2", "poc_id": "syn-b-2", "poc_hash": "0ae660cdc09af20220a0ac56f6bd891ae40fa7f1d5d9e143e9e0a9e2e7f1c978", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 0, "created_at": "2026-09-28T11:10:00Z", "updated_at": "2026-09-28T11:11:00Z"},
+    {"agent_id": "synthetic-agent-b", "task_id": "synthetic:task-3", "poc_id": "syn-b-3", "poc_hash": "534971fe42da7c0694526573ba8d7362d32ab16b3372ed3f20b87bdd7fc4192d", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": null, "created_at": "2026-09-28T11:20:00Z", "updated_at": "2026-09-28T11:21:00Z"},
+    {"agent_id": "synthetic-agent-b", "task_id": "synthetic:task-5", "poc_id": "syn-b-4", "poc_hash": "9deadc632bf6aac15718b8c878d363de3d98939c4838893ec27a537de0984f6d", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 0, "created_at": "2026-09-28T11:40:00Z", "updated_at": "2026-09-28T11:41:00Z"},
+    {"agent_id": "synthetic-agent-b", "task_id": "synthetic:task-6", "poc_id": "syn-b-5", "poc_hash": "bf8c27b6c308973bf2c228855a64b83b8000f964a820611fd1784adf49673ea6", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 300, "created_at": "2026-09-28T11:50:00Z", "updated_at": "2026-09-28T11:51:00Z"}
+  ],
+  "final_submissions": [
+    {"task_id": "synthetic:task-1", "poc_id": "syn-b-1"},
+    {"task_id": "synthetic:task-2", "poc_id": "syn-b-2"},
+    {"task_id": "synthetic:task-3", "poc_id": "syn-b-3"},
+    {"task_id": "synthetic:task-5", "poc_id": "syn-b-4"},
+    {"task_id": "synthetic:task-6", "poc_id": "syn-b-5"}
+  ]
+}

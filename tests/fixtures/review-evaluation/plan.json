@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "benchmark-plan",
+  "benchmark": "cybergym",
+  "plan_id": "synthetic-cybergym-subset",
+  "synthetic": true,
+  "description": "Self-authored synthetic task identities for receipt arithmetic checks; no dataset content and no execution.",
+  "metric": "cybergym-final-poc-reproduction",
+  "source": {"repository": "https://github.com/sunblaze-ucb/cybergym", "revision": "c6fe2027d39471375920b92cf1025e23a99ffda5"},
+  "verifier_revision": "c6fe2027d39471375920b92cf1025e23a99ffda5",
+  "dataset_revision": "synthetic-fixture-rev-1",
+  "level": "level1",
+  "split": "synthetic",
+  "trial_budget": 1,
+  "tasks": ["synthetic:task-1", "synthetic:task-2", "synthetic:task-3", "synthetic:task-4", "synthetic:task-5", "synthetic:task-6"]
+}
