@@ -132,6 +132,10 @@ SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
+> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
+>   `scripts/`, `references/`, `data/` or `${{LINTEL_SKILLS_DIR:-skills}}/…`) mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder. `bin/li-run` exports
+>   `LINTEL_SKILLS_DIR` for shell steps.
 """ + SHELL_STEPS + """> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
 >   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
 >   with that custom agent, WebFetch=`web_fetch`.
@@ -854,7 +858,7 @@ def native_skill_file(source: Path, name: str, files: dict[str, bytes], local: b
     if length > host["description_limit"]:
         raise ValueError(f"Skill description exceeds {host['description_limit']} characters: {canonical}")
     text = (render_frontmatter({"name": skill, "description": description}, host["skill_frontmatter"]) + "\n"
-            + SKILL_PREAMBLE.format(canonical=canonical, root=root) + body)
+            + SKILL_PREAMBLE.format(canonical=canonical, root=root, name=name) + body)
     return generated, text_bytes(text)
 
 

@@ -19,12 +19,16 @@ adapter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(adapter)
 HOST = adapter.NATIVE_HOSTS["copilot"]
 REPOSITORY = "https://github.com/jokerman89/lintel"
-# Independent oracle: the exact text of spec.md "Skill preamble".
+# Independent oracle: the exact text of spec.md "Skill preamble", with the skill-relative paths bullet.
 SPEC_SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`; edit the canonical file, then run
 > `li-copilot init`.
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
+> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
+>   `scripts/`, `references/`, `data/` or `${{LINTEL_SKILLS_DIR:-skills}}/…`) mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder. `bin/li-run` exports
+>   `LINTEL_SKILLS_DIR` for shell steps.
 > - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
 >   `System32\\bash.exe`). Save a snippet to a temporary `.sh` file and run
 >   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
@@ -77,6 +81,10 @@ memory: project
 def frontmatter_keys(data: bytes) -> list[str]:
     lines, _ = adapter.split_frontmatter(data.decode("utf-8"))
     return [line.split(":", 1)[0] for line in lines]
+
+
+def skill_preamble(root: str, name: str = "plan") -> str:
+    return SPEC_SKILL_PREAMBLE.format(canonical=f"skills/{name}/SKILL.md", root=root, name=name)
 
 
 class NativeArtifacts(unittest.TestCase):
@@ -170,14 +178,26 @@ class NativeArtifacts(unittest.TestCase):
         self.assertIn(b"\ndescription: Use before /li-generate-ppt runs.\n", data)
         self.assertNotIn(b"/li:", data)
 
-    def test_skill_preamble_has_the_exact_root_in_both_modes(self):  # 1.1.d
+    def test_skill_preamble_has_the_exact_root_in_both_modes(self):  # 1.1.d, skill-relative paths
         bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
         for local, root, files in ((True, "../../..", {}), (False, "../../lintel", bundled)):
             with self.subTest(local=local):
-                preamble = SPEC_SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md", root=root)
-                self.assertEqual(adapter.SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md", root=root), preamble)
+                preamble = skill_preamble(root)
+                self.assertEqual(adapter.SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md", root=root,
+                                                               name="plan"), preamble)
                 rendered = self.render("plan", local=local, files=files)
                 self.assertEqual(self.body(rendered, preamble), "\n# plan\n\nThe canonical plan method.\n")
+                # The skill-relative bullet follows Resource root and names this skill's canonical folder.
+                self.assertIn("never into the resource root.\n> - **Skill-relative paths:** paths relative to "
+                              "this skill's own folder (such as `<base>`,\n>   `scripts/`, `references/`, `data/` "
+                              "or `${LINTEL_SKILLS_DIR:-skills}/…`) mean\n"
+                              f">   `{root}/skills/plan/` in the Lintel source, not this generated folder. "
+                              "`bin/li-run` exports\n>   `LINTEL_SKILLS_DIR` for shell steps.\n> - **Shell steps:**",
+                              rendered)
+                define = self.render("define", local=local, files=files)
+                self.assertEqual(self.body(define, skill_preamble(root, "define")),
+                                 "\n# define\n\nThe canonical define method.\n")
+                self.assertIn(f"\n>   `{root}/skills/define/` in the Lintel source", define)
 
     def test_invocation_and_tool_transforms_change_nothing_else(self):  # 1.1.e
         original = ("Run /li:plan, then /li:<phase> or `/li:build --resume`.\r\n"
@@ -187,7 +207,7 @@ class NativeArtifacts(unittest.TestCase):
         self.assertEqual(adapter.native_text(original, HOST), expected)
         body = "\n# Plan\n\nUse /li:plan and /li:<phase>.\nAskUserQuestion: confirm?\n\n```bash\nlintel /li:review\n```\n"
         self.skill("plan", "Plans.", body)
-        preamble = SPEC_SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md", root="../../..")
+        preamble = skill_preamble("../../..")
         self.assertEqual(self.body(self.render("plan"), preamble), body.replace("/li:plan", "/li-plan")
                          .replace("/li:<phase>", "/li-<phase>").replace("AskUserQuestion", "ask_user")
                          .replace("/li:review", "/li-review"))
@@ -196,8 +216,7 @@ class NativeArtifacts(unittest.TestCase):
         self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md#start)\n"
                    "[Decision][x]\n[Section](#local) [Site](https://example.invalid/a.md)\n"
                    "`[Code](../define/references/intake.md)`\n\n[x]: ../../.claude/decisions/x.md\n")
-        body = self.body(self.render("plan"), SPEC_SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md",
-                                                                         root="../../.."))
+        body = self.body(self.render("plan"), skill_preamble("../../.."))
         self.assertEqual(body, "\n[Intake](../../../skills/define/references/intake.md#start)\n"
                          "[Decision][x]\n[Section](#local) [Site](https://example.invalid/a.md)\n"
                          "`[Code](../define/references/intake.md)`\n\n[x]: ../../../.claude/decisions/x.md\n")
@@ -213,8 +232,7 @@ class NativeArtifacts(unittest.TestCase):
                    "[Skills](../)\n")
         files = {".github/lintel/skills/define/references/intake.md": b"# Intake\n",
                  ".github/lintel/skills/plan/SKILL.md": b"canonical copy\n"}
-        body = self.body(self.render("plan", local=False, files=files),
-                         SPEC_SKILL_PREAMBLE.format(canonical="skills/plan/SKILL.md", root="../../lintel"))
+        body = self.body(self.render("plan", local=False, files=files), skill_preamble("../../lintel"))
         self.assertEqual(body, "\n[Intake](../../lintel/skills/define/references/intake.md)\n"
                          f"[Decision]({REPOSITORY}/blob/main/.claude/decisions/x.md#a)\n"
                          f"[Tests]({REPOSITORY}/tree/main/tests)\n[Skills](../../lintel/skills/)\n")
@@ -243,6 +261,7 @@ class NativeArtifacts(unittest.TestCase):
                                                   SPEC_SKILL_PREAMBLE.index("> - **Tools:**")]
                 self.assertIn(shell_steps, preamble)
                 _, body = adapter.split_frontmatter(text)
+                self.assertNotIn("Skill-relative paths", text)  # an agent has no skill folder
                 self.assertEqual(body, "\n" + preamble + "\nYou review.\nAsk with ask_user; run /li-review.\n"
                                  f"See [evidence]({link}).\n")
 
