@@ -826,6 +826,29 @@ Results:
   V14 run on the joined tree. The launcher-dependent parts of V09, V11 and V12 remain pending the
   WF join and INT.
 
+## R11 acceptance and PACK L-P1 follow-up join
+
+- **R11 accepted.** The same core reviewer checked `56d750d6`: SPEC and QUALITY PASS, with no
+  findings at any severity (report `review-core-r11-56d750d6.md`). This is milestone acceptance,
+  not native v2 clearance. WF is authorized to merge exactly `56d750d6` and adopt
+  `validate_selection_report`. When WF is joined, its dependency base moves to `56d750d6`, and
+  that will be recorded explicitly.
+- **PACK L-P1 approved.** Integration reviewer 24bf5df0 approved `5e2ba144` (report
+  `pack-5e2b-lp1-review.md`). It closes the production opaque-argument issue L-P1. A new low
+  finding, L-P2, concerns only the test harness; it stays PACK-owned and will come in a later
+  follow-up.
+- **Join.** `69f208c648579002bc3062998de60c367b38355d` is an ordinary `--no-ff` merge with
+  parents `56d750d6` (frozen R11 target) and `5e2ba144`. `5e2ba144`'s parent is `44c6b176`. Its
+  3 PACK files (+52/-9) are `bin/li-pattern`, which keeps mode 100755,
+  `tests/unit/pattern-launcher-roots.py` and `tests/unit/pattern_pack_harness.py`.
+  `li-swarm check-scope --task PACK --actor worker` over the complete list returns `ok: true`.
+- **Joined checks:**
+  - `bash -n bin/li-pattern` exits 0;
+  - `patterns.sh`: 135 OK;
+  - `pattern-pack-origins.sh`: 13 OK;
+  - `pattern-launcher-roots.sh`: 13 OK;
+  - `li-swarm validate`: ok.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
