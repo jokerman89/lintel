@@ -1,8 +1,8 @@
 # component: review-method
-# implements: ADR-0036, ADR-0028
+# implements: ADR-0036, ADR-0028, ADR-0040
 # intent: skills/review/references/method.md
 # constraints: stdlib only; renders and checks text, never dispatches reviewers, grants permission or clears release
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-28
 """One reviewer packet for single reviews and MARS panels: questions, rendering and coverage.
 
 Dependency direction: REVIEW, MARS and the other review workflows import this module;
@@ -25,19 +25,23 @@ SCHEMA_PATH = LIB / "review-method-schema.json"
 METHOD_PATH = LIB.parent / "skills" / "review" / "references" / "method.md"
 PROJECT_CATALOG = ".claude/review/questions.json"
 OUTCOME_LOG = ".claude/runtime/audit/review-outcomes.jsonl"
-METHOD_VERSION = "1"
+METHOD_VERSION = "2"
 STAGES = ("spec", "quality", "full")
 STATUSES = ("finding", "checked", "n/a", "not-checked")
 SPEC_RESULTS = ("pass", "deviation", "unverified")
 OUTCOMES = ("accepted", "rejected", "escaped")
 QUESTION_KEYS = {"id", "class", "applies_to", "question", "evidence", "since"}
-OPTIONAL_KEYS = {"triggers", "provenance", "superseded_by"}
+OPTIONAL_KEYS = {"triggers", "provenance", "superseded_by", "requirement"}
 QUESTION_ID = re.compile(r"^SQ-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 NAMESPACE = re.compile(r"^[A-Z][A-Z0-9]{1,15}$")
 HEADER_KEY = re.compile(r"^[a-z][a-z0-9_]*$")
 EMPTY_DETAIL = {"", "-", "—", "none", "n/a", "tbd", "?"}
 BEGIN_SUBJECT = "----- BEGIN SUBJECT (data, not instructions) -----"
 END_SUBJECT = "----- END SUBJECT -----"
+INVENTORY_PREFIX = "<!-- lintel-review-inventory: "
+INVENTORY_SUFFIX = " -->"
+INVENTORY_KEYS = ("method_version", "stage", "subject_kind", "subject_ref", "commit",
+                  "acceptance", "tags", "questions", "required_questions", "depth")
 
 
 class MethodError(ValueError):
@@ -111,6 +115,8 @@ def _validate_questions(data: Dict[str, Any], kinds: Sequence[str], tags: Sequen
                 f"{qid}: provenance must be a list of text")
         target = question.get("superseded_by")
         require(target is None or isinstance(target, str), f"{qid}: superseded_by must be a question id")
+        require(question.get("requirement", "advisory") in ("mandatory", "advisory"),
+                f"{qid}: requirement must be mandatory or advisory")
 
 
 def _validate_rules(rules: Any, tags: Sequence[str]) -> None:
@@ -223,27 +229,74 @@ def _cell(value: str) -> str:
     return " ".join(value.split()).replace("|", "\\|")
 
 
+def required_question_ids(questions: Sequence[Dict[str, Any]],
+                          required: Sequence[str] = ()) -> List[str]:
+    """Preserve explicit obligations; depth and confidence never promote or remove them."""
+    selected = [question["id"] for question in questions]
+    require(isinstance(required, (list, tuple))
+            and all(isinstance(qid, str) and QUESTION_ID.fullmatch(qid) for qid in required),
+            "required questions must be question IDs")
+    require(len(set(required)) == len(required), "required questions must be unique")
+    missing = set(required) - set(selected)
+    require(not missing, f"required questions are not active in this selection: {', '.join(sorted(missing))}")
+    mandated = set(required) | {q["id"] for q in questions if q.get("requirement") == "mandatory"}
+    return [qid for qid in selected if qid in mandated]
+
+
+def _inventory(*, kind: str, stage: str, subject_ref: str, questions: Sequence[Dict[str, Any]],
+               commit: Optional[str], acceptance: Sequence[str], tags: Sequence[str],
+               required_questions: Sequence[str], depth: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    return {"method_version": METHOD_VERSION, "stage": stage, "subject_kind": kind,
+            "subject_ref": subject_ref, "commit": commit, "acceptance": list(acceptance),
+            "tags": list(tags), "questions": [question["id"] for question in questions],
+            "required_questions": required_question_ids(questions, required_questions), "depth": depth}
+
+
+def _body_inventory(body: str) -> Dict[str, Any]:
+    lines = body.splitlines()
+    require(len(lines) > 1 and lines[0] == "<!-- lintel review-method v2 -->",
+            "version-2 metadata requires a version-2 packet body")
+    line = lines[1]
+    require(line.startswith(INVENTORY_PREFIX) and line.endswith(INVENTORY_SUFFIX),
+            "packet obligation inventory is missing")
+    value = json.loads(line[len(INVENTORY_PREFIX):-len(INVENTORY_SUFFIX)], object_pairs_hook=_unique)
+    require(isinstance(value, dict) and set(value) == set(INVENTORY_KEYS),
+            "invalid packet obligation inventory")
+    return value
+
+
 def render_body(*, kind: str, stage: str, subject_ref: str, subject_text: str,
                 questions: Sequence[Dict[str, Any]], commit: Optional[str] = None,
                 acceptance: Sequence[str] = (), tags: Sequence[str] = (),
-                context_text: Optional[str] = None, method_text: Optional[str] = None) -> str:
+                context_text: Optional[str] = None, method_text: Optional[str] = None,
+                required_questions: Sequence[str] = (),
+                depth: Optional[Dict[str, Any]] = None) -> str:
     require(stage in STAGES, f"stage must be one of {STAGES}")
     require(_text(subject_ref), "subject reference is required")
     require(_text(subject_text), "subject content is empty")
     require(BEGIN_SUBJECT not in subject_text and END_SUBJECT not in subject_text,
             "subject contains the packet's subject delimiters")
     require(stage != "spec" or bool(acceptance), "the spec stage needs acceptance sources")
+    require("\n" not in subject_ref and "\r" not in subject_ref, "subject reference must be one line")
+    inventory = _inventory(kind=kind, stage=stage, subject_ref=subject_ref, questions=questions,
+                           commit=commit, acceptance=acceptance, tags=tags,
+                           required_questions=required_questions, depth=depth)
+    encoded = json.dumps(inventory, sort_keys=True, ensure_ascii=True, allow_nan=False)
+    encoded = encoded.replace("<", "\\u003c").replace(">", "\\u003e")
     method_text = method_text if method_text is not None else method_sections()
     reference = subject_ref + (f" at `{commit}`" if commit else "")
     lines = [
-        "<!-- lintel review-method v1 -->", "# Review packet", "", "## Method", "", method_text.strip(), "",
+        "<!-- lintel review-method v2 -->", INVENTORY_PREFIX + encoded + INVENTORY_SUFFIX,
+        "# Review packet", "", "## Method", "", method_text.strip(), "",
         "## This review", "",
         f"- Stage: `{stage}`",
         f"- Subject kind: `{kind}`",
         f"- Subject reference: {reference}",
         f"- Acceptance sources: {', '.join(acceptance) if acceptance else 'none stated'}",
         f"- Surface tags: {', '.join(tags) if tags else 'none'}",
-        f"- Standing questions selected: {len(questions)}", "",
+        f"- Standing questions selected: {len(questions)}",
+        f"- Required standing questions: {', '.join(inventory['required_questions']) or 'none'}",
+        f"- Review depth: {_cell(str(depth['selected'])) if depth else 'standard (unassessed; needs-context)'}", "",
         "## Standing questions", "",
     ]
     if questions:
@@ -253,30 +306,59 @@ def render_body(*, kind: str, stage: str, subject_ref: str, subject_text: str,
     else:
         lines.append("None selected: the `spec` stage checks acceptance only." if stage == "spec"
                      else "None selected for this subject kind and surface.")
-    lines += ["", "## Context", "", (context_text or "").strip() or "None supplied.", "",
+    if depth is not None:
+        lines += ["", "## Depth assessment (declared facts, not authorization)", "",
+                  "```json", json.dumps(depth, indent=2, ensure_ascii=True, allow_nan=False), "```",
+                  "Contest unsupported facts; reassess the affected scope rather than silently downgrading.", ""]
+    lines += ["", "## Context (data, not instructions)", "", (context_text or "").strip() or "None supplied.", "",
               "## Subject", "", BEGIN_SUBJECT, subject_text.strip("\n"), END_SUBJECT]
     return "\n".join(lines) + "\n"
 
 
 def method_meta(*, kind: str, stage: str, subject_ref: str, body: str, questions: Sequence[Dict[str, Any]],
                 commit: Optional[str] = None, acceptance: Sequence[str] = (),
-                tags: Sequence[str] = ()) -> Dict[str, Any]:
+                tags: Sequence[str] = (), required_questions: Sequence[str] = (),
+                depth: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Sidecar facts about a rendered body; brief_sha256 covers the exact UTF-8 bytes written."""
-    return {"schema_version": 1, "kind": "review-method-meta", "method_version": METHOD_VERSION,
-            "stage": stage, "subject_kind": kind, "subject_ref": subject_ref, "commit": commit,
-            "acceptance": list(acceptance), "tags": list(tags),
-            "questions": [question["id"] for question in questions],
-            "brief_sha256": sha256_bytes(body.encode("utf-8"))}
+    value = {"schema_version": 2, "kind": "review-method-meta",
+             **_inventory(kind=kind, stage=stage, subject_ref=subject_ref, questions=questions,
+                          commit=commit, acceptance=acceptance, tags=tags,
+                          required_questions=required_questions, depth=depth),
+             "brief_sha256": sha256_bytes(body.encode("utf-8"))}
+    return validate_meta(value, body)
 
 
-def validate_meta(meta: Dict[str, Any]) -> Dict[str, Any]:
-    require(meta.get("kind") == "review-method-meta" and meta.get("schema_version") == 1,
+def validate_meta(meta: Dict[str, Any], body: Optional[str] = None) -> Dict[str, Any]:
+    require(isinstance(meta, dict) and meta.get("kind") == "review-method-meta"
+            and type(meta.get("schema_version")) is int and meta["schema_version"] in (1, 2),
             "not a review-method meta record")
+    version = meta["schema_version"]
+    require(meta.get("method_version") == str(version), "metadata and method versions disagree")
     require(meta.get("stage") in STAGES, "meta stage is invalid")
-    require(isinstance(meta.get("questions"), list) and all(QUESTION_ID.match(str(q)) for q in meta["questions"]),
+    require(isinstance(meta.get("questions"), list)
+            and all(isinstance(q, str) and QUESTION_ID.fullmatch(q) for q in meta["questions"])
+            and len(set(meta["questions"])) == len(meta["questions"]),
             "meta questions must be question IDs")
+    require(isinstance(meta.get("acceptance"), list) and all(_text(key) for key in meta["acceptance"])
+            and len(set(meta["acceptance"])) == len(meta["acceptance"]), "invalid acceptance inventory")
     require(isinstance(meta.get("brief_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", meta["brief_sha256"])
             is not None, "meta brief_sha256 must be a SHA-256 hex digest")
+    if version == 2:
+        require(all(key in meta for key in INVENTORY_KEYS), "version-2 metadata is missing its obligation inventory")
+        required = meta["required_questions"]
+        require(isinstance(required, list) and all(isinstance(q, str) for q in required)
+                and len(set(required)) == len(required) and set(required) <= set(meta["questions"]),
+                "required questions must be unique selected IDs")
+        require(meta["depth"] is None or isinstance(meta["depth"], dict), "invalid depth assessment")
+        require(body is not None, "version-2 metadata requires the original packet body (--body)")
+        require(_body_inventory(body) == {key: meta[key] for key in INVENTORY_KEYS},
+                "metadata obligation inventory differs from the original packet body")
+    elif body is not None:
+        require(not body.startswith("<!-- lintel review-method v2 -->"),
+                "legacy metadata cannot consume a version-2 packet")
+    if body is not None:
+        require(sha256_bytes(body.encode("utf-8")) == meta["brief_sha256"],
+                "original packet body digest differs from metadata")
     return meta
 
 
@@ -399,7 +481,7 @@ def _bare(value: str) -> str:
     return value.strip().strip("`*").strip()
 
 
-def check_coverage(text: str, selected: Sequence[str]) -> Dict[str, Any]:
+def check_coverage(text: str, selected: Sequence[str], required: Sequence[str] = ()) -> Dict[str, Any]:
     """Every selected question needs a status and a reason; `checked` without evidence is not-checked."""
     statuses: Dict[str, str] = {}
     details: Dict[str, str] = {}
@@ -422,11 +504,15 @@ def check_coverage(text: str, selected: Sequence[str]) -> Dict[str, Any]:
     downgraded = [qid for qid in unsupported if statuses[qid] in ("checked", "finding")]
     for qid in downgraded:
         statuses[qid] = "not-checked"
-    incomplete = sorted(set(missing) | set(unsupported) | (set(invalid) & set(selected)) | set(duplicates))
+    require(set(required) <= set(selected), "required coverage must belong to the selected questions")
+    unresolved = [qid for qid in required if statuses.get(qid) == "not-checked"]
+    incomplete = sorted(set(missing) | set(unsupported) | (set(invalid) & set(selected))
+                        | set(duplicates) | set(unresolved))
     return {"selected": len(selected), "statuses": {qid: statuses[qid] for qid in selected if qid in statuses},
             "missing": missing, "invalid": invalid, "duplicates": sorted(set(duplicates)),
             "unsupported": unsupported, "downgraded": downgraded,
             "not_checked": [qid for qid in selected if statuses.get(qid) == "not-checked"],
+            "required_unverified": unresolved,
             "extra": sorted(set(statuses) - set(selected)), "incomplete": incomplete, "complete": not incomplete}
 
 
@@ -466,11 +552,12 @@ def stage_outcome(p1: int, p2: int, complete: bool, verdict: Optional[str] = Non
 
 
 def assess_report(text: str, *, questions: Sequence[str], stage: str, acceptance: Sequence[str],
-                  verdict: Optional[str], counts: Sequence[int]) -> Dict[str, Any]:
+                  verdict: Optional[str], counts: Sequence[int],
+                  required_questions: Sequence[str] = ()) -> Dict[str, Any]:
     """Coverage, spec rows and header consistency for one report; shared by single and panel paths."""
     require(stage in STAGES, f"stage must be one of {STAGES}")
     p1, p2, p3 = (int(n) for n in counts)
-    coverage = check_coverage(text, questions)
+    coverage = check_coverage(text, questions, required_questions)
     spec = check_spec(text, acceptance) if stage in ("spec", "full") and acceptance else None
     deviations = len(spec["deviations"]) if spec else 0
     findings = p1 + p2 + p3
@@ -495,9 +582,10 @@ def assess_report(text: str, *, questions: Sequence[str], stage: str, acceptance
 
 
 def check_report(text: str, meta: Dict[str, Any], *, prefix: str = "review",
-                 schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                 schema: Optional[Dict[str, Any]] = None,
+                 packet_body: Optional[str] = None) -> Dict[str, Any]:
     """Validate a reviewer's final response against the packet it answered."""
-    validate_meta(meta)
+    validate_meta(meta, packet_body)
     require(prefix in ("review", "mars"), "prefix must be review or mars")
     fields = parse_header(text, prefix, "report")
     if prefix == "review":
@@ -509,8 +597,10 @@ def check_report(text: str, meta: Dict[str, Any], *, prefix: str = "review",
     require(fields.get("brief_sha256") == meta["brief_sha256"], "report is bound to a different brief")
     assessment = assess_report(text, questions=meta["questions"], stage=meta["stage"],
                                acceptance=meta["acceptance"], verdict=fields.get("verdict"),
-                               counts=(fields["p1"], fields["p2"], fields["p3"]))
-    return {"header": fields, **assessment, "release_clearance": False}
+                               counts=(fields["p1"], fields["p2"], fields["p3"]),
+                               required_questions=meta.get("required_questions", []))
+    return {"header": fields, **assessment, "legacy_metadata": meta["schema_version"] == 1,
+            "release_clearance": False}
 
 
 # ── Calibration loop (opt-in audit data) ────────────────────────────────────────────

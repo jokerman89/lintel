@@ -50,6 +50,14 @@ evidence, legal/policy applicability and unknowns are different. Produce threats
 auth/secret/audit designs, compliance coverage and incident playbooks, not a blanket
 certification. The host's permission and actual policy remain authoritative.
 
+For an implementation review, use the same
+[adaptive Review Method](../review/references/adaptive.md) and
+[targeted security evidence](../review/references/security.md) as REVIEW and MARS.
+Keep source/version, actual trust boundary and selected mandatory controls
+explicit. Object/tenant authorization is distinct from privacy or residency;
+agent/tool authority is distinct from a model's declared role. This adds review
+questions, not a scanning engine, credential use or permission to reproduce vulnerabilities.
+
 `/li:sc full` covers the checkpoints below. `/li:sc loop` revisits explicitly saved evidence;
 `/li:sc <capability>` or `/li:sc single --action <capability>` limits the assignment. Preserve
 read-only review versus authorized implementation. No scan of live services,

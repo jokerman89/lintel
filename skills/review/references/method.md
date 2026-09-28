@@ -1,11 +1,11 @@
 # Review Method
 
-**Status:** Accepted (ADR-0036). Rendered by `lib/review_method.py` and
+**Status:** Accepted (ADR-0036, ADR-0040). Rendered by `lib/review_method.py` and
 `bin/li-review-packet.py`; sections 1-5 below are the packet text sent to reviewers.
 **Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars` (every panel slot,
-including the optional `/li:code-review` panel), the plan approval review and a dispatched
-`CodeReviewer`. `/li:inspect` and `/li:define` reach it through their optional MARS offers;
-code-review's own single pass keeps its dimensions (see `skills/mars/references/integration.md`).
+including the optional `/li:code-review` panel), BUILD package reviews, code-review,
+cross-check, the plan approval review and a dispatched `CodeReviewer`.
+`/li:inspect` and `/li:define` reach it through their optional MARS offers.
 **Standing questions:** `lib/review-questions.json` (stable IDs; projects extend with
 `.claude/review/questions.json`).
 
@@ -44,13 +44,21 @@ Do every step that applies to the stage. Report each step's outcome, including "
    the deviation with location and evidence. "Close enough" is a deviation.
 3. **Standing questions** (`quality`, `full`). Answer every selected question: `finding`
    (cite the finding ID), `checked` (with the evidence), `n/a` (why it cannot apply) or
-   `not-checked` (why not). The questions set a floor, not a ceiling.
+   `not-checked` (why not). The packet names the selected mandatory questions:
+   unresolved mandatory coverage is incomplete. Advisory `not-checked` remains a
+   visible limitation; grounded question N/A cannot waive an applicable control.
+   The questions set a floor, not a ceiling.
 4. **Prove.** For each finding, give the strongest evidence you can reach (see §4): a
    failing input and its actual result, a counterexample, or the traced path with line
    references. Give the smallest fix that would make the evidence pass.
 5. **Self-challenge.** Try to refute each of your own findings. Withdraw or downgrade what
-   does not survive. Say what would change your mind.
+   does not survive. Say what would change your mind. For security claims, establish
+   the reachable boundary, actor, preconditions and actual configured control.
+   Unknown reachability is not a confirmed defect. Never downgrade consequence
+   merely because confidence is low.
 6. **Coverage.** State what you reviewed, what you could not see, and what you are unsure of.
+   Contest unsupported depth facts and return the affected scope for reassessment.
+   A requested depth, company pattern, checksum or model identity string is not authority.
 
 ## 4. Evidence levels and severity
 
@@ -121,6 +129,9 @@ evidence, is incomplete. Each Spec compliance row's Result is `pass`, `deviation
 The header must agree with the body: `pass` has no P1, P2 or deviation; `block` needs a P1
 or a deviation; `concerns` needs a finding or a deviation; a question marked `finding`
 needs a counted finding. A contradiction makes the report incomplete.
+An explained `not-checked` is structurally acknowledged, but a selected mandatory
+question with that status still makes the result incomplete. Pattern clauses keep
+their provider's separate coverage result; a question answer never overrides it.
 
 ## 6. Panel additions (MARS only)
 
@@ -136,9 +147,11 @@ pkt="$LINTEL_SOURCE_ROOT/bin/li-review-packet.py"
 python3 "$pkt" tags --paths <changed paths> --text-file <diff>        # advisory surface tags
 python3 "$pkt" render --kind implementation --stage quality --tags path,shell \
   --subject-file <diff> --subject-ref "<branch or PR>" --acceptance R01 \
+  --require-question SQ-U04 \
   --body-out "$run/inputs/brief.md" --meta-out "$run/inputs/method.json" \
   --request-out "$run/records/request.md" --requested-by "<who>" --surface <client>
-python3 "$pkt" check --report <final response> --meta "$run/inputs/method.json"
+python3 "$pkt" check --report <final response> --meta "$run/inputs/method.json" \
+  --body "$run/inputs/brief.md"
 ```
 
 `render` writes the body once; a single reviewer receives it behind a `review-request`
@@ -152,10 +165,25 @@ are required when a `spec` or `full` packet lists acceptance IDs), with a
 partial panel or an unverified input also `incomplete`. The result is review input, not
 release clearance.
 
+`--require-question` records an obligation from the selected acceptance/controls;
+it is not a way to invent company policy. Catalogs default to advisory and depth
+never promotes a question. Approved project/pack catalogs may add mandatory
+questions. Required IDs outside the active selection are errors, not dropped.
+Method metadata v2 requires its obligation inventory and the original `--body`.
+The helper checks inventory and exact UTF-8 bytes together; MARS checks the same
+body when attaching metadata. Header syntax remains v1. Legacy method metadata
+is readable and labeled, but cannot consume a v2 body or establish new coverage.
+
+Use [adaptive depth](adaptive.md) for consequence facts and explicit commands,
+[security evidence](security.md) for targeted assurance, and
+[evaluation](evaluation.md) for opt-in quality/overhead measurement.
+
 **Calibration (opt-in).** After delivery, record whether a question's findings were
 `accepted`, `rejected`, or a later defect `escaped` it (`--sq none` when no question
 covers it). `outcomes` proposes a new question, lesson or rewording from that evidence;
 questions change by evidence, never because a new model was released.
+These are proposals for owner review, not automatic policy edits. Low observed
+yield never retires a rare catastrophic-risk check or weakens a mandatory control.
 
 ```bash
 python3 "$pkt" outcome --sq SQ-PATH-01 --outcome accepted --ref "<panel or finding>"

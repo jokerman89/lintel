@@ -36,6 +36,18 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 
 ## Workflow
 
+### Adaptive depth, one method
+
+Accept `--depth auto|lean|standard|deep` (default `auto`) through
+[adaptive review](references/adaptive.md). Establish evidenced consequences from
+the existing task/context, preserve unknowns and refuse a requested downgrade.
+Keep mandatory acceptance, policy and independent-review obligations at every
+depth; deep adds targeted questions, not automatic MARS consent or a scanner.
+Use selected company/repository patterns through their existing provider only.
+Read [security evidence](references/security.md) on a relevant surface, not for
+every mechanical edit. Keep the fact file and mandatory question inventory in
+the same content-bound review selection.
+
 ### Resolve authoritative artifacts before review
 
 If this initiative has a committed work.json, validate the explicit map with
@@ -126,7 +138,8 @@ python3 "$LINTEL_SOURCE_ROOT/bin/li-review-packet.py" --repo "$LINTEL_REPO_ROOT"
 
 Send the rendered request unchanged. The method sets the strictness ("close enough" is a
 deviation) and the report shape; validate the reply with
-`li-review-packet.py check --report <reply> --meta "$run/inputs/stage1.json"`. Any
+`li-review-packet.py check --report <reply> --meta "$run/inputs/stage1.json"
+--body "$run/inputs/stage1.md"`. Any
 `deviation` row fails Stage 1 (outcome `changes-requested`: fix loop, defer with ADR or
 accept-risk). A missing, duplicated or `unverified` acceptance row, or a header that
 contradicts the findings, is `incomplete` (exit 3): re-request it, never score it as PASS.
@@ -149,6 +162,10 @@ carries the selected standing questions, the evidence levels and the one severit
 P1 blocks ship, P2 is fixed before ship unless explicitly accepted, P3 is a nit; confidence
 never changes severity. `check` returns `incomplete` when a selected question lacks a
 status or evidence; re-request instead of treating the silence as a pass.
+Pass the same assessed `--depth`/`--risk-file` and explicit `--require-question`
+obligations to the renderer. Validate method metadata v2 against the original
+packet `--body`; mandatory `not-checked` is incomplete, while advisory limitations
+remain visible. Neither question N/A nor a packet pass overrides required controls.
 
 If Stage 2 FAILS:
 - P1 findings BLOCK — fix loop required
@@ -361,7 +378,8 @@ review, not an exemption from selected-content and acceptance binding.
 - GDPRReviewer — if EU customer + PII
 - EUAIActReviewer — if AI in EU market
 - SOC2Reviewer — if SOC2 scope
-- PrivacyBoundaryAudit (security/) — if cross-tenant
+- PrivacyBoundaryAudit (security/) — for residency and data-flow boundaries;
+  SecurityAuditor with SQ-AUTH-02 covers object/tenant authorization separately
 
 **Pack-contributed compliance:**
 - The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) supply any further reviewers (e.g. agentic-governance, provenance, customer-engagement audits).

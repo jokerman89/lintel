@@ -212,19 +212,20 @@ class ReportTests(unittest.TestCase):
         self.questions = rm.select_questions(catalog, "implementation", ["path"], "quality")
         body = rm.render_body(kind="implementation", stage="quality", subject_ref="util.py",
                               subject_text=SUBJECT.read_text(encoding="utf-8"), questions=self.questions)
+        self.body = body
         self.meta = rm.method_meta(kind="implementation", stage="quality", subject_ref="util.py", body=body,
                                    questions=self.questions)
         self.rows = [(q["id"], "checked", "traced util.py:1-20, no issue") for q in self.questions]
 
     def test_complete_report_maps_counts_to_one_outcome(self):
-        result = rm.check_report(report(self.meta, self.rows), self.meta)
+        result = rm.check_report(report(self.meta, self.rows), self.meta, packet_body=self.body)
         self.assertTrue(result["complete"])
         self.assertEqual(result["outcome"], "pass")
         self.assertFalse(result["release_clearance"])
         self.assertEqual(rm.check_report(report(self.meta, self.rows, p2=1, verdict="concerns"),
-                                         self.meta)["outcome"], "changes-requested")
+                                         self.meta, packet_body=self.body)["outcome"], "changes-requested")
         self.assertEqual(rm.check_report(report(self.meta, self.rows, p1=1, verdict="block"),
-                                         self.meta)["outcome"], "fail")
+                                         self.meta, packet_body=self.body)["outcome"], "fail")
 
     def test_missing_or_unsupported_coverage_is_incomplete_never_pass(self):
         cases = {
@@ -235,18 +236,20 @@ class ReportTests(unittest.TestCase):
             "duplicate": [self.rows[0], *self.rows],
         }
         for name, rows in cases.items():
-            result = rm.check_report(report(self.meta, rows), self.meta)
+            result = rm.check_report(report(self.meta, rows), self.meta, packet_body=self.body)
             self.assertFalse(result["complete"], name)
             self.assertEqual(result["outcome"], "incomplete", name)
-        downgraded = rm.check_report(report(self.meta, cases["checked-without-evidence"]), self.meta)
+        downgraded = rm.check_report(report(self.meta, cases["checked-without-evidence"]), self.meta,
+                                    packet_body=self.body)
         self.assertEqual(downgraded["coverage"]["statuses"][self.rows[0][0]], "not-checked")
         honest = [(self.rows[0][0], "not-checked", "no Windows host available"), *self.rows[1:]]
-        self.assertTrue(rm.check_report(report(self.meta, honest), self.meta)["complete"])
+        self.assertTrue(rm.check_report(report(self.meta, honest), self.meta, packet_body=self.body)["complete"])
 
     def test_wrong_brief_and_inconsistent_verdict_are_refused(self):
         with self.assertRaises(rm.MethodError):
-            rm.check_report(report(self.meta, self.rows, brief="f" * 64), self.meta)
-        result = rm.check_report(report(self.meta, self.rows, p1=1, verdict="pass"), self.meta)
+            rm.check_report(report(self.meta, self.rows, brief="f" * 64), self.meta, packet_body=self.body)
+        result = rm.check_report(report(self.meta, self.rows, p1=1, verdict="pass"), self.meta,
+                                 packet_body=self.body)
         self.assertFalse(result["verdict_consistent"])
         self.assertEqual(result["outcome"], "fail")
 
@@ -255,11 +258,11 @@ class ReportTests(unittest.TestCase):
                               questions=self.questions, acceptance=["R01", "R02"])
         meta = rm.method_meta(kind="implementation", stage="full", subject_ref="util.py", body=body,
                               questions=self.questions, acceptance=["R01", "R02"])
-        partial = rm.check_report(report(meta, self.rows, spec_rows=[("R01", "PASS")]), meta)
+        partial = rm.check_report(report(meta, self.rows, spec_rows=[("R01", "PASS")]), meta, packet_body=body)
         self.assertFalse(partial["complete"])
         self.assertEqual(partial["spec"]["missing"], ["R02"])
         full = rm.check_report(report(meta, self.rows, spec_rows=[("R01", "PASS"), ("R02", "deviation")],
-                                      p2=1, verdict="concerns"), meta)
+                                      p2=1, verdict="concerns"), meta, packet_body=body)
         self.assertTrue(full["complete"])
         self.assertEqual(full["spec"]["deviations"], ["R02"])
 
@@ -268,7 +271,8 @@ class ReportTests(unittest.TestCase):
         for counts, complete in (((0, 0), True), ((0, 2), True), ((1, 0), True), ((0, 0), False)):
             verdict = "block" if counts[0] else "concerns" if counts[1] else "pass"
             single = rm.check_report(report(self.meta, self.rows if complete else self.rows[1:],
-                                            p1=counts[0], p2=counts[1], verdict=verdict), self.meta)
+                                            p1=counts[0], p2=counts[1], verdict=verdict), self.meta,
+                                     packet_body=self.body)
             self.assertEqual(single["outcome"], rm.stage_outcome(counts[0], counts[1], complete))
 
     def test_spec_deviation_unverified_and_duplicate_rows_never_pass(self):
@@ -276,12 +280,14 @@ class ReportTests(unittest.TestCase):
                               questions=[], acceptance=["R01"])
         meta = rm.method_meta(kind="implementation", stage="spec", subject_ref="util.py", body=body,
                               questions=[], acceptance=["R01"])
-        deviation = rm.check_report(report(meta, [], verdict="concerns", spec_rows=[("R01", "deviation")]), meta)
+        deviation = rm.check_report(report(meta, [], verdict="concerns", spec_rows=[("R01", "deviation")]), meta,
+                                    packet_body=body)
         self.assertEqual((deviation["outcome"], deviation["usable"]), ("changes-requested", True))
         for rows in ([("R01", "unverified")], [("R01", "pass"), ("R01", "deviation")], []):
-            result = rm.check_report(report(meta, [], spec_rows=rows), meta)
+            result = rm.check_report(report(meta, [], spec_rows=rows), meta, packet_body=body)
             self.assertEqual(result["outcome"], "incomplete", rows)
-        self.assertEqual(rm.check_report(report(meta, [], spec_rows=[("R01", "PASS")]), meta)["outcome"], "pass")
+        self.assertEqual(rm.check_report(report(meta, [], spec_rows=[("R01", "PASS")]), meta,
+                                        packet_body=body)["outcome"], "pass")
 
     def test_header_contradicting_the_body_is_incomplete(self):
         cases = {
@@ -291,28 +297,32 @@ class ReportTests(unittest.TestCase):
             "unable": dict(verdict="unable"),
         }
         for name, fields in cases.items():
-            result = rm.check_report(report(self.meta, self.rows, **fields), self.meta)
+            result = rm.check_report(report(self.meta, self.rows, **fields), self.meta, packet_body=self.body)
             self.assertEqual(result["outcome"], "incomplete", name)
             self.assertFalse(result["usable"], name)
         cited = [(self.rows[0][0], "finding", "F1"), *self.rows[1:]]
-        self.assertEqual(rm.check_report(report(self.meta, cited), self.meta)["outcome"], "incomplete")
-        self.assertEqual(rm.check_report(report(self.meta, cited, p3=1, verdict="concerns"), self.meta)["outcome"],
+        self.assertEqual(rm.check_report(report(self.meta, cited), self.meta,
+                                        packet_body=self.body)["outcome"], "incomplete")
+        self.assertEqual(rm.check_report(report(self.meta, cited, p3=1, verdict="concerns"), self.meta,
+                                        packet_body=self.body)["outcome"],
                          "pass")
 
     def test_cli_check_exit_codes(self):
         with tempfile.TemporaryDirectory() as tmp:
             meta, good, bad = Path(tmp) / "m.json", Path(tmp) / "good.md", Path(tmp) / "bad.md"
+            body = Path(tmp) / "body.md"
+            body.write_bytes(self.body.encode("utf-8"))
             meta.write_text(json.dumps(self.meta), encoding="utf-8")
             good.write_text(report(self.meta, self.rows), encoding="utf-8")
             bad.write_text(report(self.meta, self.rows[1:]), encoding="utf-8")
-            self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta).returncode, 0)
-            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 3)
+            self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta, "--body", body).returncode, 0)
+            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta, "--body", body).returncode, 3)
             bad.write_text(report(self.meta, self.rows, verdict="unable"), encoding="utf-8")
-            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 3)
+            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta, "--body", body).returncode, 3)
             good.write_text(report(self.meta, self.rows, p1=1, verdict="block"), encoding="utf-8")
-            self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta).returncode, 0)
+            self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta, "--body", body).returncode, 0)
             bad.write_text("no header\n", encoding="utf-8")
-            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 2)
+            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta, "--body", body).returncode, 2)
 
 
 class IndependenceTests(unittest.TestCase):
@@ -325,7 +335,7 @@ class IndependenceTests(unittest.TestCase):
         """RM7b: REVIEW's packet path needs only the method files."""
         with tempfile.TemporaryDirectory() as tmp:
             tree = Path(tmp)
-            for relative in ("lib/review_method.py", "lib/review-questions.json", "lib/review-method-schema.json",
+            for relative in ("lib/review_method.py", "lib/review_context.py", "lib/review-questions.json", "lib/review-method-schema.json",
                              "skills/review/references/method.md", "bin/li-review-packet.py"):
                 (tree / relative).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / relative, tree / relative)
@@ -339,7 +349,8 @@ class IndependenceTests(unittest.TestCase):
             data = json.loads(meta.read_text(encoding="utf-8"))
             answer = tree / "out" / "report.md"
             answer.write_text(report(data, [(q, "checked", "traced") for q in data["questions"]]), encoding="utf-8")
-            checked = run(tree / "bin" / "li-review-packet.py", "check", "--report", answer, "--meta", meta)
+            checked = run(tree / "bin" / "li-review-packet.py", "check", "--report", answer, "--meta", meta,
+                          "--body", body)
             self.assertEqual(checked.returncode, 0, checked.stderr)
 
 

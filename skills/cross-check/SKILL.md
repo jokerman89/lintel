@@ -36,6 +36,8 @@ question is [MARS](../mars/SKILL.md), never a panel role-played inside cross-che
 - Optional `--style <defects|alternatives>`: strict defect-finding (default) or
   exploratory alternatives.
 - Optional `--budget <constraint>`: an operator constraint, not an invented token-limit CLI flag.
+- Optional `--depth auto|lean|standard|deep`: the same
+  [adaptive review](../review/references/adaptive.md), not model selection or panel consent.
 - For mapped delivery: the original work map, package/leaf IDs, acceptance and effective
   profile reference. A genuine ad-hoc inspection does not require a new plan or backlog.
 
@@ -79,8 +81,11 @@ do not silently substitute another provider.
    map or promote that inspection into release clearance. Exact selection and input
    shapes belong to the shared implementation, not this skill.
 4. **Run the authorized review or hand it off.** Give the external actor read-only scope,
-   separate context, the content selection and a severity/location/evidence report
-   contract: P1/P2/P3, confidence, file:line, observed impact and suggested correction.
+   separate context and the [shared method packet](../review/references/method.md)
+   for the selected subject/stage, depth, tags and mandatory questions. Retain its
+   P1/P2/P3, confidence, file:line and evidence contract rather than a second rubric.
+   Check the reply against metadata and the original body; unexplored mandatory
+   evidence remains incomplete and optional limitations remain visible.
    Capture actual stdout, stderr and exit status. Missing client/tools leave a
    replayable manual brief; main-agent role-play is not a substitute. Do not let the
    reviewer repair its own findings or run concurrent writers against shared files.

@@ -516,7 +516,8 @@ class BindingTests(unittest.TestCase):
             for leftover in self.records.glob("*.md"):
                 leftover.unlink()
             rm, meta, panel, schema, texts = self.method_panel(stage, acceptance, {"r1": slot_report, "r2": slot_report})
-            single = rm.check_report(texts["r1"], meta, prefix="mars")
+            single = rm.check_report(texts["r1"], meta, prefix="mars",
+                                     packet_body=self.brief.read_bytes().decode("utf-8"))
             self.assertEqual(single["outcome"], expected, (stage, slot_report))
             self.assertEqual(self.panel_outcome(panel, schema, adjudicated), expected, (stage, slot_report))
             if acceptance:

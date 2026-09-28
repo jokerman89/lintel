@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: review-packet-cli
-# implements: ADR-0036, ADR-0028
+# implements: ADR-0036, ADR-0028, ADR-0040
 # intent: skills/review/references/method.md
 # constraints: stdlib only; never invokes models, sessions or network; writes only the named output files
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-28
 """Review Method packet helper: select questions, render one packet body, check reports.
 
 Subcommands print JSON. Exit 0 = ok (for check: a complete, consistent report, whatever its
@@ -42,6 +42,22 @@ def _catalog(args):
     return rm.load_catalog(rm.CATALOG_PATH, [*rm.project_catalogs(args.repo), *(args.catalog or [])])
 
 
+def _context_library():
+    import review_context
+    return review_context
+
+
+def _assessment(args):
+    context = _context_library()
+    return context.assess_depth(context.read_context(args.risk_file) if args.risk_file else None,
+                                requested=args.depth)
+
+
+def _depth_options(parser):
+    parser.add_argument("--depth", choices=("auto", "lean", "standard", "deep"), default="auto")
+    parser.add_argument("--risk-file", type=Path, help="evidenced consequence facts, not authority")
+
+
 def _write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
@@ -58,6 +74,19 @@ def main(argv=None) -> int:
     questions.add_argument("--kind", required=True)
     questions.add_argument("--stage", choices=rm.STAGES, required=True)
     questions.add_argument("--tags", default="")
+    questions.add_argument("--require-question", action="append", default=[],
+                           help="selected obligation from accepted requirements (repeatable)")
+    _depth_options(questions)
+
+    depth = sub.add_parser("depth", help="assess an evidenced consequence floor; never dispatches")
+    _depth_options(depth)
+
+    patterns = sub.add_parser("pattern-context", help="verify and project through the optional pattern provider")
+    for name in ("roots", "lock", "context", "task-map"):
+        patterns.add_argument(f"--{name}", type=Path, required=True)
+    patterns.add_argument("--package", required=True)
+    patterns.add_argument("--coverage", type=Path)
+    patterns.add_argument("--attestations", type=Path)
 
     tags = sub.add_parser("tags", help="advisory surface tags from paths and diff text")
     tags.add_argument("--paths", nargs="*", default=[])
@@ -71,6 +100,9 @@ def main(argv=None) -> int:
     render.add_argument("--commit")
     render.add_argument("--acceptance", action="append", default=[])
     render.add_argument("--tags", default="")
+    render.add_argument("--require-question", action="append", default=[],
+                        help="selected obligation from accepted requirements (repeatable)")
+    _depth_options(render)
     render.add_argument("--context-file", type=Path)
     render.add_argument("--body-out", type=Path, required=True)
     render.add_argument("--meta-out", type=Path)
@@ -89,6 +121,7 @@ def main(argv=None) -> int:
     check = sub.add_parser("check", help="validate a reviewer report against its packet meta")
     check.add_argument("--report", type=Path, required=True)
     check.add_argument("--meta", type=Path, required=True)
+    check.add_argument("--body", type=Path, help="original packet body; required for method metadata v2")
     check.add_argument("--header", choices=("review", "mars"), default="review")
 
     outcome = sub.add_parser("outcome", help="append one opt-in calibration outcome")
@@ -103,24 +136,41 @@ def main(argv=None) -> int:
 
     args = parser.parse_args(argv)
     try:
+        if args.command == "depth":
+            result = _assessment(args)
+            return emit(result, 0 if result["status"] == "ok" else 3)
+        if args.command == "pattern-context":
+            result = _context_library().prepare_pattern_review(
+                roots=args.roots, lock=args.lock, context=args.context, task_map=args.task_map,
+                package=args.package, coverage=args.coverage, attestations=args.attestations)
+            codes = {"ok": 0, "ready": 0, "empty": 0, "invalid": 2, "needs-context": 3,
+                     "conflict": 4, "unavailable": 5, "write-collision": 6, "review-unmet": 7}
+            rm.require(result["status"] in codes, f"unknown pattern-provider status: {result['status']}")
+            return emit(result, codes[result["status"]])
         if args.command == "tags":
             text = args.text_file.read_text(encoding="utf-8-sig", errors="replace") if args.text_file else ""
             return emit(rm.suggest_tags(_catalog(args), args.paths, text))
         if args.command == "questions":
-            selected = rm.select_questions(_catalog(args), args.kind, _tags(args.tags), args.stage)
-            return emit({"stage": args.stage, "kind": args.kind, "questions": selected})
+            assessment = _assessment(args)
+            tags = list(dict.fromkeys([*_tags(args.tags), *assessment["question_tags"]]))
+            selected = rm.select_questions(_catalog(args), args.kind, tags, args.stage)
+            return emit({"stage": args.stage, "kind": args.kind, "questions": selected,
+                         "required_questions": rm.required_question_ids(selected, args.require_question),
+                         "depth": assessment, "release_clearance": False})
         if args.command == "render":
             catalog = _catalog(args)
-            tag_list = _tags(args.tags)
+            assessment = _assessment(args)
+            tag_list = list(dict.fromkeys([*_tags(args.tags), *assessment["question_tags"]]))
             selected = rm.select_questions(catalog, args.kind, tag_list, args.stage)
             context = args.context_file.read_text(encoding="utf-8-sig") if args.context_file else None
             body = rm.render_body(kind=args.kind, stage=args.stage, subject_ref=args.subject_ref,
                                   subject_text=args.subject_file.read_text(encoding="utf-8-sig"),
                                   questions=selected, commit=args.commit, acceptance=args.acceptance,
-                                  tags=tag_list, context_text=context)
+                                  tags=tag_list, context_text=context, required_questions=args.require_question,
+                                  depth=assessment)
             meta = rm.method_meta(kind=args.kind, stage=args.stage, subject_ref=args.subject_ref, body=body,
                                   questions=selected, commit=args.commit, acceptance=args.acceptance,
-                                  tags=tag_list)
+                                  tags=tag_list, required_questions=args.require_question, depth=assessment)
             request = None
             if args.request_out:
                 missing = [flag for flag, value in (("--requested-by", args.requested_by),
@@ -154,10 +204,12 @@ def main(argv=None) -> int:
                          "meta": args.meta_out.as_posix() if args.meta_out else None,
                          "request": args.request_out.as_posix() if args.request_out else None,
                          "stage": args.stage, "kind": args.kind, "tags": tag_list,
-                         "questions": meta["questions"]})
+                         "questions": meta["questions"], "required_questions": meta["required_questions"],
+                         "depth": assessment, "release_clearance": False})
         if args.command == "check":
             result = rm.check_report(args.report.read_text(encoding="utf-8-sig"), rm.read_json(args.meta),
-                                     prefix=args.header)
+                                     prefix=args.header,
+                                     packet_body=args.body.read_bytes().decode("utf-8") if args.body else None)
             return emit(result, 0 if result["usable"] else 3)
         log = args.log or (args.repo / rm.OUTCOME_LOG)
         if args.command == "outcome":

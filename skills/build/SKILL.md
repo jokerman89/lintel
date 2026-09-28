@@ -260,10 +260,11 @@ This is an off-switch for trivial tasks ONLY — it does NOT remove the two-stag
 
 **Stage 1 — Spec compliance review (substantive tasks — dedicated; mechanical tasks — inline):**
 
-Dispatch reviewer subagent (CodeReviewer or general-purpose):
-"Review this package against every member leaf's requirements and evidence. Map findings
-to leaf IDs, identify missing acceptance and cross-leaf integration gaps, and report the
-package verdict. Review only the supplied owned diff and relevant surrounding code."
+Use the [shared Review Method](../review/references/method.md) packet for stage
+`spec`, carrying every original member leaf and its acceptance evidence.
+Dispatch the actual independent reviewer for substantive work. Review the owned
+result and relevant surrounding code; map deviations and integration gaps to
+the original IDs, without a package-specific rubric.
 
 If Stage 1 FAILS:
 - Fix the gaps (Edit tool, or re-dispatch implementer with specific fix-list)
@@ -272,8 +273,11 @@ If Stage 1 FAILS:
 
 #### 3d — Stage 2 — Code quality review (ONLY after Stage 1 PASS):
 
-Dispatch reviewer subagent:
-"Quality dimensions: correctness, security, performance, code-style, edge-cases, error handling, test coverage. Score each. P1/P2/P3 findings."
+Use the same method with stage `quality` and
+[adaptive depth](../review/references/adaptive.md). Keep aggregate package risk,
+confirmed surface tags, selected mandatory questions and applicable pattern
+evidence. Validate metadata v2 against the original packet body; do not average
+missing mandatory evidence away or automatically request a MARS panel.
 
 If Stage 2 FAILS:
 - Fix per finding severity (P1 = block, P2 = fix, P3 = log + defer if pressed for time)

@@ -284,6 +284,14 @@ def new_panel(panel_id: str, owner: str, brief: Path, consent_ref: str,
 
 def validate_panel(panel: Dict[str, Any]) -> None:
     require(panel.get("kind") == "mars-panel" and panel.get("schema_version") == 1, "not a MARS panel")
+    method = panel.get("subject", {}).get("method")
+    if method and (method.get("schema_version") is not None or method.get("version") == "2"):
+        rm = _lib_module("review_method")
+        try:
+            rm.validate_meta(method, Path(panel["subject"]["brief_path"]).read_bytes().decode("utf-8"))
+            require(method["version"] == method["method_version"], "panel method versions disagree")
+        except (rm.MethodError, OSError, UnicodeError) as error:
+            raise ContractError(f"invalid panel method inventory: {error}") from error
     seen_slots, seen_sessions = set(), set()
     parts = panel.get("participants", [])
     require(len(parts) <= panel["limits"]["max_participants"], "too many participants")
@@ -339,6 +347,7 @@ def _origin(panel: Dict[str, Any]) -> Dict[str, Any]:
 def build_request(panel: Dict[str, Any], slot: str, round_no: int, body: str,
                   schema: Dict[str, Any], lens: Optional[str] = None) -> Tuple[str, Dict[str, Any]]:
     """Header + body for one reviewer call. Round 2 is the challenge round."""
+    validate_panel(panel)
     part = _participant(panel, slot)
     require(part["state"] != "closed", "cannot brief a closed participant")
     require(1 <= round_no <= panel["limits"]["max_rounds"], "round over limit")
@@ -381,6 +390,7 @@ def record_round(panel: Dict[str, Any], slot: str, round_no: int, result: Path,
                  status: str = "received", brief_sha256: Optional[str] = None,
                  schema: Optional[Dict[str, Any]] = None, legacy: bool = False) -> None:
     """Record a report. v1 reports must open with a matching ```mars-report header."""
+    validate_panel(panel)
     require(status in ("received", "failed"), "round status must be received or failed")
     if brief_sha256 is not None:
         require(brief_sha256 == panel["subject"]["brief_sha256"], "report is bound to a different brief")
@@ -407,7 +417,8 @@ def record_round(panel: Dict[str, Any], slot: str, round_no: int, result: Path,
         if method and round_no == 1:
             assessment = _lib_module("review_method").assess_report(
                 text, questions=method["questions"], stage=method["stage"], acceptance=method["acceptance"],
-                verdict=fields["verdict"], counts=(entry["counts"]["p1"], entry["counts"]["p2"], entry["counts"]["p3"]))
+                verdict=fields["verdict"], counts=(entry["counts"]["p1"], entry["counts"]["p2"], entry["counts"]["p3"]),
+                required_questions=method.get("required_questions", []))
             entry["coverage"] = {"complete": assessment["usable"], "incomplete": assessment["incomplete"],
                                  "inconsistencies": assessment["inconsistencies"],
                                  "deviations": assessment["deviations"], "outcome": assessment["outcome"]}
@@ -582,14 +593,12 @@ def attach_method(panel: Dict[str, Any], meta: Dict[str, Any]) -> None:
     """Link the frozen brief to the Review Method packet it was rendered from."""
     rm = _lib_module("review_method")
     try:
-        rm.validate_meta(meta)
+        rm.validate_meta(meta, Path(panel["subject"]["brief_path"]).read_bytes().decode("utf-8"))
     except rm.MethodError as error:
         raise ContractError(str(error)) from error
     require(meta["brief_sha256"] == panel["subject"]["brief_sha256"], "method meta describes a different brief")
     require(meta["subject_kind"] == panel["subject"]["kind"], "method meta subject kind differs from --kind")
-    panel["subject"]["method"] = {"version": meta["method_version"], "stage": meta["stage"],
-                                  "questions": list(meta["questions"]), "tags": list(meta["tags"]),
-                                  "acceptance": list(meta["acceptance"])}
+    panel["subject"]["method"] = {"version": meta["method_version"], **json.loads(json.dumps(meta))}
 
 
 def attach_profile(panel: Dict[str, Any], repo: Path, reference: Optional[Path] = None) -> None:

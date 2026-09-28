@@ -40,6 +40,9 @@ outside-review tool does not substitute for missing independence.
   required independent review of substantive work.
 - Optional `--reviewer <name>` — select an actual reviewer/client for `--cross-check`;
   requires that flag. Codex remains a valid explicitly authorized client.
+- Optional `--depth auto|lean|standard|deep` — use the shared
+  [adaptive depth](../review/references/adaptive.md); default auto. An explicit
+  depth cannot remove required controls or approve a multi-model panel.
 
 Invocation: `/code-review [--base <ref>] [--cross-check [--reviewer <name>] | --no-cross-check]`.
 Conflicting cross-check flags are an input error, not a reason to choose silently.
@@ -61,11 +64,13 @@ enter the strict SHIP path. See [inspection mode](../review/references/evidence.
    to downgrade substantive risk.
 2. **Read selected content** — inspect every selected changed state and relevant
    surrounding functions/tests. A commit-only diff cannot clear dirty/new files.
-3. **4-dimension review** (focused on implementation; no routine per-issue approval interview):
-   - Architecture impact (does the diff respect existing boundaries?)
-   - Code quality (DRY violations, error handling, edge cases)
-   - Test coverage (does the diff add tests for new code paths? regression risk?)
-   - Performance (N+1, memory, slow paths introduced)
+3. **Shared method review** (no routine per-issue approval interview) — render the
+   [Review Method](../review/references/method.md) packet, kind `code-review`,
+   stage `quality`, with assessed depth, confirmed surface tags and selected
+   mandatory question IDs. Architecture, correctness, coverage and performance
+   remain useful lenses, not a separate severity or evidence rubric. Check the
+   report against its metadata and original packet body; preserve required
+   unknowns, optional limitations and applicable pattern coverage.
 4. **Independent pass** — use an actual available independent reviewer for substantive
    scope. `--cross-check` requests an additional separate opinion; skipping it does not
    waive required independence. Keep findings read-only and route fixes to the builder.
@@ -124,19 +129,16 @@ are not valid evidence.
 
 For a high-risk diff (auth, data loss, concurrency, migration or a security boundary),
 offer [MARS](../mars/SKILL.md) once when `li-mars.py offer` (caller `code-review`) returns 0.
-The panel sends the shared [Review Method](../review/references/method.md) packet (kind
-`code-review`, stage `quality`) and binds the same selection; this workflow's own single
-pass keeps its four dimensions. Findings stay read-only inspection input; the optional
+The panel sends the same [Review Method](../review/references/method.md) packet (kind
+`code-review`, stage `quality`) as the single reviewer and binds the same selection,
+depth and mandatory inventory. Findings stay read-only inspection input; the optional
 `--cross-check` pass, required independence and the shared evidence gate are unchanged.
 
 ## Confidence scoring
 
-Every finding gets a 1-10 confidence:
-- 9-10: verified by reading specific code
-- 7-8: high-confidence pattern match
-- 5-6: medium — show with "verify this is actually an issue" caveat
-- 3-4: suppressed from main report, appendix only
-- 1-2: speculation only (rarely reported)
+Use the shared method's 1-10 confidence and E1-E4 evidence levels. Confidence never
+changes consequence-based severity or hides an unresolved mandatory observation.
+Separate a concrete defect from a hypothesis and state the check that would settle it.
 
 ## Failure modes
 
