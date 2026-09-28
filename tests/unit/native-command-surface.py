@@ -334,9 +334,9 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
         review_path.write_bytes(original)
         register = self.root / guard.RESIDUAL_REGISTER
-        value = json.loads(re.search(r"lintel-reviewed-source-spans:v1\n([\s\S]*?)\n-->", register.read_text())[1])
+        value = json.loads(re.search(r"lintel-reviewed-source-spans:v1\n([\s\S]*?)\n-->", register.read_text(encoding="utf-8"))[1])
         value["entries"][0]["end"] = "Retained record boundary."
-        register.write_text("# Residuals\n<!-- lintel-reviewed-source-spans:v1\n" + json.dumps(value) + "\n-->\n")
+        register.write_text("# Residuals\n<!-- lintel-reviewed-source-spans:v1\n" + json.dumps(value) + "\n-->\n", encoding="utf-8")
         self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
 
     def test_semantic_report_fields_do_not_hide_new_runtime_routing(self):
@@ -403,7 +403,7 @@ class CommandSurfaceTests(unittest.TestCase):
         contract.validate_review(decision)
         self.write(entry["review"], json.dumps(decision))
         corroboration_path = self.root / entry["corroboration"]
-        corroboration = json.loads(corroboration_path.read_text())
+        corroboration = json.loads(corroboration_path.read_text(encoding="utf-8"))
         corroboration["record_digest"] = contract.content_digest(decision)
         corroboration_path.write_text(json.dumps(corroboration), encoding="utf-8")
         self.assertEqual(guard.scan(self.root), [])

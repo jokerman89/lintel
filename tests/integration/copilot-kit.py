@@ -1439,10 +1439,10 @@ except (ValueError,OSError) as error:
         self.assertEqual(before, self.snapshot())
         self.run_cli("check")
         self.assertTrue((self.target / ".github/lintel/scaffolding/01-foundation/templates/plan/spec.template.md").is_file())
-        self.assertIn(".claude/runtime/", (self.target / ".gitignore").read_text())
+        self.assertIn(".claude/runtime/", (self.target / ".gitignore").read_text(encoding="utf-8"))
         self.assertFalse((self.target / ".github/hooks").exists())
         self.assertFalse((self.target / ".github/lintel/hooks").exists())
-        self.assertFalse(json.loads((self.target / adapter.INVENTORY).read_text())["hooks_installed"])
+        self.assertFalse(json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["hooks_installed"])
         # A different clone with only committed artifacts remains independently usable.
         clone = self.base / "fresh-clone"
         shutil.copytree(self.target, clone)
@@ -1703,17 +1703,17 @@ else:
 
     def test_preserves_existing_project_instructions_and_memory(self):
         (self.target / ".github").mkdir()
-        (self.target / ".github/copilot-instructions.md").write_text("Team policy stays.\n")
-        (self.target / "AGENTS.md").write_text("Existing project agent rules.\n")
+        (self.target / ".github/copilot-instructions.md").write_text("Team policy stays.\n", encoding="utf-8")
+        (self.target / "AGENTS.md").write_text("Existing project agent rules.\n", encoding="utf-8")
         self.run_cli()
-        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(), "Team policy stays.\n")
-        self.assertTrue((self.target / "AGENTS.md").read_text().startswith("Existing project agent rules.\n"))
-        self.assertIn(adapter.PROTOCOL_START.decode(), (self.target / "AGENTS.md").read_text())
+        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(encoding="utf-8"), "Team policy stays.\n")
+        self.assertTrue((self.target / "AGENTS.md").read_text(encoding="utf-8").startswith("Existing project agent rules.\n"))
+        self.assertIn(adapter.PROTOCOL_START.decode(), (self.target / "AGENTS.md").read_text(encoding="utf-8"))
         memory = self.target / ".claude/memory/lessons.md"
-        memory.write_text("Our durable lesson.\n")
+        memory.write_text("Our durable lesson.\n", encoding="utf-8")
         self.run_cli()
         self.run_cli("check")
-        self.assertEqual(memory.read_text(), "Our durable lesson.\n")
+        self.assertEqual(memory.read_text(encoding="utf-8"), "Our durable lesson.\n")
 
     def test_modified_managed_file_refuses_entire_update(self):
         self.run_cli()
@@ -1755,7 +1755,7 @@ else:
             with self.subTest(relative=relative):
                 collision = self.target / relative
                 collision.parent.mkdir(parents=True, exist_ok=True)
-                collision.write_text("Our own file.\n")
+                collision.write_text("Our own file.\n", encoding="utf-8")
                 before = self.snapshot()
                 self.assertIn(f"Unmanaged collision (preserved): {relative}", self.run_cli(success=False).stderr)
                 self.assertEqual(before, self.snapshot())
@@ -1776,11 +1776,11 @@ else:
         self.assertIn("runtime/ ignore rule", self.run_cli("check", success=False).stderr)
         self.run_cli()
         self.run_cli("check")
-        ignore.write_text("# Project ignores\n*.local\n")
+        ignore.write_text("# Project ignores\n*.local\n", encoding="utf-8")
         self.assertIn("runtime/ ignore rule", self.run_cli("check", success=False).stderr)
         self.run_cli()
         self.run_cli("check")
-        self.assertIn("*.local", ignore.read_text())
+        self.assertIn("*.local", ignore.read_text(encoding="utf-8"))
 
     def test_source_update_is_reviewable_and_deterministic(self):
         self.run_cli()
@@ -1799,26 +1799,26 @@ else:
     def test_inventory_traversal_and_windows_paths_refused(self):
         self.run_cli()
         manifest = self.target / adapter.INVENTORY
-        original = json.loads(manifest.read_text())
+        original = json.loads(manifest.read_text(encoding="utf-8"))
         for unsafe in ("../../escape", "/absolute", "C:/escape", ".github/../escape", ".github\\escape", "AGENTS.md", ".github/skills/li-plan/./SKILL.md", ".github/skills//li-plan/SKILL.md",
                        ".github/agents/../x", ".github/other.json", ".github/agents/x.md", ".github/agents/x_y.agent.md",
                        ".github/agents/sub/x.agent.md", ".github/plugin/plugin.json", ".github/hooks/other.json"):
             forged = dict(original)
             forged["files"] = {unsafe: "0" * 64}
-            manifest.write_text(json.dumps(forged))
+            manifest.write_text(json.dumps(forged), encoding="utf-8")
             self.assertIn("ERROR:", self.run_cli(success=False).stderr)
         registry = adapter.load_registry(adapter.native_io_path(adapter.safe_path(self.source, "lib/cli-tiers.yaml")))
         accepted = {path: "0" * 64 for path in (".github/agents/CodeReviewer.agent.md", ".github/plugin/hooks.json",
                                                 ".github/hooks/lintel.json", ".github/agents/lintel-planner.agent.md")}
-        manifest.write_text(json.dumps(dict(original, files=accepted)))
+        manifest.write_text(json.dumps(dict(original, files=accepted)), encoding="utf-8")
         self.assertEqual(adapter.load_inventory(self.target, registry)[0], accepted)
-        manifest.write_text(json.dumps(original))
+        manifest.write_text(json.dumps(original), encoding="utf-8")
 
     def test_invalid_inventory_root_types_are_clean_errors(self):
         self.run_cli()
         manifest = self.target / adapter.INVENTORY
         for value in (None, [], "invalid", 7, {"schema_version": True, "files": {}}):
-            manifest.write_text(json.dumps(value))
+            manifest.write_text(json.dumps(value), encoding="utf-8")
             before = self.snapshot()
             for command in ("init", "check"):
                 result = self.run_cli(command, success=False)
@@ -1839,7 +1839,7 @@ else:
     def test_dogfood_has_no_recursive_source_copy(self):
         local = self.base / "dogfood"
         shutil.copytree(self.source, local)
-        (local / "AGENTS.md").write_text("Read canonical repository instructions.\n")
+        (local / "AGENTS.md").write_text("Read canonical repository instructions.\n", encoding="utf-8")
         self.run_cli(source=local, target=local)
         self.run_cli("check", source=local, target=local)
         self.assertFalse((local / ".github/lintel/skills").exists())
@@ -1880,10 +1880,10 @@ test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
         shutil.copytree(self.source, crlf)
         source_skill = crlf / "skills/plan/SKILL.md"
         source_skill.write_bytes(source_skill.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
-        (self.target / ".gitattributes").write_text("*.custom binary\n")
+        (self.target / ".gitattributes").write_text("*.custom binary\n", encoding="utf-8")
         self.run_cli(source=crlf)
         self.assertNotIn(b"\r\n", (self.target / ".github/lintel/skills/plan/SKILL.md").read_bytes())
-        self.assertIn("*.custom binary", (self.target / ".gitattributes").read_text())
+        self.assertIn("*.custom binary", (self.target / ".gitattributes").read_text(encoding="utf-8"))
         self.run_cli("check", source=self.source)
         git = shutil.which("git")
         self.assertTrue(git, "Git is required for the real autocrlf clone test")
@@ -1973,7 +1973,7 @@ bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$PWD/downstream-scaffo
         validator = bundle / "bin/li-envelope-validate"
         validator.chmod(0o600)
         invalid = self.target / "invalid-envelope.yaml"
-        invalid.write_text("not-an-envelope: true\n")
+        invalid.write_text("not-an-envelope: true\n", encoding="utf-8")
         bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
         self.assertTrue(bash)
         env = {key: value for key, value in os.environ.items() if not key.startswith("LINTEL_")}
