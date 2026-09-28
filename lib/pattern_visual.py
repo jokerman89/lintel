@@ -98,11 +98,28 @@ def _typed(kind: str, value: Any) -> bool:
 
 
 def _equal(kind: str, expected: Any, actual: Any) -> bool:
-    if not _typed(kind, actual):
+    """Exact type and value comparison; callers type-check `expected` first (M1)."""
+    if not _typed(kind, expected) or not _typed(kind, actual):
         return False
     if kind == "color":
         return expected.lower() == actual.lower()
     return type(expected) is type(actual) and expected == actual
+
+
+_URL = re.compile(r"https://[^\s]+\Z")
+
+
+def _portable_ref(value: Any) -> str:
+    """A committed provenance label: an https URL or a portable relative path (never a local root)."""
+    if isinstance(value, str) and _URL.match(value):
+        return value
+    if isinstance(value, str) and value.split("/", 1)[0].startswith("~"):
+        _fail("unportable_source_ref", "source_ref must not name a home directory; use a vault-relative label")
+    try:
+        return p.validate_relative_path(value, "source_ref").as_posix()
+    except p.PatternError as error:
+        _fail("unportable_source_ref", f"source_ref must be an https URL or a portable relative label: "
+                                       f"{error.message}")
 
 
 # ---------------------------------------------------------------- legacy discrimination
@@ -111,8 +128,9 @@ def classify_document(value: Any, *, location: Optional[str] = None) -> str:
     """Return `universal` or `legacy-visual`; schema_version 1 alone never decides.
 
     A universal record is one the shared core validator accepts. A legacy record carries the
-    legacy visual fields, a `name` and none of the universal-only fields. `location` (a portable
-    path) is checked for consistency: legacy vaults live under `design-patterns/`.
+    legacy visual fields, a `name` and none of the universal-only fields. `location` is only a
+    hint: a legacy pattern may live under any `--out` directory, but a universal pattern inside a
+    legacy `design-patterns` vault is refused as a likely mix-up.
     """
     if not isinstance(value, dict) or type(value.get("schema_version")) is not int or value["schema_version"] != 1:
         _fail("unknown_pattern_document", "not a schema_version 1 pattern document")
@@ -126,8 +144,6 @@ def classify_document(value: Any, *, location: Optional[str] = None) -> str:
             _fail("location_mismatch", "a universal pattern stored in a legacy design-patterns vault", where=location)
         return "universal"
     if isinstance(value.get("name"), str) and value.keys() & LEGACY_MARKERS and not value.keys() & _UNIVERSAL_ONLY:
-        if location is not None and not legacy_location:
-            _fail("location_mismatch", "a legacy visual pattern outside a design-patterns vault", where=location)
         return "legacy-visual"
     _fail("unknown_pattern_document", "neither a valid universal pattern nor a legacy visual pattern")
 
@@ -148,7 +164,10 @@ def legacy_to_draft(data: bytes, *, pattern_id: str, applies_to: Mapping[str, An
     The original bytes become a `visual-legacy` asset with their raw digest; unrecognized fields
     stay in that asset and are not interpreted. Observations are never `confirmed`. The draft is
     validated by the shared core validator and is never approved or registered here.
+    `source_ref` is recorded as provenance in the committed draft, so it must be an https URL or
+    a portable relative (vault) label; absolute, drive, UNC and home paths are refused.
     """
+    source_ref = _portable_ref(source_ref)
     legacy = p.parse_json(data, limit=p.LIMITS.asset_bytes, what="legacy visual pattern")
     if classify_document(legacy, location=location) != "legacy-visual":
         _fail("not_legacy_visual", "the input is already a universal pattern; capture it directly")
@@ -233,17 +252,31 @@ def stage_draft(conversion: Mapping[str, Any], data: bytes, directory: Path) -> 
 
 # ---------------------------------------------------------------- projection
 
-def _report(resolution: Any) -> Mapping[str, Any]:
-    """Accept an in-process report or a lock; a lock is structurally re-checked by the core.
+def _report(resolution: Any, context: Optional[p.Context] = None, refs: Any = ()) -> Mapping[str, Any]:
+    """Return a selection the core has checked: a lock, or a report bound to its inputs (M2).
 
-    Across processes, pass a lock that `verify_lock` accepted; a raw report read from disk is
-    not verified evidence of a selection.
+    A lock is re-checked with `parse_lock`; persisted or cross-entry callers pass a lock that
+    `verify_lock` accepted. A fresh in-process report must come with the `context` (and any
+    explicit `refs`) it was resolved with; the public core `build_lock` then recomputes its
+    selection digest and refuses a report whose content no longer matches. A bare report is
+    `selection_not_usable`. Non-ready/empty reports are returned so their status is reported.
     """
     if not isinstance(resolution, Mapping) or any(key not in resolution for key in p.REPORT_KEYS):
         _fail("invalid_resolution", "expected a resolution report or lock from lib/patterns.py")
     if "created_at" in resolution:
         return p.parse_lock(copy.deepcopy(dict(resolution)))
-    return resolution
+    if resolution.get("status") not in ("ready", "empty"):
+        return resolution
+    if not isinstance(context, p.Context):
+        _fail("selection_not_usable", "a resolution report is usable only with the context it was resolved "
+                                      "with (and its refs); across entries pass a verified lock", "invalid")
+    if refs and not all(isinstance(item, p.InvocationRef) for item in refs):
+        refs = p.parse_refs(list(refs))
+    budget = resolution.get("metrics", {}).get("context_budget", p.LIMITS.context_budget)
+    try:
+        return p.build_lock(resolution, context, refs=tuple(refs), context_budget=budget)
+    except p.PatternError as error:
+        _fail("selection_not_usable", f"the report does not match its inputs: {error.message}", "invalid")
 
 
 def _require_ready(resolution: Mapping[str, Any]) -> str:
@@ -282,17 +315,23 @@ def _review_required(resolution: Mapping[str, Any], unverified: set) -> list[dic
 
 
 def project_visual(base_spec: Mapping[str, Any], resolution: Mapping[str, Any], *,
+                   context: Optional[p.Context] = None, refs: Any = (),
                    phase: Optional[str] = None, domain: Optional[str] = None) -> dict:
     """Apply final visual setting winners to a frontend design spec copy (spec section 9).
 
-    Empty resolutions leave the spec byte-for-byte equal in meaning (ADR-0016 precedence stays).
+    `resolution` is a verified lock, or an in-process report with its `context`/`refs`.
+    Empty resolutions leave a genuine no-pattern spec unchanged (ADR-0016 precedence stays); a
+    spec that still carries a `pattern_context` is a stale selection and is refused (L4).
     Wrong-shaped existing objects or wrongly typed winners are conflicts, never coerced.
     """
     if not isinstance(base_spec, Mapping):
         _fail("invalid_spec", "the design spec must be a JSON object")
-    resolution = _report(resolution)
+    resolution = _report(resolution, context, refs)
     spec = copy.deepcopy(dict(base_spec))
     if resolution["status"] == "empty" and not resolution["selected"]:
+        if "pattern_context" in spec:
+            _fail("stale_pattern_context", "the spec carries a pattern_context but the current resolution selects "
+                                           "no patterns; re-plan instead of keeping or dropping it", "conflict")
         return {"schema_version": 1, "status": "empty", "spec": spec, "pattern_context": None, "applied": [],
                 "unverified_settings": [], "review_required": [], "limits": _LIMITS_NOTE}
     digest = _require_ready(resolution)
@@ -337,15 +376,18 @@ def project_visual(base_spec: Mapping[str, Any], resolution: Mapping[str, Any], 
             "review_required": _review_required(resolution, missing), "limits": _LIMITS_NOTE}
 
 
-def validate_visual(spec: Mapping[str, Any], resolution: Mapping[str, Any]) -> dict:
+def validate_visual(spec: Mapping[str, Any], resolution: Mapping[str, Any], *,
+                    context: Optional[p.Context] = None, refs: Any = ()) -> dict:
     """Check each mapped destination against the resolution; report mismatches by clause.
 
+    `resolution` is a verified lock, or an in-process report with its `context`/`refs`.
     `passed` means only that every mechanical setting matches and none is unverified. It is
-    never a review clearance; `review_required` lists what ordinary review must assess.
+    never a review clearance; `review_required` lists what ordinary review must assess. A winner
+    whose own value has the wrong type is a failed check for its clause, never a crash (M1).
     """
     if not isinstance(spec, Mapping):
         _fail("invalid_spec", "the design spec must be a JSON object")
-    resolution = _report(resolution)
+    resolution = _report(resolution, context, refs)
     attached = spec.get("pattern_context")
     diagnostics = []
     if resolution["status"] == "empty" and not resolution["selected"]:
@@ -378,12 +420,18 @@ def validate_visual(spec: Mapping[str, Any], resolution: Mapping[str, Any]) -> d
                 present = False
                 break
         actual = node if present else None
-        ok = present and _equal(kind, record["value"], actual)
+        if not _typed(kind, record["value"]):
+            reason = f"the winning value is not a {kind}; correct the pattern (conflict)"
+        elif not present:
+            reason = "missing"
+        elif not _equal(kind, record["value"], actual):
+            reason = "type or value differs"
+        else:
+            reason = ""
         checks.append({"setting": setting, "destination": _display(path), "winner": record.get("winner"),
                        "clauses": list(record.get("clauses", [])), "state": record["state"],
                        "expected": record["value"], "actual": actual, "present": present,
-                       "status": "passed" if ok else "failed",
-                       "reason": "" if ok else ("missing" if not present else "type or value differs")})
+                       "status": "failed" if reason else "passed", "reason": reason})
     failed = any(item["status"] == "failed" for item in checks) or any(
         item["severity"] == "error" for item in diagnostics)
     status = "failed" if failed else ("incomplete" if unverified else "passed")
@@ -409,10 +457,13 @@ def design_attachment(lock: Mapping[str, Any], lock_ref: str) -> dict:
             "clause_ids": clause_ids}
 
 
-def verify_design_attachment(roots: p.Roots, run_dir: Path, attachment: Any, context: p.Context, *,
+def verify_design_attachment(roots: p.Roots, lock_root: Path, attachment: Any, context: p.Context, *,
                              today: Optional[_dt.date] = None, reader: Optional[p.Reader] = None) -> dict:
     """Verify a pipeline attachment: contained lock, same digest, full mandatory clauses, current pins.
 
+    `lock_root` is the run's pattern-state directory inside the repository (for example
+    `.claude/runtime/patterns/<run-id>/`, or the run directory itself when the run lives there);
+    `lock_ref` is relative to it. Document outputs may live elsewhere; the lock never does (L3).
     An attachment is a reference, not proof. Any mismatch is `unavailable`; the lock is then
     checked with the core `verify_lock` against the current context and sources.
     """
@@ -421,9 +472,18 @@ def verify_design_attachment(roots: p.Roots, run_dir: Path, attachment: Any, con
         _fail("invalid_attachment", "pattern_context needs schema_version, selection_digest, lock_ref, clause_ids")
     if type(attachment["schema_version"]) is not int or attachment["schema_version"] != 1:
         _fail("invalid_attachment", "unsupported pattern_context schema_version")
-    reader = reader or p.Reader()
+    if roots.repository is None:
+        _fail("repository_required", "an attached lock lives in the repository; supply its root")
     try:
-        path = p.contained_path(Path(run_dir), attachment["lock_ref"], "lock_ref")
+        relative = Path(lock_root).resolve().relative_to(roots.repository.resolve()).as_posix()
+    except ValueError:
+        _fail("lock_outside_repository", "the attachment's lock root must be inside the repository "
+                                         "(for example .claude/runtime/patterns/<run-id>/)")
+    reader = reader or p.Reader()
+    p.validate_relative_path(attachment["lock_ref"], "lock_ref")
+    try:
+        joined = attachment["lock_ref"] if relative == "." else f"{relative}/{attachment['lock_ref']}"
+        path = p.contained_path(roots.repository, joined, "lock_ref")
         data = reader.read(path, kind="input", limit=p.LIMITS.catalog_bytes)
     except p.PatternError as error:
         if error.code == "unsafe_path":

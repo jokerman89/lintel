@@ -27,6 +27,7 @@ from pattern_consumer_fixtures import (  # noqa: E402
 SEED = ROOT / "seeds" / "brand" / "design-patterns" / "ultra-modern-lovable-style" / "pattern.json"
 SEED_LOCATION = "brand/design-patterns/ultra-modern-lovable-style/pattern.json"
 WEBSITE = {"artifact": ["website"]}
+WEB = p.parse_context(ctx(artifact="website"))
 
 
 def visual_pattern(pid="example.visual", level="default", extra=(), **kwargs):
@@ -63,12 +64,23 @@ class LegacyTests(unittest.TestCase):
                     dict(legacy, id="example.mixed"), dict(legacy, schema_version=2)):
             with self.assertRaises(p.PatternError, msg=bad.keys()):
                 pv.classify_document(bad)
-        with self.assertRaises(p.PatternError) as raised:
-            pv.classify_document(legacy, location=".claude/patterns/legacy/pattern.json")
-        self.assertEqual(raised.exception.code, "location_mismatch")
+        for location in (".claude/patterns/legacy/pattern.json", "out/my-style/pattern.json"):
+            self.assertEqual(pv.classify_document(legacy, location=location), "legacy-visual",
+                             "location is a hint: a documented --out directory is accepted (L2)")
         with self.assertRaises(p.PatternError) as raised:
             pv.classify_document(visual_pattern(), location=SEED_LOCATION)
         self.assertEqual(raised.exception.code, "location_mismatch")
+
+    def test_source_ref_must_be_portable_provenance(self):
+        for good in ("brand/design-patterns/x/pattern.json", "https://example.test/style"):
+            self.assertEqual(self.convert(source_ref=good)["draft"]["extensions"]["lintel.visual-legacy"]["original"],
+                             good)
+        for bad in ("C:/Users/someone/private/pattern.json", "//server/share/pattern.json", "/home/me/p.json",
+                    "~/.lintel/brand/design-patterns/x/pattern.json", "..\\escape.json", "http://insecure.test/x"):
+            with self.assertRaises(p.PatternError, msg=bad) as raised:
+                self.convert(source_ref=bad)
+            self.assertEqual(raised.exception.code, "unportable_source_ref")
+        self.assertEqual(SEED.read_bytes(), self.data)
 
     def convert(self, data=None, **kwargs):
         kwargs.setdefault("pattern_id", "example.lovable-draft")
@@ -186,7 +198,7 @@ class ProjectionTests(unittest.TestCase):
         report = ProjectionFixture(self).resolve()
         self.assertEqual(report["status"], "ready")
         base = visual_base_spec()
-        result = pv.project_visual(base, report)
+        result = pv.project_visual(base, report, context=WEB)
         spec = result["spec"]
         self.assertEqual(spec["layout_grammar"], {"max_width": "1200px", "section_spacing": "6rem", "grid": "12-col"})
         self.assertEqual(spec["interaction_signature"],
@@ -206,13 +218,13 @@ class ProjectionTests(unittest.TestCase):
 
     def test_unknown_visual_settings_remain_unverified_obligations(self):
         report = ProjectionFixture(self).resolve()
-        result = pv.project_visual(visual_base_spec(), report)
+        result = pv.project_visual(visual_base_spec(), report, context=WEB)
         self.assertEqual(result["unverified_settings"], ["visual.mood.energy"])
         self.assertNotIn("mood", json.dumps(result["spec"]["layout_grammar"]))
         open_clauses = {item["clause"] for item in result["review_required"]}
         self.assertEqual(open_clauses, {"example.visual@1.0.0#MOOD", "example.visual@1.0.0#PROSE",
                                         "example.visual@1.0.0#DENSITY"})
-        check = pv.validate_visual(result["spec"], report)
+        check = pv.validate_visual(result["spec"], report, context=WEB)
         self.assertEqual(check["status"], "incomplete", "an unverified setting is never a mechanical pass")
         self.assertFalse(check["clearance"])
 
@@ -220,18 +232,18 @@ class ProjectionTests(unittest.TestCase):
         report = ProjectionFixture(self).resolve()
         wrong = dict(visual_base_spec(), layout_grammar="1200px")
         with self.assertRaises(p.PatternError) as raised:
-            pv.project_visual(wrong, report)
+            pv.project_visual(wrong, report, context=WEB)
         self.assertEqual((raised.exception.code, raised.exception.status), ("visual_destination_shape", "conflict"))
         bad = visual_pattern(extra=[], pid="example.bad")
         bad["requirements"] = [clause("SMOOTH", "default", "visual.interaction.scroll-smoothing", "yes")]
         report = ProjectionFixture(self, pattern=bad).resolve()
         with self.assertRaises(p.PatternError) as raised:
-            pv.project_visual(visual_base_spec(), report)
+            pv.project_visual(visual_base_spec(), report, context=WEB)
         self.assertEqual((raised.exception.code, raised.exception.status), ("visual_type_mismatch", "conflict"))
         bad["requirements"] = [clause("ACCENT", "default", "visual.palette.accent", "blue")]
         report = ProjectionFixture(self, pattern=bad).resolve()
         with self.assertRaises(p.PatternError):
-            pv.project_visual(visual_base_spec(), report)
+            pv.project_visual(visual_base_spec(), report, context=WEB)
 
     def test_only_ready_bound_resolutions_project(self):
         fixture = ProjectionFixture(self, level="must")
@@ -240,14 +252,47 @@ class ProjectionTests(unittest.TestCase):
         needs, _ = fixture.fx.resolve(ctx(artifact="website"))
         self.assertEqual(needs["status"], "needs-context")
         with self.assertRaises(p.PatternError) as raised:
-            pv.project_visual(visual_base_spec(), needs)
+            pv.project_visual(visual_base_spec(), needs, context=WEB)
         self.assertEqual(raised.exception.status, "needs-context")
         forged = dict(needs, status="ready", selection_digest=None)
         with self.assertRaises(p.PatternError) as raised:
-            pv.project_visual(visual_base_spec(), forged)
-        self.assertEqual(raised.exception.code, "selection_unbound")
+            pv.project_visual(visual_base_spec(), forged, context=WEB)
+        self.assertEqual(raised.exception.code, "selection_not_usable")
         with self.assertRaises(p.PatternError):
             pv.project_visual(visual_base_spec(), {"status": "ready"})
+
+    def test_reports_need_their_inputs_and_matching_content(self):
+        """M2: a bare or edited report is refused; a report is bound to its context and refs."""
+        report = ProjectionFixture(self).resolve()
+        for call in (lambda r, **k: pv.project_visual(visual_base_spec(), r, **k),
+                     lambda r, **k: pv.validate_visual(visual_base_spec(), r, **k)):
+            with self.assertRaises(p.PatternError) as raised:
+                call(report)
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+            tampered = copy.deepcopy(report)
+            tampered["settings"]["visual.layout.max-width"]["value"] = "9999px"
+            with self.assertRaises(p.PatternError) as raised:
+                call(tampered, context=WEB)
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+            with self.assertRaises(p.PatternError) as raised:
+                call(report, context=p.parse_context(ctx(artifact="website", audience="public")))
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+        lock = p.build_lock(report, WEB)
+        self.assertEqual(pv.project_visual(visual_base_spec(), lock)["spec"],
+                         pv.project_visual(visual_base_spec(), report, context=WEB)["spec"])
+
+    def test_explicit_refs_are_part_of_the_bound_inputs(self):
+        fx = Fixture(self)
+        pattern = visual_pattern(pid="me.visual")
+        fx.publish(fx.personal_patterns, "personal.me", [pattern])
+        refs = [{"ref": ref("personal.me", pattern), "role": "default", "approved_by": "me", "approval_ref": "brief"}]
+        report, _ = fx.resolve(ctx(artifact="website"), refs=p.parse_refs(refs))
+        self.assertEqual(report["status"], "ready")
+        with self.assertRaises(p.PatternError) as raised:
+            pv.project_visual(visual_base_spec(), report, context=WEB)
+        self.assertEqual(raised.exception.code, "selection_not_usable")
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB, refs=refs)["spec"]
+        self.assertEqual(spec["layout_grammar"]["max_width"], "1200px")
 
     def test_explicit_brief_override_wins_over_defaults_but_not_over_must(self):
         fixture = ProjectionFixture(self)
@@ -255,13 +300,13 @@ class ProjectionTests(unittest.TestCase):
             "setting": "visual.layout.max-width", "value": "960px", "reason": "brief asks for narrow reading",
             "approval_ref": "brief.md", "replaces": ["example.visual@1.0.0#MAX"]}]})
         report = fixture.resolve(overrides=override)
-        spec = pv.project_visual(visual_base_spec(), report)["spec"]
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
         self.assertEqual(spec["layout_grammar"]["max_width"], "960px")
         must = ProjectionFixture(self, level="must")
         report = must.resolve(overrides=override)
         self.assertEqual(report["status"], "conflict")
         with self.assertRaises(p.PatternError) as raised:
-            pv.project_visual(visual_base_spec(), report)
+            pv.project_visual(visual_base_spec(), report, context=WEB)
         self.assertEqual(raised.exception.status, "conflict")
 
     def test_repository_defaults_outrank_pack_defaults_from_the_resolver(self):
@@ -277,7 +322,7 @@ class ProjectionTests(unittest.TestCase):
         fx.publish(fx.repo_patterns, "repo.visual", [repo])
         fx.repo_bindings([binding("web", [ref("repo.visual", repo)], role="default", when=WEBSITE)])
         report, _ = fx.resolve(ctx(artifact="website"))
-        spec = pv.project_visual(visual_base_spec(), report)["spec"]
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
         self.assertEqual(spec["layout_grammar"]["max_width"], "1100px")
         self.assertEqual(spec["layout_grammar"]["grid"], "bento", "an unconflicted pack default still applies")
 
@@ -285,10 +330,10 @@ class ProjectionTests(unittest.TestCase):
 class ValidationTests(unittest.TestCase):
     def setUp(self):
         self.report = ProjectionFixture(self).resolve()
-        self.spec = pv.project_visual(visual_base_spec(), self.report)["spec"]
+        self.spec = pv.project_visual(visual_base_spec(), self.report, context=WEB)["spec"]
 
     def failed(self, spec):
-        check = pv.validate_visual(spec, self.report)
+        check = pv.validate_visual(spec, self.report, context=WEB)
         self.assertEqual(check["status"], "failed")
         return {item["winner"] for item in check["checks"] if item["status"] == "failed"}
 
@@ -306,25 +351,56 @@ class ValidationTests(unittest.TestCase):
     def test_palette_comparison_is_case_insensitive_and_stale_context_fails(self):
         spec = copy.deepcopy(self.spec)
         spec["palette"]["tokens"]["accent"] = "#1A2B3C"
-        self.assertEqual(pv.validate_visual(spec, self.report)["status"], "incomplete")
+        self.assertEqual(pv.validate_visual(spec, self.report, context=WEB)["status"], "incomplete")
         spec["pattern_context"]["selection_digest"] = "0" * 64
-        check = pv.validate_visual(spec, self.report)
+        check = pv.validate_visual(spec, self.report, context=WEB)
         self.assertEqual(check["status"], "failed")
         self.assertIn("stale_pattern_context", [item["code"] for item in check["diagnostics"]])
 
     def test_matching_spec_without_unknown_settings_passes_mechanically_only(self):
         pattern = visual_pattern(pid="example.visual-only")
         report = ProjectionFixture(self, pattern=pattern).resolve()
-        spec = pv.project_visual(visual_base_spec(), report)["spec"]
-        check = pv.validate_visual(spec, report)
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
+        check = pv.validate_visual(spec, report, context=WEB)
         self.assertEqual(check["status"], "passed")
         self.assertEqual(len(check["checks"]), 7)
         self.assertFalse(check["clearance"])
+
+    def test_malformed_scalar_winners_fail_by_clause_in_projection_and_validation(self):
+        """M1: any JSON scalar winner of the wrong type is structured, never an exception."""
+        for setting, value in (("visual.palette.accent", 5), ("visual.palette.accent", None),
+                               ("visual.palette.accent", True), ("visual.layout.max-width", 1200),
+                               ("visual.interaction.scroll-smoothing", "true")):
+            pattern = visual_pattern(pid="example.bad-scalar", extra=[])
+            pattern["requirements"] = [clause("BAD", "default", setting, value)]
+            report = ProjectionFixture(self, pattern=pattern).resolve()
+            self.assertEqual(report["status"], "ready")
+            with self.assertRaises(p.PatternError) as raised:
+                pv.project_visual(visual_base_spec(), report, context=WEB)
+            self.assertEqual((raised.exception.code, raised.exception.status), ("visual_type_mismatch", "conflict"))
+            spec = visual_base_spec()
+            spec["palette"]["tokens"]["accent"] = "#1a2b3c"
+            check = pv.validate_visual(spec, report, context=WEB)
+            self.assertEqual(check["status"], "failed", (setting, value))
+            [item] = check["checks"]
+            self.assertEqual((item["winner"], item["status"]), ("example.bad-scalar@1.0.0#BAD", "failed"))
+            self.assertIn("winning value is not", item["reason"])
 
 
 class CompatibilityTests(unittest.TestCase):
     def setUp(self):
         self.design = load_design_contract()
+
+    def test_empty_projection_refuses_a_stale_pattern_context(self):
+        """L4: a spec projected earlier is never silently kept or stripped when patterns disappear."""
+        fx = Fixture(self)
+        report, _ = fx.resolve(ctx(artifact="website"))
+        stale = dict(visual_base_spec(), pattern_context={"schema_version": 1, "selection_digest": "a" * 64,
+                                                          "clauses": [], "asset_refs": []})
+        with self.assertRaises(p.PatternError) as raised:
+            pv.project_visual(stale, report, context=WEB)
+        self.assertEqual((raised.exception.code, raised.exception.status), ("stale_pattern_context", "conflict"))
+        self.assertEqual(pv.validate_visual(stale, report, context=WEB)["status"], "failed")
 
     def test_no_patterns_leaves_the_spec_and_precedence_unchanged(self):
         fx = Fixture(self)
@@ -332,15 +408,15 @@ class CompatibilityTests(unittest.TestCase):
         self.assertEqual((report["status"], report["selected"]), ("empty", []))
         self.assertEqual((reader.count("pattern"), reader.count("asset")), (0, 0))
         base = visual_base_spec()
-        result = pv.project_visual(base, report)
+        result = pv.project_visual(base, report, context=WEB)
         self.assertEqual(result["spec"], base)
         self.assertNotIn("pattern_context", result["spec"])
-        self.assertEqual(pv.validate_visual(base, report)["status"], "empty")
+        self.assertEqual(pv.validate_visual(base, report, context=WEB)["status"], "empty")
         self.assertEqual(self.design.validate_spec(result["spec"]), self.design.validate_spec(base))
 
     def test_projected_spec_still_passes_the_shared_design_validator(self):
         report = ProjectionFixture(self).resolve()
-        spec = pv.project_visual(visual_base_spec(), report)["spec"]
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
         loaded = self.design.validate_spec(spec)
         self.assertEqual(loaded["kind"], "frontend")
         self.assertEqual(loaded["design"]["layout_grammar"]["max_width"], "1200px")
@@ -350,7 +426,7 @@ class CompatibilityTests(unittest.TestCase):
         base = visual_base_spec()
         base["motion"] = {"schema_version": 1, "mode": "none", "libraries": [], "key_animations": [],
                           "perf_budget": {"fallback_for_prefers_reduced_motion": "no-animation"}}
-        spec = pv.project_visual(base, report)["spec"]
+        spec = pv.project_visual(base, report, context=WEB)["spec"]
         with self.assertRaises(self.design.DesignError):
             self.design.validate_spec(spec)
 
