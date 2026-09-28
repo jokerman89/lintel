@@ -100,11 +100,6 @@ def cli_commands() -> set:
     return set()
 
 
-def read_asset_accepts_selection() -> bool:
-    import inspect
-    return "selection" in inspect.signature(p.read_asset).parameters
-
-
 class Fixture:
     """Temporary repository, personal home and synthetic neutral pack, fully isolated."""
 

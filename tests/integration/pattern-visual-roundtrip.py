@@ -22,7 +22,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pattern_consumer_fixtures import (  # noqa: E402
-    Fixture, binding, clause, ctx, load_design_contract, make_pattern, p, pv, read_asset_accepts_selection, ref,
+    Fixture, binding, clause, ctx, load_design_contract, make_pattern, p, pv, ref,
     tree_digest, visual_base_spec,
 )
 
@@ -74,6 +74,22 @@ class Roundtrip:
             args += ["--overrides", self.fx.write_json("overrides.json", overrides)]
         return self.fx.cli(*args)
 
+    def locked(self, artifact="website", refs=None):
+        """Cross-process selection: the CLI writes a lock, then the core verifies it before use."""
+        self.locks = getattr(self, "locks", 0) + 1
+        path = self.run / f"patterns-{self.locks}.lock.json"
+        context = ctx(artifact=artifact)
+        args = ["resolve", "--context", self.fx.write_json(f"lock-context-{self.locks}.json", context),
+                "--lock", path]
+        if refs is not None:
+            args += ["--refs", self.fx.write_json(f"lock-refs-{self.locks}.json", refs)]
+        code, report, _ = self.fx.cli(*args)
+        self.t.assertEqual(code, 0, report["diagnostics"])
+        lock = json.loads(path.read_text(encoding="utf-8"))
+        verified = p.verify_lock(self.fx.roots(), lock, p.parse_context(context))
+        self.t.assertEqual(verified["status"], "ok", verified["diagnostics"])
+        return lock
+
     def personal_ref(self):
         return [{"ref": ref("personal.me", self.personal), "role": "default", "approved_by": "operator",
                  "approval_ref": "brief.md"}]
@@ -102,14 +118,16 @@ class VisualRoundtripTests(unittest.TestCase):
         self.assertEqual(spec["interaction_signature"]["hover_intent"], "pronounced")
         self.assertEqual(spec["typography"], visual_base_spec()["typography"], "Design DNA choices stay")
         self.assertEqual(self.design.validate_spec(spec)["kind"], "frontend")
-        review = pv.validate_visual(spec, report)
+        lock = self.rt.locked(refs=self.rt.personal_ref())
+        self.assertEqual(lock["selection_digest"], report["selection_digest"])
+        review = pv.validate_visual(spec, lock)
         self.assertEqual(review["status"], "passed")
         self.assertFalse(review["clearance"])
         self.assertIn("example.dashboard@1.0.0#NAV", {item["clause"] for item in review["review_required"]},
                       "prose must clauses stay with ordinary review")
 
     def test_review_fails_when_the_built_spec_drifts_from_the_baseline(self):
-        _, report, _ = self.rt.resolve()
+        report = self.rt.locked()
         spec = self.project(report)
         drifted = copy.deepcopy(spec)
         drifted["layout_grammar"]["max_width"] = "1440px"
@@ -141,24 +159,29 @@ class VisualRoundtripTests(unittest.TestCase):
     def test_assets_are_read_only_on_explicit_need_through_the_core(self):
         _, report, _ = self.rt.resolve()
         self.assertEqual(report["metrics"]["asset_reads"], 0, "selection alone reads no asset")
-        refs = pv.project_visual(visual_base_spec(), report)["pattern_context"]["asset_refs"]
+        lock = self.rt.locked()
+        refs = pv.project_visual(visual_base_spec(), lock)["pattern_context"]["asset_refs"]
         self.assertEqual([(item["path"], item["kind"]) for item in refs], [("tokens.json", "tokens")])
         reader = p.Reader()
-        kwargs = {"selection": report} if read_asset_accepts_selection() else {}
-        data = p.read_asset(self.rt.fx.roots(), refs[0], domain="frontend", reader=reader, **kwargs)
+        data = p.read_asset(self.rt.fx.roots(), refs[0], domain="frontend", reader=reader, selection=lock)
         self.assertEqual((data, reader.count("asset")), (TOKENS, 1))
         with self.assertRaises(p.PatternError):
-            p.read_asset(self.rt.fx.roots(), refs[0], domain="backend", **kwargs)
+            p.read_asset(self.rt.fx.roots(), refs[0], domain="backend", selection=lock)
+
+    def test_an_edited_lock_is_refused_by_the_adapter(self):
+        tampered = copy.deepcopy(self.rt.locked())
+        tampered["settings"]["visual.layout.max-width"]["value"] = "1440px"
+        with self.assertRaises(p.PatternError) as raised:
+            pv.project_visual(visual_base_spec(), tampered)
+        self.assertEqual(raised.exception.status, "invalid")
 
     def test_foreign_assets_are_refused_for_a_selection(self):
-        if not read_asset_accepts_selection():
-            self.skipTest("PENDING join: read_asset(selection=) arrives with core R3 (f1918e12)")
-        _, report, _ = self.rt.resolve()
-        _, backend, _ = self.rt.resolve(artifact="service")
+        lock = self.rt.locked()
+        backend = self.rt.locked(artifact="service")
         foreign = p.asset_refs(backend)[0]
         with self.assertRaises(p.PatternError) as raised:
-            p.read_asset(self.rt.fx.roots(), foreign, selection=report)
-        self.assertEqual(raised.exception.status, "unavailable")
+            p.read_asset(self.rt.fx.roots(), foreign, selection=lock)
+        self.assertEqual((raised.exception.code, raised.exception.status), ("asset_not_selected", "unavailable"))
 
     def test_no_patterns_roundtrip_is_unchanged_and_writes_nothing(self):
         fx = Fixture(self)
@@ -190,8 +213,10 @@ class VisualRoundtripTests(unittest.TestCase):
         spec = pv.project_visual(visual_base_spec(), report)["spec"]
         self.assertEqual(spec["layout_grammar"]["section_spacing"], "clamp(4rem, 8vw, 8rem)")
         ref_legacy = [item for item in spec["pattern_context"]["asset_refs"] if item["kind"] == "visual-legacy"]
-        kwargs = {"selection": report} if read_asset_accepts_selection() else {}
-        self.assertEqual(p.read_asset(fx.roots(), ref_legacy[0], **kwargs), data, "original bytes are preserved")
+        lock = p.build_lock(report, p.parse_context(ctx(artifact="website")))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")))["status"], "ok")
+        self.assertEqual(p.read_asset(fx.roots(), ref_legacy[0], selection=lock), data,
+                         "original bytes are preserved")
 
     def test_launcher_gives_the_same_selection_as_the_direct_cli(self):
         fx = Fixture(self)

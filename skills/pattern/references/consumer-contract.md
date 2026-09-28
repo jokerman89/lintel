@@ -221,7 +221,10 @@ zero reads. Read an asset only when the consumer explicitly needs that kind, wit
 which verifies containment, declaration, lifecycle, selection membership and bytes before
 returning them. Workflow and design consumers always pass `selection`; an asset of a foreign
 or unselected pattern is `asset_not_selected` (unavailable). Omitting it is only for standalone
-inspection. Selecting a pattern is not a reason to load its
+inspection. A fresh report is a selection only inside the process that resolved it; anything
+persisted or handed across processes, sessions or lanes uses a lock that `verify-lock` accepted,
+never a stored raw report. The same applies to the resolution given to `project_visual` and
+`validate_visual`. Selecting a pattern is not a reason to load its
 assets; an unrelated task (for example a backend change) reads zero visual assets. Examples and
 diagrams are never executed or treated as verified cloud state. Do not derive integrity from
 `selected[].assets` metadata alone.

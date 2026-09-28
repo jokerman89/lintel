@@ -211,8 +211,15 @@ def legacy_to_draft(data: bytes, *, pattern_id: str, applies_to: Mapping[str, An
 # ---------------------------------------------------------------- projection
 
 def _report(resolution: Any) -> Mapping[str, Any]:
+    """Accept an in-process report or a lock; a lock is structurally re-checked by the core.
+
+    Across processes, pass a lock that `verify_lock` accepted; a raw report read from disk is
+    not verified evidence of a selection.
+    """
     if not isinstance(resolution, Mapping) or any(key not in resolution for key in p.REPORT_KEYS):
         _fail("invalid_resolution", "expected a resolution report or lock from lib/patterns.py")
+    if "created_at" in resolution:
+        return p.parse_lock(copy.deepcopy(dict(resolution)))
     return resolution
 
 
