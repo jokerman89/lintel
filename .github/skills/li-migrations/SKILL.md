@@ -8,7 +8,8 @@ description: Read the installed-source migration catalog against the selected ta
 > - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
 >   `../../../skills/migrations/` in the Lintel source, not this generated folder.
 >   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
 >   runs in the working repository, so use `$LINTEL_SKILLS_DIR/migrations/` there.

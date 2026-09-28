@@ -8,7 +8,8 @@ description: Use for an independent second opinion on a diff, plan, code or hypo
 > - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
 >   `../../../skills/cross-check/` in the Lintel source, not this generated folder.
 >   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
 >   runs in the working repository, so use `$LINTEL_SKILLS_DIR/cross-check/` there.
