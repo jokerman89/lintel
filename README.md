@@ -168,7 +168,7 @@ conservative hints, not runtime grants.
 |---|---|---|---|
 | Claude Code CLI | .claude/skills | documented | not_run |
 | Claude Desktop Code local | .claude/skills | unknown | not_run |
-| GitHub Copilot CLI | .github/skills | documented | not_run |
+| GitHub Copilot CLI | .github/skills | documented | partial session observations |
 | GitHub Copilot App | .github/skills | conditional | partial session observations |
 | GitHub Copilot VS Code | .github/skills | conditional | not_run |
 | GitHub Copilot cloud agent | .github/skills | unknown | not_run |
