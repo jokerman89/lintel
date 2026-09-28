@@ -682,6 +682,8 @@ def public_url(repository: str, target: str, link: str) -> str:
     parsed = urlsplit(link)
     kind = "tree" if parsed.path.endswith("/") else "blob"
     url = f"{repository}/{kind}/main/{quote(target, safe='/')}"
+    if parsed.query:
+        url += "?" + parsed.query
     if parsed.fragment:
         url += "#" + quote(unquote(parsed.fragment), safe="-_")
     return url
@@ -813,8 +815,9 @@ def native_link(link: str, canonical: str, generated: str, source: Path, files: 
                 raise ValueError(f"Missing bundled source target: {canonical} -> {link}")
             return public_url(repository, target, link)
     relative = posixpath.relpath(resolved, posixpath.dirname(generated)) + ("/" if directory else "")
+    query = "?" + parsed.query if parsed.query else ""
     fragment = "#" + quote(unquote(parsed.fragment), safe="-_") if parsed.fragment else ""
-    return quote(relative, safe="/") + fragment
+    return quote(relative, safe="/") + query + fragment
 
 
 def native_markdown(body: str, host: dict, rebase) -> str:

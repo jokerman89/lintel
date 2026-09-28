@@ -253,6 +253,17 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing bundled source target: skills/plan/SKILL.md"):
             self.render("plan", local=False, files=files)
 
+    def test_query_strings_survive_rebasing_in_both_modes(self):  # L2
+        self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md?plain=1#L3)\n"
+                   "[Decision](../../.claude/decisions/x.md?plain=1#a)\n")
+        self.assertEqual(self.body(self.render("plan"), skill_preamble("../../..")),
+                         "\n[Intake](../../../skills/define/references/intake.md?plain=1#L3)\n"
+                         "[Decision](../../../.claude/decisions/x.md?plain=1#a)\n")
+        files = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        self.assertEqual(self.body(self.render("plan", local=False, files=files), skill_preamble("../../lintel")),
+                         "\n[Intake](../../lintel/skills/define/references/intake.md?plain=1#L3)\n"
+                         f"[Decision]({REPOSITORY}/blob/main/.claude/decisions/x.md?plain=1#a)\n")
+
     def test_agents_keep_the_allowlist_preamble_and_transformed_body(self):  # 1.3.b
         self.agent("engineering", "CodeReviewer", "\nYou review.\nAsk with AskUserQuestion; run /li:review.\n"
                    "See [evidence](../../skills/define/references/intake.md).\n")
