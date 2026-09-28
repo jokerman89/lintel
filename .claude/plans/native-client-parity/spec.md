@@ -54,7 +54,8 @@ generation error that names the canonical file (review finding L5).
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
 >   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
 >   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `{root}/skills`. A `bin/li-run` step
 >   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
@@ -69,7 +70,9 @@ generation error that names the canonical file (review finding L5).
 >   files. Named roles such as `CodeReviewer` are custom agents.
 ```
 
-The skill-relative paths bullet comes from review findings M2 and N1.
+The skill-relative paths bullet comes from review findings M2, N1 and N5. It scopes `<base>` to a
+workflow that defines it as its own directory, because other workflows use `<base>` differently (for
+example, a Git base ref in code review).
 - `bin/li-run` always exports `LINTEL_SKILLS_DIR="$LINTEL_SOURCE_ROOT/skills"` and ignores an
   inherited value, exactly as it ignores an inherited `LINTEL_SOURCE_ROOT`. The reason: the variable
   selects scripts that canonical steps execute, and a relative value would resolve inside the working
@@ -139,13 +142,19 @@ The camelCase `preToolUse`/`postToolUse` shapes below were **recorded live** (pr
     public URL get no separate source note. `shims/copilot/COPILOT.md` documents the policy (review
     finding L7).
   - **Both modes:** a link's query string and fragment are kept (`intake.md?plain=1#L3`; review
-    finding L2).
+    finding L2). Both are written back percent-encoded, like the path. The query encodes every
+    character outside letters, digits and `=&-_.~/?:@!$*+,;%`, keeping existing percent-escapes
+    (`urllib.parse.quote(query, safe="=&-_.~/?:@!$*+,;%")`). The fragment is encoded as before. So
+    a space, parenthesis, quote, angle bracket or backslash cannot break the Markdown destination
+    (review finding N4).
   - **Local mode, and bundled targets in vendored mode:**
     - a link ending in `/` may name an existing directory, and verification accepts it the same way
       (review finding L1);
     - a link that names an existing directory without a trailing `/` is a generation error with a
       clear message (review finding N2); vendored mode reports a bundled component directory linked
       without the `/` as a missing bundled source target;
+    - a link ending in `/` that names a file is a generation error with a clear message, and
+      verification accepts a file only through a link without a trailing `/` (review finding N3);
     - a missing target is an error.
   - **Vendored targets outside the bundle** become public URLs without a source check. The source
     repository's own local-mode generation and its CI drift check (`li-copilot check --target .
