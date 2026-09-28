@@ -146,6 +146,11 @@ Recovery refuses later edits, foreign/corrupt receipts and reuse of consumed res
 permission. It does not reactivate/deactivate a host or roll back external effects.
 See [lifecycle operations](lifecycle.md) for source/profile boundaries and limitations.
 
+The reusable-patterns release adds `patterns.source: null` to the bundled neutral pack. That
+changes the neutral manifest, so every bound profile context, including ones used only by
+unrelated callers, reports drift until you rebind it explicitly with a reason. Then re-plan the
+affected work. Nothing rebinds automatically. See [reusable patterns](concepts/patterns.md).
+
 Rollback the adoption or upgrade through a reviewed Git change, retaining project lessons,
 plans and decisions. The installer has no remove command; consult its inventory and remove
 only files introduced by that installation after checking for subsequent edits. Avoid deleting

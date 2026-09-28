@@ -229,6 +229,25 @@ identity; partial and rerouted cycles never offer, and auto mode never accepts. 
 reviewer and every panel slot receive the same Review Method packet. MARS output is inspection
 input, never release clearance. See [MARS](concepts/mars.md).
 
+### Reusable patterns follow the phases
+
+Where [reusable patterns](concepts/patterns.md) are configured, each phase has one obligation:
+- SENSE lists metadata only;
+- SCOPE names uncertain context;
+- DEFINE resolves before design;
+- DISCOVER verifies sources;
+- PLAN writes the lock beside the initiative and maps clauses to existing task IDs;
+- BUILD verifies the lock and hands each package its projection;
+- REVIEW checks clause evidence;
+- SHIP exposes failed, waived or unverified mandatory clauses;
+- CAPTURE proposes updates as drafts;
+- RESUME verifies pins.
+
+Direct entry into any phase resolves or verifies on its own. With no configured patterns, nothing
+changes. When the pattern runtime is missing, the result is "pattern check unavailable", never
+"no patterns". The [consumer contract](../skills/pattern/references/consumer-contract.md) is the
+single procedure.
+
 Use explicit cycle ranges or a documented preset for a shorter route:
 
 ```

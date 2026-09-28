@@ -62,6 +62,13 @@ blocks over company policy. Cloning copies the manifest as an editable starting 
 **not** referenced private corpora, credentials, executable extensions or hook settings.
 Inspect and explicitly configure referenced resources before claiming they are usable.
 
+A pack may point at a reusable-pattern catalog. Set the optional field
+`patterns: { source: patterns/catalog.json }`, whose path is relative to the pack root; the
+neutral value is `source: null`. The block replaces a parent's block wholesale. Keep a
+source-local `.gitattributes` with `* -text` beside that catalog so asset bytes stay exact. Do not
+invent pattern content: capture it with the [pattern workflow](../pattern/SKILL.md) from the
+owner's confirmed expectations, and ship every declared asset and pinned `root: pattern` source.
+
 ### 3. Verify and report
 
 Run `pack-validate "$name"` through that helper. Report the actual destination, effective

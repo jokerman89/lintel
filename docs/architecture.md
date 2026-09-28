@@ -210,6 +210,22 @@ The committed contract lives beside the trio under
 reviewable artifacts and attributable changes rather than chat memory or a still-running worker.
 See [swarming work](concepts/swarming-work.md) for the artifact tree and operating procedure.
 
+## Reusable patterns as data
+
+Reusable patterns are recurring expectations stated once and applied to named work. They are
+data-only records, validated and resolved by one module (`lib/patterns.py`) behind one CLI and
+launcher (`bin/li-pattern.py`, `bin/li-pattern`). Sources come from three scopes:
+- the repository (`.claude/patterns/`);
+- the active pack (`patterns.source`, resolved through the ADR-0029 profile record, with no
+  second parser);
+- a person (`$LINTEL_HOME/patterns/`), which is never automatic.
+
+Workflows follow one [consumer contract](../skills/pattern/references/consumer-contract.md):
+resolve metadata first, lock at PLAN, verify when continuing, and review clause evidence as
+supplemental content inside the ADR-0028 review contract. Patterns execute nothing and grant no
+authority. Runtime operations need optional Python 3.10+, and bare installation stays
+Python-free. See [reusable patterns](concepts/patterns.md) and ADR-0038.
+
 ---
 
 ## Depth — the engineering modules

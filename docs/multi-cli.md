@@ -134,6 +134,14 @@ The old `cli_tier_*` functions remain a conservative reader over the same regist
 legacy ID warns and degrades to manual; explicit installer requests reject unknown IDs.
 The [swarm guide](concepts/swarming-work.md) retains the complete artifact and recovery method.
 
+## Reusable patterns on every client
+
+The pattern workflow and its consumer contract are canonical files. Every client runs the same
+launcher from the trusted source root, `bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" <command>`,
+and needs Python 3.10+ only for pattern operations. The Copilot kit ships the `li-pattern` native
+wrapper and the pattern resources. Other hosts use the canonical-file handoff. Without the
+runtime, the host reports "pattern check unavailable". See [reusable patterns](concepts/patterns.md).
+
 <a id="adding-a-new-cli"></a>
 
 ## Adding or verifying a surface
