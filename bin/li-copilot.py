@@ -132,7 +132,8 @@ SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
 >   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
 >   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. A `bin/li-run` step
 >   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
@@ -142,8 +143,9 @@ SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 """
-# The spec's first two skill bullets; an agent has no skill base directory, so the root is
-# relative to the agent file's folder.
+# The spec's exact agent preamble: an agent has no skill folder, so it has no skill-relative paths
+# bullet; its Resource root is relative to the agent file's folder, followed by the shared Shell
+# steps bullet and the delegation line.
 AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
 >   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
 >   `.claude/` tree, never into the resource root.

@@ -25,7 +25,8 @@ SPEC_SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canoni
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
-> - **Skill-relative paths:** `<base>` and this skill's `scripts/`, `references/` and `data/` mean
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
 >   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
 >   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. A `bin/li-run` step
 >   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
@@ -187,10 +188,12 @@ class NativeArtifacts(unittest.TestCase):
                                                                name="plan"), preamble)
                 rendered = self.render("plan", local=local, files=files)
                 self.assertEqual(self.body(rendered, preamble), "\n# plan\n\nThe canonical plan method.\n")
-                # The skill-relative bullet follows Resource root: this skill's own folder, the skills
-                # root that ${LINTEL_SKILLS_DIR:-skills} names, and the pinned variable for li-run steps.
-                self.assertIn("never into the resource root.\n> - **Skill-relative paths:** `<base>` and "
-                              "this skill's `scripts/`, `references/` and `data/` mean\n"
+                # The skill-relative bullet follows Resource root: this skill's own folders and a <base>
+                # the workflow defines as its own directory, the skills root that
+                # ${LINTEL_SKILLS_DIR:-skills} names, and the pinned variable for li-run steps.
+                self.assertIn("never into the resource root.\n> - **Skill-relative paths:** this skill's own "
+                              "`scripts/`, `references/` and `data/` folders (and a\n>   `<base>` that the "
+                              "workflow defines as its own directory) mean\n"
                               f">   `{root}/skills/plan/` in the Lintel source, not this generated folder.\n"
                               f">   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. "
                               "A `bin/li-run` step\n>   runs in the working repository, so use "
@@ -214,9 +217,10 @@ class NativeArtifacts(unittest.TestCase):
                 start = rendered.index("> - **Skill-relative paths:**")
                 bullet = rendered[start:rendered.index("> - **Shell steps:**", start)].splitlines()
                 self.assertEqual([(len(line), line) for line in bullet if len(line) > 100], [])
-                self.assertEqual(len(bullet), 4)
-                self.assertIn(f"`{root}/skills/{longest}/`", bullet[1])
-                self.assertIn(f"`$LINTEL_SKILLS_DIR/{longest}/`", bullet[3])
+                self.assertEqual(len(bullet), 5)
+                self.assertIn("`<base>` that the workflow defines as its own directory", bullet[1])
+                self.assertIn(f"`{root}/skills/{longest}/`", bullet[2])
+                self.assertIn(f"`$LINTEL_SKILLS_DIR/{longest}/`", bullet[4])
                 self.body(rendered, skill_preamble(root, longest))
 
     def test_invocation_and_tool_transforms_change_nothing_else(self):  # 1.1.e
