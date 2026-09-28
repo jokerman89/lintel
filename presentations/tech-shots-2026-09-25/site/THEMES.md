@@ -22,6 +22,11 @@ Choose **Fluent** in the header, or link to `show/index.html?theme=fluent`. A th
 
 The initial deck still defaults to Neon. A URL theme overrides a saved preference. Theme choice never changes the current slide, demo state or source data.
 
+## Extending the presentation
+
+Use `three-hours`, `what-is-lintel` and `team-value` as visual references. Reuse the deck's `--paper`, `--purple`, `--lime`, `--muted` and `--line` tokens; the shared theme adapter gives them their Paper and Fluent equivalents. A new scene must not introduce a parallel palette or globally reset highlighted text to neutral.
+
+Use the existing `scene-icon` outline family from `show/app.js`. Violet identifies methods, roles and context; lime emphasizes the useful outcome, invariant or question. Color is not evidence of a passing test or a winning benchmark. Prefer the established thin rules and restrained panels. Vary layout to fit the explanation, while retaining that shared hierarchy. Compare additions beside the reference slides in all three themes before publication.
 ## Maintenance checks
 
 When adding slides or UI, verify all three palettes, selected/hover/focus states, readable muted text, graphical marks and overlays. Keep original screenshots unfiltered. Inspect dense diagrams and long headings at desktop and mobile sizes, including 320px. Check keyboard navigation, the theme query, preference persistence, reduced motion, and the offline download. Compare the original themes before publishing changes to the shared adapter.
