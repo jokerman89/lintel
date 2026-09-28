@@ -994,7 +994,7 @@ P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
 
 ## INT review of `b8312bb7` and Low fixes (`ea2c139d`, `fed0d884`)
 
-- Reviewer 24bf5df0 accepted the INT packaging milestone with four Low findings and one Info.
+- Reviewer 24bf5df0 accepted the INT packaging milestone with four Low findings and seven Info.
   This is milestone acceptance, not ADR-0028 v2 release clearance. Fixes, docs and tests
   committed separately:
   - `ea2c139d`, docs:
@@ -1007,8 +1007,9 @@ P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
     - a "Portable kit boundary" section in the template README.
   - `fed0d884`, tests:
     - the installed kit's example must be raw byte-identical to the source;
-    - the source example must be LF-only with a trailing newline, the boundary imposed by the
-      generator's text normalization.
+    - the source example must be LF-only, the boundary imposed by the generator's text
+      normalization. (The commit also adds a missing final newline to the test files themselves;
+      no test asserts that the example ends with a newline.)
 - Rechecked after the commits, synthetic environment:
   - `li-copilot.py check`: 22 managed files verified.
   - `li-catalog.py --check`: clean.
@@ -1042,9 +1043,10 @@ Deferred host rows, recorded as blocked or deferred rather than passed:
   no authorized PDF reader. Conversion preservation of required clauses is unobserved.
 - **Word page rendering (C1/C2 shared inspection).** Unavailable in this host; still a required
   unverified control.
-- **Per-consumer visual cells (5.2.a).** Only the dashboard build path (A) was observed.
-  `design-dna`, `frontend-typography`, `frontend-motion`, `frontend-shader` and `generate-app`
-  have no model, render or host cell.
+- **Per-consumer visual cells (5.2.a).** Case A's route was `li-cycle`/`li-build` with
+  `project_visual`/`validate_visual` and a real browser, not an observed `generate-web` command
+  route. `generate-web`, `design-dna`, `frontend-typography`, `frontend-motion`,
+  `frontend-shader` and `generate-app` have no model, render or host cell.
 - **Clients and browsers.** One client, one model, Chromium only. No installed-target App
   discovery, screen reader or other client. The numeric context capacity was not observed.
 
