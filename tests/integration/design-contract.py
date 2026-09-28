@@ -32,6 +32,8 @@ from profile_context import ProfileConfig, load_profile_context, profile_referen
 from review_contract import content_digest, evidence_manifest, verify_qa
 import domain_result
 import design_contract as design
+import patterns as pat
+import pattern_visual as pv
 
 RUNTIME = SOURCE / ".claude/runtime/p11-a14"
 safety.native_io_path(RUNTIME).mkdir(parents=True, exist_ok=True)
@@ -61,6 +63,33 @@ safety.native_io_path(RUN / "source-seals.json").write_text(json.dumps(SEALS, in
 
 def encoded(data):
     return (json.dumps(data, sort_keys=True, allow_nan=False) + "\n").encode()
+
+
+WEBSITE = {"artifact": ["website"]}
+PATTERN_TS = "2026-09-01T00:00:00Z"
+
+
+def brand_pattern(value="#112233", level="default", pid="example.brand"):
+    """A synthetic approved universal pattern whose one clause binds visual.palette.ink."""
+    return {"schema_version": 1, "id": pid, "version": "1.0.0", "status": "approved",
+            "summary": f"Summary of {pid}", "owner": "platform team", "applies_to": WEBSITE, "includes": [],
+            "sources": [{"kind": "operator-statement", "ref": "The operator stated this expectation.",
+                         "root": "statement", "section": "", "observed_at": PATTERN_TS,
+                         "confidence": "confirmed", "reuse": "internal use"}],
+            "requirements": [{"id": "INK", "level": level, "text": "Ink colour", "verify": "check INK",
+                              "setting": "visual.palette.ink", "value": value}],
+            "guidance": "", "assets": [],
+            "approval": {"by": "architecture board", "reference": "ADR-0038", "at": PATTERN_TS}}
+
+
+def pattern_ref(source, pattern):
+    return {"source": source, "id": pattern["id"], "version": pattern["version"],
+            "sha256": pat.content_digest(pattern)}
+
+
+def pattern_binding(bid, uses, role="required"):
+    return {"id": bid, "when": WEBSITE, "use": uses, "role": role, "approved_by": "lead",
+            "approval_ref": "decision-1"}
 
 
 class DesignContract(unittest.TestCase):
@@ -752,6 +781,256 @@ original_output_state = inputs["original_output_state"]
         self.write("run with spaces/frontend-design-spec.json", b"{}\n")
         self.assertFalse(domain_result.verify_result(self.repo, "domain-request.json",
                                                     expected=expected, profile_config=self.config)["ok"])
+
+    # ---- reusable patterns: the spec section 9 precedence join (ADR-0038, R12, RN-15)
+    SPEC_PATH = "run with spaces/frontend-design-spec.json"
+    LOCK = "run with spaces/patterns.lock.json"
+    CONTEXT = "run with spaces/pattern-context.json"
+
+    def publish_patterns(self, directory, source_id, patterns, bindings=(), revocations=None):
+        entries = []
+        for item in patterns:
+            relative = f"{item['id']}/{item['version']}/pattern.json"
+            target = safety.native_io_path(Path(directory) / relative)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(encoded(item))
+            entries.append({"id": item["id"], "version": item["version"], "path": relative,
+                            "sha256": pat.content_digest(item), "summary": item["summary"],
+                            "status": item["status"], "applies_to": item["applies_to"]})
+        catalog = {"schema_version": 1, "source_id": source_id, "entries": entries, "includes": [],
+                   "bindings": list(bindings), "lifecycle": []}
+        if revocations is not None:
+            catalog["revocations"] = list(revocations)
+        safety.native_io_path(Path(directory) / "catalog.json").write_bytes(encoded(catalog))
+        return catalog
+
+    def repository_pattern(self, **kwargs):
+        pattern = brand_pattern(**kwargs)
+        self.publish_patterns(self.repo / ".claude/patterns", "repo.main", [pattern])
+        self.write_json(".claude/patterns/bindings.json", {"schema_version": 1, "bindings": [
+            pattern_binding("brand", [pattern_ref("repo.main", pattern)])]})
+        return pattern
+
+    def pattern_roots(self):
+        return pat.parse_roots(pat.build_envelope(self.repo, self.config.home,
+                                                  pat.pack_context_from_profile(self.profile)))
+
+    def pattern_lock(self, overrides=None, lock=None):
+        """Resolve with the real core and write the lock where the direct-entry rule puts it."""
+        context = {"schema_version": 1, "facts": {"artifact": "website"}, "evidence": {"artifact": "brief with spaces.md"}}
+        self.write_json(self.CONTEXT, context)
+        parsed = pat.parse_context(context)
+        report = pat.resolve(self.pattern_roots(), parsed,
+                             overrides=pat.parse_overrides(overrides) if overrides else ())
+        self.assertEqual(report["status"], "ready", report["diagnostics"])
+        built = pat.build_lock(report, parsed)
+        pat.write_lock(self.pattern_roots(), self.repo / (lock or self.LOCK), built)
+        return built
+
+    def load_patterned(self, spec, *, lock=LOCK, context=CONTEXT, extra=(), path=None):
+        target = path or self.SPEC_PATH
+        self.write_json(target, spec)
+        selection = [".claude/patterns"] if safety.native_io_path(self.repo / ".claude/patterns").exists() else []
+        kwargs = {} if lock is None else {"pattern_lock": lock, "pattern_context": context}
+        return design.load_design(self.repo, target, expected=self.prepare([*selection, *extra]),
+                                  profile_config=self.config, **kwargs)
+
+    def profiles_digest(self):
+        root = safety.native_io_path(SOURCE / "skills/design-dna/profiles")
+        return {item.name: hashlib.sha256(item.read_bytes()).hexdigest() for item in sorted(root.rglob("*"))
+                if item.is_file()}
+
+    def test_verified_repository_pattern_default_outranks_the_pinned_profile_palette(self):
+        before = self.profiles_digest()
+        self.assertEqual(self.leaves["color.ink"].lower(), "#141413")
+        self.repository_pattern()
+        lock = self.pattern_lock()
+        spec = pv.project_visual(self.spec, lock)["spec"]
+        self.assertEqual(spec["palette"]["tokens"]["ink"], "#112233")
+        loaded = self.load_patterned(spec)
+        self.assertEqual(loaded["design"]["palette"]["tokens"]["ink"], "#112233")
+        self.assertEqual(loaded["verification"], "current_inputs")
+        self.write_json(".claude/runtime/expected.json", self.prepare([".claude/patterns"]))
+        mapped = self.run_process([
+            sys.executable, "-B", SOURCE / "skills/design-dna/scripts/design_contract.py",
+            "renderer-args", "--repo", self.repo, "--file", self.SPEC_PATH,
+            "--expected", ".claude/runtime/expected.json", "--out", "out with spaces",
+            "--profile-home", self.config.home, "--profile-packs", self.config.packs,
+            "--profile-pointer", self.config.pointer,
+            "--pattern-lock", self.LOCK, "--pattern-context", self.CONTEXT,
+        ])
+        self.assertEqual(mapped.returncode, 0, mapped.stdout)
+        self.assertEqual(self.profiles_digest(), before, "profile files are never modified")
+        self.assertEqual(design.profile_asset(self.profile, self.config)[1]["color.ink"].lower(), "#141413")
+
+    def test_verified_pack_pattern_default_outranks_the_pinned_profile_palette(self):
+        packs = Path(self.env["LINTEL_PACKS_DIR"])
+        team = packs / "team"
+        safety.native_io_path(team).mkdir(parents=True)
+        safety.native_io_path(team / "pack.yaml").write_bytes(
+            b"name: team\nversion: 1.0.0\nvoice: {default_tier: internal}\ncompliance: {mode: advisory}\n"
+            b"navigation: {default_workflow: cycle}\npatterns: {source: patterns/catalog.json}\n")
+        safety.native_io_path(packs / "active-pack").write_bytes(b"team\n")
+        pattern = brand_pattern()
+        self.publish_patterns(team / "patterns", "team.patterns", [pattern], bindings=[
+            pattern_binding("team-brand", [pattern_ref("team.patterns", pattern)], role="default")])
+        self.config = ProfileConfig(SOURCE, self.repo, self.home / "lintel", packs, packs / "active-pack",
+                                    context_id="synthetic-pack")
+        self.profile = load_profile_context(self.config, create=True)
+        self.assertEqual(pat.pack_context_from_profile(self.profile)["identity"]["name"], "team")
+        spec = deepcopy(self.spec)
+        spec["binding"]["profile_ref"] = profile_reference(self.profile)
+        spec["binding"]["profile_asset"] = design.profile_asset(self.profile, self.config)[0]
+        self.prepare_input["profile"] = profile_reference(self.profile)
+        self.prepare_input["required_policy"] = required_policy(self.profile)
+        lock = self.pattern_lock()
+        self.assertEqual([item["scope"] for item in lock["selected"]], ["pack"])
+        projected = pv.project_visual(spec, lock)["spec"]
+        self.assertEqual(self.load_patterned(projected)["design"]["palette"]["tokens"]["ink"], "#112233")
+        self.assertFalse(safety.native_io_path(self.repo / ".claude/patterns").exists())
+
+    def test_without_a_verified_selection_the_profile_palette_still_needs_a_brief_override(self):
+        self.repository_pattern()
+        lock = self.pattern_lock()
+        projected = pv.project_visual(self.spec, lock)["spec"]
+        with self.assertRaisesRegex(ValueError, "pattern_context"):
+            self.load_patterned(projected, lock=None)
+        bare = deepcopy(self.spec)
+        bare["palette"]["tokens"]["ink"] = "#112233"
+        with self.assertRaisesRegex(ValueError, "without a brief override"):
+            self.load_patterned(bare, lock=None)
+        bare["binding"]["overrides"] = [{"field": "palette.ink", "reason": "Explicit brief direction",
+                                         "evidence": self.ref("brief with spaces.md")}]
+        self.assertEqual(self.load_patterned(bare, lock=None)["design"]["palette"]["tokens"]["ink"], "#112233")
+
+    def test_forged_contexts_projections_and_winners_never_authorize_the_palette(self):
+        self.repository_pattern()
+        lock = self.pattern_lock()
+        projected = pv.project_visual(self.spec, lock)["spec"]
+        claimed = deepcopy(projected)
+        claimed["palette"]["tokens"]["ink"] = "#445566"
+        with self.assertRaises(ValueError, msg="a caller-claimed winner differs from the verified lock"):
+            self.load_patterned(claimed)
+        forged = deepcopy(projected)
+        forged["pattern_context"]["selection_digest"] = "f" * 64
+        with self.assertRaises(ValueError, msg="a forged pattern_context digest"):
+            self.load_patterned(forged)
+        edited = deepcopy(lock)
+        edited["settings"]["visual.palette.ink"]["value"] = "#445566"
+        self.write_json(self.LOCK, edited)
+        with self.assertRaises(ValueError, msg="an edited lock"):
+            self.load_patterned(claimed)
+        self.write_json("locks/forged.lock.json", lock)
+        with self.assertRaisesRegex(ValueError, "not bound", msg="a lock outside the P05 selection"):
+            self.load_patterned(projected, lock="locks/forged.lock.json")
+        for foreign in ("../outside.lock.json", str(self.base / "outside.lock.json")):
+            with self.assertRaises((ValueError, OSError), msg="a caller-selected foreign lock path"):
+                self.load_patterned(projected, lock=foreign)
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            self.load_patterned(projected, context=None)
+
+    def test_stale_revoked_missing_or_conflicting_selections_block_before_output(self):
+        pattern = self.repository_pattern()
+        lock = self.pattern_lock()
+        projected = pv.project_visual(self.spec, lock)["spec"]
+        self.assertEqual(self.load_patterned(projected)["design"]["palette"]["tokens"]["ink"], "#112233")
+        self.write_json(self.CONTEXT, {"schema_version": 1, "facts": {"artifact": "report"},
+                                       "evidence": {"artifact": "brief with spaces.md"}})
+        with self.assertRaisesRegex(ValueError, "context_changed"):
+            self.load_patterned(projected)
+        self.pattern_lock_path_reset(pattern)
+        with self.assertRaisesRegex(ValueError, "Pattern selection", msg="revoked pin"):
+            self.load_patterned(projected)
+        self.publish_patterns(self.repo / ".claude/patterns", "repo.main", [brand_pattern(value="#998877")])
+        with self.assertRaisesRegex(ValueError, "Pattern selection", msg="changed pinned source"):
+            self.load_patterned(projected)
+        safety.native_io_path(self.repo / self.LOCK).unlink()
+        with self.assertRaisesRegex(ValueError, "unreadable", msg="missing lock"):
+            self.load_patterned(projected)
+        self.assertFalse(safety.native_io_path(self.repo / "out with spaces").exists())
+
+    def pattern_lock_path_reset(self, pattern):
+        """Restore the current context, then revoke the pinned version in its catalog."""
+        self.write_json(self.CONTEXT, {"schema_version": 1, "facts": {"artifact": "website"},
+                                       "evidence": {"artifact": "brief with spaces.md"}})
+        self.publish_patterns(self.repo / ".claude/patterns", "repo.main", [pattern], revocations=[{
+            "id": pattern["id"], "version": pattern["version"], "sha256": pat.content_digest(pattern),
+            "reason": "Synthetic revocation", "reference": "decision-2", "at": PATTERN_TS}])
+
+    def test_brief_beats_a_pattern_default_but_never_a_mandatory_clause(self):
+        self.repository_pattern()
+        override = {"schema_version": 1, "items": [{
+            "setting": "visual.palette.ink", "value": "#aabbcc", "reason": "brief",
+            "approval_ref": "brief with spaces.md", "replaces": ["example.brand@1.0.0#INK"]}]}
+        lock = self.pattern_lock(overrides=override)
+        self.assertEqual(lock["settings"]["visual.palette.ink"]["value"].lower(), "#aabbcc")
+        spec = pv.project_visual(self.spec, lock)["spec"]
+        spec["binding"]["overrides"] = [{"field": "palette.ink", "reason": "Explicit brief direction",
+                                         "evidence": self.ref("brief with spaces.md")}]
+        self.assertEqual(self.load_patterned(spec)["design"]["palette"]["tokens"]["ink"], "#aabbcc")
+        safety.native_io_path(self.repo / self.LOCK).unlink()
+        self.repository_pattern(level="must")
+        context = pat.parse_context({"schema_version": 1, "facts": {"artifact": "website"},
+                                     "evidence": {"artifact": "brief with spaces.md"}})
+        refused = pat.resolve(self.pattern_roots(), context, overrides=pat.parse_overrides(override))
+        self.assertEqual(refused["status"], "conflict", "a brief override never bypasses a must clause")
+        must = self.pattern_lock()
+        briefed = pv.project_visual(self.spec, must)["spec"]
+        briefed["palette"]["tokens"]["ink"] = "#aabbcc"
+        briefed["binding"]["overrides"] = spec["binding"]["overrides"]
+        with self.assertRaises(ValueError, msg="the brief colour contradicts the mandatory winner"):
+            self.load_patterned(briefed)
+
+    def test_pattern_inputs_must_be_current_in_the_p05_selection(self):
+        self.repository_pattern()
+        lock = self.pattern_lock()
+        projected = pv.project_visual(self.spec, lock)["spec"]
+        self.write_json(self.SPEC_PATH, projected)
+        expected = self.prepare()
+        with self.assertRaisesRegex(ValueError, "not bound", msg="repository pattern sources are unselected"):
+            design.load_design(self.repo, self.SPEC_PATH, expected=expected, profile_config=self.config,
+                               pattern_lock=self.LOCK, pattern_context=self.CONTEXT)
+        expected = self.prepare([".claude/patterns"])
+        self.write_json(".claude/patterns/bindings.json", {"schema_version": 1, "bindings": []})
+        with self.assertRaisesRegex(ValueError, "not bound|content changed",
+                                    msg="a pattern source changed after selection"):
+            design.load_design(self.repo, self.SPEC_PATH, expected=expected, profile_config=self.config,
+                               pattern_lock=self.LOCK, pattern_context=self.CONTEXT)
+
+    def test_no_pattern_and_pipeline_routes_through_the_real_loader(self):
+        pattern = brand_pattern()
+        self.publish_patterns(self.repo / ".claude/patterns", "repo.main", [pattern])
+        self.write_json(".claude/patterns/bindings.json", {"schema_version": 1, "bindings": [
+            dict(pattern_binding("brand", [pattern_ref("repo.main", pattern)]), when={"artifact": ["service"]})]})
+        context = pat.parse_context({"schema_version": 1, "facts": {"artifact": "website"},
+                                     "evidence": {"artifact": "brief with spaces.md"}})
+        empty = pat.resolve(self.pattern_roots(), context)
+        self.assertEqual((empty["status"], empty["selected"]), ("empty", []))
+        unchanged = pv.project_visual(self.spec, empty, context=context)["spec"]
+        self.assertEqual(unchanged, self.spec)
+        self.assertEqual(self.load_patterned(unchanged, lock=None)["design"]["palette"]["tokens"]["ink"], "#141413")
+        self.repository_pattern()
+        lock = self.pattern_lock()
+        web = pv.project_visual(self.spec, lock)["spec"]
+        binding = web.pop("binding")
+        del web["source"], web["pattern_context"]
+        self.write("run with spaces/content.md", b"Selected pipeline content.\n")
+        binding["brief"] = self.ref("run with spaces/content.md")
+        pipeline = {"version": "1.0", "schema_version": 1, "source": "pipeline",
+                    "palette": {"text_dark": "#112233", "background": "#faf9f5"},
+                    "fonts": {"heading": "Poppins", "body": "Lora"}, "per_format": {"web": {"sections": []}},
+                    "web_design": web, "binding": binding,
+                    "pattern_context": pv.design_attachment(lock, "patterns.lock.json")}
+        path = "run with spaces/design-spec.json"
+        loaded = self.load_patterned(pipeline, path=path)
+        self.assertEqual(loaded["design"]["palette"]["tokens"]["ink"], "#112233")
+        with self.assertRaisesRegex(ValueError, "pattern_context", msg="pipeline attachment without its lock"):
+            self.load_patterned(pipeline, lock=None, path=path)
+        drifted = deepcopy(pipeline)
+        drifted["web_design"]["palette"]["tokens"]["ink"] = "#445566"
+        drifted["palette"]["text_dark"] = "#445566"
+        with self.assertRaisesRegex(ValueError, "verified pattern selection"):
+            self.load_patterned(drifted, path=path)
 
     def test_cli_rejects_duplicates_unknown_options_and_unknown_versions(self):
         cli = [sys.executable, "-B", SOURCE / "skills/design-dna/scripts/design_contract.py",

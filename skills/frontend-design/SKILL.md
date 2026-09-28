@@ -188,8 +188,10 @@ versions/licenses; empty lists are valid.
 ### Step 6 — Call rendering-engine
 
 Prepare the external P05 input context, then call the shared helper's
-`renderer-args` operation with the explicit target/profile paths. It validates
-current bytes and returns a literal argument array:
+`renderer-args` operation with the explicit target/profile paths. With a `ready` pattern
+selection, also pass `--pattern-lock` and `--pattern-context`, and select both files plus
+`.claude/patterns` in the P05 context; only this verified selection admits a pattern palette
+winner over the pinned profile. It validates current bytes and returns a literal argument array:
 
 - `single-file` -> `generate-web --from-frontend-design <run> --variant single-file --out <out>`
 - `nextjs` -> `generate-web --from-frontend-design <run> --variant nextjs-scaffold --out <out>`

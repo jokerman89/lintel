@@ -229,6 +229,11 @@ reference, not proof of resolution: consumers verify it before use.
   `refs=`; the core then rechecks the report's digest against those inputs. A bare, stored or
   edited report is `selection_not_usable`. Separate entries (design, render, review) exchange
   the lock, never a report.
+- **Loading a bound spec.** `design_contract.load_design` (and `renderer-args`/`review`) takes the
+  lock and the current context as `pattern_lock`/`pattern_context`. Only that verified selection
+  lets a pattern palette winner outrank the pinned Design DNA profile. The lock, the context and
+  `.claude/patterns` are selected in the P05 context. A spec with a `pattern_context` but no lock
+  is refused; see the [design contract](../../design-dna/references/design-contract.md).
 
 ## Review evidence
 

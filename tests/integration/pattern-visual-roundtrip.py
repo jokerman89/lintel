@@ -457,7 +457,7 @@ class DirectEntryTests(unittest.TestCase):
         code, report, lock = self.direct_entry()
         self.assertEqual((code, report["status"]), (0, "ready"))
         self.assertTrue(self.lock_path.resolve().is_relative_to(self.fx.repo.resolve()),
-                        "the lock stays inside the repository run even when --out is elsewhere")
+                        "the lock is written inside the repository run")
         mandatory = [item["clause"] for item in report["requirements"] if item["state"] == "mandatory"]
         self.assertEqual(mandatory, ["example.web@1.0.0#MAX"], "the required clause reaches the design choice")
         base = visual_base_spec()

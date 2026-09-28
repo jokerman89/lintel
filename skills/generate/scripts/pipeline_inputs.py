@@ -199,6 +199,7 @@ def load_pipeline_inputs(
     selected_inputs: Sequence[str] = (), linked_authority: Optional[str] = None,
     upstream_request: Optional[str] = None, upstream_expected: Optional[dict[str, Any]] = None,
     upstream_profile: Optional[ProfileConfig] = None,
+    pattern_lock: Optional[str] = None, pattern_context: Optional[str] = None,
 ) -> dict[str, Any]:
     """Return full current source inputs and diagnostics, not a new persisted envelope."""
     root = safety.checked_root(repo)
@@ -283,7 +284,8 @@ def load_pipeline_inputs(
         raise ValueError("Canonical design source_content_hash mismatch")
     mixed = "web" in design["per_format"] or "web_design" in design or "binding" in design
     if mixed:
-        design_contract.load_design(root, design_ref["path"], expected=expected, profile_config=profile_config)
+        design_contract.load_design(root, design_ref["path"], expected=expected, profile_config=profile_config,
+                                    pattern_lock=pattern_lock, pattern_context=pattern_context)
     inputs = {}
     for path in selected_inputs:
         _, reference = _bound(root, path, expected)
@@ -342,6 +344,8 @@ def main() -> int:
     parser.add_argument("--linked-authority", action=_Once)
     parser.add_argument("--upstream-request", action=_Once)
     parser.add_argument("--upstream-expected", action=_Once)
+    parser.add_argument("--pattern-lock", action=_Once)
+    parser.add_argument("--pattern-context", action=_Once)
     for prefix, required in (("profile", True), ("upstream-profile", False)):
         for suffix in ("home", "packs", "pointer", "context-file"):
             parser.add_argument(f"--{prefix}-{suffix}", type=Path, action=_Once,
@@ -372,6 +376,7 @@ def main() -> int:
             upstream_request=args.upstream_request,
             upstream_expected=read_json(args.upstream_expected) if args.upstream_expected else None,
             upstream_profile=upstream_config,
+            pattern_lock=args.pattern_lock, pattern_context=args.pattern_context,
         )
         print(canonical_json(result))
         return 0

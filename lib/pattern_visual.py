@@ -32,7 +32,7 @@ import patterns as p  # noqa: E402
 
 __all__ = (
     "SETTINGS", "PALETTE_PREFIX", "LEGACY_MARKERS", "destination", "classify_document",
-    "legacy_to_draft", "stage_draft", "project_visual", "validate_visual", "design_attachment",
+    "legacy_to_draft", "stage_draft", "project_visual", "validate_visual", "palette_winners", "design_attachment",
     "verify_design_attachment",
 )
 
@@ -436,6 +436,27 @@ def validate_visual(spec: Mapping[str, Any], resolution: Mapping[str, Any], *,
     return {"schema_version": 1, "status": status, "selection_digest": digest, "checks": checks,
             "unverified_settings": sorted(unverified), "review_required": _review_required(resolution, unverified),
             "diagnostics": diagnostics, "clearance": False, "limits": _LIMITS_NOTE}
+
+
+def palette_winners(resolution: Mapping[str, Any], *, context: Optional[p.Context] = None, refs: Any = ()) -> dict:
+    """Final `visual.palette.<token>` winners of a checked selection, as lowercase colours.
+
+    `resolution` is a verified lock, or an in-process report with its `context`/`refs`. An empty
+    selection has no winners. A token winner that is not a colour is a conflict, never coerced.
+    """
+    resolution = _report(resolution, context, refs)
+    if resolution["status"] == "empty" and not resolution["selected"]:
+        return {}
+    _require_ready(resolution)
+    winners = {}
+    for setting, record in _winners(resolution):
+        target = destination(setting)
+        if target is None or target[0][:2] != ("palette", "tokens"):
+            continue
+        if not _typed("color", record["value"]):
+            _fail("visual_type_mismatch", f"{setting} needs a color value", "conflict")
+        winners[target[0][2]] = record["value"].lower()
+    return winners
 
 
 # ---------------------------------------------------------------- pipeline design-spec attachment

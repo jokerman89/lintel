@@ -45,7 +45,8 @@ The ordinary pipeline and frontend-design renderer routes remain unchanged.
    and the external P05/current P07 context. The same `schema_version: 1` and
    `source: frontend-design` contract applies. Do not pretend a raw token file,
    screenshot or missing binding is a resolved render-ready spec. With a `ready`
-   selection, `validate_visual` against the verified lock must pass before step 4.
+   selection, pass its lock and context to `load_design`, and `validate_visual` against the
+   verified lock must pass before step 4.
 4. Actually write one HTML document with a doctype, language, charset, viewport,
    meaningful title, semantic landmarks and accessible controls. Put CSS in
    `<style>` and only necessary demonstration interactions in `<script>`.

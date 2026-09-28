@@ -197,8 +197,9 @@ choice**:
    - `empty`: continue exactly as without patterns. Write no lock and no `pattern_context`.
    - `ready`: rerun the same command with `--lock
      .claude/runtime/patterns/<run-id>/patterns.lock.json`. The lock goes inside this repository
-     even when `--out` is elsewhere. Confirm the same `selection_digest`, then carry the full
-     requirements and setting winners into the design choices.
+     even when `--out` is elsewhere. Confirm the same `selection_digest`, then run
+     `li-pattern verify-lock` on the new lock against the same context; only `ok` continues.
+     Carry the full requirements and setting winners into the design choices.
    - Any other status blocks the dependent design decision and the render: `needs-context`,
      `conflict`, `unavailable` (including a pack context in `fallback` or `error`) and
      `invalid`. So does a run that prints no JSON report. Report the status; never
@@ -208,6 +209,9 @@ choice**:
    `pattern_context`, before that spec's P05 binding is prepared.
    - Never project after binding: that would change bytes the bound context already selected.
 4. Load the bound spec with `design_contract.load_design` and the current P07 configuration.
+   With a `ready` selection, pass `pattern_lock` and `pattern_context`, and select both files
+   plus `.claude/patterns` in the P05 context; this is what lets a verified pattern palette winner
+   outrank the pinned profile.
    Run `validate_visual` against the verified lock **before rendering**; only `passed`
    continues, and unknown settings stay open review items.
 

@@ -21,19 +21,24 @@ SCHEMA = "skills/design-dna/references/design-contract.schema.json"
 MAX_BYTES = 2 * 1024 * 1024
 
 
+def _trusted(relative: str) -> Path:
+    path = SOURCE / relative
+    for part in (path, *path.parents):
+        info = part.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise ImportError(f"Linked trusted design resource refused: {relative}")
+    if not path.is_file():
+        raise ImportError(f"Required trusted design resource missing: {relative}")
+    return path
+
+
 def _preflight() -> None:
     for relative in (
         SCHEMA, "skills/design-dna/scripts/emit_tokens.py", "lib/context_safety.py",
         "lib/native_paths.py", "lib/profile_context.py", "lib/profile-context-schema.json",
         "lib/review_contract.py", "lib/review-schema.json", "lib/markdown_source.py",
     ):
-        path = SOURCE / relative
-        for part in (path, *path.parents):
-            info = part.lstat()
-            if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
-                raise ImportError(f"Linked trusted design resource refused: {relative}")
-        if not path.is_file():
-            raise ImportError(f"Required trusted design resource missing: {relative}")
+        _trusted(relative)
 
 
 _preflight()
@@ -316,8 +321,96 @@ def _project(binding: dict, repo: Path, expected: dict) -> None:
         raise DesignError("Selected project technology contradicts or lacks manifest evidence")
 
 
-def load_design(repo: Path, path: str, *, expected: dict, profile_config: ProfileConfig) -> dict:
-    """Verify existing context and exact selected inputs; never bootstrap/rebind or render."""
+PATTERN_SOURCE = ".claude/patterns"
+
+
+def _selected_bytes(repo: Path, path: str, expected: dict, label: str) -> bytes:
+    """Read one repository input that the external P05 context must select with its current bytes."""
+    if not isinstance(path, str) or not path.strip():
+        raise DesignError(f"{label} needs a repository-relative path")
+    relative = safety.selector_path(path)
+    try:
+        _, state = safety.read_owned(repo, relative, MAX_BYTES)
+    except FileNotFoundError:
+        raise DesignError(f"{label} is unreadable: {relative}") from None
+    return _bound(repo, {"path": relative, "sha256": state["sha256"]}, expected)
+
+
+def _pattern_palette(repo: Path, data: dict, kind: str, design: dict, *, expected: dict, record: dict,
+                     profile_config: ProfileConfig, pattern_lock: Optional[str],
+                     pattern_context: Optional[str]) -> dict:
+    """Palette winners of a verified pattern selection (ADR-0038 spec section 9 precedence).
+
+    Only a lock that the core `verify_lock` accepts against the supplied current context admits a
+    palette value that differs from the pinned profile. The lock, the context and every
+    repository pattern source file must be selected by the external P05 context. The roots
+    are this repository, the P07 home and the pack context of the verified P07 record, never a
+    caller-selected root. A `pattern_context` in the spec is a reference, never authority: without a
+    lock it blocks, and with one it must match. Pack and personal pattern bytes are pinned by
+    the lock and re-read by `verify_lock`.
+    """
+    attached = data.get("pattern_context")
+    if pattern_lock is None and pattern_context is None:
+        if attached is not None:
+            raise DesignError("Design carries a pattern_context; supply its verified pattern lock and current context")
+        return {}
+    if pattern_lock is None or pattern_context is None:
+        raise DesignError("A pattern lock and its current pattern context are supplied together")
+    for relative in ("lib/patterns.py", "lib/pattern_visual.py"):
+        _trusted(relative)
+    import patterns as p
+    import pattern_visual as pv
+    lock_raw = _selected_bytes(repo, pattern_lock, expected, "Pattern lock")
+    context_raw = _selected_bytes(repo, pattern_context, expected, "Pattern context")
+    tree = safety.native_io_path(safety.safe_path(repo, PATTERN_SOURCE))
+    if tree.exists():
+        for item in sorted(tree.rglob("*")):
+            if item.is_file() or item.is_symlink():
+                _selected_bytes(repo, f"{PATTERN_SOURCE}/{item.relative_to(tree).as_posix()}", expected,
+                                "Repository pattern source")
+    try:
+        lock = p.parse_lock(p.parse_json(lock_raw, limit=p.LIMITS.catalog_bytes, what="pattern lock"))
+        context = p.parse_context(p.parse_json(context_raw, limit=p.LIMITS.input_bytes, what="pattern context"))
+        roots = p.parse_roots(p.build_envelope(repo, profile_config.home, p.pack_context_from_profile(record)))
+        verified = p.verify_lock(roots, lock, context)
+        if verified["status"] != "ok":
+            codes = ", ".join(item["code"] for item in verified["diagnostics"] if item.get("severity") == "error")
+            raise DesignError(f"Pattern selection is not current ({verified['status']}): {codes}")
+        if not isinstance(attached, dict) or attached.get("selection_digest") != lock["selection_digest"]:
+            raise DesignError("Design pattern_context does not match the verified pattern lock")
+        if kind == "frontend":
+            checked = pv.validate_visual(data, lock)
+            if checked["status"] not in ("passed", "incomplete"):
+                failed = [item["setting"] for item in checked["checks"] if item["status"] == "failed"]
+                raise DesignError(f"Design differs from the verified pattern selection: {', '.join(failed) or 'context'}")
+        else:
+            lock_ref = attached.get("lock_ref")
+            relative = safety.selector_path(pattern_lock)
+            if not isinstance(lock_ref, str) or not (relative == lock_ref or relative.endswith("/" + lock_ref)):
+                raise DesignError("Pipeline pattern_context lock_ref does not name the supplied pattern lock")
+            lock_root = repo / relative[: len(relative) - len(lock_ref)].rstrip("/")
+            attachment = pv.verify_design_attachment(roots, lock_root, attached, context)
+            if attachment["status"] != "ok":
+                raise DesignError(f"Pipeline pattern attachment is not current ({attachment['status']})")
+        winners = pv.palette_winners(lock)
+    except p.PatternError as error:
+        raise DesignError(f"Pattern selection is unusable ({error.status}): {error.code}") from None
+    tokens = {key: value.lower() for key, value in design["palette"]["tokens"].items()}
+    for key, value in winners.items():
+        if tokens.get(key) != value:
+            raise DesignError(f"Palette differs from the verified pattern selection: {key}")
+    return winners
+
+
+def load_design(repo: Path, path: str, *, expected: dict, profile_config: ProfileConfig,
+                pattern_lock: Optional[str] = None, pattern_context: Optional[str] = None) -> dict:
+    """Verify existing context and exact selected inputs; never bootstrap/rebind or render.
+
+    `pattern_lock` and `pattern_context` are optional repository-relative paths of a pattern lock
+    and the current resolution context, both selected by `expected`. They are the only way a
+    selected pattern palette winner outranks the pinned profile (spec precedence: brief >
+    repository > pack > personal pattern defaults > profile > corpus).
+    """
     root = safety.checked_root(repo)
     if profile_config.repo != root or profile_config.source != SOURCE.resolve():
         raise DesignError("Profile configuration must name this target and trusted source")
@@ -354,9 +447,13 @@ def load_design(repo: Path, path: str, *, expected: dict, profile_config: Profil
     for item in overrides.values():
         if item["evidence"] != binding["brief"]:
             raise DesignError("Aesthetic override needs the selected brief as evidence")
+    admitted = _pattern_palette(root, data, result["kind"], design, expected=expected, record=record,
+                                profile_config=profile_config, pattern_lock=pattern_lock,
+                                pattern_context=pattern_context)
     for key, value in design["palette"]["tokens"].items():
         pinned = leaves.get(f"color.{key}")
-        if pinned is not None and value.lower() != pinned.lower() and f"palette.{key}" not in overrides:
+        if pinned is not None and value.lower() != pinned.lower() and f"palette.{key}" not in overrides \
+                and admitted.get(key) != value.lower():
             raise DesignError(f"Palette differs from pinned profile without a brief override: {key}")
     for font in design["typography"]["font_stacks"]:
         role = "display" if font["role"] == "heading" else font["role"]
@@ -435,8 +532,10 @@ def validate_review(data: dict, dimensions: Optional[list[str]] = None) -> dict:
 
 def review_result(data: dict, *, repo: Path, expected: dict, qa: dict,
                   design_path: str, profile_config: ProfileConfig,
-                  dimensions: Optional[list[str]] = None) -> dict:
-    load_design(repo, design_path, expected=expected, profile_config=profile_config)
+                  dimensions: Optional[list[str]] = None, pattern_lock: Optional[str] = None,
+                  pattern_context: Optional[str] = None) -> dict:
+    load_design(repo, design_path, expected=expected, profile_config=profile_config,
+                pattern_lock=pattern_lock, pattern_context=pattern_context)
     advisory = validate_review(data, dimensions)
     controls = verify_qa(repo, qa, expected=expected)
     return {"advisory": advisory, "controls": controls, "blocked": controls["blocked"],
@@ -468,6 +567,8 @@ def main() -> int:
             for flag in ("home", "packs", "pointer"):
                 command.add_argument(f"--profile-{flag}", type=Path, required=True, action=_Once)
             command.add_argument("--profile-context-file", type=Path, action=_Once)
+            command.add_argument("--pattern-lock", action=_Once)
+            command.add_argument("--pattern-context", action=_Once)
         if name == "renderer-args":
             command.add_argument("--out", required=True, action=_Once)
         if name == "review":
@@ -485,7 +586,8 @@ def main() -> int:
             config = ProfileConfig(SOURCE, args.repo, args.profile_home, args.profile_packs,
                                    args.profile_pointer, context_file=args.profile_context_file)
             if args.command == "renderer-args":
-                loaded = load_design(args.repo, args.file, expected=expected, profile_config=config)
+                loaded = load_design(args.repo, args.file, expected=expected, profile_config=config,
+                                     pattern_lock=args.pattern_lock, pattern_context=args.pattern_context)
                 result = {**renderer_args(loaded, out=args.out), "verification": "current_inputs",
                           "executed": False, "release_clearance": False}
             else:
@@ -493,7 +595,8 @@ def main() -> int:
                 qa, _ = read_document(args.repo, args.qa)
                 result = review_result(data, repo=args.repo, expected=expected, qa=qa,
                                        design_path=args.design, profile_config=config,
-                                       dimensions=args.dimensions.split(",") if args.dimensions else None)
+                                       dimensions=args.dimensions.split(",") if args.dimensions else None,
+                                       pattern_lock=args.pattern_lock, pattern_context=args.pattern_context)
         print(canonical_json(result))
         return 3 if result.get("blocked") else 0
     except (ValueError, OSError, UnicodeError) as error:

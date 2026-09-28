@@ -83,13 +83,40 @@ Python:
 ```python
 validate_spec(data, kind=None)  # frontend/pipeline, or typography/motion/shader fragments; shape only
 profile_asset(verified_profile_record, explicit_profile_config)  # asset ref, scalar leaves
-load_design(repo, path, expected=prepared_context, profile_config=explicit_profile_config)
+load_design(repo, path, expected=prepared_context, profile_config=explicit_profile_config,
+            pattern_lock=None, pattern_context=None)  # optional verified pattern selection
 renderer_args(loaded_design, out="explicit relative output")
 normalize_dimensions(["typography", "accessibility"])  # canonical long keys
 validate_review(data, dimensions=None)  # advisory only
 review_result(data, repo=repo, expected=prepared_context, qa=p05_qa,
-              design_path=selected_spec, profile_config=explicit_profile_config)
+              design_path=selected_spec, profile_config=explicit_profile_config,
+              pattern_lock=None, pattern_context=None)
 ```
+
+**Reusable patterns (ADR-0038, spec section 9).** A pinned profile palette colour normally
+changes only through a brief-evidenced override. `pattern_lock` and `pattern_context` are
+repository-relative paths of a pattern lock and the current resolution context. They are the
+only way a selected pattern palette winner, such as a repository or pack default, outranks the
+pinned profile. The profile and corpus files stay unchanged.
+
+- **Verification.** The loader imports the trusted `lib/patterns.py` and `lib/pattern_visual.py`
+  only then. It runs the core `verify_lock` against that context, with roots taken from this
+  repository, the P07 home and the verified P07 record's pack context. Only `ok` continues.
+- **Consistency checks:**
+  - The spec's `pattern_context` must name the same selection.
+  - A frontend spec must pass `validate_visual`.
+  - A pipeline attachment must pass `verify_design_attachment`, with its `lock_ref` naming
+    the supplied lock.
+  - Every palette winner must equal the design's value.
+- **P05 selection.** The lock, the context and every file under `.claude/patterns` must be
+  selected by the external P05 context with their current bytes. Pack and personal pattern
+  bytes are pinned by the lock and re-read by `verify_lock`.
+- **References are not authority.** A spec that carries a `pattern_context` without a supplied
+  lock is refused. Neither a forged context nor a caller-claimed winner admits anything.
+- **Precedence.** Pass explicit brief decisions to the resolver as `--overrides`: the verified
+  winner then reflects brief precedence. A brief never bypasses a `must` clause, because
+  resolution is a conflict.
+- **No pattern.** Without a pattern selection, loading is unchanged.
 
 All file inputs use accepted P03 rooted, no-link, bounded reads. JSON is parsed by
 P05. The context/work/controls and profile reference are validated by P05/P07,
@@ -103,7 +130,8 @@ The CLI exposes `validate`, `renderer-args` and `review`. `validate --kind` sele
 render readiness. Every option occurs
 once; unknown, duplicate or missing options fail. Supply explicit `--repo` and
 `--file`. `renderer-args` also requires `--expected`, `--out`, `--profile-home`,
-`--profile-packs`, `--profile-pointer`, with optional `--profile-context-file`.
+`--profile-packs`, `--profile-pointer`, with optional `--profile-context-file`, and optional
+`--pattern-lock` with `--pattern-context` (supplied together).
 `review` requires `--expected`, `--qa`, `--design` and the same explicit profile
 configuration, and accepts `--dimensions`.
 All data paths are literal repository-relative paths, with Windows separators
