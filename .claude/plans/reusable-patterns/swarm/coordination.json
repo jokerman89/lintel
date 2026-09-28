@@ -133,7 +133,8 @@
         "tests/unit/pattern-visual.py",
         "tests/unit/pattern-visual.sh",
         "tests/integration/pattern-visual-roundtrip.py",
-        "tests/integration/pattern-visual-roundtrip.sh"
+        "tests/integration/pattern-visual-roundtrip.sh",
+        "tests/integration/pattern_consumer_fixtures.py"
       ],
       "brief": ".claude/plans/reusable-patterns/swarm/briefs/WF.md",
       "report": ".claude/plans/reusable-patterns/swarm/reports/WF.md",
