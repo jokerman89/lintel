@@ -805,8 +805,12 @@ def native_link(link: str, canonical: str, generated: str, source: Path, files: 
     parsed = urlsplit(link)
     directory = parsed.path.endswith("/")
     if local:
-        if not native_io_path(safe_path(source, target)).exists():
+        present = native_io_path(safe_path(source, target))
+        if not present.exists():
             raise ValueError(f"Missing canonical link target: {canonical} -> {link}")
+        # Verification accepts a directory only through a trailing '/', so refuse it here, not later.
+        if present.is_dir() and not directory:
+            raise ValueError(f"Directory link needs a trailing '/': {canonical} -> {link}")
         resolved = target
     else:
         resolved = f"{BUNDLE}/{target}"

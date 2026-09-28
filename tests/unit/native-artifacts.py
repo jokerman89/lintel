@@ -259,6 +259,21 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing canonical link target: skills/plan/SKILL.md"):
             self.render("plan")
 
+    def test_directory_links_without_a_trailing_slash_are_errors(self):  # N2
+        bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        for link in ("../define/references", "../define/references#top"):
+            with self.subTest(link=link):
+                self.skill("plan", "Plans.", f"\n[References]({link})\n")
+                with self.assertRaises(ValueError) as caught:
+                    self.render("plan")
+                self.assertEqual(str(caught.exception),
+                                 f"Directory link needs a trailing '/': skills/plan/SKILL.md -> {link}")
+                # Vendored mode already refuses a bundled component directory without the slash.
+                with self.assertRaisesRegex(ValueError, "Missing bundled source target: skills/plan/SKILL.md"):
+                    self.render("plan", local=False, files=bundled)
+        self.skill("plan", "Plans.", "\n[References](../define/references/)\n")
+        self.assertIn("\n[References](../../../skills/define/references/)\n", self.render("plan"))
+
     def test_vendored_links_stay_bundled_or_become_public_urls(self):  # 1.2.b
         self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md)\n"
                    "[Decision](../../.claude/decisions/x.md#a)\n[Tests](../../tests/)\n"
