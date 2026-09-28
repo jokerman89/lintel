@@ -43,7 +43,10 @@ NATIVE_HOSTS = {
 }
 ```
 
-### Skill preamble (exact text; `{root}` is `../../..` locally or `../../lintel` vendored; `{canonical}` is the canonical path)
+`description_limit` applies to skill and agent descriptions alike; a longer description is a
+generation error that names the canonical file (review finding L5).
+
+### Skill preamble (exact text; `{root}` is `../../..` locally or `../../lintel` vendored; `{canonical}` is the canonical path; `{name}` is the canonical skill folder name)
 
 ```markdown
 > **Lintel on GitHub Copilot.** Generated from `{canonical}`; edit the canonical file, then run
@@ -51,6 +54,10 @@ NATIVE_HOSTS = {
 > - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
 >   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
 >   tree, never into the resource root.
+> - **Skill-relative paths:** paths relative to this skill's own folder (such as `<base>`,
+>   `scripts/`, `references/`, `data/` or `${LINTEL_SKILLS_DIR:-skills}/…`) mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder. `bin/li-run` exports
+>   `LINTEL_SKILLS_DIR` for shell steps.
 > - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
 >   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
 >   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
@@ -62,10 +69,25 @@ NATIVE_HOSTS = {
 >   files. Named roles such as `CodeReviewer` are custom agents.
 ```
 
-The agent preamble uses the same first two bullets (the agent file's directory is `.github/agents`,
-so `{root}` is `../..` locally or `../lintel` vendored), plus one line: "You were delegated by a
-Lintel workflow; stay inside the supplied task and report changed files, checks run, findings by
-severity and limitations."
+The skill-relative paths bullet was added after review finding M2. `bin/li-run` sets
+`LINTEL_SKILLS_DIR` to `<resource root>/skills` unless the variable is already set.
+
+The agent preamble has no skill folder, so it omits the skill-relative paths bullet. The agent file's
+directory is `.github/agents`, so `{root}` is `../..` locally or `../lintel` vendored. This is its exact
+text; it replaces the earlier "same first two bullets" wording (review finding L3):
+
+```markdown
+> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
+>   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
+>   `.claude/` tree, never into the resource root.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+>
+> You were delegated by a Lintel workflow; stay inside the supplied task and report changed files,
+> checks run, findings by severity and limitations.
+```
 
 ### Recorded payloads (Copilot CLI 1.0.89, probes 2026-09-28; sanitized)
 
@@ -107,11 +129,21 @@ The camelCase `preToolUse`/`postToolUse` shapes below were **recorded live** (pr
   - **Local mode:** `posixpath.relpath(target, generated_dir)`, and the target must exist.
   - **Vendored mode:** if `BUNDLE/target` is in the generated files, use the relative path.
     Otherwise use `https://github.com/jokerman89/lintel/{blob|tree}/main/<quoted target>`, keeping the
-    fragment, following `bundle_documentation`.
+    fragment, following `bundle_documentation`. Native skill and agent files that carry such a
+    public URL get no separate source note. `shims/copilot/COPILOT.md` documents the policy (review
+    finding L7).
+  - **Both modes:**
+    - a link's query string and fragment are kept (`intake.md?plain=1#L3`; review finding L2);
+    - a link ending in `/` may name an existing directory, and verification accepts it the same way
+      (review finding L1);
+    - a missing target is still an error.
+- **Normalization:** one blank line separates the preamble from the body, and trailing whitespace at
+  the end of the file becomes exactly one final newline. Reviewed and accepted as is.
 - **Degradations recorded in docs:**
   - agents lose `memory`, `model`, `color`, `tier`, `voice`, `category` and `cli_support`;
-  - skills lose `layer`, `color`, `tools`, `voice`, `cli_support`, `necessity`, `gap_if_skipped` and
-    `navigation`.
+  - skills lose `layer`, `color`, `tools`, `voice`, `cli_support`, `necessity`, `gap_if_skipped`,
+    `navigation`, `workflow_root`, `domain`, `license_note` and `hop_in` (the last four added from
+    review finding L4).
 
 ### Hook registration mapping (from `hooks/hooks.json`)
 
