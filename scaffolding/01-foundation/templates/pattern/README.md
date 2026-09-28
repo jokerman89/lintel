@@ -43,8 +43,10 @@ Keep a source-local `.gitattributes` beside the catalog, as `example/.gitattribu
 - **Repository source:** put it at `.claude/patterns/.gitattributes`.
 - **Pack source:** put it in the directory that holds the pack's pattern catalog.
 
-Git applies the most specific attributes file, so this changes only the pattern source. It never
-rewrites an existing file.
+Git applies the most specific in-tree attributes file, so this changes only the pattern source.
+A repository's `.git/info/attributes` still overrides it. It never rewrites an existing file.
+`-text` stops line-ending conversion only. It does not disable clean/smudge filters, LFS,
+`working-tree-encoding` or `ident`; check those against the repository policy too.
 
 If your repository already has an authoritative attributes policy for that path, do not override
 it silently. Either decide explicitly to adopt `* -text` for the pattern source, or commit the
@@ -52,6 +54,16 @@ assets with bytes the policy already preserves. Then re-check with `li-pattern c
 
 Git is not a runtime requirement: patterns work from any directory, and this matters only when
 the source travels through Git.
+
+## Portable kit boundary
+
+The portable Copilot kit copies text files with LF line endings. The canonical example is LF-only,
+so the kit's copy is byte-identical and its digests hold. A shape check enforces this. Author your
+own CRLF or binary assets in your repository or pack source, not in the kit's template directory.
+
+## Windows path length
+
+Windows path length: the runtime opens pattern files with ordinary paths, so without Windows long-path support a pattern file whose full path exceeds about 260 characters is reported missing (fail-closed, never success). The bundled kit's deepest path is the example asset directory, so on Windows PowerShell 5.1 with `LongPathsEnabled=0` the bare installer needs a correspondingly short Lintel home: a home near 108 characters was observed to work and near 134 characters to fail, recoverably, with `-Recover`. The exact budget depends on the host. Keep pattern sources and the Lintel home at ordinary depths, or enable long paths; full long-path support is not claimed.
 
 ## Checks
 

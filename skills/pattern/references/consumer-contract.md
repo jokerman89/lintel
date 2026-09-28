@@ -82,6 +82,10 @@ Bare installation has no Python prerequisite and never installs Python.
 **Missing runtime.** If Python, Bash or the helper cannot run, report "pattern check unavailable"
 once. It is never "no patterns" and never a verified neutral result; do not synthesize JSON.
 
+Any invocation that prints no JSON report on stdout is "pattern check unavailable", whatever its
+exit code. Examples are a missing runtime (exit 5), a partial kit or a missing helper. Do not infer
+`invalid` from exit 2 alone when no report was printed.
+
 - Ordinary unrelated or unconfigured Lintel work may continue with that limitation stated, but only
   when no known pattern or policy obligation depends on the check.
 - These block their dependent action until the runtime and policy validation are available:

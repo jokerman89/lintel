@@ -65,6 +65,8 @@ unchanged, including Design DNA's brief > profile > corpus order.
 A linked (junction or symlink) home, repository, `.claude` or pattern root is refused. Pass the
 real path instead.
 
+Windows path length: the runtime opens pattern files with ordinary paths, so without Windows long-path support a pattern file whose full path exceeds about 260 characters is reported missing (fail-closed, never success). The bundled kit's deepest path is the example asset directory, so on Windows PowerShell 5.1 with `LongPathsEnabled=0` the bare installer needs a correspondingly short Lintel home: a home near 108 characters was observed to work and near 134 characters to fail, recoverably, with `-Recover`. The exact budget depends on the host. Keep pattern sources and the Lintel home at ordinary depths, or enable long paths; full long-path support is not claimed.
+
 ## Running the helper
 
 Call the launcher from the trusted source root with its interpreter; never run a relative
@@ -83,8 +85,12 @@ is never "no patterns". See the [consumer contract](references/consumer-contract
 may continue and which must stop. The exact invocations, status handling, phase obligations and
 evidence rules consumers follow are all in that [consumer contract](references/consumer-contract.md).
 
-Every command prints one JSON report on stdout and its error diagnostics on stderr. Act on the
-reported status; do not only check whether the exit code is zero:
+A successful runtime prints exactly one JSON report on stdout, with its error diagnostics on stderr.
+Act on the reported `status`, not only on whether the exit code is zero. **No JSON report on stdout
+means "pattern check unavailable", whatever the exit code.** That covers a missing runtime (exit 5), a
+partial kit, or a missing helper. It is never "no patterns" and never permission to continue dependent
+work; see the consumer contract's "Missing runtime" rule. The table applies only when a report was
+printed:
 
 | Exit | Status | Meaning for the workflow |
 | --- | --- | --- |
@@ -136,7 +142,13 @@ digests, and no silent change to active work.
 5. Keep each declared asset, and any `root: pattern` source, next to the draft file you capture,
    or pass `--files-from <dir>`. Every version carries exactly those files, digest-checked. Nothing
    else is copied, and a missing or changed file stops publication.
-6. Never copy credentials, private source documents or absolute home paths into a pattern, lock
+6. Before a pattern source is tracked in Git, protect its raw bytes with a source-scoped
+   `.gitattributes` containing `* -text` beside the catalog, as described in the
+   [pattern template](../../scaffolding/01-foundation/templates/pattern/README.md). Never overwrite
+   an existing attributes file. If a repository policy already governs that path, honor it and
+   decide explicitly. `-text` stops line-ending conversion only; it does not disable filters, LFS,
+   `working-tree-encoding` or `ident`, so check those against the policy as well.
+7. Never copy credentials, private source documents or absolute home paths into a pattern, lock
    or export.
 
 ## Workflow consumers
