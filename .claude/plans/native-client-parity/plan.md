@@ -104,22 +104,24 @@ the leaves split as follows:
   aggregate clearance follow the actual hosted results. A failure goes back for fixes and is never
   waived.
 - **PR-1b amendments (MasterCoordinator, 2026-09-28):**
-  - The P2 review's canonical pre-check finding (F1) becomes a separately reviewable defensive fix.
+  - A defensive hardening of the shared hook pre-check, identified in the P2 review, becomes a
+    separately reviewable change.
     - It lives on its own branch from `main` and is owned by the P2 implementer.
     - It carries only the shared helper and the tests it needs.
     - It may land after an accepted PR-1a and ahead of the rest of PR-1b, taking its own version at
       its SHIP.
   - Registration (package P3) is BLOCKED until all of the following are accepted:
-    - the F1-F4 fixes;
+    - the P2 review fixes;
     - explicit refusal behavior for malformed, unknown, oversized or unparseable protected inputs,
       audited and redacted, in the host format;
     - bounded runtime;
     - an independent re-review.
   - Validation uses classification and protocol unit tests with inert fixtures, plus timing against the
     declared budget.
-  - The F5 finding is an architectural limit of command-text inspection: state that persists inside a
-    shell session. It is documented as unsupported and never claimed as enforced.
-  - Versions: PR-1a is 0.13.0, the F1 fix takes the next free version, and PR-1b comes after it.
+  - A limit of command-text inspection: state that persists inside a shell session is outside what a
+    hook can observe. It is documented as unsupported and never claimed as enforced.
+  - Versions: PR-1a is 0.13.0, the pre-check hardening takes the next free version, and PR-1b comes
+    after it.
 - **The P2 lane is paused (2026-09-28 22:47):**
   - The P2 continuation's turns ended at a host content-filter boundary.
   - Its fix commits through `a003d922` are historical implementation evidence only: not reviewed, not
