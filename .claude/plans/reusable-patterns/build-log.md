@@ -629,6 +629,43 @@ Results:
 
 Contract R8 records the compatibility notice for the stricter `check`.
 
+## Review revision R9 (review of `445e3ad9`: SPEC/QUALITY PASS; P3-R8-1, P3-R8-2)
+
+Reviewer c3015de8's report is `review-core-closure-445e3ad9.md`, read only. I ran unmodified copies
+of `repro-r8.py` (`80B46DD9…`) and `repro-r8b.py` (`F296B80C…`).
+
+Repro results:
+
+- **S1** (a sibling `a.md`, `a-b` or `a b` between `a` and `a/b`): preview, write and retry each
+  give `destination_conflict`, and the CLI gives no traceback.
+- **S3**: the reserved body name is still refused, and nested `docs/pattern.json` still publishes,
+  approves and checks.
+- **T1**: CLI preview and write exit 2, the catalog is unchanged, and there is no orphan.
+- **T2** (`Docs/x` + `docs/y`, and an asset `docs/` + a source `DOCS/`): `destination_conflict`,
+  with nothing stored.
+- **T3**: a case collision is refused, a same-file pinned source coalesces, and a different
+  pinned sha gives `declared_file_conflict`.
+- **T4**: a valid nested approval publishes.
+
+New `NamespaceInvariantTests` (4 cases):
+
+- 11 refused sets, checked in every permutation. They cover the sibling separators `.`, `-`,
+  space and `_`, a grandchild, a deep child with siblings in between, a case-varied file versus a
+  directory, a file case collision, a directory spelled two ways, a multilevel ancestor, and a
+  Unicode casefold (`Straße`/`STRASSE`).
+- 4 allowed sets, checked in every permutation, plus same-bytes coalescing and a different-bytes
+  refusal.
+- 8 real CLI `update` cases that mix previous-version fallback files with supplied files. Each is
+  run as preview, write and retry, and each exits 2 with no traceback and no change to the tree.
+- Valid similar siblings and nested paths publish through capture and approve.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 126 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each of these failed at least
+  one test: the old R8 adjacency check, removing the directory-spelling check, and removing the
+  file-versus-ancestor check.
+
 ## Supplementary POSIX run (parent-owned) and R7 doc corrections
 
 - **POSIX (parent-provided, supplementary).** The parent ran the exact R7 archive of `2fd07f00`,

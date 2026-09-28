@@ -2596,12 +2596,15 @@ def _declared_files(pattern: Pattern, source_dir: Optional[Path], *, fallback_di
 
 
 def _check_namespace(files: Sequence[tuple[str, bytes]], where: str = "destination") -> list[tuple[str, bytes]]:
-    """One destination namespace must be unambiguous on every filesystem before anything is written.
+    """One destination namespace must be unambiguous before anything is written.
 
-    Refuses a path that equals another only by case, a path that is both a file and a directory
-    prefix of another (`a` and `a/b`), and a closure file that takes the reserved version body name
-    (`<id>/<version>/pattern.json` is only ever the body). Exact duplicates with identical bytes
-    coalesce; with different bytes they refuse. Returns the coalesced list in the original order.
+    Every planned file key and every proper directory prefix of every key are compared, independent
+    of order or siblings. Refused: two files that differ only by Unicode casefold; a file that is also
+    a directory of another file (`a` and `a/b`, at any depth); one directory spelled two ways
+    (`Docs/x` and `docs/y`). Exact duplicates with identical bytes coalesce; different bytes refuse.
+    This is a portable-safety restriction for case-insensitive filesystems. It does not model every
+    filesystem's normalization rules (for example Unicode NFC/NFD folding), which the path
+    validator does not attempt. Returns the coalesced list in the original order.
     """
     seen: dict[str, tuple[str, bytes]] = {}
     result = []
@@ -2616,12 +2619,18 @@ def _check_namespace(files: Sequence[tuple[str, bytes]], where: str = "destinati
             continue
         seen[key] = (relative, data)
         result.append((relative, data))
-    keys = sorted(seen)
-    for index, key in enumerate(keys[:-1]):
-        following = keys[index + 1]
-        if following.startswith(key + "/"):
-            _fail("destination_conflict", f"{seen[key][0]} is a file and also a directory of {seen[following][0]}",
-                  where)
+    directories: dict[str, str] = {}
+    for key, (relative, _) in seen.items():
+        parts = relative.split("/")
+        for depth in range(1, len(parts)):
+            spelled = "/".join(parts[:depth])
+            folded = spelled.casefold()
+            if folded in seen:
+                _fail("destination_conflict", f"{seen[folded][0]} is a file and also a directory of {relative}", where)
+            previous = directories.setdefault(folded, spelled)
+            if previous != spelled:
+                _fail("destination_conflict", f"directory {spelled} (in {relative}) and {previous} differ only by "
+                      "case; use one spelling", where)
     return result
 
 

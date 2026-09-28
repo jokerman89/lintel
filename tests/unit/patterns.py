@@ -3228,5 +3228,112 @@ class NamespaceTests(unittest.TestCase):
         self.assertNotIn("Traceback", stderr)
 
 
+class NamespaceInvariantTests(unittest.TestCase):
+    """Review of 445e3ad9 (P3-R8-1, P3-R8-2): the whole namespace invariant, table-driven."""
+
+    REFUSED = [
+        ("file vs child, sibling '.'", ["a", "a.md", "a/b"]),
+        ("file vs child, sibling '-'", ["a", "a-b", "a/b"]),
+        ("file vs child, sibling ' '", ["a", "a b", "a/b"]),
+        ("file vs child, sibling '_'", ["a", "a_b", "a/b"]),
+        ("file vs grandchild", ["x", "x/y/z"]),
+        ("file vs deep child, siblings between", ["d/e", "d/e.txt", "d/e-1", "d/e/f/g"]),
+        ("case-varied file vs directory", ["A", "a/b"]),
+        ("file case collision", ["Guide.md", "guide.md"]),
+        ("directory spelled two ways", ["Docs/x", "docs/y"]),
+        ("multilevel ancestor case", ["top/Mid/x", "top/mid/y"]),
+        ("unicode casefold ancestor", ["Stra\u00dfe/a", "STRASSE/b"]),
+    ]
+    ALLOWED = [
+        ("similar siblings", ["a", "a.md", "a-b", "a b", "a_b", "ab"]),
+        ("nested siblings", ["a/b", "a/c", "a/d/e", "a/d/f"]),
+        ("same directory, same spelling", ["docs/x", "docs/y", "docs/sub/z"]),
+        ("file named like a sibling directory's prefix", ["a.md", "a/b"]),
+    ]
+
+    def keys(self, names):
+        return [(name, name.encode("utf-8")) for name in names]
+
+    def test_every_order_of_refused_sets_is_refused(self):
+        import itertools
+        for label, names in self.REFUSED:
+            for order in itertools.permutations(names):
+                with self.subTest(label=label, order=order):
+                    with self.assertRaises(p.PatternError) as caught:
+                        p._check_namespace(self.keys(order))
+                    self.assertEqual(caught.exception.code, "destination_conflict")
+
+    def test_every_order_of_allowed_sets_passes(self):
+        import itertools
+        for label, names in self.ALLOWED:
+            for order in itertools.permutations(names):
+                with self.subTest(label=label, order=order):
+                    self.assertEqual(len(p._check_namespace(self.keys(order))), len(names))
+        self.assertEqual(len(p._check_namespace([("docs/x", b"1"), ("docs/x", b"1")])), 1, "same bytes coalesce")
+        with self.assertRaises(p.PatternError):
+            p._check_namespace([("docs/x", b"1"), ("docs/x", b"2")])
+
+    CLI_CASES = [
+        (["a/b"], ["a", "a.md"]), (["a/b"], ["a", "a-b"]), (["a/b"], ["a", "a b"]), (["a/b"], ["A"]),
+        (["x/y/z"], ["x"]), (["d/e/f/g", "d/e.txt"], ["d/e", "d/e-1"]),
+        (["Docs/x"], ["docs/y"]), (["top/Mid/x"], ["top/mid/y"]),
+    ]
+
+    def test_cli_preview_write_and_retry_leave_zero_changes(self):
+        """A previous version's files (fallback) plus supplied files, through the real CLI update."""
+        for base_names, added in self.CLI_CASES:
+            with self.subTest(base=base_names, added=added):
+                fx = Fixture(self)
+
+                def put(root, names):
+                    records = []
+                    for name in names:
+                        data = f"{name}\n".encode("utf-8")
+                        target = root / name
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(data)
+                        records.append({"path": name, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()})
+                    return records
+
+                work, supply = fx.root / "work", fx.root / "supply"
+                base = draft("example.base", assets=put(work, base_names))
+                p.capture(fx.roots(), base, scope="repo", name="example.base", source_id="repo.main", files_from=work)
+                newer = dict(base, version="0.2.0", assets=base["assets"] + put(supply, added))
+                source = fx.root / "newer.json"
+                source.write_text(json.dumps(newer), encoding="utf-8")
+                envelope = fx.write_json("roots.json", fx.envelope())
+                before = tree_digest(fx.repo)
+                for attempt in ("preview", "write", "retry"):
+                    args = ["update", "--roots-file", envelope, "--path",
+                            fx.repo_patterns / "example.base" / "0.1.0" / "pattern.json", "--input", source,
+                            "--expected-digest", p.content_digest(base), "--files-from", supply]
+                    if attempt != "preview":
+                        args.append("--write")
+                    code, report, stderr = fx.cli(*args)
+                    self.assertEqual((attempt, code, report["status"]), (attempt, 2, "invalid"), stderr)
+                    self.assertIn("destination_conflict", stderr)
+                    self.assertNotIn("Traceback", stderr)
+                    self.assertEqual(tree_digest(fx.repo), before, f"{attempt} changed the tree")
+
+    def test_valid_names_still_publish_through_capture_and_approve(self):
+        fx = Fixture(self)
+        work = fx.root / "work"
+        names = ["a", "a.md", "a-b", "a b", "docs/x", "docs/sub/y"]
+        assets = []
+        for name in names:
+            data = f"{name}\n".encode("utf-8")
+            target = work / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            assets.append({"path": name, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()})
+        value = draft("example.names", assets=assets)
+        p.capture(fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=work)
+        p.approve(fx.roots(), fx.repo_patterns / "example.names" / "0.1.0" / "pattern.json", version="1.0.0",
+                  approval_value=APPROVAL, expected_digest=p.content_digest(value))
+        published = sorted(path.relative_to(fx.repo_patterns / "example.names" / "1.0.0").as_posix()
+                           for path in (fx.repo_patterns / "example.names" / "1.0.0").rglob("*") if path.is_file())
+        self.assertEqual(published, sorted(names + ["pattern.json"]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

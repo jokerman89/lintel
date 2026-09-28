@@ -297,6 +297,18 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R9 (2026-09-28, independent review of `445e3ad9`: P3-R8-1, P3-R8-2)
+
+The shared namespace check compares every planned file key and every proper directory prefix of
+each key, whatever the order or the siblings. R8 compared sorted neighbors only, so `a`, `a.md`,
+`a/b` slipped through. The check refuses:
+- a file that is also a directory of another file, at any depth;
+- one directory spelled two ways (`Docs/x` and `docs/y`, including an asset and a source);
+- files that differ only by Unicode casefold.
+
+This is a portable-safety restriction for case-insensitive filesystems, not a model of every
+filesystem's normalization rules (NFC/NFD folding is not attempted). No name or shape changed.
+
 ## Revision R8 (2026-09-28, independent review of `8addc395`: P3-R6-1, P3-R6-2, note 1, note 2)
 
 - **One destination namespace per publication.** The shared `_preflight` validates the complete
