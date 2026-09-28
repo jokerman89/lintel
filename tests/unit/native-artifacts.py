@@ -336,6 +336,36 @@ class NativeArtifacts(unittest.TestCase):
                          "\n[Intake](../../lintel/skills/define/references/intake.md?plain=1#L3)\n"
                          f"[Decision]({REPOSITORY}/blob/main/.claude/decisions/x.md?plain=1#a)\n")
 
+    def test_link_queries_are_percent_encoded_in_both_modes(self):  # N4
+        canonical, generated = "skills/plan/SKILL.md", ".github/skills/li-plan/SKILL.md"
+        bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        # Markdown cannot carry a space, quote or angle bracket unescaped, so call the rebasing directly.
+        for query, encoded in (("plain=1", "plain=1"),
+                               ('q=a b(c)%41"<>&plain=1', "q=a%20b%28c%29%41%22%3C%3E&plain=1")):
+            intake = f"../define/references/intake.md?{query}#L3"
+            decision = f"../../.claude/decisions/x.md?{query}#a"
+            results = {
+                "local relative": (
+                    adapter.native_link(intake, canonical, generated, self.source, {}, True, None),
+                    f"../../../skills/define/references/intake.md?{encoded}#L3"),
+                "vendored bundled relative": (
+                    adapter.native_link(intake, canonical, generated, self.source, bundled, False, REPOSITORY),
+                    f"../../lintel/skills/define/references/intake.md?{encoded}#L3"),
+                "vendored public URL": (
+                    adapter.native_link(decision, canonical, generated, self.source, bundled, False, REPOSITORY),
+                    f"{REPOSITORY}/blob/main/.claude/decisions/x.md?{encoded}#a"),
+                "public_url tree": (
+                    adapter.public_url(REPOSITORY, "tests", f"../../tests/?{query}"),
+                    f"{REPOSITORY}/tree/main/tests?{encoded}"),
+            }
+            for mode, (actual, expected) in results.items():
+                with self.subTest(query=query, mode=mode):
+                    self.assertEqual(actual, expected)
+        # Balanced parentheses can stay in a Markdown destination; the rendered link encodes them.
+        self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md?q=(c)%41#L3)\n")
+        self.assertEqual(self.body(self.render("plan"), skill_preamble("../../..")),
+                         "\n[Intake](../../../skills/define/references/intake.md?q=%28c%29%41#L3)\n")
+
     def test_agents_keep_the_allowlist_preamble_and_transformed_body(self):  # 1.3.b
         self.agent("engineering", "CodeReviewer", "\nYou review.\nAsk with AskUserQuestion; run /li:review.\n"
                    "See [evidence](../../skills/define/references/intake.md).\n")

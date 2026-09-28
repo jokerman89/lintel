@@ -73,6 +73,9 @@ PUBLIC_SOURCE_NOTE = (
     "by the installer. Private packs, personal settings and `.claude/` "
     "knowledge/runtime content are not copied.\n\n"
 )
+# A rebased link's query keeps these characters and existing percent-escapes; anything else, such as
+# a space, parenthesis, quote or angle bracket, is percent-encoded so the destination stays intact.
+LINK_QUERY_SAFE = "=&-_.~/?:@!$*+,;%"
 SOURCE_METADATA = (".claude-plugin/plugin.json", "config/aliases.yaml", "install/upstream-sources.yaml")
 TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt",
                  ".template", ".base", ".html", ".htm", ".css", ".js", ".mjs", ".svg"}
@@ -685,7 +688,7 @@ def public_url(repository: str, target: str, link: str) -> str:
     kind = "tree" if parsed.path.endswith("/") else "blob"
     url = f"{repository}/{kind}/main/{quote(target, safe='/')}"
     if parsed.query:
-        url += "?" + parsed.query
+        url += "?" + quote(parsed.query, safe=LINK_QUERY_SAFE)
     if parsed.fragment:
         url += "#" + quote(unquote(parsed.fragment), safe="-_")
     return url
@@ -827,7 +830,7 @@ def native_link(link: str, canonical: str, generated: str, source: Path, files: 
                 raise ValueError(f"Missing bundled source target: {canonical} -> {link}")
             return public_url(repository, target, link)
     relative = posixpath.relpath(resolved, posixpath.dirname(generated)) + ("/" if directory else "")
-    query = "?" + parsed.query if parsed.query else ""
+    query = "?" + quote(parsed.query, safe=LINK_QUERY_SAFE) if parsed.query else ""
     fragment = "#" + quote(unquote(parsed.fragment), safe="-_") if parsed.fragment else ""
     return quote(relative, safe="/") + query + fragment
 
