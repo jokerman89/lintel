@@ -29,6 +29,11 @@ affected_paths:
   - tests/integration/{pattern-workflows,pattern-visual-roundtrip,pattern-portability}.*
   - tests/integration/pattern_consumer_fixtures.py
   - tests/integration/design-contract.py
+  - skills/design-dna/scripts/design_contract.py
+  - skills/design-dna/references/design-contract.md
+  - skills/generate/scripts/pipeline_inputs.py
+  - skills/generate-web/references/mockup.md
+  - skills/pattern/references/consumer-contract.md
   - tests/shape/{pattern-contract,skill-descriptions-trigger}.sh
   - .claude/plans/reusable-patterns/
   - .claude/decisions/0038-reusable-patterns.md
@@ -39,16 +44,36 @@ breaking_change: false
 # Structure change: reusable patterns
 
 > Gate M1 (structure-impact analysis) artifact for ADR-0038. Updated by the integration owner
-> after the PACK and WF joins and the INT packaging, 2026-09-28.
+> after the PACK and WF joins, the INT packaging and the RN-14/RN-15 join corrections, 2026-09-28.
 
 ## What changed (shape)
 
-A new data-only runtime module and CLI with registered unit tests. Pattern, catalog,
-binding, context, reference, override, exception, roots-envelope and resolution-report
-records are validated by one module. No hook, MCP server, scheduler, service, network
-access, frontmatter field, cycle phase, work-map field or state schema changes. Planned
-later packages add an optional `patterns.source` pack field, a launcher, a canonical
-pattern workflow, consumer wiring and a visual adapter.
+A data-only runtime module (`lib/patterns.py`) and JSON CLI (`bin/li-pattern.py`), with
+registered unit tests. One module validates the pattern, catalog, binding, context, reference,
+override, exception, roots-envelope, resolution-report and lock records. The integrated feature
+also has:
+
+- **Pack field.** The optional pack manifest field `patterns.source`. The neutral pack declares it
+  `null`; ADR-0029 provenance records it.
+- **Launcher.** `bin/li-pattern` builds the roots envelope from the ADR-0029 profile record. A
+  missing runtime reports "pattern check unavailable".
+- **Workflow.** The canonical `skills/pattern/` workflow, its single consumer contract, and the
+  generated `li-pattern` native wrapper.
+- **Consumers.** Consumer wiring in the cycle, document-pipeline, engineering and frontend skills.
+  The `generate-web` direct `--mode mockup`/`--brief` entries resolve for themselves (RN-14).
+- **Visual adapter.** `lib/pattern_visual.py`: projection, validation, pipeline attachment and
+  palette winners.
+- **Design loader.** A verified-pattern palette admission in
+  `skills/design-dna/scripts/design_contract.py` `load_design`, and its
+  `renderer-args`/`review` CLI and `skills/generate/scripts/pipeline_inputs.py` caller (RN-15).
+  With an optional pattern lock and current context that the core verifies and P05 selects, a
+  selected pattern palette winner outranks the pinned Design DNA profile. Without one, loading
+  is unchanged. A spec that carries a `pattern_context` without its lock is refused.
+- **Packaging.** The authoring template with one neutral example, and the docs.
+
+No hook, MCP server, scheduler, service, network access, frontmatter field, cycle phase,
+work-map field, installer, policy, or P05/P07 schema changes. Profile and corpus files are never
+modified.
 
 ## Backward-compat
 
@@ -83,4 +108,13 @@ activation.
 
 ## Rollback procedure
 
-Revert the feature commits. Nothing else reads the new module until later packages wire it.
+Revert the feature commits as a whole, by an ordinary revert of the feature merge. Consumer
+skills, the launcher and the Copilot kit reference the module, and `design_contract.load_design`
+and `pipeline_inputs` gained optional pattern arguments. Reverting only part of it would leave
+dangling references or refused `pattern_context` specs. After a revert:
+
+- run `li-copilot.py init` and `li-catalog.py` to regenerate the managed outputs;
+- rebind profile contexts that were bound to the manifest carrying `patterns.source: null`,
+  explicitly and with a reason, as described in the upgrade notice.
+
+Repository `.claude/patterns` data stays inert. Locks and task maps remain historical files.
