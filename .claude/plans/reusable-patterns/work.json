@@ -5,5 +5,7 @@
   "spec": ".claude/plans/reusable-patterns/spec.md",
   "plan": ".claude/plans/reusable-patterns/plan.md",
   "tasks": ".claude/plans/reusable-patterns/plan.md",
-  "prompt": ".claude/plans/reusable-patterns/prompt.md"
+  "prompt": ".claude/plans/reusable-patterns/prompt.md",
+  "execution_mode": "swarm",
+  "coordination": ".claude/plans/reusable-patterns/swarm/coordination.json"
 }

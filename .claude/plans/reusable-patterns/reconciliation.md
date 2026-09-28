@@ -103,6 +103,37 @@ bindings. Until card 3.2.b adds attestations, a mandatory pattern with an extern
 source or a past `review_after` is `unavailable` (the spec's blocking default).
 
 **RN-10 Execution topology.** [topology.md](topology.md) records the actual dependency graph,
-the proposed safe reordering for two disjoint lanes after P1, and file ownership. It needs
-the parent's approval before dispatch. The work map stays in ordinary sequential mode; the
-parent owns nested-session dispatch and independent review.
+the approved safe reordering into disjoint lanes after P1, and file ownership. The parent owns
+nested-session dispatch and commissions independent review.
+
+**RN-11 Swarm reconciliation (2026-09-28).** The operator opted into swarm execution. The running
+initiative is brought under the existing swarm contract:
+
+- `work.json` gains `execution_mode: "swarm"` and a `coordination` pointer.
+- A `swarm/` directory holds the charter, coordination.json and brief pointers, instantiated from
+  the canonical templates.
+- The 48 leaf tables were rewritten losslessly into the canonical tree-form checklist items, with
+  the same IDs, text, files, requirements and verification keys, and declared prerequisites as
+  `(depends ...)`. The reason: the swarm parser reads completion only from checklist items, never
+  from a table column.
+- The approved edge relaxations are 2.2.a and 4.1.a on 1.3.c, 4.2.c on 4.2.b.wf, and 6.1.a on the
+  lane outputs. They are written into those items. 4.2.a and 4.2.b are split into `.core` and
+  `.wf` children.
+- A "Swarm execution packages" table groups every leaf exactly once.
+- `li-work-artifacts.py`, `li-swarm.py validate` and `wave` pass. `wave` reports CORE, PACK and WF
+  as the wave-1 frontier.
+
+The chronology is recorded in the charter. P0/P1 and the current lane launches were
+host-coordinated. They are not retroactively validated native dispatch, and no brief, QA or
+corroboration receipt was fabricated.
+
+Two representational tensions remain, surfaced rather than worked around:
+
+1. The command-surface guard refuses nonexistent workflow paths in plans, while the swarm package
+   boundary needs literal, possibly not-yet-created paths. The WF boundary
+   `skills/pattern/references` therefore reports one `missing-path` finding until the WF lane's
+   consumer reference is integrated.
+2. `skills/CATALOG.md` drifts from the new canonical pattern skill until the coordinator
+   regenerates the shared reducers at integration (card 6.1.b).
+
+Neither validator is weakened.
