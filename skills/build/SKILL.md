@@ -396,6 +396,17 @@ For BLOCKED, set `build_next_action` to the unresolved package/leaf and its repa
 preserve its owned diff, acceptance results and review evidence for a cold session. Emit
 DONE_WITH_CONCERNS only when all required leaf acceptance and reviews have passed.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the plan links a pattern lock, run `bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" verify-lock
+--lock <lock> --context <saved context>` before each package. Stop the affected work on
+`unavailable` (changed bytes, retired or revoked pins, missing sources) and return to PLAN on
+`conflict` (changed context or mandatory baseline). Give each implementer the `project --package
+<id>` output: the complete clauses mapped to that package with their original task IDs. Never
+trim mandatory clauses, re-resolve silently or rename Spec Kit task IDs. Record the
+verify/project output in the leaf evidence. No lock means no pattern step.
+
 ## Status protocol
 
 - **DONE** — all tasks complete, both reviews PASS, all tests green

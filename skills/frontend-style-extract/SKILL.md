@@ -208,6 +208,22 @@ Next:
   Diff vs another:  diff <out_dir>/pattern.json <other-out>/pattern.json
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+vault output above is unchanged, including a custom `--out` location. To propose it for reuse,
+convert the legacy `pattern.json` with `$LINTEL_SOURCE_ROOT/lib/pattern_visual.py`
+`legacy_to_draft`: it emits a universal draft of defaults only, with observation confidence
+(never confirmed) and the original bytes kept unchanged as a `visual-legacy` asset by digest;
+unrecognized fields stay in that asset. Pass `source_ref` as a portable vault label (for example
+`brand/design-patterns/<name>/pattern.json`) or an https URL, never an absolute or home path.
+Stage the draft and that sidecar into a new scratch directory with `stage_draft`, then register
+it only through `bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" capture --input <dir>/pattern.json`,
+which verifies and stages the declared files before registration; approval is separate. The
+legacy `schema_version: 1` is not the universal schema. Never copy proprietary code, shaders or
+assets without permission, and record fonts, accessibility and licensing as unknown unless
+evidenced.
+
 ## Status protocol
 
 - **DONE** — all 4 required files emitted + schema valid

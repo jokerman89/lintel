@@ -208,6 +208,15 @@ Same as generate-web (per existing v3.5 pattern):
 
 `voice: mixed`. Default `internal`. `--customer-share` triggers compliance-gate + voice-gate.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Before scaffolding, check the spec's `pattern_context` with `validate_visual` against the
+verified lock handed over by the design step (never a stored report); a stale context,
+mismatched setting or unusable selection blocks instead of being corrected here. Apply the
+projected values; generate-app still makes no design decisions. When the runtime reports no
+patterns, scaffolding is unchanged.
+
 ## Status protocol
 
 - **DONE** — app skeleton generated, npm install + npm run dev succeed in smoke-test

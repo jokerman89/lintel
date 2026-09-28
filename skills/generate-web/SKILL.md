@@ -175,6 +175,15 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    local server. Verify health and actual session ownership first; provider availability
    and URL admission are not established by this instruction.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). In
+from-frontend-design mode and `--mode mockup`, check the spec's `pattern_context` with
+`validate_visual` against the verified lock handed over by the design step (never a stored
+report) before rendering; a stale context, a mismatched setting or an unusable selection blocks
+the render instead of being corrected here. Render the projected values; generate-web still
+makes no design decisions. When the runtime reports no patterns, rendering is unchanged.
+
 ## Report format
 
 Report mode/variant, exact source/design/output paths, selected profile/template,

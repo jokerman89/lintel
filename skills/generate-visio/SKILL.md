@@ -50,6 +50,14 @@ Per `skills/generate/agent-mapping.yaml`:
 
 If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) on any text labels in diagram (orchestrator-level gate).
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+This skill stays a template slot. The at-invocation contract resolves, or verifies a supplied
+attachment, and records each mandatory clause as unverified unless its presence in the produced
+diagram was inspected. Patterns never promote the slot, and diagrams are not verified cloud
+state.
+
 ## Status protocol
 
 - **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful

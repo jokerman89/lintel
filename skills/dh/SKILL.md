@@ -122,6 +122,16 @@ measured against the observable checkpoint criteria. Scores cannot erase one mis
 selected required evidence and independent acceptance; DONE_WITH_CONCERNS is only
 advisory residue. Unresolved evidence/authority is BLOCKED/NEEDS_CONTEXT.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the delivery and operations expectations bound to the current target
+context and passes each sub-capability only its projected clauses (`project` for the mapped
+package, or the clauses mapped to it). An unknown deployment environment yields `needs-context`
+and blocks the dependent design; no live cloud, tenant or environment discovery is implied, and
+requirements are never inferred from generic recommendations. When the runtime reports no
+patterns, the module is unchanged.
+
 ## Integration and dormant hooks
 
 DA/SC can feed DH only through verified selected artifacts; TQ exercises its promises.

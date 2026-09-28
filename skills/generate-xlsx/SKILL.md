@@ -195,6 +195,14 @@ failed/unverified integrity and exit 2 is invalid/unreadable/unsupported input.
 Record this result as P05 evidence alongside native calculation, edit/reopen and
 render observations. Do not replace P05's control schema with this local diagnostic.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+This remains the working workbook provider; patterns do not change its status. Resolve, or
+verify a supplied attachment, before composing sheets. Mandatory clauses (for example required
+sheets or columns) shape the composition, and each is reported by clause ID with the inspection
+evidence above, or as unverified when it was not inspected.
+
 ## Status and handoff
 
 - **DONE:** source retention, real calculation, required persisted caches,

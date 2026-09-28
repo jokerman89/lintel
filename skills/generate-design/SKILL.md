@@ -180,6 +180,14 @@ For each content.md section (§N):
 
 Write to `--out`. Surface summary (per-format layout count, palette used, font baseline) to operator.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the run has a lock, add the optional `pattern_context` attachment to design-spec.json with
+`design_attachment`; the outer `version: "1.0"` and existing fields are unchanged. Direct entry
+without a verified attachment resolves itself. Do not copy clause text into palette, fonts or
+per-format mappings as a second authoritative copy.
+
 ## Status protocol
 
 - **DONE** — design-spec.json written, all sections mapped, validation passed

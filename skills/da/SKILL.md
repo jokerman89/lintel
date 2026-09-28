@@ -132,6 +132,16 @@ clear a failed/unknown mandatory control. DONE requires actual selected checks a
 independent acceptance; DONE_WITH_CONCERNS only allows advisory residuals. Missing
 authority/evidence is BLOCKED or NEEDS_CONTEXT, never a green partial pass.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the data expectations bound to the current target context and passes each
+sub-capability only its projected clauses (`project` for the mapped package, or the clauses
+mapped to it). An unknown data classification or store yields `needs-context` and blocks the
+dependent design; no live cloud, tenant or environment discovery is implied, and requirements
+are never inferred from generic recommendations. When the runtime reports no patterns, the
+module is unchanged.
+
 ## Integration and dormant hooks
 
 TA contracts/scaling inform data design; DH consumes migration/recovery and TQ

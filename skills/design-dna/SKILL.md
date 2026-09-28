@@ -110,6 +110,14 @@ severity columns. Validation falls back to the review checklist in `frontend-des
 **Consumed by:** `/li:frontend-design` (Step 1.5), `/li:frontend-typography`,
 `/li:frontend-motion`, `/li:generate-web`, `/li:generate-app`, `/li:frontend-design-review`
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Retrieval, validators and the non-negotiables above are unchanged. When a consumer supplies a
+ready resolution, its mandatory clauses bound the choices and its defaults fill only choices the
+brief did not decide, ahead of the profile and corpus. Profile and corpus files are never
+modified to implement a pattern. A pure palette or token read needs no cycle.
+
 ## Status protocol
 
 - **DONE** — search/compose/validate returned, results surfaced

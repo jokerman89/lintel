@@ -181,6 +181,20 @@ ts: <iso-8601>
 - **Default `internal`** — no invented customer voice rule; any applicable configured internal requirements still apply.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the runtime reports patterns, the pipeline resolves once for the brief's context before
+OUTLINE, writes the lock in the repository under
+`.claude/runtime/patterns/<run-id>/patterns.lock.json` (the run directory itself when the run
+lives there; document outputs may be elsewhere) and attaches it to `design-spec.json` as
+`pattern_context` (`$LINTEL_SOURCE_ROOT/lib/pattern_visual.py` `design_attachment`, `lock_ref`
+relative to that pattern-state directory). Every stage verifies that attachment
+(`verify_design_attachment` with the same pattern-state directory) before using clauses; a
+missing, stale or mismatched attachment is `unavailable`, never a pass. Mandatory clauses reach
+the format-builders and QA unchanged. When the runtime reports no patterns, nothing is attached
+or asked; `unavailable` or `invalid` is never treated as no patterns.
+
 ## Status protocol
 
 - **DONE** — all formats produced + qa_pass=true + run_dir printed
