@@ -590,6 +590,45 @@ only. No pack-owned file was changed.
 
 `python -I -B tests\unit\patterns.py` -> exit 0, 116 tests OK.
 
+## Review revision R8 (review of `8addc395`: R6 closure accepted; P3-R6-1, P3-R6-2)
+
+Reviewer c3015de8's report is `review-core-closure-8addc395.md`, which I only read. SPEC and
+QUALITY both passed, with 115 tests and the clock shifted to 2027 and 2030; all prior findings
+are closed. This revision is applied on top of R7 (`2fd07f00`), whose target stays unchanged.
+
+The fix is one shared namespace check inside `_preflight`, applied to every destination before
+the first write. Each version's closure is also checked on its own by `_version_files`, at
+preview time.
+
+New `NamespaceTests` (6 cases):
+
+1. **Reserved body name.** The name `pattern.json` is refused, for an asset and for a
+   case-varied `root: pattern` source, on the first attempt and on retry. An update preview that
+   would create it is refused too. A nested `docs/pattern.json` publishes.
+2. **Resealed draft.** A registered draft resealed with a `root: pattern` source named
+   `pattern.json` cannot be approved, and two attempts leave no `1.0.0` directory.
+3. **Case collisions.** Case-variant assets are refused, and so is an asset colliding by case
+   with a source. An asset and a source naming the same exact file coalesce.
+4. **Update prefix collision.** Mixing a fallback `a/b` with a supplied `a` is refused in both
+   preview and write. Valid nested `a/b` plus `a/c` publish.
+5. **Existing disk file.** A file already on disk where a directory is needed gives
+   `destination_conflict`, not a traceback.
+6. **CLI.** A case collision exits 2 with no traceback.
+
+Results:
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 122 tests OK.
+- Mutation probe, run once with the source restored byte-identical. Each removal failed at least
+  one test:
+  - the casefold key;
+  - the prefix check;
+  - the on-disk ancestor check;
+  - update bypassing the version check;
+  - the version-level reserved check (caught by the preview case);
+  - the publish-level preflight.
+
+Contract R8 records the compatibility notice for the stricter `check`.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

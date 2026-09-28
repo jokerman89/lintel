@@ -3089,5 +3089,144 @@ class CoreReviewTests(unittest.TestCase):
         self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["pattern.json"], "no orphaned asset")
 
 
+class NamespaceTests(unittest.TestCase):
+    """Regressions for review of 8addc395 (P3-R6-1, P3-R6-2, note 2): one unambiguous destination namespace."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.work = self.fx.root / "work"
+        self.work.mkdir()
+
+    def asset(self, path, data):
+        return {"path": path, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()}
+
+    def write(self, name, data):
+        target = self.work / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+
+    def assert_refused_unchanged(self, action, code="destination_conflict"):
+        before = tree_digest(self.fx.root)
+        with self.assertRaises(p.PatternError) as caught:
+            action()
+        self.assertEqual(caught.exception.code, code, caught.exception.message)
+        self.assertEqual(tree_digest(self.fx.root), before, "nothing written anywhere")
+        return caught.exception
+
+    def capture(self, value, **kwargs):
+        kwargs.setdefault("source_id", None if (self.fx.repo_patterns / "catalog.json").exists() else "repo.main")
+        if kwargs["source_id"] is None:
+            kwargs.pop("source_id")
+            kwargs["expected_catalog_digest"] = p.content_digest(json.loads(
+                (self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8")))
+        return p.capture(self.fx.roots(), value, scope="repo", name=value["id"], files_from=self.work, **kwargs)
+
+    def test_reserved_body_name_is_refused_for_assets_and_pattern_sources(self):
+        self.write("pattern.json", b"{}")
+        asset_case = draft("example.pj", assets=[self.asset("pattern.json", b"{}")])
+        self.assert_refused_unchanged(lambda: self.capture(asset_case))
+        self.assert_refused_unchanged(lambda: self.capture(asset_case), "destination_conflict")
+        source_case = draft("example.src", sources=[dict(statement(), root="pattern", ref="Pattern.JSON")])
+        self.write("Pattern.JSON", b"{}")
+        self.assert_refused_unchanged(lambda: self.capture(source_case))
+        plain = draft("example.plain")
+        self.capture(plain)
+        clash = dict(plain, version="0.2.0", assets=[self.asset("pattern.json", b"{}")])
+        self.assert_refused_unchanged(lambda: p.update(
+            self.fx.roots(), self.fx.repo_patterns / "example.plain" / "0.1.0" / "pattern.json", clash,
+            expected_digest=p.content_digest(plain), files_from=self.work))
+        nested = draft("example.nested", assets=[self.asset("docs/pattern.json", b"nested\n")])
+        self.write("docs/pattern.json", b"nested\n")
+        self.capture(nested)
+        self.assertEqual(sorted(path.relative_to(self.fx.repo_patterns / "example.nested" / "0.1.0").as_posix()
+                                for path in (self.fx.repo_patterns / "example.nested" / "0.1.0").rglob("*")
+                                if path.is_file()), ["docs/pattern.json", "pattern.json"],
+                         "a nested file named pattern.json is not the body and is allowed")
+
+    def test_reserved_name_in_a_registered_draft_cannot_orphan_approval(self):
+        value = draft("example.approve")
+        self.capture(value)
+        root = self.fx.repo_patterns / "example.approve" / "0.1.0"
+        catalog = json.loads((self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8"))
+        hacked = dict(value, sources=[dict(statement(), root="pattern", ref="pattern.json")])
+        (root / "pattern.json").write_text(json.dumps(hacked), encoding="utf-8")
+        catalog["entries"][0]["sha256"] = p.content_digest(hacked)
+        (self.fx.repo_patterns / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+        for attempt in range(2):
+            with self.subTest(attempt=attempt):
+                self.assert_refused_unchanged(lambda: p.approve(self.fx.roots(), root / "pattern.json", version="1.0.0",
+                                                                approval_value=APPROVAL,
+                                                                expected_digest=p.content_digest(hacked)))
+        self.assertFalse((self.fx.repo_patterns / "example.approve" / "1.0.0").exists(), "no orphan, retry is clean")
+
+    def test_case_fold_and_prefix_collisions(self):
+        data = b"same\n"
+        self.write("Guide.md", data)
+        self.write("guide.md", data)
+        cases = {
+            "case variants": draft("example.case", assets=[self.asset("Guide.md", data), self.asset("guide.md", data)]),
+            "source vs asset case": draft("example.mixed", assets=[self.asset("guide.md", data)],
+                                          sources=[dict(statement(), root="pattern", ref="GUIDE.md")]),
+        }
+        for name, value in cases.items():
+            with self.subTest(name=name):
+                self.assert_refused_unchanged(lambda value=value: self.capture(value))
+        shared = draft("example.shared", assets=[self.asset("guide.md", data)],
+                       sources=[dict(statement(), root="pattern", ref="guide.md", sha256=hashlib.sha256(data).hexdigest())])
+        self.capture(shared)
+        self.assertEqual(sorted(path.name for path in (self.fx.repo_patterns / "example.shared" / "0.1.0").iterdir()),
+                         ["guide.md", "pattern.json"], "an asset and a source naming the same exact file coalesce")
+
+    def test_update_mixing_fallback_and_supplied_files_detects_prefix_collision(self):
+        nested_data, flat_data = b"nested\n", b"flat\n"
+        self.write("a/b", nested_data)
+        base = draft("example.ab", assets=[self.asset("a/b", nested_data)])
+        self.capture(base)
+        root = self.fx.repo_patterns / "example.ab" / "0.1.0"
+        supply = self.fx.root / "supply"
+        supply.mkdir()
+        (supply / "a").write_bytes(flat_data)
+        newer = dict(base, version="0.2.0", assets=[self.asset("a/b", nested_data), self.asset("a", flat_data)])
+        for write in (False, True):
+            with self.subTest(write=write):
+                self.assert_refused_unchanged(lambda write=write: p.update(
+                    self.fx.roots(), root / "pattern.json", newer, expected_digest=p.content_digest(base), write=write,
+                    files_from=supply))
+        valid = dict(base, version="0.2.0", assets=[self.asset("a/b", nested_data), self.asset("a/c", flat_data)])
+        (supply / "a").unlink()
+        (supply / "a").mkdir()
+        (supply / "a" / "c").write_bytes(flat_data)
+        p.update(self.fx.roots(), root / "pattern.json", valid, expected_digest=p.content_digest(base), write=True,
+                 files_from=supply)
+        self.assertEqual(sorted(path.relative_to(self.fx.repo_patterns / "example.ab" / "0.2.0").as_posix()
+                                for path in (self.fx.repo_patterns / "example.ab" / "0.2.0").rglob("*") if path.is_file()),
+                         ["a/b", "a/c", "pattern.json"], "valid nested paths from both sources are published")
+
+    def test_existing_disk_file_blocks_a_directory_destination_without_traceback(self):
+        value = draft("example.disk", assets=[self.asset("a/b", b"x\n")])
+        self.write("a/b", b"x\n")
+        blocked = self.fx.repo_patterns / "example.disk" / "0.1.0"
+        blocked.mkdir(parents=True)
+        (blocked / "a").write_bytes(b"stray\n")
+        (self.fx.repo_patterns / "catalog.json").unlink(missing_ok=True)
+        with self.assertRaises(p.PatternError) as caught:
+            p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=self.work)
+        self.assertEqual(caught.exception.code, "destination_conflict")
+        self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["a"])
+
+    def test_cli_reports_namespace_conflicts_as_invalid_input(self):
+        self.write("Guide.md", b"x\n")
+        self.write("guide.md", b"x\n")
+        source = self.work / "draft.json"
+        source.write_text(json.dumps(draft("example.cli", assets=[self.asset("Guide.md", b"x\n"),
+                                                                  self.asset("guide.md", b"x\n")])), encoding="utf-8")
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        code, report, stderr = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                           "--name", "example.cli", "--source-id", "repo.main")
+        self.assertEqual((code, report["status"]), (2, "invalid"))
+        self.assertIn("destination_conflict", stderr)
+        self.assertNotIn("Traceback", stderr)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

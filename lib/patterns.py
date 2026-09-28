@@ -355,7 +355,7 @@ class Reader:
                 if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                     _fail("unsafe_path", "only regular files are read", str(path))
                 data = stream.read(limit + 1)
-        except FileNotFoundError:
+        except (FileNotFoundError, NotADirectoryError):
             if optional:
                 return None
             if kind == "input":
@@ -2595,10 +2595,63 @@ def _declared_files(pattern: Pattern, source_dir: Optional[Path], *, fallback_di
     return result
 
 
-def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> None:
-    """Check every destination before the first write: absent, or identical bytes (a completed retry)."""
+def _check_namespace(files: Sequence[tuple[str, bytes]], where: str = "destination") -> list[tuple[str, bytes]]:
+    """One destination namespace must be unambiguous on every filesystem before anything is written.
+
+    Refuses a path that equals another only by case, a path that is both a file and a directory
+    prefix of another (`a` and `a/b`), and a closure file that takes the reserved version body name
+    (`<id>/<version>/pattern.json` is only ever the body). Exact duplicates with identical bytes
+    coalesce; with different bytes they refuse. Returns the coalesced list in the original order.
+    """
+    seen: dict[str, tuple[str, bytes]] = {}
+    result = []
+    for relative, data in files:
+        key = str(validate_relative_path(relative, where)).casefold()
+        if key in seen:
+            original, existing = seen[key]
+            if original != relative or existing != data:
+                _fail("destination_conflict", f"{relative} and {original} claim the same destination "
+                      f"{'with different spelling' if original != relative else 'with different bytes'}; rename one",
+                      where)
+            continue
+        seen[key] = (relative, data)
+        result.append((relative, data))
+    keys = sorted(seen)
+    for index, key in enumerate(keys[:-1]):
+        following = keys[index + 1]
+        if following.startswith(key + "/"):
+            _fail("destination_conflict", f"{seen[key][0]} is a file and also a directory of {seen[following][0]}",
+                  where)
+    return result
+
+
+def _version_files(pattern_id: str, version: str, files: Sequence[tuple[str, bytes]], what: str) -> list[tuple[str, bytes]]:
+    """Closure files of one version, checked against each other and against the reserved body name."""
+    for name, _ in files:
+        if str(validate_relative_path(name, what)).casefold() == "pattern.json":
+            _fail("destination_conflict", f"{what}: {name} is reserved for the version body; rename the asset or source")
+    placed = [(f"{pattern_id}/{version}/{name}", data) for name, data in files]
+    _check_namespace(placed + [(f"{pattern_id}/{version}/pattern.json", b"")], what)
+    return placed
+
+
+def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> list[tuple[str, bytes]]:
+    """Check the complete destination list before the first write, then every existing destination.
+
+    The list must be an unambiguous namespace (see `_check_namespace`). On disk each destination is
+    absent, or holds identical bytes (a completed retry), and no ancestor is a file.
+    """
+    files = _check_namespace(files)
     for relative, data in files:
         target = contained_path(root, relative, "destination")
+        current = Path(root)
+        for part in PurePosixPath(relative).parts[:-1]:
+            current = current / part
+            if current.exists() and not current.is_dir():
+                _fail("destination_conflict", f"{relative}: {current.name} already exists as a file", str(current),
+                      status="collision")
+        if target.is_dir():
+            _fail("destination_conflict", f"{relative} already exists as a directory", str(target), status="collision")
         if target.exists():
             existing = Reader().read(target, kind="asset", limit=max(LIMITS.asset_bytes, LIMITS.pattern_bytes))
             same = existing == data
@@ -2611,7 +2664,7 @@ def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> None:
             if not same:
                 _fail("unregistered_staging_conflict", f"an unregistered file already occupies {relative}; inspect "
                       "it before publishing", str(target), status="collision")
-
+    return files
 
 def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_required: bool = True) -> dict:
     """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last.
@@ -2633,9 +2686,10 @@ def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_
         for pattern in patterns:
             if any(item["id"] == pattern.id and item["version"] == pattern.version for item in catalog_value["entries"]):
                 _fail("version_exists", f"{pattern.id}@{pattern.version} is already registered", status="collision")
-        _preflight(root, [(relative_file, data) for relative_file, data in extra_files] +
-                   [(f"{pattern.id}/{pattern.version}/pattern.json", emit_json(pattern.raw).encode("utf-8"))
-                    for pattern in patterns])
+        body_names = {f"{pattern.id}/{pattern.version}/pattern.json".casefold() for pattern in patterns}
+        extra_files = [item for item in _preflight(root, list(extra_files) + [
+            (f"{pattern.id}/{pattern.version}/pattern.json", emit_json(pattern.raw).encode("utf-8"))
+            for pattern in patterns]) if item[0].casefold() not in body_names]
         staged = []
         for relative_file, data in extra_files:
             _stage_file(root, relative_file, data)
@@ -2695,7 +2749,7 @@ def capture(roots: Roots, draft_value: Any, *, scope: str, name: str, source_id:
         elif source_id is not None and source_id != value["source_id"]:
             _fail("source_id_mismatch", f"this scope's source is {value['source_id']}, not {source_id}")
         files = _declared_files(pattern, files_from, reader=reader, what=f"{pattern.id}@{pattern.version}")
-        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        extra = _version_files(pattern.id, pattern.version, files, f"{pattern.id}@{pattern.version}")
         return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build)
@@ -2804,7 +2858,7 @@ def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expe
         pattern = parse_pattern(approved, "approved")
         draft_dir = loaded.directory / PurePosixPath(catalog_entry.path).parent
         files = _declared_files(pattern, draft_dir, reader=reader, what=f"{draft.id}@{draft.version}")
-        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        extra = _version_files(pattern.id, pattern.version, files, f"{pattern.id}@{pattern.version}")
         return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build, cas_required=False)
@@ -3106,7 +3160,7 @@ def update(roots: Roots, path: Path, input_value: Any, *, expected_digest: str, 
     old_ref = ExactRef(loaded.catalog.source_id, old.id, old.version, old.digest)
     files = _declared_files(new, files_from, fallback_dir=loaded.directory / PurePosixPath(entry.path).parent,
                             reader=reader, what=f"{new.id}@{new.version}")
-    extra = [(f"{new.id}/{new.version}/{name}", data) for name, data in files]
+    extra = _version_files(new.id, new.version, files, f"{new.id}@{new.version}")
     report = {"schema_version": 1, "status": "ok", "written": False, "scope": scope, "from": old_ref.to_json(),
               "to": ExactRef(loaded.catalog.source_id, new.id, new.version, new.digest).to_json(),
               "clause_diff": _clause_diff(old, new), "impact": dependents(roots, [old_ref], reader=reader, sources=sources),
@@ -3811,8 +3865,9 @@ def import_bundle(roots: Roots, bundle: Path, *, scope: str, destination_source:
                      "bindings": [], "lifecycle": []}
         elif value["source_id"] != destination_source:
             _fail("source_id_mismatch", "the destination source changed", status="collision")
-        extra = [(f"{transformed[key]['ref'].id}/{transformed[key]['ref'].version}/{path}", data)
-                 for key in order for path, data in transformed[key]["assets"]]
+        extra = [item for key in order for item in _version_files(
+            transformed[key]["ref"].id, transformed[key]["ref"].version, transformed[key]["assets"],
+            transformed[key]["ref"].text)]
         return copy_json(value), [transformed[key]["pattern"] for key in order], diagnostics, extra
 
     written = _publish(root, reader, expected=expected_catalog_digest, build=build)

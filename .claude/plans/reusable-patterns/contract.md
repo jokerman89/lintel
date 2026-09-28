@@ -297,6 +297,28 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R8 (2026-09-28, independent review of `8addc395`: P3-R6-1, P3-R6-2, note 1, note 2)
+
+- **One destination namespace per publication.** The shared `_preflight` validates the complete
+  destination list before the first write, using the existing path validator, for capture,
+  update, approve and import alike. It refuses (`destination_conflict`, invalid) any of these:
+  - paths equal only by case;
+  - a path that is both a file and a directory prefix of another (`a` and `a/b`);
+  - the same path claimed with different bytes.
+
+  An exact duplicate with identical bytes coalesces, for example an asset and a `root: pattern`
+  source that name the same file. On disk, a destination whose ancestor is a file, or which is
+  itself a directory, is a collision. Each version's closure is also checked on its own, at
+  preview time, and a closure file may never take the version body name `pattern.json` at the
+  version root (a nested `docs/pattern.json` is fine). A refusal writes nothing, so a retry is
+  clean. A reader that meets a file where a directory is expected reports a missing file, never
+  an uncaught `NotADirectoryError`.
+- **Compatibility notice.** `check`/`check_sources` now verify every registered version's
+  declared file closure. An entry approved before R6 without its files, or a pack that declares a
+  `root: pattern` source it does not ship, now reports `unavailable` (`declared_file_missing`) in
+  `check`. Remedy: in a repository, run `update --files-from <dir>`, then `approve`; a pack must
+  ship the declared file. `list` and ordinary resolution stay metadata-first and are unaffected.
+
 ## Revision R7 (2026-09-28, independent PACK-lane review: coupled F1, F2, F3, F6)
 
 - **F2** `build_envelope` checks each anchor (repository, personal) for a link or junction on the
