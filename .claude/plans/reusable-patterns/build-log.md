@@ -326,6 +326,28 @@ Results:
   - the exact old approve behaviour;
   - no membership check.
 
+## Swarm reconciliation (RN-11)
+
+- `python -I -B bin\li-work-artifacts.py --repo . --map .claude\plans\reusable-patterns\work.json` -> exit 0.
+- `python -I -B bin\li-swarm.py validate --repo . --coord .claude/plans/reusable-patterns/swarm/coordination.json`
+  -> `ok: true`, no diagnostics.
+- `li-swarm.py wave --host-capability native` -> wave 1, with CORE, PACK and WF as the dispatch
+  candidates and no `blocked_by`. The P0P1 prerequisites were read as complete from the converted
+  checklist items. `release_clearance: false`.
+- `li-swarm.py check-scope --task CORE --actor worker` over the CORE subset of `ae9d6df7..777b4f6d`
+  (`bin/li-pattern.py`, `lib/patterns.py`, `skills/pattern/SKILL.md`, `tests/unit/patterns.py`)
+  -> `ok: true`. The same range's `.claude/plans/reusable-patterns/**` paths are coordinator
+  writes by the same session in its coordinator role, and `check-scope` correctly flags them as
+  outside the CORE worker scope.
+
+  Attribution: path-level only. The integration session plays both roles, and some commits mix
+  coordinator and CORE paths. The pack and workflow lanes have their own worktrees and branches;
+  their check-scope runs before each join.
+- Command-surface guard: 1 finding, `missing-path` for the WF-owned planned path
+  `skills/pattern/references` in the package boundary. It is pending join (RN-11). The
+  `catalog-regenerates-clean` shape test reports drift for the new `pattern` skill; this is
+  pending INT 6.1.b. `frontmatter-lint-all` and `skill-descriptions-trigger` pass.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
