@@ -60,15 +60,19 @@ contains "the step runs in the working repository" "$out" "CWD=$FIXTURE"
 contains "the profile context is prepared" "$out" "PROFILE=ready"
 contains "the step keeps default shell options (no errexit)" "$out" "after-false"
 if [ -e "$TEST_TMP/hostile-ran" ]; then fail "an inherited source root executed"; else pass "inherited source root ignored"; fi
-contains "LINTEL_SKILLS_DIR defaults to the runner's skills folder" "$out" $'\n'"SKILLS=$REPO_ROOT/skills"$'\n'
+contains "LINTEL_SKILLS_DIR is the runner's skills folder" "$out" $'\n'"SKILLS=$REPO_ROOT/skills"$'\n'
 contains "LINTEL_SKILLS_DIR is exported to child processes" "$out" $'\n'"CHILD_SKILLS=$REPO_ROOT/skills"$'\n'
 
-# 1b. An explicit LINTEL_SKILLS_DIR is operator configuration and wins over the default.
-rc=0
-out=$(cd "$FIXTURE" && LINTEL_SKILLS_DIR="$TEST_TMP/operator skills" bash "$RUN" "$TEST_TMP/step.sh" 2>&1) || rc=$?
-check "explicit LINTEL_SKILLS_DIR step exit status" 3 "$rc"
-contains "an explicit LINTEL_SKILLS_DIR wins" "$out" $'\n'"SKILLS=$TEST_TMP/operator skills"$'\n'
-contains "the explicit LINTEL_SKILLS_DIR is exported" "$out" $'\n'"CHILD_SKILLS=$TEST_TMP/operator skills"$'\n'
+# 1b. LINTEL_SKILLS_DIR is pinned like LINTEL_SOURCE_ROOT: an inherited absolute or relative value
+#     is ignored, and the pinned value is exported to child processes.
+for inherited in "$TEST_TMP/operator skills" skills; do
+  rc=0
+  out=$(cd "$FIXTURE" && LINTEL_SKILLS_DIR="$inherited" bash "$RUN" "$TEST_TMP/step.sh" 2>&1) || rc=$?
+  check "inherited LINTEL_SKILLS_DIR '$inherited' step exit status" 3 "$rc"
+  contains "an inherited LINTEL_SKILLS_DIR '$inherited' is ignored" "$out" $'\n'"SKILLS=$REPO_ROOT/skills"$'\n'
+  contains "the pinned LINTEL_SKILLS_DIR reaches a child over '$inherited'" "$out" \
+    $'\n'"CHILD_SKILLS=$REPO_ROOT/skills"$'\n'
+done
 
 # 2. stdin (-) defaults to the current repository and removes its buffer.
 rc=0
