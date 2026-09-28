@@ -87,7 +87,19 @@ Phase, document, engineering and frontend workflows follow one shared
   - In a repository, fix it with `update --files-from <dir>`, then `approve`.
   - In a pack, ship the file.
   - `list` and ordinary resolution stay metadata-first.
-- **Windows path length.** Windows path length: the runtime opens pattern files with ordinary paths, so without Windows long-path support a pattern file whose full path exceeds about 260 characters is reported missing (fail-closed, never success). The bundled kit's deepest path is the example asset directory, so on Windows PowerShell 5.1 with `LongPathsEnabled=0` the bare installer needs a correspondingly short Lintel home: a home near 108 characters was observed to work and near 134 characters to fail, recoverably, with `-Recover`. The exact budget depends on the host. Keep pattern sources and the Lintel home at ordinary depths, or enable long paths; full long-path support is not claimed.
+  - `check` also rejects a previously published or pack entry whose declared files collide on a
+    portable filesystem, for example `guide.md` and `Guide.md`, as `destination_conflict`.
+    Metadata resolution is unchanged. Publish a corrected version or layout; re-running `check`
+    or reindexing does not accept the old entry.
+- **Windows path length.** The runtime opens pattern files with ordinary paths. Without Windows
+  long-path support, a pattern file whose full path exceeds about 260 characters is reported
+  missing: fail-closed, never success.
+  - The kit's deepest path is the example asset directory. So on Windows PowerShell 5.1 with
+    `LongPathsEnabled=0`, the bare installer needs a correspondingly short Lintel home.
+  - A home of about 108 characters was observed to work, and about 134 to fail recoverably with
+    `-Recover`. The exact budget depends on the host.
+  - Keep pattern sources and the Lintel home at ordinary depths, or enable long paths. Full
+    long-path support is not claimed.
 - **Byte-exact sources through Git.** Asset digests cover raw bytes. Keep `* -text` in a
   source-local `.gitattributes` beside the pattern catalog, so line-ending conversion cannot
   rewrite assets. `-text` does not disable filters, LFS, `working-tree-encoding` or `ident`, and it

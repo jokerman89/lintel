@@ -309,6 +309,10 @@ No signature, exit code or report shape changes.
   missing or unreadable file. `_is_link` treats ENOTDIR (a parent component is a file) like
   ENOENT: not a link. The caller then sees a missing path or a destination conflict. There is no
   new abstraction and no broad exception catch.
+  - Disclosure (review P3): explicit `check`/`check_sources` now rejects a previously published
+    or pack entry with a nonportable declared namespace (for example `guide.md` plus `Guide.md`)
+    as `destination_conflict`. Ordinary metadata resolution is unchanged. The owner publishes a
+    corrected version or layout; `check` and reindexing never accept the old entry.
 - **No report means unavailable.** Consumers treat a run that writes no JSON report on stdout as
   `pattern check unavailable`, whatever the exit code. This is stated in the skill and the
   consumer contract. Exit 5 from the launcher's missing-runtime branch (R12) is one such case.
