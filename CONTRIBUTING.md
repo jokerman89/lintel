@@ -183,6 +183,24 @@ frontmatter:
 Optional `memory:` (`project`, `user`, or `local`) and `model:` are validated when present. Give an
 agent only the tools it actually needs.
 
+### After editing a skill or agent
+
+Several files are generated from the canonical skills and agents and committed with them. After
+you add or edit any canonical skill or agent, regenerate them from the repository root and commit
+the regenerated files in the same change (use `python3` where that is your Python 3 command):
+
+```bash
+python bin/li-copilot.py init --target . --source .
+python bin/li-catalog.py
+bash bin/li-wiki-gen
+```
+
+The first command regenerates the native Copilot skills in `.github/skills/` and the custom
+agents in `.github/agents/`, the second `skills/CATALOG.md`, and the third `docs/wiki/` and the
+showcase page. CI enforces all three drift checks (`li-copilot.py check --target . --source .`,
+`li-catalog.py --check` and `li-wiki-gen --check`), so a stale generated file fails the pull
+request. Never edit the generated files by hand; change the canonical source and regenerate.
+
 ### A new hook
 
 Lives at `hooks/shared/<kebab-case>/HOOK.md` plus `hooks/shared/<kebab-case>/run.sh`. `HOOK.md`
@@ -223,7 +241,7 @@ Open an issue. Be specific about the problem you are solving.
 
 ## Copilot adapter changes
 
-Edit canonical skills, `shims/copilot/` templates and the adapter generator rather than generated `.github/skills/` output. Run the adapter's repository generation/check path and the relevant installation tests. A discovery test must cover valid native frontmatter, portable referenced resources and non-clobber behavior. Document host validation separately from static or hermetic checks. [The Copilot guide](docs/copilot.md) defines the shipped integration scope.
+Edit canonical skills and agents, `shims/copilot/` templates and the adapter generator rather than generated `.github/skills/` or `.github/agents/` output, then regenerate as described in [after editing a skill or agent](#after-editing-a-skill-or-agent). Run the adapter's repository generation/check path and the relevant installation tests. A discovery test must cover valid native frontmatter, portable referenced resources and non-clobber behavior. Document host validation separately from static or hermetic checks. [The Copilot guide](docs/copilot.md) defines the shipped integration scope.
 
 
 Shared startup disciplines are authored in `scaffolding/01-foundation/SESSION-PROTOCOL.md`. Run `python3 bin/li-instructions.py sync` after an approved change, then `check`. Keep all four generated entry blocks identical, preserve project-owned prose and update the protocol coverage map when changing the reusable contract.
