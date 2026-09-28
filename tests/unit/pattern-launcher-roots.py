@@ -153,6 +153,45 @@ class HardeningTests(unittest.TestCase):
                                      "--profile-error-message", opaque)
         self.assertEqual(envelope["pack_context"]["diagnostics"][0]["message"], opaque)
 
+    def test_msys_conversion_is_off_for_opaque_values_but_known_paths_still_convert(self):
+        """Review L-P1: plain /c/... spellings are the ones MSYS itself would rewrite."""
+        h = Harness(self, root_name="plain roots")
+        for opaque in ("/etc/x", "/c/not/a/path"):
+            for spelling in (("--profile-error-message", opaque), (f"--profile-error-message={opaque}",)):
+                code, envelope, err = h.launch("envelope", "--personal", native(h.home), "--profile-error", "E",
+                                               *spelling)
+                self.assertEqual((code, envelope["pack_context"]["diagnostics"][0]["message"]), (0, opaque), err)
+        draft = h.write_input("draft.json", make_pattern("example.mine", version="0.1.0", status="draft"))
+        for spelling in (("--name", "/etc/x"), ("--name=/etc/x",)):
+            code, report, err = h.launch("capture", "--input", posix_spelling(draft), "--scope", "personal",
+                                         *spelling, "--source-id", "me.personal")
+            self.assertNotEqual(code, 0, err)
+            text = json.dumps(report)
+            self.assertIn("/etc/x", text, "the core sees and reports the raw name")
+            self.assertNotIn("Program Files", text)
+        self.assertFalse((h.home / "patterns").exists(), "a refused name writes nothing")
+        context = posix_spelling(h.context())
+        for args in (("resolve", "--context", context), ("resolve", f"--context={context}")):
+            code, report, err = h.launch(*args)
+            self.assertEqual((code, report["status"]), (0, "empty"), (args, err))
+        pattern = posix_spelling(h.write_input("pattern.json", make_pattern("example.checked")))
+        for args in (("check", "--path", pattern), ("check", f"--path={pattern}")):
+            self.assertEqual(h.launch(*args)[0], 0, args)
+        roots = h.launch("roots")[1]
+        roots_file = posix_spelling(h.write_input("roots.json", roots))
+        for args in (("list", "--roots-file", roots_file), ("list", f"--roots-file={roots_file}")):
+            code, listed, err = h.launch(*args)
+            self.assertEqual((code, listed["sources"]), (0, []), (args, err))
+        assets = h.inputs / "assets"
+        assets.mkdir()
+        code, report, err = h.launch("capture", "--input", posix_spelling(draft), "--scope", "personal",
+                                     "--name", "example.mine", "--source-id", "me.personal",
+                                     f"--files-from={posix_spelling(assets)}")
+        self.assertEqual(code, 0, (err, report))
+        self.assertTrue((h.home / "patterns" / "catalog.json").is_file())
+        script = posix_spelling(h.source / "bin" / "li-pattern")
+        code, out, err = h.shell('exec bash "$2" roots', script)
+        self.assertEqual((code, json.loads(out)["personal"]), (0, native(h.home)), err)
     def test_outside_git_home_is_the_profile_context_not_a_repository(self):
         h = Harness(self, git=False)
         outside = h.root / "outside"

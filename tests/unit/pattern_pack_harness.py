@@ -97,19 +97,17 @@ def _remove_tree(path: Path) -> None:
 
 
 def posix_spelling(path: Path) -> str:
-    """The shell's own spelling: /c/... under MSYS (where auto-conversion may skip it), else native."""
-    cygpath = shutil.which("cygpath")
-    if not cygpath:
-        return str(path)
-    return subprocess.run([cygpath, "-u", str(path)], capture_output=True, check=True,
-                          timeout=30).stdout.decode("utf-8").rstrip("\n")
+    """The launcher shell's own spelling: /c/... under MSYS, else native (asked of that bash, not PATH)."""
+    body = 'if command -v cygpath >/dev/null 2>&1; then cygpath -u -- "$1"; else printf "%s\\n" "$1"; fi'
+    return subprocess.run([bash_executable(), "-c", body, "spelling", str(path)], capture_output=True, check=True,
+                          timeout=30, stdin=subprocess.DEVNULL).stdout.decode("utf-8").rstrip("\n")
 
 
 class Harness:
-    def __init__(self, testcase, *, git=True):
+    def __init__(self, testcase, *, git=True, root_name=AWKWARD):
         base = Path(tempfile.mkdtemp(prefix="lintel-pack-lane-")).resolve()
         testcase.addCleanup(_remove_tree, base)
-        self.root = base / AWKWARD
+        self.root = base / root_name
         self.source = self.root / "installed source"
         for relative in SOURCE_FILES:
             target = self.source / relative

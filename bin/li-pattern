@@ -102,7 +102,13 @@ for argument in "$@"; do
 done
 set -- "${normalized[@]}"
 
-run_cli() { "$python" -I -B "$(_native "$SOURCE/bin/li-pattern.py")" "$@"; }
+# Every path this call receives is already native: the script path, the envelope
+# roots and the known path options (normalized above). MSYS's own argv conversion
+# is therefore disabled for this call only, so opaque values such as a message or
+# name starting with "/" reach Python verbatim. No-op off MSYS; the core spawns nothing.
+run_cli() {
+  MSYS2_ARG_CONV_EXCL='*' MSYS_NO_PATHCONV=1 "$python" -I -B "$(_native "$SOURCE/bin/li-pattern.py")" "$@"
+}
 
 command="$1"
 passthrough=0
