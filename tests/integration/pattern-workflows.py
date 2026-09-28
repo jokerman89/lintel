@@ -172,6 +172,28 @@ class ConsumerContractTests(unittest.TestCase):
         _, direct, _ = ws.resolve()
         self.assertEqual((code, launched["selection_digest"]), (0, direct["selection_digest"]))
 
+    def test_fallback_or_error_profile_without_sources_is_never_no_patterns(self):
+        """M3: an empty-looking repository under a fallback/error profile still surfaces unavailable."""
+        for status, diagnostics in (("fallback", [{"code": "optional_pack_missing", "message": "team pack absent"}]),
+                                    ("error", [{"code": "profile_drift", "message": "pointer changed"}])):
+            fx = Fixture(self)
+            fx.pack_context = dict(fx.neutral_context(), status=status, diagnostics=diagnostics,
+                                   identity=None if status == "error" else fx.pack_context["identity"])
+            context = fx.write_json("context.json", ctx(artifact="dashboard"))
+            for command in (("list",), ("resolve", "--context", context)):
+                code, report, stderr = fx.cli(*command)
+                self.assertEqual((code, report["status"]), (5, "unavailable"), (status, command))
+                self.assertIn(f"pack_context_{status}", stderr)
+                self.assertNotEqual(report["status"], "empty")
+
+    def test_launcher_surfaces_a_fallback_profile(self):
+        fx = Fixture(self)
+        packs = fx.lintel_home / "packs"
+        packs.mkdir(parents=True)
+        (packs / "active-pack").write_text("missing-team-pack\n", encoding="utf-8")
+        code, report, _ = fx.launcher("list")
+        self.assertEqual((code, report["status"]), (5, "unavailable"))
+
 
 class StartupTests(unittest.TestCase):
     """4.1.b: metadata-only startup, pre-design resolution and source checks; no guessed target."""
@@ -445,7 +467,21 @@ class DocumentPipelineTests(unittest.TestCase):
         self.assertEqual(direct["requirements"], attached["requirements"])
         self.assertEqual(direct["selection_digest"], attached["selection_digest"])
 
-    def test_format_conversion_preserves_required_clauses(self):
+    def test_document_outputs_elsewhere_keep_the_lock_in_the_repository(self):
+        """L3: the run's documents may live outside the repository; the lock and its root never do."""
+        outside = self.fx.root / "document outputs" / "run-7"
+        outside.mkdir(parents=True)
+        (outside / "design-spec.json").write_text(json.dumps({"pattern_context": self.attachment}), encoding="utf-8")
+        self.assertEqual(self.verify(self.attachment)["status"], "ok")
+        with self.assertRaises(p.PatternError) as raised:
+            pv.verify_design_attachment(self.fx.roots(), outside, self.attachment, self.context, today=TODAY)
+        self.assertEqual((raised.exception.code, raised.exception.status), ("lock_outside_repository", "invalid"))
+        with self.assertRaises(p.PatternError) as raised:
+            p.write_lock(self.fx.roots(), outside / "patterns.lock.json", self.lock)
+        self.assertFalse((outside / "patterns.lock.json").exists())
+
+    def test_unrelated_format_fact_does_not_change_the_selection(self):
+        """L5: selection invariance only. Real conversion/provider preservation stays INT/V17 evidence."""
         for provider in ("docx", "pptx", "pdf", "xlsx", "vsdx"):
             report, _ = self.fx.resolve(ctx(artifact="technical-document", format=provider))
             mandatory = [item["clause"] for item in report["requirements"] if item["state"] == "mandatory"]

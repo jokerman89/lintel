@@ -27,6 +27,7 @@ from pattern_consumer_fixtures import (  # noqa: E402
 )
 
 WEBSITE = {"artifact": ["website"]}
+WEB = p.parse_context(ctx(artifact="website"))
 TOKENS = json.dumps({"accent": "#1a2b3c"}).encode("utf-8")
 GUIDE = b"# Backend guide\nSynthetic backend guidance.\n"
 
@@ -113,13 +114,13 @@ class VisualRoundtripTests(unittest.TestCase):
         self.assertEqual(winners["visual.interaction.scroll-smoothing"], True, "repository default beats pack default")
         self.assertEqual(winners["visual.layout.grid"], "bento", "pack default beats explicit personal default")
         self.assertEqual(winners["visual.interaction.hover-intent"], "pronounced", "personal default fills a gap")
-        spec = self.project(report)
+        lock = self.rt.locked(refs=self.rt.personal_ref())
+        self.assertEqual(lock["selection_digest"], report["selection_digest"])
+        spec = self.project(lock)
         self.assertEqual(spec["layout_grammar"], {"max_width": "1200px", "grid": "bento"})
         self.assertEqual(spec["interaction_signature"]["hover_intent"], "pronounced")
         self.assertEqual(spec["typography"], visual_base_spec()["typography"], "Design DNA choices stay")
         self.assertEqual(self.design.validate_spec(spec)["kind"], "frontend")
-        lock = self.rt.locked(refs=self.rt.personal_ref())
-        self.assertEqual(lock["selection_digest"], report["selection_digest"])
         review = pv.validate_visual(spec, lock)
         self.assertEqual(review["status"], "passed")
         self.assertFalse(review["clearance"])
@@ -152,7 +153,8 @@ class VisualRoundtripTests(unittest.TestCase):
         self.assertEqual([item["ref"]["id"] for item in report["selected"]], ["example.backend"])
         self.assertEqual(report["metrics"]["asset_reads"], 0)
         self.assertNotIn("visual.layout.max-width", report["settings"])
-        self.assertEqual(pv.project_visual(visual_base_spec(), report)["spec"]["layout_grammar"],
+        backend = self.rt.locked(artifact="service")
+        self.assertEqual(pv.project_visual(visual_base_spec(), backend)["spec"]["layout_grammar"],
                          visual_base_spec()["layout_grammar"])
         self.assertEqual(p.asset_refs(report, kind="tokens"), [])
 
@@ -175,6 +177,13 @@ class VisualRoundtripTests(unittest.TestCase):
             pv.project_visual(visual_base_spec(), tampered)
         self.assertEqual(raised.exception.status, "invalid")
 
+    def test_a_report_from_another_process_is_not_a_selection(self):
+        _, report, _ = self.rt.resolve()
+        for call in (pv.project_visual, pv.validate_visual):
+            with self.assertRaises(p.PatternError) as raised:
+                call(visual_base_spec(), report)
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+
     def test_foreign_assets_are_refused_for_a_selection(self):
         lock = self.rt.locked()
         backend = self.rt.locked(artifact="service")
@@ -191,9 +200,11 @@ class VisualRoundtripTests(unittest.TestCase):
         self.assertEqual((code, report["status"], stderr), (0, "empty", ""))
         self.assertEqual((report["metrics"]["pattern_reads"], report["metrics"]["asset_reads"]), (0, 0))
         base = visual_base_spec()
-        self.assertEqual(pv.project_visual(base, report)["spec"], base)
-        self.assertEqual(self.design.validate_spec(base), self.design.validate_spec(
-            pv.project_visual(base, report)["spec"]))
+        fresh, _ = fx.resolve(ctx(artifact="website"))
+        self.assertEqual(fresh["selection_digest"], report["selection_digest"])
+        projected = pv.project_visual(base, fresh, context=WEB)["spec"]
+        self.assertEqual(projected, base)
+        self.assertEqual(self.design.validate_spec(base), self.design.validate_spec(projected))
         self.assertEqual(tree_digest(fx.repo), before)
 
     def test_legacy_import_roundtrip_stays_default_and_schema_only(self):
@@ -210,7 +221,7 @@ class VisualRoundtripTests(unittest.TestCase):
         report, reader = fx.resolve(ctx(artifact="website"))
         self.assertEqual({item["state"] for item in report["requirements"]}, {"default"})
         self.assertEqual(reader.count("asset"), 0)
-        spec = pv.project_visual(visual_base_spec(), report)["spec"]
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
         self.assertEqual(spec["layout_grammar"]["section_spacing"], "clamp(4rem, 8vw, 8rem)")
         ref_legacy = [item for item in spec["pattern_context"]["asset_refs"] if item["kind"] == "visual-legacy"]
         lock = p.build_lock(report, p.parse_context(ctx(artifact="website")), now=NOW)
@@ -260,8 +271,135 @@ class VisualRoundtripTests(unittest.TestCase):
         _, direct, _ = fx.cli("resolve", "--context", context)
         self.assertEqual((code, launched["status"]), (0, "ready"))
         self.assertEqual(launched["selection_digest"], direct["selection_digest"])
-        self.assertEqual(pv.project_visual(visual_base_spec(), launched)["spec"],
-                         pv.project_visual(visual_base_spec(), direct)["spec"])
+        self.assertEqual(launched["requirements"], direct["requirements"])
+
+
+# Card 5.2.a: one explicit acceptance case per frontend consumer. "helper" is what this suite
+# executes through the real resolver, adapter and shared design validator; "deferred" is model,
+# render or host behavior that only V17 can observe. A row is never evidence of that deferred part.
+CONSUMER_ACCEPTANCE = {
+    "design-dna": {"phase": "define (direct decision)", "test": "test_design_dna_defaults_fill_only_unset_choices",
+                   "input": "repository default visual.palette.accent; Design DNA profile tokens in the base spec",
+                   "expected": "accent projected, other profile tokens kept, profile/corpus files byte-identical",
+                   "deferred": "V17: retrieval and model choice honoring the bound palette"},
+    "frontend-typography": {"phase": "define (direct decision)", "test": "test_typography_prose_clause_stays_a_review_item",
+                            "input": "mandatory prose typography clause without a v1 setting",
+                            "expected": "typography unchanged, clause listed in review_required, validate never passes it",
+                            "deferred": "V17: model picks fonts satisfying the clause"},
+    "frontend-motion": {"phase": "define (direct decision)", "test": "test_motion_bound_setting_constrains_motion_mode",
+                        "input": "mandatory visual.interaction.scroll-smoothing=true",
+                        "expected": "shared validator refuses mode none with the projected value; a library mode passes",
+                        "deferred": "V17: model chooses a compatible motion library"},
+    "frontend-shader": {"phase": "define (direct decision)", "test": "test_shader_default_prose_leaves_shader_unconstrained",
+                        "input": "default prose shader clause, no assets",
+                        "expected": "shader field unchanged, clause in review_required, zero asset reads",
+                        "deferred": "V17: model shader decision"},
+    "generate-web": {"phase": "build (render, including --mode mockup)", "test": "test_renderers_block_on_stale_or_mismatched_specs",
+                     "input": "verified lock; projected, drifted and stale-context specs for target single-file",
+                     "expected": "projected spec passes; drift and stale context fail before render",
+                     "deferred": "V17: actual HTML render and browser check"},
+    "generate-app": {"phase": "build (scaffold)", "test": "test_renderers_block_on_stale_or_mismatched_specs",
+                     "input": "verified lock; projected, drifted and stale-context specs for target app",
+                     "expected": "projected spec passes; drift and stale context fail before scaffolding",
+                     "deferred": "V17: actual project scaffold and build"},
+    "frontend-design": {"phase": "define (orchestrator)", "test": "test_selection_adapter_spec_review_roundtrip",
+                        "input": "repo/pack/personal defaults plus mandatory setting",
+                        "expected": "precedence winners projected into the spec with pattern_context",
+                        "deferred": "V17: end-to-end orchestrated session"},
+    "frontend-design-review": {"phase": "review", "test": "test_review_fails_when_the_built_spec_drifts_from_the_baseline",
+                               "input": "verified lock and a drifted built spec",
+                               "expected": "per-clause failures, never clearance",
+                               "deferred": "V17: review of a rendered UI"},
+    "frontend-style-extract": {"phase": "capture", "test": "test_legacy_capture_approve_roundtrip_reads_the_asset_after_approval",
+                               "input": "legacy visual pattern bytes",
+                               "expected": "draft of defaults captured with sidecar; bytes readable after approval",
+                               "deferred": "V17: real extraction from an authorized site"},
+    "generate-style-learn": {"phase": "capture", "test": "tests/unit/pattern-visual.py LegacyTests (palette tokens map to defaults)",
+                             "input": "palette observation via the legacy adapter",
+                             "expected": "only #RRGGBB tokens become defaults; no confirmed confidence",
+                             "deferred": "V17: real palette learning"},
+}
+
+
+class ConsumerAcceptanceTests(unittest.TestCase):
+    """5.2.a helper-level cases; the deferred column stays open until V17."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.design = load_design_contract()
+
+    def bind(self, requirements, role="required"):
+        pattern = make_pattern("example.consumer", applies_to=WEBSITE, requirements=requirements)
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [pattern])
+        self.fx.repo_bindings([binding("web", [ref("repo.main", pattern)], role=role, when=WEBSITE)])
+        report, reader = self.fx.resolve(ctx(artifact="website"))
+        self.assertEqual(report["status"], "ready", report["diagnostics"])
+        lock = p.build_lock(report, WEB, now=NOW)
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, WEB, today=TODAY)["status"], "ok")
+        return lock, reader
+
+    def test_every_frontend_consumer_has_a_mapped_case(self):
+        names = {"design-dna", "frontend-typography", "frontend-motion", "frontend-shader", "generate-web",
+                 "generate-app", "frontend-design", "frontend-design-review", "frontend-style-extract",
+                 "generate-style-learn"}
+        self.assertEqual(set(CONSUMER_ACCEPTANCE), names)
+        for name, row in CONSUMER_ACCEPTANCE.items():
+            self.assertTrue(all(row[key] for key in ("phase", "input", "expected", "test", "deferred")), name)
+            if row["test"].startswith("test_"):
+                self.assertTrue(hasattr(VisualRoundtripTests, row["test"]) or hasattr(type(self), row["test"]), name)
+
+    def test_design_dna_defaults_fill_only_unset_choices(self):
+        profiles = Path(p.__file__).resolve().parents[1] / "skills" / "design-dna" / "profiles"
+        before = tree_digest(profiles)
+        lock, _ = self.bind([clause("ACCENT", "default", "visual.palette.accent", "#1A2B3C")], role="default")
+        spec = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertEqual(spec["palette"]["tokens"], {"ink": "#141413", "paper": "#faf9f5", "accent": "#1a2b3c"})
+        self.assertEqual(spec["typography"], visual_base_spec()["typography"])
+        self.assertEqual(tree_digest(profiles), before, "profile files are never modified")
+
+    def test_typography_prose_clause_stays_a_review_item(self):
+        lock, _ = self.bind([clause("TYPE", "must", text="Headings use a serif family with a sans body.")])
+        result = pv.project_visual(visual_base_spec(), lock)
+        self.assertEqual(result["spec"]["typography"], visual_base_spec()["typography"])
+        self.assertEqual([item["clause"] for item in result["review_required"]], ["example.consumer@1.0.0#TYPE"])
+        check = pv.validate_visual(result["spec"], lock)
+        self.assertEqual((check["status"], check["checks"]), ("passed", []))
+        self.assertEqual([item["clause"] for item in check["review_required"]], ["example.consumer@1.0.0#TYPE"],
+                         "no mechanical check exists for prose; review must assess it")
+
+    def test_motion_bound_setting_constrains_motion_mode(self):
+        lock, _ = self.bind([clause("SMOOTH", "must", "visual.interaction.scroll-smoothing", True)])
+        still = visual_base_spec()
+        still["motion"] = {"schema_version": 1, "mode": "none", "libraries": [], "key_animations": [],
+                           "perf_budget": {"fallback_for_prefers_reduced_motion": "no-animation"}}
+        with self.assertRaises(self.design.DesignError):
+            self.design.validate_spec(pv.project_visual(still, lock)["spec"])
+        moving = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertIs(moving["interaction_signature"]["scroll_smoothing"], True)
+        self.assertEqual(self.design.validate_spec(moving)["kind"], "frontend")
+
+    def test_shader_default_prose_leaves_shader_unconstrained(self):
+        lock, reader = self.bind([clause("SHADER", "default", text="Prefer a low-complexity gradient backdrop.")],
+                                 role="default")
+        result = pv.project_visual(visual_base_spec(), lock)
+        self.assertIsNone(result["spec"]["shader"])
+        self.assertEqual([item["clause"] for item in result["review_required"]], ["example.consumer@1.0.0#SHADER"])
+        self.assertEqual((reader.count("asset"), result["pattern_context"]["asset_refs"]), (0, []))
+
+    def test_renderers_block_on_stale_or_mismatched_specs(self):
+        lock, _ = self.bind([clause("MAX", "must", "visual.layout.max-width", "1200px"),
+                             clause("GRID", "default", "visual.layout.grid", "12-col")])
+        for target in ("single-file", "app"):
+            with self.subTest(renderer="generate-web" if target == "single-file" else "generate-app"):
+                spec = pv.project_visual(dict(visual_base_spec(), target_format=target), lock)["spec"]
+                self.assertEqual(self.design.validate_spec(spec)["design"]["target_format"], target)
+                self.assertEqual(pv.validate_visual(spec, lock)["status"], "passed")
+                drifted = copy.deepcopy(spec)
+                drifted["layout_grammar"]["max_width"] = "100%"
+                self.assertEqual(pv.validate_visual(drifted, lock)["status"], "failed")
+                stale = copy.deepcopy(spec)
+                stale["pattern_context"]["selection_digest"] = "f" * 64
+                self.assertEqual(pv.validate_visual(stale, lock)["status"], "failed")
 
 
 if __name__ == "__main__":
