@@ -1174,12 +1174,15 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
             if bundled_doc and not key.startswith(BUNDLE + "/"):
                 missing.append(f"Bundled documentation link escapes source: {relative} -> {link}")
                 continue
+            directory = urlsplit(link).path.endswith("/")
             if key.startswith(BUNDLE + "/"):
-                directory = urlsplit(link).path.endswith("/")
                 if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
                     missing.append(f"Missing bundled documentation target: {relative} -> {link}")
-            elif key not in files and not native_io_path(safe_path(target, key)).is_file():
-                missing.append(f"Missing generated link: {relative} -> {link}")
+            elif key not in files:
+                # Rendering accepts an existing directory for a link ending in "/"; verify the same way.
+                present = native_io_path(safe_path(target, key))
+                if not (present.is_file() or (directory and present.is_dir())):
+                    missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 
 

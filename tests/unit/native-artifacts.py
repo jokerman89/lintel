@@ -226,6 +226,19 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing canonical link target: skills/plan/SKILL.md"):
             self.render("plan")
 
+    def test_directory_links_render_and_verify_only_when_the_directory_exists(self):  # L1
+        self.skill("plan", "Plans.", "\n[References](../define/references/)\n")
+        rendered = self.render("plan")
+        self.assertIn("\n[References](../../../skills/define/references/)\n", rendered)
+        generated = {".github/skills/li-plan/SKILL.md": rendered.encode("utf-8")}
+        self.assertEqual(adapter.verify_links(generated, self.source), [])
+        absent = {".github/skills/li-plan/SKILL.md": b"[Absent](../../../skills/define/absent/)\n"}
+        self.assertEqual(adapter.verify_links(absent, self.source),
+                         ["Missing generated link: .github/skills/li-plan/SKILL.md -> ../../../skills/define/absent/"])
+        self.skill("plan", "Plans.", "\n[Absent](../define/absent/)\n")
+        with self.assertRaisesRegex(ValueError, "Missing canonical link target: skills/plan/SKILL.md"):
+            self.render("plan")
+
     def test_vendored_links_stay_bundled_or_become_public_urls(self):  # 1.2.b
         self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md)\n"
                    "[Decision](../../.claude/decisions/x.md#a)\n[Tests](../../tests/)\n"
