@@ -1,7 +1,7 @@
 # Lintel
 
 [Presentation, demos & technical reference](https://jokerman89.github.io/lintel/) · [Presentation source](presentations/tech-shots-2026-09-25/README.md)
-(a 2026-09-25 event snapshot; its client matrix predates the four supported client families)
+(refreshed 2026-09-28 against the 0.12.0 source, including the four supported client families)
 
 **A shared engineering workflow across coding agents.** Turn an issue into a
 reviewed plan, small build cards, verified changes and a handoff the next session can use.

@@ -225,7 +225,8 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertEqual(phases, ["SENSE", "DEFINE", "DISCOVER"])
         self.assertTrue({"BUILD", "SHIP"} <= set(skipped))
         guide = (ROOT / "presentations/tech-shots-2026-09-25/show/field-guide.html").read_text(encoding="utf-8")
-        self.assertIn("/li:research", guide.splitlines()[3])
+        # The retained shortcut must be documented, independent of page layout.
+        self.assertIn("<code>/li:research</code>", guide)
         self.skill("cycle")
         self.write("skills/research/SKILL.md", source)
         self.assertEqual(self.findings("Run /li:research for the survey.\n"), [])

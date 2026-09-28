@@ -12,7 +12,8 @@ const context=await browser.newContext({viewport:{width:1440,height:960}});
 const errors=[];context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
 const p=await context.newPage();
 const slide=i=>p.evaluate(i=>window.DECK_API.go(i),i);
-const synced=async(n,i)=>{await n.waitForFunction(i=>document.querySelector('#position').textContent.startsWith('SLIDE '+String(i+1).padStart(2,'0')+' /'),i);const actual=await n.locator('#script').innerHTML();const expected=await p.evaluate(()=>window.DECK_API.getPresenterNotes().html);ok(actual===expected,'Popup receives exact current notes');ok((await n.locator('#slideAnnouncement').innerText()).startsWith('Slide '+(i+1)+' of'),'Slide change has a concise live announcement');};
+// Compare browser-normalized markup: rendering decodes entities such as &#39;.
+const synced=async(n,i)=>{await n.waitForFunction(i=>document.querySelector('#position').textContent.startsWith('SLIDE '+String(i+1).padStart(2,'0')+' /'),i);const actual=await n.locator('#script').innerHTML();const expected=await p.evaluate(()=>{const parsed=document.createElement('div');parsed.innerHTML=window.DECK_API.getPresenterNotes().html;return parsed.innerHTML;});ok(actual===expected,'Popup receives exact current notes');ok((await n.locator('#slideAnnouncement').innerText()).startsWith('Slide '+(i+1)+' of'),'Slide change has a concise live announcement');};
 const open=async()=>{const created=p.waitForEvent('popup');await p.locator('#notes').click();const n=await created;await n.waitForLoadState();return n;};
 try{
  await p.goto(new URL('show/index.html?theme=fluent#welcome',base).href);
