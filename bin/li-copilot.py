@@ -810,13 +810,19 @@ def native_link(link: str, canonical: str, generated: str, source: Path, files: 
         present = native_io_path(safe_path(source, target))
         if not present.exists():
             raise ValueError(f"Missing canonical link target: {canonical} -> {link}")
-        # Verification accepts a directory only through a trailing '/', so refuse it here, not later.
+        # Verification accepts a directory only through a trailing '/' and a file only without one,
+        # so refuse either mismatch here, not later.
         if present.is_dir() and not directory:
             raise ValueError(f"Directory link needs a trailing '/': {canonical} -> {link}")
+        if directory and not present.is_dir():
+            raise ValueError(f"File link must not end with '/': {canonical} -> {link}")
         resolved = target
     else:
         resolved = f"{BUNDLE}/{target}"
-        if resolved not in files and not (directory and any(path.startswith(resolved + "/") for path in files)):
+        if resolved in files:
+            if directory:
+                raise ValueError(f"File link must not end with '/': {canonical} -> {link}")
+        elif not (directory and any(path.startswith(resolved + "/") for path in files)):
             if any(target == component or target.startswith(component + "/") for component in COMPONENTS):
                 raise ValueError(f"Missing bundled source target: {canonical} -> {link}")
             return public_url(repository, target, link)
@@ -1185,13 +1191,19 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
                 missing.append(f"Bundled documentation link escapes source: {relative} -> {link}")
                 continue
             directory = urlsplit(link).path.endswith("/")
-            if key.startswith(BUNDLE + "/"):
-                if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
+            # Every branch accepts a file only through a link without a trailing '/' and a
+            # directory only through a link with one, exactly as rendering does.
+            if key in files:
+                if directory:
+                    missing.append(f"File link must not end with '/': {relative} -> {link}")
+            elif key.startswith(BUNDLE + "/"):
+                if not (directory and any(path.startswith(key + "/") for path in files)):
                     missing.append(f"Missing bundled documentation target: {relative} -> {link}")
-            elif key not in files:
-                # Rendering accepts an existing directory for a link ending in "/"; verify the same way.
+            else:
                 present = native_io_path(safe_path(target, key))
-                if not (present.is_file() or (directory and present.is_dir())):
+                if directory and present.is_file():
+                    missing.append(f"File link must not end with '/': {relative} -> {link}")
+                elif not (present.is_file() or (directory and present.is_dir())):
                     missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 

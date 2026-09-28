@@ -278,6 +278,39 @@ class NativeArtifacts(unittest.TestCase):
         self.skill("plan", "Plans.", "\n[References](../define/references/)\n")
         self.assertIn("\n[References](../../../skills/define/references/)\n", self.render("plan"))
 
+    def test_file_links_with_a_trailing_slash_are_errors(self):  # N3
+        bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        for link in ("../define/references/intake.md/", "../define/references/intake.md/#top"):
+            for local, files in ((True, {}), (False, bundled)):
+                with self.subTest(link=link, local=local):
+                    self.skill("plan", "Plans.", f"\n[Intake]({link})\n")
+                    with self.assertRaises(ValueError) as caught:
+                        self.render("plan", local=local, files=files)
+                    self.assertEqual(str(caught.exception),
+                                     f"File link must not end with '/': skills/plan/SKILL.md -> {link}")
+
+    def test_verification_accepts_files_without_and_directories_with_a_trailing_slash(self):  # N3, L1
+        page = ".github/skills/li-plan/SKILL.md"
+        generated = {".github/skills/li-define/SKILL.md": b"# Define\n",
+                     ".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
+        cases = (  # (link from the page, expected error prefix or None)
+            ("../../../skills/define/references/intake.md", None),  # on-disk target
+            ("../../../skills/define/references/intake.md/", "File link must not end with '/'"),
+            ("../../../skills/define/references/", None),
+            ("../../../skills/define/references", "Missing generated link"),
+            ("../li-define/SKILL.md", None),  # generated file
+            ("../li-define/SKILL.md/", "File link must not end with '/'"),
+            ("../../lintel/skills/define/references/intake.md", None),  # bundled target
+            ("../../lintel/skills/define/references/intake.md/", "File link must not end with '/'"),
+            ("../../lintel/skills/define/references/", None),
+            ("../../lintel/skills/define/references", "Missing bundled documentation target"),
+        )
+        for link, error in cases:
+            with self.subTest(link=link):
+                files = {**generated, page: f"[Link]({link})\n".encode("utf-8")}
+                self.assertEqual(adapter.verify_links(files, self.source),
+                                 [f"{error}: {page} -> {link}"] if error else [])
+
     def test_vendored_links_stay_bundled_or_become_public_urls(self):  # 1.2.b
         self.skill("plan", "Plans.", "\n[Intake](../define/references/intake.md)\n"
                    "[Decision](../../.claude/decisions/x.md#a)\n[Tests](../../tests/)\n"
