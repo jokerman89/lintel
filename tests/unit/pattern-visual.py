@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import inspect
 import json
 from pathlib import Path
 import sys
@@ -95,6 +96,9 @@ class LegacyTests(unittest.TestCase):
                                             "sha256": digest}])
         source = draft["sources"][0]
         self.assertEqual((source["kind"], source["confidence"], source["sha256"]), ("observation", "inferred", digest))
+        self.assertEqual((source["root"], source["ref"]), ("pattern", "visual-legacy/pattern.json"),
+                         "provenance points at the preserved bytes, not an external vault path")
+        self.assertEqual(draft["extensions"]["lintel.visual-legacy"]["original"], SEED_LOCATION)
         self.assertNotEqual(source["confidence"], "confirmed")
         self.assertEqual(SEED.read_bytes(), self.data, "the legacy original is never modified")
 
@@ -126,11 +130,31 @@ class LegacyTests(unittest.TestCase):
         with self.assertRaises(p.PatternError):
             self.convert(asset_path="../outside.json")
 
+    def test_stage_draft_writes_capture_input_with_its_sidecar_only(self):
+        fx = Fixture(self)
+        result = self.convert()
+        directory = fx.root / "run" / "draft"
+        path = pv.stage_draft(result, self.data, directory)
+        self.assertEqual(json.loads(path.read_text(encoding="utf-8")), result["draft"])
+        self.assertEqual((directory / "visual-legacy" / "pattern.json").read_bytes(), self.data)
+        self.assertEqual(sorted(item.relative_to(directory).as_posix() for item in directory.rglob("*")
+                                if item.is_file()), ["pattern.json", "visual-legacy/pattern.json"])
+        with self.assertRaises(FileExistsError):
+            pv.stage_draft(result, self.data, directory)
+        with self.assertRaises(p.PatternError) as raised:
+            pv.stage_draft(result, self.data + b" ", fx.root / "run" / "other")
+        self.assertEqual(raised.exception.code, "asset_digest_mismatch")
+        self.assertFalse((fx.root / "run" / "other").exists())
+        self.assertFalse(fx.personal_patterns.exists(), "staging never registers anything")
+
     def test_captured_draft_is_registered_but_never_active(self):
         fx = Fixture(self)
         result = self.convert()
+        kwargs = {}
+        if "files_from" in inspect.signature(p.capture).parameters:
+            kwargs["files_from"] = pv.stage_draft(result, self.data, fx.root / "run" / "draft").parent
         report = p.capture(fx.roots(), result["draft"], scope="personal", name="example.lovable-draft",
-                           source_id="personal.designs")
+                           source_id="personal.designs", **kwargs)
         self.assertEqual(report["status"], "ok")
         catalog = json.loads((fx.personal_patterns / "catalog.json").read_text(encoding="utf-8"))
         self.assertEqual(catalog["entries"][0]["status"], "draft")

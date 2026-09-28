@@ -21,7 +21,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pattern_consumer_fixtures import (  # noqa: E402
-    CONTRACT, ROOT, Fixture, binding, cli_commands, clause, codes, ctx, load_design_contract, make_pattern, p,
+    CONTRACT, NOW, ROOT, TODAY, Fixture, binding, cli_commands, clause, codes, ctx, load_design_contract, make_pattern, p,
     pv, ref, tree_digest,
 )
 
@@ -377,12 +377,12 @@ class DocumentPipelineTests(unittest.TestCase):
         self.context = p.parse_context(ctx(artifact="technical-document"))
         report, _ = self.fx.resolve(ctx(artifact="technical-document"))
         self.report = report
-        self.lock = p.build_lock(report, self.context)
+        self.lock = p.build_lock(report, self.context, now=NOW)
         p.write_lock(self.fx.roots(), self.run / "patterns.lock.json", self.lock)
         self.attachment = pv.design_attachment(self.lock, "patterns.lock.json")
 
     def verify(self, attachment):
-        return pv.verify_design_attachment(self.fx.roots(), self.run, attachment, self.context, today=None)
+        return pv.verify_design_attachment(self.fx.roots(), self.run, attachment, self.context, today=TODAY)
 
     def test_pipeline_attachment_is_verified_and_accepted_by_the_shared_validator(self):
         result = self.verify(self.attachment)
@@ -474,7 +474,7 @@ class EngineeringTests(unittest.TestCase):
                          ["example.prod-network@1.0.0#INGRESS", "example.prod-network@1.0.0#TLS"])
         self.assertEqual(reader.count("asset"), 0)
         self.assertEqual(p.asset_refs(report, kind="tokens"), [])
-        lock = p.build_lock(report, p.parse_context(ctx(artifact="service", **{"deployment.target": "prod"})))
+        lock = p.build_lock(report, p.parse_context(ctx(artifact="service", **{"deployment.target": "prod"})), now=NOW)
         task_map = {"schema_version": 1, "selection_digest": lock["selection_digest"], "tasks": ["SC-1", "DH-1"],
                     "packages": [{"id": "sc", "tasks": ["SC-1"]}, {"id": "dh", "tasks": ["DH-1"]}],
                     "clauses": [{"clause": "example.prod-network@1.0.0#TLS", "tasks": ["SC-1"]},

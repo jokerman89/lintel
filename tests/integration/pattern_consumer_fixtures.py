@@ -32,6 +32,7 @@ CLI = ROOT / "bin" / "li-pattern.py"
 LAUNCHER = ROOT / "bin" / "li-pattern"
 CONTRACT = ROOT / "skills" / "pattern" / "references" / "consumer-contract.md"
 TODAY = dt.date(2026, 9, 28)
+NOW = dt.datetime(2026, 9, 28, 1, 2, 3, tzinfo=dt.timezone.utc)
 TS = "2026-09-01T00:00:00Z"
 PENDING_LAUNCHER = "PENDING join: bin/li-pattern launcher (card 2.1.c, pack lane) is not in this tree"
 
@@ -88,16 +89,24 @@ def tree_digest(root: Path) -> dict:
 
 def cli_commands() -> set:
     """Subcommands the installed CLI actually accepts; missing ones are pending, never mocked."""
-    sys.path.insert(0, str(ROOT / "bin"))
+    return set(_cli_subparsers())
+
+
+def cli_options(command: str) -> set:
+    """Option strings a CLI subcommand accepts (for additive options that arrive with the core)."""
+    parser = _cli_subparsers().get(command)
+    return {option for action in parser._actions for option in action.option_strings} if parser else set()
+
+
+def _cli_subparsers() -> dict:
     import importlib.util
     spec = importlib.util.spec_from_file_location("li_pattern_cli", CLI)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    parser = module.build_parser()
-    for action in parser._actions:
+    for action in module.build_parser()._actions:
         if getattr(action, "choices", None):
-            return set(action.choices)
-    return set()
+            return dict(action.choices)
+    return {}
 
 
 class Fixture:

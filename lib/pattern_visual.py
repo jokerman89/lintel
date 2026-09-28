@@ -32,7 +32,7 @@ import patterns as p  # noqa: E402
 
 __all__ = (
     "SETTINGS", "PALETTE_PREFIX", "LEGACY_MARKERS", "destination", "classify_document",
-    "legacy_to_draft", "project_visual", "validate_visual", "design_attachment",
+    "legacy_to_draft", "stage_draft", "project_visual", "validate_visual", "design_attachment",
     "verify_design_attachment",
 )
 
@@ -190,7 +190,7 @@ def legacy_to_draft(data: bytes, *, pattern_id: str, applies_to: Mapping[str, An
         "schema_version": 1, "id": pattern_id, "version": version, "status": "draft",
         "summary": f"Draft visual defaults converted from legacy pattern {legacy['name']}"[:240],
         "owner": owner, "applies_to": copy.deepcopy(dict(applies_to)), "includes": [],
-        "sources": [{"kind": "observation", "ref": source_ref, "root": "pattern", "section": "",
+        "sources": [{"kind": "observation", "ref": asset_path, "root": "pattern", "section": "",
                      "observed_at": _observed_at(legacy, observed_at), "confidence": confidence,
                      "reuse": reuse, "sha256": digest}],
         "requirements": requirements,
@@ -199,6 +199,7 @@ def legacy_to_draft(data: bytes, *, pattern_id: str, applies_to: Mapping[str, An
                      "unchanged in the visual-legacy asset and are not universal policy. The conversion "
                      "does not verify fonts, accessibility, dependencies or licensing."),
         "assets": [{"path": asset_path, "kind": "visual-legacy", "sha256": digest}],
+        "extensions": {"lintel.visual-legacy": {"name": legacy["name"], "original": source_ref}},
     }
     p.parse_pattern(draft, "draft")
     return {"schema_version": 1, "status": "draft", "draft": draft, "asset": {"path": asset_path, "sha256": digest},
@@ -206,6 +207,28 @@ def legacy_to_draft(data: bytes, *, pattern_id: str, applies_to: Mapping[str, An
             "uninterpreted_fields": uninterpreted,
             "unknowns": ["fonts", "accessibility", "licensing", "dependencies"],
             "limits": "A draft for review; conversion never approves, registers or promotes observations."}
+
+
+def stage_draft(conversion: Mapping[str, Any], data: bytes, directory: Path) -> Path:
+    """Write a conversion's draft and its declared legacy asset into a NEW scratch directory.
+
+    The result is capture input: `pattern.json` with its declared sidecar beside it, for
+    `li-pattern capture --input <dir>/pattern.json`, which verifies and stages the closure before
+    registration. Nothing is written into a catalog here, and nothing is overwritten.
+    """
+    draft = p.parse_pattern(copy.deepcopy(dict(conversion["draft"])), "draft")
+    asset = conversion["asset"]
+    if hashlib.sha256(data).hexdigest() != asset["sha256"] or \
+            not any(item.path == asset["path"] and item.sha256 == asset["sha256"] for item in draft.assets):
+        _fail("asset_digest_mismatch", "the supplied bytes are not the converted legacy asset", "unavailable")
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=False)
+    for relative, content in ((asset["path"], data), ("pattern.json", p.emit_json(draft.raw).encode("utf-8"))):
+        target = p.contained_path(directory, relative, "staged draft")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with open(target, "xb") as stream:
+            stream.write(content)
+    return directory / "pattern.json"
 
 
 # ---------------------------------------------------------------- projection

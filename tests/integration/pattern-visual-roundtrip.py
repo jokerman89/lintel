@@ -22,7 +22,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pattern_consumer_fixtures import (  # noqa: E402
-    Fixture, binding, clause, ctx, load_design_contract, make_pattern, p, pv, ref,
+    NOW, TODAY, Fixture, binding, cli_options, clause, ctx, load_design_contract, make_pattern, p, pv, ref,
     tree_digest, visual_base_spec,
 )
 
@@ -86,7 +86,7 @@ class Roundtrip:
         code, report, _ = self.fx.cli(*args)
         self.t.assertEqual(code, 0, report["diagnostics"])
         lock = json.loads(path.read_text(encoding="utf-8"))
-        verified = p.verify_lock(self.fx.roots(), lock, p.parse_context(context))
+        verified = p.verify_lock(self.fx.roots(), lock, p.parse_context(context), today=TODAY)
         self.t.assertEqual(verified["status"], "ok", verified["diagnostics"])
         return lock
 
@@ -213,10 +213,42 @@ class VisualRoundtripTests(unittest.TestCase):
         spec = pv.project_visual(visual_base_spec(), report)["spec"]
         self.assertEqual(spec["layout_grammar"]["section_spacing"], "clamp(4rem, 8vw, 8rem)")
         ref_legacy = [item for item in spec["pattern_context"]["asset_refs"] if item["kind"] == "visual-legacy"]
-        lock = p.build_lock(report, p.parse_context(ctx(artifact="website")))
-        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")))["status"], "ok")
+        lock = p.build_lock(report, p.parse_context(ctx(artifact="website")), now=NOW)
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")), today=TODAY)["status"], "ok")
         self.assertEqual(p.read_asset(fx.roots(), ref_legacy[0], selection=lock), data,
                          "original bytes are preserved")
+
+    def test_legacy_capture_approve_roundtrip_reads_the_asset_after_approval(self):
+        if "--files-from" not in cli_options("capture"):
+            self.skipTest("PENDING join: asset-bearing capture/approve (core --files-from, 8addc395) is not in this CLI")
+        seed = Path(p.__file__).resolve().parents[1] / "seeds/brand/design-patterns/ultra-modern-lovable-style/pattern.json"
+        data = seed.read_bytes()
+        fx = Fixture(self)
+        conversion = pv.legacy_to_draft(data, pattern_id="example.lovable", applies_to=WEBSITE, owner="design",
+                                        source_ref="brand/design-patterns/ultra-modern-lovable-style/pattern.json")
+        staged = pv.stage_draft(conversion, data, fx.root / "scratch" / "draft")
+        code, captured, _ = fx.cli("capture", "--input", staged, "--scope", "repo", "--name", "example.lovable",
+                                   "--source-id", "repo.main")
+        self.assertEqual(code, 0, captured["diagnostics"])
+        draft_path = fx.repo_patterns / "example.lovable" / "0.1.0" / "pattern.json"
+        approval = fx.write_json("approval.json", {"by": "design review", "reference": "synthetic-review",
+                                                   "at": "2026-09-27T00:00:00Z"})
+        code, approved, _ = fx.cli("approve", "--path", draft_path, "--version", "1.0.0", "--approval", approval,
+                                   "--expected-digest", p.content_digest(conversion["draft"]))
+        self.assertEqual(code, 0, approved["diagnostics"])
+        body = json.loads((fx.repo_patterns / "example.lovable" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        fx.repo_bindings([binding("legacy", [ref("repo.main", body)], role="default", when=WEBSITE)])
+        lock_path = fx.repo / ".claude" / "plans" / "demo" / "patterns.lock.json"
+        lock_path.parent.mkdir(parents=True)
+        code, report, _ = fx.cli("resolve", "--context", fx.write_json("c.json", ctx(artifact="website")),
+                                 "--lock", lock_path)
+        self.assertEqual((code, report["metrics"]["asset_reads"]), (0, 0))
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")),
+                                       today=TODAY)["status"], "ok")
+        legacy_ref = p.asset_refs(lock, kind="visual-legacy")[0]
+        self.assertEqual(p.read_asset(fx.roots(), legacy_ref, selection=lock), data,
+                         "the approved version still carries the original legacy bytes")
 
     def test_launcher_gives_the_same_selection_as_the_direct_cli(self):
         fx = Fixture(self)
