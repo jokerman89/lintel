@@ -95,6 +95,8 @@ def build_parser() -> argparse.ArgumentParser:
     capture.add_argument("--name", required=True, help="the draft's pattern ID, confirmed explicitly")
     capture.add_argument("--source-id", help="namespaced source ID; required on the first capture in a scope")
     capture.add_argument("--expected-catalog-digest")
+    capture.add_argument("--files-from", help="directory holding declared assets and pattern-root sources "
+                         "(default: the input file's directory)")
     index = commands.add_parser("index", help="verify registered entries and regenerate derived metadata")
     _add_roots(index)
     index.add_argument("--source-root", required=True)
@@ -113,6 +115,8 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--expected-digest", required=True)
     update.add_argument("--expected-catalog-digest")
     update.add_argument("--write", action="store_true")
+    update.add_argument("--files-from", help="directory holding new or changed declared files "
+                        "(default: the input file's directory; unchanged files come from the previous version)")
     for action in p.LIFECYCLE_ACTIONS:
         event = commands.add_parser(action, help=f"preview or record a {action} event with its impact")
         _add_roots(event)
@@ -204,7 +208,8 @@ def run(argv) -> tuple[dict, int]:
                                    attestations=attestations)
     elif args.command == "update":
         report = p.update(roots, Path(args.path), _pattern_input(args.input, reader), expected_digest=args.expected_digest,
-                          write=args.write, expected_catalog_digest=args.expected_catalog_digest, reader=reader)
+                          write=args.write, expected_catalog_digest=args.expected_catalog_digest, reader=reader,
+                          files_from=Path(args.files_from or Path(args.input).resolve().parent))
     elif args.command in p.LIFECYCLE_ACTIONS:
         report = p.record_lifecycle(roots, args.ref, action=args.command, record_value=_input(args.record, "record", reader),
                                     expected_catalog_digest=args.expected_catalog_digest, write=args.write,
@@ -234,7 +239,8 @@ def run(argv) -> tuple[dict, int]:
         report = p.capture(roots, p.parse_json(reader.read(Path(args.input), kind="input", limit=p.LIMITS.pattern_bytes),
                                                limit=p.LIMITS.pattern_bytes, what="draft"),
                            scope=args.scope, name=args.name, source_id=args.source_id,
-                           expected_catalog_digest=args.expected_catalog_digest, reader=reader)
+                           expected_catalog_digest=args.expected_catalog_digest, reader=reader,
+                           files_from=Path(args.files_from or Path(args.input).resolve().parent))
     elif args.command == "index":
         report = p.index_source(roots, Path(args.source_root), expected_catalog_digest=args.expected_catalog_digest,
                                 reader=reader)

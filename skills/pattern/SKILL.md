@@ -126,7 +126,10 @@ digests, and no silent change to active work.
 4. Capture the pattern as a draft, and show the operator its clauses and provenance. Approve only
    after review, with a new version and an approval reference. Approval records provenance; it
    does not prove the approver's authority.
-5. Never copy credentials, private source documents or absolute home paths into a pattern, lock
+5. Keep each declared asset, and any `root: pattern` source, next to the draft file you capture,
+   or pass `--files-from <dir>`. Every version carries exactly those files, digest-checked. Nothing
+   else is copied, and a missing or changed file stops publication.
+6. Never copy credentials, private source documents or absolute home paths into a pattern, lock
    or export.
 
 ## Workflow consumers

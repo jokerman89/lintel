@@ -2223,7 +2223,8 @@ class MaintenanceTests(unittest.TestCase):
         before = bindings.read_bytes()
         with self.assertRaises(p.PatternError) as caught:
             p.apply_change(self.fx.roots(), removal, expected_digest="0" * 64, write=True)
-        self.assertEqual(caught.exception.code, "stale_catalog_digest")
+        self.assertEqual(caught.exception.code, "stale_bindings_digest")
+        self.assertIn("bindings", caught.exception.message)
         self.assertEqual(bindings.read_bytes(), before)
         for bad, code in ((dict(removal, id="nope"), "binding_missing"),
                           (dict(change, operation="replace", id="extra", binding=binding("other", [ref("repo.main", self.unused)])),
@@ -2474,7 +2475,15 @@ class BundleTests(unittest.TestCase):
         retired = copy.deepcopy(manifest)
         retired["lifecycle"][0]["effective_status"] = "retired"
         manifest_path.write_text(json.dumps(retired), encoding="utf-8")
+        attempt("invalid_bundle")
+        retired["lifecycle"][0]["events"] = [{"kind": "lifecycle", "status": "retired", "reason": "r",
+                                              "reference": "ADR", "at": TS}]
+        manifest_path.write_text(json.dumps(retired), encoding="utf-8")
         attempt("bundle_contains_retired")
+        laundered = copy.deepcopy(manifest)
+        laundered["lifecycle"][0]["events"] = [{"kind": "revocation", "reason": "r", "reference": "SEC", "at": TS}]
+        manifest_path.write_text(json.dumps(laundered), encoding="utf-8")
+        attempt("invalid_bundle")
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         p.capture(roots, draft("local.child", version="0.1.0"), scope="repo", name="local.child", source_id="repo.local")
         with self.assertRaises(p.PatternError) as caught:
@@ -2761,6 +2770,242 @@ class StrictBaselineTests(unittest.TestCase):
         mapped = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(p.verify_lock(fx.roots(), mapped, context, today=TODAY)["status"], "ok")
         self.assertEqual(len(p.project_package(mapped, task_map, "P1")["clauses"]), len(task_map["clauses"]))
+
+
+class CoreReviewTests(unittest.TestCase):
+    """Regressions for independent review of c92ae4dc (P1-C92-1, P3-C92-1..9), using real flows."""
+
+    GUIDE = b"# dashboard guide\n"
+    EVIDENCE = b"approved policy excerpt\n"
+
+    def setUp(self):
+        self.fx = Fixture(self)
+
+    def asset(self, path="guide.md", data=GUIDE):
+        return {"path": path, "kind": "guide", "sha256": hashlib.sha256(data).hexdigest()}
+
+    def version_dir(self, root, pid, version):
+        return root / pid / version
+
+    def files(self, root, pid, version):
+        return sorted(item.name for item in self.version_dir(root, pid, version).iterdir())
+
+    def test_p1_import_children_first_approve_then_read_asset_and_re_export(self):
+        src_root = self.fx.personal_patterns
+        child = make_pattern("example.child", assets=[self.asset()])
+        parent = make_pattern("example.parent", requirements=[], includes=[ref("team.src", child)])
+        self.fx.publish(src_root, "team.src", [child, parent])
+        (src_root / "example.child" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        bundle = self.fx.root / "bundle"
+        p.export_bundle(self.fx.roots(), [p.parse_exact_ref(ref("team.src", parent), "r")], bundle)
+        mapping = [{"original": ref("team.src", child), "id": "local.child", "version": "0.1.0"},
+                   {"original": ref("team.src", parent), "id": "local.parent", "version": "0.1.0"}]
+        imported = p.import_bundle(self.fx.roots(), bundle, scope="repo", destination_source="repo.local",
+                                   version_map_value=mapping, write=True)
+        child_draft = next(item["destination"] for item in imported["mapping"] if item["destination"]["id"] == "local.child")
+        root = self.fx.repo_patterns
+        child_ok = p.approve(self.fx.roots(), root / "local.child" / "0.1.0" / "pattern.json", version="1.0.0",
+                             approval_value=APPROVAL, expected_digest=child_draft["sha256"])
+        self.assertEqual(self.files(root, "local.child", "1.0.0"), ["guide.md", "pattern.json"])
+        parent_draft = json.loads((root / "local.parent" / "0.1.0" / "pattern.json").read_text(encoding="utf-8"))
+        updated = dict(copy.deepcopy(parent_draft), version="0.2.0", includes=[child_ok["ref"]])
+        p.update(self.fx.roots(), root / "local.parent" / "0.1.0" / "pattern.json", updated,
+                 expected_digest=p.content_digest(parent_draft), write=True)
+        parent_ok = p.approve(self.fx.roots(), root / "local.parent" / "0.2.0" / "pattern.json", version="1.0.0",
+                              approval_value=APPROVAL, expected_digest=p.content_digest(updated))
+        self.fx.repo_bindings([binding("b", [parent_ok["ref"]])])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        lock = p.build_lock(report, p.parse_context(ctx()))
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), today=TODAY)["status"], "ok")
+        guide = p.asset_refs(lock)[0]
+        self.assertEqual(p.read_asset(self.fx.roots(), guide, selection=lock), self.GUIDE)
+        self.assertEqual(p.check_sources(self.fx.roots())["status"], "ok")
+        again = p.export_bundle(self.fx.roots(), [p.parse_exact_ref(parent_ok["ref"], "r")], self.fx.root / "bundle-2")
+        self.assertEqual(again["files"], 3, "re-export carries pattern, child and its asset")
+
+    def test_p1_update_then_approve_carries_assets_and_pattern_sources(self):
+        root = self.fx.repo_patterns
+        source = dict(statement(), root="pattern", ref="evidence.md",
+                      sha256=hashlib.sha256(self.EVIDENCE).hexdigest())
+        base = make_pattern("example.visual", assets=[self.asset()], sources=[source])
+        self.fx.publish(root, "repo.main", [base])
+        (root / "example.visual" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        (root / "example.visual" / "1.0.0" / "evidence.md").write_bytes(self.EVIDENCE)
+        (root / "example.visual" / "1.0.0" / "unrelated-private.md").write_bytes(b"do not copy\n")
+        newer = dict(copy.deepcopy(base), version="1.1.0", status="draft")
+        newer.pop("approval")
+        p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", newer,
+                 expected_digest=p.content_digest(base), write=True)
+        self.assertEqual(self.files(root, "example.visual", "1.1.0"), ["evidence.md", "guide.md", "pattern.json"],
+                         "unchanged declared files come from the previous version; nothing else is copied")
+        approved = p.approve(self.fx.roots(), root / "example.visual" / "1.1.0" / "pattern.json", version="1.2.0",
+                             approval_value=APPROVAL, expected_digest=p.content_digest(newer))
+        self.assertEqual(self.files(root, "example.visual", "1.2.0"), ["evidence.md", "guide.md", "pattern.json"])
+        self.fx.repo_bindings([binding("b", [approved["ref"]])])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(p.read_asset(self.fx.roots(), p.asset_refs(report)[0], selection=report,
+                                      context=p.parse_context(ctx())), self.GUIDE)
+        attestation = p.parse_attestations({"schema_version": 1, "items": [{
+            "ref": approved["ref"], "source_index": 0, "source_ref": "evidence.md",
+            "source_digest": hashlib.sha256(self.EVIDENCE).hexdigest(), "reviewed_by": "r", "review_ref": "R",
+            "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}]})
+        self.assertEqual(self.fx.resolve(ctx(), attestations=attestation)[0]["status"], "ready",
+                         "the carried pattern-root source still attests")
+
+    def test_p1_missing_or_tampered_files_fail_before_publication(self):
+        root = self.fx.repo_patterns
+        base = make_pattern("example.visual", assets=[self.asset()])
+        self.fx.publish(root, "repo.main", [base])
+        (root / "example.visual" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        changed = dict(copy.deepcopy(base), version="1.1.0", status="draft",
+                       assets=[self.asset("new.md", b"new asset\n")])
+        changed.pop("approval")
+        before = tree_digest(root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                     expected_digest=p.content_digest(base), write=True)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("declared_file_missing", "unavailable"))
+        self.assertEqual(tree_digest(root), before)
+        incoming = self.fx.root / "incoming"
+        incoming.mkdir()
+        (incoming / "new.md").write_bytes(b"tampered\n")
+        with self.assertRaises(p.PatternError) as caught:
+            p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                     expected_digest=p.content_digest(base), write=True, files_from=incoming)
+        self.assertEqual(caught.exception.code, "declared_file_changed")
+        self.assertEqual(tree_digest(root), before)
+        (incoming / "new.md").write_bytes(b"new asset\n")
+        p.update(self.fx.roots(), root / "example.visual" / "1.0.0" / "pattern.json", changed,
+                 expected_digest=p.content_digest(base), write=True, files_from=incoming)
+        self.assertEqual(self.files(root, "example.visual", "1.1.0"), ["new.md", "pattern.json"])
+        draft_file = root / "example.visual" / "1.1.0" / "new.md"
+        draft_file.write_bytes(b"edited after capture\n")
+        before = tree_digest(root)
+        with self.assertRaises(p.PatternError) as caught:
+            p.approve(self.fx.roots(), root / "example.visual" / "1.1.0" / "pattern.json", version="1.2.0",
+                      approval_value=APPROVAL, expected_digest=p.content_digest(changed))
+        self.assertEqual(caught.exception.code, "declared_file_changed")
+        self.assertEqual(tree_digest(root), before, "old tree and catalog unchanged")
+
+    def test_p1_capture_carries_declared_files_and_check_detects_missing_ones(self):
+        work = self.fx.root / "authoring"
+        work.mkdir()
+        (work / "guide.md").write_bytes(self.GUIDE)
+        value = draft("example.captured", assets=[self.asset()])
+        with self.assertRaises(p.PatternError) as caught:
+            p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main")
+        self.assertEqual(caught.exception.code, "declared_file_missing")
+        self.assertFalse((self.fx.repo_patterns / "catalog.json").exists())
+        p.capture(self.fx.roots(), value, scope="repo", name=value["id"], source_id="repo.main", files_from=work)
+        self.assertEqual(self.files(self.fx.repo_patterns, "example.captured", "0.1.0"), ["guide.md", "pattern.json"])
+        self.assertEqual(p.check_sources(self.fx.roots())["status"], "ok")
+        (self.fx.repo_patterns / "example.captured" / "0.1.0" / "guide.md").unlink()
+        reader = p.Reader()
+        listed = p.list_catalogs(self.fx.roots(), reader)
+        self.assertEqual((listed["status"], reader.count("asset")), ("ok", 0), "list stays metadata-only")
+        checked = p.check_sources(self.fx.roots())
+        self.assertEqual((checked["status"], checked["checked"][0]["status"]), ("unavailable", "unavailable"))
+        self.assertIn("declared_file_missing", codes(checked, "error"))
+        envelope = self.fx.write_json("roots.json", self.fx.envelope())
+        source = work / "second.json"
+        second = draft("example.second", assets=[self.asset()])
+        source.write_text(json.dumps(second), encoding="utf-8")
+        code, report, _ = self.fx.cli("capture", "--roots-file", envelope, "--input", source, "--scope", "repo",
+                                      "--name", "example.second", "--expected-catalog-digest",
+                                      p.content_digest(json.loads((self.fx.repo_patterns / "catalog.json")
+                                                                  .read_text(encoding="utf-8"))))
+        self.assertEqual(code, 0, "the CLI takes declared files from the input file's directory")
+        self.assertEqual(self.files(self.fx.repo_patterns, "example.second", "0.1.0"), ["guide.md", "pattern.json"])
+
+    def test_p3_1_lifecycle_preview_applies_the_write_rules(self):
+        retired = make_pattern("example.retired")
+        drafty = draft("example.drafty")
+        catalog = self.fx.publish(self.fx.repo_patterns, "repo.main", [retired, drafty])
+        entry = catalog["entries"][0]
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [retired, drafty], lifecycle=[
+            {**{k: entry[k] for k in ("id", "version", "sha256")}, "status": "retired", "reason": "r",
+             "reference": "ADR", "at": TS}])
+        record = {"reason": "r", "reference": "x", "at": "2026-09-20T00:00:00Z"}
+        for ref_text, action in (("repo.main:example.retired@1.0.0", "deprecate"),
+                                 ("repo.main:example.drafty@0.1.0", "deprecate")):
+            with self.subTest(ref=ref_text):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.record_lifecycle(self.fx.roots(), ref_text, action=action, record_value=record,
+                                       expected_catalog_digest=None)
+                self.assertIn("transition", caught.exception.message)
+        preview = p.record_lifecycle(self.fx.roots(), "repo.main:example.retired@1.0.0", action="revoke",
+                                     record_value=record, expected_catalog_digest=None)
+        self.assertEqual(preview["catalog_sha256"], p.content_digest(json.loads(
+            (self.fx.repo_patterns / "catalog.json").read_text(encoding="utf-8"))), "preview returns the CAS digest")
+
+    def test_p3_2_default_url_source_warns(self):
+        url = make_pattern("example.url", requirements=[clause("D-1", "default")],
+                           sources=[dict(statement(), root="external", ref="https://standards.example/doc")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [url],
+                        bindings=[binding("d", [ref("repo.main", url)], role="default")])
+        report, _ = self.fx.resolve(ctx())
+        self.assertEqual(report["status"], "ready")
+        self.assertIn("source_unverified_default", codes(report, "warning"))
+
+    def test_p3_3_p3_4_attestation_inputs_are_validated(self):
+        rules = make_pattern("example.rules")
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
+        report, _ = self.fx.resolve(ctx())
+        lock = p.build_lock(report, p.parse_context(ctx()))
+        good = {"ref": ref("repo.main", rules), "source_index": 0, "source_ref": rules["sources"][0]["ref"],
+                "source_digest": "a" * 64, "reviewed_by": "r", "review_ref": "R",
+                "reviewed_at": "2026-09-20T00:00:00Z", "valid_until": "2026-12-31", "purpose": "both"}
+        for raw in ([{}], ["x"], "x", [good, good], [dict(good, source_index=-1)]):
+            with self.subTest(raw=str(raw)[:30]):
+                with self.assertRaises(p.PatternError):
+                    self.fx.resolve(ctx(), attestations=raw)
+                with self.assertRaises(p.PatternError):
+                    p.verify_lock(self.fx.roots(), lock, p.parse_context(ctx()), attestations=raw, today=TODAY)
+        self.assertEqual(self.fx.resolve(ctx(), attestations=[good])[0]["status"], "ready", "raw valid items work")
+        junk = dict(copy.deepcopy(lock), source_attestations=[{"junk": 1}])
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(junk)
+        self.assertEqual(caught.exception.status, "invalid")
+
+    def test_p3_5_p3_6_p3_7_apply_refuses_unavailable_refs_and_creates_parents(self):
+        fx = Fixture(self)
+        shutil.rmtree(fx.repo / ".claude")
+        rules = make_pattern("example.rules")
+        ghost = {"source": "repo.main", "id": "example.ghost", "version": "1.0.0", "sha256": "0" * 64}
+        change = {"schema_version": 1, "operation": "add", "id": "g", "binding": binding("g", [ghost]),
+                  "reason": "r", "approved_by": "a", "approval_ref": "b"}
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(fx.roots(), change)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("binding_ref_unavailable", "unavailable"))
+        self.assertFalse((fx.repo / ".claude").exists())
+        pack_root = fx.pack_chain()
+        fx.publish(pack_root / "patterns", "team.patterns", [rules])
+        real = dict(change, binding=binding("g", [ref("team.patterns", rules)]))
+        written = p.apply_change(fx.roots(), real, write=True)
+        self.assertTrue(written["written"])
+        self.assertTrue((fx.repo / ".claude" / "patterns" / "bindings.json").is_file(), "missing parents are created")
+        with self.assertRaises(p.PatternError) as caught:
+            p.apply_change(fx.roots(), dict(real, operation="replace"), write=True)
+        self.assertIn("--expected-digest", caught.exception.message)
+        self.assertIn("bindings", caught.exception.message)
+
+    def test_p3_8_import_preflights_every_destination(self):
+        src_root = self.fx.personal_patterns
+        child = make_pattern("example.child", assets=[self.asset()])
+        self.fx.publish(src_root, "team.src", [child])
+        (src_root / "example.child" / "1.0.0" / "guide.md").write_bytes(self.GUIDE)
+        bundle = self.fx.root / "bundle"
+        p.export_bundle(self.fx.roots(), [p.parse_exact_ref(ref("team.src", child), "r")], bundle)
+        blocked = self.fx.repo_patterns / "local.child" / "0.1.0"
+        blocked.mkdir(parents=True)
+        (blocked / "pattern.json").write_text("{}", encoding="utf-8")
+        with self.assertRaises(p.PatternError) as caught:
+            p.import_bundle(self.fx.roots(), bundle, scope="repo", destination_source="repo.local",
+                            version_map_value=[{"original": ref("team.src", child), "id": "local.child",
+                                                "version": "0.1.0"}], write=True)
+        self.assertEqual(caught.exception.code, "unregistered_staging_conflict")
+        self.assertEqual(sorted(item.name for item in blocked.iterdir()), ["pattern.json"], "no orphaned asset")
 
 
 if __name__ == "__main__":

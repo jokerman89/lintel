@@ -1679,6 +1679,7 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
     if type(context_budget) is not int or context_budget < 1:
         _fail("invalid_budget", "context budget must be a positive integer within the resource limit")
     today = today or _dt.datetime.now(_dt.timezone.utc).date()
+    attestations = _as_attestations(attestations, "attestations")
     reader = reader or Reader()
     sources = load_sources(roots, reader)
     resolution = _Resolution(sources, context, preview_draft, today)
@@ -1728,7 +1729,15 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
                                "use a required binding or correct the pattern", ref=node.ref.to_json())
         if node.role == "required":
             _attestation_checks(resolution, node, attestations, roots)
-        elif node.pattern.review_after and _dt.date.fromisoformat(node.pattern.review_after) < today:
+        else:
+            for index, source in enumerate(node.pattern.sources):
+                if source.is_url:
+                    resolution.diagnostics.append(_note(
+                        "source_unverified_default", f"{node.ref.text} source {index} is an unverified URL; it is "
+                        "only a default here, so it warns rather than blocks", "warning", ref=node.ref.to_json(),
+                        source_index=index))
+        if node.role != "required" and node.pattern.review_after and \
+                _dt.date.fromisoformat(node.pattern.review_after) < today:
             resolution.diagnostics.append(_note("review_overdue_default", f"{node.ref.text} is past review_after",
                                                 "warning", ref=node.ref.to_json()))
     requirements.sort(key=lambda item: item["clause"])
@@ -1852,6 +1861,8 @@ def check_sources(roots: Roots, reader: Optional[Reader] = None) -> dict:
         for entry in loaded.catalog.entries:
             try:
                 pattern = _read_pattern(sources, loaded, entry)
+                _declared_files(pattern, loaded.directory / PurePosixPath(entry.path).parent, reader=sources.reader,
+                                what=f"{entry.id}@{entry.version}")
                 for child in pattern.includes:
                     _lookup(sources, child)
                 checked.append({"source": loaded.catalog.source_id, "id": entry.id, "version": entry.version,
@@ -2107,7 +2118,8 @@ def parse_lock(value: Any, where: str = "lock") -> dict:
         parse_task_map(mapping, value, f"{where}.requirement_tasks")
         if recorded != content_digest(mapping):
             _fail("invalid_lock", "requirement_tasks mapping_digest does not match its record", where)
-    _array(value["source_attestations"], f"{where}.source_attestations")
+    _as_attestations(_array(value["source_attestations"], f"{where}.source_attestations"),
+                     f"{where}.source_attestations")
     _array(value["review_evidence"], f"{where}.review_evidence")
     return value
 
@@ -2124,6 +2136,7 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
     Never upgrades or rewrites the lock; the original snapshots stay historical evidence.
     """
     lock = parse_lock(lock)
+    attestations = _as_attestations(attestations, "attestations")
     reader = reader or Reader()
     sources = load_sources(roots, reader)
     diagnostics = [dict(item) for item in sources.blockers]
@@ -2165,8 +2178,7 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
         overrides = parse_overrides({"schema_version": 1, "items": lock["overrides"]})
         exceptions = parse_exceptions({"schema_version": 1, "items": lock["exceptions"]})
         try:
-            merged = merge_attestations(parse_attestations({"schema_version": 1,
-                                                            "items": lock["source_attestations"]}), attestations)
+            merged = merge_attestations(lock["source_attestations"], attestations)
             current = resolve(roots, context, refs=refs, overrides=overrides, exceptions=exceptions,
                               context_budget=lock["context_budget"], today=today, reader=reader,
                               attestations=merged)
@@ -2469,13 +2481,15 @@ def _entry_for(pattern: Pattern, relative: str) -> dict:
             "summary": pattern.summary, "status": pattern.status, "applies_to": pattern.applies_to.to_json()}
 
 
-def _check_cas(current: Optional[str], expected: Optional[str], what: str) -> None:
+def _check_cas(current: Optional[str], expected: Optional[str], what: str, *, obj: str = "catalog",
+               flag: str = "--expected-catalog-digest") -> None:
     if current is None and expected is not None:
-        _fail("stale_catalog_digest", f"{what}: no catalog exists yet; omit the expected digest", status="collision")
+        _fail(f"stale_{obj}_digest", f"{what}: no {obj} file exists yet; omit {flag}", status="collision")
     if current is not None and expected is None:
-        _fail("expected_digest_required", f"{what}: supply --expected-catalog-digest {current}", status="collision")
+        _fail("expected_digest_required", f"{what}: supply {flag} {current} (the current {obj} digest)",
+              status="collision")
     if current is not None and expected != current:
-        _fail("stale_catalog_digest", f"{what}: the catalog changed since it was read; re-read and retry",
+        _fail(f"stale_{obj}_digest", f"{what}: the {obj} changed since it was read; re-read and retry",
               status="collision")
 
 
@@ -2521,6 +2535,64 @@ def _stage_file(root: Path, relative: str, data: bytes) -> None:
     _atomic_write(target, data, replace=False)
 
 
+def _declared_files(pattern: Pattern, source_dir: Optional[Path], *, fallback_dir: Optional[Path] = None,
+                    reader: Optional[Reader] = None, what: str = "pattern") -> list[tuple[str, bytes]]:
+    """The exact local file closure of one version: declared assets (digest-verified) and
+    `root: pattern` sources (verified against any pinned sha256). Nothing else is ever copied.
+
+    Each file is read contained under `source_dir`, falling back to `fallback_dir` (the previous
+    version) for an asset whose digest matches there. A missing or changed file fails before any write.
+    """
+    reader = reader or Reader()
+    wanted: dict[str, Optional[str]] = {}
+    for asset in pattern.assets:
+        wanted[asset.path] = asset.sha256
+    for source in pattern.sources:
+        if source.root == "pattern":
+            path = str(validate_relative_path(source.ref, "source"))
+            pinned = source.sha256
+            if path in wanted and wanted[path] is not None and pinned is not None and pinned != wanted[path]:
+                _fail("declared_file_conflict", f"{what}: {path} is declared with two different digests")
+            wanted[path] = wanted.get(path) or pinned
+    result = []
+    for path in sorted(wanted):
+        expected = wanted[path]
+        data = None
+        for base in (source_dir, fallback_dir):
+            if base is None:
+                continue
+            candidate = reader.read(contained_path(base, path, f"{what} file"), kind="asset", limit=LIMITS.asset_bytes,
+                                    optional=True)
+            if candidate is not None and (expected is None or hashlib.sha256(candidate).hexdigest() == expected):
+                data = candidate
+                break
+            if candidate is not None and base is source_dir:
+                _fail("declared_file_changed", f"{what}: {path} does not match its declared sha256", status="unavailable")
+        if data is None:
+            _fail("declared_file_missing", f"{what}: declared file {path} is missing; supply it before publishing",
+                  status="unavailable")
+        result.append((path, data))
+    return result
+
+
+def _preflight(root: Path, files: Sequence[tuple[str, bytes]]) -> None:
+    """Check every destination before the first write: absent, or identical bytes (a completed retry)."""
+    for relative, data in files:
+        target = contained_path(root, relative, "destination")
+        if target.exists():
+            existing = Reader().read(target, kind="asset", limit=max(LIMITS.asset_bytes, LIMITS.pattern_bytes))
+            same = existing == data
+            if not same and relative.endswith("/pattern.json"):
+                try:
+                    same = content_digest(parse_json(existing, limit=LIMITS.pattern_bytes, what="staged")) == \
+                        content_digest(parse_json(data, limit=LIMITS.pattern_bytes, what="staged"))
+                except PatternError:
+                    same = False
+            if not same:
+                _fail("unregistered_staging_conflict", f"an unregistered file already occupies {relative}; inspect "
+                      "it before publishing", str(target), status="collision")
+
+
 def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_required: bool = True) -> dict:
     """Exclusive per-root lock, CAS, stage immutable content, then replace the catalog last.
 
@@ -2541,6 +2613,9 @@ def _publish(root: Path, reader: Reader, *, expected: Optional[str], build, cas_
         for pattern in patterns:
             if any(item["id"] == pattern.id and item["version"] == pattern.version for item in catalog_value["entries"]):
                 _fail("version_exists", f"{pattern.id}@{pattern.version} is already registered", status="collision")
+        _preflight(root, [(relative_file, data) for relative_file, data in extra_files] +
+                   [(f"{pattern.id}/{pattern.version}/pattern.json", emit_json(pattern.raw).encode("utf-8"))
+                    for pattern in patterns])
         staged = []
         for relative_file, data in extra_files:
             _stage_file(root, relative_file, data)
@@ -2572,8 +2647,13 @@ def _source_summary(pattern: Pattern) -> list[dict]:
 
 
 def capture(roots: Roots, draft_value: Any, *, scope: str, name: str, source_id: Optional[str] = None,
-            expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None) -> dict:
-    """Register a new draft in an explicit repo/personal scope (never approves, never overwrites)."""
+            expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None,
+            files_from: Optional[Path] = None) -> dict:
+    """Register a new draft in an explicit repo/personal scope (never approves, never overwrites).
+
+    Declared assets and `root: pattern` sources are copied from `files_from` (the CLI uses the
+    input file's directory) after verification; a draft that declares files needs that directory.
+    """
     reader = reader or Reader()
     pattern = parse_pattern(draft_value, "draft")
     if pattern.status != "draft":
@@ -2594,7 +2674,9 @@ def capture(roots: Roots, draft_value: Any, *, scope: str, name: str, source_id:
                      "lifecycle": []}
         elif source_id is not None and source_id != value["source_id"]:
             _fail("source_id_mismatch", f"this scope's source is {value['source_id']}, not {source_id}")
-        return copy_json(value), [pattern], _source_summary(pattern)
+        files = _declared_files(pattern, files_from, reader=reader, what=f"{pattern.id}@{pattern.version}")
+        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build)
     report["ref"] = ExactRef(report["source_id"], pattern.id, pattern.version, pattern.digest).to_json()
@@ -2700,7 +2782,10 @@ def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expe
                                status="unavailable")
         approved = dict(copy_json(draft.raw), version=version, status="approved", approval=approval)
         pattern = parse_pattern(approved, "approved")
-        return copy_json(value), [pattern], _source_summary(pattern)
+        draft_dir = loaded.directory / PurePosixPath(catalog_entry.path).parent
+        files = _declared_files(pattern, draft_dir, reader=reader, what=f"{draft.id}@{draft.version}")
+        extra = [(f"{pattern.id}/{pattern.version}/{name}", data) for name, data in files]
+        return copy_json(value), [pattern], _source_summary(pattern), extra
 
     report = _publish(root, reader, expected=expected_catalog_digest, build=build, cas_required=False)
     published = report["published"][0]
@@ -2922,15 +3007,10 @@ def record_lifecycle(roots: Roots, ref_text: str, *, action: str, record_value: 
         state, _ = effective_status(replacement_loaded, replacement_entry)
         if state not in ("approved", "deprecated") or _key(replaced) == _key(target):
             _fail("invalid_replacement", "replaced_by must be a different approved or deprecated pattern")
-    impact = dependents(roots, [target], reader=reader, sources=sources)
     after = "revoked" if action == "revoke" else {"deprecate": "deprecated", "retire": "retired"}[action]
-    report = {"schema_version": 1, "status": "ok", "written": False, "action": action, "ref": target.to_json(),
-              "effective_status": {"before": before, "after": after}, "impact": impact,
-              "diagnostics": [], "metrics": reader.metrics()}
-    if not write:
-        return report
 
-    def build(value):
+    def apply_event(value):
+        """One definition of the event and its rules, used by the preview and the write alike."""
         current = next((item for item in value["entries"] if (item["id"], item["version"]) == (pattern_id, version)), None)
         if current is None or current["sha256"] != entry.sha256:
             _fail("snapshot_mismatch", "the entry changed since the preview; re-read and retry", status="collision")
@@ -2950,7 +3030,19 @@ def record_lifecycle(roots: Roots, ref_text: str, *, action: str, record_value: 
             if replaced is not None:
                 event["replaced_by"] = replaced.to_json()
             updated["lifecycle"].append(event)
-        return updated, [], []
+        parse_catalog(updated, "catalog after the event")
+        return updated
+
+    apply_event(dict(loaded.catalog.raw))
+    impact = dependents(roots, [target], reader=reader, sources=sources)
+    report = {"schema_version": 1, "status": "ok", "written": False, "action": action, "ref": target.to_json(),
+              "effective_status": {"before": before, "after": after}, "impact": impact,
+              "catalog_sha256": loaded.catalog.digest, "diagnostics": [], "metrics": reader.metrics()}
+    if not write:
+        return report
+
+    def build(value):
+        return apply_event(value), [], []
 
     written = _publish(root, reader, expected=expected_catalog_digest, build=build)
     report.update(written=True, catalog_sha256=written["catalog_sha256"],
@@ -2968,7 +3060,8 @@ def _clause_diff(old: Pattern, new: Pattern) -> dict:
 
 
 def update(roots: Roots, path: Path, input_value: Any, *, expected_digest: str, write: bool = False,
-           expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None) -> dict:
+           expected_catalog_digest: Optional[str] = None, reader: Optional[Reader] = None,
+           files_from: Optional[Path] = None) -> dict:
     """Preview (default) or publish a strictly newer draft version; the existing version stays intact."""
     reader = reader or Reader()
     root, scope, relative = _root_for_path(roots, path)
@@ -2991,6 +3084,9 @@ def update(roots: Roots, path: Path, input_value: Any, *, expected_digest: str, 
     if _version_key(new.version) <= _version_key(old.version):
         _fail("version_not_newer", f"version {new.version} must be greater than {old.version}")
     old_ref = ExactRef(loaded.catalog.source_id, old.id, old.version, old.digest)
+    files = _declared_files(new, files_from, fallback_dir=loaded.directory / PurePosixPath(entry.path).parent,
+                            reader=reader, what=f"{new.id}@{new.version}")
+    extra = [(f"{new.id}/{new.version}/{name}", data) for name, data in files]
     report = {"schema_version": 1, "status": "ok", "written": False, "scope": scope, "from": old_ref.to_json(),
               "to": ExactRef(loaded.catalog.source_id, new.id, new.version, new.digest).to_json(),
               "clause_diff": _clause_diff(old, new), "impact": dependents(roots, [old_ref], reader=reader, sources=sources),
@@ -3002,7 +3098,7 @@ def update(roots: Roots, path: Path, input_value: Any, *, expected_digest: str, 
         own = next((item for item in current["entries"] if item["path"] == relative), None)
         if own is None or own["sha256"] != old.digest:
             _fail("snapshot_mismatch", "the pattern changed since the preview; re-read and retry", status="collision")
-        return copy_json(current), [new], _source_summary(new)
+        return copy_json(current), [new], _source_summary(new), extra
 
     written = _publish(root, reader, expected=expected_catalog_digest, build=build, cas_required=False)
     report.update(written=True, published=written["published"], catalog_sha256=written["catalog_sha256"],
@@ -3041,8 +3137,16 @@ def parse_attestations(value: Any, where: str = "attestations") -> tuple[dict, .
     return tuple(items)
 
 
+def _as_attestations(items: Any, where: str) -> tuple[dict, ...]:
+    """Validate raw or already parsed attestation items with the same parser (PatternError, never KeyError)."""
+    if isinstance(items, (str, bytes)) or not isinstance(items, (list, tuple)):
+        _fail("invalid_schema", "attestations must be a list of attestation records", where)
+    return parse_attestations({"schema_version": 1, "items": list(items)}, where)
+
+
 def merge_attestations(saved: Sequence[Mapping[str, Any]], supplied: Sequence[Mapping[str, Any]]) -> list[dict]:
     """Renewal replaces evidence for the same pattern/source; it never changes the selection."""
+    saved, supplied = _as_attestations(saved, "saved attestations"), _as_attestations(supplied, "attestations")
     def identity(item):
         return ((item["ref"]["id"], item["ref"]["version"], item["ref"]["sha256"]), item["source_index"])
     merged = {identity(item): copy_json(item) for item in saved}
@@ -3122,10 +3226,11 @@ def _attestation_checks(resolution: "_Resolution", node: "_Node", attestations: 
 
 # ---------------------------------------------------------------- binding changes (spec 7 apply, card 3.2.b)
 
-def _required_clauses(sources: SourceSet, binding: Optional[Binding]) -> set:
+def _required_clauses(sources: SourceSet, binding: Optional[Binding]) -> tuple[set, list]:
+    """Must clauses a required binding reaches, plus references it cannot reach (reported, never hidden)."""
     if binding is None or binding.role != "required":
-        return set()
-    result, stack, seen = set(), list(binding.use), set()
+        return set(), []
+    result, missing, stack, seen = set(), [], list(binding.use), set()
     while stack:
         ref = stack.pop()
         if _key(ref) in seen:
@@ -3134,12 +3239,12 @@ def _required_clauses(sources: SourceSet, binding: Optional[Binding]) -> set:
         try:
             loaded, entry = _lookup(sources, ref)
             pattern = _read_pattern(sources, loaded, entry)
-        except PatternError:
-            result.add(f"{ref.id}@{ref.version}#<unavailable>")
+        except PatternError as error:
+            missing.append({"ref": ref.to_json(), "code": error.code})
             continue
         result.update(pattern.clause_ref(item.id) for item in pattern.requirements if item.level == "must")
         stack.extend(pattern.includes)
-    return result
+    return result, sorted(missing, key=lambda item: canonical_json(item["ref"]))
 
 
 def apply_change(roots: Roots, change_value: Any, *, expected_digest: Optional[str] = None, write: bool = False,
@@ -3181,9 +3286,22 @@ def apply_change(roots: Roots, change_value: Any, *, expected_digest: Optional[s
         new_value = {"schema_version": 1, "bindings": sorted(items, key=lambda item: item["id"])}
         parse_bindings(new_value)
         sources = load_sources(roots, reader)
-        before, after = _required_clauses(sources, existing), _required_clauses(sources, replacement)
+        if replacement is not None:
+            for ref in replacement.use:
+                try:
+                    loaded, entry = _lookup(sources, ref)
+                    state, _ = effective_status(loaded, entry)
+                    if state not in ("approved", "deprecated"):
+                        _fail(f"pattern_{state}", f"{ref.text} is {state}", status="unavailable")
+                    _read_pattern(sources, loaded, entry)
+                except PatternError as error:
+                    _fail("binding_ref_unavailable", f"binding {binding_id} uses {ref.text}, which cannot be selected "
+                          f"({error.code}); a binding may only use registered approved or deprecated patterns",
+                          status="unavailable")
+        (before, before_missing), (after, _) = _required_clauses(sources, existing), _required_clauses(sources, replacement)
         return new_value, existing, {"before": sorted(before), "after": sorted(after),
-                                     "reduced": sorted(before - after), "added": sorted(after - before)}
+                                     "reduced": sorted(before - after), "added": sorted(after - before),
+                                     "unreachable_before": before_missing}
 
     def read():
         data = reader.read(path, kind="bindings", limit=LIMITS.input_bytes, optional=True)
@@ -3199,16 +3317,25 @@ def apply_change(roots: Roots, change_value: Any, *, expected_digest: Optional[s
               "bindings_sha256": None if value is None else content_digest(value),
               "limits": "Records an authorized change; it does not validate the approver's authority.",
               "diagnostics": [], "metrics": reader.metrics()}
+    if required["unreachable_before"]:
+        report["diagnostics"].append(_note("binding_had_unavailable_refs", "the current binding already uses "
+                                           "patterns that cannot be selected; its baseline is incomplete", "warning",
+                                           refs=required["unreachable_before"]))
     if required["reduced"]:
         report["diagnostics"].append(_note("mandatory_baseline_reduced", "this change removes mandatory clauses "
                                            "from the repository baseline", "warning", clauses=required["reduced"]))
     if not write:
         return report
-    root.mkdir(exist_ok=True)
+    base = roots.repository
+    for part in (".claude", "patterns"):
+        base = base / part
+        if _is_link(base):
+            _fail("unsafe_path", "linked repository pattern root refused", str(base))
+        base.mkdir(exist_ok=True)
     with _WriteLock(path):
         value = read()
         current = None if value is None else content_digest(value)
-        _check_cas(current, expected_digest, "bindings")
+        _check_cas(current, expected_digest, "apply", obj="bindings", flag="--expected-digest")
         new_value, _, required = plan(value)
         _atomic_write(path, emit_json(new_value).encode("utf-8"), replace=True)
     report.update(written=True, required_clauses=required, bindings_sha256=content_digest(new_value),
@@ -3263,6 +3390,7 @@ def remove(roots: Roots, ref_text: str, *, expected_catalog_digest: Optional[str
         blockers.append("the inventory is incomplete (unreadable patterns or locks)")
     report = {"schema_version": 1, "status": "ok", "written": False, "ref": target.to_json(),
               "effective_status": state, "impact": impact, "removable": not blockers, "blockers": blockers,
+              "catalog_sha256": loaded.catalog.digest,
               "files_kept": [entry.path],
               "diagnostics": [] if state == "draft" else [_note(
                   "external_consumers_unknown", "removing a published entry cannot prove that no external consumer "
@@ -3550,6 +3678,24 @@ def _read_bundle(bundle: Path, reader: Reader) -> tuple[dict, dict, dict]:
         lifecycle[_key(ref)] = copy_json(item)
     if set(lifecycle) != set(records):
         _fail("invalid_bundle", "every bundled pattern needs exactly one lifecycle record")
+    for key, item in lifecycle.items():
+        at = f"bundle.lifecycle[{records[key]['ref'].text}]"
+        revoked, last = False, None
+        for index, event in enumerate(_array(item["events"], f"{at}.events")):
+            where = f"{at}.events[{index}]"
+            if not isinstance(event, dict) or event.get("kind") not in ("lifecycle", "revocation"):
+                _fail("invalid_bundle", "each event is a lifecycle or revocation record", where)
+            _timestamp(event.get("at"), f"{where}.at")
+            if event["kind"] == "revocation":
+                revoked = True
+            elif event.get("status") not in ("deprecated", "retired"):
+                _fail("invalid_bundle", "a lifecycle event is deprecated or retired", where)
+            elif last is None or _instant(event["at"]) > _instant(last["at"]):
+                last = event
+        derived = "revoked" if revoked else last["status"] if last else records[key]["pattern"].status
+        if item["effective_status"] != derived:
+            _fail("invalid_bundle", f"{at}: effective_status {item['effective_status']} contradicts its events "
+                  f"({derived})")
     for key, record in records.items():
         state = lifecycle[key]["effective_status"]
         if state in ("retired", "revoked"):
