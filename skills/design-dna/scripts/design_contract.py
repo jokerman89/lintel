@@ -338,7 +338,7 @@ def _selected_bytes(repo: Path, path: str, expected: dict, label: str) -> bytes:
 
 def _pattern_palette(repo: Path, data: dict, kind: str, design: dict, *, expected: dict, record: dict,
                      profile_config: ProfileConfig, pattern_lock: Optional[str],
-                     pattern_context: Optional[str]) -> dict:
+                     pattern_context: Optional[str]) -> tuple[dict, Any]:
     """Palette winners of a verified pattern selection (ADR-0038 spec section 9 precedence).
 
     Only a lock that the core `verify_lock` accepts against the supplied current context admits a
@@ -348,12 +348,19 @@ def _pattern_palette(repo: Path, data: dict, kind: str, design: dict, *, expecte
     caller-selected root. A `pattern_context` in the spec is a reference, never authority: without a
     lock it blocks, and with one it must match. Pack and personal pattern bytes are pinned by
     the lock and re-read by `verify_lock`.
+
+    Admission is palette-only. `validate_visual` may report `incomplete` here, because unmapped
+    settings stay open review items; that is not render or review clearance. Rendering still
+    requires `passed`, and mandatory clauses still need their own QA evidence.
+
+    Returns the admitted winners and a recheck that re-runs `verify_lock` just before the loader
+    returns (no cache, no retry).
     """
     attached = data.get("pattern_context")
     if pattern_lock is None and pattern_context is None:
         if attached is not None:
             raise DesignError("Design carries a pattern_context; supply its verified pattern lock and current context")
-        return {}
+        return {}, None
     if pattern_lock is None or pattern_context is None:
         raise DesignError("A pattern lock and its current pattern context are supplied together")
     for relative in ("lib/patterns.py", "lib/pattern_visual.py"):
@@ -372,10 +379,17 @@ def _pattern_palette(repo: Path, data: dict, kind: str, design: dict, *, expecte
         lock = p.parse_lock(p.parse_json(lock_raw, limit=p.LIMITS.catalog_bytes, what="pattern lock"))
         context = p.parse_context(p.parse_json(context_raw, limit=p.LIMITS.input_bytes, what="pattern context"))
         roots = p.parse_roots(p.build_envelope(repo, profile_config.home, p.pack_context_from_profile(record)))
-        verified = p.verify_lock(roots, lock, context)
-        if verified["status"] != "ok":
-            codes = ", ".join(item["code"] for item in verified["diagnostics"] if item.get("severity") == "error")
-            raise DesignError(f"Pattern selection is not current ({verified['status']}): {codes}")
+
+        def current() -> None:
+            try:
+                verified = p.verify_lock(roots, lock, context)
+            except p.PatternError as error:
+                raise DesignError(f"Pattern selection is unusable ({error.status}): {error.code}") from None
+            if verified["status"] != "ok":
+                codes = ", ".join(item["code"] for item in verified["diagnostics"] if item.get("severity") == "error")
+                raise DesignError(f"Pattern selection is not current ({verified['status']}): {codes}")
+
+        current()
         if not isinstance(attached, dict) or attached.get("selection_digest") != lock["selection_digest"]:
             raise DesignError("Design pattern_context does not match the verified pattern lock")
         if kind == "frontend":
@@ -399,7 +413,7 @@ def _pattern_palette(repo: Path, data: dict, kind: str, design: dict, *, expecte
     for key, value in winners.items():
         if tokens.get(key) != value:
             raise DesignError(f"Palette differs from the verified pattern selection: {key}")
-    return winners
+    return winners, current
 
 
 def load_design(repo: Path, path: str, *, expected: dict, profile_config: ProfileConfig,
@@ -447,7 +461,7 @@ def load_design(repo: Path, path: str, *, expected: dict, profile_config: Profil
     for item in overrides.values():
         if item["evidence"] != binding["brief"]:
             raise DesignError("Aesthetic override needs the selected brief as evidence")
-    admitted = _pattern_palette(root, data, result["kind"], design, expected=expected, record=record,
+    admitted, recheck = _pattern_palette(root, data, result["kind"], design, expected=expected, record=record,
                                 profile_config=profile_config, pattern_lock=pattern_lock,
                                 pattern_context=pattern_context)
     for key, value in design["palette"]["tokens"].items():
@@ -461,6 +475,8 @@ def load_design(repo: Path, path: str, *, expected: dict, profile_config: Profil
         if pinned and font["family"] != pinned and f"typography.{font['role']}" not in overrides:
             raise DesignError(f"Typography differs from pinned profile without a brief override: {font['role']}")
     _project(binding, root, expected)
+    if recheck is not None:
+        recheck()
     verify_profile_reference(binding["profile_ref"], profile_config)
     verify_context(root, expected)
     return {**result, "spec": reference, "profile_ref": binding["profile_ref"],

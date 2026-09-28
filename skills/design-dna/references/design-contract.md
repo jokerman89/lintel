@@ -104,7 +104,8 @@ pinned profile. The profile and corpus files stay unchanged.
   repository, the P07 home and the verified P07 record's pack context. Only `ok` continues.
 - **Consistency checks:**
   - The spec's `pattern_context` must name the same selection.
-  - A frontend spec must pass `validate_visual`.
+  - A frontend spec's `validate_visual` must report `passed` or `incomplete`, with no failed
+    check. `incomplete` means only that unmapped settings remain open review items.
   - A pipeline attachment must pass `verify_design_attachment`, with its `lock_ref` naming
     the supplied lock.
   - Every palette winner must equal the design's value.
@@ -116,6 +117,12 @@ pinned profile. The profile and corpus files stay unchanged.
 - **Precedence.** Pass explicit brief decisions to the resolver as `--overrides`: the verified
   winner then reflects brief precedence. A brief never bypasses a `must` clause, because
   resolution is a conflict.
+- **Palette-only admission.** This admission governs only palette tokens that differ from the
+  pinned profile. It is not render or review clearance. generate-web and generate-app still
+  require `validate_visual` `passed` before rendering. Mandatory clauses, including prose and
+  unmapped settings, still need their own QA evidence, and incomplete or unknown mandatory
+  coverage never becomes a pass.
+- **Recheck.** `verify_lock` runs again just before the loader returns.
 - **No pattern.** Without a pattern selection, loading is unchanged.
 
 All file inputs use accepted P03 rooted, no-link, bounded reads. JSON is parsed by

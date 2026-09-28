@@ -29,7 +29,8 @@ SOURCE = args.root.resolve()
 sys.path[:0] = [str(SOURCE / "lib"), str(SOURCE / "skills/design-dna/scripts")]
 import context_safety as safety
 from profile_context import ProfileConfig, load_profile_context, profile_reference, required_policy
-from review_contract import content_digest, evidence_manifest, verify_qa
+from review_contract import content_digest, evidence_manifest, verify_context, verify_qa
+from profile_context import verify_profile_reference
 import domain_result
 import design_contract as design
 import patterns as pat
@@ -67,6 +68,8 @@ def encoded(data):
 
 WEBSITE = {"artifact": ["website"]}
 PATTERN_TS = "2026-09-01T00:00:00Z"
+FOREIGN_PATH = "Unsafe relative path"
+CHANGED_PIN = r"not current \(unavailable\): .*reference_digest_mismatch"
 
 
 def brand_pattern(value="#112233", level="default", pid="example.brand"):
@@ -888,6 +891,20 @@ original_output_state = inputs["original_output_state"]
         projected = pv.project_visual(spec, lock)["spec"]
         self.assertEqual(self.load_patterned(projected)["design"]["palette"]["tokens"]["ink"], "#112233")
         self.assertFalse(safety.native_io_path(self.repo / ".claude/patterns").exists())
+        with self.assertRaisesRegex(ValueError, "pattern_context", msg="pack projection without its lock"):
+            self.load_patterned(projected, lock=None)
+        self.publish_patterns(team / "patterns", "team.patterns", [brand_pattern(value="#998877")], bindings=[
+            pattern_binding("team-brand", [pattern_ref("team.patterns", brand_pattern(value="#998877"))],
+                            role="default")])
+        self.write_json(self.SPEC_PATH, projected)
+        expected = self.prepare()
+        verify_context(self.repo, expected)
+        self.assertEqual(verify_profile_reference(self.prepare_input["profile"], self.config)["digest"],
+                         self.prepare_input["profile"]["digest"],
+                         "P05 and P07 alone do not see the republished pack pattern")
+        with self.assertRaisesRegex(ValueError, CHANGED_PIN, msg="the loader re-verifies the pack pin"):
+            design.load_design(self.repo, self.SPEC_PATH, expected=expected, profile_config=self.config,
+                               pattern_lock=self.LOCK, pattern_context=self.CONTEXT)
 
     def test_without_a_verified_selection_the_profile_palette_still_needs_a_brief_override(self):
         self.repository_pattern()
@@ -909,22 +926,26 @@ original_output_state = inputs["original_output_state"]
         projected = pv.project_visual(self.spec, lock)["spec"]
         claimed = deepcopy(projected)
         claimed["palette"]["tokens"]["ink"] = "#445566"
-        with self.assertRaises(ValueError, msg="a caller-claimed winner differs from the verified lock"):
+        with self.assertRaisesRegex(ValueError, "differs from the verified pattern selection: visual.palette.ink",
+                                    msg="a caller-claimed winner differs from the verified lock"):
             self.load_patterned(claimed)
         forged = deepcopy(projected)
         forged["pattern_context"]["selection_digest"] = "f" * 64
-        with self.assertRaises(ValueError, msg="a forged pattern_context digest"):
+        with self.assertRaisesRegex(ValueError, "pattern_context does not match the verified pattern lock",
+                                    msg="a forged pattern_context digest"):
             self.load_patterned(forged)
         edited = deepcopy(lock)
         edited["settings"]["visual.palette.ink"]["value"] = "#445566"
         self.write_json(self.LOCK, edited)
-        with self.assertRaises(ValueError, msg="an edited lock"):
+        with self.assertRaisesRegex(ValueError, r"Pattern selection is unusable \(invalid\): \w+",
+                                    msg="an edited lock"):
             self.load_patterned(claimed)
         self.write_json("locks/forged.lock.json", lock)
         with self.assertRaisesRegex(ValueError, "not bound", msg="a lock outside the P05 selection"):
             self.load_patterned(projected, lock="locks/forged.lock.json")
         for foreign in ("../outside.lock.json", str(self.base / "outside.lock.json")):
-            with self.assertRaises((ValueError, OSError), msg="a caller-selected foreign lock path"):
+            with self.subTest(foreign=foreign), self.assertRaisesRegex(
+                    ValueError, FOREIGN_PATH, msg="a caller-selected foreign lock path"):
                 self.load_patterned(projected, lock=foreign)
         with self.assertRaisesRegex(ValueError, "supplied together"):
             self.load_patterned(projected, context=None)
@@ -939,10 +960,10 @@ original_output_state = inputs["original_output_state"]
         with self.assertRaisesRegex(ValueError, "context_changed"):
             self.load_patterned(projected)
         self.pattern_lock_path_reset(pattern)
-        with self.assertRaisesRegex(ValueError, "Pattern selection", msg="revoked pin"):
+        with self.assertRaisesRegex(ValueError, r"not current \(unavailable\): .*pinned_revoked", msg="revoked pin"):
             self.load_patterned(projected)
         self.publish_patterns(self.repo / ".claude/patterns", "repo.main", [brand_pattern(value="#998877")])
-        with self.assertRaisesRegex(ValueError, "Pattern selection", msg="changed pinned source"):
+        with self.assertRaisesRegex(ValueError, CHANGED_PIN, msg="changed pinned source"):
             self.load_patterned(projected)
         safety.native_io_path(self.repo / self.LOCK).unlink()
         with self.assertRaisesRegex(ValueError, "unreadable", msg="missing lock"):
@@ -978,7 +999,8 @@ original_output_state = inputs["original_output_state"]
         briefed = pv.project_visual(self.spec, must)["spec"]
         briefed["palette"]["tokens"]["ink"] = "#aabbcc"
         briefed["binding"]["overrides"] = spec["binding"]["overrides"]
-        with self.assertRaises(ValueError, msg="the brief colour contradicts the mandatory winner"):
+        with self.assertRaisesRegex(ValueError, "differs from the verified pattern selection: visual.palette.ink",
+                                    msg="the brief colour contradicts the mandatory winner"):
             self.load_patterned(briefed)
 
     def test_pattern_inputs_must_be_current_in_the_p05_selection(self):
@@ -1031,6 +1053,121 @@ original_output_state = inputs["original_output_state"]
         drifted["palette"]["text_dark"] = "#445566"
         with self.assertRaisesRegex(ValueError, "verified pattern selection"):
             self.load_patterned(drifted, path=path)
+
+    # ---- D1/A6 (owner decision (a), RN-16): the compound consumer re-verifies at use
+    def use_pack(self, value="#112233"):
+        packs = Path(self.env["LINTEL_PACKS_DIR"])
+        team = packs / "team"
+        if not safety.native_io_path(team / "pack.yaml").exists():
+            safety.native_io_path(team).mkdir(parents=True)
+            safety.native_io_path(team / "pack.yaml").write_bytes(
+                b"name: team\nversion: 1.0.0\nvoice: {default_tier: internal}\ncompliance: {mode: advisory}\n"
+                b"navigation: {default_workflow: cycle}\npatterns: {source: patterns/catalog.json}\n")
+            safety.native_io_path(packs / "active-pack").write_bytes(b"team\n")
+            self.config = ProfileConfig(SOURCE, self.repo, self.home / "lintel", packs, packs / "active-pack",
+                                        context_id="synthetic-pack")
+            self.profile = load_profile_context(self.config, create=True)
+            self.spec["binding"]["profile_ref"] = profile_reference(self.profile)
+            self.spec["binding"]["profile_asset"] = design.profile_asset(self.profile, self.config)[0]
+            self.prepare_input["profile"] = profile_reference(self.profile)
+            self.prepare_input["required_policy"] = required_policy(self.profile)
+        pattern = brand_pattern(value=value)
+        self.publish_patterns(team / "patterns", "team.patterns", [pattern], bindings=[
+            pattern_binding("team-brand", [pattern_ref("team.patterns", pattern)], role="default")])
+        return team / "patterns"
+
+    def use_personal(self, value="#112233"):
+        pattern = brand_pattern(value=value)
+        self.publish_patterns(self.config.home / "patterns", "personal.me", [pattern])
+        return [{"ref": pattern_ref("personal.me", brand_pattern()), "role": "default",
+                 "approved_by": "operator", "approval_ref": "brief with spaces.md"}]
+
+    def compound_inputs(self, refs=None):
+        """A genuine positive selected lock, a bound spec and a bound passing QA record."""
+        context = {"schema_version": 1, "facts": {"artifact": "website"}, "evidence": {"artifact": "brief with spaces.md"}}
+        self.write_json(self.CONTEXT, context)
+        parsed = pat.parse_context(context)
+        invocation = pat.parse_refs(refs) if refs else ()
+        report = pat.resolve(self.pattern_roots(), parsed, refs=invocation)
+        self.assertEqual(report["status"], "ready", report["diagnostics"])
+        pat.write_lock(self.pattern_roots(), self.repo / self.LOCK, pat.build_lock(report, parsed, refs=invocation))
+        lock = json.loads(safety.native_io_path(self.repo / self.LOCK).read_text(encoding="utf-8"))
+        self.write_json(self.SPEC_PATH, pv.project_visual(self.spec, lock)["spec"])
+        self.write("contrast.txt", b"Synthetic measured fixture ratio: 16.8 normal\n")
+        expected = self.prepare(["contrast.txt"])
+        control = {**self.requirement, "status": "pass", "reason": "Synthetic supplied measurement",
+                   "evidence": ["contrast.txt"], "observation": {"ratio": 16.8, "text_size": "normal"}}
+        qa = {"schema_version": 2, "context_digest": content_digest(expected), "controls": [control],
+              "evidence": evidence_manifest(self.repo, [control])}
+        review = {"schema_version": 1, "dimensions": {
+            name: {"score": 100, "findings": ["Synthetic advisory"]}
+            for name in design.normalize_dimensions(["typography", "accessibility"])}}
+        return expected, qa, review
+
+    def compound(self, expected, qa, review):
+        """The design review consumer: live verify_lock, then the P05/P07 and QA gates."""
+        return design.review_result(review, repo=self.repo, expected=expected, qa=qa,
+                                    design_path=self.SPEC_PATH, profile_config=self.config,
+                                    dimensions=["typography", "accessibility"],
+                                    pattern_lock=self.LOCK, pattern_context=self.CONTEXT)
+
+    def assert_external_drift_revokes_old_clearance(self, source, republish, restore):
+        expected, qa, review = self.compound_inputs(**source)
+        repo_files = {path: safety.read_owned(self.repo, path)[1]["sha256"]
+                      for path in (self.LOCK, self.CONTEXT, self.SPEC_PATH, "contrast.txt")}
+        first = self.compound(expected, qa, review)
+        self.assertFalse(first["blocked"], first["controls"])
+        self.assertFalse(first["release_clearance"])
+        republish()
+        verify_context(self.repo, expected)
+        self.assertFalse(verify_qa(self.repo, qa, expected=expected)["blocked"],
+                         "P05 and QA alone are repository-only and still accept")
+        with self.assertRaisesRegex(ValueError, CHANGED_PIN, msg="the same consumer refuses the old clearance"):
+            self.compound(expected, qa, review)
+        self.assertEqual({path: safety.read_owned(self.repo, path)[1]["sha256"] for path in repo_files}, repo_files,
+                         "no repository lock or P05 file was touched")
+        restore()
+        again = self.compound(expected, qa, review)
+        self.assertFalse(again["blocked"], "unchanged external content stays admissible")
+
+    def test_compound_consumer_refuses_old_clearance_after_pack_drift(self):
+        self.use_pack()
+        self.assert_external_drift_revokes_old_clearance(
+            {}, lambda: self.use_pack(value="#998877"), lambda: self.use_pack())
+
+    def test_compound_consumer_refuses_old_clearance_after_personal_drift(self):
+        refs = self.use_personal()
+        self.assert_external_drift_revokes_old_clearance(
+            {"refs": refs}, lambda: self.use_personal(value="#998877"), lambda: self.use_personal())
+
+    def test_review_cli_forwards_the_pattern_selection(self):
+        self.use_pack()
+        self.write_json("design-review.json", {"schema_version": 1, "dimensions": {
+            name: {"score": 100, "findings": ["Synthetic advisory"]}
+            for name in design.normalize_dimensions(["typography", "accessibility"])}})
+        self.prepare_input["selection"].append("design-review.json")
+        expected, qa, _ = self.compound_inputs()
+        self.write_json(".claude/runtime/expected.json", expected)
+        self.write_json(".claude/runtime/qa.json", qa)
+        cli = [sys.executable, "-B", SOURCE / "skills/design-dna/scripts/design_contract.py", "review",
+               "--repo", self.repo, "--file", "design-review.json",
+               "--expected", ".claude/runtime/expected.json", "--qa", ".claude/runtime/qa.json",
+               "--design", self.SPEC_PATH, "--dimensions", "typography,accessibility",
+               "--profile-home", self.config.home, "--profile-packs", self.config.packs,
+               "--profile-pointer", self.config.pointer]
+        flags = ["--pattern-lock", self.LOCK, "--pattern-context", self.CONTEXT]
+        accepted = self.run_process([*cli, *flags], separate_stderr=True)
+        self.assertEqual(accepted.returncode, 0, accepted.stderr)
+        self.assertFalse(json.loads(accepted.stdout)["blocked"])
+        omitted = self.run_process(cli, separate_stderr=True)
+        self.assertEqual(omitted.returncode, 2)
+        self.assertIn("pattern_context", omitted.stderr)
+        self.assertEqual(self.run_process([*cli, flags[0], flags[1]], separate_stderr=True).returncode, 2)
+        self.use_pack(value="#998877")
+        drifted = self.run_process([*cli, *flags], separate_stderr=True)
+        self.assertEqual(drifted.returncode, 2)
+        self.assertRegex(drifted.stderr, CHANGED_PIN)
+        self.assertFalse(drifted.stdout.strip(), "no review result is emitted for a stale selection")
 
     def test_cli_rejects_duplicates_unknown_options_and_unknown_versions(self):
         cli = [sys.executable, "-B", SOURCE / "skills/design-dna/scripts/design_contract.py",

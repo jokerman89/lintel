@@ -158,6 +158,33 @@ resolves the current context itself or consumes an explicitly supplied lock and 
 a remembered chat, or the presence of an attachment. Direct entry and cycle entry call the same
 command with the same inputs and therefore produce the same `selection_digest`.
 
+## Currentness at use
+
+Every pattern-dependent consumption re-verifies the lock at the point of use, against the actual
+current roots and context. This covers REVIEW, QA, render, SHIP and RESUME. The command is one
+of:
+
+- `verify-lock`;
+- `li-pattern review`, which verifies first;
+- `design_contract` with `--pattern-lock`/`--pattern-context`, which verifies again just before it
+  returns;
+- `verify_design_attachment`.
+
+Any status other than `ok` rejects the dependent action: changed, missing, revoked, conflicting
+or unavailable input. Only after that does the consumer take the ordinary current P05, P07, QA,
+latest-review and corroboration gates.
+
+- **After intervening work.** Re-run the check after any work that may change the inputs, and
+  again before dependent output or release. A stored verification output, an earlier review, or
+  a lock that was verified earlier is not evidence of currentness.
+- **Neither success grants the other.** Pattern success alone never grants release, and P05
+  success alone never skips the pattern check.
+- **What P05 does and does not cover.** Standalone P05 selection is repository-only. It binds the
+  repository lock, the context and `.claude/patterns`. Pack and personal pattern sources are
+  content-addressed through that selected lock, and re-read by this check at use; they are
+  never claimed as repository-snapshotted (RN-16).
+- **No patterns.** Without a lock or attachment, nothing extra is checked.
+
 ## Phase obligations
 
 | Phase | Obligation | Never |
@@ -169,7 +196,7 @@ command with the same inputs and therefore produce the same `selection_digest`.
 | PLAN | Resolve with `--lock` beside the initiative; map every selected must/default clause to existing spec/work-map/Spec Kit task IDs with `map --write`; link the lock and task map from plan and prompt | Invent task IDs, change work-map v1 or write a lock for a non-ready result |
 | BUILD | `verify-lock` before each package; hand implementers the `project` output for their package | Continue affected work after changed, retired, revoked or missing pins |
 | REVIEW | Assess clause evidence with `review` as supplemental content evidence inside the ADR-0028 v2 review | Let pattern coverage clear stale, missing or rejected independent review |
-| SHIP | Show failed, waived and unverified mandatory clauses in the delivery summary | Claim platform enforcement or a pass from coverage alone |
+| SHIP | Immediately before the shared SHIP gate, re-run `li-pattern review` (it verifies the lock at use); show failed, waived and unverified mandatory clauses in the delivery summary | Claim platform enforcement or a pass from coverage alone, or reuse a stored clause review |
 | CAPTURE | Propose new or changed patterns as drafts with provenance | Approve, publish over or bless inferred expectations |
 | RESUME | `verify-lock` the saved lock with the saved context before the next card | Silently re-resolve, upgrade pins or keep an obsolete mandatory baseline |
 

@@ -128,6 +128,10 @@ For each format in `--formats`:
   Select canonical sibling files, source evidence and every template/config
   override. Preserve complete returned source and existing design projections;
   the helper neither invokes a builder nor requires a future artifact's QA.
+  For a mixed web design whose `design-spec.json` carries a `pattern_context`,
+  also pass `--pattern-lock <run lock>` and `--pattern-context <current context>`,
+  and select both files plus `.claude/patterns`. A document-only design refuses
+  these flags; each stage verifies its attachment instead.
 - Read original prerequisites and actual acceptance evidence; source checkboxes
   from the work reader cannot authorize execution. Selected upstream P09 data
   retains its own request/context/profile, not the document's new QA inventory.

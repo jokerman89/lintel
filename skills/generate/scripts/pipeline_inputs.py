@@ -283,6 +283,9 @@ def load_pipeline_inputs(
     if design.get("source_content_hash") != documents["content.md"]["sha256"]:
         raise ValueError("Canonical design source_content_hash mismatch")
     mixed = "web" in design["per_format"] or "web_design" in design or "binding" in design
+    if not mixed and (pattern_lock is not None or pattern_context is not None):
+        raise ValueError("Pattern lock/context apply only to a mixed web design; a document-only design "
+                         "verifies its pattern_context attachment in each stage instead")
     if mixed:
         design_contract.load_design(root, design_ref["path"], expected=expected, profile_config=profile_config,
                                     pattern_lock=pattern_lock, pattern_context=pattern_context)

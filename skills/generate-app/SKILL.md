@@ -211,8 +211,9 @@ Same as generate-web (per existing v3.5 pattern):
 ## Reusable patterns
 
 Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
-Before scaffolding, check the spec's `pattern_context` with `validate_visual` against the
-verified lock handed over by the design step (never a stored report); a stale context,
+Before scaffolding, `verify-lock` the lock handed over by the design step against the current
+context, then check the spec's `pattern_context` with `validate_visual` against it (never a
+stored report). Loading through `design_contract` with `--pattern-lock` does both. A stale context,
 mismatched setting or unusable selection blocks instead of being corrected here. Apply the
 projected values; generate-app still makes no design decisions. When the runtime reports no
 patterns, scaffolding is unchanged.
