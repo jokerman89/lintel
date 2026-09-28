@@ -208,6 +208,17 @@ Next:
   Diff vs another:  diff <out_dir>/pattern.json <other-out>/pattern.json
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The vault output above is unchanged. To propose it for reuse, convert the
+legacy `pattern.json` with `lib/pattern_visual.py` `legacy_to_draft`: it emits a universal draft of
+defaults only, with observation confidence (never confirmed) and the original bytes kept as a
+`visual-legacy` asset by digest; unrecognized fields stay in that asset. Write the draft to the
+run's scratch directory and register it only through `bin/li-pattern capture`; approval is
+separate. The legacy `schema_version: 1` is not the universal schema. Never copy proprietary
+code, shaders or assets without permission, and record fonts, accessibility and licensing as
+unknown unless evidenced.
+
 ## Status protocol
 
 - **DONE** — all 4 required files emitted + schema valid

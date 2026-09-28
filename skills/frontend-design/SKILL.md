@@ -242,6 +242,18 @@ Next:
 
 `voice: mixed`. Default `internal`. `--customer-share` triggers the active pack's compliance-gate + voice-gate (`resolve_pack_field compliance.hooks`; none by default).
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Resolve, or verify a supplied lock, before the first design decision. Turn
+explicit brief decisions about bound settings into `--overrides` before resolving; the adapter
+never guesses. After synthesizing `frontend-design-spec.json`, apply
+`lib/pattern_visual.py` `project_visual` to write the final setting winners and the optional
+`pattern_context`; unknown settings stay open review items. With selected patterns the
+preference order is explicit brief overrides > repository > active-pack > explicitly selected
+personal pattern defaults > Design DNA profile > corpus, with mandatory clauses bounding all of
+it; with none, brief > profile > corpus is unchanged. Legacy `--pattern`/`--baseline` names keep
+legacy lookup and map only to defaults; colliding names need a qualified reference.
+
 ## Status protocol
 
 - **DONE** — the requested mode produced its actual outputs and required

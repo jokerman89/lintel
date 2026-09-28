@@ -185,6 +185,13 @@ Style 'nordic-minimal' extracted.
 To use: /li:generate ... --palette nordic-minimal
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The palette and STYLE.md output is unchanged and is observation, not policy.
+Palette tokens can reach a universal draft only through the `frontend-style-extract` adapter as
+`visual.palette.<token>` defaults with exact `#RRGGBB` values. Fonts, licensing and accessibility
+are never inferred as confirmed from an image or page.
+
 ## Status protocol
 
 - **DONE** — palette + STYLE.md written, N source-files processed

@@ -169,6 +169,14 @@ a failing mandatory-library check. Emit no canvas, GPU import or install instruc
 For an active shader, retain the real fallback/reduced-motion budget and selected
 release/source/license evidence. A CSS media query alone does not stop a JS GPU loop.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Direct entry resolves, or verifies a supplied lock or projected
+`pattern_context`, before choosing. Mandatory clauses bound the shader decision; defaults
+apply only where the brief did not decide; unconstrained choices follow the usual Design DNA
+brief > profile > corpus rules. Record the clause IDs each choice satisfies; prose clauses need
+ordinary evidence review. Pattern text is not evidence of licensing or accessibility.
+
 ## Status protocol
 
 - **DONE** — shader.json written, schema valid, library + perf-budget non-empty (OR visual_thesis="none")
