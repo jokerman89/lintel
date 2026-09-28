@@ -21,7 +21,10 @@ feature PR and normal merge the operator authorized.
 
 ## Plan signals
 
-- Leaf tasks: 48. Work packages: P0-P6, executed sequentially.
+- Leaf tasks: 48 original IDs and 50 executable leaves. 4.2.a and 4.2.b stay as parent IDs, each split
+  into `.core`/`.wf` child leaves (topology.md). A parent is complete only when both children pass.
+  Original packages P0-P6 below are retained as the planning boundary. Execution uses the
+  swarm package table ("Swarm execution packages") under the approved topology.
 - Phases: architecture record, core contract, pack resolution, lifecycle, workflow
   wiring, visual adapter, portability/delivery verification.
 - Size prior: 120,000 tokens, UNCALIBRATED, from `size_default_prior XL` in the
@@ -64,6 +67,21 @@ their row. "Unit" below means `tests/unit/patterns.py`; "core" means
 `lib/patterns.py`; "CLI" means `bin/li-pattern.py`; "launcher" means `bin/li-pattern`.
 New test paths are planned, not currently existing.
 
+## Swarm execution packages
+
+Operator opt-in and parent approval of the split are recorded in [topology.md](topology.md) and
+[swarm/charter.md](swarm/charter.md). The leaf items below remain authoritative for text,
+dependencies, status and acceptance; this table only groups them. P0P1 is complete and INT is the
+coordinator-only serial join (no lane). Cross-lane verification is pending join (topology.md).
+
+| Package ID | Outcome | Leaf IDs (dependency order) | Owner / edit boundary | Dependencies | Review |
+| --- | --- | --- | --- | --- | --- |
+| P0P1 | Promoted plan, ADR and pure P1 contract (reviewed milestone) | 0.1.a, 0.1.b, 1.1.a, 1.1.b, 1.1.c, 1.1.d, 1.2.a, 1.2.b, 1.2.c, 1.3.a, 1.3.b, 1.3.c | integration owner; `lib/patterns.py`, `bin/li-pattern.py`, `tests/unit/patterns.py`, `tests/unit/patterns.sh` | none | substantive |
+| CORE | Pins, lifecycle, sharing and core evidence | 2.2.a, 2.2.b, 2.2.c, 3.1.a, 3.1.b, 3.1.c, 3.2.a, 3.2.b, 3.2.c, 3.3.a, 3.3.b, 4.2.a.core, 4.2.b.core | integration owner; `lib/patterns.py`, `bin/li-pattern.py`, `tests/unit/patterns.py`, `tests/unit/patterns.sh`, `skills/pattern/SKILL.md` | P0P1 | substantive |
+| PACK | Roots, pack provenance and launcher | 2.1.a, 2.1.b, 2.1.c, 2.1.d | pack lane; `lib/pack-resolver.sh`, `lib/paths.sh`, `bin/li-pattern`, `packs/_default/pack.yaml`, `lib/pack-schema.yaml`, `tests/unit/pattern-pack-origins.sh`, `tests/unit/pattern-pack-origins.py`, `tests/unit/pattern-launcher-roots.sh`, `tests/unit/pattern-launcher-roots.py`, `tests/unit/pattern_pack_harness.py` | P0P1 | substantive |
+| WF | Workflow, document, engineering and visual consumers | 4.1.a, 4.1.b, 4.1.c, 4.2.a.wf, 4.2.b.wf, 4.2.c, 4.3.a, 4.3.b, 4.3.c, 4.3.d, 5.1.a, 5.1.b, 5.1.c, 5.2.a, 5.2.b | workflow/visual lane; `skills/sense/SKILL.md`, `skills/scope/SKILL.md`, `skills/define/SKILL.md`, `skills/discover/SKILL.md`, `skills/cycle/SKILL.md`, `skills/plan/SKILL.md`, `skills/build/SKILL.md`, `skills/resume/SKILL.md`, `skills/review/SKILL.md`, `skills/ship/SKILL.md`, `skills/capture/SKILL.md`, `skills/generate/SKILL.md`, `skills/generate-outline/SKILL.md`, `skills/generate-write/SKILL.md`, `skills/generate-design/SKILL.md`, `skills/generate-qa/SKILL.md`, `skills/generate-word/SKILL.md`, `skills/generate-ppt/SKILL.md`, `skills/generate-pdf/SKILL.md`, `skills/generate-xlsx/SKILL.md`, `skills/generate-visio/SKILL.md`, `skills/ta/SKILL.md`, `skills/da/SKILL.md`, `skills/sc/SKILL.md`, `skills/dh/SKILL.md`, `skills/tq/SKILL.md`, `skills/frontend-style-extract/SKILL.md`, `skills/generate-style-learn/SKILL.md`, `skills/frontend-design/SKILL.md`, `skills/generate-web/SKILL.md`, `skills/design-dna/SKILL.md`, `skills/frontend-typography/SKILL.md`, `skills/frontend-motion/SKILL.md`, `skills/frontend-shader/SKILL.md`, `skills/generate-app/SKILL.md`, `skills/frontend-design-review/SKILL.md`, `skills/pattern/references`, `lib/pattern_visual.py`, `tests/integration/pattern-workflows.py`, `tests/integration/pattern-workflows.sh`, `tests/unit/pattern-visual.py`, `tests/unit/pattern-visual.sh`, `tests/integration/pattern-visual-roundtrip.py`, `tests/integration/pattern-visual-roundtrip.sh`, `tests/integration/pattern_consumer_fixtures.py` | P0P1 | substantive |
+| INT | Packaging, generated adapters, docs and release evidence | 6.1.a, 6.1.b, 6.1.c, 6.2.a, 6.2.b, 6.2.c | integration owner (coordinator-only, no lane); `scaffolding/01-foundation/templates/pattern`, `docs`, `skills/pack-create/SKILL.md`, `skills/pack-validate/SKILL.md`, `bin/li-copilot.py`, `.github`, `skills/CATALOG.md`, `tests/integration/pattern-portability.py`, `tests/integration/pattern-portability.sh`, `tests/shape/pattern-contract.sh` | CORE, PACK, WF | substantive |
+
 ## Verification command key
 
 Use native Python 3 command available on the host. Commands below use Windows
@@ -105,10 +123,8 @@ test tools only after a missing-dependency result and within authorized scope.
 
 ### 0.1 Establish the isolated implementation baseline
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [x] | 0.1.a | Own initiative plan/map | None | R16 | Promote this package only after BUILD authorization; select explicit work.json; preserve other plan entries and record actual base hash. Map validator passes. | V18 |
-| [x] | 0.1.b | New ADR, `.claude/engineering/evolution/<date>-reusable-patterns.md` | 0.1.a | R16 | Allocate unused ADR number; record spec section 1, affected contracts and feature-only rollback. No accepted ADR/governance rewritten. | V18 |
+- [x] 0.1.a Promote this package only after BUILD authorization; select explicit work.json; preserve other plan entries and record actual base hash. Map validator passes. Files: Own initiative plan/map. Req: R16. Verify: V18. (depends None)
+- [x] 0.1.b Allocate unused ADR number; record spec section 1, affected contracts and feature-only rollback. No accepted ADR/governance rewritten. Files: New ADR, `.claude/engineering/evolution/<date>-reusable-patterns.md`. Req: R16. Verify: V18. (depends 0.1.a)
 
 Milestone: bounded authorization, compatible architecture and explicit task source.
 
@@ -116,28 +132,22 @@ Milestone: bounded authorization, compatible architecture and explicit task sour
 
 ### 1.1 Parse and validate records
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [x] | 1.1.a | core, Unit | 0.1.b | R01 | Pattern/clauses/sources/assets/exact-reference records and canonical digest per sections 4.1/4.4. Correct roundtrip; no bool schema or duplicate-key acceptance. | V01 |
-| [x] | 1.1.b | core, Unit | 1.1.a | R01 | Catalog/binding/context/report records including lifecycle arrays and extension seam. Required fields, enums and cross-field constraints reject malformed input. | V01 |
-| [x] | 1.1.c | core, Unit | 1.1.b | R09 | Central contained path resolver; reject escaping paths and symlink/reparse parents on reads/writes. Tests verify no access outside fixture root. | V02 |
-| [x] | 1.1.d | core, CLI, Unit, `tests/unit/patterns.sh` | 1.1.c | R09 | Strict size/depth limits, status codes and stderr/stdout contracts; register unit runner. CLI errors preserve destination bytes. | V01, V02 |
+- [x] 1.1.a Pattern/clauses/sources/assets/exact-reference records and canonical digest per sections 4.1/4.4. Correct roundtrip; no bool schema or duplicate-key acceptance. Files: core, Unit. Req: R01. Verify: V01. (depends 0.1.b)
+- [x] 1.1.b Catalog/binding/context/report records including lifecycle arrays and extension seam. Required fields, enums and cross-field constraints reject malformed input. Files: core, Unit. Req: R01. Verify: V01. (depends 1.1.a)
+- [x] 1.1.c Central contained path resolver; reject escaping paths and symlink/reparse parents on reads/writes. Tests verify no access outside fixture root. Files: core, Unit. Req: R09. Verify: V02. (depends 1.1.b)
+- [x] 1.1.d Strict size/depth limits, status codes and stderr/stdout contracts; register unit runner. CLI errors preserve destination bytes. Files: core, CLI, Unit, `tests/unit/patterns.sh`. Req: R09. Verify: V01, V02. (depends 1.1.c)
 
 ### 1.2 Match metadata before opening content
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [x] | 1.2.a | core, Unit | 1.1.d | R01,R04 | AND/OR selectors and evidenced context; known mismatch beats unknown, empty selector explicit. Multi-domain fixtures need no domain-specific runtime code. | V03 |
-| [x] | 1.2.b | core, CLI, Unit | 1.2.a | R04,R13 | list/show/check and catalog-based explain scaffolding; unbound matching returns <=5 summaries/1,200 characters; unrelated body/asset reads stay zero. | V03 |
-| [x] | 1.2.c | core, Unit | 1.2.b | R04,R13 | Selected body metadata/digest revalidation and read-once snapshots; stale metadata fails, file replacement cannot change validated content. Exact read metrics asserted. | V03 |
+- [x] 1.2.a AND/OR selectors and evidenced context; known mismatch beats unknown, empty selector explicit. Multi-domain fixtures need no domain-specific runtime code. Files: core, Unit. Req: R01,R04. Verify: V03. (depends 1.1.d)
+- [x] 1.2.b list/show/check and catalog-based explain scaffolding; unbound matching returns <=5 summaries/1,200 characters; unrelated body/asset reads stay zero. Files: core, CLI, Unit. Req: R04,R13. Verify: V03. (depends 1.2.a)
+- [x] 1.2.c Selected body metadata/digest revalidation and read-once snapshots; stale metadata fails, file replacement cannot change validated content. Exact read metrics asserted. Files: core, Unit. Req: R04,R13. Verify: V03. (depends 1.2.b)
 
 ### 1.3 Resolve authority and completeness
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [x] | 1.3.a | core, Unit | 1.2.c | R05 | Required bindings are independent of candidate ranking; six mandatory patterns survive top-five advisory cap; unknown required binding produces needs-context. | V04 |
-| [x] | 1.3.b | core, Unit | 1.3.a | R05,R07 | Required/default distinction and structured setting conflicts/default precedence; same-scope ties fail, must under default binding is conflict. | V04 |
-| [x] | 1.3.c | core, CLI, Unit | 1.3.b | R05,R07 | Exact exception/override/ref-role inputs per spec; expired exceptions fail, explicit must never gains implicit authority, and budget excess emits no success lock. | V04 |
+- [x] 1.3.a Required bindings are independent of candidate ranking; six mandatory patterns survive top-five advisory cap; unknown required binding produces needs-context. Files: core, Unit. Req: R05. Verify: V04. (depends 1.2.c)
+- [x] 1.3.b Required/default distinction and structured setting conflicts/default precedence; same-scope ties fail, must under default binding is conflict. Files: core, Unit. Req: R05,R07. Verify: V04. (depends 1.3.a)
+- [x] 1.3.c Exact exception/override/ref-role inputs per spec; expired exceptions fail, explicit must never gains implicit authority, and budget excess emits no success lock. Files: core, CLI, Unit. Req: R05,R07. Verify: V04. (depends 1.3.b)
 
 Milestone: deterministic local resolution with explicit uncertainty and no dropped rules.
 
@@ -145,20 +155,16 @@ Milestone: deterministic local resolution with explicit uncertainty and no dropp
 
 ### 2.1 Integrate existing pack resolution
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 2.1.a | `lib/paths.sh`, launcher, core, Unit | 1.3.c | R02 | Add path helpers and roots-envelope parser; personal-only inspection works, repository operations require explicit valid root when outside Git. No writes to source tree. | V02, V12 |
-| [ ] | 2.1.b | `lib/pack-resolver.sh` (adapter only; RN-01), `tests/unit/pattern-pack-origins.sh` | 2.1.a | R02,R03 | Exact same-snapshot context/ancestry transport; inherited/null/fallback origins correct; pointer change and missing cached origin explicit. Existing accessors unchanged. | V05, V14 |
-| [ ] | 2.1.c | launcher, `packs/_default/pack.yaml`, `lib/pack-schema.yaml`, origin tests | 2.1.b | R02,R03 | Optional `patterns.source: null`, source-aware pack/ancestry registry, JSON stdin bridge safely handles spaces and quoting. Declared absent catalog is not neutral success. | V05 |
-| [ ] | 2.1.d | core, launcher, Unit | 2.1.c | R02,R15 | Unconfigured roots preserve old workflow behavior; active enterprise fallback remains visible/unavailable for dependent use. No automatic personal activation. | V05, V12, V14 |
+- [ ] 2.1.a Add path helpers and roots-envelope parser; personal-only inspection works, repository operations require explicit valid root when outside Git. No writes to source tree. Files: `lib/paths.sh`, launcher, core, Unit. Req: R02. Verify: V02, V12. (depends 1.3.c)
+- [ ] 2.1.b Exact same-snapshot context/ancestry transport; inherited/null/fallback origins correct; pointer change and missing cached origin explicit. Existing accessors unchanged. Files: `lib/pack-resolver.sh` (adapter only; RN-01), `tests/unit/pattern-pack-origins.sh`. Req: R02,R03. Verify: V05, V14. (depends 2.1.a)
+- [ ] 2.1.c Optional `patterns.source: null`, source-aware pack/ancestry registry, JSON stdin bridge safely handles spaces and quoting. Declared absent catalog is not neutral success. Files: launcher, `packs/_default/pack.yaml`, `lib/pack-schema.yaml`, origin tests. Req: R02,R03. Verify: V05. (depends 2.1.b)
+- [ ] 2.1.d Unconfigured roots preserve old workflow behavior; active enterprise fallback remains visible/unavailable for dependent use. No automatic personal activation. Files: core, launcher, Unit. Req: R02,R15. Verify: V05, V12, V14. (depends 2.1.c)
 
 ### 2.2 Bind and freeze a reproducible selection
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 2.2.a | core, Unit | 2.1.d | R01,R08 | Exact pattern includes, catalog includes and cycle/depth/conflicting-digest detection; transitive dependencies inherit requiredness and must match context. | V06 |
-| [ ] | 2.2.b | core, CLI, Unit | 2.2.a | R03,R08 | resolve lock/verify-lock with stable digests, source snapshots and current lifecycle/revocations; pointer changes or missing source never silently upgrade pins. | V06 |
-| [ ] | 2.2.c | core, CLI, Unit | 2.2.b | R05,R11,R13 | map/project use section 4.6 schema/digests; unknown IDs and unmapped clauses block; mapping changes invalidate review coverage; budget overflow emits no partial lock. | V06 |
+- [x] 2.2.a Exact pattern includes, catalog includes and cycle/depth/conflicting-digest detection; transitive dependencies inherit requiredness and must match context. Files: core, Unit. Req: R01,R08. Verify: V06. Declared prerequisite `2.1.d` relaxed per topology.md. (depends 1.3.c)
+- [x] 2.2.b resolve lock/verify-lock with stable digests, source snapshots and current lifecycle/revocations; pointer changes or missing source never silently upgrade pins. Files: core, CLI, Unit. Req: R03,R08. Verify: V06. (depends 2.2.a)
+- [x] 2.2.c map/project use section 4.6 schema/digests; unknown IDs and unmapped clauses block; mapping changes invalidate review coverage; budget overflow emits no partial lock. Files: core, CLI, Unit. Req: R05,R11,R13. Verify: V06. (depends 2.2.b)
 
 Milestone: reproducible selection across scopes with verified no-pattern compatibility.
 
@@ -166,26 +172,20 @@ Milestone: reproducible selection across scopes with verified no-pattern compati
 
 ### 3.1 Capture and publish reviewed local patterns
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 3.1.a | core, CLI, Unit | 2.2.c | R06 | capture writes only a valid draft in explicit scope; source statements and observations distinguish inference; existing name/version refuses overwrite. | V07 |
-| [ ] | 3.1.b | core, CLI, Unit | 3.1.a | R06 | Exclusive source lock/CAS and catalog-last publication; index never discovers unregistered staging or removed entries and preserves lifecycle events. | V07 |
-| [ ] | 3.1.c | core, CLI, Unit | 3.1.b | R06 | approve requires explicit newer version and valid approved dependencies; source evidence rejects if missing. Deprecate->index/remove->index preserve effective state. | V07 |
+- [x] 3.1.a capture writes only a valid draft in explicit scope; source statements and observations distinguish inference; existing name/version refuses overwrite. Files: core, CLI, Unit. Req: R06. Verify: V07. (depends 2.2.c)
+- [x] 3.1.b Exclusive source lock/CAS and catalog-last publication; index never discovers unregistered staging or removed entries and preserves lifecycle events. Files: core, CLI, Unit. Req: R06. Verify: V07. (depends 3.1.a)
+- [x] 3.1.c approve requires explicit newer version and valid approved dependencies; source evidence rejects if missing. Deprecate->index/remove->index preserve effective state. Files: core, CLI, Unit. Req: R06. Verify: V07. (depends 3.1.b)
 
 ### 3.2 Maintain without silently changing active work
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 3.2.a | core, CLI, Unit | 3.1.c | R08 | update versions and lifecycle/revocation events; changed requirements and configured dependents appear in impact preview; current pins remain unchanged. | V07 |
-| [ ] | 3.2.b | core, CLI, Unit | 3.2.a | R07,R08 | apply add/replace/remove and section 4.5 attestations; wrong-digest/expired/URL evidence handled; renewal preserves selection digest; binding reduction preview explicit. | V07 |
-| [ ] | 3.2.c | core, CLI, Unit | 3.2.b | R08 | remove preview, referenced-history protection and bounded dependency scan; unknown external consumers reported, unrelated sessions not read. | V07 |
+- [ ] 3.2.a update versions and lifecycle/revocation events; changed requirements and configured dependents appear in impact preview; current pins remain unchanged. Files: core, CLI, Unit. Req: R08. Verify: V07. (depends 3.1.c)
+- [ ] 3.2.b apply add/replace/remove and section 4.5 attestations; wrong-digest/expired/URL evidence handled; renewal preserves selection digest; binding reduction preview explicit. Files: core, CLI, Unit. Req: R07,R08. Verify: V07. (depends 3.2.a)
+- [ ] 3.2.c remove preview, referenced-history protection and bounded dependency scan; unknown external consumers reported, unrelated sessions not read. Files: core, CLI, Unit. Req: R08. Verify: V07. (depends 3.2.b)
 
 ### 3.3 Share data, not execution or inherited trust
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 3.3.a | core, CLI, Unit | 3.2.c | R09 | export exact dependency closure and authorized assets to new directory; no external source fetch, private source-document copy or absolute-root leak. | V08 |
-| [ ] | 3.3.b | core, CLI, Unit, canonical `SKILL.md` under `skills/pattern/` (planned; RN-07) | 3.3.a | R09 | import transforms children-first with explicit source/version mapping and recomputed pins; closure imports then approves locally; collisions/external refs fail. Skill documents all operations. | V08, V18 |
+- [ ] 3.3.a export exact dependency closure and authorized assets to new directory; no external source fetch, private source-document copy or absolute-root leak. Files: core, CLI, Unit. Req: R09. Verify: V08. (depends 3.2.c)
+- [ ] 3.3.b import transforms children-first with explicit source/version mapping and recomputed pins; closure imports then approves locally; collisions/external refs fail. Skill documents all operations. Files: core, CLI, Unit, canonical `SKILL.md` under `skills/pattern/` (planned; RN-07). Req: R09. Verify: V08, V18. (depends 3.3.a)
 
 Milestone: safe complete local lifecycle; no remote distribution implied.
 
@@ -193,28 +193,26 @@ Milestone: safe complete local lifecycle; no remote distribution implied.
 
 ### 4.1 Resolve before decisions, including direct entry
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 4.1.a | `references/consumer-contract.md` under `skills/pattern/` (planned; RN-07), workflow test | 3.3.b | R10 | Single invocation/result contract with selector evidence and all failure branches; test invokes real launcher using this envelope. | V09 |
-| [ ] | 4.1.b | `skills/sense/SKILL.md`, `skills/scope/SKILL.md`, `skills/define/SKILL.md`, `skills/discover/SKILL.md` | 4.1.a | R10 | Metadata-only startup and pre-design resolution/source verification; unknown target does not become a guessed deployment baseline. | V09, V18 |
-| [ ] | 4.1.c | `skills/cycle/SKILL.md`, `skills/plan/SKILL.md`, workflow test | 4.1.b | R10,R15 | Direct PLAN and cycle PLAN produce equivalent selection on same inputs; no sources adds no prompts/mandatory artifacts. Preserve existing phase/approval protocol. | V09 |
+- [ ] 4.1.a Single invocation/result contract with selector evidence and all failure branches; test invokes real launcher using this envelope. Files: `references/consumer-contract.md` under `skills/pattern/` (planned; RN-07), workflow test. Req: R10. Verify: V09. Declared prerequisite `3.3.b` relaxed per topology.md. (depends 1.3.c)
+- [ ] 4.1.b Metadata-only startup and pre-design resolution/source verification; unknown target does not become a guessed deployment baseline. Files: `skills/sense/SKILL.md`, `skills/scope/SKILL.md`, `skills/define/SKILL.md`, `skills/discover/SKILL.md`. Req: R10. Verify: V09, V18. (depends 4.1.a)
+- [ ] 4.1.c Direct PLAN and cycle PLAN produce equivalent selection on same inputs; no sources adds no prompts/mandatory artifacts. Preserve existing phase/approval protocol. Files: `skills/cycle/SKILL.md`, `skills/plan/SKILL.md`, workflow test. Req: R10,R15. Verify: V09. (depends 4.1.b)
 
 ### 4.2 Carry requirements through implementation and review
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 4.2.a | `skills/build/SKILL.md`, `skills/resume/SKILL.md`, core/CLI evidence functions | 4.1.c | R10,R11 | Explicit lock verification and package projection; changed/revoked content blocks affected continuation, Spec Kit task IDs remain unchanged. | V09 |
-| [ ] | 4.2.b | `skills/review/SKILL.md`, `skills/ship/SKILL.md`, core/CLI, workflow test | 4.2.a | R10,R11 | review input validator and coverage verdict; omitted/failed/unverified must exits 7, exception is waived not passed; no claim evidence links prove truth. | V09 |
-| [ ] | 4.2.c | `skills/capture/SKILL.md`, workflow test and runner wrapper | 4.2.b | R11 | CAPTURE proposes rather than silently approves changes; cold handoff reconstructs from explicit artifacts; runner executes real traceability roundtrip. | V09 |
+- [ ] 4.2.a Explicit lock verification and package projection; changed/revoked content blocks affected continuation, Spec Kit task IDs remain unchanged. Files: `skills/build/SKILL.md`, `skills/resume/SKILL.md`, core/CLI evidence functions. Req: R10,R11. Verify: V09. Parent: complete only when both suffix parts below pass on the integrated branch (topology.md).
+  - [ ] 4.2.a.core Core/CLI part of 4.2.a: explicit lock verification and package projection functions consumed by BUILD and RESUME; changed or revoked content blocks affected continuation, Spec Kit task IDs unchanged. Files: core, CLI, Unit. Req: R10,R11. Verify: V06; V09 pending join. (depends 2.2.c)
+  - [ ] 4.2.a.wf Skill part of 4.2.a: `skills/build/SKILL.md` and `skills/resume/SKILL.md` verify an explicit lock and use package projections; changed or revoked content blocks affected continuation, Spec Kit task IDs unchanged. Files: `skills/build/SKILL.md`, `skills/resume/SKILL.md`. Req: R10,R11. Verify: V09 pending join. (depends 4.1.c)
+- [ ] 4.2.b review input validator and coverage verdict; omitted/failed/unverified must exits 7, exception is waived not passed; no claim evidence links prove truth. Files: `skills/review/SKILL.md`, `skills/ship/SKILL.md`, core/CLI, workflow test. Req: R10,R11. Verify: V09. Parent: complete only when both suffix parts below pass on the integrated branch (topology.md).
+  - [ ] 4.2.b.core Core/CLI part of 4.2.b: review input validator and coverage verdict; omitted/failed/unverified must exits 7, exception is waived not passed; no claim evidence links prove truth. Files: core, CLI, Unit. Req: R10,R11. Verify: V09 pending join. (depends 4.2.a.core)
+  - [ ] 4.2.b.wf Skill part of 4.2.b: `skills/review/SKILL.md` and `skills/ship/SKILL.md` consume the review verdict, with workflow-test cases; no claim evidence links prove truth. Files: `skills/review/SKILL.md`, `skills/ship/SKILL.md`, workflow test. Req: R10,R11. Verify: V09 pending join. (depends 4.2.a.wf)
+- [ ] 4.2.c CAPTURE proposes rather than silently approves changes; cold handoff reconstructs from explicit artifacts; runner executes real traceability roundtrip. Files: `skills/capture/SKILL.md`, workflow test and runner wrapper. Req: R11. Verify: V09. Declared prerequisite `4.2.b` refers to its workflow part per topology.md. (depends 4.2.b.wf)
 
 ### 4.3 Integrate nonvisual standalone work
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 4.3.a | `skills/generate/SKILL.md`, `skills/generate-outline/SKILL.md`, `skills/generate-write/SKILL.md`, `skills/generate-design/SKILL.md`, `skills/generate-qa/SKILL.md` | 4.2.c | R10 | Shared pipeline carries verified lock reference; direct subskill entry resolves itself; absent/stale attachment is not a pass. | V09, V18 |
-| [ ] | 4.3.b | `skills/generate-word/SKILL.md`, `skills/generate-ppt/SKILL.md`, workflow test | 4.3.a | R10 | Direct brief and pipeline paths receive same clauses; direct document pattern requires a named section and quality gate flags absence; record real host case separately. | V09, V17 |
-| [ ] | 4.3.c | `skills/generate-pdf/SKILL.md`, `skills/generate-xlsx/SKILL.md`, `skills/generate-visio/SKILL.md` | 4.3.b | R10 | At-invocation slot contracts resolve/verify patterns without falsely promoting renderer status; document conversion preserves required clauses. | V09, V18 |
-| [ ] | 4.3.d | `skills/ta/SKILL.md`, `skills/da/SKILL.md`, `skills/sc/SKILL.md`, `skills/dh/SKILL.md`, `skills/tq/SKILL.md` | 4.3.c | R10 | Engineering entries resolve target-bound expectations and pass projections; unknown target blocks dependent design, no live discovery implied. | V09, V18 |
+- [ ] 4.3.a Shared pipeline carries verified lock reference; direct subskill entry resolves itself; absent/stale attachment is not a pass. Files: `skills/generate/SKILL.md`, `skills/generate-outline/SKILL.md`, `skills/generate-write/SKILL.md`, `skills/generate-design/SKILL.md`, `skills/generate-qa/SKILL.md`. Req: R10. Verify: V09, V18. (depends 4.2.c)
+- [ ] 4.3.b Direct brief and pipeline paths receive same clauses; direct document pattern requires a named section and quality gate flags absence; record real host case separately. Files: `skills/generate-word/SKILL.md`, `skills/generate-ppt/SKILL.md`, workflow test. Req: R10. Verify: V09, V17. (depends 4.3.a)
+- [ ] 4.3.c At-invocation slot contracts resolve/verify patterns without falsely promoting renderer status; document conversion preserves required clauses. Files: `skills/generate-pdf/SKILL.md`, `skills/generate-xlsx/SKILL.md`, `skills/generate-visio/SKILL.md`. Req: R10. Verify: V09, V18. (depends 4.3.b)
+- [ ] 4.3.d Engineering entries resolve target-bound expectations and pass projections; unknown target blocks dependent design, no live discovery implied. Files: `skills/ta/SKILL.md`, `skills/da/SKILL.md`, `skills/sc/SKILL.md`, `skills/dh/SKILL.md`, `skills/tq/SKILL.md`. Req: R10. Verify: V09, V18. (depends 4.3.c)
 
 Milestone: core, document and engineering entries share the same selection contract.
 
@@ -222,18 +220,14 @@ Milestone: core, document and engineering entries share the same selection contr
 
 ### 5.1 Adapt existing visual artifacts
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 5.1.a | `lib/pattern_visual.py`, visual unit test | 4.3.d | R12 | Distinguish legacy schema-1 pattern from universal schema-1; convert to draft defaults with source confidence/rights, preserving unknown fields in legacy asset. | V10 |
-| [ ] | 5.1.b | `skills/frontend-style-extract/SKILL.md`, `skills/generate-style-learn/SKILL.md` | 5.1.a | R12 | Existing extraction emits universal draft via adapter; no implicit source copying or trust promotion, legacy originals preserved. | V10, V18 |
-| [ ] | 5.1.c | `skills/frontend-design/SKILL.md`, `skills/generate-web/SKILL.md` (`--mode mockup`; RN-04), visual adapter | 5.1.b | R12 | Implement section 9 setting/destination/type table and explicit profile precedence; assert changed actual spec values and mismatch failures, not attachment presence alone. | V10 |
+- [ ] 5.1.a Distinguish legacy schema-1 pattern from universal schema-1; convert to draft defaults with source confidence/rights, preserving unknown fields in legacy asset. Files: `lib/pattern_visual.py`, visual unit test. Req: R12. Verify: V10. (depends 4.3.d)
+- [ ] 5.1.b Existing extraction emits universal draft via adapter; no implicit source copying or trust promotion, legacy originals preserved. Files: `skills/frontend-style-extract/SKILL.md`, `skills/generate-style-learn/SKILL.md`. Req: R12. Verify: V10, V18. (depends 5.1.a)
+- [ ] 5.1.c Implement section 9 setting/destination/type table and explicit profile precedence; assert changed actual spec values and mismatch failures, not attachment presence alone. Files: `skills/frontend-design/SKILL.md`, `skills/generate-web/SKILL.md` (`--mode mockup`; RN-04), visual adapter. Req: R12. Verify: V10. (depends 5.1.b)
 
 ### 5.2 Wire decision, rendering and review consumers
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 5.2.a | `skills/design-dna/SKILL.md`, `skills/frontend-typography/SKILL.md`, `skills/frontend-motion/SKILL.md`, `skills/frontend-shader/SKILL.md`, `skills/generate-web/SKILL.md`, `skills/generate-app/SKILL.md` | 5.1.c | R12 | Direct callers verify/resolve context; requirements constrain decisions, ordinary brief/profile/corpus rules still apply for unconstrained choices. Each consumer has mapped acceptance case. | V11, V18 |
-| [ ] | 5.2.b | `skills/frontend-design-review/SKILL.md` (sole built-UI review owner; RN-04), adapter, visual integration test and wrappers | 5.2.a | R12,R15 | Baseline mismatch fails review; actual resolver->adapter->spec->review tested; no-pattern spec remains compatible; legacy schema-only test not called rendering proof. | V10, V11, V15 |
+- [ ] 5.2.a Direct callers verify/resolve context; requirements constrain decisions, ordinary brief/profile/corpus rules still apply for unconstrained choices. Each consumer has mapped acceptance case. Files: `skills/design-dna/SKILL.md`, `skills/frontend-typography/SKILL.md`, `skills/frontend-motion/SKILL.md`, `skills/frontend-shader/SKILL.md`, `skills/generate-web/SKILL.md`, `skills/generate-app/SKILL.md`. Req: R12. Verify: V11, V18. (depends 5.1.c)
+- [ ] 5.2.b Baseline mismatch fails review; actual resolver->adapter->spec->review tested; no-pattern spec remains compatible; legacy schema-only test not called rendering proof. Files: `skills/frontend-design-review/SKILL.md` (sole built-UI review owner; RN-04), adapter, visual integration test and wrappers. Req: R12,R15. Verify: V10, V11, V15. (depends 5.2.a)
 
 Milestone: shared patterns work with existing visual flow without replacing Design DNA.
 
@@ -241,19 +235,15 @@ Milestone: shared patterns work with existing visual flow without replacing Desi
 
 ### 6.1 Make adoption self-contained
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 6.1.a | `scaffolding/01-foundation/templates/pattern/`, `docs/concepts/patterns.md`, `docs/architecture.md`, `docs/the-cycle.md`, `docs/multi-cli.md`, `docs/copilot.md`, `skills/pack-create/SKILL.md`, `skills/pack-validate/SKILL.md` | 5.2.b | R14 | One canonical neutral example plus template; authoring and lifecycle documented; pack-create/validate understand optional source; no curated company rules. | V18 |
-| [ ] | 6.1.b | `bin/li-copilot.py`, generated `.github/skills/li-pattern/`, managed inventory/plugin outputs as generator requires, `skills/CATALOG.md` | 6.1.a | R14 | Add pattern workflow and required doc bundle entries; regenerate with existing init/catalog commands, never hand-edit generated profiles. Missing downstream links fail check. | V13 |
-| [ ] | 6.1.c | `tests/integration/pattern-portability.py`, runner wrapper, `tests/shape/pattern-contract.sh` | 6.1.b | R14 | Fresh kit includes helper, canonical skill and reference; explicit non-Git root and Windows paths work; old catalogs/legacy inputs don't imply active policy. | V12, V13 |
+- [ ] 6.1.a One canonical neutral example plus template; authoring and lifecycle documented; pack-create/validate understand optional source; no curated company rules. Files: `scaffolding/01-foundation/templates/pattern/`, `docs/concepts/patterns.md`, `docs/architecture.md`, `docs/the-cycle.md`, `docs/multi-cli.md`, `docs/copilot.md`, `skills/pack-create/SKILL.md`, `skills/pack-validate/SKILL.md`. Req: R14. Verify: V18. Declared prerequisite `5.2.b` relaxed per topology.md. (depends 2.1.d, 3.3.b, 4.2.b.core, 5.2.b)
+- [ ] 6.1.b Add pattern workflow and required doc bundle entries; regenerate with existing init/catalog commands, never hand-edit generated profiles. Missing downstream links fail check. Files: `bin/li-copilot.py`, the generated `li-pattern` native wrapper under `.github/skills/` (planned; RN-07), managed inventory/plugin outputs as generator requires, `skills/CATALOG.md`. Req: R14. Verify: V13. (depends 6.1.a)
+- [ ] 6.1.c Fresh kit includes helper, canonical skill and reference; explicit non-Git root and Windows paths work; old catalogs/legacy inputs don't imply active policy. Files: `tests/integration/pattern-portability.py`, runner wrapper, `tests/shape/pattern-contract.sh`. Req: R14. Verify: V12, V13. (depends 6.1.b)
 
 ### 6.2 Verify behavior and prepare later integration
 
-| Done | ID | Files | Deps | Req | Implementation and acceptance | Verify |
-| --- | --- | --- | --- | --- | --- | --- |
-| [ ] | 6.2.a | New tests and only directly coupled fixes | 6.1.c | R13,R14,R15 | Run read-count/size boundaries, targeted compatibility and strict full suite. No claimed pass for skipped/missing tools. | V01-V16 |
-| [ ] | 6.2.b | Own acceptance/review record | 6.2.a | R14,R15 | Fresh host/model acceptance for dashboard/backend/resume, or explicit deferred host gate. Independent spec and quality review closes substantive findings. | V17, V18 |
-| [ ] | 6.2.c | Own plan, ADR/evolution evidence, integration handoff | 6.2.b | R16 | Final diff, requirement coverage and source/target baseline recorded; no unrelated changes, no other-session contact; leave feature ready for authorized later integration. | V18 |
+- [ ] 6.2.a Run read-count/size boundaries, targeted compatibility and strict full suite. No claimed pass for skipped/missing tools. Files: New tests and only directly coupled fixes. Req: R13,R14,R15. Verify: V01-V16. (depends 6.1.c)
+- [ ] 6.2.b Fresh host/model acceptance for dashboard/backend/resume, or explicit deferred host gate. Independent spec and quality review closes substantive findings. Files: Own acceptance/review record. Req: R14,R15. Verify: V17, V18. (depends 6.2.a)
+- [ ] 6.2.c Final diff, requirement coverage and source/target baseline recorded; no unrelated changes, no other-session contact; leave feature ready for authorized later integration. Files: Own plan, ADR/evolution evidence, integration handoff. Req: R16. Verify: V18. (depends 6.2.b)
 
 Milestone: local system verified; deployment/host claims limited to actual evidence.
 

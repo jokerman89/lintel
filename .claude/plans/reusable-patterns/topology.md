@@ -1,10 +1,14 @@
 # Reusable patterns: dependency topology and lane ownership
 
-Status: split APPROVED IN PRINCIPLE by the parent (2026-09-28), conditional on the P1
-package's independent review being accepted before any dependent dispatch. V09, V11 and all
-of P6 wait for the real integrated join. Leaf text, requirement mappings and acceptance in
-[plan.md](plan.md) are unchanged. Revision R1 corrects the first draft's summary of the
-original graph and its range-only lane membership.
+Status: split APPROVED by the parent (2026-09-28) after the independent re-review of the R2 contract
+(`ae9d6df7`) accepted it for dependent dispatch. V09, V11 and all of P6 wait for the real integrated
+join. Revision R2 (2026-09-28): the relaxed edges, the suffix splits and the package membership are
+now written into the authoritative plan.md leaf items and its "Swarm execution packages" table, and
+they are validated by `li-work-artifacts.py` and `li-swarm.py validate`/`wave`. This file keeps the
+rationale. The coordination document is [swarm/coordination.json](swarm/coordination.json). The suffix
+IDs are spelled `4.2.a.core`, `4.2.a.wf`, `4.2.b.core` and `4.2.b.wf`, because the swarm parser
+recognizes dotted children of an original leaf. R1 spelled them `4.2.a.core` and so on; the meaning
+is unchanged.
 
 ## Original graph (as declared)
 
@@ -31,24 +35,24 @@ declared edge stands.
 | 2.2.a | 2.1.d | 1.3.c | Includes/pins consume the frozen roots envelope. Tests build envelopes directly, and the implementation exists and is tested (build log) |
 | 4.1.a | 3.3.b | 1.3.c and the frozen contract | The consumer reference documents only the frozen CLI/report. Its "real launcher" verification stays pending join with 2.1.c |
 | 4.2.a, 4.2.b | 4.1.c; 4.2.a | split by file ownership (below) | Each leaf names both skill files (workflow lane) and core/CLI evidence functions (core lane). The plan permits suffix splits that keep requirement mapping |
-| 6.1.a | 5.2.b | 2.1.d, 3.3.b, 4.2.b-core, 5.2.b, all integrated and reviewed | P6 is the serial join |
+| 6.1.a | 5.2.b | 2.1.d, 3.3.b, 4.2.b.core, 5.2.b, all integrated and reviewed | P6 is the serial join |
 
 Suffix splits, both parts keeping the parent leaf's requirement IDs and verification keys.
 The parent leaf is ticked only when both parts pass on the integrated branch.
 
-- **4.2.a-core:** lock verification and package projection functions/CLI. Depends on 2.2.c.
-- **4.2.a-wf:** `skills/build/SKILL.md` and `skills/resume/SKILL.md` wiring. Depends on 4.1.c.
-- **4.2.b-core:** the `review` input validator, coverage verdict and exit 7. Depends on 4.2.a-core.
-- **4.2.b-wf:** `skills/review/SKILL.md`, `skills/ship/SKILL.md` and the workflow-test cases.
-  Depends on 4.2.a-wf.
+- **4.2.a.core:** lock verification and package projection functions/CLI. Depends on 2.2.c.
+- **4.2.a.wf:** `skills/build/SKILL.md` and `skills/resume/SKILL.md` wiring. Depends on 4.1.c.
+- **4.2.b.core:** the `review` input validator, coverage verdict and exit 7. Depends on 4.2.a.core.
+- **4.2.b.wf:** `skills/review/SKILL.md`, `skills/ship/SKILL.md` and the workflow-test cases.
+  Depends on 4.2.a.wf.
 
 ## Explicit lane membership
 
 | Lane | Member leaves (in execution order) | Entry prerequisite |
 | --- | --- | --- |
-| Core (integration owner) | 2.2.a, 2.2.b, 2.2.c, 3.1.a, 3.1.b, 3.1.c, 3.2.a, 3.2.b, 3.2.c, 3.3.a, 3.3.b, 4.2.a-core, 4.2.b-core | 1.3.c |
+| Core (integration owner) | 2.2.a, 2.2.b, 2.2.c, 3.1.a, 3.1.b, 3.1.c, 3.2.a, 3.2.b, 3.2.c, 3.3.a, 3.3.b, 4.2.a.core, 4.2.b.core | 1.3.c |
 | Pack | 2.1.a, 2.1.b, 2.1.c, 2.1.d | 1.3.c |
-| Workflow/visual | 4.1.a, 4.1.b, 4.1.c, 4.2.a-wf, 4.2.b-wf, 4.2.c, 4.3.a, 4.3.b, 4.3.c, 4.3.d, 5.1.a, 5.1.b, 5.1.c, 5.2.a, 5.2.b | 1.3.c and frozen contract |
+| Workflow/visual | 4.1.a, 4.1.b, 4.1.c, 4.2.a.wf, 4.2.b.wf, 4.2.c, 4.3.a, 4.3.b, 4.3.c, 4.3.d, 5.1.a, 5.1.b, 5.1.c, 5.2.a, 5.2.b | 1.3.c and frozen contract |
 | Integration (serial, core owner) | 6.1.a, 6.1.b, 6.1.c, 6.2.a, 6.2.b, 6.2.c | All lanes integrated |
 
 Every one of the 48 original IDs appears exactly once above; 4.2.a and 4.2.b appear through
@@ -58,7 +62,7 @@ members.
 **Pending-join rule.** A lane leaf whose verification needs another lane's output stays open
 until the integrated branch runs it. No lane ticks such a leaf. This covers:
 
-- 4.1.a, 4.1.c, 4.2.b-wf and 4.2.c, which need the launcher (2.1.c) and core lock/review
+- 4.1.a, 4.1.c, 4.2.b.wf and 4.2.c, which need the launcher (2.1.c) and core lock/review
   commands;
 - 5.2.a and 5.2.b, which need V11;
 - all of P6.
