@@ -723,6 +723,30 @@ byte-identical): removing the digest recompute, the status check, or `read_asset
 helper each fails at least one test. The context and preview checks are redundant with the digest
 by design; the digest catches them.
 
+## Authorized harness correction: `tests/integration/design-contract.py` (inherited failure)
+
+- **Scope extension.** The parent authorized one directly coupled correction to
+  `tests/integration/design-contract.py`, which the integration coordinator owns (not WF).
+- **Inherited failure.** The design-contract epilogue failed with exit 128 before any pattern
+  change. The parent's root-cause repro, which touched no real credentials or config:
+  - after `patch.dict(clear=True)` restores `os.environ`, a Windows child inheriting the native
+    environment loses `GIT_CONFIG_VALUE_0=''`;
+  - the counted `GIT_CONFIG_*` config then breaks, and `git rev-parse` exits 128;
+  - passing `env=os.environ` explicitly preserves the value.
+- **Change.** The final `source_revision` subprocess passes `env=os.environ`, with a why-comment.
+  No `GIT_CONFIG_*` scrubbing, no trust, auth or hook flags, and no hard-coded index.
+- **Evidence.** Synthetic HOME and TEMP, with the process-scoped synthetic config
+  `GIT_CONFIG_COUNT=1`, `KEY_0=core.fsmonitor`, `VALUE_0=''`:
+
+  | Run | Result |
+  | --- | --- |
+  | Before (HEAD `1f7784e5` file) | 18 tests ran; exit 1 from `CalledProcessError`, git exit status 128; no `source_revision` |
+  | After | exit 0; 18 tests; `source_revision` = `1f7784e5…` exactly |
+  | Without the synthetic config | exit 0; 18 tests; 0 failures, 0 skipped; exact `source_revision` |
+
+  The before run used a temporary `git stash push`/`pop` of this one file in my own worktree. No
+  history was changed.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
