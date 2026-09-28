@@ -297,6 +297,28 @@ subsystem. It adds no names and changes no shapes; digest values are unchanged.
 - **Digests are unkeyed and authenticate no one.** They detect edits relative to content, and
   re-resolution detects resealed edits relative to current inputs.
 
+## Revision R13 (2026-09-28, POSIX full-suite finding and INT review Low fixes)
+
+No signature, exit code or report shape changes.
+
+- **Planned names are classified before any read, on every platform** (`8fb265cf`). For a
+  version's declared files, `_declared_files` rejects the reserved body name (`pattern.json`,
+  casefolded) and runs the shared `_check_namespace` preflight over the planned names before it
+  opens a file. Case-only and file-versus-directory collisions therefore report
+  `destination_conflict` on case-sensitive POSIX filesystems too. Before, they could surface as a
+  missing or unreadable file. `_is_link` treats ENOTDIR (a parent component is a file) like
+  ENOENT: not a link. The caller then sees a missing path or a destination conflict. There is no
+  new abstraction and no broad exception catch.
+- **No report means unavailable.** Consumers treat a run that writes no JSON report on stdout as
+  `pattern check unavailable`, whatever the exit code. This is stated in the skill and the
+  consumer contract. Exit 5 from the launcher's missing-runtime branch (R12) is one such case.
+- **Byte preservation is a source-authoring step, not a runtime check.** Capture step 6 in the
+  skill, the template README and the concepts page tell authors to add a source-scoped
+  `.gitattributes` with `* -text` before Git tracks a pattern source. They must never overwrite
+  existing attributes. `-text` does not disable filters, LFS, `working-tree-encoding` or `ident`,
+  and `.git/info/attributes` can still override it. The kit generator normalizes text to LF, so
+  the shipped example is LF-only, and tests enforce that.
+
 ## Revision R12 (2026-09-28, INT packaging: missing runtime and kit closure)
 
 - **Missing runtime.** When Python 3.10+ is missing, the launcher now exits **5**. Before, it

@@ -966,10 +966,101 @@ P6 addition: see reconciliation RN-13 (raw CRLF asset bytes through Git).
 - **Ledger.** 4.3.b and 5.2.a are unticked again. Their local helper acceptance is reviewed, but
   their original real-document and per-consumer model/render/host acceptance remains V17.
 
+## First strict Windows full run on `b8312bb7` (interrupted, not a pass)
+
+- `bash tests/runner/run-all.sh --require-all` ran with synthetic HOME and TEMP in the
+  background. After 95 `RUN` lines it stalled for more than 45 minutes inside
+  `integration/copilot-kit.sh`. The parent authorized stopping only this session's own run. I
+  stopped it and its leftover own processes, and the runner printed no summary.
+- The log is kept as session artifact `fullsuite-b8312bb7.log`, marked `INTERRUPTED`. It is
+  partial evidence only and records no V16 result.
+
+## POSIX full-suite finding and fix (`8fb265cf`, contract R13)
+
+- The parent's Linux full run on `b8312bb7` (169 files: 165 pass, 4 fail) found one core
+  defect. On a case-sensitive filesystem, a case-only or file-versus-directory collision among a
+  version's declared files could surface as a missing or unreadable file rather than
+  `destination_conflict`. The other three failures were two environment artifacts and a missing
+  `pwsh`; the parent handled those separately. This is the parent's log, not a claim of a Linux
+  full pass.
+- The fix classifies the planned names before reading (reserved body name plus the shared
+  namespace preflight) and treats ENOTDIR as not-a-link. `PlannedNamespaceBeforeReadTests`
+  was added.
+- Results:
+  - Windows, synthetic environment: `tests/unit/patterns.py` 137 OK.
+  - Parent's Linux run: 137 OK. Log `posix-8fb-patterns.log` in the parent's artifacts; read
+    for this reduction.
+- Independent review of `b8312bb7..8fb265cf` is with reviewer c3015de8.
+
+## INT review of `b8312bb7` and Low fixes (`ea2c139d`, `fed0d884`)
+
+- Reviewer 24bf5df0 accepted the INT packaging milestone with four Low findings and one Info.
+  This is milestone acceptance, not ADR-0028 v2 release clearance. Fixes, docs and tests
+  committed separately:
+  - `ea2c139d`, docs:
+    - a missing JSON report means `pattern check unavailable`, whatever the exit code;
+    - the Windows path-length limit (R12) is stated in the skill, template README and concepts
+      page, with an observed and environment-dependent bare-install home budget rather than a
+      promised number;
+    - skill capture step 6 is the source-scoped `* -text` attributes step: never overwrite
+      existing attributes, and state what `-text` does not disable;
+    - a "Portable kit boundary" section in the template README.
+  - `fed0d884`, tests:
+    - the installed kit's example must be raw byte-identical to the source;
+    - the source example must be LF-only with a trailing newline, the boundary imposed by the
+      generator's text normalization.
+- Rechecked after the commits, synthetic environment:
+  - `li-copilot.py check`: 22 managed files verified.
+  - `li-catalog.py --check`: clean.
+  - `pattern-contract.sh`: all pass.
+  - `pattern-portability.sh`: 6 OK.
+  - `git diff --check`: clean.
+
+## V17 host observations (coordinator-observed on frozen `b8312bb7`)
+
+The parent ran fresh Copilot App task sessions and consolidated them in its artifact
+`host-observations.json`, which I read for this reduction. The setup:
+
+- development-mode native wrappers in separate fresh worktrees, not installed-target App
+  discovery;
+- ordinary user requests, with no expected pattern IDs, clauses or outcomes supplied;
+- synthetic environment only, with no dependency, private pack or publication;
+- no acceptance branch is an integration source, and none is merged here.
+
+| Case | Request | Observed | Explicit limits |
+|---|---|---|---|
+| A | Internal analytics dashboard | Required repository dashboard pattern selected, with lock and task mapping. `project_visual`/`validate_visual` ran on the real frontend spec. In Chromium: sticky filters, consistent filters, CSV downloads matching visible rows, 1280px and `#1f6feb`. Coordinator: 12/12 app tests, and a 9999px in-memory negative failed DASH-03 with the original bytes unchanged | Chromium only. Builder self-review only; BUILD stayed blocked on independent review. One model and one client |
+| B | Retry with backoff (backend) | `list` read metadata only. `resolve` returned `empty`: 0 selected, 0 requirements, 0 body reads, 0 asset reads. No lock or task map. Protected paths unchanged; 11/11 tests | Self-review only. Observed behavior, not universal automatic activation |
+| C1 | Technical change document | Canonical `generate-word` route found DOC-01 and produced a real DOCX in Word Canvas. Copy-reopen, edit and readback restored identical bytes. Ledger 96/96 blocks; DOC-01 coverage passed with `release_clearance: false`. Coordinator checked the XML: Rollback is a Heading1 with content, and there are no macros or tracked revisions | **Word page rendering is unavailable in this host.** Shared rendered-page inspection stayed unverified (exit 3). No rendered-page or release clearance |
+| C2 | Remove Rollback, run QA | A marked negative copy lost 21 paragraphs. Positive artifact, pattern, lock and map unchanged. `verify-lock` still passed. Pattern review exit 7, DOC-01 `mandatory_unmet`. Shared QA blocked. Review reader and SHIP exit 3 with no applicable independent decision; nothing fabricated | QA observations were authored by the task; helpers check structure and binding, not their truth. No page rendering |
+| D | Resume dashboard (cold) | Coordinator revoked the pin in a separate cold worktree. The fresh task loaded the committed handoff and map; `verify-lock` exited 5 with `pinned_revoked`, digests unchanged. It stopped before BUILD or review | The first next-action prose wrongly suggested withdrawing the revocation. A docs-only correction states that v1 is append-only with no un-revoke; the original result is preserved |
+| C-PDF | PDF companion via the existing provider | Work map, P07 profile and companion lock/mapping validated. The declared Markdown converter was unavailable, so labeled AI-authored HTML kept 96/96 blocks. The owned loopback server passed. **The existing print provider's fresh Chrome gave no verified DevTools endpoint, so no PDF was produced.** Cleanup was verified. Pattern review exit 7, DOC-01 unverified | Prepared-HTML fidelity is not PDF fidelity. No alternate flags, COM, private profile, dependency or PDF reader was used |
+
+Deferred host rows, recorded as blocked or deferred rather than passed:
+
+- **PDF conversion endpoint (4.3.c).** BLOCKED on the host/provider: no DevTools endpoint and
+  no authorized PDF reader. Conversion preservation of required clauses is unobserved.
+- **Word page rendering (C1/C2 shared inspection).** Unavailable in this host; still a required
+  unverified control.
+- **Per-consumer visual cells (5.2.a).** Only the dashboard build path (A) was observed.
+  `design-dna`, `frontend-typography`, `frontend-motion`, `frontend-shader` and `generate-app`
+  have no model, render or host cell.
+- **Clients and browsers.** One client, one model, Chromium only. No installed-target App
+  discovery, screen reader or other client. The numeric context capacity was not observed.
+
+Ledger: 4.3.b is ticked. Its specific host case (a required named section, plus a QA negative
+on a real generated document) is observed in C1/C2; page rendering stays a separate deferred
+shared control. 4.3.c remains unticked and blocked. 5.2.a remains unticked. 6.2.b's host part is
+recorded, but it remains unticked until the final independent aggregate review.
+
 ## Pending
 
-All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
-at this milestone.
+- 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
+- 6.2.b: final independent aggregate review and actual ADR-0028 v2 context/QA/corroboration.
+- 6.2.c: final diff and baseline record.
+- 4.3.c: blocked (provider). 5.2.a: per-consumer host cells.
+- GitHub write access for the feature PR (403, unresolved).
+- No release clearance is claimed.
 
 ## Milestone integration with main
 
