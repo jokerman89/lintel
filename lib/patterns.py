@@ -305,7 +305,9 @@ def validate_relative_path(value: Any, where: str = "path") -> PurePosixPath:
 def _is_link(path: Path) -> bool:
     try:
         info = os.lstat(path)
-    except FileNotFoundError:
+    except (FileNotFoundError, NotADirectoryError):
+        # Absent, or a parent component is a file (ENOTDIR on POSIX): not a link. Callers that need
+        # the path then see it as missing or as a destination conflict, consistently across platforms.
         return False
     except OSError as error:
         _fail("unsafe_path", f"cannot inspect path: {error.strerror}", str(path))
@@ -2574,6 +2576,12 @@ def _declared_files(pattern: Pattern, source_dir: Optional[Path], *, fallback_di
             if path in wanted and wanted[path] is not None and pinned is not None and pinned != wanted[path]:
                 _fail("declared_file_conflict", f"{what}: {path} is declared with two different digests")
             wanted[path] = wanted.get(path) or pinned
+    # Classify the planned names before any file is read: the reserved body name, case-only and
+    # file-versus-directory collisions are logical conflicts, independent of the filesystem.
+    for name in wanted:
+        if str(validate_relative_path(name, what)).casefold() == "pattern.json":
+            _fail("destination_conflict", f"{what}: {name} is reserved for the version body; rename the asset or source")
+    _check_namespace([(name, b"") for name in sorted(wanted)], what)
     result = []
     for path in sorted(wanted):
         expected = wanted[path]

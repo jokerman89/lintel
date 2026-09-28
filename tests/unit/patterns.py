@@ -3363,6 +3363,33 @@ class NamespaceTests(unittest.TestCase):
         self.assertNotIn("Traceback", stderr)
 
 
+class PlannedNamespaceBeforeReadTests(unittest.TestCase):
+    """POSIX finding at 87c2/b831: logical conflicts are classified before any file is read."""
+
+    def test_declared_names_are_classified_without_reading(self):
+        cases = {
+            "case-only asset and source": draft("example.a", assets=[{"path": "guide.md", "kind": "guide",
+                                                                      "sha256": "0" * 64}],
+                                                sources=[dict(statement(), root="pattern", ref="GUIDE.md")]),
+            "file versus directory": draft("example.b", assets=[{"path": "a", "kind": "guide", "sha256": "0" * 64},
+                                                                {"path": "a/b", "kind": "guide", "sha256": "1" * 64}]),
+            "reserved body name": draft("example.c", assets=[{"path": "pattern.json", "kind": "guide",
+                                                               "sha256": "0" * 64}]),
+        }
+        for name, value in cases.items():
+            with self.subTest(name=name):
+                with self.assertRaises(p.PatternError) as caught:
+                    p._declared_files(p.parse_pattern(value), None)
+                self.assertEqual(caught.exception.code, "destination_conflict",
+                                 "a logical conflict is not reported as a missing file")
+
+    def test_a_file_parent_is_not_a_link(self):
+        fx = Fixture(self)
+        parent = fx.root / "plain-file"
+        parent.write_bytes(b"x")
+        self.assertFalse(p._is_link(parent / "child"), "ENOTDIR (POSIX) and ENOENT (Windows) agree")
+
+
 class NamespaceInvariantTests(unittest.TestCase):
     """Review of 445e3ad9 (P3-R8-1, P3-R8-2): the whole namespace invariant, table-driven."""
 
