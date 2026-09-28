@@ -61,6 +61,13 @@ capture:
 opinions:
   source: null                                    # stance documents
 
+# ─── Reusable patterns (ADR-0038) ──────────────────────────────────────────
+# A catalog JSON file relative to the declaring pack root; null means none.
+# A child that declares this block replaces it whole. Parent catalogs join
+# only through explicit catalog includes, never by pack ancestry alone.
+patterns:
+  source: null                                    # e.g. patterns/catalog.json
+
 # ─── Navigation (orientator at SENSE) ──────────────────────────────────────
 navigation:
   default_workflow: cycle                         # primary workflow for this pack
