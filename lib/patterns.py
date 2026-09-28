@@ -39,6 +39,7 @@ __all__ = (
     "list_catalogs", "show_pattern", "check_document", "check_sources", "resolve",
     "build_lock", "write_lock", "parse_lock", "selection_digest", "verify_lock",
     "parse_task_map", "map_lock", "project_package", "capture", "index_source", "approve",
+    "asset_refs", "read_asset",
 )
 
 SCHEMA_VERSION = 1
@@ -80,7 +81,7 @@ CLAUSE_ID = re.compile(r"[A-Z0-9-]+\Z")
 SELECTOR_KEY = re.compile(r"[a-z][a-z0-9_.-]*\Z")
 PACK_NAME = re.compile(r"[A-Za-z_][A-Za-z_0-9-]*\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
-TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:[Zz]|\+00:00)\Z")
+TIMESTAMP = re.compile(r"(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?(?:[Zz]|\+00:00)\Z")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}\Z")
 FQ_CLAUSE = re.compile(r"(?P<id>[^@#\s]+)@(?P<version>[^@#\s]+)#(?P<clause>[^@#\s]+)\Z")
 REF_TEXT = re.compile(r"(?P<source>[^:@\s]+):(?P<id>[^:@\s]+)@(?P<version>[^:@\s]+)\Z")
@@ -239,9 +240,8 @@ def _timestamp(value: Any, where: str) -> str:
     """UTC RFC 3339: `Z`/`z` or `+00:00` offset, optional fraction (spec 4.1)."""
     if not isinstance(value, str) or not TIMESTAMP.fullmatch(value):
         _fail("invalid_schema", "expected a UTC RFC3339 timestamp (Z or +00:00)", where)
-    core = value[:-6] if value.endswith("+00:00") else value[:-1]
     try:
-        _dt.datetime.fromisoformat(core.replace("t", "T"))
+        _instant(value)
     except ValueError:
         _fail("invalid_schema", "invalid timestamp", where)
     return value
@@ -249,8 +249,10 @@ def _timestamp(value: Any, where: str) -> str:
 
 def _instant(value: str) -> _dt.datetime:
     """Comparable instant for validated timestamps (ordering must not depend on spelling)."""
-    core = value[:-6] if value.endswith("+00:00") else value[:-1]
-    return _dt.datetime.fromisoformat(core.replace("t", "T")).replace(tzinfo=_dt.timezone.utc)
+    match = TIMESTAMP.fullmatch(value)
+    year, month, day, hour, minute, second, fraction = match.groups()
+    return _dt.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second),
+                        int((fraction or "0").ljust(6, "0")), tzinfo=_dt.timezone.utc)
 
 
 def _date(value: Any, where: str) -> str:
@@ -344,6 +346,8 @@ class Reader:
             raise ValueError(f"unknown read kind: {kind}")
         if _is_link(path):
             _fail("unsafe_path", "linked file refused", str(path))
+        if os.path.isdir(path):
+            _fail("unsafe_path", f"expected a regular {kind} file, found a directory", str(path))
         try:
             with open(path, "rb") as stream:
                 if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
@@ -352,6 +356,8 @@ class Reader:
         except FileNotFoundError:
             if optional:
                 return None
+            if kind == "input":
+                _fail("input_missing", "the supplied input file does not exist", str(path))
             _fail("source_missing", f"declared {kind} file is missing", str(path), status="unavailable")
         except IsADirectoryError:
             _fail("unsafe_path", "expected a regular file", str(path))
@@ -1115,11 +1121,13 @@ def pack_context_from_profile(record: Optional[Mapping[str, Any]] = None, *, err
         diagnostics.append({"code": "pack_source_invalid",
                             "message": "patterns.source must be a relative catalog path string or null"})
     ancestry = []
-    for pack in chain:
-        manifest = Path(pack["path"])
-        digest = str(pack["digest"])
-        ancestry.append({"pack": pack["name"], "version": pack["version"], "root": manifest.parent.as_posix(),
-                         "manifest_sha256": digest.removeprefix("sha256:")})
+    try:
+        for pack in chain:
+            manifest = Path(pack["path"])
+            ancestry.append({"pack": pack["name"], "version": pack["version"], "root": manifest.parent.as_posix(),
+                             "manifest_sha256": str(pack["digest"]).removeprefix("sha256:")})
+    except (KeyError, TypeError, AttributeError):
+        _fail("invalid_pack_context", "profile ancestry entries need name, version, path and digest")
     context = {"schema_version": 1, "status": status, "identity": identity, "source": source,
                "ancestry": ancestry, "diagnostics": diagnostics}
     parse_pack_context(context)
@@ -1156,7 +1164,7 @@ def evaluate_selector(selector: Selector, context: Context) -> SelectorDecision:
 @dataclass(frozen=True)
 class LoadedCatalog:
     locator: str
-    scope: str  # repo | pack | personal (the activating top-level scope)
+    scope: str  # repo | pack | personal: the declaring locator's scope, never the traversal path
     directory: Path
     catalog: Catalog
     active: bool
@@ -1173,7 +1181,7 @@ class SourceSet:
     roots: Roots
     reader: Reader
     catalogs: list[LoadedCatalog] = field(default_factory=list)
-    bindings: list[tuple[str, Binding]] = field(default_factory=list)
+    bindings: list[tuple[str, Binding, str]] = field(default_factory=list)  # (scope, binding, origin)
     blockers: list[dict] = field(default_factory=list)
     notes: list[dict] = field(default_factory=list)
 
@@ -1205,16 +1213,34 @@ def _verified_ancestor(sources: SourceSet, name: str) -> PackAncestor:
 
 
 def _locator_root(sources: SourceSet, locator: str) -> Path:
+    """Derived roots are checked component by component from their trusted anchor (F1)."""
     if locator == "repo":
         if sources.roots.repository is None:
             _fail("repository_required", "repository locator needs an explicit repository root", status="unavailable")
-        return sources.roots.repository / ".claude" / "patterns"
+        return contained_path(sources.roots.repository, ".claude/patterns", "repository pattern root")
     if locator == "personal":
-        return sources.roots.personal / "patterns"
-    return _verified_ancestor(sources, locator[5:]).root
+        return contained_path(sources.roots.personal, "patterns", "personal pattern root")
+    ancestor = _verified_ancestor(sources, locator[5:])
+    if _is_link(ancestor.root):
+        _fail("unsafe_path", f"linked pack root refused: {locator}")
+    return ancestor.root
 
 
-def _load_catalog(sources: SourceSet, locator: str, relative: str, scope: str, active: bool, depth: int,
+def _locator_scope(locator: str) -> str:
+    return "pack" if locator.startswith("pack:") else locator
+
+
+def _register_bindings(sources: SourceSet, loaded: "LoadedCatalog") -> None:
+    if not loaded.catalog.bindings:
+        return
+    if loaded.active and loaded.scope != "personal":
+        sources.bindings.extend((loaded.scope, binding, loaded.catalog.source_id) for binding in loaded.catalog.bindings)
+    else:
+        sources.notes.append(_note("personal_bindings_inactive" if loaded.scope == "personal" else "inactive_bindings",
+                                   f"{loaded.catalog.source_id} bindings are not auto-applied from this location"))
+
+
+def _load_catalog(sources: SourceSet, locator: str, relative: str, active: bool, depth: int,
                   expected: Optional[str], stack: list, optional: bool = False) -> None:
     if depth > LIMITS.include_depth:
         _fail("resource_limit", f"catalog includes exceed depth {LIMITS.include_depth}")
@@ -1235,21 +1261,25 @@ def _load_catalog(sources: SourceSet, locator: str, relative: str, scope: str, a
     if existing is not None:
         if existing.catalog.digest != catalog.digest:
             _fail("source_id_collision", f"two catalogs declare source {catalog.source_id} with different content")
+        if active and not existing.active:
+            upgraded = LoadedCatalog(existing.locator, existing.scope, existing.directory, existing.catalog, True,
+                                     min(existing.depth, depth))
+            sources.catalogs[sources.catalogs.index(existing)] = upgraded
+            sources.notes = [item for item in sources.notes
+                             if not (item["code"] in ("personal_bindings_inactive", "inactive_bindings")
+                                     and catalog.source_id in item["message"])]
+            _register_bindings(sources, upgraded)
         return
     if len(sources.catalogs) >= LIMITS.source_catalogs:
         _fail("resource_limit", f"more than {LIMITS.source_catalogs} source catalogs")
-    sources.catalogs.append(LoadedCatalog(locator, scope, path.parent, catalog, active, depth))
-    if catalog.bindings:
-        if active:
-            sources.bindings.extend((scope, binding) for binding in catalog.bindings)
-        else:
-            sources.notes.append(_note("personal_bindings_inactive",
-                                       f"{catalog.source_id} bindings are not auto-applied in v1"))
+    loaded = LoadedCatalog(locator, _locator_scope(locator), path.parent, catalog, active, depth)
+    sources.catalogs.append(loaded)
+    _register_bindings(sources, loaded)
     allowed = {locator} | {f"pack:{item.pack}" for item in sources.roots.pack_context.ancestry}
     for include in sorted(catalog.includes, key=lambda item: (item.locator, item.path)):
         if include.locator not in allowed:
             _fail("include_locator_refused", f"{catalog.source_id} cannot include from {include.locator}")
-        _load_catalog(sources, include.locator, include.path, scope, active, depth + 1, include.sha256,
+        _load_catalog(sources, include.locator, include.path, active, depth + 1, include.sha256,
                       stack + [identity])
 
 
@@ -1257,11 +1287,11 @@ def load_sources(roots: Roots, reader: Optional[Reader] = None) -> SourceSet:
     """Load configured catalogs and bindings. Unavailable sources become blockers, not empty success."""
     sources = SourceSet(roots, reader or Reader())
     if roots.repository is not None:
-        _load_catalog(sources, "repo", "catalog.json", "repo", True, 0, None, [], optional=True)
-        bindings_path = contained_path(roots.repository / ".claude" / "patterns", "bindings.json")
+        _load_catalog(sources, "repo", "catalog.json", True, 0, None, [], optional=True)
+        bindings_path = contained_path(roots.repository, ".claude/patterns/bindings.json", "repository bindings")
         data = sources.reader.read(bindings_path, kind="bindings", limit=LIMITS.input_bytes, optional=True)
         if data is not None:
-            sources.bindings.extend(("repo", binding) for binding in parse_bindings(
+            sources.bindings.extend(("repo", binding, "repo:bindings.json") for binding in parse_bindings(
                 parse_json(data, limit=LIMITS.input_bytes, what="repository bindings"), "repo:bindings.json"))
     context = roots.pack_context
     if context.status in ("error", "fallback"):
@@ -1281,17 +1311,17 @@ def load_sources(roots: Roots, reader: Optional[Reader] = None) -> SourceSet:
                                           "error", status="unavailable"))
         else:
             try:
-                _load_catalog(sources, f"pack:{owner[0].pack}", context.source_value, "pack", True, 0, None, [])
+                _load_catalog(sources, f"pack:{owner[0].pack}", context.source_value, True, 0, None, [])
             except PatternError as error:
                 if error.status != "unavailable":
                     raise
                 sources.blockers.append(dict(error.diagnostic()))
-    _load_catalog(sources, "personal", "catalog.json", "personal", False, 0, None, [], optional=True)
+    _load_catalog(sources, "personal", "catalog.json", False, 0, None, [], optional=True)
     seen = set()
-    for scope, binding in sources.bindings:
-        if (scope, binding.id) in seen:
-            _fail("invalid_schema", f"duplicate {scope} binding ID {binding.id}")
-        seen.add((scope, binding.id))
+    for _, binding, origin in sources.bindings:
+        if (origin, binding.id) in seen:
+            _fail("invalid_schema", f"duplicate binding ID {binding.id} in {origin}")
+        seen.add((origin, binding.id))
     return sources
 
 
@@ -1345,7 +1375,7 @@ def _lookup(sources: SourceSet, ref: ExactRef) -> tuple[LoadedCatalog, CatalogEn
 
 # ---------------------------------------------------------------- resolution
 
-REPORT_KEYS = ("schema_version", "status", "context_digest", "sources", "selected", "candidates",
+REPORT_KEYS = ("schema_version", "status", "context_digest", "selection_digest", "sources", "selected", "candidates",
                "requirements", "settings", "overrides", "exceptions", "diagnostics", "metrics")
 
 
@@ -1358,6 +1388,12 @@ class _Node:
     scope: str
     reasons: list = field(default_factory=list)
     preview: bool = False
+    equivalents: list = field(default_factory=list)
+
+    @property
+    def identity(self) -> tuple[str, str, str]:
+        """Clause identity is source-independent: `<id>@<version>` plus its content digest (spec 4.1/4.2)."""
+        return (self.ref.id, self.ref.version, self.ref.sha256)
 
 
 class _Resolution:
@@ -1376,9 +1412,14 @@ class _Resolution:
         loaded = self.sources.by_source(ref.source)
         return loaded.scope if loaded is not None else "personal"
 
-    def expand(self, ref: ExactRef, role: str, scope: str, reason: dict, explicit: bool,
+    def expand(self, ref: ExactRef, role: str, scope: str, reason: dict, explicit: bool, origin: str,
                stack: tuple = (), blocking: Optional[bool] = None) -> Optional[list[_Node]]:
-        """Return the node closure, or None when this subtree is blocked (already diagnosed)."""
+        """Return the node closure, or None when this subtree is blocked or not applicable.
+
+        Integrity, lookup and lifecycle failures of any bound, included or explicit record are
+        errors (unavailable) whatever the role; only selector non-applicability of a default
+        is a non-blocking skip. `origin` is the selecting authority (repo, pack or explicit).
+        """
         if len(stack) > LIMITS.include_depth:
             _fail("resource_limit", f"pattern includes exceed depth {LIMITS.include_depth}")
         if ref.key in stack:
@@ -1395,6 +1436,10 @@ class _Resolution:
                 loaded, entry = _lookup(self.sources, ref)
                 state, replacement = effective_status(loaded, entry)
                 pattern = None
+            if loaded.locator == "personal" and origin == "pack":
+                _fail("personal_ref_refused", f"{ref.text} is personal; pack bindings and their includes never "
+                      "activate personal patterns (use an explicit reference or a repository binding)",
+                      status="unavailable")
             preview = False
             if state == "draft":
                 if not (explicit and not stack and self.preview_draft):
@@ -1403,19 +1448,14 @@ class _Resolution:
                 preview = True
             elif state in ("retired", "revoked"):
                 _fail(f"pattern_{state}", f"{ref.text} is {state}", status="unavailable")
-            if pattern is None:
-                pattern = _read_pattern(self.sources, loaded, entry)
-                self.loaded[ref.key] = (loaded, entry, state, replacement, pattern)
         except PatternError as error:
             if error.status == "invalid":
                 raise
-            if blocking:
-                self.diagnostics.append(dict(error.diagnostic(), ref=ref.to_json()))
-            else:
-                self.diagnostics.append(_note("default_skipped", f"default {ref.text} skipped: {error.message}",
-                                              "warning", ref=ref.to_json()))
+            self.diagnostics.append(dict(error.diagnostic(), ref=ref.to_json(), role=role))
             return None
-        decision = evaluate_selector(pattern.applies_to, self.context)
+        # Metadata first: the validated catalog selector equals the body's, so a non-applicable
+        # record is decided with zero body reads.
+        decision = evaluate_selector(pattern.applies_to if pattern else entry.applies_to, self.context)
         if decision.decision != "matched":
             details = {"ref": ref.to_json(), "missing_keys": list(decision.missing),
                        "mismatched_keys": list(decision.mismatched)}
@@ -1430,6 +1470,15 @@ class _Resolution:
                 self.diagnostics.append(_note("default_not_applicable",
                                               f"default {ref.text} not applied ({decision.decision})", "info", **details))
             return None
+        if pattern is None:
+            try:
+                pattern = _read_pattern(self.sources, loaded, entry)
+            except PatternError as error:
+                if error.status == "invalid":
+                    raise
+                self.diagnostics.append(dict(error.diagnostic(), ref=ref.to_json(), role=role))
+                return None
+            self.loaded[ref.key] = (loaded, entry, state, replacement, pattern)
         if state == "deprecated":
             self.diagnostics.append(_note("pattern_deprecated", f"{ref.text} is deprecated", "warning",
                                           ref=ref.to_json(),
@@ -1439,9 +1488,9 @@ class _Resolution:
             self.problem("unavailable", "draft_preview_only",
                          f"{ref.text} is a draft preview; this report is not executable selection evidence",
                          ref=ref.to_json())
-        closure = [_Node(ref, pattern, state, role, scope, [reason], preview)]
+        closure = [_Node(ref, pattern, state, role, scope, [reason], preview, [ref.to_json()])]
         for child in pattern.includes:
-            nodes = self.expand(child, role, scope, {"kind": "include", "parent": ref.to_json()}, False,
+            nodes = self.expand(child, role, scope, {"kind": "include", "parent": ref.to_json()}, False, origin,
                                 stack + (ref.key,), blocking)
             if nodes is None:
                 self.diagnostics.append(_note("include_blocked", f"{ref.text} is blocked by its include {child.text}",
@@ -1451,18 +1500,21 @@ class _Resolution:
         return closure
 
     def add(self, nodes: Optional[list[_Node]]) -> None:
+        """Merge identical content selected through several sources into one clause identity."""
         for node in nodes or ():
-            key = node.ref.key
-            current = self.nodes.get(key)
+            current = self.nodes.get(node.identity)
             if current is None:
-                self.nodes[key] = node
+                self.nodes[node.identity] = node
                 continue
             if node.role == "required":
                 current.role = "required"
-            if _SCOPE_RANK[node.scope] < _SCOPE_RANK[current.scope]:
-                current.scope = node.scope
+            if (_SCOPE_RANK[node.scope], node.ref.source) < (_SCOPE_RANK[current.scope], current.ref.source):
+                current.scope, current.ref = node.scope, node.ref
             current.reasons.extend(item for item in node.reasons if item not in current.reasons)
+            current.equivalents.extend(item for item in node.equivalents if item not in current.equivalents)
+            current.equivalents.sort(key=lambda item: (item["source"], item["id"], item["version"]))
             current.preview = current.preview or node.preview
+            current.effective = node.effective if node.effective == "deprecated" else current.effective
 
 
 def _asset_json(asset: Asset) -> dict:
@@ -1575,7 +1627,7 @@ def _candidates(resolution: _Resolution) -> dict:
         if not loaded.active:
             continue
         for entry in loaded.catalog.entries:
-            if (loaded.catalog.source_id, entry.id, entry.version) in resolution.nodes:
+            if (entry.id, entry.version, entry.sha256) in resolution.nodes:
                 continue
             state, _ = effective_status(loaded, entry)
             if state not in ("approved", "deprecated"):
@@ -1597,7 +1649,8 @@ def _candidates(resolution: _Resolution) -> dict:
 
 def _empty_report(status: str, diagnostics: list[dict], context_digest: Optional[str] = None,
                   metrics: Optional[dict] = None) -> dict:
-    return {"schema_version": 1, "status": status, "context_digest": context_digest, "sources": [],
+    return {"schema_version": 1, "status": status, "context_digest": context_digest, "selection_digest": None,
+            "sources": [],
             "selected": [], "candidates": {"total": 0, "items": []}, "requirements": [], "settings": {},
             "overrides": [], "exceptions": [], "diagnostics": diagnostics, "metrics": metrics or {}}
 
@@ -1621,23 +1674,23 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
     reader = reader or Reader()
     sources = load_sources(roots, reader)
     resolution = _Resolution(sources, context, preview_draft, today)
-    for scope, binding in sorted(sources.bindings, key=lambda item: (_SCOPE_RANK[item[0]], item[1].id)):
+    for scope, binding, origin_id in sorted(sources.bindings, key=lambda item: (_SCOPE_RANK[item[0]], item[2], item[1].id)):
         decision = evaluate_selector(binding.when, context)
-        resolution.bindings.append({"scope": scope, "id": binding.id, "role": binding.role,
+        resolution.bindings.append({"scope": scope, "origin": origin_id, "id": binding.id, "role": binding.role,
                                     "decision": decision.decision, "missing_keys": list(decision.missing),
                                     "mismatched_keys": list(decision.mismatched)})
         if decision.decision == "matched":
             for ref in binding.use:
                 resolution.add(resolution.expand(ref, binding.role, scope, {
-                    "kind": "binding", "binding": binding.id, "scope": scope,
-                    "approved_by": binding.approved_by, "approval_ref": binding.approval_ref}, False))
+                    "kind": "binding", "binding": binding.id, "scope": scope, "origin": origin_id,
+                    "approved_by": binding.approved_by, "approval_ref": binding.approval_ref}, False, scope))
         elif decision.decision == "needs-context" and binding.role == "required":
             resolution.problem("needs-context", "required_binding_needs_context",
                                f"required binding {scope}:{binding.id} needs facts: {', '.join(decision.missing)}",
                                binding=binding.id, scope=scope, missing_keys=list(decision.missing))
     for item in refs:
         resolution.add(resolution.expand(item.ref, item.role, resolution.scope_of(item.ref), {
-            "kind": "explicit", "approved_by": item.approved_by, "approval_ref": item.approval_ref}, True))
+            "kind": "explicit", "approved_by": item.approved_by, "approval_ref": item.approval_ref}, True, "explicit"))
     if len(resolution.nodes) > LIMITS.selected_patterns:
         _fail("resource_limit", f"more than {LIMITS.selected_patterns} selected patterns")
     identities = {}
@@ -1696,19 +1749,22 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
                          "effective_status": node.effective, "summary": node.pattern.summary,
                          "reasons": node.reasons, "preview": node.preview,
                          "clauses": [node.pattern.clause_ref(clause.id) for clause in node.pattern.requirements],
-                         "assets": [_asset_json(asset) for asset in node.pattern.assets]})
+                         "assets": [_asset_json(asset) for asset in node.pattern.assets],
+                         "equivalent_refs": node.equivalents})
     statuses = [item["status"] for item in resolution.diagnostics if item.get("severity") == "error" and "status" in item]
     status = _worst(statuses, "ready" if selected else "empty")
     metrics = dict(reader.metrics(), selected_patterns=len(selected), selected_context_code_points=selected_chars,
                    advisory_summary_code_points=sum(len(item["summary"]) for item in candidates["items"]),
                    context_budget=context_budget, bindings_evaluated=len(resolution.bindings))
-    report = {"schema_version": 1, "status": status, "context_digest": context.digest,
+    report = {"schema_version": 1, "status": status, "context_digest": context.digest, "selection_digest": None,
               "sources": [item.summary() for item in sources.catalogs], "selected": selected,
               "candidates": candidates, "requirements": requirements, "settings": settings,
               "overrides": applied_overrides, "exceptions": applied_exceptions,
               "diagnostics": resolution.diagnostics, "metrics": metrics,
               "limits": "Runtime checks structure and declared provenance only; a repository can forge "
                         "bindings, and approval, source authenticity and prose conflicts need review."}
+    if status in ("ready", "empty") and not any(item["preview"] for item in selected):
+        report["selection_digest"] = selection_digest(_lock_material(report, context, refs))
     if explain:
         report["explanation"] = {"bindings": resolution.bindings,
                                  "precedence": ["explicit", "repo", "pack", "personal", "corpus"]}
@@ -1884,7 +1940,7 @@ def _repository_file(roots: Roots, path: Path, what: str) -> Path:
 
 # ---------------------------------------------------------------- locks (spec 4.4, card 2.2.b)
 
-LOCK_ADDED_KEYS = ("selection_digest", "context", "created_at", "source_snapshots", "asset_pins",
+LOCK_ADDED_KEYS = ("context", "created_at", "source_snapshots", "asset_pins",
                    "requirement_tasks", "source_attestations", "review_evidence", "invocation_refs",
                    "context_budget")
 LOCK_KEYS = REPORT_KEYS + ("limits",) + LOCK_ADDED_KEYS
@@ -1913,6 +1969,19 @@ def _invocation_json(item: InvocationRef) -> dict:
             "approval_ref": item.approval_ref}
 
 
+def _snapshots(report: Mapping[str, Any]) -> list[dict]:
+    return [{key: item[key] for key in ("locator", "source_id", "scope", "active", "catalog_sha256")}
+            for item in report["sources"]]
+
+
+def _lock_material(report: Mapping[str, Any], context: Context, refs: Sequence[InvocationRef]) -> dict:
+    """The one definition of selection content shared by the report and the lock (F7)."""
+    return {"context": _context_json(context), "source_snapshots": _snapshots(report),
+            "selected": report["selected"], "requirements": report["requirements"], "settings": report["settings"],
+            "overrides": report["overrides"], "exceptions": report["exceptions"],
+            "invocation_refs": [_invocation_json(item) for item in refs]}
+
+
 def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[InvocationRef] = (),
                context_budget: int = LIMITS.context_budget, now: Optional[_dt.datetime] = None) -> dict:
     """Freeze a ready/empty report. Conflicts, unknown context and previews never lock."""
@@ -1921,17 +1990,20 @@ def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[In
               status=report.get("status") if report.get("status") in EXIT_CODES else "invalid")
     if any(item.get("preview") for item in report["selected"]):
         _fail("lock_refused", "a draft preview is never locked", status="unavailable")
+    if report.get("context_digest") != context.digest:
+        _fail("lock_refused", "the report was resolved for a different context")
     now = now or _dt.datetime.now(_dt.timezone.utc)
     lock = {key: copy_json(report[key]) for key in REPORT_KEYS + ("limits",)}
     lock.update(
         context=_context_json(context),
         created_at=now.astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        source_snapshots=[{key: item[key] for key in ("locator", "source_id", "scope", "active", "catalog_sha256")}
-                          for item in report["sources"]],
-        asset_pins=[dict(asset, pattern=item["ref"]) for item in report["selected"] for asset in item["assets"]],
+        source_snapshots=_snapshots(report),
+        asset_pins=asset_refs(report),
         requirement_tasks=None, source_attestations=[], review_evidence=[],
         invocation_refs=[_invocation_json(item) for item in refs], context_budget=context_budget)
     lock["selection_digest"] = selection_digest(lock)
+    if report.get("selection_digest") != lock["selection_digest"]:
+        _fail("lock_refused", "the report's selection_digest does not match its content or invocation refs")
     return lock
 
 
@@ -2032,7 +2104,6 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
                 locked=lock["context_digest"], current=context.digest)
     for item in lock["selected"]:
         ref = parse_exact_ref(item["ref"], "lock.selected.ref")
-        blocking = item["role"] == "required" or any(reason.get("kind") == "explicit" for reason in item["reasons"])
         try:
             loaded, entry = _lookup(sources, ref)
             state, _ = effective_status(loaded, entry)
@@ -2046,11 +2117,7 @@ def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
         except PatternError as error:
             if error.status == "invalid":
                 raise
-            record = dict(error.diagnostic(), ref=ref.to_json())
-            if not blocking:
-                record.update(severity="warning", status=None)
-                record.pop("status")
-            diagnostics.append(record)
+            diagnostics.append(dict(error.diagnostic(), ref=ref.to_json(), role=item["role"]))
             checked.append({"ref": ref.to_json(), "status": error.status})
     baseline = None
     if not any(item.get("severity") == "error" for item in diagnostics):
@@ -2462,3 +2529,63 @@ def approve(roots: Roots, path: Path, *, version: str, approval_value: Any, expe
     report["scope"] = scope
     report["draft_left_unchanged"] = relative
     return report
+
+# ---------------------------------------------------------------- assets (F6: stable refs and verified on-demand reads)
+
+def _asset_applies(asset: Mapping[str, Any], phase: Optional[str], domain: Optional[str]) -> bool:
+    """Absent filters apply to any task; a present empty filter matches none (spec 4.1)."""
+    for key, wanted in (("phases", phase), ("domains", domain)):
+        values = asset.get(key)
+        if values is None:
+            continue
+        if not values or (wanted is not None and wanted not in values):
+            return False
+    return True
+
+
+def asset_refs(report: Mapping[str, Any], *, kind: Optional[str] = None, phase: Optional[str] = None,
+               domain: Optional[str] = None) -> list[dict]:
+    """Metadata-only asset references for selected patterns of a report or lock; reads nothing.
+
+    Shape: `{pattern: <exact ref>, path, kind, sha256[, phases][, domains]}` (the lock's asset_pins).
+    """
+    if phase is not None and phase not in PHASES:
+        _fail("invalid_phase", f"unknown phase {phase}")
+    result = []
+    for item in report["selected"]:
+        for asset in item.get("assets", ()):
+            if (kind is None or asset["kind"] == kind) and _asset_applies(asset, phase, domain):
+                result.append(dict(copy_json(asset), pattern=copy_json(item["ref"])))
+    return sorted(result, key=lambda item: (item["pattern"]["source"], item["pattern"]["id"],
+                                            item["pattern"]["version"], item["path"]))
+
+
+def read_asset(roots: Roots, asset_ref: Mapping[str, Any], *, phase: Optional[str] = None,
+               domain: Optional[str] = None, reader: Optional[Reader] = None) -> bytes:
+    """Read one declared asset: contained, listed by its verified pattern and digest-checked before use."""
+    if not isinstance(asset_ref, Mapping):
+        _fail("invalid_asset_ref", "asset reference must be an object")
+    _object(dict(asset_ref), "asset_ref", ("pattern", "path", "kind", "sha256"), ("phases", "domains"))
+    ref = parse_exact_ref(asset_ref["pattern"], "asset_ref.pattern")
+    validate_relative_path(asset_ref["path"], "asset_ref.path")
+    if phase is not None and phase not in PHASES:
+        _fail("invalid_phase", f"unknown phase {phase}")
+    reader = reader or Reader()
+    sources = load_sources(roots, reader)
+    loaded, entry = _lookup(sources, ref)
+    state, _ = effective_status(loaded, entry)
+    if state not in ("approved", "deprecated"):
+        _fail(f"pattern_{state}", f"assets of a {state} pattern are not used", status="unavailable")
+    pattern = _read_pattern(sources, loaded, entry)
+    declared = next((asset for asset in pattern.assets if asset.path == asset_ref["path"]), None)
+    if declared is None or _asset_json(declared) != {key: asset_ref[key] for key in asset_ref if key != "pattern"}:
+        _fail("asset_not_declared", f"{asset_ref['path']} is not declared with this kind/digest by {ref.text}",
+              status="unavailable")
+    if not _asset_applies(_asset_json(declared), phase, domain):
+        _fail("asset_not_applicable", f"{declared.path} does not apply to phase={phase} domain={domain}")
+    relative = PurePosixPath(entry.path).parent / declared.path
+    data = reader.read(contained_path(loaded.directory, relative.as_posix(), f"asset {declared.path}"),
+                       kind="asset", limit=LIMITS.asset_bytes)
+    if hashlib.sha256(data).hexdigest() != declared.sha256:
+        _fail("asset_digest_mismatch", f"{declared.path} bytes differ from the declared digest", status="unavailable")
+    return data

@@ -79,7 +79,8 @@ resource constants of spec section 6.
 
 ## Resolution report (spec section 4.4)
 
-Keys (`REPORT_KEYS`): `schema_version`, `status`, `context_digest`, `sources`, `selected`,
+Keys (`REPORT_KEYS`): `schema_version`, `status`, `context_digest`, `selection_digest` (R2),
+`sources`, `selected`,
 `candidates`, `requirements`, `settings`, `overrides`, `exceptions`, `diagnostics`, `metrics`;
 `resolve` adds `limits` (a fixed limitation statement) and `explain` adds `explanation`
 (`bindings` evaluations, `precedence`). Invalid-input reports carry all keys with empty values.
@@ -102,7 +103,8 @@ Keys (`REPORT_KEYS`): `schema_version`, `status`, `context_digest`, `sources`, `
 
 Decisions within the spec's latitude (RN-09): explicit/required pattern whose own selector
 rejects -> `conflict` (`applicability_mismatch`); missing facts -> `needs-context`; a default
-binding whose pattern does not apply is skipped with a diagnostic; a draft preview reports
+binding whose pattern does not apply is skipped with a diagnostic, while any integrity or
+lifecycle failure of a bound record is `unavailable` (R2/F2); a draft preview reports
 `unavailable` (`draft_preview_only`) and is never executable; personal catalogs never supply
 advisory candidates or active bindings; setting and override values are any JSON scalar
 (string, number, boolean or null, per spec 4.1; null is compared as a distinct value);
@@ -112,6 +114,63 @@ until card 3.2.b a required pattern with an external URL source or a past
 Revision R1 (2026-09-28, parent review note): the P1 milestone `eaffeb6c` wrongly rejected
 null setting/override values, narrowing spec 4.1's "JSON scalar". Fixed to accept null;
 covered by `AuthorityTests.test_null_is_a_json_scalar_setting_value`.
+
+## Revision R2 (2026-09-28, independent review of `eaffeb6c`: F1-F7 and advisories)
+
+Behavior fixes (the frozen names and signatures are unchanged except the additions noted):
+
+- **F1** Every derived root is checked component by component from its trusted anchor:
+  `<repository>/.claude/patterns`, `<repository>/.claude/patterns/bindings.json`,
+  `<personal>/patterns`, and an unlinked pack ancestry root. A junction or symlink at `.claude`
+  or `.claude/patterns` is `unsafe_path` (exit 2) for reads and writes. A directory where a file
+  is expected is also `unsafe_path`.
+- **F2** Lookup, digest, stale-metadata, draft, retired and revoked failures of ANY bound,
+  included or explicit record are errors with status `unavailable` (exit 5), whatever the role.
+  Only selector non-applicability of a default is a non-blocking skip (`default_not_applicable`).
+  `verify-lock` applies the same rule to pinned defaults. This supersedes RN-09's former
+  `default_skipped` warning.
+- **F3** Clause identity is source-independent. The same `(id, version, sha256)` selected
+  through several sources is one selection and one set of requirements. It takes the strongest
+  role and the highest-precedence selecting scope, keeps every reason, and its
+  `selected[].equivalent_refs` lists every exact ref. Differing digests for one `id@version`
+  remain `clause_identity_collision` (conflict).
+- **F4** A catalog's `scope` and its bindings' activation scope come from its own locator (`repo`,
+  `pack:<name>`, `personal`), never from the catalog that included it. Including a pack catalog
+  from the repository never promotes that pack's bindings to repository authority. A repository
+  binding that uses a pack pattern still selects it at repository scope. Binding IDs must be
+  unique per declaring file (`selected[].reasons[].origin` records it).
+- **F5** Personal patterns are selected only through an explicit invocation reference or a
+  repository binding, including those bindings' includes. A pack binding, or an include
+  reached from it, that uses a personal pattern is `personal_ref_refused` (unavailable).
+
+Interface additions (F6, F7). These are frozen for the visual adapter:
+
+| Function / field | Signature or shape | Contract |
+| --- | --- | --- |
+| report `selection_digest` | 64-hex or `null` | Set for `ready`/`empty` (non-preview) resolutions. It is computed by the same `_lock_material` definition the lock uses, so `build_lock(report, context, refs=same refs)["selection_digest"]` equals it. `build_lock` refuses a report whose digest does not match its content or its refs. `null` for any other status |
+| `selected[].assets` | `[{path, kind, sha256[, phases][, domains]}]` | Declared metadata only; no asset read |
+| `asset_refs` | `(report_or_lock, *, kind=None, phase=None, domain=None) -> list[dict]` | Stable metadata-only refs `{pattern: <exact ref>, path, kind, sha256[, phases][, domains]}`, the same shape as the lock's `asset_pins`. Absent phase/domain filters on an asset match any task; a present empty filter matches none; zero reads |
+| `read_asset` | `(roots, asset_ref, *, phase=None, domain=None, reader=None) -> bytes` | Re-resolves the exact pattern ref: registered, digest-verified body, and effective status approved/deprecated. The asset must be declared with an identical path/kind/digest and pass the filters. It is read contained under the pattern directory with a 4 MiB limit, and the bytes are SHA-256-verified before return. Errors: `asset_not_declared`/`asset_digest_mismatch` (unavailable), `asset_not_applicable`/`unsafe_path` (invalid) |
+
+Lock and projection shapes are those of "Locks, verification and task maps" above; they are now
+frozen. Visual consumers read `settings`, `requirements`, `selected`, `selection_digest` and
+`asset_refs`/`read_asset`. They never recompute precedence, hashing or validation.
+
+Advisories fixed:
+
+- A missing explicit input file is `input_missing` (exit 2); a missing configured source is still
+  `source_missing` (exit 5).
+- A malformed profile ancestry is `invalid_pack_context` (exit 2, JSON report, no traceback).
+- Timestamp fractions of 1-6 digits are parsed without `datetime.fromisoformat`, so Python 3.10
+  and 3.11 agree. Not observed on 3.10: no 3.10 interpreter exists on this host, and installing
+  one is outside this authorization.
+- Selection is metadata-first: a non-applicable bound or explicit record is decided from its
+  validated catalog selector with zero body reads.
+
+Stricter-than-spec choices retained (for reviewer ruling, see build log R1): C0 control
+characters, JSON depth 64, dotted namespaces, a 64-character version cap, 128-character
+selector keys/values, duplicate-record rejection, and (R2) a linked `LINTEL_HOME` or
+repository root refused as a pattern anchor.
 
 ## Locks, verification and task maps (additive, 2.2.b/2.2.c)
 

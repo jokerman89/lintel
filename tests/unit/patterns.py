@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -1472,6 +1473,295 @@ class LifecycleTests(unittest.TestCase):
                                       "--version", "1.0.0", "--approval", approval,
                                       "--expected-digest", p.content_digest(value))
         self.assertEqual((code, report["ref"]["version"]), (0, "1.0.0"))
+
+
+class ReviewRegressionTests(unittest.TestCase):
+    """Regressions for independent review of eaffeb6c (F1-F7, advisories); names match the report."""
+
+    def test_f1_ancestor_reparse_points_are_refused_for_reads_and_writes(self):
+        for linked in (".claude", ".claude/patterns"):
+            with self.subTest(linked=linked):
+                fx = Fixture(self)
+                outside = fx.root / "outside-target"
+                target = outside / "patterns" if linked == ".claude" else outside
+                target.mkdir(parents=True)
+                secret = make_pattern("example.outside")
+                fx.publish(target, "repo.outside", [secret], bindings=[binding("b", [ref("repo.outside", secret)])])
+                repo = fx.root / "repo2"
+                (repo / ".claude").mkdir(parents=True) if linked != ".claude" else repo.mkdir()
+                link = repo / linked
+                if os.name == "nt":
+                    import _winapi
+                    _winapi.CreateJunction(str(outside), str(link))
+                else:
+                    os.symlink(outside, link, target_is_directory=True)
+                self.addCleanup(lambda path=link: os.rmdir(path) if os.name == "nt" else os.unlink(path))
+                roots = p.parse_roots(p.build_envelope(repo, fx.home, fx.pack_context))
+                reader = p.Reader()
+                before = tree_digest(outside)
+                for action in (lambda: p.resolve(roots, p.parse_context(ctx()), reader=reader, today=TODAY),
+                               lambda: p.list_catalogs(roots, reader),
+                               lambda: p.capture(roots, draft("example.new"), scope="repo", name="example.new",
+                                                 source_id="repo.new")):
+                    with self.assertRaises(p.PatternError) as caught:
+                        action()
+                    self.assertEqual((caught.exception.code, caught.exception.status), ("unsafe_path", "invalid"))
+                self.assertEqual(reader.reads, [], "nothing is read through the reparse point")
+                self.assertEqual(tree_digest(outside), before, "nothing is written through it")
+        fx = Fixture(self)
+        pattern = make_pattern("example.dir")
+        fx.publish(fx.repo_patterns, "repo.main", [pattern], bindings=[binding("b", [ref("repo.main", pattern)])])
+        body = fx.repo_patterns / "example.dir" / "1.0.0" / "pattern.json"
+        body.unlink()
+        body.mkdir()
+        with self.assertRaises(p.PatternError) as caught:
+            fx.resolve(ctx())
+        self.assertEqual(caught.exception.code, "unsafe_path", "a directory at a file path is unsafe, not io_error")
+
+    def test_f2_default_bound_integrity_failures_are_unavailable(self):
+        for mode in ("tampered", "revoked", "retired", "missing", "draft"):
+            with self.subTest(mode=mode):
+                fx = Fixture(self)
+                good = make_pattern("example.style", status="draft" if mode == "draft" else "approved",
+                                    requirements=[clause("S-1", "default", "visual.layout.grid", "12")])
+                catalog = fx.publish(fx.repo_patterns, "repo.main", [good])
+                r = ref("repo.main", good)
+                event = {"id": good["id"], "version": "1.0.0", "sha256": r["sha256"], "reason": "x",
+                         "reference": "y", "at": TS}
+                if mode == "tampered":
+                    (fx.repo_patterns / "example.style" / "1.0.0" / "pattern.json").write_text(
+                        json.dumps(dict(good, guidance="tampered")), encoding="utf-8")
+                elif mode == "revoked":
+                    catalog["revocations"] = [event]
+                elif mode == "retired":
+                    catalog["lifecycle"] = [dict(event, status="retired")]
+                elif mode == "missing":
+                    r = dict(r, version="9.9.9")
+                (fx.repo_patterns / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+                fx.repo_bindings([binding("style", [r], role="default")])
+                report, _ = fx.resolve(ctx())
+                self.assertEqual((report["status"], p.exit_code(report["status"])), ("unavailable", 5))
+                self.assertNotIn("default_skipped", codes(report))
+        fx = Fixture(self)
+        scoped = make_pattern("example.scoped", applies_to={"artifact": ["dashboard"]},
+                              requirements=[clause("S-1", "default")])
+        fx.publish(fx.repo_patterns, "repo.main", [scoped], bindings=[binding("d", [ref("repo.main", scoped)], role="default")])
+        report, reader = fx.resolve(ctx(artifact="api"))
+        self.assertEqual((report["status"], codes(report)), ("empty", ["default_not_applicable"]),
+                         "only selector non-applicability skips a default")
+        self.assertEqual(reader.count("pattern"), 0, "metadata-first: a non-applicable record reads no body")
+
+    def test_f2_verify_lock_blocks_pinned_default_failures(self):
+        lf = LockFixture(self)
+        soft = make_pattern("example.soft", requirements=[clause("D-9", "default")])
+        lf.publish(extra=[soft])
+        lf.fx.repo_bindings([binding("req", [ref("repo.main", lf.rules)], when={"artifact": ["dashboard"]}),
+                             binding("soft", [ref("repo.main", soft)], role="default")])
+        lf.write()
+        entry = next(item for item in lf.publish(extra=[soft])["entries"] if item["id"] == "example.soft")
+        lf.publish(extra=[soft], revocations=[{**{k: entry[k] for k in ("id", "version", "sha256")},
+                                               "reason": "r", "reference": "SEC", "at": TS}])
+        report = lf.verify()
+        self.assertEqual(report["status"], "unavailable")
+        self.assertIn("pinned_revoked", codes(report, "error"))
+
+    def test_f3_identical_content_from_two_sources_is_one_clause_identity(self):
+        fx = Fixture(self)
+        shared = make_pattern("example.shared", requirements=[clause("M-1", "must")])
+        pack_root = fx.pack_chain()
+        fx.publish(pack_root / "patterns", "pack.base", [shared], bindings=[binding("p", [ref("pack.base", shared)])])
+        fx.publish(fx.repo_patterns, "repo.main", [shared],
+                   bindings=[binding("r", [ref("repo.main", shared)], role="default", when={"never": ["x"]}),
+                             binding("r2", [ref("repo.main", shared)])])
+        context = ctx()
+        exception = {"clause": "example.shared@1.0.0#M-1", "context_digest": p.parse_context(context).digest,
+                     "reason": "r", "approval_ref": "a", "approved_by": "b", "expires": "2099-01-01",
+                     "verification": "v"}
+        report, _ = fx.resolve(context, exceptions=p.parse_exceptions({"schema_version": 1, "items": [exception]}))
+        self.assertEqual(report["status"], "ready")
+        self.assertEqual([(item["clause"], item["scope"], item["state"]) for item in report["requirements"]],
+                         [("example.shared@1.0.0#M-1", "repo", "waived")])
+        self.assertEqual(len(report["selected"]), 1)
+        chosen = report["selected"][0]
+        self.assertEqual((chosen["role"], chosen["ref"]["source"]), ("required", "repo.main"))
+        self.assertEqual([item["source"] for item in chosen["equivalent_refs"]], ["pack.base", "repo.main"])
+        self.assertEqual(sorted(reason.get("origin") for reason in chosen["reasons"]), ["pack.base", "repo.main"])
+        fx = Fixture(self)
+        pack_root = fx.pack_chain()
+        other = dict(shared, guidance="different bytes")
+        fx.publish(pack_root / "patterns", "pack.base", [other], bindings=[binding("p", [ref("pack.base", other)])])
+        fx.publish(fx.repo_patterns, "repo.main", [shared], bindings=[binding("r", [ref("repo.main", shared)])])
+        self.assertIn("clause_identity_collision", codes(fx.resolve(ctx())[0], "error"))
+
+    def test_f4_included_pack_catalog_keeps_pack_scope(self):
+        results = {}
+        for include in (False, True):
+            fx = Fixture(self)
+            fx.pack_chain()
+            pack_grid = make_pattern("example.pack-grid", requirements=[clause("G-1", "default", "visual.layout.grid", "8")])
+            pack_catalog = fx.publish(fx.packs / "base" / "patterns", "pack.base", [pack_grid],
+                                      bindings=[binding("pg", [ref("pack.base", pack_grid)], role="default")])
+            repo_grid = make_pattern("example.repo-grid", requirements=[clause("G-1", "default", "visual.layout.grid", "12")])
+            includes = [{"locator": "pack:base", "path": "patterns/catalog.json",
+                         "sha256": p.content_digest(pack_catalog)}] if include else []
+            fx.publish(fx.repo_patterns, "repo.main", [repo_grid], includes=includes,
+                       bindings=[binding("rg", [ref("repo.main", repo_grid)], role="default"),
+                                 binding("rp", [ref("pack.base", pack_grid)], role="default", when={"explicit": ["yes"]})])
+            report, _ = fx.resolve(ctx())
+            results[include] = (report["status"], report["settings"]["visual.layout.grid"]["value"],
+                                sorted((item["source_id"], item["scope"]) for item in report["sources"]))
+            if include:
+                selected, _ = fx.resolve(ctx(explicit="yes"))
+                scopes = {item["ref"]["id"]: item["scope"] for item in selected["selected"]}
+                self.assertEqual(scopes["example.pack-grid"], "repo",
+                                 "a repository binding to a pack pattern selects at repository scope")
+        self.assertEqual(results[False], results[True], "including a pack catalog never promotes its bindings")
+        self.assertEqual(results[True][:2], ("ready", "12"))
+        self.assertEqual(results[True][2], [("pack.base", "pack"), ("repo.main", "repo")])
+
+    def test_f5_personal_patterns_need_explicit_or_repository_authority(self):
+        def setup(fx):
+            fx.pack_chain()
+            fx.publish(fx.packs / "base" / "patterns", "pack.base", [])
+            personal = make_pattern("example.personal-rule")
+            fx.publish(fx.personal_patterns, "me.personal", [personal])
+            return personal
+
+        fx = Fixture(self)
+        personal = setup(fx)
+        fx.publish(fx.packs / "base" / "patterns", "pack.base", [],
+                   bindings=[binding("pp", [ref("me.personal", personal)])])
+        report, _ = fx.resolve(ctx())
+        self.assertEqual((report["status"], report["selected"]), ("unavailable", []))
+        self.assertIn("personal_ref_refused", codes(report, "error"))
+        fx = Fixture(self)
+        personal = setup(fx)
+        blueprint = make_pattern("example.blueprint", requirements=[], includes=[ref("me.personal", personal)])
+        fx.publish(fx.packs / "base" / "patterns", "pack.base", [blueprint],
+                   bindings=[binding("bp", [ref("pack.base", blueprint)])])
+        self.assertIn("personal_ref_refused", codes(fx.resolve(ctx())[0], "error"),
+                      "a pack-selected include cannot activate a personal pattern")
+        fx = Fixture(self)
+        personal = setup(fx)
+        fx.repo_bindings([binding("mine", [ref("me.personal", personal)])])
+        report, _ = fx.resolve(ctx())
+        self.assertEqual((report["status"], report["selected"][0]["scope"]), ("ready", "repo"))
+        fx.repo_bindings([])
+        explicit = p.parse_refs([{"ref": ref("me.personal", personal), "role": "required", "approved_by": "me",
+                                  "approval_ref": "task"}])
+        self.assertEqual(fx.resolve(ctx(), refs=explicit)[0]["status"], "ready")
+
+    def test_f6_asset_refs_and_verified_reads(self):
+        fx = Fixture(self)
+        guide, tokens = b"# Dashboard guide\n", b'{"grid": 12}\n'
+        rules = make_pattern("example.visual", assets=[
+            {"path": "assets/guide.md", "kind": "guide", "sha256": hashlib.sha256(guide).hexdigest(), "phases": ["build"]},
+            {"path": "assets/tokens.json", "kind": "tokens", "sha256": hashlib.sha256(tokens).hexdigest(),
+             "domains": ["dashboard"]},
+            {"path": "assets/never.md", "kind": "guide", "sha256": "0" * 64, "phases": []}])
+        fx.publish(fx.repo_patterns, "repo.main", [rules], bindings=[binding("b", [ref("repo.main", rules)])])
+        folder = fx.repo_patterns / "example.visual" / "1.0.0" / "assets"
+        folder.mkdir()
+        (folder / "guide.md").write_bytes(guide)
+        (folder / "tokens.json").write_bytes(tokens)
+        report, reader = fx.resolve(ctx())
+        self.assertEqual(reader.count("asset"), 0)
+        self.assertEqual([item["path"] for item in p.asset_refs(report)], ["assets/guide.md", "assets/tokens.json"],
+                         "a present empty filter matches nothing")
+        self.assertEqual([item["path"] for item in p.asset_refs(report, kind="tokens", domain="dashboard")],
+                         ["assets/tokens.json"])
+        self.assertEqual([item["path"] for item in p.asset_refs(report, phase="review")], ["assets/tokens.json"])
+        ref_guide = p.asset_refs(report, kind="guide", phase="build")[0]
+        reader = p.Reader()
+        self.assertEqual(p.read_asset(fx.roots(), ref_guide, phase="build", reader=reader), guide)
+        self.assertEqual(reader.count("asset"), 1)
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), ref_guide, phase="review")
+        self.assertEqual(caught.exception.code, "asset_not_applicable")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), dict(ref_guide, path="assets/tokens.json"))
+        self.assertEqual(caught.exception.code, "asset_not_declared")
+        with self.assertRaises(p.PatternError):
+            p.read_asset(fx.roots(), dict(ref_guide, path="../../catalog.json"))
+        (folder / "guide.md").write_bytes(b"tampered\n")
+        with self.assertRaises(p.PatternError) as caught:
+            p.read_asset(fx.roots(), ref_guide, phase="build")
+        self.assertEqual((caught.exception.code, caught.exception.status), ("asset_digest_mismatch", "unavailable"))
+        lock = p.build_lock(report, p.parse_context(ctx()))
+        self.assertEqual(lock["asset_pins"], p.asset_refs(report), "lock pins use the same stable shape")
+
+    def test_f7_report_selection_digest_matches_lock(self):
+        lf = LockFixture(self)
+        report, _ = lf.fx.resolve(lf.context)
+        self.assertRegex(report["selection_digest"], r"^[0-9a-f]{64}$")
+        self.assertEqual(p.build_lock(report, p.parse_context(lf.context))["selection_digest"], report["selection_digest"])
+        needs, _ = lf.fx.resolve(ctx())
+        self.assertIsNone(needs["selection_digest"], "no digest for unresolved work")
+        empty, _ = lf.fx.resolve(ctx(artifact="api"))
+        self.assertEqual(empty["status"], "empty")
+        self.assertRegex(empty["selection_digest"], r"^[0-9a-f]{64}$")
+        refs = p.parse_refs([{"ref": ref("repo.main", lf.other), "role": "required", "approved_by": "me",
+                              "approval_ref": "task"}])
+        with_ref, _ = lf.fx.resolve(lf.context, refs=refs)
+        self.assertNotEqual(with_ref["selection_digest"], report["selection_digest"])
+        self.assertEqual(p.build_lock(with_ref, p.parse_context(lf.context), refs=refs)["selection_digest"],
+                         with_ref["selection_digest"])
+        with self.assertRaises(p.PatternError) as caught:
+            p.build_lock(with_ref, p.parse_context(lf.context))
+        self.assertEqual(caught.exception.code, "lock_refused", "refs omitted from the lock are detected")
+        tampered = copy.deepcopy(report)
+        tampered["requirements"][0]["text"] = "edited"
+        with self.assertRaises(p.PatternError):
+            p.build_lock(tampered, p.parse_context(lf.context))
+
+    def test_advisories_input_profile_and_timestamps(self):
+        fx = Fixture(self)
+        envelope = fx.write_json("roots.json", fx.envelope())
+        code, report, stderr = fx.cli("resolve", "--roots-file", envelope, "--context", fx.root / "missing.json")
+        self.assertEqual((code, report["status"]), (2, "invalid"))
+        self.assertIn("input_missing", stderr)
+        bad = fx.write_json("profile.json", {"selection": {"mode": "neutral", "status": "loaded"},
+                                             "values": {"name": "_default", "version": "1.0.0"}, "provenance": {},
+                                             "ancestry": [{"name": "_default", "version": "1.0.0"}]})
+        code, report, stderr = fx.cli("envelope", "--personal", fx.home, "--profile-record", bad)
+        self.assertEqual((code, report["diagnostics"][0]["code"]), (2, "invalid_pack_context"))
+        self.assertNotIn("Traceback", stderr)
+        for digits in range(1, 7):
+            stamp = "2026-09-01T00:00:00." + "5" * digits + "Z"
+            self.assertEqual(p._instant(stamp).microsecond, int(("5" * digits).ljust(6, "0")))
+        with self.assertRaises(p.PatternError):
+            p._timestamp("2026-02-30T00:00:00Z", "t")
+        source = Path(p.__file__).read_text(encoding="utf-8")
+        self.assertNotIn("fromisoformat(core", source, "timestamp parsing must not depend on 3.11 fromisoformat")
+
+    def test_positive_real_profile_context_record(self):
+        """P3-5: a real stored ADR-0029 context record (with digest) converts and reaches the CLI."""
+        fx = Fixture(self)
+        profile = p._profile_module()
+        packs = fx.root / "profile-packs"
+        (packs / "base").mkdir(parents=True)
+        (packs / "base" / "pack.yaml").write_text(
+            "name: base\nversion: 1.0.0\nvoice:\n  default_tier: internal\ncompliance:\n  mode: advisory\n"
+            "navigation:\n  default_workflow: cycle\npatterns:\n  source: patterns/catalog.json\n", encoding="utf-8")
+        pointer = fx.home / "active-pack"
+        pointer.write_text("base", encoding="utf-8")
+        config = profile.ProfileConfig(ROOT, fx.repo, fx.home, packs, pointer, context_id="pattern-test")
+        runtime = fx.home / "sessions"
+        # Runs before the TemporaryDirectory cleanup: history paths can exceed MAX_PATH, as in
+        # tests/integration/universal-profile-context.py, so remove them through the native spelling.
+        self.addCleanup(lambda: shutil.rmtree(profile._native_io_path(runtime)) if runtime.exists() else None)
+        record = profile.load_profile_context(config, create=True)
+        self.assertEqual(set(record) >= {"digest", "profile", "context_id"}, True)
+        context = p.pack_context_from_profile(record)
+        self.assertEqual((context["status"], context["source"]["state"], context["ancestry"][-1]["pack"]),
+                         ("resolved", "value", "base"))
+        stored = fx.write_json("record.json", record)
+        code, envelope, _ = fx.cli("envelope", "--personal", fx.home, "--repository", fx.repo, "--profile-record", stored)
+        self.assertEqual((code, envelope["pack_context"]), (0, context))
+        forged = dict(record, profile=dict(record["profile"], values=dict(record["profile"]["values"], version="9.9.9")))
+        with self.assertRaises(p.PatternError) as caught:
+            p.pack_context_from_profile(forged)
+        self.assertEqual(caught.exception.code, "invalid_pack_context")
 
 
 if __name__ == "__main__":

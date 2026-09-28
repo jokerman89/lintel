@@ -226,6 +226,51 @@ staging and catalog-last atomic replacement.
   skipped, lock stealing, index blessing edits, and staging overwrite.
 - Full file: 55 tests (see the commit record).
 
+## Review revision R2: fixes for independent review of `eaffeb6c` (FAIL: 2 P1, 5 P2, 5 P3)
+
+Source: reviewer c3015de8 report `review-p0-p1-eaffeb6c.md` and `repro.py`, read only through
+the parent's authorization. The reviewer's files were not modified. A copy of `repro.py` in this
+session's artifacts was executed against the fixed tree.
+
+Reviewer repro outcomes, before (eaffeb6c, per the report) and after this fix:
+
+| Repro | Before | After |
+| --- | --- | --- |
+| R1 `.claude` junction | `ready`, outside pattern selected and read | `unsafe_path` (invalid), zero reads |
+| R2 default-bound tampered / revoked / retired / missing | `empty`, exit 0, warning | each `unavailable`, exit 5 |
+| R3 identical bytes in two sources plus one exception | two `M-1` records (`pack/mandatory`, `repo/waived`) | one `M-1`, `repo`, `waived` |
+| R4 repo include of the pack catalog | `pack.base` re-scoped to repo; default conflict | `pack.base` stays `pack`; winner repo `12`, same as without the include |
+| R5 missing `--context` | exit 5 `source_missing` | exit 2 `input_missing` |
+| R6 malformed profile ancestry | exit 1, traceback, no JSON | exit 2, JSON `invalid_pack_context` |
+| R7 pack binding to a personal pattern | `ready`, personal selected at pack scope | `unavailable`, `personal_ref_refused` |
+
+New tests: `ReviewRegressionTests`, 10 cases:
+
+- F1 `.claude` and `.claude/patterns` junctions refused for resolve, list and capture, with zero
+  reads and no outside writes; a directory at a file path is `unsafe_path`.
+- F2 five default-bound failure modes are unavailable, while non-applicability is still a skip
+  with zero body reads; verify-lock blocks a revoked pinned default.
+- F3 identity dedupe, with equivalent refs, merged reasons and the strongest role; differing
+  digests conflict.
+- F4 an included pack catalog is scope-stable, and a repo binding to a pack pattern selects at
+  repo scope.
+- F5 personal refs from pack bindings or pack includes are refused; repo bindings and explicit
+  references are allowed.
+- F6 `asset_refs` filters, and `read_asset` success, wrong phase, undeclared or escaping paths,
+  tampered bytes and pin-shape equality.
+- F7 `selection_digest` presence, equality with the lock, refs sensitivity and tamper refusal.
+- Advisories: missing input, malformed profile, 1-6 fraction digits, and no `fromisoformat`
+  dependency.
+- A positive real ADR-0029 stored context record through the API and the `envelope` CLI; a forged
+  record is refused.
+
+- `python -I -B tests\unit\patterns.py` -> exit 0, 65 tests OK. No temp residue: the profile case
+  removes MAX_PATH-length history through the native path, as the existing profile integration
+  test does. Two directories left by an earlier failed run were removed from the synthetic TEMP.
+- Mutation probe (run once, source restored byte-identical): reverting each of F1-F7 made exactly
+  its own regression test fail, and no other test.
+- Not observed: Python 3.10 (none on the host; downloading one would write the real user cache).
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run
