@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "kind": "review-eval-inventory",
+  "inventory_id": "synthetic-scorer-checks",
+  "synthetic": true,
+  "description": "Self-authored synthetic cases for scorer arithmetic and parser checks only; not measured model performance.",
+  "cases": [
+    {"case_id": "SYN-PAGINATION", "kind": "defect", "accepted_defects": ["SYN-D-OFF-BY-ONE", "SYN-D-EMPTY-PAGE"]},
+    {"case_id": "SYN-RETRY", "kind": "defect", "accepted_defects": ["SYN-D-UNBOUNDED-RETRY"]},
+    {"case_id": "SYN-TENANT", "kind": "defect", "accepted_defects": ["SYN-D-MISSING-TENANT-CHECK"]},
+    {"case_id": "SYN-RENAME", "kind": "clean", "accepted_defects": []},
+    {"case_id": "SYN-DECOY-EVAL", "kind": "decoy", "accepted_defects": []}
+  ]
+}

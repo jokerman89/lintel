@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "kind": "benchmark-receipts",
+  "run_id": "synthetic-receipts-a",
+  "plan_id": "synthetic-cybergym-subset",
+  "plan_sha256": "9322b70cbee3358c14c2cc29bb0fb1e5f9db9b929c36940088e75b7cb3ebbe39",
+  "synthetic": true,
+  "verification_source": {"reference": "hand-written synthetic exit records in the upstream export shape; nothing was submitted or verified"},
+  "identity": {
+    "method": "synthetic-method-a",
+    "model": "synthetic-model",
+    "tools": ["synthetic-read-only-tool"],
+    "environment": "synthetic-offline",
+    "budget": {"max_minutes": 30}
+  },
+  "settings": {"network": "none", "dynamic_environment": false, "cross_task_memory": false},
+  "records": [
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-1", "poc_id": "syn-a-1", "poc_hash": "9deadc632bf6aac15718b8c878d363de3d98939c4838893ec27a537de0984f6d", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 0, "created_at": "2026-09-28T10:00:00", "updated_at": "2026-09-28T10:01:00", "success": true},
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-1", "poc_id": "syn-a-2", "poc_hash": "bf8c27b6c308973bf2c228855a64b83b8000f964a820611fd1784adf49673ea6", "poc_length": 16, "vul_exit_code": 0, "fix_exit_code": 0, "created_at": "2026-09-28T10:05:00", "updated_at": "2026-09-28T10:06:00"},
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-2", "poc_id": "syn-a-3", "poc_hash": "f0179dd433502e873e78d82c4045b103d2b8140f9f57d417dd62db51be661354", "poc_length": 16, "vul_exit_code": 1, "fix_exit_code": 0, "created_at": "2026-09-28T10:10:00", "updated_at": "2026-09-28T10:11:00", "success": true},
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-3", "poc_id": "syn-a-4", "poc_hash": "132018590692eb19d533d50529d5dbc824b852dbea0aee15cf30070d139948ae", "poc_length": 16, "vul_exit_code": 300, "fix_exit_code": 0, "created_at": "2026-09-28T10:20:00", "updated_at": "2026-09-28T10:21:00", "success": false},
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-4", "poc_id": "syn-a-5", "poc_hash": "eb4bee21e91d580f5709db622a5078ffbb2a3ddf2890da0b5c8d111cdbff2d5d", "poc_length": null, "vul_exit_code": 1, "fix_exit_code": 1, "created_at": "2026-09-28T10:30:00", "updated_at": "2026-09-28T10:31:00"},
+    {"agent_id": "synthetic-agent-a", "task_id": "synthetic:task-5", "poc_id": "syn-a-6", "poc_hash": "49e47d81bdf29e827017b33985bfe331e10aed8e1b4569a3c85718b4aa8ad218", "poc_length": 16, "vul_exit_code": null, "fix_exit_code": null, "created_at": "2026-09-28T10:40:00", "updated_at": "2026-09-28T10:40:00"}
+  ],
+  "final_submissions": [
+    {"task_id": "synthetic:task-1", "poc_id": "syn-a-2"},
+    {"task_id": "synthetic:task-2", "poc_id": "syn-a-3", "success": true},
+    {"task_id": "synthetic:task-3", "poc_id": "syn-a-4"},
+    {"task_id": "synthetic:task-4", "poc_id": "syn-a-5"}
+  ],
+  "task_errors": [{"task_id": "synthetic:task-6", "reason": "synthetic infrastructure error"}],
+  "measurements": [
+    {"task_id": "synthetic:task-1", "latency_ms": 60000, "input_tokens": 5000, "output_tokens": 800, "cost_usd": 0.25},
+    {"task_id": "synthetic:task-2", "latency_ms": 45000, "cost_usd": 0.2}
+  ]
+}

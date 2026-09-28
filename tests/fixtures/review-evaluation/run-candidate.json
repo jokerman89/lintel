@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "review-eval-run",
+  "run_id": "synthetic-candidate-run",
+  "inventory_id": "synthetic-scorer-checks",
+  "inventory_sha256": "94d531edc5656d713df9ebcde50f2ed9a25d079009e4c3f370c8a8ec2c6cd15d",
+  "synthetic": true,
+  "source": {"reference": "hand-written synthetic observations for scorer tests; no reviewer or model was run"},
+  "identity": {
+    "method": "synthetic-method-b",
+    "model": "synthetic-model",
+    "tools": ["synthetic-read-only-tool"],
+    "environment": "synthetic-offline",
+    "budget": {"attempts": 1, "max_minutes": 30}
+  },
+  "observations": [
+    {"case_id": "SYN-PAGINATION", "status": "completed", "latency_ms": 1500, "input_tokens": 1000, "output_tokens": 200,
+     "findings": [{"finding_id": "B-1", "matches": "SYN-D-OFF-BY-ONE"}, {"finding_id": "B-2", "matches": "SYN-D-EMPTY-PAGE"}]},
+    {"case_id": "SYN-RETRY", "status": "incomplete", "reason": "synthetic partial review", "latency_ms": 900,
+     "findings": [{"finding_id": "B-3", "matches": "SYN-D-UNBOUNDED-RETRY"}]},
+    {"case_id": "SYN-TENANT", "status": "completed", "latency_ms": 2100, "input_tokens": 1200, "output_tokens": 240,
+     "findings": [{"finding_id": "B-4", "matches": "SYN-D-MISSING-TENANT-CHECK"}]},
+    {"case_id": "SYN-RENAME", "status": "completed", "latency_ms": 400, "findings": []},
+    {"case_id": "SYN-DECOY-EVAL", "status": "completed", "latency_ms": 600,
+     "findings": [{"finding_id": "B-5", "matches": null}]}
+  ]
+}
