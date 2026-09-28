@@ -68,7 +68,28 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--exceptions")
             command.add_argument("--preview-draft", action="store_true")
             command.add_argument("--context-budget-chars", type=int, default=p.LIMITS.context_budget)
+        if name == "resolve":
+            command.add_argument("--lock", help="write a new lock file (inside the repository) for ready/empty only")
+    verify = commands.add_parser("verify-lock")
+    _add_roots(verify)
+    verify.add_argument("--lock", required=True)
+    verify.add_argument("--context", required=True)
+    mapping = commands.add_parser("map")
+    _add_roots(mapping)
+    mapping.add_argument("--lock", required=True)
+    mapping.add_argument("--task-map", required=True)
+    mapping.add_argument("--expected-lock-digest", required=True)
+    mapping.add_argument("--write", action="store_true")
+    project = commands.add_parser("project")
+    project.add_argument("--lock", required=True)
+    project.add_argument("--task-map", required=True)
+    project.add_argument("--package", required=True)
     return parser
+
+
+def _lock_input(path: str, reader: p.Reader):
+    return p.parse_json(reader.read(Path(path), kind="input", limit=p.LIMITS.catalog_bytes),
+                        limit=p.LIMITS.catalog_bytes, what="lock")
 
 
 def run(argv) -> tuple[dict, int]:
@@ -86,6 +107,10 @@ def run(argv) -> tuple[dict, int]:
             raise p.PatternError("invalid_arguments", "check --path takes no roots")
         report = p.check_document(Path(args.path), args.kind, reader)
         return report, 0
+    if args.command == "project":
+        report = p.project_package(_lock_input(args.lock, reader), _input(args.task_map, "task map", reader),
+                                   args.package)
+        return report, 0
     roots = _roots(args, reader)
     if args.command == "list":
         report = p.list_catalogs(roots, reader)
@@ -93,6 +118,12 @@ def run(argv) -> tuple[dict, int]:
         report = p.show_pattern(roots, args.ref, reader)
     elif args.command == "check":
         report = p.check_sources(roots, reader)
+    elif args.command == "verify-lock":
+        report = p.verify_lock(roots, _lock_input(args.lock, reader),
+                               p.parse_context(_input(args.context, "context", reader)), reader=reader)
+    elif args.command == "map":
+        report = p.map_lock(roots, Path(args.lock), _input(args.task_map, "task map", reader),
+                            expected_lock_digest=args.expected_lock_digest, write=args.write, reader=reader)
     else:
         context = p.parse_context(_input(args.context, "context", reader))
         refs = p.parse_refs(_input(args.refs, "refs", reader)) if args.refs else ()
@@ -101,6 +132,13 @@ def run(argv) -> tuple[dict, int]:
         report = p.resolve(roots, context, refs=refs, overrides=overrides, exceptions=exceptions,
                            preview_draft=args.preview_draft, context_budget=args.context_budget_chars,
                            reader=reader, explain=args.command == "explain")
+        if args.command == "resolve" and args.lock:
+            if report["status"] not in ("ready", "empty"):
+                report["diagnostics"].append({"code": "lock_not_written", "severity": "info",
+                                              "message": f"no lock written for status {report['status']}"})
+            else:
+                lock = p.build_lock(report, context, refs=refs, context_budget=args.context_budget_chars)
+                report["lock"] = p.write_lock(roots, Path(args.lock), lock)
     return report, p.exit_code(report["status"])
 
 

@@ -37,6 +37,8 @@ __all__ = (
     "parse_exact_ref", "parse_ref_text", "evaluate_selector",
     "pack_context_from_profile", "build_envelope", "load_sources",
     "list_catalogs", "show_pattern", "check_document", "check_sources", "resolve",
+    "build_lock", "write_lock", "parse_lock", "selection_digest", "verify_lock",
+    "parse_task_map", "map_lock", "project_package",
 )
 
 SCHEMA_VERSION = 1
@@ -1463,6 +1465,15 @@ class _Resolution:
             current.preview = current.preview or node.preview
 
 
+def _asset_json(asset: Asset) -> dict:
+    record = {"path": asset.path, "kind": asset.kind, "sha256": asset.sha256}
+    if asset.phases is not None:
+        record["phases"] = list(asset.phases)
+    if asset.domains is not None:
+        record["domains"] = list(asset.domains)
+    return record
+
+
 def _clause_record(node: _Node, clause: Clause, state: str, reason: str = "") -> dict:
     record = {"clause": node.pattern.clause_ref(clause.id), "pattern": node.ref.to_json(), "level": clause.level,
               "role": node.role, "scope": node.scope, "state": state, "text": clause.text, "verify": clause.verify}
@@ -1684,7 +1695,8 @@ def resolve(roots: Roots, context: Context, *, refs: Sequence[InvocationRef] = (
         selected.append({"ref": node.ref.to_json(), "role": node.role, "scope": node.scope,
                          "effective_status": node.effective, "summary": node.pattern.summary,
                          "reasons": node.reasons, "preview": node.preview,
-                         "clauses": [node.pattern.clause_ref(clause.id) for clause in node.pattern.requirements]})
+                         "clauses": [node.pattern.clause_ref(clause.id) for clause in node.pattern.requirements],
+                         "assets": [_asset_json(asset) for asset in node.pattern.assets]})
     statuses = [item["status"] for item in resolution.diagnostics if item.get("severity") == "error" and "status" in item]
     status = _worst(statuses, "ready" if selected else "empty")
     metrics = dict(reader.metrics(), selected_patterns=len(selected), selected_context_code_points=selected_chars,
@@ -1794,3 +1806,409 @@ def check_sources(roots: Roots, reader: Optional[Reader] = None) -> dict:
                                 "status": error.status})
     status = _worst((item["status"] for item in diagnostics if item.get("severity") == "error"), "ok")
     return _inspection(status, sources, diagnostics, checked=checked)
+
+# ---------------------------------------------------------------- write safety (shared by lock and lifecycle writes)
+
+class _WriteLock:
+    """Exclusive-creation lock beside a target; released only by its owner, never stolen."""
+
+    def __init__(self, target: Path):
+        self.path = Path(str(target) + ".lock")
+        self.token = f"{os.getpid()}:{os.urandom(8).hex()}"
+
+    def __enter__(self):
+        try:
+            descriptor = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except FileExistsError:
+            _fail("write_locked", f"another writer holds {self.path.name}; retry after it finishes "
+                  "(stale locks are never stolen automatically)", status="collision")
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(self.token)
+        return self
+
+    def __exit__(self, *_):
+        try:
+            with open(self.path, encoding="utf-8") as stream:
+                owned = stream.read() == self.token
+        except OSError:
+            return False
+        if owned:
+            os.unlink(self.path)
+        return False
+
+
+def _atomic_write(path: Path, data: bytes, *, replace: bool) -> None:
+    """Write a complete temp file in the same directory, then publish it atomically.
+
+    `replace=False` never overwrites an existing file (collision instead).
+    """
+    directory = path.parent
+    if _is_link(directory) or not directory.is_dir():
+        _fail("unsafe_path", "destination directory must exist and be unlinked", str(directory))
+    temp = directory / f".{path.name}.{os.getpid()}.{os.urandom(4).hex()}.tmp"
+    try:
+        with open(temp, "xb") as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if replace:
+            os.replace(temp, path)
+        elif os.name == "nt":
+            try:
+                os.rename(temp, path)
+            except FileExistsError:
+                _fail("destination_exists", f"refusing to overwrite {path.name}", str(path), status="collision")
+        else:
+            try:
+                os.link(temp, path)
+            except FileExistsError:
+                _fail("destination_exists", f"refusing to overwrite {path.name}", str(path), status="collision")
+    finally:
+        if temp.exists():
+            os.unlink(temp)
+
+
+def _repository_file(roots: Roots, path: Path, what: str) -> Path:
+    """A write target contained in the explicit repository root, with no linked components."""
+    if roots.repository is None:
+        _fail("repository_required", f"{what} needs an explicit repository root", status="invalid")
+    base = roots.repository.resolve()
+    candidate = Path(path)
+    candidate = candidate if candidate.is_absolute() else Path.cwd() / candidate
+    try:
+        relative = candidate.resolve().relative_to(base)
+    except ValueError:
+        _fail("unsafe_path", f"{what} must be inside the repository root", str(path))
+    return contained_path(base, relative.as_posix(), what)
+
+
+# ---------------------------------------------------------------- locks (spec 4.4, card 2.2.b)
+
+LOCK_ADDED_KEYS = ("selection_digest", "context", "created_at", "source_snapshots", "asset_pins",
+                   "requirement_tasks", "source_attestations", "review_evidence", "invocation_refs",
+                   "context_budget")
+LOCK_KEYS = REPORT_KEYS + ("limits",) + LOCK_ADDED_KEYS
+_EFFECTIVE_MANDATORY = ("mandatory", "waived")
+
+
+def _context_json(context: Context) -> dict:
+    return {"schema_version": 1, "facts": dict(context.facts), "evidence": dict(context.evidence)}
+
+
+def _selection_material(lock: Mapping[str, Any]) -> dict:
+    """Digest input: excludes timestamps, metrics, diagnostics, attestations, mapping and evidence."""
+    return {"context": lock["context"], "source_snapshots": lock["source_snapshots"],
+            "selected": [{key: item[key] for key in ("ref", "role", "scope")} for item in lock["selected"]],
+            "requirements": lock["requirements"], "settings": lock["settings"],
+            "overrides": lock["overrides"], "exceptions": lock["exceptions"],
+            "invocation_refs": lock["invocation_refs"]}
+
+
+def selection_digest(lock: Mapping[str, Any]) -> str:
+    return content_digest(_selection_material(lock))
+
+
+def _invocation_json(item: InvocationRef) -> dict:
+    return {"ref": item.ref.to_json(), "role": item.role, "approved_by": item.approved_by,
+            "approval_ref": item.approval_ref}
+
+
+def build_lock(report: Mapping[str, Any], context: Context, *, refs: Sequence[InvocationRef] = (),
+               context_budget: int = LIMITS.context_budget, now: Optional[_dt.datetime] = None) -> dict:
+    """Freeze a ready/empty report. Conflicts, unknown context and previews never lock."""
+    if report.get("status") not in ("ready", "empty"):
+        _fail("lock_refused", f"only ready or empty resolutions can be locked (status {report.get('status')})",
+              status=report.get("status") if report.get("status") in EXIT_CODES else "invalid")
+    if any(item.get("preview") for item in report["selected"]):
+        _fail("lock_refused", "a draft preview is never locked", status="unavailable")
+    now = now or _dt.datetime.now(_dt.timezone.utc)
+    lock = {key: copy_json(report[key]) for key in REPORT_KEYS + ("limits",)}
+    lock.update(
+        context=_context_json(context),
+        created_at=now.astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        source_snapshots=[{key: item[key] for key in ("locator", "source_id", "scope", "active", "catalog_sha256")}
+                          for item in report["sources"]],
+        asset_pins=[dict(asset, pattern=item["ref"]) for item in report["selected"] for asset in item["assets"]],
+        requirement_tasks=None, source_attestations=[], review_evidence=[],
+        invocation_refs=[_invocation_json(item) for item in refs], context_budget=context_budget)
+    lock["selection_digest"] = selection_digest(lock)
+    return lock
+
+
+def copy_json(value: Any) -> Any:
+    return json.loads(canonical_json(value).decode("utf-8"))
+
+
+def _assert_portable(lock: Mapping[str, Any], roots: Roots) -> None:
+    """Durable locks carry locators and source IDs, never local absolute roots (spec 4.4)."""
+    text = canonical_json(lock).decode("utf-8")
+    probes = {Path(roots.personal).resolve().as_posix(), str(Path(roots.personal).resolve())}
+    if roots.repository is not None:
+        probes |= {roots.repository.resolve().as_posix(), str(roots.repository.resolve())}
+    for ancestor in roots.pack_context.ancestry:
+        probes |= {ancestor.root.as_posix(), str(ancestor.root)}
+    escaped = {json.dumps(item, ensure_ascii=False)[1:-1] for item in probes}
+    if any(item and (item in text or item.casefold() in text.casefold()) for item in probes | escaped):
+        _fail("lock_not_portable", "the lock would contain a local absolute root; refusing to write it")
+
+
+def write_lock(roots: Roots, path: Path, lock: Mapping[str, Any]) -> dict:
+    target = _repository_file(roots, path, "lock")
+    _assert_portable(lock, roots)
+    data = emit_json(lock).encode("utf-8")
+    _atomic_write(target, data, replace=False)
+    return {"path": target.resolve().relative_to(roots.repository.resolve()).as_posix(),
+            "lock_sha256": content_digest(lock), "selection_digest": lock["selection_digest"]}
+
+
+def parse_lock(value: Any, where: str = "lock") -> dict:
+    """Validate structure and self-consistency; tampered clause/selection content is invalid."""
+    _object(value, where, LOCK_KEYS)
+    _schema_version(value, where)
+    if value["status"] not in ("ready", "empty"):
+        _fail("invalid_lock", "a lock records only a ready or empty resolution", where)
+    context = parse_context(value["context"], f"{where}.context")
+    if context.digest != value["context_digest"]:
+        _fail("invalid_lock", "context_digest does not match the stored context", where)
+    _timestamp(value["created_at"], f"{where}.created_at")
+    for index, item in enumerate(_array(value["source_snapshots"], f"{where}.source_snapshots")):
+        at = f"{where}.source_snapshots[{index}]"
+        _object(item, at, ("locator", "source_id", "scope", "active", "catalog_sha256"))
+        _matching(item["source_id"], NAMESPACED_ID, at, "source ID")
+        _matching(item["catalog_sha256"], HEX64, at, "catalog digest", 64)
+    for index, item in enumerate(_array(value["selected"], f"{where}.selected")):
+        at = f"{where}.selected[{index}]"
+        if not isinstance(item, dict) or item.get("preview") is not False:
+            _fail("invalid_lock", "selected records must be non-preview selections", at)
+        parse_exact_ref(item.get("ref"), f"{at}.ref")
+        if item.get("role") not in ("required", "default") or item.get("scope") not in ("repo", "pack", "personal"):
+            _fail("invalid_lock", "invalid selection role or scope", at)
+    clause_ids = set()
+    for index, item in enumerate(_array(value["requirements"], f"{where}.requirements")):
+        at = f"{where}.requirements[{index}]"
+        if not isinstance(item, dict):
+            _fail("invalid_lock", "requirement records are objects", at)
+        clause_ids.add(_fq_clause(item.get("clause"), f"{at}.clause"))
+        if item.get("level") not in ("must", "default", "recommendation") or item.get("state") not in (
+                "mandatory", "default", "recommendation", "suppressed", "overridden", "waived"):
+            _fail("invalid_lock", "invalid clause level or state", at)
+    parse_refs(value["invocation_refs"], f"{where}.invocation_refs")
+    if type(value["context_budget"]) is not int or value["context_budget"] < 1:
+        _fail("invalid_lock", "context_budget must be a positive integer", where)
+    if value["selection_digest"] != selection_digest(value):
+        _fail("invalid_lock", "selection_digest does not match the lock content (edited or corrupted)", where)
+    if value["requirement_tasks"] is not None:
+        mapping = dict(value["requirement_tasks"])
+        recorded = mapping.pop("mapping_digest", None)
+        parse_task_map(mapping, value, f"{where}.requirement_tasks")
+        if recorded != content_digest(mapping):
+            _fail("invalid_lock", "requirement_tasks mapping_digest does not match its record", where)
+    _array(value["source_attestations"], f"{where}.source_attestations")
+    _array(value["review_evidence"], f"{where}.review_evidence")
+    return value
+
+
+def _mandatory(requirements: Iterable[Mapping[str, Any]]) -> set:
+    return {item["clause"] for item in requirements if item["level"] == "must" and item["state"] in _EFFECTIVE_MANDATORY}
+
+
+def verify_lock(roots: Roots, lock: Mapping[str, Any], context: Context, *,
+                today: Optional[_dt.date] = None, reader: Optional[Reader] = None) -> dict:
+    """Continuation check: pins, current lifecycle/revocations, context and mandatory baseline.
+
+    Never upgrades or rewrites the lock; the original snapshots stay historical evidence.
+    """
+    lock = parse_lock(lock)
+    reader = reader or Reader()
+    sources = load_sources(roots, reader)
+    diagnostics = [dict(item) for item in sources.blockers]
+    checked = []
+
+    def problem(status, code, message, **details):
+        diagnostics.append(_note(code, message, "error", status=status, **details))
+
+    if context.digest != lock["context_digest"]:
+        problem("conflict", "context_changed", "the current context differs from the locked context; re-plan",
+                locked=lock["context_digest"], current=context.digest)
+    for item in lock["selected"]:
+        ref = parse_exact_ref(item["ref"], "lock.selected.ref")
+        blocking = item["role"] == "required" or any(reason.get("kind") == "explicit" for reason in item["reasons"])
+        try:
+            loaded, entry = _lookup(sources, ref)
+            state, _ = effective_status(loaded, entry)
+            if state in ("retired", "revoked"):
+                _fail(f"pinned_{state}", f"pinned {ref.text} is now {state}", status="unavailable")
+            _read_pattern(sources, loaded, entry)
+            if state == "deprecated":
+                diagnostics.append(_note("pinned_deprecated", f"pinned {ref.text} is deprecated", "warning",
+                                         ref=ref.to_json()))
+            checked.append({"ref": ref.to_json(), "status": "ok", "effective_status": state})
+        except PatternError as error:
+            if error.status == "invalid":
+                raise
+            record = dict(error.diagnostic(), ref=ref.to_json())
+            if not blocking:
+                record.update(severity="warning", status=None)
+                record.pop("status")
+            diagnostics.append(record)
+            checked.append({"ref": ref.to_json(), "status": error.status})
+    baseline = None
+    if not any(item.get("severity") == "error" for item in diagnostics):
+        refs = parse_refs(lock["invocation_refs"])
+        overrides = parse_overrides({"schema_version": 1, "items": lock["overrides"]})
+        exceptions = parse_exceptions({"schema_version": 1, "items": lock["exceptions"]})
+        try:
+            current = resolve(roots, context, refs=refs, overrides=overrides, exceptions=exceptions,
+                              context_budget=lock["context_budget"], today=today, reader=reader)
+        except PatternError as error:
+            problem("conflict", "replan_required", f"the locked inputs no longer resolve: {error.message}",
+                    cause=error.code)
+            current = None
+        if current is not None:
+            for item in current["diagnostics"]:
+                if item.get("severity") == "error":
+                    diagnostics.append(dict(item))
+            old, new = _mandatory(lock["requirements"]), _mandatory(current["requirements"])
+            if old != new:
+                baseline = {"locked": sorted(old), "current": sorted(new), "added": sorted(new - old),
+                            "removed": sorted(old - new)}
+                problem("conflict", "mandatory_baseline_changed",
+                        "current bindings change the mandatory clauses for this context; re-plan with a new lock",
+                        added=baseline["added"], removed=baseline["removed"])
+            locked_defaults = {item["clause"] for item in lock["requirements"] if item["state"] == "default"}
+            current_defaults = {item["clause"] for item in current["requirements"] if item["state"] == "default"}
+            if locked_defaults != current_defaults:
+                diagnostics.append(_note("default_baseline_changed", "selected defaults changed since locking",
+                                         "warning", added=sorted(current_defaults - locked_defaults),
+                                         removed=sorted(locked_defaults - current_defaults)))
+    statuses = [item["status"] for item in diagnostics if item.get("severity") == "error" and item.get("status")]
+    status = _worst(statuses, "ok")
+    mapping = lock["requirement_tasks"]
+    return {"schema_version": 1, "status": status, "selection_digest": lock["selection_digest"],
+            "mapping_digest": mapping["mapping_digest"] if mapping else None,
+            "context_digest": context.digest, "checked": checked, "baseline": baseline,
+            "historical_sources": lock["source_snapshots"], "diagnostics": diagnostics,
+            "metrics": reader.metrics()}
+
+
+# ---------------------------------------------------------------- task mapping (spec 4.6, card 2.2.c)
+
+def _task_id(value: Any, where: str) -> str:
+    return _string(value, where, limit=256)
+
+
+def parse_task_map(value: Any, lock: Mapping[str, Any], where: str = "task_map") -> dict:
+    """Validate a companion task map against a lock; returns the canonical record."""
+    _object(value, where, ("schema_version", "selection_digest", "tasks", "packages", "clauses"))
+    _schema_version(value, where)
+    if value["selection_digest"] != lock["selection_digest"]:
+        _fail("mapping_selection_mismatch", "the task map was made for a different selection", where)
+    tasks = [_task_id(item, f"{where}.tasks") for item in _array(value["tasks"], f"{where}.tasks", nonempty=True)]
+    if len(set(tasks)) != len(tasks):
+        _fail("invalid_task_map", "duplicate task IDs", f"{where}.tasks")
+    owner, package_ids = {}, set()
+    for index, package in enumerate(_array(value["packages"], f"{where}.packages", nonempty=True)):
+        at = f"{where}.packages[{index}]"
+        _object(package, at, ("id", "tasks"))
+        package_id = _task_id(package["id"], f"{at}.id")
+        if package_id in package_ids:
+            _fail("invalid_task_map", f"duplicate package {package_id}", at)
+        package_ids.add(package_id)
+        members = [_task_id(item, f"{at}.tasks") for item in _array(package["tasks"], f"{at}.tasks", nonempty=True)]
+        for task in members:
+            if task not in tasks:
+                _fail("invalid_task_map", f"unknown task {task}", at)
+            if task in owner:
+                _fail("invalid_task_map", f"task {task} belongs to two packages", at)
+            owner[task] = package_id
+    unowned = sorted(set(tasks) - owner.keys())
+    if unowned:
+        _fail("invalid_task_map", f"tasks without a package: {', '.join(unowned)}", f"{where}.packages")
+    known = {item["clause"]: item for item in lock["requirements"]}
+    mapped = {}
+    for index, item in enumerate(_array(value["clauses"], f"{where}.clauses")):
+        at = f"{where}.clauses[{index}]"
+        _object(item, at, ("clause", "tasks"))
+        clause_id = _fq_clause(item["clause"], f"{at}.clause")
+        if clause_id not in known:
+            _fail("invalid_task_map", f"unknown clause {clause_id}", at)
+        if clause_id in mapped:
+            _fail("invalid_task_map", f"duplicate clause record {clause_id}", at)
+        members = [_task_id(task, f"{at}.tasks") for task in _array(item["tasks"], f"{at}.tasks", nonempty=True)]
+        if len(set(members)) != len(members) or any(task not in tasks for task in members):
+            _fail("invalid_task_map", f"clause {clause_id} maps duplicate or unknown tasks", at)
+        mapped[clause_id] = members
+    required = sorted(clause for clause, item in known.items()
+                      if (item["level"] == "must" and item["state"] in _EFFECTIVE_MANDATORY)
+                      or (item["level"] == "default" and item["state"] == "default"))
+    missing = [clause for clause in required if clause not in mapped]
+    if missing:
+        _fail("unmapped_clause", f"selected must/default clauses without a task: {', '.join(missing)}", where)
+    return value
+
+
+def map_lock(roots: Roots, lock_path: Path, task_map_value: Any, *, expected_lock_digest: str,
+             write: bool = False, reader: Optional[Reader] = None) -> dict:
+    """Preview (default) or atomically install requirement_tasks under CAS + exclusive lock."""
+    reader = reader or Reader()
+    target = _repository_file(roots, lock_path, "lock") if write else Path(lock_path)
+
+    def load():
+        return parse_json(reader.read(target, kind="input", limit=LIMITS.catalog_bytes),
+                          limit=LIMITS.catalog_bytes, what="lock")
+
+    def plan(lock):
+        parse_lock(lock)
+        digest = content_digest(lock)
+        if digest != expected_lock_digest:
+            _fail("stale_lock_digest", "the lock changed since it was read; re-read and retry", status="collision")
+        mapping = copy_json(parse_task_map(task_map_value, lock))
+        mapping_digest = content_digest(mapping)
+        installed = dict(mapping, mapping_digest=mapping_digest)
+        previous = lock["requirement_tasks"]["mapping_digest"] if lock["requirement_tasks"] else None
+        invalidated = sum(1 for item in lock["review_evidence"]
+                          if isinstance(item, dict) and item.get("mapping_digest") != mapping_digest)
+        updated = dict(lock, requirement_tasks=installed)
+        return updated, {"schema_version": 1, "status": "ok", "written": False,
+                         "selection_digest": lock["selection_digest"], "mapping_digest": mapping_digest,
+                         "previous_mapping_digest": previous, "invalidated_review_evidence": invalidated,
+                         "requirement_tasks": installed, "diagnostics": [], "metrics": reader.metrics()}
+
+    if not write:
+        return plan(load())[1]
+    with _WriteLock(target):
+        updated, report = plan(load())
+        if selection_digest(updated) != updated["selection_digest"]:
+            _fail("invalid_lock", "mapping must not change the selection digest")
+        _assert_portable(updated, roots)
+        _atomic_write(target, emit_json(updated).encode("utf-8"), replace=True)
+    report.update(written=True, lock_sha256=content_digest(updated), metrics=reader.metrics())
+    return report
+
+
+def project_package(lock: Mapping[str, Any], task_map_value: Any, package: str) -> dict:
+    """Clauses mapped to one package with IDs and completeness preserved; never a silent top-N."""
+    lock = parse_lock(lock)
+    mapping = parse_task_map(task_map_value, lock)
+    mapping_digest = content_digest(copy_json(mapping))
+    packages = {item["id"]: item["tasks"] for item in mapping["packages"]}
+    if package not in packages:
+        _fail("unknown_package", f"package {package} is not in the task map")
+    members = set(packages[package])
+    by_clause = {item["clause"]: item for item in lock["requirements"]}
+    clauses = []
+    for item in mapping["clauses"]:
+        tasks = [task for task in item["tasks"] if task in members]
+        if tasks:
+            clauses.append(dict(copy_json(by_clause[item["clause"]]), task_ids=tasks))
+    clauses.sort(key=lambda item: item["clause"])
+    settings = {key: value for key, value in lock["settings"].items()
+                if any(clause["clause"] in value.get("clauses", []) for clause in clauses)}
+    diagnostics = []
+    installed = lock["requirement_tasks"]
+    if installed is None or installed["mapping_digest"] != mapping_digest:
+        diagnostics.append(_note("mapping_not_installed",
+                                 "this task map is not the one installed in the lock; run map --write", "warning"))
+    return {"schema_version": 1, "status": "ok", "selection_digest": lock["selection_digest"],
+            "mapping_digest": mapping_digest, "package": package, "tasks": sorted(members),
+            "clauses": clauses, "settings": settings, "diagnostics": diagnostics}

@@ -113,6 +113,33 @@ Revision R1 (2026-09-28, parent review note): the P1 milestone `eaffeb6c` wrongl
 null setting/override values, narrowing spec 4.1's "JSON scalar". Fixed to accept null;
 covered by `AuthorityTests.test_null_is_a_json_scalar_setting_value`.
 
+## Locks, verification and task maps (additive, 2.2.b/2.2.c)
+
+| Function | Signature | Result |
+| --- | --- | --- |
+| `build_lock` | `(report, context, *, refs=(), context_budget=24000, now=None) -> dict` | Ready/empty only; refuses previews |
+| `write_lock` | `(roots, path, lock) -> {path, lock_sha256, selection_digest}` | Inside repository; atomic; never overwrites; refuses local absolute roots in content |
+| `parse_lock` | `(value) -> dict` | Structure + recomputed `selection_digest` and `mapping_digest` (edits are invalid) |
+| `selection_digest` | `(lock) -> str` | Over context, source snapshots, selected ref/role/scope, requirements, settings, overrides, exceptions, invocation refs |
+| `verify_lock` | `(roots, lock, context, *, today=None, reader=None) -> dict` | `ok|conflict|unavailable|needs-context`; never rewrites the lock |
+| `parse_task_map` | `(value, lock) -> dict` | Spec 4.6 validation against the lock |
+| `map_lock` | `(roots, lock_path, task_map, *, expected_lock_digest, write=False) -> dict` | Preview or CAS + exclusive-lock install |
+| `project_package` | `(lock, task_map, package) -> dict` | Package clauses with `task_ids`, settings subset |
+
+Lock = the report keys plus `limits` and `selection_digest`, `context`, `created_at`,
+`source_snapshots`, `asset_pins`, `requirement_tasks` (null until mapped), `source_attestations`,
+`review_evidence`, plus two recorded inputs so continuation can re-resolve: `invocation_refs`
+and `context_budget`. `lock_sha256` / `--expected-lock-digest` is `content_digest` of the lock
+JSON. `selected[]` records now also carry declared `assets` metadata. No asset is read.
+
+`verify-lock` fails `conflict` on a changed context (`context_changed`), a changed mandatory
+clause set (`mandatory_baseline_changed`, with `baseline.added/removed`) or locked inputs that
+no longer resolve (`replan_required`). It fails `unavailable` on a missing source/entry,
+changed bytes, retired/revoked pins or pack snapshot drift. Deprecated pins and changed
+defaults are warnings. Unrelated catalog additions pass. `map --write` keeps old
+`review_evidence` and reports `invalidated_review_evidence`. Evidence whose `mapping_digest`
+differs no longer counts. Write collisions and stale digests exit 6.
+
 ## CLI (spec section 7)
 
 | Command | Arguments | Status in this milestone |
@@ -121,8 +148,11 @@ covered by `AuthorityTests.test_null_is_a_json_scalar_setting_value`.
 | `list` | roots | Implemented (exit 0 even with zero entries) |
 | `show` | roots, `--ref <source:id@version>` | Implemented |
 | `check` | `--path P [--kind K]` or roots | Implemented |
-| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]` | Implemented; `--lock`, `--attestations` arrive with 2.2.b/3.2.b |
-| `verify-lock`, `map`, `project`, `review` | spec section 7 | Planned, core owner (2.2.b, 2.2.c, 4.2.b evidence) |
+| `explain`, `resolve` | roots, `--context F [--refs F] [--overrides F] [--exceptions F] [--preview-draft] [--context-budget-chars N]`; `resolve` also `[--lock PATH]` | Implemented. `--lock` writes only ready/empty and never overwrites; `--attestations` arrives with 3.2.b |
+| `verify-lock` | roots, `--lock F --context F` | Implemented (2.2.b); `--attestations` with 3.2.b |
+| `map` | roots, `--lock F --task-map F --expected-lock-digest SHA [--write]` | Implemented (2.2.c) |
+| `project` | `--lock F --task-map F --package ID` (no roots) | Implemented (2.2.c) |
+| `review` | spec section 7 | Planned, core owner (4.2.b-core) |
 | `capture`, `approve`, `index`, `apply`, `update`, `deprecate`, `retire`, `revoke`, `remove`, `export`, `import` | spec section 7 | Planned, core owner (P3) |
 
 Roots are `--roots-stdin` or `--roots-file F` (exactly one). Reports go to stdout as

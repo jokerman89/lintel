@@ -150,6 +150,45 @@ graph: a declared total order in which 2.1.a already depends on 1.3.c.
   `PinTests.test_cycles_depth_and_conflicting_digests`, and the personal-to-pack include case in
   `SelectorTests.test_personal_scope_is_explicit_only`.
 
+## 2.2.b / 2.2.c (core lane; implemented ahead of the join, checkboxes pending P1 review acceptance)
+
+`build_lock`, `write_lock`, `parse_lock`, `selection_digest`, `verify_lock`, `parse_task_map`,
+`map_lock`, `project_package`; shared `_WriteLock` (exclusive creation, owner-only release, no
+stealing) and `_atomic_write` (same-directory temp, fsync, atomic publish; no-overwrite mode).
+CLI `resolve --lock`, `verify-lock`, `map`, `project`.
+
+- `python -I -B tests\unit\patterns.py PinTests` -> exit 0, 14 tests OK:
+  - Includes: 4 tests, from 2.2.a.
+  - Lock (6):
+    - digest stable across `created_at`;
+    - evidence/metrics excluded from the digest;
+    - asset pins and compact clause text present;
+    - LF/no-BOM output with no local absolute root;
+    - tampered clause text and tampered context rejected;
+    - needs-context and conflict never lock;
+    - existing lock never overwritten;
+    - outside-repository path refused, with no temp residue;
+    - verify cases: unchanged, unrelated addition, changed context, deprecated warning,
+      retired and revoked block, changed bytes, deleted catalog, added mandatory binding,
+      demoted required binding, pack manifest drift;
+    - lock bytes unchanged by verify;
+    - CLI exit codes 0/6/0/3/5.
+  - Mapping (4):
+    - preview writes nothing;
+    - `--write` installs the mapping without changing `selection_digest`;
+    - per-package projection, with a shared clause in both packages;
+    - unknown package rejected, uninstalled map warned;
+    - nine invalid maps rejected with the lock byte-identical;
+    - stale digest gives a collision;
+    - a foreign `.lock` file gives `write_locked` and is left intact;
+    - recommendations optional;
+    - remap reports the invalidated evidence and keeps it;
+    - CLI exit codes 0/6/0.
+- Mutation probe (run once, source restored byte-identical): disabling the revocation block
+  failed 1 test, skipping the unmapped-must check failed 4, and allowing lock overwrite
+  failed 2.
+- Full file: `python -I -B tests\unit\patterns.py` -> exit 0, 46 tests OK.
+
 ## Pending
 
 All other leaves. Host/model acceptance (V17) not attempted. Full required suite (V16) not run

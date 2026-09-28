@@ -869,8 +869,8 @@ class AuthorityTests(unittest.TestCase):
                 self.assertEqual(bool(stderr), code != 0)
 
 
-class PinTests(unittest.TestCase):
-    """V06 subset (card 2.2.a): pattern/catalog includes, cycles, depth, digests and pack snapshots."""
+class _IncludeCases:
+    """Card 2.2.a: pattern/catalog includes, cycles, depth, digests and pack snapshots."""
 
     def test_includes_inherit_requiredness_and_must_match_context(self):
         fixture = Fixture(self)
@@ -954,6 +954,290 @@ class PinTests(unittest.TestCase):
         fixture.pack_chain(origin="elsewhere")
         report, _ = fixture.resolve(ctx())
         self.assertEqual(codes(report, "error"), ["pack_source_origin_unknown"])
+
+
+class LockFixture:
+    """A ready selection with one mandatory, one default and one recommendation clause."""
+
+    def __init__(self, testcase):
+        self.t = testcase
+        self.fx = Fixture(testcase)
+        self.rules = make_pattern("example.rules", requirements=[
+            clause("MUST-1", "must", "ui.theme", "dark"), clause("DEF-1", "default", "ui.density", "compact"),
+            clause("REC-1", "recommendation")], assets=[{"path": "guide.md", "kind": "guide", "sha256": "a" * 64,
+                                                         "phases": ["build"]}])
+        self.other = make_pattern("example.other", requirements=[clause("MUST-2", "must")])
+        self.publish()
+        self.fx.repo_bindings([binding("req", [ref("repo.main", self.rules)], when={"artifact": ["dashboard"]})])
+        self.context = ctx(artifact="dashboard")
+        self.lock_path = self.fx.repo / ".claude" / "plans" / "demo" / "patterns.lock.json"
+        self.lock_path.parent.mkdir(parents=True)
+
+    def publish(self, extra=(), **kwargs):
+        return self.fx.publish(self.fx.repo_patterns, "repo.main", [self.rules, self.other, *extra], **kwargs)
+
+    def lock(self, now=dt.datetime(2026, 9, 28, 1, 2, 3, tzinfo=dt.timezone.utc)):
+        report, _ = self.fx.resolve(self.context)
+        self.t.assertEqual(report["status"], "ready")
+        return p.build_lock(report, p.parse_context(self.context), now=now)
+
+    def write(self):
+        lock = self.lock()
+        p.write_lock(self.fx.roots(), self.lock_path, lock)
+        return lock
+
+    def read(self):
+        return json.loads(self.lock_path.read_text(encoding="utf-8"))
+
+    def verify(self, context=None):
+        return p.verify_lock(self.fx.roots(), self.read(), p.parse_context(context or self.context), today=TODAY)
+
+    def task_map(self, **change):
+        lock = self.read()
+        value = {"schema_version": 1, "selection_digest": lock["selection_digest"], "tasks": ["T1", "T2", "T3"],
+                 "packages": [{"id": "P1", "tasks": ["T1", "T2"]}, {"id": "P2", "tasks": ["T3"]}],
+                 "clauses": [{"clause": "example.rules@1.0.0#MUST-1", "tasks": ["T1", "T3"]},
+                             {"clause": "example.rules@1.0.0#DEF-1", "tasks": ["T2"]}]}
+        value.update(change)
+        return value
+
+
+class _LockCases:
+    """Card 2.2.b: explicit locks, stable digests and continuation verification."""
+
+    def test_lock_contents_digest_and_portability(self):
+        lf = LockFixture(self)
+        first = lf.lock()
+        second = lf.lock(now=dt.datetime(2027, 1, 1, tzinfo=dt.timezone.utc))
+        self.assertEqual(first["selection_digest"], second["selection_digest"], "timestamps are not selection content")
+        self.assertEqual(set(first), set(p.LOCK_KEYS))
+        self.assertEqual(first["created_at"], "2026-09-28T01:02:03Z")
+        self.assertEqual(first["asset_pins"], [{"path": "guide.md", "kind": "guide", "sha256": "a" * 64,
+                                                "phases": ["build"], "pattern": ref("repo.main", lf.rules)}])
+        self.assertEqual([item["locator"] for item in first["source_snapshots"]], ["repo"])
+        self.assertEqual({item["clause"]: item["text"] for item in first["requirements"]}["example.rules@1.0.0#MUST-1"],
+                         "MUST-1 text", "compact clause text travels with the lock")
+        evidence_only = dict(first, review_evidence=[{"note": "x"}], source_attestations=[{"a": 1}],
+                             metrics={"pattern_reads": 99})
+        self.assertEqual(p.selection_digest(evidence_only), first["selection_digest"])
+        written = p.write_lock(lf.fx.roots(), lf.lock_path, first)
+        self.assertEqual(written["path"], ".claude/plans/demo/patterns.lock.json")
+        data = lf.lock_path.read_bytes()
+        self.assertTrue(data.endswith(b"}\n") and b"\r\n" not in data and not data.startswith(b"\xef\xbb\xbf"))
+        for root in (lf.fx.repo, lf.fx.home, lf.fx.packs):
+            self.assertNotIn(root.as_posix().encode(), data)
+        self.assertEqual(p.parse_lock(json.loads(data))["selection_digest"], first["selection_digest"])
+
+    def test_tampered_or_refused_locks(self):
+        lf = LockFixture(self)
+        lock = lf.lock()
+        tampered = copy.deepcopy(lock)
+        tampered["requirements"][0]["text"] = "weakened"
+        with self.assertRaises(p.PatternError) as caught:
+            p.parse_lock(tampered)
+        self.assertIn("selection_digest", caught.exception.message)
+        with self.assertRaises(p.PatternError):
+            p.parse_lock(dict(lock, context=ctx(artifact="api")))
+        report, _ = lf.fx.resolve(ctx())
+        self.assertEqual(report["status"], "needs-context")
+        with self.assertRaises(p.PatternError) as caught:
+            p.build_lock(report, p.parse_context(ctx()))
+        self.assertEqual((caught.exception.code, caught.exception.status), ("lock_refused", "needs-context"))
+        p.write_lock(lf.fx.roots(), lf.lock_path, lock)
+        before = lf.lock_path.read_bytes()
+        with self.assertRaises(p.PatternError) as caught:
+            p.write_lock(lf.fx.roots(), lf.lock_path, lf.lock(now=dt.datetime(2027, 1, 1, tzinfo=dt.timezone.utc)))
+        self.assertEqual(caught.exception.status, "collision")
+        self.assertEqual(lf.lock_path.read_bytes(), before, "an existing lock is never overwritten")
+        with self.assertRaises(p.PatternError) as caught:
+            p.write_lock(lf.fx.roots(), lf.fx.root / "outside.lock.json", lock)
+        self.assertEqual(caught.exception.code, "unsafe_path")
+        self.assertEqual(sorted(path.name for path in lf.lock_path.parent.iterdir()), ["patterns.lock.json"],
+                         "no temp or lock-file residue")
+
+    def test_verify_lock_continuation_cases(self):
+        lf = LockFixture(self)
+        lf.write()
+        original = lf.lock_path.read_bytes()
+        ok = lf.verify()
+        self.assertEqual((ok["status"], [item["status"] for item in ok["checked"]]), ("ok", ["ok"]))
+        lf.publish(extra=[make_pattern("example.unrelated", applies_to={"artifact": ["api"]})])
+        ok = lf.verify()
+        self.assertEqual(ok["status"], "ok", "unrelated catalog additions do not disturb a pin")
+        self.assertEqual(ok["historical_sources"], json.loads(original)["source_snapshots"])
+        self.assertIn("conflict", [lf.verify(ctx(artifact="report"))["status"]])
+        self.assertIn("context_changed", codes(lf.verify(ctx(artifact="report")), "error"))
+        entry = next(item for item in lf.publish()["entries"] if item["id"] == "example.rules")
+        event = {k: entry[k] for k in ("id", "version", "sha256")}
+        lf.publish(lifecycle=[dict(event, status="deprecated", reason="r", reference="ADR", at=TS)])
+        report = lf.verify()
+        self.assertEqual(report["status"], "ok")
+        self.assertIn("pinned_deprecated", codes(report, "warning"))
+        lf.publish(lifecycle=[dict(event, status="retired", reason="r", reference="ADR", at=TS)])
+        self.assertEqual(codes(lf.verify(), "error"), ["pinned_retired"])
+        lf.publish(revocations=[dict(event, reason="unsafe", reference="SEC-1", at=TS)])
+        report = lf.verify()
+        self.assertEqual((report["status"], codes(report, "error")), ("unavailable", ["pinned_revoked"]))
+        self.assertEqual(lf.lock_path.read_bytes(), original, "verification never rewrites the lock")
+
+    def test_verify_lock_changed_bytes_missing_source_and_baseline(self):
+        lf = LockFixture(self)
+        lf.write()
+        edited = dict(lf.rules, guidance="changed after locking")
+        lf.fx.publish(lf.fx.repo_patterns, "repo.main", [edited, lf.other])
+        report = lf.verify()
+        self.assertEqual((report["status"], codes(report, "error")), ("unavailable", ["reference_digest_mismatch"]))
+        lf.publish()
+        (lf.fx.repo_patterns / "catalog.json").unlink()
+        self.assertEqual(codes(lf.verify(), "error"), ["source_unavailable"])
+        lf.publish()
+        lf.fx.repo_bindings([binding("req", [ref("repo.main", lf.rules)], when={"artifact": ["dashboard"]}),
+                             binding("new", [ref("repo.main", lf.other)])])
+        report = lf.verify()
+        self.assertEqual(report["status"], "conflict")
+        self.assertEqual(report["baseline"]["added"], ["example.other@1.0.0#MUST-2"])
+        self.assertEqual(report["baseline"]["removed"], [])
+        lf.fx.repo_bindings([binding("dflt", [ref("repo.main", lf.rules)], role="default",
+                                     when={"artifact": ["dashboard"]})])
+        report = lf.verify()
+        self.assertEqual(report["status"], "conflict", "reducing a mandatory binding is a re-plan, never silent")
+
+    def test_verify_lock_pack_drift_blocks(self):
+        lf = LockFixture(self)
+        pack_root = lf.fx.pack_chain()
+        team_rule = make_pattern("example.team")
+        lf.fx.publish(pack_root / "patterns", "team.patterns", [team_rule],
+                      bindings=[binding("t", [ref("team.patterns", team_rule)])])
+        lf.write()
+        self.assertEqual(lf.verify()["status"], "ok")
+        (lf.fx.packs / "base" / "pack.yaml").write_text("name: base\nversion: 2.0.0\n", encoding="utf-8")
+        self.assertIn("pack_snapshot_drift", codes(lf.verify(), "error"))
+
+    def test_cli_lock_roundtrip(self):
+        lf = LockFixture(self)
+        envelope = lf.fx.write_json("roots.json", lf.fx.envelope())
+        context = lf.fx.write_json("context.json", lf.context)
+        code, report, _ = lf.fx.cli("resolve", "--roots-file", envelope, "--context", context, "--lock", lf.lock_path)
+        self.assertEqual((code, report["lock"]["path"]), (0, ".claude/plans/demo/patterns.lock.json"))
+        code, again, _ = lf.fx.cli("resolve", "--roots-file", envelope, "--context", context, "--lock", lf.lock_path)
+        self.assertEqual(code, 6)
+        code, verified, _ = lf.fx.cli("verify-lock", "--roots-file", envelope, "--lock", lf.lock_path, "--context", context)
+        self.assertEqual((code, verified["status"]), (0, "ok"))
+        needs = lf.fx.write_json("needs.json", ctx())
+        other = lf.fx.repo / ".claude" / "plans" / "demo" / "other.lock.json"
+        code, report, _ = lf.fx.cli("resolve", "--roots-file", envelope, "--context", needs, "--lock", other)
+        self.assertEqual((code, other.exists()), (3, False), "no lock for unknown mandatory context")
+        entry = next(item for item in lf.publish()["entries"] if item["id"] == "example.rules")
+        lf.publish(revocations=[{**{k: entry[k] for k in ("id", "version", "sha256")}, "reason": "r",
+                                 "reference": "SEC", "at": TS}])
+        code, verified, _ = lf.fx.cli("verify-lock", "--roots-file", envelope, "--lock", lf.lock_path, "--context", context)
+        self.assertEqual((code, verified["status"]), (5, "unavailable"))
+
+
+class _MappingCases:
+    """Card 2.2.c: task mapping, projection and review-evidence invalidation."""
+
+    def test_map_preview_write_and_projection(self):
+        lf = LockFixture(self)
+        lf.write()
+        digest = p.content_digest(lf.read())
+        preview = p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(), expected_lock_digest=digest)
+        self.assertEqual((preview["written"], lf.read()["requirement_tasks"]), (False, None))
+        written = p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(), expected_lock_digest=digest, write=True)
+        lock = lf.read()
+        self.assertTrue(written["written"])
+        self.assertEqual(lock["requirement_tasks"]["mapping_digest"], preview["mapping_digest"])
+        self.assertEqual(lock["selection_digest"], p.parse_lock(lock)["selection_digest"],
+                         "regrouping work does not change the selection")
+        first = p.project_package(lock, lf.task_map(), "P1")
+        self.assertEqual([(item["clause"], item["task_ids"]) for item in first["clauses"]],
+                         [("example.rules@1.0.0#DEF-1", ["T2"]), ("example.rules@1.0.0#MUST-1", ["T1"])])
+        self.assertEqual(first["diagnostics"], [])
+        self.assertEqual(sorted(first["settings"]), ["ui.density", "ui.theme"])
+        second = p.project_package(lock, lf.task_map(), "P2")
+        self.assertEqual([item["clause"] for item in second["clauses"]], ["example.rules@1.0.0#MUST-1"],
+                         "shared clauses appear in every owning package")
+        self.assertEqual((first["mapping_digest"], first["selection_digest"]),
+                         (written["mapping_digest"], lock["selection_digest"]))
+        with self.assertRaises(p.PatternError):
+            p.project_package(lock, lf.task_map(), "P9")
+        regrouped = lf.task_map(packages=[{"id": "P1", "tasks": ["T1", "T2", "T3"]}])
+        warned = p.project_package(lock, regrouped, "P1")
+        self.assertIn("mapping_not_installed", codes(warned, "warning"))
+
+    def test_map_rejections_leave_lock_unchanged(self):
+        lf = LockFixture(self)
+        lf.write()
+        before = lf.lock_path.read_bytes()
+        digest = p.content_digest(lf.read())
+        bad_maps = {
+            "unknown task": {"packages": [{"id": "P1", "tasks": ["T1", "T2", "T9"]}, {"id": "P2", "tasks": ["T3"]}]},
+            "two packages": {"packages": [{"id": "P1", "tasks": ["T1", "T2"]}, {"id": "P2", "tasks": ["T2", "T3"]}]},
+            "unowned": {"packages": [{"id": "P1", "tasks": ["T1", "T2"]}]},
+            "duplicate task": {"tasks": ["T1", "T1", "T2", "T3"]},
+            "unknown clause": {"clauses": [{"clause": "example.rules@1.0.0#NOPE", "tasks": ["T1"]}]},
+            "empty mapping": {"clauses": [{"clause": "example.rules@1.0.0#MUST-1", "tasks": []},
+                                          {"clause": "example.rules@1.0.0#DEF-1", "tasks": ["T2"]}]},
+            "unmapped must": {"clauses": [{"clause": "example.rules@1.0.0#DEF-1", "tasks": ["T2"]}]},
+            "unmapped default": {"clauses": [{"clause": "example.rules@1.0.0#MUST-1", "tasks": ["T1"]}]},
+            "other selection": {"selection_digest": "0" * 64},
+        }
+        for name, change in bad_maps.items():
+            with self.subTest(name=name):
+                with self.assertRaises(p.PatternError) as caught:
+                    p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(**change), expected_lock_digest=digest,
+                               write=True)
+                self.assertEqual(caught.exception.status, "invalid")
+        self.assertEqual(lf.lock_path.read_bytes(), before)
+        with self.assertRaises(p.PatternError) as caught:
+            p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(), expected_lock_digest="0" * 64, write=True)
+        self.assertEqual((caught.exception.code, caught.exception.status), ("stale_lock_digest", "collision"))
+        Path(str(lf.lock_path) + ".lock").write_text("another-writer", encoding="utf-8")
+        with self.assertRaises(p.PatternError) as caught:
+            p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(), expected_lock_digest=digest, write=True)
+        self.assertEqual(caught.exception.code, "write_locked")
+        self.assertEqual(Path(str(lf.lock_path) + ".lock").read_text(encoding="utf-8"), "another-writer",
+                         "a foreign lock is never stolen or removed")
+        self.assertEqual(lf.lock_path.read_bytes(), before)
+        recommendation_optional = lf.task_map()
+        self.assertEqual(len(p.parse_task_map(recommendation_optional, lf.read())["clauses"]), 2)
+
+    def test_remap_invalidates_old_task_evidence(self):
+        lf = LockFixture(self)
+        lf.write()
+        first = p.map_lock(lf.fx.roots(), lf.lock_path, lf.task_map(),
+                           expected_lock_digest=p.content_digest(lf.read()), write=True)
+        lock = lf.read()
+        lock["review_evidence"] = [{"mapping_digest": first["mapping_digest"], "clause": "x"}]
+        lf.lock_path.write_text(p.emit_json(lock), encoding="utf-8")
+        regrouped = lf.task_map(packages=[{"id": "P1", "tasks": ["T1", "T2", "T3"]}])
+        second = p.map_lock(lf.fx.roots(), lf.lock_path, regrouped,
+                            expected_lock_digest=p.content_digest(lf.read()), write=True)
+        self.assertNotEqual(second["mapping_digest"], first["mapping_digest"])
+        self.assertEqual((second["previous_mapping_digest"], second["invalidated_review_evidence"]),
+                         (first["mapping_digest"], 1))
+        self.assertEqual(lf.read()["review_evidence"], lock["review_evidence"], "old evidence is kept, not deleted")
+        self.assertEqual(lf.read()["selection_digest"], lock["selection_digest"])
+
+    def test_cli_map_and_project(self):
+        lf = LockFixture(self)
+        lf.write()
+        envelope = lf.fx.write_json("roots.json", lf.fx.envelope())
+        task_map = lf.fx.write_json("tasks.json", lf.task_map())
+        digest = p.content_digest(lf.read())
+        code, report, _ = lf.fx.cli("map", "--roots-file", envelope, "--lock", lf.lock_path, "--task-map", task_map,
+                                    "--expected-lock-digest", digest, "--write")
+        self.assertEqual((code, report["written"]), (0, True))
+        code, report, _ = lf.fx.cli("map", "--roots-file", envelope, "--lock", lf.lock_path, "--task-map", task_map,
+                                    "--expected-lock-digest", digest, "--write")
+        self.assertEqual(code, 6, "the old digest is stale after the first write")
+        code, projected, _ = lf.fx.cli("project", "--lock", lf.lock_path, "--task-map", task_map, "--package", "P2")
+        self.assertEqual((code, [item["clause"] for item in projected["clauses"]]),
+                         (0, ["example.rules@1.0.0#MUST-1"]))
+
+
+class PinTests(_IncludeCases, _LockCases, _MappingCases, unittest.TestCase):
+    """V06: includes, digests, lifecycle and context changes detected; cold projection complete."""
 
 
 if __name__ == "__main__":
