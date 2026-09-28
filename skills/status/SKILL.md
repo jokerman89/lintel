@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: full
+  - cli: copilot
+    level: full
 ---
 
 You are the `status` skill: read the selected original work and recorded cycle, with

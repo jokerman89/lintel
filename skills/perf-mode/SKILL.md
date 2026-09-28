@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 # Perf mode

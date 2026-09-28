@@ -5,7 +5,7 @@ description: Use to turn an authorized recurring task or pattern into a new Lint
 color: green
 tools: Read, Write, Edit, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Skill new

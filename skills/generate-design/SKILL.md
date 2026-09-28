@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-design` skill — third stage of the v3.5 shared content pipeline. Produces design-spec.json from content.md.

@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 You are the `hooks-status` skill — reader for the `hooks` audit category. It reports what the

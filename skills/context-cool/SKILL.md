@@ -5,7 +5,7 @@ description: Exclude explicitly selected files from future context reads without
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Context cool

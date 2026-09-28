@@ -5,7 +5,7 @@ description: Use for an honest context-weight readout and a pause/fresh-session/
 color: yellow
 tools: Read, Bash, Grep
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, copilot]
 ---
 
 # /clean

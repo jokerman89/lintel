@@ -5,7 +5,7 @@ description: Retrieve bounded external reference text only through explicit host
 color: cyan
 tools: Read, Bash, WebFetch
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Context warm from URL

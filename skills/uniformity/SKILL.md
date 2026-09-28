@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: full
+  - cli: copilot
+    level: full
 ---
 
 You are the `uniformity` skill — read-only window onto the uniformity-as-contract

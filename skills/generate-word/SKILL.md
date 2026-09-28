@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 license_note: produces customer-bound output; honors the active pack's compliance gates for customer-facing variants
 ---
 

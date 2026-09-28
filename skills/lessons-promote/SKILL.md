@@ -5,7 +5,7 @@ description: Promote one ID-managed project lesson into an explicitly named Lint
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the lessons-promote skill. You run `bin/li-lessons-promote`; there is no separate Git

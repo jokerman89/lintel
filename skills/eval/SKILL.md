@@ -5,7 +5,7 @@ description: Run the active pack's voice TEST against its voice CORPUS — per-c
 color: orange
 tools: Read, Write, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /li:eval

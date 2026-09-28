@@ -5,7 +5,7 @@ description: Use when a non-trivial decision needs recording to bootstrap a new 
 color: cyan
 tools: Read, Bash, Edit, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the adr-new skill.

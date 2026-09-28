@@ -5,7 +5,7 @@ description: Measure performance — runtime, memory, cold-start — and detect 
 color: yellow
 tools: Read, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /perfbench

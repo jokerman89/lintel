@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-style-learn` skill — v3.5 Phase 3 of the doc-generation-pipeline. Extracts palettes from existing artifacts.
