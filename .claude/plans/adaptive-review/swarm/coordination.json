@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "initiative": "adaptive-review",
+  "work_map": ".claude/plans/adaptive-review/work.json",
+  "charter": ".claude/plans/adaptive-review/swarm/charter.md",
+  "integration_branch": "jokerman-microsoft-adaptive-review",
+  "max_parallel": 2,
+  "coordinator_paths": [
+    ".claude/plans/adaptive-review/spec.md",
+    ".claude/plans/adaptive-review/plan.md",
+    ".claude/plans/adaptive-review/prompt.md",
+    "lib/review_method.py",
+    "lib/review-questions.json",
+    "lib/mars_contract.py",
+    "bin/li-review-packet.py",
+    "skills/CATALOG.md"
+  ],
+  "scope_rules": {
+    "worker": "write_scope+own_report",
+    "reviewer": "own_review",
+    "reducers": "coordinator-only"
+  },
+  "lanes": [
+    {
+      "task_id": "P1",
+      "wave": 1,
+      "role": "lintel-builder",
+      "isolation": "git-worktree",
+      "write_scope": ["lib/review_context.py", "tests/unit/review_context.py", "tests/unit/review-context.sh"],
+      "brief": ".claude/plans/adaptive-review/swarm/briefs/P1.md",
+      "report": ".claude/plans/adaptive-review/swarm/reports/P1.md",
+      "review": ".claude/plans/adaptive-review/swarm/reviews/P1.md"
+    },
+    {
+      "task_id": "P2",
+      "wave": 1,
+      "role": "lintel-builder",
+      "isolation": "git-worktree",
+      "write_scope": ["lib/review_evaluation.py", "bin/li-review-eval.py", "tests/unit/review_evaluation.py", "tests/unit/review-evaluation.sh", "tests/fixtures/review-evaluation"],
+      "brief": ".claude/plans/adaptive-review/swarm/briefs/P2.md",
+      "report": ".claude/plans/adaptive-review/swarm/reports/P2.md",
+      "review": ".claude/plans/adaptive-review/swarm/reviews/P2.md"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/adaptive-review/spec.md",
+  "plan": ".claude/plans/adaptive-review/plan.md",
+  "tasks": ".claude/plans/adaptive-review/plan.md",
+  "prompt": ".claude/plans/adaptive-review/prompt.md",
+  "execution_mode": "swarm",
+  "coordination": ".claude/plans/adaptive-review/swarm/coordination.json"
+}
