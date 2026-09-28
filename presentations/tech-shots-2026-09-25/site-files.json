@@ -128,5 +128,8 @@
   "comparison/kitchen-provenance.json",
   "show/refresh.js",
   "show/refresh.css",
-  "assets/swarming/github-tab.png"
+  "assets/swarming/github-tab.png",
+  "comparison/runtime-v2.md",
+  "show/story-map.html",
+  "verification/story-refresh.json"
 ]

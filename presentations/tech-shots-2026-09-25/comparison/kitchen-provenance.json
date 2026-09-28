@@ -1,22 +1,49 @@
 {
-  "presentation_snapshot": "2026-09-25",
+  "presentation_snapshot": "2026-09-28",
   "source_repository": "lintel-kitchen-demo",
-  "source_commit": "f347241",
-  "status": "No completed three-arm comparative results published",
+  "source_commit": "e31f80ac411b6a0a6bea6de2afb5bd1d7199f1ed",
+  "protocol_version": 2,
+  "source_working_tree": "Additional untracked development was present; no clean measured cohort is inferred.",
+  "status": "No completed controlled three-arm comparison in the inspected evidence",
+  "native_v2_rehearsal_verified": false,
+  "controlled_comparison_available": false,
+  "model_runs_started_by_this_update": false,
   "arms": [
     "Naked Copilot",
-    "Lintel (serial packages + independent review)",
+    "Lintel: serial packages with independent review",
     "Lintel + Swarming"
   ],
   "requirements": 32,
   "possible_points": 100,
-  "raw_trials_included": false,
-  "model_runs_started_by_this_update": false,
-  "prompt_sha256": "749045fb36e72e1bc2dce02843ac911ad9a2a6380e908e38adf6c2192cbd89d9",
-  "brief_sha256": "375fde476f09117ae2aa1fce3497138b832e62f5552b0458eec261b288032829",
-  "calibration_only": {
-    "reference": 100,
+  "input_sha256": {
+    "PROMPT-v2.txt": "6bb1eda730275d4a2e1e87af551ec39d157c601b5b10a379ab658630f91526b2",
+    "BRIEF.md": "375fde476f09117ae2aa1fce3497138b832e62f5552b0458eec261b288032829",
+    "RUNTIME-v2.md": "8a88f4d8e699a0dc101a463ce07d0d5e1218016705eb8a579471ba54bdd0ff96"
+  },
+  "runtime_precedence": "RUNTIME-v2.md supersedes only the BRIEF.md server-start and free-technology paragraphs.",
+  "earlier_attempts": [
+    {
+      "kind": "naked pilot",
+      "status": "timeout; subsequent grading rejected after source drift",
+      "comparable": false
+    },
+    {
+      "kind": "external demonstrations",
+      "status": "uncontrolled conditions; incomplete final evidence",
+      "comparable": false
+    }
+  ],
+  "historical_calibration": {
+    "date": "2026-09-24",
+    "reference_fixture": 100,
     "incomplete_control": 0,
-    "source": "Recorded harness self-check2026-09-24; not a model result"
+    "participant_results": false,
+    "interpretation": "Harness calibration under the earlier protocol; not comparative model evidence."
+  },
+  "public_export": {
+    "raw_trials_included": false,
+    "host_identifiers_included": false,
+    "machine_paths_included": false,
+    "usage_receipts_included": false
   }
 }
