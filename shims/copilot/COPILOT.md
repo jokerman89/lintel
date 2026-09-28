@@ -74,19 +74,32 @@ by name.
 
 A generated skill is the canonical body with deterministic transforms: `/li:<name>`
 becomes `/li-<name>`, `AskUserQuestion` becomes `ask_user`, and relative links are
-rebased to the generated location. In a vendored kit, a link to a file outside the
-bundle becomes a public GitHub URL. A short preamble states the resource root, the
+rebased to the generated location. A short preamble states the resource root, the
 shell-step runner, the tool map and native invocation. Agents receive the same body
 transforms and a shorter preamble. Edit the canonical file, then run `li-copilot init`;
 `li-copilot check` fails on drift, and CI runs it.
+
+Skill-relative paths in a native skill's body (`<base>`, `scripts/`, `references/`,
+`data/` and `${LINTEL_SKILLS_DIR:-skills}/…`) refer to the Lintel source's
+`skills/<name>/` under the resource root, not to the generated `.github/skills/li-<name>/`
+folder, which holds only `SKILL.md`; `bin/li-run` exports `LINTEL_SKILLS_DIR` for shell
+steps.
+
+In a vendored kit, a link from a native file to a repository-only file that the bundle
+does not carry, for example under `.claude/`, points to the public GitHub source on
+`main`. Such a link follows that branch and is not fetched or live-verified by the
+installer. Bundled guides that contain such links start with a source note; native
+skill and agent files carry no separate source note, so this section documents the
+policy.
 
 Generated frontmatter keeps only the fields Copilot reads. Every dropped field is a
 recorded degradation, not a silent loss:
 
 - Skills keep `name` and `description` (curated text for the core workflows, at most
   1024 characters). They drop `layer`, `color`, `tools`, `voice`, `cli_support`,
-  `necessity`, `gap_if_skipped` and `navigation`, so a skill does not narrow the
-  session's tools.
+  `necessity`, `gap_if_skipped`, `navigation`, `workflow_root`, `domain`,
+  `license_note` and `hop_in`. Without `tools`, a skill does not narrow the session's
+  tools.
 - Agents keep `name`, `description` and `tools`. They drop `memory`, `model`, `color`,
   `tier`, `voice`, `category` and `cli_support`. GitHub documents no agent memory
   property, so prior findings do not carry over between runs; agents whose method
