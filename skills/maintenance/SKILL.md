@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 You are the `maintenance` skill — on-demand Lintel-maintenance pass.

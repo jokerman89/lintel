@@ -5,7 +5,7 @@ description: Use to take on or change a working role — activate one for a ligh
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the role skill — the lifecycle command for session roles.

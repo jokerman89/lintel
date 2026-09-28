@@ -2,7 +2,7 @@
 
 Lintel supports GitHub Copilot, Claude, Codex and Cursor (ADR-0035); any other host uses
 the manual `other` route. Choose the exact surface, not just its vendor. Every listed route
-preserves canonical planning, build, review and resume resources. Native-format wrappers
+preserves canonical planning, build, review and resume resources. Native-format files
 are generated only where the project discovery root is documented. Other routes are
 plainly manual.
 
@@ -19,28 +19,31 @@ python3 bin/li-adapter.py check --target <project>
 
 Use actual values for the placeholders. Repeat `--client` to select multiple surfaces in
 one invocation. The existing inventory preserves previously selected clients. One managed
-source bundle serves them all; shared roots produce identical wrappers rather than duplicate
-copies of the method. No user-global installation, enablement, model or hook command exists
-in this helper.
+source bundle serves them all; surfaces that share a discovery root receive one identical
+set of generated files rather than one copy per surface. No user-global installation,
+enablement, model or hook command exists in this helper.
 
-`show` returns official URLs checked on 2026-09-20 with version/conditions, the delivered route
+`show` returns official URLs with their check dates and version/conditions, the delivered route
 and observed evidence per operation. These dates describe source checks, not client runs.
 All live workflows remain unrun here except the explicitly limited Copilot App session
 observations. Locally exercised installer fixtures do not establish discovery or model quality.
 
 ## Client-specific routes
 
-No client is the default. Every native route generates `li-<skill>` wrappers for the core
-workflow entry points; invoke them through the host's own mechanism (slash command, `$`
-reference, skills UI or skill tool). The Claude Code plugin keeps its namespaced
-`/li:<skill>` form. Manual routes read the canonical `skills/<skill>/SKILL.md` through
-`START.md`. Former workflow names are mapped in the
-[native workflow migration](migrations/2026-09-25-native-workflows.md), not aliased.
+No client is the default. The GitHub Copilot surfaces receive a complete generated native
+skill for every canonical skill and a custom agent for every canonical agent. The other
+native routes generate `li-<skill>` wrappers for the core workflow entry points. Invoke
+either through the host's own mechanism (slash command, `$` reference, skills UI or skill
+tool). The Claude Code plugin keeps its namespaced `/li:<skill>` form. Manual routes read
+the canonical `skills/<skill>/SKILL.md` through `START.md`. Former workflow names are mapped
+in the [native workflow migration](migrations/2026-09-25-native-workflows.md), not aliased.
 
 **GitHub Copilot:** `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud` each select
-the existing `.github/skills` and custom-agent kit. Organization policy and available APIs
-still differ. Other Copilot IDEs use `other` until their contracts are verified.
-The [dedicated guide](copilot.md) preserves the native kit and CLI plugin.
+the `.github/skills` and `.github/agents` kit: every canonical skill as a complete `li-<skill>`
+skill, every canonical agent as a custom agent, and the three `lintel-*` role profiles.
+Organization policy and available APIs still differ. Other Copilot IDEs use `other` until
+their contracts are verified. The [dedicated guide](copilot.md) covers the native kit, the
+plugin routes and the surface matrix.
 
 **Claude:** `claude-code` and `claude-desktop` select `.claude/skills` for CLI and Desktop
 Code local respectively. This does not cover Chat, Cowork or cloud. The

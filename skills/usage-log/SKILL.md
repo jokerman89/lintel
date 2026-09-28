@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 You are the `usage-log` skill — the observation foundation under maintenance, token budgeting, hook audit, and low-observed-usage review.

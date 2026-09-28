@@ -2,8 +2,9 @@
 
 Lintel supports four client families: GitHub Copilot, Claude, Codex and Cursor (ADR-0035).
 It keeps one shared workflow in `skills/`, specialist roles in `agents/`, and reusable
-helpers/templates in `lib/` and `scaffolding/`. Thin adapters expose documented native
-discovery formats; any other host can use an explicit file handoff. Universal means
+helpers/templates in `lib/` and `scaffolding/`. Generated adapters expose documented native
+discovery formats: complete skills and custom agents on GitHub Copilot, thin wrappers on the
+other native routes. Any other host can use an explicit file handoff. Universal means
 continuity of intent, work, policy and evidence, not identical client tools or blanket support.
 
 ## Three separate facts
@@ -80,12 +81,14 @@ invoke it depends on the route, not on a preferred client:
 | Route | Invocation form |
 |---|---|
 | Claude Code plugin | Namespaced `/li:<skill>`, for example `/li:plan` |
-| Generated repository wrappers (Claude Code, Codex, Copilot and Cursor) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
-| Copilot CLI plugin | The same core `li-<skill>` wrappers as the repository kit |
+| GitHub Copilot repository kit and plugin | The complete native `li-<skill>` skill generated for every canonical skill, for example `/li-plan`; named roles are custom agents |
+| Generated repository wrappers (Claude Code, Codex and Cursor) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
 | Codex and Cursor plugins | Canonical `skills/<skill>` names as the host's plugin UI lists them (form not verified here) |
 | Universal manual handoff | Ask the host to read `.github/lintel/START.md` and the canonical `skills/<skill>/SKILL.md` |
 
-Wrappers are generated only for the core workflows (welcome, cycle, the nine phase workflows, resume, spec-kit, swarm and mars). Other catalog workflows are read
+On Copilot, every canonical skill is generated as a complete native skill. On the other native
+routes, wrappers are generated only for the core workflows (welcome, cycle, the nine phase
+workflows, resume, spec-kit, swarm and mars); other catalog workflows are read
 from their canonical file on demand. Deeper documents use `/li:<skill>` notation; translate
 it to the route you actually use. Former entry names from the workflow consolidation are
 mapped in the [native workflow migration](migrations/2026-09-25-native-workflows.md);
@@ -95,8 +98,10 @@ they are not executable aliases.
 
 ### GitHub Copilot
 
-The native `.github/skills` and `.github/agents` kit and `.github/plugin/` manifest remain.
-CLI, App, VS Code and cloud have individual records. Use the [Copilot guide](copilot.md).
+The `.github/skills` and `.github/agents` kit and the `.github/plugin/` manifest carry a
+complete generated skill for every canonical skill and a custom agent for every canonical
+agent, plus the three `lintel-*` role profiles. CLI, App, VS Code and cloud have individual
+records. Use the [Copilot guide](copilot.md).
 Lintel does not translate Claude hooks into Copilot's distinct hook API.
 
 ### Claude Code

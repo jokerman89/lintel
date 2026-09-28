@@ -5,7 +5,7 @@ description: List configured-store, repository and installed-source packs with r
 color: green
 tools: Read, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the PACK-LIST skill — surfaces every pack available on this machine.

@@ -6,7 +6,7 @@ description: Use for security and compliance depth — threat models, auth flows
 color: red
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Security-bearing work lacks explicit threat, auth, secret and applicable-control evidence; vulnerabilities or unsupported clearance can reach delivery."
 navigation:

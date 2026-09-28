@@ -5,7 +5,7 @@ description: Use to initialize or inspect repository foundations through the own
 color: cyan
 tools: Read, Bash, Edit, Write, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Scaffold

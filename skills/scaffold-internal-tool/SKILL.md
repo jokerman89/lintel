@@ -5,7 +5,7 @@ description: Create a working internal CLI, service, dashboard or script using t
 color: green
 tools: Read, Write, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Scaffold an internal tool

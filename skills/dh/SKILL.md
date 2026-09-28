@@ -6,7 +6,7 @@ description: Use for devops and hosting depth — deployment plans, rollback str
 color: purple
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Production-bound work lacks state-compatible recovery, observable service objectives, capacity/cost assumptions and actionable on-call evidence."
 navigation:

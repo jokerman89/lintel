@@ -27,6 +27,9 @@
     "copilot-app": {"url": "https://docs.github.com/en/copilot/concepts/agents/github-copilot-app", "checked": "2026-09-20", "version": "Rolling documentation; local build not recorded in source research", "conditions": "Separate app policy and worktree/session APIs; not blanket CLI parity."},
     "copilot-vscode": {"url": "https://code.visualstudio.com/docs/agents/overview", "checked": "2026-09-20", "version": "Rolling documentation; preview behavior may differ", "conditions": "Harness-specific customization, planning and browser; inspect active tools."},
     "copilot-cloud": {"url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent", "checked": "2026-09-20", "version": "Hosted service documentation; no job run", "conditions": "Ephemeral task environment and Playwright; a cloud task is not nested local delegation."},
+    "copilot-hooks": {"url": "https://docs.github.com/en/copilot/reference/hooks-reference", "checked": "2026-09-28", "version": "Rolling documentation; exact version not tested", "conditions": "Copilot CLI and cloud agent only. The CLI combines policy, repository .github/hooks, user, settings and installed-plugin hooks; the cloud agent reads only repository .github/hooks/*.json and honors bash entries."},
+    "copilot-plugins": {"url": "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference", "checked": "2026-09-28", "version": "Rolling documentation; exact version not tested", "conditions": "Copilot CLI plugin install, update, enable/disable and marketplace commands; a plugin can package skills, custom agents, hooks and MCP servers. Managed or repository enabledPlugins settings override local toggles."},
+    "copilot-agents": {"url": "https://docs.github.com/en/copilot/reference/custom-agents-configuration", "checked": "2026-09-28", "version": "Rolling documentation; exact version not tested", "conditions": "Agent profiles for GitHub.com, Copilot CLI and supported IDEs, with no documented memory property. An unset tools list allows all tools, unrecognized tool names are ignored and a prompt holds at most 30,000 characters."},
     "codex-cli": {"url": "https://learn.chatgpt.com/docs/codex/cli.md", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Interactive/headless and resume; web search is not browser control."},
     "codex-skills": {"url": "https://learn.chatgpt.com/docs/build-skills", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Codex repository .agents/skills; CLI/IDE use /skills or $ references, desktop has its own UI."},
     "codex-agents": {"url": "https://learn.chatgpt.com/docs/agent-configuration/subagents", "checked": "2026-09-20", "version": "Rolling documentation; exact version not tested", "conditions": "Separate configured subagent feature; available tools and permissions must be inspected."},
@@ -67,7 +70,8 @@
       "label": "GitHub Copilot CLI", "family": "copilot", "surface": "cli",
       "discovery": {"kind": "copilot", "root": ".github/skills", "source": "copilot-skills"},
       "preserved": [".github/plugin/plugin.json"],
-      "vendor": {"skills": {"status": "documented", "source": "copilot-skills"}, "instructions": {"status": "documented", "source": "copilot-cli"}, "plan": {"status": "documented", "source": "copilot-cli"}, "delegate": {"status": "documented", "source": "copilot-cli"}, "hooks": {"status": "documented", "source": "copilot-cli"}}
+      "sources": ["copilot-plugins", "copilot-agents"],
+      "vendor": {"skills": {"status": "documented", "source": "copilot-skills"}, "instructions": {"status": "documented", "source": "copilot-cli"}, "plan": {"status": "documented", "source": "copilot-cli"}, "delegate": {"status": "documented", "source": "copilot-cli"}, "hooks": {"status": "documented", "source": "copilot-hooks"}}
     },
     "copilot-app": {
       "label": "GitHub Copilot App", "family": "copilot", "surface": "desktop",
@@ -84,13 +88,15 @@
       "label": "GitHub Copilot VS Code", "family": "copilot", "surface": "ide",
       "discovery": {"kind": "copilot", "root": ".github/skills", "source": "copilot-skills"},
       "preserved": [],
+      "sources": ["copilot-agents"],
       "vendor": {"skills": {"status": "documented", "source": "copilot-skills"}, "plan": {"status": "documented", "source": "copilot-vscode"}, "delegate": {"status": "conditional", "source": "copilot-vscode"}, "browser": {"status": "conditional", "source": "copilot-vscode"}, "hooks": {"status": "conditional", "source": "copilot-vscode"}}
     },
     "copilot-cloud": {
       "label": "GitHub Copilot cloud agent", "family": "copilot", "surface": "cloud",
       "discovery": {"kind": "copilot", "root": ".github/skills", "source": "copilot-skills"},
       "preserved": [],
-      "vendor": {"skills": {"status": "documented", "source": "copilot-skills"}, "browser": {"status": "conditional", "source": "copilot-cloud"}, "hooks": {"status": "documented", "source": "copilot-cloud"}, "isolate": {"status": "conditional", "source": "copilot-cloud"}}
+      "sources": ["copilot-agents"],
+      "vendor": {"skills": {"status": "documented", "source": "copilot-skills"}, "browser": {"status": "conditional", "source": "copilot-cloud"}, "hooks": {"status": "documented", "source": "copilot-hooks"}, "isolate": {"status": "conditional", "source": "copilot-cloud"}}
     },
     "codex-cli": {
       "label": "Codex CLI", "family": "codex", "surface": "cli",

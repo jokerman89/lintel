@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-outline` skill — first stage of the v3.5 shared content pipeline. Produces an outline.md from a brief.

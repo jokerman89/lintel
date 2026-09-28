@@ -50,7 +50,9 @@ python bin\li-adapter.py check --target ..\your-repo
 
 Git and Bash are needed by workflows that use them; use Git Bash on Windows. No client,
 account, global configuration, model settings, hooks or MCP servers are installed by this
-command. Native-format output is written only to the selected documented project root.
+command. Native-format output is written only to the selected documented project root:
+complete skills and custom agents for the Copilot surfaces, core-workflow wrappers for the
+other native routes.
 
 If native discovery is unverified, use `--client other`, or the exact manual surface ID.
 This installs a **manual canonical-file handoff**, not a native plugin. The same plan,
@@ -67,8 +69,10 @@ to force an update. Review and commit the installation diff, including its sourc
 
 Open the target in the selected client. Inspect the host's actual skills/agent UI under
 its trust and organization policies; do not assume a reload command works everywhere.
-The portable wrappers are named `li-*`; invocation syntax follows the host. Claude's
-preserved plugin names use `/li:<skill>`; the Universal adapter uses an explicit file read.
+Native skills are named `li-*` and invocation syntax follows the host. On Copilot every
+workflow is a complete `li-<name>` skill and named roles are custom agents; other native
+routes generate wrappers for the core workflows. Claude's preserved plugin names use
+`/li:<skill>`; the Universal adapter uses an explicit file read.
 
 When discovery is absent or uncertain, use the explicit route:
 
@@ -105,7 +109,7 @@ unlike vendor documentation or a generated-file check.
 | Path | Purpose |
 |---|---|
 | `AGENTS.md`, `CLAUDE.md` | Full shared protocol with preserved project prose |
-| Selected native discovery root | Small `li-*` wrappers where documented; none on manual routes |
+| Selected native discovery root | Complete `li-*` skills and `.github/agents/` custom agents on Copilot; small `li-*` core-workflow wrappers on other documented roots; none on manual routes |
 | `.github/lintel/START.md` | Explicit manual entry on every route |
 | `.github/lintel/` | One shared managed source bundle, not a requirement to use Copilot |
 | `.github/lintel/manifest.json` | Selected surfaces, owned file hashes and owned protocol blocks |
