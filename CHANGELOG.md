@@ -45,8 +45,8 @@ separate file.
 - The client registry cites three more dated GitHub references for the Copilot surfaces
   (plugins, custom agents and hooks) as documented sources.
 - The Copilot, client-adapter, getting-started, architecture and client-support guides describe
-  the native model, the plugin and kit install routes and a surface matrix whose live
-  verification is pending observation.
+  the native model, the plugin and kit install routes and a surface matrix with each surface's
+  live verification state.
 
 ### Migration and evidence
 
@@ -56,8 +56,11 @@ separate file.
 - Regenerate after editing a canonical skill or agent, and commit the result with the change:
   `python bin/li-copilot.py init --target . --source .`, then `python bin/li-catalog.py` and
   `bash bin/li-wiki-gen`. CI enforces all three drift checks.
-- No live Copilot session has been recorded for these native skills and agents yet; each
-  surface's observation stays open in the registry.
+- One live observation is recorded, on the Copilot CLI 1.0.89 on Windows. Both the plugin route
+  and a vendored kit discovered every native skill. `li-cycle` arrived with its full generated body,
+  and the plugin route selected the generated `CodeReviewer` agent. The app, VS Code and cloud
+  surfaces are still pending observation in the registry
+  ([evidence](.claude/plans/native-client-parity/evidence/copilot-acceptance.md)).
 
 ---
 
