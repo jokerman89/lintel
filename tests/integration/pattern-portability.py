@@ -113,6 +113,9 @@ class PatternPortabilityTests(unittest.TestCase):
             with self.subTest(relative=relative):
                 self.assertEqual(native(self.kit.bundle / relative).read_bytes(),
                                  generator.source_bytes(ROOT / relative), relative)
+                if "/templates/pattern/example/" in relative:
+                    self.assertEqual(native(self.kit.bundle / relative).read_bytes(), (ROOT / relative).read_bytes(),
+                                     "byte-bound example files ship raw, unchanged by kit normalization")
         wrapper = (self.kit.kit_repo / ".github" / "skills" / "li-pattern" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("../../lintel/skills/pattern/SKILL.md", wrapper)
         skill = (self.kit.bundle / "skills" / "pattern" / "SKILL.md").read_text(encoding="utf-8")

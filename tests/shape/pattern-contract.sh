@@ -39,6 +39,9 @@ for entry in catalog.entries:
     for asset in body.assets:
         data = (example / Path(entry.path).parent / asset.path).read_bytes()
         check(hashlib.sha256(data).hexdigest() == asset.sha256, f"asset {asset.path} digest matches its bytes")
+raw = [path for path in sorted(example.rglob("*")) if path.is_file()]
+check(all(b"\r" not in path.read_bytes() for path in raw),
+      "the example is LF-only, so the kit's LF text copy is byte-identical (bundle boundary)")
 check((example / ".gitattributes").read_text(encoding="utf-8").splitlines()[-1].strip() == "* -text",
       "the example source keeps raw bytes with a source-local `* -text`")
 skill = (root / "skills/pattern/SKILL.md").read_text(encoding="utf-8")
