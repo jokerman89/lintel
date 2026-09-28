@@ -84,6 +84,7 @@ class UniversalAdapters(unittest.TestCase):
         actual_roots = {str(Path(p).parent.parent).replace("\\", "/") for p in inventory["files"]
                         if p.endswith("/li-plan/SKILL.md")}
         self.assertEqual(actual_roots, expected_roots)
+        self.assertIn(".github/agents/CodeReviewer.agent.md", inventory["files"])
         self.assertTrue((self.target / ".github/lintel/.claude-plugin/plugin.json").is_file())
         self.assertFalse((self.target / ".github/hooks").exists())
         self.assertFalse((self.target / ".github/lintel/hooks").exists())
@@ -94,8 +95,15 @@ class UniversalAdapters(unittest.TestCase):
         (self.target / ".github/copilot-instructions.md").write_text("Existing team policy.\n")
         self.run_cli(client="copilot-cli")
         copilot = (self.target / ".github/skills/li-plan/SKILL.md").read_bytes()
+        # Copilot receives the complete native method; other roots keep Universal wrappers.
+        self.assertIn(b"> **Lintel on GitHub Copilot.** Generated from `skills/plan/SKILL.md`", copilot)
+        self.assertNotIn(b"/li:", copilot)
         self.run_cli(client="codex-cli")
         self.run_cli(client="cursor-cli")
+        for root in (".agents/skills", ".cursor/skills"):
+            wrapper = (self.target / root / "li-plan/SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("[Universal adapter](", wrapper)
+            self.assertNotIn("Lintel on GitHub Copilot", wrapper)
         before = self.snapshot()
         self.run_cli(client="codex-cli")
         self.assertEqual(before, self.snapshot())

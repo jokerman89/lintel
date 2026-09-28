@@ -1277,8 +1277,8 @@ class CommandSurfaceTests(unittest.TestCase):
         self.skill("qa")
         self.assertTrue(any(item.code == "retired-entry" for item in guard.scan(self.root)))
 
-    def test_generated_retired_wrapper_is_not_exempt(self):
-        self.write(".github/skills/li-qa/SKILL.md", "---\nname: li-qa\n---\n")
+    def test_generated_retired_native_skill_is_not_exempt(self):
+        self.write(".github/skills/li-qa/SKILL.md", "---\nname: li-qa\ndescription: A generated native skill.\n---\n")
         self.assertTrue(any(item.code == "retired-entry" for item in guard.scan(self.root)))
 
     def test_missing_skill_file_and_nested_asset_are_reported(self):
@@ -1314,7 +1314,7 @@ class CommandSurfaceTests(unittest.TestCase):
     def test_native_relative_links_resolve_at_the_discovery_root(self):
         self.write(".github/skills/li-plan/SKILL.md", "---\nname: li-plan\n---\n")
         self.assertEqual(self.findings("Use [plan](../skills/li-plan/SKILL.md).\n",
-                                      ".github/agents/planner.md"), [])
+                                      ".github/agents/lintel-planner.agent.md"), [])
 
     def test_external_urls_templates_and_generic_host_commands_are_not_local_paths(self):
         self.assertEqual(self.findings(
@@ -1322,7 +1322,7 @@ class CommandSurfaceTests(unittest.TestCase):
             "[external](https://example.invalid/skills/qa/SKILL.md).\n"
             "Use `skills/<name>/SKILL.md`, `/skills reload`, and `/help` in the host UI.\n"
             "The helper is `${SOURCE}/skills/${name}/SKILL.md`.\n"
-            "Generate `.github/skills/li-*` wrappers from canonical skills/agents.\n"
+            "Generate `.github/skills/li-*` native skills from canonical skills/agents.\n"
             "Keep the skills/agents/hooks interfaces consistent.\n"
             "An example utility can be named `li-example`.\n"), [])
 

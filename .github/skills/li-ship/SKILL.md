@@ -3,9 +3,403 @@ name: li-ship
 description: Use after review to prepare a verified change for a pull request or an explicitly authorized release.
 ---
 
-# Lintel ship
+> **Lintel on GitHub Copilot.** Generated from `skills/ship/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
 
-Read the [Copilot adapter contract](../../../shims/copilot/COPILOT.md) first, then execute the
-[canonical ship workflow](../../../skills/ship/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
+You are the SHIP skill — Phase 7 of the Lintel cycle.
+
+## What this skill does
+
+Ships the BUILD output via PR (default) or direct-push (with explicit per-batch authorization). Customer-deliverables go through the doc-gen pipeline. Release notes generated.
+
+Hard-stops from the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). When a pack activates them, typical gates include:
+- customer-data in commit
+- secrets in any file
+- prod-mutations without explicit per-call auth
+
+The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) fire on customer-facing artifacts.
+
+## When to use
+
+- After REVIEW PASS, ship-ready=yes
+- Operator types `/li-ship` to ship existing branch
+- Doc-gen customer-deliverable shipping (PPT/Word/Web with 4-gate pipeline)
+- Demo deliverable handoff to customer
+
+## When NOT to use
+
+- REVIEW returned BLOCKED (P1 unfixed) → fix loop, then ship
+- intent=research-only — no ship
+- intent=local-dev-only — operator works locally, no ship
+- intent=draft-PR-only — retain draft labeling and every applicable mandatory policy boundary
+
+## Workflow
+
+### Step 1 — Pre-flight (MANDATORY)
+
+Verify ship-readiness:
+- `git status` is clean OR operator confirms uncommitted is intentional
+- Current branch is NOT main (unless explicit per-batch direct-push auth)
+- Run `/li-verify` in its read-only default, never `--repair` after review. Require actual nonzero
+  applicable validation and explicit skipped/unavailable coverage. An approved
+  docs-only package can use an observed mandatory document check with grounded
+  tests N/A; applicable required tests still need nonzero executed coverage.
+- Consume the [shared content-bound gate](../../../skills/review/references/evidence.md) with
+  the selected context, actual independent corroboration and read-only QA record.
+  `li-review-evidence.py ship` invokes the real audit reader, selects the latest
+  applicable decision before verdict, and revalidates content/acceptance/profile.
+  Require v2 review/context/QA and exact accepted `qa_requirements`; a submitted
+  document pass cannot replace bound tests, and relabeling a result cannot alter
+  its mandatory/applicability/kind/policy contract. Older evidence remains history
+  until a fresh prepared context and independent review supersede it.
+- Human-readable review/compliance reports remain supporting evidence. PASS text,
+  an old commit-only review, elapsed time or an operator note is not a substitute
+  for sufficient current evidence.
+- Surface the ANALYZE verdict from the report explicitly linked to the selected
+  work/cycle, if available, after checking its work-map, profile and package/leaf
+  identity. An unlinked `.claude/runtime/state/analyze-report.md` is legacy history,
+  not current readiness evidence. ADR-0004 remains advisory by default: surface
+  RED/YELLOW findings to the operator, without automatic blocking or treating a
+  missing report as a pass. Declared mandatory controls still use the shared gate above.
+
+If pre-flight fails: BLOCKED. Don't proceed.
+
+Intentional dirty work must be in the reviewed explicit selection, including new
+files, deletions, documents and config. Staging, committing or editing selected
+content after review requires a newly verified context and affected review/QA.
+Unrelated files/commits outside selection do not alone invalidate unchanged evidence.
+The helper verifies readiness only; it grants no push, merge, release or deployment
+permission and does not authenticate the reviewer from a digest.
+
+### Step 2 — Audience + voice classification
+
+From mode + role:
+- audience: solo / team / customer
+- voice_tier: internal / mixed / external
+- artifact_kind: code-only / docs / customer-deliverable / demo
+
+Determines which gates fire in subsequent steps.
+
+### Step 3 — Compliance hard-stop check (active pack's gates)
+
+Resolve the required profile successfully, then run its applicable controls using
+the shared `mandatory`/`advisory` model. A mandatory fail/error/unverified or unknown
+required policy blocks even if every advisory score is green. Advisory issues do
+not become hard stops merely because a gate exists. Re-verify the same context even
+if REVIEW passed. Example checks a pack may require:
+
+```bash
+# Customer data
+grep -rE '(customer-name-patterns|PII-patterns)' --include='*.md' --include='*.ts' --include='*.json' staged_files
+# Secrets
+gitleaks detect --staged
+# Production mutations without auth
+# (operator-specific, check for prod-deploy commands or live-cloud-mutation)
+```
+
+If any applicable mandatory control fails, errors or remains unverified:
+- HARD STOP
+- Surface to operator: violation + file:line + recommended fix
+- Fix the violation or obtain a policy-authorized scope change and re-plan/review.
+  An override note cannot relabel a failed mandatory control as passed or N/A.
+- Log the stop mechanically (one line; ts/operator/cycle_id come from the envelope):
+
+Retain advisory violations in the report without converting them into hard stops.
+A configured control is not automatically mandatory.
+
+```bash
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<open|fixed|policy-replan>
+# → .claude/runtime/audit/compliance-stops.jsonl
+```
+
+### Step 4 — Voice + brand gate (if customer-facing)
+
+If `audience=customer` AND the active pack defines voice gates (`resolve_pack_field voice.gates_active`; none by default):
+- Run the pack's voice gates (already done in REVIEW Stage 3, but final verification)
+- If new edits since REVIEW: re-run
+- Threshold: ≥85% known-good match against the pack's voice corpus (`resolve_pack_field voice.corpus`)
+
+If `artifact_kind=customer-deliverable` (PPT/Word/Web):
+- Invoke `/li-generate-ppt` / `-word` / `-web` pipeline; gates derive from the active pack:
+  1. Voice gate (`resolve_pack_field voice.gates_active`; none by default)
+  2. Brand-conformance (`resolve_pack_field brand.templates`; default-fallback if null)
+  3. Honest-limitations (AI-disclaimer present?)
+  4. Provenance (AI-assistance logged?)
+- All applicable mandatory controls must pass for customer-shippable. Grounded N/A
+  and advisory findings retain their actual policy classification; configured
+  advisory scores do not become blocking acceptance by appearing in this list.
+
+### Step 5 — Provenance tracking (if the active pack requires it)
+
+If the active pack activates a provenance gate (`resolve_pack_field compliance.hooks`; none by default):
+- Log AI-assistance provenance for the shipped artifact — one line via the unified writer (ts/operator/cycle_id come from the envelope; the audit dir is already repo-scoped in v5 repos, so no `<repo>-` prefix in the filename):
+
+```bash
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+audit_log provenance-log shipped branch=<branch> commit_range=<sha>..<sha> ai_assistance=lintel-cycle \
+  phases=<DEFINE,PLAN,BUILD,REVIEW,SHIP> audience=<audience> voice_tier=<tier> gates_passed=<gate1,gate2>
+# → .claude/runtime/audit/provenance-log.jsonl
+```
+
+If audience=customer AND an AI-system shipped: if the pack provides a transparency-note generator, draft a transparency note for the customer.
+
+### Step 6 — Choose ship path
+
+```yaml
+ship_path:
+  # PR (default, recommended)
+  pr:
+    - git push -u origin <branch>
+    - gh pr create with structured body
+    - PR includes: design-doc link, plan.md link, review-report link, compliance-report link
+  
+  # Direct-push (requires explicit per-batch auth)
+  direct_main:
+    - operator must explicitly authorize: "commit and merge"
+    - the active pack's compliance gates re-checked
+    - merge commit message includes review-report path
+  
+  # Demo handoff (no PR, customer deliverable)
+  demo:
+    - generate customer artifact (PPT/Word/Web via 4-gate pipeline)
+    - operator distributes via approved channel
+    - provenance logged
+```
+
+Operator chooses path via flag or auto-detect from artifact_kind.
+
+### Step 7 — PR creation (default path)
+
+```bash
+# Use gh CLI
+gh pr create --title "<short title>" --body "$(cat <<'EOF'
+## Summary
+[1-3 bullets from design doc]
+
+## Design + Plan
+- Design: <.claude/engineering/design-archive/lintel-*-design-*.md>
+- Plan: <plan.md>
+- Review report: <review-report.md>
+- Compliance report: <compliance-report.md if applicable>
+
+## Test plan
+[Bulleted checklist from plan.md acceptance criteria]
+
+## Process
+Phases run: DEFINE → PLAN → BUILD → REVIEW → SHIP
+Review: passed
+EOF
+)"
+```
+
+Apply CODEOWNERS auto-request. Note required reviewers.
+
+### Step 8 — CI / deploy validation (if the active pack configures deploy targets)
+
+If the active pack defines CI/deploy targets (and provides validation skills for them), run them here. Generic targets work out of the box:
+- GHActionsReviewer (devops/) if GH Actions involved
+- TerraformReviewer / K8sManifestReviewer (devops/) if infra ship
+
+Pack-specific deploy pipelines (e.g. ring-based or canary strategies) are contributed by the active pack and run via the pack's own validation skills; none ship with Lintel by default.
+
+### Step 9 — Customer-deliverable generation (if applicable)
+
+For artifact_kind=customer-deliverable:
+
+**PPT path:**
+```bash
+# Invoke /li-generate-ppt with the pack-configured gate pipeline
+# Dispatch agents: PPTNarrativeArchitect (5-beat slide arc) + the pack's voice gate (resolve_pack_field voice.gates_active; none by default)
+# Output: <name>.pptx
+# Brand: from resolve_pack_field brand.templates or default fallback template
+```
+
+**Word path:**
+```bash
+# /li-generate-word with WordTechnicalEditor agent
+# Variants: technical / customer-summary / transparency-note
+```
+
+**Web path:**
+```bash
+# /li-generate-web with WebExperienceCritic agent  
+# Variants: single-file HTML OR Next.js scaffold
+```
+
+All paths go through the pack-configured gates before customer-shippable.
+
+**Demo handoff path** (ship_path=demo): before distributing demo comms + after the demo, dispatch the customer agents:
+
+```bash
+empathy_brief=$(mktemp)
+cat > "$empathy_brief" <<EOF
+task: Empathy-review the customer-facing demo handout / follow-up comms
+context_pointers:
+  - <demo comms draft path>
+constraints:
+  - flag transactional / corporate / dismissive phrasing
+  - preserve substance, add humanity
+acceptance:
+  - per-passage empathy verdict + specific rewrite recommendations
+EOF
+
+/li-brief-forge subagent_spawn ship CustomerEmpathyCheck brief "$empathy_brief"
+
+followup_brief=$(mktemp)
+cat > "$followup_brief" <<EOF
+task: Advise post-demo follow-up — what to send, when, which expansion paths to open
+context_pointers:
+  - demo signal (questions asked, follow-up requests, decision-maker presence)
+constraints:
+  - cadence: immediate / 48hr / weekly
+  - shape next 30-day plan + expansion paths (next demo / PoC / workshop)
+acceptance:
+  - follow-up plan with cadence + expansion paths
+EOF
+
+/li-brief-forge subagent_spawn ship PostDemoFollowup brief "$followup_brief"
+```
+
+### Step 10 — Release notes (if version tag)
+
+For an explicitly authorized release or PR summary, use the release-report step in
+`/li-capture --release-summary`. Select the actual commit/tag range, link delivered work, distinguish
+features/fixes/migrations and state unresolved limits. Generate a `CHANGELOG.md` entry
+and a separate release-notes file only when those outputs are requested. A report
+does not create a tag, release or deployment. Apply configured customer-facing voice
+checks where relevant; neither this prose nor a pack label proves a hook fired.
+
+### Step 11 — 00-state.md append
+
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `hard_rule_violations` must be 0 to reach here; gate detail lives in the compliance/provenance logs:
+
+```bash
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
+```
+
+## Status protocol
+
+- **DONE** — PR opened / deployed / handoff complete, all applicable mandatory controls verified
+- **DONE_WITH_CONCERNS** — shipped with caveats (e.g., voice gate at 85%, P3 deferred)
+- **BLOCKED** — applicable mandatory failure/error/unverified result or required policy unresolved
+- **NEEDS_CONTEXT** — deploy target unclear, or PR template not configured
+
+## Pause-points (MANDATORY)
+
+1. Before PR open: confirm commit messages + branch state + base branch
+2. On an applicable mandatory failure/error/unverified control: stop the affected
+   action. Surface advisory findings without promoting them to hard stops.
+3. Per customer-deliverable: the pack-configured gates (voice + brand + honest-limitations + provenance) each fire
+4. PR creation confirmation: ask_user "Open PR now?" — last chance to cancel
+5. If direct-main path: ask_user explicit per-batch authorization required (per CLAUDE.md)
+
+## Hop-in support
+
+YES — operator can `/li-ship` on existing branch outside full cycle.
+
+Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
+
+## Integration
+
+**Reads:**
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
+- latest applicable structured review decision, selected expected context and independent corroboration
+- same-context QA record with actual executed/failed/skipped coverage
+- review-report.md (human-readable supporting evidence, not standalone clearance)
+- compliance-report.md (if the active pack defines compliance gates)
+- brand assets (`resolve_pack_field brand.templates` if doc-gen)
+- the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default — if voice gate)
+- plan.md (for PR body)
+- design doc (for PR body)
+
+**Writes:**
+- PR (via gh)
+- release-notes.md (if tag)
+- provenance-log.md (append)
+- customer deliverables (.pptx, .docx, .html if applicable)
+- transparency-note.md (if AI-system shipped to customer)
+- `.claude/runtime/state/00-state.md` (SHIP entry)
+- `.claude/runtime/audit/compliance-stops.jsonl` (if any violations)
+
+**Triggers:**
+- CAPTURE next (final phase)
+
+## Recommended agents
+
+**Release infrastructure:**
+- ReleaseEngineer (engineering/) — primary
+- GHActionsReviewer (devops/) — GH Actions
+- TerraformReviewer / K8sManifestReviewer (devops/) — if infra ship
+
+**Compliance final (pack-contributed):**
+- The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) supply any final compliance + provenance reviewers.
+
+**Voice + doc-gen (customer artifacts):**
+- The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) — voice gate
+- PPTNarrativeArchitect (doc-gen/) — slide arc
+- WordTechnicalEditor (doc-gen/) — Word variants
+- WebExperienceCritic (doc-gen/) — web review
+
+**Customer:**
+- DemoNarrativeArc (customer/) — if demo
+- DemoNarratorJunior (customer/) — if narrative needed
+- CustomerEmpathyCheck (customer/) — empathy-review demo comms before handoff (Step 9 demo path)
+- PostDemoFollowup (customer/) — post-demo follow-up cadence + expansion paths (Step 9 demo path)
+- ExecutiveBriefingDrafter / ProposalDrafter / RFPResponseDrafter (customer/) — if engagement deliverables
+
+**Communication:**
+- EmailCustomerDrafter (communication/) — if announce email
+- BlogPostDrafter / LinkedInPostDrafter (communication/) — if public post
+
+## Anti-patterns
+
+- **Direct-push to main without explicit per-batch auth** — never (per CLAUDE.md)
+- **Skipping the pack's compliance re-check at SHIP** — REVIEW passed but pre-ship sanity is mandatory when the pack defines gates
+- **Skipping voice gate because "operator wrote it themselves"** — if final artifact customer-facing and the pack defines voice gates, they fire regardless
+- **Letting honest-limitations be implicit** — must be explicit AI-disclaimer
+- **Shipping AI-assisted artifacts without provenance log** — audit trail mandatory if the pack activates a provenance gate
+- **Bundling unrelated changes in one PR** — atomic per design doc (one logical change per PR)
+- **PR body without design+plan+review links** — traceability requirement
+- **Skipping --no-verify** to bypass hooks — never bypass hooks unless explicitly authorized
+
+## Failure recovery
+
+- **Mandatory compliance control unresolved at pre-ship**: stop the affected action,
+  repair and re-run from Step 3. Log to audit. Advisory findings remain visible advice.
+- **gh CLI unavailable**: surface command, operator runs manually. Save state for resume.
+- **Voice control fails after edits**: mandatory failure blocks and requires repair
+  or an authorized policy re-plan; advisory findings may remain documented concerns.
+- **Brand assets missing AND default templates failed**: surface, operator either pulls brand or accepts text-only output.
+- **Pack deploy validation fails**: BLOCKED. Fix infra config. Re-run.
+- **Customer wants to delay deliverable**: SHIP completes commit/PR but skips customer-handoff. Resume customer-handoff later via the doc-gen path (`/li-generate-ppt` / `-word` / `-web`).
+
+## Voice tier behavior
+
+`voice: mixed`. PR body + release notes follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal). Customer-facing artifacts go through the pack's voice gates (`resolve_pack_field voice.gates_active`; none by default). Internal handoff (engineering team) uses internal voice.
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li-cycle`:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../../.claude/decisions/0003-cycle-position-footer.md).

@@ -3,9 +3,738 @@ name: li-plan
 description: Use to turn a design into a requirement-traced spec, dependency-ordered build cards and a cold-executor prompt.
 ---
 
-# Lintel plan
+> **Lintel on GitHub Copilot.** Generated from `skills/plan/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
 
-Read the [Copilot adapter contract](../../../shims/copilot/COPILOT.md) first, then execute the
-[canonical plan workflow](../../../skills/plan/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
+You are the PLAN skill — Phase 4 of the Lintel cycle.
+
+## What this skill does
+
+Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and produces:
+1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
+2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
+3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
+4. **Operator approval gate** — resolve missing authority without repeating existing approval
+5. **Optional swarm profile** — when independent domains exist and the operator opts in, add one
+   validated coordination pointer without duplicating task authority
+
+Keep requirements, work selection, review evidence and approval distinct. ANALYZE
+checks cross-artifact consistency; inspect supplies engineering, design and
+developer-experience judgment without creating another planning authority.
+
+## When to use
+
+- After DEFINE has produced APPROVED design doc
+- After DISCOVER has produced discover-report.md
+- Standalone if operator already has design doc but needs plan
+- Re-PLAN if BUILD reveals plan was wrong (loop-back path)
+
+## When NOT to use
+
+- intent=hotfix (light plan only, or skip to BUILD with minimal task list)
+- intent=trivial-edit (skip entirely, just BUILD with verification)
+- No APPROVED design doc → return to DEFINE
+- intent=research-dive → no PLAN needed (research mode ends at DISCOVER)
+
+## Workflow
+
+### Existing Spec Kit plan branch
+
+When the operator selects existing Spec Kit artifacts, use the
+[shared work-map contract](../../../skills/spec-kit/references/work-map.md) before the ordinary template
+pipeline below. Read the original spec.md, implementation plan.md and tasks.md, check their
+coverage/dependencies and record missing decisions. Preserve their structure and task IDs.
+Write the exact-path handoff and work.json, then validate it with `bin/li-work-artifacts.py`; Lintel plan.md/spec.md companions, if needed, are
+reference-only. Existing authorization can approve this mapped scope; do not require a new
+Lintel approval heading inside Spec Kit plan.md or recreate its tasks through DEFINE/PLAN.
+The remainder of the ordinary trio-generation steps applies only to Lintel-native plans.
+For native plans, also write work.json with `tasks` pointing to plan.md and link it from todo.md.
+
+For either workflow, select the initiative explicitly from operator intent or unambiguous
+committed work links. Set `LINTEL_WORK_MAP` to that work.json; for a newly created native
+plan, set `LINTEL_PLAN_DIR` to the exact directory being written. Never select by modification
+time. The completeness gate below validates this selection for both workflows. Record package
+membership in the existing design or linked handoff using the original task IDs; mapped work
+without grouping uses singleton packages, without a duplicate task list. Code/helpers live in
+`LINTEL_SOURCE_ROOT`; maps and their artifacts resolve relative to `LINTEL_REPO_ROOT`.
+
+
+**Existing authorization:** record the operator's authorized scope before the gates below.
+Present plan signals and a reviewable plan, but do not ask again for execution already explicitly
+authorized in this session. Ask once when a material scope/authority decision remains unanswered.
+Approval does not extend to production actions, secrets or unrelated work.
+Apply [task-relevant intake](../../../skills/define/references/intake.md) at every gate. Use
+`workflow_resume` to verify an existing cycle/profile before consuming its policy,
+and `bin/li-work-artifacts.py --view context` for the same original artifact/ID view
+used by BUILD, ANALYZE, CAPTURE and handoff budgeting.
+
+### Step 1 — Load context
+
+**Surface relevant lessons (mirrors SENSE Step 0a — non-blocking):**
+
+Invoke `/li-lessons-surface` keyword-scoped to planning so prior-session lessons warm the plan before any tasks are written. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
+
+Invocation: `/li-lessons-surface --keyword "planning architecture scope dependencies"` (a portable skill call; silent if no relevant matches).
+
+Then read:
+- APPROVED design doc from DEFINE
+- discover-report.md from DISCOVER (if present)
+- `scope.md` from SCOPE (the `depth_schema` source — `flat` / `phased` / `tree`; selects the plan.template.md variant). If absent (e.g. SCOPE skipped in a light mode), default `depth_schema: flat`.
+- the canonical templates (`scaffolding/01-foundation/templates/plan/{plan,spec,prompt}.template.md`)
+- CORE-PRINCIPLES.md (always)
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
+- Recent ADRs identified by DISCOVER as relevant
+
+If design doc not APPROVED → BLOCKED, return to DEFINE.
+
+**Profile impact:** resolve the active pack through `resolve_pack_field` and read only the
+referenced policies or knowledge relevant to this design. In the template's Profile impact
+section, trace each applicable requirement to its exact pack field or source file/section,
+existing requirement ID, affected leaf IDs and verification evidence. State what changes in
+the deliverable because of that requirement. Keep advice distinct from mandatory policy;
+profile presence does not prove that a hook is installed or a control passed. For `_default`
+or no applicable requirement, record that outcome without inventing enterprise controls.
+
+### Step 2 — Draft tasks and inspect engineering
+
+Draft the tasks below from the approved design and current code, then invoke
+`/li-inspect --target plan --lens engineering --map <same selected work.json>`.
+For an explicitly unmapped design, pass its exact path until the native DRAFT
+map exists. PLAN owns task writing; inspect reports findings and proposals.
+
+Output: task list with for each task:
+- Task ID
+- Title (verb + object)
+- Target file path(s), one accountable implementer/owner and the permitted edit boundary
+- Requirement IDs from the approved design/spec (including applicable profile requirements)
+- Dependency on prior tasks
+- Observable acceptance outcome, verification command/procedure and expected evidence
+- Estimated tokens; keep the granularity time check internal unless time was requested
+- Complexity (mechanical / multi-file / architecture)
+- Recommended implementer role (per discover-report's mapping; shared by its work package)
+
+Each leaf should be 2-5 minutes of bounded implementation. Larger leaves need
+decomposition or an explicitly accepted concern; packaging does not waive the check.
+
+Group leaves into **work packages** (`P1`, `P2`, …) using the
+[planner module contract](../../../docs/concepts/planner-as-module.md#work-packages).
+Each package has one outcome, the same write owner and edit boundary, connected dependencies
+and acceptance evidence mapped back to its unchanged leaf IDs. The template carries the
+package table; keep leaf detail separate. Split at owner, security, irreversible-decision or
+independent rollback boundaries. Choose boundaries from the work, not a fixed leaf count or
+duration. An existing ungrouped plan uses one package per leaf without renumbering its tasks.
+
+BUILD executes packages sequentially, their leaves in dependency order, and applies spec then
+quality review to the combined package once, with findings and evidence mapped to leaves.
+A package cannot be DONE until every leaf is verified. Determine review depth from the whole
+package: several small edits can still form a substantive integration. Packaging changes the
+execution/review unit; the ≤5-minute leaf check and approval gates remain.
+
+Instantiate the trio from the canonical templates as **DRAFT** before the following reviews;
+keep those drafts current as tasks change. A verification command alone is not an acceptance
+criterion: name the behavior it must demonstrate and its expected result. Link existing
+authoritative requirements instead of copying them into a competing specification.
+For new native work, write/validate its DRAFT work.json at this point and call
+`workflow_bind_work` in the already established cycle. ANALYZE and budgeting then
+use that selection before final approval; a path binding never upgrades DRAFT.
+
+### Step 3 — Inspect design when a rendered surface is in scope
+
+If the design changes a rendered or interactive surface, invoke
+`/li-inspect --target plan --lens design --map <same selected work.json>`:
+- Design system implications
+- Accessibility considerations
+- Interaction states, edge cases and trustworthy feedback
+- Optional authorized sketch through `/li-generate-web` mockup mode or
+  `/li-frontend-design` variants; sketches are not browser validation
+
+Reconcile findings in the original task artifact. Record grounded
+not-applicable when there is no design surface; do not invent a visual PASS.
+
+### Step 4 — Inspect developer experience when workflows are affected
+
+Invoke `/li-inspect --target plan --lens devex --map <same selected work.json>`:
+- Operator-DX implications (will this be painful to use later?)
+- Documentation needed
+- Telemetry hooks needed
+- Test coverage gaps
+
+Add DX-improving tasks to plan.
+
+### Step 5 — Reconcile actual review findings
+
+Compare findings from engineering, design and developer-experience review against
+the same specification, original IDs, accepted decisions and verified policy.
+The coordinating planner resolves routine corrections within authority. Present a
+material unresolved trade-off to the operator once, with viable alternatives.
+
+Update the selected original artifacts and re-review affected findings until the
+plan is consistent. Preserve one shared inspection result covering all required
+lenses; the last optional lens cannot erase another lens's unresolved finding.
+Existing question-preference history stays dormant and is not approval authority.
+
+### Step 6 — Dependency graph
+
+For each leaf, identify upstream blocking leaves, then derive package dependencies from those
+edges. A package must not hide a dependency on a leaf in a later package. Visualize:
+
+```
+T1 (setup) → T2 (schema) → T3 (api) → T5 (test-e2e)
+                       ↘ T4 (ui) ↗
+```
+
+Detect cycles and impossible orderings in both views. Keep leaf IDs authoritative; the package
+table is a grouping in plan.md, not a new job-state schema or an automatic dispatch service.
+Surface blockers explicitly.
+
+### Step 6a — Detect swarm candidates without opting in automatically
+
+After the dependency graph is stable, identify whether two or more packages are dependency-independent
+and can own disjoint repository paths. Generated outputs, shared schemas, plan/runtime ledgers,
+commits, and integration are coordinator-owned reducers; do not count them as worker domains.
+
+If no independent ownership exists, keep ordinary sequential BUILD and emit no swarm fields. If it
+does exist, show the candidate waves, write scopes, expected isolation, `max_parallel`, and
+the actual host's inspected delegation/isolation capabilities and permissions.
+`lib/cli-tiers.yaml` describes surfaces, not proof that a tool ran. Ask whether to use the swarm profile unless
+the operator already requested it in the current authorized scope. This is an execution-profile
+choice, not approval for additional scope or external actions.
+
+When selected:
+
+1. Keep the existing mapped `tasks` artifact authoritative for card text, dependencies, checkboxes,
+   and acceptance.
+2. Add only `execution_mode: "swarm"` and a repository-relative `coordination` pointer to the
+   schema-version-1 work map.
+3. Instantiate the charter, coordination, brief, report, and review templates from
+   `scaffolding/01-foundation/templates/swarm/` under the initiative's committed plan directory.
+4. Give each package at most one lane, retaining its authoritative member leaf IDs and aggregate
+   review depth from the plan. Legacy ungrouped tasks are singleton packages. Coordination contains
+   topology and ownership only; it must not duplicate task prose, dependencies, status, or acceptance.
+5. Resolve helpers only from explicit `LINTEL_SOURCE_ROOT`, then `CLAUDE_PLUGIN_ROOT` when Claude
+   supplies it; other adapters export their installed bundle path. If neither trusted root exists,
+   return `NEEDS_CONTEXT`. Run `bin/li-work-artifacts.py` and `bin/li-swarm.py validate` from that
+   source with the working repo only as `--repo`. Validation must pass before the plan is presented
+   as swarm-ready. Tests/self-checks export `LINTEL_SOURCE_ROOT` explicitly.
+
+Sequenced and no-subagent hosts emit the same artifacts. They degrade execution speed, not the
+scope/evidence contract, and must not claim concurrency or independent review they did not perform.
+
+### Step 7 — Cost estimate (MANDATORY GATE)
+
+**Time-on-request (design §3.7):** wall-clock time fields are emitted **only** when the operator asked for them (`--with-time`, or they explicitly request it). Tokens + task count + size are always shown; time is opt-in so the default estimate never anchors on a guessed duration.
+
+**Honest signals only (no invented dollar figure).** Lintel has no pricing table and the token
+estimator is **uncalibrated until CAPTURE records actuals** (`scale_calibrated_prior` falls back to
+`size_default_prior` — a hardcoded guess — when no history exists; see `lib/scale-estimator.sh`).
+So the gate presents what the system can honestly compute — **task count, the phase list, and a
+labelled token estimate** — and does **not** present a dollar number the system cannot derive.
+
+```yaml
+# Plan signals (honest — task count + phases + labelled token estimate)
+total_tasks: N   # unchanged leaf count
+work_packages: N
+phases: [<phase list from the plan — what BUILD will actually run>]
+size: <XS|S|M|L|XL from scope.md>
+execution_roles: [<roles selected for package complexity and review independence>]
+# model_configuration: <actual available host configuration, only when known>
+
+token_estimate:
+  value: <tokens from scale_token_estimate <size>, once for the whole cycle>
+  basis: <calibrated|uncalibrated from the same helper result>
+  samples: <matching measured cycles from the same helper result>
+  scope: cycle
+# estimated_time: <sum minutes>     # only when --with-time
+```
+
+`scale_token_estimate <size>` returns `tokens basis samples` in one read; the numeric
+`scale_calibrated_prior` API remains available. CAPTURE records whole-cycle actuals, so never
+multiply this prior by the number of tasks or sum it once per leaf. Calibration writes remain
+opt-in under ADR-0008; no usable actuals means `uncalibrated`, even if a log file exists.
+
+When approval or a changed resource boundary is unresolved, use the actual host
+question channel; otherwise present these signals under the existing authorization:
+"Plan ready: <N> tasks across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>). Proceed?"  (append ", ~<duration>" only when `--with-time`; **never** a `$` figure)
+- A) Approve and proceed
+- B) Scope-trim (which tasks to defer)
+- C) Decompose (tasks too big, break further)
+- D) Abort (scope too large)
+
+If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
+
+### Step 8 — Cross-section-analyze (delegates to /li-analyze, ADR-0004)
+
+Prepare the selected cycle's request, verifying its original map and actual P07
+reference before consuming policy or selecting a report. Do not bootstrap a missing
+context, adopt the latest cycle, or infer an initiative from a global report:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+analyze_cycle_id="${LINTEL_CYCLE_ID:?select the original cycle}"
+analyze_work_map="${LINTEL_WORK_MAP:?select the original work map}"
+workflow_resume "$analyze_cycle_id" "$analyze_work_map" >/dev/null || exit $?
+analyze_state_dir="$(dirname "$(state_file)")"
+analyze_candidate_path="$(state_cycle_field analyze_report_path)" || exit $?
+if [ -z "$analyze_candidate_path" ]; then
+  analyze_candidate_path="$analyze_state_dir/$analyze_cycle_id-analyze-report.md"
+fi
+_workflow_guard_analyze_report_path "$analyze_candidate_path" "$analyze_state_dir" || exit $?
+analyze_report_path="$analyze_candidate_path"
+```
+
+The identity guard anchors relative input to the explicit working target and
+honors the already declared state root. It refuses global history in native or
+portable spelling even before that file exists. Unsupported, inaccessible or
+uncertain identity is INCOMPLETE, not permission to select a fallback or create
+a directory. Existing distinct locations retain their filesystem identity;
+the guard neither rewrites stored paths nor authorizes a candidate's parent.
+
+Invoke `/li-analyze` with trigger `plan-step8`, this exact report path, original
+map/artifact paths and package/leaf IDs, and the verified `LINTEL_PROFILE_REFERENCE`
+and unchanged `LINTEL_REQUIRED_POLICY`. Carry these selections explicitly across
+delegation or a fresh tool process. ANALYZE runs the DEFINE↔PLAN and authority legs
+(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints).
+Keep that one implementation, shared with BUILD's final pass and standalone runs;
+do not re-implement its checks inline.
+
+ANALYZE writes the selected report with the identity and incomplete-leg fields from
+its [report contract](../../../skills/analyze/SKILL.md#report-format-persisted). Before reusing a
+linked report, check its map/profile/package/leaf identity; a mismatch is INCOMPLETE
+and requires reconciliation, not permission to overwrite another initiative.
+Retain other cycles' reports and the old global `analyze-report.md` as history only.
+A rerun supersedes this selected report while retaining its operator-accepted findings.
+
+As ANALYZE's persistence handoff, after verifying the written report's identity,
+record its actual status and exact path once using the shared writer below. This is
+ANALYZE's existing persistence step, not a second entry on return to PLAN. Missing or
+incomplete analysis is not GREEN. This utility entry does not complete PLAN or move
+the canonical phase:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+workflow_resume "${analyze_cycle_id:?}" "${analyze_work_map:?}" >/dev/null || exit $?
+if [ ! -s "${analyze_report_path:?}" ]; then
+  echo "INCOMPLETE [lintel/plan]: analysis report was not persisted" >&2
+  exit 2
+fi
+state_append ANALYZE "${analyze_status:?set the actual analysis status}" \
+  "analyze_report_path=$analyze_report_path" || exit $?
+```
+
+Consumers resume the same cycle and read `state_cycle_field analyze_report_path`,
+then check that report's identity rather than falling back to a global GREEN.
+The verdict remains advisory under ADR-0004; declared mandatory controls and P05's
+immutable evidence/QA obligations remain unchanged. A report pointer is not release clearance.
+
+If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
+accept gap (record the acceptance in the report).
+
+### Step 9 — Adversarial two-stage review with shared evidence
+
+Use the [shared evidence contract](../../../skills/review/references/evidence.md). Prepare the
+exact selected plan/map/package/leaf context before review, using inspect's
+target-specific required-lens check IDs, verified profile/required policy and
+immutable `qa_requirements`. State the actual
+validation required at plan time; proposed future BUILD tests are not observations.
+
+Give a separately attributable reviewer the original requirements/design/tasks,
+the selected diff and all applicable inspect lens findings. Use a real available
+reviewer or a durable external/manual handoff, not a mandatory agent/model name.
+
+**Stage 1 — Spec compliance review:**
+"Do the original selected design and task artifacts match every requirement?
+Identify coverage gaps and tasks without a traceable requirement."
+
+If Stage 1 finds issues: fix (Edit tool), re-dispatch. Max 3 iterations.
+
+**Stage 2 — Quality review (only after Stage 1 PASS):**
+"Are leaves well-decomposed, package boundaries coherent and aggregate review depth appropriate?
+Are dependencies correct, estimates grounded, acceptance and evidence complete for every leaf?"
+
+If Stage 2 finds issues: fix, re-dispatch. Max 3 iterations.
+
+Convergence guard: if the same issues persist across three iterations, surface them
+against their original task IDs. Required unresolved acceptance/review remains open;
+the retry limit is not permission to proceed as though it passed.
+
+If independent review is unavailable, retain a manual/external handoff and label
+the plan unreviewed. Do not call self-review independent or close a required gate.
+
+The actual reviewer persists observed v2 decisions using inspect's
+[bound-review procedure](../../../skills/inspect/SKILL.md#persist-via-first-party),
+including failures. The final decision must cover spec, quality and every required
+lens/leaf against this context; a spec-only or final-lens-only pass is insufficient.
+PLAN then consumes the latest applicable decision explicitly:
+
+```bash
+bash "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-review-read" --skill inspect \
+  --expected "${review_context:?set the same prepared v2 context}" \
+  --corroboration "${corroboration:?set actual independent receipt}" --gate-json
+```
+
+Missing, stale, rejected or uncorroborated required evidence keeps PLAN open. A
+`REVIEW REPORT` heading, score or direct `verify` is not latest-log clearance.
+Unmapped/draft exploratory inspection can remain non-clearing; obtain required
+bound evidence before claiming readiness. Later implementation/QA/SHIP needs its
+own applicable context, not borrowed planning clearance.
+
+### Step 10 — Operator approval gate
+
+Retain existing authorization for the same reviewed scope. If it is not yet
+approved, ask through the actual host question channel:
+"Plan reviewed. <N tasks> across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED>). Final approval?"  (append ", ~<duration>" only when `--with-time`; never a `$` figure — the basis for this is Step 7)
+- A) APPROVE — proceed to BUILD
+- B) REDIRECT — specific feedback (loop back)
+- C) PAUSE — save state for later, don't proceed
+- D) ABORT — close plan, status BLOCKED
+- E) MARS FIRST — only when the MARS offer gate below passed
+
+**Optional MARS (offered at most once).** Before asking, build a request for
+`li-mars.py offer` ([MARS](../../../skills/mars/SKILL.md)): caller `plan`, live host facts and any
+recorded decline; inside a cycle add the cycle's actual selected `route` and checkpoint
+`PLAN-approval`, so only a full nine-phase cycle can pass. Exit 3 means no option E and
+no mention. When existing approval is retained, ask the offer alone instead of re-asking
+approval. Keep the answer from the moment it is given: every later approval question in
+this plan run (after REDIRECT or after a MARS run) sends `already_offered: true`, plus
+`declined: true` after a no, so option E never reappears. Inside a cycle, PAUSE puts
+`mars_offer` on the cycle's pause entry (`cycle_paused: true`), so a resumed plan does not
+re-offer. A standalone plan writes no pause entry, so after a standalone PAUSE the offer gate
+runs again and may ask once more. With consent, MARS reviews the
+plan with the shared review method; its findings return to Step 9 fix/accept handling,
+then approval is asked again. Record `mars_offer` on the Step 12 PLAN entry so no later phase
+re-offers: `accepted` (consent given), `declined` (offered and refused or unanswered) or
+`not-offered` (the gate returned 3, so nothing was asked). `--auto` and silence never select E.
+
+If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
+status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
+
+### Step 11 — Write artifacts
+
+**The trio comes from versioned template files (Slice 2 — design §3.3).** plan.md / spec.md / prompt.md are no longer rendered from inline prose; they are instantiated from the canonical template family, the **single source of truth** for their shape:
+
+- `scaffolding/01-foundation/templates/plan/plan.template.md` — **depth_schema-parametric** (flat / phased / tree marked sections).
+- `scaffolding/01-foundation/templates/plan/spec.template.md` — engineering master spec.
+- `scaffolding/01-foundation/templates/plan/prompt.template.md` — cold-executor handoff.
+
+Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. Preserve the approval status established at Step 10 when finalizing the drafts. If the scaffolding tree is absent, locate these templates in the installed Lintel source; if unavailable there too, retain the essential task fields from Step 2 and depth structure below, and record that the canonical template was unavailable.
+
+**plan.md** (canonical, `.claude/plans/<slug>/plan.md`) — from `plan.template.md`:
+```markdown
+# Plan: <wedge title>   (size: <XS|S|M|L|XL> · schema: <flat|phased|tree>)
+
+**Generated by:** /li-plan on <date>
+**Status:** DRAFT (APPROVED only after Step 10)
+**Design doc:** <path>
+**Discover report:** <path>
+**Scope:** <path to scope.md>
+
+## Summary
+<2-3 sentences>
+
+## Plan signals
+- Tasks: <N>
+- Phases: <phase list — what BUILD will run>
+- Size: <XS|S|M|L|XL from scope.md>
+- Token estimate: ~<total> (<CALIBRATED from CAPTURE history | UNCALIBRATED — no actuals yet, size_default_prior guess>)
+<!-- no dollar figure: Lintel has no pricing table (Step 7) -->
+<!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
+```
+
+**Depth-parametric rendering (design §3.3).** Read `depth_schema` from `scope.md` (emitted by the SCOPE phase) and render the `plan.template.md` section that matches. The 2-5 min granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) — hierarchy adds milestones, it does not weaken the leaf check. The inspect engineering lens retains the blocking per-leaf granularity check.
+
+- **`flat`** (XS/S — today's shape): one task table, IDs `T1, T2, …`.
+- **`phased`** (M): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
+- **`tree`** (L/XL): phases → tasks → subtasks + milestone checkpoints, `1 / 1.1 / 1.1.a` (Slice 2 — see below).
+
+Use the matching tables and per-leaf detail from `plan.template.md`; it is the source of
+truth for ownership, requirement tracing, acceptance, verification and evidence fields.
+Only add a minutes column when the operator requested time estimates.
+
+**`depth_schema: tree` — WBS rendering for L/XL (Slice 2 — design §3.3).** Renders phase → task → subtask with milestone checkpoints. This replaces Slice 1's fallback (where `tree` degraded to `phased`).
+
+**Numbering scheme** (three tiers, strictly hierarchical):
+- **Phase** — `Phase 1`, `Phase 2`, … (top tier; each carries a `[milestone-checkpoint: <pass criterion>]`).
+- **Task** — `1.1`, `1.2` / `2.1`, `2.2` (the `<phase>.<task>` tier).
+- **Subtask** — `1.1.a`, `1.1.b` / `1.2.a` (the `<phase>.<task>.<letter>` tier; lowercase letters).
+
+The **subtask is the LEAF** at tree depth — the verification and progress unit. The 2-5 min granularity rule applies to the subtask (`1.1.a`), NOT the task or phase. Work packages group these leaves for execution and review while retaining leaf evidence and status. Milestone checkpoints stay at the **phase** level; packaging does not replace existing resume pointers.
+
+**`--lazy` (optional, opt-in — design §5 Approach-C graft):** for very large XL trees, the subtask leaves (`1.1.a`) under a phase MAY be elaborated **just-in-time** when BUILD reaches that phase, rather than all up front. When `--lazy` is set, render the phases + tasks now and mark each phase's subtasks `(lazy: elaborated at BUILD)`; the per-leaf ≤5 min rule still applies once a leaf is elaborated. Opt-in only — the default renders the full tree up front (preserves the trio's born-together contract; `--lazy` is the escape hatch for genuinely huge greenfield work where up-front elaboration would be wasteful).
+
+**spec.md** (canonical, `.claude/plans/<slug>/spec.md`) — from `spec.template.md`:
+- Master engineering specification — born in PLAN (v3.8 Feature 2.2: trio born together)
+- Architecture overview from design doc
+- Data model, interfaces, contracts
+- Requirements traced to design
+- Status: APPROVED (CAPTURE re-affirms on cycle-end, no longer the birth-point)
+
+**prompt.md** (canonical, `.claude/plans/<slug>/prompt.md`) — from `prompt.template.md` — **v3.8 Feature 2.2: born in PLAN, not CAPTURE.**
+
+It is a SELF-CONTAINED prompt: a fresh AI session reading only this prompt + the linked spec.md + plan.md can re-execute or extend the work without prior context. See `prompt.template.md` for the full skeleton (Context / Constraints / Acceptance criteria / Deliverables / How to re-execute / What you DON'T need to know).
+
+The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. Born together in PLAN — from the versioned templates above — so standalone planner-module invocations (`/li-plan <design.md>` without a surrounding cycle) produce a complete handoff. CAPTURE re-affirms the trio (verifies presence, updates with final-build evidence) but no longer generates prompt.md.
+
+**.planner-checkpoint.md** (`.claude/runtime/state/`):
+- State for `/li-resume`
+- Includes plan.md path, current task pointer, build-log placeholder
+
+### Step 11a — Trio completeness gate (mechanical — issue I4)
+
+The selected work map is the handoff contract for native and Spec Kit work. Before declaring
+PLAN done, validate its paths, approval status and nonempty artifacts through the shared
+validator. This proves selection and structural completeness; the preceding reviews must
+also verify that requirements, leaf acceptance and handoff context are substantive, with no
+unfilled template placeholders. Structural validation alone does not prove those semantics.
+
+```bash
+working_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+lintel_source="${LINTEL_SOURCE_ROOT:?select the trusted source}"
+selected_work_map="${LINTEL_WORK_MAP:-}"
+if [ -z "$selected_work_map" ] && [ -n "${LINTEL_PLAN_DIR:-}" ]; then
+  selected_work_map="${LINTEL_PLAN_DIR%/}/work.json"
+fi
+[ -n "$selected_work_map" ] || {
+  echo "PLAN BLOCKED: select the initiative's work.json or exact LINTEL_PLAN_DIR" >&2
+  exit 1
+}
+case "$selected_work_map" in
+  /*|[A-Za-z]:/*) : ;;
+  *) selected_work_map="$working_repo/$selected_work_map" ;;
+esac
+"${PYTHON:-python3}" - "$lintel_source/bin/li-work-artifacts.py" "$working_repo" "$selected_work_map" <<'PY'
+from pathlib import Path
+import runpy
+import sys
+
+helper, repo, selected = sys.argv[1:]
+try:
+    contract = runpy.run_path(helper)
+    root = Path(repo).resolve()
+    work = contract["load_work_map"](root, Path(selected))
+    if work["status"] != "APPROVED":
+        raise ValueError("selected work must be APPROVED before BUILD")
+    for field in contract["REQUIRED_ARTIFACTS"]:
+        path = contract["artifact_path"](root, work[field])
+        if not path.read_text(encoding="utf-8-sig").strip():
+            raise ValueError(f"selected {field} artifact is empty: {work[field]}")
+except (OSError, ValueError, TypeError) as error:
+    print(f"PLAN BLOCKED: {error}", file=sys.stderr)
+    sys.exit(1)
+print("PASS: explicitly selected approved work map and nonempty artifacts")
+PY
+gate_status=$?
+[ "$gate_status" -eq 0 ] || exit "$gate_status"
+slug_dir="$(dirname "$selected_work_map")"
+# Optional stronger check: if a cold_executor envelope was emitted, validate it against the schema
+[ -f "$slug_dir/handoff.envelope.yaml" ] && "$lintel_source/bin/li-envelope-validate" "$slug_dir/handoff.envelope.yaml" --quiet || true
+```
+
+### Step 11b — Handoff-size check of the selected work (advisory)
+
+Invoke `/li-handoff-size-check --map <same selected work.json>` with exact P03 warming
+inputs. The common reader measures spec/plan/tasks/prompt and constitution without
+double-counting native plan/tasks aliases. It uses actual supplied host capacity
+and usage, or reports unknown; changing a mode never raises a model context limit.
+
+Surface an estimated over-capacity handoff and options to split the work or narrow
+future reads. This advisory result does not itself halt PLAN. A declared required
+limit or host refusal still blocks its dependent load. Missing/unreadable inputs
+remain incomplete, never a silent zero-byte green. A skip flag records an unrun
+advisory estimate rather than claiming the handoff fits. The retained off-switch is
+`--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`), for this advisory estimate only.
+
+### Step 12 — 00-state.md append
+
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/workflow.sh"
+workflow_bind_work "${LINTEL_WORK_MAP:?select the approved map}" || exit $?
+state_append PLAN DONE next=BUILD "work_map_path=$LINTEL_WORK_MAP" \
+  "plan_path=${plan_path:?mapped plan}" "tasks_path=${tasks_path:?mapped tasks}" \
+  "spec_draft_path=${spec_path:?mapped spec}" "prompt_path=${prompt_path:?mapped handoff}" \
+  "tasks_count=${tasks_count:?original leaf count}" \
+  "tokens_est=${tokens_est:?labeled estimate}" "tokens_est_basis=$tokens_est_basis" \
+  "mars_offer=${mars_offer:?accepted, declined or not-offered}"
+```
+
+## Status protocol
+
+- **DONE** — plan APPROVED with cost estimate accepted + adversarial review pass
+- **DONE_WITH_CONCERNS** — approved with caveats noted (reviewer concerns left in plan.md)
+- **BLOCKED** — cost exceeds operator budget OR alternative undecided OR design missing
+- **NEEDS_CONTEXT** — design doc incomplete, return to DEFINE
+
+## Pause-points (MANDATORY)
+
+1. After applicable inspect lenses, reconcile required findings in the original tasks.
+2. After the cost estimate, ask only if a resource or scope decision remains unresolved.
+3. After cross-section-analyze, resolve material gaps against existing authority.
+4. After two-stage review → fix gaps before next stage
+5. After full plan + reviews -> actual host question only for missing scope approval (D10)
+
+## Hop-in support
+
+YES — operator can /li-plan with existing APPROVED design doc.
+
+Skip-conditions:
+- intent=hotfix (light plan, skip cost-estimate gate if <5k tokens)
+- intent=research-dive (no plan needed)
+
+## Integration
+
+**Reads:**
+- APPROVED design doc (from DEFINE)
+- discover-report.md (from DISCOVER)
+- `scope.md` (from SCOPE — the `depth_schema` that selects the WBS template variant)
+- `scaffolding/01-foundation/templates/plan/{plan,spec,prompt}.template.md` (the canonical trio templates)
+- CORE-PRINCIPLES.md
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
+- Recent relevant ADRs
+- `.claude/memory/lessons.md` (via `/li-lessons-surface`, keyword-scoped, non-blocking)
+
+**Writes:**
+- `plan.md` (canonical)
+- `spec.md` (draft, finalized in CAPTURE)
+- `work.json` (schema version 1; optional additive swarm fields only after opt-in)
+- `.claude/plans/<initiative>/swarm/` (optional charter, topology, briefs, and evidence destinations)
+- `.claude/runtime/state/.planner-checkpoint.md`
+- `.claude/runtime/state/00-state.md` (PLAN entry)
+- `.claude/runtime/audit/plan-metrics.jsonl`
+
+**Triggers:**
+- BUILD with plan.md as canonical source
+- `/li-swarm` when the validated map explicitly selects the swarm profile
+
+## Recommended agents to dispatch (from discover-report)
+
+- **Planner** (engineering/) — primary, task decomposition
+- **Architect** (engineering/) — sanity-check tech choices
+- **BackendArchitect / FrontendBuilder / DataPipelineDesigner** (engineering/) — per domain
+- **APIDesigner** (engineering/) — if API surface
+- **DatabaseDesigner** (engineering/) — if schema changes
+- **TerraformReviewer / K8sManifestReviewer** (devops/) — if infra
+- **ADRDrafter** (engineering/) — if non-trivial decisions surface during planning
+- **SecurityAuditor / ThreatModelDrafter** (security/) — sensitive-data flow review
+- **EUAIActReviewer** (compliance/) — if AI/ML in a regulated market
+
+## Anti-patterns
+
+- **Plan that's a vague to-do list** — must be file:line:verb with complete code or precise spec
+- **No cost estimate** — operator commits to unknown burn → wasted hours
+- **Skipping two-stage review because "it's a simple plan"** — simple plans hide assumption gaps
+- **Ignoring ADRs identified in DISCOVER** — they're constraints, not advisory
+- **Task decomposition too coarse** — 2-5 min per leaf; bigger requires decomposition or an explicit concern
+- **Invented model availability** — select roles by package complexity and honor the current host's actual model configuration
+- **Plan finalized without scope authority** — retain existing approval or ask for
+  the missing decision; no personal-role framing or repeated interview is required
+- **Treating parallelizable cards as automatic swarm consent** — surface the option; absence of both
+  swarm fields preserves sequential BUILD
+- **Repeating task prose/dependencies in coordination.json** — the mapped tasks artifact is the one
+  authority; coordination owns execution topology only
+
+## Failure recovery
+
+- **Cost estimate exceeds budget**: ask_user scope-trim / decompose / abort. Don't proceed silently.
+- **Independent reviewer unavailable**: preserve the report/handoff, label any
+  self-review, and keep the required independent review open.
+- **Cross-section analyze finds critical gap**: PAUSE, fix gap (back to DEFINE if design-level), re-plan.
+- **Repeated unresolved approval**: status BLOCKED, preserve the actual decision
+  and next action; do not loop through unrelated intake questions.
+
+## Voice tier behavior
+
+`voice: internal`. Plan.md is engineering-internal. spec.md inherits the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal).
+
+## Module-callable (v3.8 Feature 2.4)
+
+PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module that any workflow can invoke.
+
+### Three invocation modes
+
+**1. Inside cycle (Phase 4):**
+```
+/li-cycle → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+                                          ▲
+                                  reads DEFINE + DISCOVER outputs from job dir
+```
+
+**2. Standalone:**
+```
+/li-plan <design.md>
+   ↓
+   workflow_root: true → spawns own job at .claude/runtime/jobs/plan-<stamp>-<hash>/
+       (job auto-spawn is dormant by decision, ADR-0008 — the job-begin hook is
+        not auto-registered; the trio + approval gate below run regardless)
+   produces: plan.md + spec.md + prompt.md (the trio)
+   handoff-size-check against supplied headroom (or explicitly unknown)
+   operator approval for unresolved scope only
+   → DONE, ready for cold-executor handoff
+```
+
+**3. Sub-module called by another workflow_root skill:**
+```
+/li-cycle                    OR    /li-safe-install
+  ↓ discovery                       ↓ pre-flight
+  CALL /li-plan --from <design>     CALL /li-plan --from <change-spec>
+  ↓ receives trio                   ↓ receives trio
+  proceed to BUILD with trio        proceed to execute with trio
+```
+
+The calling workflow passes:
+- `--from <path>` (design doc or change-spec)
+- `--called-by <skill-name>` (sets `CALLED_BY` env so job.yaml records caller)
+- `--no-job` (if the caller is itself a workflow_root job; nested jobs are pointless)
+
+### Output contract (deterministic for callers)
+
+For new native work, regardless of invocation mode, PLAN emits:
+
+- `<run-dir>/plan.md` — task breakdown
+- `<run-dir>/spec.md` — engineering master spec
+- `<run-dir>/prompt.md` — cold-executor handoff (born here, v3.8 Feature 2.2)
+
+The selected work map records those exact paths. Mapped Spec Kit work instead keeps
+its original spec/plan/tasks/prompt; callers read the map, never assume siblings in
+`<run-dir>`. CAPTURE re-affirms but does not recreate a backlog or birth the handoff.
+
+### Job integration
+
+Automatic job hooks remain dormant (ADR-0008). Native artifacts are written to
+their selected committed paths; job records, when explicitly used, point at them.
+Do not rely on `job-end` to promote output, strip IDs into a shared "cycle" slug
+or overwrite existing ADRs/plans. Failed/aborted candidates retain their provenance
+and do not replace approved work.
+
+### Anti-pattern: nested job spawning
+
+If `/li-cycle` calls `/li-plan` as Phase 4, the operator already has a cycle-job. PLAN should NOT spawn its own nested job — that creates two open jobs for one workflow. The caller passes `--no-job` (or `NO_JOB=1` env) so the `job-begin` hook short-circuits.
+
+### See also
+
+- `docs/concepts/planner-as-module.md` (architecture doc)
+- `/li-jobs` controller
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li-cycle`:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../../.claude/decisions/0003-cycle-position-footer.md).
