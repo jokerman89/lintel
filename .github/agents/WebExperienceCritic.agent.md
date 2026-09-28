@@ -1,6 +1,6 @@
 ---
 name: WebExperienceCritic
-description: Applies a 6-pillar UX and brand critique to generated web output. Use before /li:generate-web runs for structural recommendations, and after it produces output for a scored review.
+description: Applies a 6-pillar UX and brand critique to generated web output. Use before /li-generate-web runs for structural recommendations, and after it produces output for a scored review.
 tools: Read, Bash, Grep, Glob
 ---
 

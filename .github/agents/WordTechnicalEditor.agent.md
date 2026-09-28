@@ -1,6 +1,6 @@
 ---
 name: WordTechnicalEditor
-description: Reviews Word output for structure, factual accuracy, voice, and variant-specific quality. Use after /li:generate-word produces a doc, or before distributing a transparency-note variant.
+description: Reviews Word output for structure, factual accuracy, voice, and variant-specific quality. Use after /li-generate-word produces a doc, or before distributing a transparency-note variant.
 tools: Read, Grep, Glob
 ---
 

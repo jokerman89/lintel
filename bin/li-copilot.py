@@ -844,11 +844,12 @@ def native_skill_file(source: Path, name: str, files: dict[str, bytes], local: b
     header, root, body = native_document(source, canonical, generated, files, local, repository, host)
     if scalar_value(frontmatter_value(header, "name", canonical), "name", canonical) != name:
         raise ValueError(f"Canonical skill name must match its folder: {canonical}")
-    # The core workflows keep their curated discovery text; every other skill uses its own.
+    # The core workflows keep their curated discovery text; every other skill uses its own,
+    # with the same invocation and tool spelling as the body.
     if name in WORKFLOWS:
         description, length = yaml_scalar(WORKFLOWS[name]), len(WORKFLOWS[name])
     else:
-        description = frontmatter_value(header, "description", canonical)
+        description = native_text(frontmatter_value(header, "description", canonical), host)
         length = len(scalar_value(description, "description", canonical))
     if length > host["description_limit"]:
         raise ValueError(f"Skill description exceeds {host['description_limit']} characters: {canonical}")
@@ -865,7 +866,7 @@ def native_agent_file(source: Path, canonical: str, files: dict[str, bytes], loc
     name = scalar_value(frontmatter_value(header, "name", canonical), "name", canonical)
     if name != stem or not NATIVE_AGENT_NAME.fullmatch(name):
         raise ValueError(f"Canonical agent name must match its file name: {canonical}")
-    values = {"name": name, "description": frontmatter_value(header, "description", canonical),
+    values = {"name": name, "description": native_text(frontmatter_value(header, "description", canonical), host),
               "tools": frontmatter_value(header, "tools", canonical, required=False)}
     scalar_value(values["description"], "description", canonical)
     data = text_bytes(render_frontmatter(values, host["agent_frontmatter"]) + "\n"

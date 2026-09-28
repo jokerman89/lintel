@@ -1718,7 +1718,7 @@ else:
     def test_modified_managed_file_refuses_entire_update(self):
         self.run_cli()
         path = self.target / ".github/skills/li-plan/SKILL.md"
-        path.write_text(path.read_text() + "\nTeam modification.\n")
+        path.write_text(path.read_text(encoding="utf-8") + "\nTeam modification.\n", encoding="utf-8")
         before = self.snapshot()
         self.assertIn("Modified managed file", self.run_cli(success=False).stderr)
         self.assertEqual(before, self.snapshot())

@@ -160,6 +160,16 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must match its folder"):
             self.render("mismatch")
 
+    def test_descriptions_use_the_host_invocation_and_tool_spelling(self):  # 1.1.c, 1.3.b
+        self.skill("verify", "Use after /li:build; confirm with AskUserQuestion.", "\n# Verify\n")
+        self.assertIn("\ndescription: Use after /li-build; confirm with ask_user.\n", self.render("verify"))
+        self.agent("doc-gen", "PPTNarrativeArchitect", "\nDesigns the arc.\n",
+                   description="Use before /li:generate-ppt runs.")
+        _, _, data = adapter.native_agent_file(self.source, "agents/doc-gen/PPTNarrativeArchitect.md", {}, True,
+                                               None, HOST)
+        self.assertIn(b"\ndescription: Use before /li-generate-ppt runs.\n", data)
+        self.assertNotIn(b"/li:", data)
+
     def test_skill_preamble_has_the_exact_root_in_both_modes(self):  # 1.1.d
         bundled = {".github/lintel/skills/define/references/intake.md": b"# Intake\n"}
         for local, root, files in ((True, "../../..", {}), (False, "../../lintel", bundled)):

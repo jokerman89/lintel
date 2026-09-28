@@ -1,6 +1,6 @@
 ---
 name: PPTNarrativeArchitect
-description: Designs the slide arc and per-slide content goal before a deck is built. Use before /li:generate-ppt runs, or when an existing deck needs a structural critique.
+description: Designs the slide arc and per-slide content goal before a deck is built. Use before /li-generate-ppt runs, or when an existing deck needs a structural critique.
 tools: Read, Grep, Glob
 ---
 
