@@ -159,8 +159,10 @@ examples, not executed conversion or inspection evidence. Use
 Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
 This remains the working PDF writer described above; patterns do not change its status or
 procedure. Resolve, or verify a supplied attachment, before preparing the HTML source.
-Conversion must preserve every section and clause required by the source document. No PDF reader
-is added: report required content not inspected in the produced PDF as unverified.
+Conversion must preserve every section and clause required by the source document. Check each
+required section in the readable source and in the prepared HTML before printing: a section
+absent there is **failed** at the source, not unknown. No PDF reader is added: report required
+content not inspected in the produced PDF as unverified.
 
 ## Roles, status and evidence
 

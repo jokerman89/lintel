@@ -60,9 +60,11 @@ state.
 
 ## Status protocol
 
-- **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful
+- **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful, and no selected
+  mandatory pattern clause is failed or unverified. The slot stays a template slot either way.
 - **DONE_WITH_CONCERNS** — produced but qa flagged stencil-inconsistency or label issues
-- **BLOCKED** — content.md has no diagrammable sections + no fresh-architecture strategy declared
+- **BLOCKED** — content.md has no diagrammable sections + no fresh-architecture strategy
+  declared, or a selected mandatory pattern clause is failed or unverified in the produced diagram
 - **NEEDS_CONTEXT** — `--from-pipeline` directory missing, design-spec absent, or output-format unspecified for ambiguous content
 
 ## When to promote from slot to curated

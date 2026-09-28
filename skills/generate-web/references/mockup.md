@@ -30,15 +30,22 @@ The ordinary pipeline and frontend-design renderer routes remain unchanged.
 1. Read the complete brief, selected references and project tokens. Separate
    existing facts from mock data. If a selected reference is denied or missing,
    report the affected work rather than silently generating a different design.
-2. Use the `frontend-design` decision method and design-DNA retrieval to resolve
+2. **Reusable patterns come first.** With no handed-over lock, resolve through the
+   [direct-entry steps](../SKILL.md#reusable-patterns) before the first design choice. With a
+   handed-over lock, run `verify-lock` first. `empty` changes nothing. Any other non-`ready`
+   status blocks this mockup's design decisions and render.
+   Then use the `frontend-design` decision method and design-DNA retrieval to resolve
    a single-file design without recursively starting another renderer.
    Preserve brief > verified profile > corpus precedence, mandatory policy and
    current project constraints. Record explicit token/reference choices as
    selected evidence and brief-backed overrides, not a new private schema.
+   With a `ready` selection, apply `project_visual` with the verified lock to write the
+   final `frontend-design-spec.json` before its binding is prepared.
 3. Load the bound `frontend-design-spec.json` with `design_contract.load_design`
    and the external P05/current P07 context. The same `schema_version: 1` and
    `source: frontend-design` contract applies. Do not pretend a raw token file,
-   screenshot or missing binding is a resolved render-ready spec.
+   screenshot or missing binding is a resolved render-ready spec. With a `ready`
+   selection, `validate_visual` against the verified lock must pass before step 4.
 4. Actually write one HTML document with a doctype, language, charset, viewport,
    meaningful title, semantic landmarks and accessible controls. Put CSS in
    `<style>` and only necessary demonstration interactions in `<script>`.

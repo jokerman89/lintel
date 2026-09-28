@@ -499,7 +499,7 @@ class DocumentPipelineTests(unittest.TestCase):
         self.assertFalse((outside / "patterns.lock.json").exists())
 
     def test_unrelated_format_fact_does_not_change_the_selection(self):
-        """L5: selection invariance only. Real conversion/provider preservation stays INT/V17 evidence."""
+        """L5: selection invariance only. Card 4.3.c's conversion duty is a V18 source review plus the existing provider compatibility tests (RN-14)."""
         for provider in ("docx", "pptx", "pdf", "xlsx", "vsdx"):
             report, _ = self.fx.resolve(ctx(artifact="technical-document", format=provider))
             mandatory = [item["clause"] for item in report["requirements"] if item["state"] == "mandatory"]
