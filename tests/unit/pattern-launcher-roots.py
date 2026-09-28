@@ -173,8 +173,16 @@ class HardeningTests(unittest.TestCase):
         context_path = h.context()
         context = h.posix_spelling(context_path)
         if h.shell("command -v cygpath >/dev/null 2>&1")[0] == 0:
-            self.assertTrue(context.startswith("/") and not context.startswith("/tmp/"), context)
+            # Any mount alias (including a shared /tmp) is valid if it names this exact file in the
+            # launcher's own environment; a forbidden prefix would reject legitimate hosts.
+            self.assertTrue(context.startswith("/"), context)
             self.assertNotEqual(context, native(context_path), "a real POSIX spelling, not the native path")
+            code, back, err = h.shell('cygpath -m -- "$2"', context)
+            self.assertEqual(code, 0, err)
+            back = back.rstrip("\n")
+            self.assertEqual(os.path.normcase(os.path.normpath(back)),
+                             os.path.normcase(os.path.normpath(native(context_path))), (context, back))
+            self.assertTrue(os.path.samefile(back, context_path), (context, back))
         for args in (("resolve", "--context", context), ("resolve", f"--context={context}")):
             code, report, err = h.launch(*args)
             self.assertEqual((code, report["status"]), (0, "empty"), (args, err))
