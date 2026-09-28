@@ -281,6 +281,26 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(pv.project_visual(visual_base_spec(), lock)["spec"],
                          pv.project_visual(visual_base_spec(), report, context=WEB)["spec"])
 
+    def test_report_validation_delegates_to_the_core_helper_when_present(self):
+        """R10 `validate_selection_report` is preferred; the build_lock route is only the pre-R10 fallback."""
+        from unittest import mock
+        report = ProjectionFixture(self).resolve()
+        calls = []
+
+        def helper(value, *, context, refs=()):
+            calls.append((value is report, context.digest, tuple(refs)))
+            return value
+
+        with mock.patch.object(p, "validate_selection_report", helper, create=True):
+            pv.project_visual(visual_base_spec(), report, context=WEB)
+        self.assertEqual(calls, [(True, WEB.digest, ())])
+        if hasattr(p, "validate_selection_report"):
+            tampered = copy.deepcopy(report)
+            tampered["requirements"][0]["text"] = "edited"
+            with self.assertRaises(p.PatternError) as raised:
+                pv.validate_visual(visual_base_spec(), tampered, context=WEB)
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+
     def test_explicit_refs_are_part_of_the_bound_inputs(self):
         fx = Fixture(self)
         pattern = visual_pattern(pid="me.visual")

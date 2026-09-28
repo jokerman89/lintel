@@ -257,9 +257,10 @@ def _report(resolution: Any, context: Optional[p.Context] = None, refs: Any = ()
 
     A lock is re-checked with `parse_lock`; persisted or cross-entry callers pass a lock that
     `verify_lock` accepted. A fresh in-process report must come with the `context` (and any
-    explicit `refs`) it was resolved with; the public core `build_lock` then recomputes its
-    selection digest and refuses a report whose content no longer matches. A bare report is
-    `selection_not_usable`. Non-ready/empty reports are returned so their status is reported.
+    explicit `refs`) it was resolved with; the core's public `validate_selection_report` (R10)
+    rechecks it, with the public `build_lock` as the pre-R10 route. A report whose content no
+    longer matches, or a bare report, is `selection_not_usable`. Non-ready/empty reports are
+    returned so their status is reported.
     """
     if not isinstance(resolution, Mapping) or any(key not in resolution for key in p.REPORT_KEYS):
         _fail("invalid_resolution", "expected a resolution report or lock from lib/patterns.py")
@@ -272,6 +273,10 @@ def _report(resolution: Any, context: Optional[p.Context] = None, refs: Any = ()
                                       "with (and its refs); across entries pass a verified lock", "invalid")
     if refs and not all(isinstance(item, p.InvocationRef) for item in refs):
         refs = p.parse_refs(list(refs))
+    validate = getattr(p, "validate_selection_report", None)
+    if validate is not None:
+        # Core R10 helper: same digest material as locks; raises selection_not_usable.
+        return validate(resolution, context=context, refs=tuple(refs))
     budget = resolution.get("metrics", {}).get("context_budget", p.LIMITS.context_budget)
     try:
         return p.build_lock(resolution, context, refs=tuple(refs), context_budget=budget)
