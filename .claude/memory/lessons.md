@@ -1063,7 +1063,6 @@ unavoidable config write, check its target with `git config --show-origin`. Neve
 the shared repository config without the operator's authorization.
 
 ## L-053 - Publish only through the authorized identity; never probe credentials
-
 **Date:** 2026-09-24
 
 **Context:** At the delivery step the coordinator's `git push` ran as the session's injected
@@ -1077,6 +1076,24 @@ probe or switch GitHub credentials, `hosts.yml` or token environment variables. 
 to an injected or Enterprise Managed User identity. If the session's identity cannot publish, stop
 and leave the exact commands for the operator, or wait for their explicit authorization to publish
 as `jokerman89`.
+
+**Recurrence and clarification (2026-09-28):** During merge coordination, an injected read-only
+identity masked an already configured, active maintainer account. The coordinator incorrectly
+treated one `api user` result as proof that authorized credentials were unavailable. The operator
+corrected that inference.
+
+An API identity check proves which account the current process selected, not which accounts are
+already configured. When the operator identifies an existing authorized account, inspect only
+documented account-status metadata, never credential files or token values. In this case, omitting
+the documented injected authentication overrides in a child process let the installed CLI use its
+existing stored active account; no token was inspected or exported, and neither the parent
+environment nor global account selection changed. Verify the resulting API identity, repository
+permissions and a non-mutating Git transport check before declaring delivery blocked. Keep Git
+credential-helper selection command-scoped and preserve repository hooks and other configuration.
+This does not authorize borrowing credentials, changing accounts globally or bypassing a real
+permission denial.
+
+Captured from the operator correction during the 2026-09-28 master merge coordination.
 
 ## L-054 - Add no third-party package the repository has not declared
 
