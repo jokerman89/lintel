@@ -34,10 +34,12 @@ Everything else in this document is a consequence of that split.
 └──────────────────────────────────────────────────────────────┘
 ```
 
-The spine carries no company identity. That is not an aspiration — it is enforced: a shape test
-fails the build if company-specific or non-English text appears in the public tree. The identity
-that used to be hardcoded was extracted wholesale into an external pack, which is what made
-publishing the harness possible at all.
+Company-specific identity belongs in external packs, not in the spine. Automated checking is
+narrower than that boundary: [`tests/shape/no-swedish.sh`](../tests/shape/no-swedish.sh) scans its
+listed shipped paths for selected Swedish letters and words, with explicit exemptions for
+functional data and generated documents. It does not detect every non-English
+language or company-specific reference, and it does not cover every tracked path.
+Company-neutrality and publication review remain obligations, not guarantees supplied by that test.
 
 ---
 
@@ -326,7 +328,7 @@ The test runner discovers checks in five tiers. Counts change as contracts are a
 
 | Tier | Asserts |
 |---|---|
-| **shape** | structural contracts — required frontmatter fields, hook registration, canonical paths, decision-record number uniqueness, generated-table sync, no non-English or company-specific text in the public tree |
+| **shape** | structural contracts — required frontmatter fields, hook registration, canonical paths, decision-record number uniqueness, generated-table sync, and selected Swedish-text checks with declared path exemptions |
 | **unit** | helper behaviour — state segmenting, memory operations, pack resolution and inheritance, one-way-door detection |
 | **integration** | cross-component links |
 | **end-to-end** | a full path through the harness |
