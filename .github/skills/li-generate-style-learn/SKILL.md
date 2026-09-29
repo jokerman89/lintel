@@ -74,7 +74,7 @@ Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an
 - Header/footer styles
 
 **Web (HTML/CSS):**
-- Parse <style> + linked CSS
+- Parse `<style>` + linked CSS
 - Extract :root CSS variables (preferred source)
 - Fall back: most-frequent computed colors in DOM
 - Typography from font-family declarations
@@ -198,7 +198,7 @@ To use: /li-generate ... --palette nordic-minimal
 
 ## Reusable patterns
 
-Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+Follow the [reusable pattern consumer contract](../../../skills/pattern/references/consumer-contract.md). The
 palette and STYLE.md output is unchanged and is observation, not policy. Palette tokens can
 reach a universal draft only through the `frontend-style-extract` adapter as
 `visual.palette.<token>` defaults with exact `#RRGGBB` values. Fonts, licensing and

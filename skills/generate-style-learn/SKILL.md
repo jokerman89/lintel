@@ -65,7 +65,7 @@ Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an
 - Header/footer styles
 
 **Web (HTML/CSS):**
-- Parse <style> + linked CSS
+- Parse `<style>` + linked CSS
 - Extract :root CSS variables (preferred source)
 - Fall back: most-frequent computed colors in DOM
 - Typography from font-family declarations
