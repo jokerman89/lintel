@@ -5,6 +5,33 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.5 — unreleased
+
+### Changed
+
+- Content-bound snapshots prefetch selected Git blobs through one batch reader.
+  Complete snapshots, digests, file modes and first-error behavior are preserved;
+  cache misses still use the existing strict reader. Ignored-file selection and
+  MARS freshness checks are unchanged. Process-count evidence is not an
+  end-to-end latency guarantee.
+
+### Fixed
+
+- New native plan, specification and handoff templates start as DRAFT rather
+  than asserting approval. PLAN reflects the selected work's actual approval;
+  CAPTURE preserves it rather than approving drafts. Existing grants and
+  original Spec Kit task IDs remain authoritative.
+- Specification requirements include observable acceptance and linked
+  verification/evidence references. Planned checks remain distinct from
+  completed observations. The existing approval gate is unchanged and does
+  not authenticate a human grant or guarantee model behavior.
+
+### Migration
+
+- Regenerate native artifacts from the canonical workflows. After a product
+  version change, use the existing reason-bearing rebind for the affected
+  profile context and obtain fresh dependent evidence.
+
 ## 0.13.4 — unreleased
 
 ### Changed
@@ -21,7 +48,9 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   The full OS matrix, job topology, strict coverage and timeouts remain intact.
 - A newer CI run cancels a running run only for pull requests. GitHub can still
   replace pending runs; this does not promise a run for every intermediate commit.
-  The expected critical-path reduction remains a model until hosted measurement.
+  In one completed full hosted matrix, the Windows critical job took 74.25
+  minutes against the earlier rounded 124.8-minute baseline. The 62.3-minute
+  model was not achieved; this observation is not a statistical speed guarantee.
 
 ### Fixed
 

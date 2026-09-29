@@ -142,6 +142,25 @@ class PlanningSourceTests(unittest.TestCase):
         ))
         self.assertIn("/li:inspect", skill("analyze"))
 
+    def test_native_finalization_and_capture_keep_one_approval_source(self):
+        plan = skill("plan")
+        self.assert_terms(section(plan, "### Step 10"), (
+            "actual retained authorization", "approval source and scope",
+            "author or inspect these documents is not approval",
+            "does not extend implementation or publication authority",
+            "selected work map APPROVED", "does not create approval",
+            "does not replace required review evidence",
+        ))
+        self.assertNotIn("draft, finalized in CAPTURE", plan)
+        self.assert_terms(skill("capture"), (
+            "A DRAFT remains DRAFT", "CAPTURE does not approve drafts",
+            "existing approval is not erased", "Planned or unrun checks",
+        ))
+        prompt = required_text(ROOT / "scaffolding/01-foundation/templates/plan/prompt.template.md")
+        self.assertIn("stop before BUILD", " ".join(prompt.split()))
+        self.assertIn("tasks.md remains authoritative", " ".join(prompt.split()))
+        self.assertNotIn("skip DEFINE/PLAN, they're done", prompt)
+
     def test_handoff_callers_use_budget_owner_without_weakening_boundaries(self):
         for name in ("plan", "capture", "spec-kit"):
             with self.subTest(skill=name):
@@ -218,6 +237,122 @@ FIXTURE = runpy.run_path(str(ROOT / "tests" / "unit" / "review_evidence.py"))
 
 
 class PlanningEvidenceTests(FIXTURE["Fixture"]):
+    def instantiate_native_drafts(self):
+        paths = {}
+        for role in ("spec", "plan", "prompt"):
+            template = required_text(
+                ROOT / "scaffolding/01-foundation/templates/plan" / (role + ".template.md"))
+            rendered = template.replace("<wedge title>", "Fixture draft").replace("<date>", "2026-09-29")
+            relative = f"draft/{role}.md"
+            self.write(relative, rendered)
+            paths[role] = relative
+        mapping = {
+            "schema_version": 1, "workflow": "lintel", "status": "DRAFT",
+            **paths, "tasks": paths["plan"],
+        }
+        self.write_json("draft/work.json", mapping)
+        return paths, mapping
+
+    def actual_plan_artifact_gate(self, selected, *, ok):
+        text = skill("plan").split("### Step 11a", 1)[1].split("\n### Step 11b", 1)[0]
+        block = re.search(r"```bash\n(.*?)\n```", text, re.S)
+        self.assertIsNotNone(block, "The actual PLAN completeness recipe is required")
+        recipe = block[1]
+        python = recipe.split("<<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+        return self.run_command(
+            [self.env["LINTEL_PYTHON"], "-B", "-", ROOT / "bin/li-work-artifacts.py",
+             self.repo, self.repo / selected],
+            input=python, ok=ok,
+        )
+
+    def test_instantiated_native_files_start_draft_and_reader_does_not_promote(self):
+        paths, mapping = self.instantiate_native_drafts()
+        before = {path: (self.repo / path).read_bytes() for path in [*paths.values(), "draft/work.json"]}
+        for role, path in paths.items():
+            with self.subTest(role=role):
+                text = (self.repo / path).read_text(encoding="utf-8")
+                status = re.search(r"(?m)^\*\*Status:\*\*\s+(\S+)", text)
+                self.assertIsNotNone(status, f"Generated {role} has no explicit status")
+                self.assertEqual(status[1], "DRAFT")
+        read = self.run_command(
+            [self.env["LINTEL_PYTHON"], ROOT / "bin/li-work-artifacts.py",
+             "--repo", self.repo, "--map", "draft/work.json"], ok=0,
+        )
+        self.assertEqual(json.loads(read.stdout), mapping)
+        blocked = self.actual_plan_artifact_gate("draft/work.json", ok=1)
+        self.assertIn("selected work must be APPROVED", blocked.stderr)
+        self.assertEqual(before, {path: (self.repo / path).read_bytes() for path in before})
+
+    def test_actual_plan_gate_rejects_approval_headings_without_approved_map(self):
+        paths, _ = self.instantiate_native_drafts()
+        for path in paths.values():
+            text = (self.repo / path).read_text(encoding="utf-8")
+            self.write(path, "**Status:** APPROVED\n" + text)
+        before = {path: (self.repo / path).read_bytes() for path in [*paths.values(), "draft/work.json"]}
+        blocked = self.actual_plan_artifact_gate("draft/work.json", ok=1)
+        self.assertIn("selected work must be APPROVED", blocked.stderr)
+        self.assertEqual(before, {path: (self.repo / path).read_bytes() for path in before})
+
+    def test_recorded_existing_approval_preserves_artifacts_and_original_ids(self):
+        # The fixture supplies recorded approval; this gate does not authenticate a human grant.
+        self.write("plan.md", "### T017 Keep the existing interface\n\n- [ ] Verify the original R1.\n")
+        before = {path: (self.repo / path).read_bytes()
+                  for path in ("work.json", "spec.md", "plan.md", "prompt.md")}
+        self.actual_plan_artifact_gate("work.json", ok=0)
+        read = self.run_command(
+            [self.env["LINTEL_PYTHON"], ROOT / "bin/li-work-artifacts.py",
+             "--repo", self.repo, "--map", "work.json", "--view", "context"], ok=0,
+        )
+        context = json.loads(read.stdout)
+        self.assertEqual(context["status"], "APPROVED")
+        self.assertEqual(set(context["tasks"]), {"T017"})
+        self.assertEqual(context["artifacts"]["tasks"], "plan.md")
+        self.assertFalse(context["release_clearance"])
+        self.assertEqual(before, {path: (self.repo / path).read_bytes() for path in before})
+
+    def test_rendered_spec_links_observable_acceptance_to_original_verification(self):
+        template = required_text(ROOT / "scaffolding/01-foundation/templates/plan/spec.template.md")
+        cases = {
+            "R1": ("T017", "Empty input is rejected without writing data.", "empty-input"),
+            "R2": ("T023", "Valid input preserves the existing value.", "valid-input"),
+        }
+        lines = []
+        for line in template.replace("<wedge title>", "Input validation").splitlines():
+            for requirement, (task, expected_result, anchor) in cases.items():
+                if not line.startswith(f"| {requirement} |"):
+                    continue
+                for placeholder, value in {
+                    "<requirement>": f"Validate {requirement}",
+                    "<T1 / 1.1 / 1.1.a>": task, "<\u2026>": task,
+                    "<expected result or original criterion link>": expected_result,
+                    "<verification reference and evidence state>":
+                        f"[Planned check](checks.md#{anchor}); evidence not run",
+                }.items():
+                    line = line.replace(placeholder, value)
+            lines.append(line)
+        rendered = "\n".join(lines) + "\n"
+        self.write("spec.md", rendered)
+        self.write("plan.md", "### T017 Reject empty input\n\n- [ ] Implement R1.\n\n"
+                   "### T023 Preserve valid input\n\n- [ ] Implement R2.\n")
+        self.write("checks.md", "## Empty input\n\nCall the input validator with an empty value; "
+                   "expect rejection and no write.\n\n## Valid input\n\nCall the input validator "
+                   "with an existing value; expect that value to be preserved.\n")
+        actual = (self.repo / "spec.md").read_text(encoding="utf-8")
+        for requirement, (task, expected_result, anchor) in cases.items():
+            row = next(line for line in actual.splitlines() if line.startswith(f"| {requirement} |"))
+            cells = [cell.strip() for cell in row.strip("|").split("|")]
+            self.assertEqual(len(cells), 6)
+            self.assertEqual(cells[3], task)
+            self.assertEqual(cells[4], expected_result)
+            self.assertEqual(cells[5], f"[Planned check](checks.md#{anchor}); evidence not run")
+            self.assertIn("### " + task, (self.repo / "plan.md").read_text(encoding="utf-8"))
+            reference = re.search(r"\[Planned check\]\(([^)]+)\)", cells[5])[1]
+            path, selected_anchor = reference.split("#", 1)
+            evidence_text = (self.repo / path).read_text(encoding="utf-8")
+            headings = [re.sub(r"\s+", "-", line.lstrip("# ").lower())
+                        for line in evidence_text.splitlines() if line.startswith("#")]
+            self.assertIn(selected_anchor, headings)
+
     def observed_inspect(self, *, status="pass", controls=None):
         self.record(status=status, controls=controls)
         self.review["skill"] = "inspect"

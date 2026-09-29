@@ -232,12 +232,16 @@ The following familiar names describe roles, not a second native backlog.
 - Verify requirements still match actual implementation
 - Report implementation/spec drift; amend a requirement only within explicit scope
   authorization, with affected review/QA evidence renewed
-- Status: APPROVED (from PLAN) — unchanged unless drift detected
+- Preserve the actual selected status and applicable authorization. A DRAFT
+  remains DRAFT; CAPTURE does not approve drafts or create a grant. An existing
+  approval is not erased by reaffirmation. Scope drift requires the existing
+  re-plan/review process, not a silent promotion or rewritten acceptance.
 
 **Mapped `tasks` reaffirm**:
 - Annotate the original tasks with actual verified status, preserving IDs and parser
   structure. Missing/blocked/deferred work stays open; CAPTURE does not approve it
-- Acceptance criteria post-verification (which actually passed)
+- Link observed evidence to the original acceptance and verification references.
+  Planned or unrun checks remain explicit; a listed command is not a passed result
 - The mapped `plan` receives design reconciliation, never a duplicate task list
 
 **`prompt.md` reaffirm** (born in PLAN, v3.8 Feature 2.2 moved birth to PLAN):
@@ -569,7 +573,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `.claude/runtime/state/build-log.md`
 - `.claude/runtime/state/review-report-*.md`
 - `.claude/runtime/state/compliance-report-*.md` (if the active pack defines compliance gates)
-- design doc, plan.md (DRAFT), spec.md (DRAFT)
+- selected design/spec/plan/prompt artifacts with their actual recorded status
 - selected work.json and optional swarm coordination/charter/brief/report/review evidence
 - Cycle's git diff for change scope
 - role file (if active)

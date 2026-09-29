@@ -32,6 +32,16 @@ with tempfile.TemporaryDirectory(prefix="lintel-work-map-") as tmp:
     native = dict(data, workflow="lintel", tasks=data["plan"])
     mapping.write_text(json.dumps(native))
     assert module.load_work_map(repo, mapping)["tasks"] == data["plan"]
+    # Reading a native draft cannot promote it; recorded approval is a separate input.
+    draft = dict(native, status="DRAFT")
+    mapping.write_text(json.dumps(draft))
+    before = mapping.read_bytes()
+    assert module.load_work_map(repo, mapping)["status"] == "DRAFT"
+    assert mapping.read_bytes() == before
+    mapping.write_text(json.dumps(native))
+    before = mapping.read_bytes()
+    assert module.load_work_map(repo, mapping)["status"] == "APPROVED"
+    assert mapping.read_bytes() == before
     for bad in (dict(data, schema_version=True), dict(data, tasks="../../outside.md"), dict(data, tasks="missing.md"), dict(data, tasks="C:/private.md"), dict(data, status="INVENTED")):
         mapping.write_text(json.dumps(bad))
         try:

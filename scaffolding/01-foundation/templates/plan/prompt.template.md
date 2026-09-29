@@ -8,7 +8,13 @@
 -->
 # Cold-Executor Prompt — <wedge title>
 
+**Status:** DRAFT
+**Work map:** <path to selected work.json>
+
 This file is a SELF-CONTAINED prompt. A fresh AI session reading only this prompt + the linked spec.md + plan.md should be able to re-execute or extend this work without prior context.
+Its status reflects the selected work map, not permission inferred from receiving
+this prompt. A new unapproved handoff remains DRAFT; retain an actual existing
+approval for the same scope without asking for it again.
 
 ## Context
 
@@ -43,9 +49,13 @@ there `verify` has no wrapper, so read the trusted `skills/verify/SKILL.md`
 (`.github/lintel/skills/verify/SKILL.md` in a repository kit). On a manual route, read each
 trusted `skills/<skill>/SKILL.md` through the Universal adapter.
 
-1. Read spec.md fully
-2. Read plan.md
-3. Run /li:cycle --from BUILD (skip DEFINE/PLAN, they're done)
+1. Read the selected work map and its original artifacts, task IDs and authorization.
+   If the work remains DRAFT, stop before BUILD and continue PLAN's required review
+   and missing-approval steps. Do not infer approval from this template or a review score.
+2. Read the mapped spec fully, then the plan and original task source. In Spec Kit,
+   tasks.md remains authoritative; no duplicate task list or native status heading is required.
+3. When the selected work is APPROVED within actual existing authorization, run
+   /li:cycle --from BUILD. Reuse that grant instead of asking the same question again.
 4. Apply specification then quality review per bounded package, covering every original leaf
 5. Run /li:verify; repairs need explicit authorization and fresh affected evidence
 6. Ship per /li:ship

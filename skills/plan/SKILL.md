@@ -423,8 +423,15 @@ then approval is asked again. Record `mars_offer` on the Step 12 PLAN entry so n
 re-offers: `accepted` (consent given), `declined` (offered and refused or unanswered) or
 `not-offered` (the gate returned 3, so nothing was asked). `--auto` and silence never select E.
 
-If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
-status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
+If A, or actual retained authorization already covers this same reviewed scope,
+record the approval source and scope in the original plan without re-asking it.
+Permission to author or inspect these documents is not approval of the plan;
+plan approval does not extend implementation or publication authority.
+Mark the selected work map APPROVED and reflect that status in the native trio,
+then finalize it and write the checkpoint. Until that approval is recorded, new
+unapproved artifacts and their map remain DRAFT. Copying a template, reading an
+artifact or passing a review does not create approval. Existing approval does not
+replace required review evidence. Only declare DONE after the artifact checks below pass.
 
 ### Step 11 — Write artifacts
 
@@ -434,7 +441,7 @@ status DONE after the artifact checks below pass. Until approval, all three rema
 - `scaffolding/01-foundation/templates/plan/spec.template.md` — engineering master spec.
 - `scaffolding/01-foundation/templates/plan/prompt.template.md` — cold-executor handoff.
 
-Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. Preserve the approval status established at Step 10 when finalizing the drafts. If the scaffolding tree is absent, locate these templates in the installed Lintel source; if unavailable there too, retain the essential task fields from Step 2 and depth structure below, and record that the canonical template was unavailable.
+Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. Defaults create DRAFT artifacts for new unapproved work. Preserve the actual selected approval established or retained at Step 10 when finalizing or updating artifacts; a template default must not erase that grant. Status headings reflect the existing work map, not a second status engine. If the scaffolding tree is absent, locate these templates in the installed Lintel source; if unavailable there too, retain the essential task fields from Step 2 and depth structure below, and record that the canonical template was unavailable.
 
 **plan.md** (canonical, `.claude/plans/<slug>/plan.md`) — from `plan.template.md`:
 ```markdown
@@ -483,8 +490,11 @@ The **subtask is the LEAF** at tree depth — the verification and progress unit
 - Master engineering specification — born in PLAN (v3.8 Feature 2.2: trio born together)
 - Architecture overview from design doc
 - Data model, interfaces, contracts
-- Requirements traced to design
-- Status: APPROVED (CAPTURE re-affirms on cycle-end, no longer the birth-point)
+- Requirements traced to design and original task IDs, with observable acceptance
+  and concrete verification/evidence references. Link the original leaf/test instead
+  of duplicating its authority; planned checks remain unrun until evidence exists.
+- Status: DRAFT for new unapproved work; APPROVED only when it reflects the actual
+  selected approval recorded at Step 10. CAPTURE reaffirms, never promotes a draft.
 
 **prompt.md** (canonical, `.claude/plans/<slug>/prompt.md`) — from `prompt.template.md` — **v3.8 Feature 2.2: born in PLAN, not CAPTURE.**
 
@@ -627,7 +637,8 @@ Skip-conditions:
 
 **Writes:**
 - `plan.md` (canonical)
-- `spec.md` (draft, finalized in CAPTURE)
+- `spec.md` and `prompt.md` (created DRAFT for unapproved native work; finalized in
+  PLAN with actual selected approval, then reaffirmed rather than approved by CAPTURE)
 - `work.json` (schema version 1; optional additive swarm fields only after opt-in)
 - `.claude/plans/<initiative>/swarm/` (optional charter, topology, briefs, and evidence destinations)
 - `.claude/runtime/state/.planner-checkpoint.md`

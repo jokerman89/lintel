@@ -24,6 +24,11 @@
 **Design doc:** <path>
 **Discover report:** <path>
 **Scope:** <path to scope.md>
+**Work map:** <path to selected work.json>
+
+The DRAFT default is for new unapproved work. This heading reflects the selected
+map's recorded approval; it neither grants authority nor erases an existing grant
+for the same reviewed scope when artifacts are updated.
 
 ## Summary
 
