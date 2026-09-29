@@ -5,6 +5,25 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.3 — unreleased
+
+### Fixed
+
+- REVIEW, SHIP and the remaining affected workflow examples load executable helpers
+  only from the explicitly selected Lintel source or documented Claude plugin root.
+  A missing helper no longer selects code from the target repository, Git cwd or
+  personal installation as a substitute. Required helper failures stop their step.
+- Optional REVIEW/SHIP footers report `UNVERIFIED` when their trusted helper is
+  unavailable. This does not create state or imply that review or delivery passed.
+
+### Migration
+
+- Supply `LINTEL_SOURCE_ROOT` through the installed adapter; the Claude plugin may
+  supply `CLAUDE_PLUGIN_ROOT`. Keep `LINTEL_REPO_ROOT` for target data, not helper
+  code. Regenerate native artifacts from the updated canonical workflows.
+- Product-version changes invalidate affected bound profile inputs. Use the
+  existing explicit, reason-bearing rebind path and fresh dependent evidence.
+
 ## 0.13.2 — unreleased
 
 Adaptive review (ADR-0040), integrated with the complete native Copilot bodies

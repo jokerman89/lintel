@@ -23,7 +23,8 @@ Two modes:
 **Writer mode (manual, operator-invoked):** records one JSONL line per invocation the operator wants counted, via the unified audit writer. There is NO automatic at-skill-invocation trigger — nothing fires this for you (the wrapper-hook this was originally designed around was never built):
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 audit_log usage-skill invocation skill=<name>     # optional: mode=<mode> tokens_est=<n> cli=<cli>
 ```
 
@@ -77,14 +78,16 @@ The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build
 Run the one-liner from "What this skill does". That is the whole writer — no script, no hook:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 audit_log usage-skill invocation skill=cycle mode=research-dive tokens_est=3500 cli=claude-code
 ```
 
 ### Step 2 — Reader mode (solo-invokable)
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh"
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 usage_dir="$(audit_dir usage-skill)"   # the router's operator-global directory
 for log in "$usage_dir"/usage-*.jsonl; do
   [ -f "$log" ] || continue

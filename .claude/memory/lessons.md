@@ -649,7 +649,6 @@ not outrank architecture, and existing explicit authorization remains valid with
 Related: [[L-025]] fix the source; ADR-0025 and the session-protocol coverage map.
 
 ## L-029 — Completion follows the user's outcome, not a draft-delivery milestone
-
 **Date:** 2026-09-08
 
 **Context:** The operator asked whether the enterprise review had fixed everything, then
@@ -663,6 +662,18 @@ not establish the intended finished result.
 draft PR can be a milestone; it is not completion when the operator expects functioning,
 integrated improvements. Reopen the ledger when new main changes invalidate the verified
 baseline, and do not claim the final outcome before the required remote merge is confirmed.
+
+**Amended 2026-09-29 (report-driven implementation):** The coordinator treated delivery of
+the skill-review summary and completion of the private repository audit as the end of those
+streams, then prepared branch cleanup. The operator clarified that the intended result was
+to rebuild and correct Lintel using those findings, not merely store the reports.
+
+Keep analysis complete, implementation complete and integrated acceptance as separate states.
+Map the existing findings to actual code, tests and delivered behavior; do not substitute a
+report commit or another feature's tests for that work. Preserve unresolved design and
+permission boundaries explicitly rather than calling them done or silently choosing a policy.
+Branch cleanup follows the clarified implementation outcome, not the report-publication
+milestone.
 
 ## L-030 — Adding a client adapter must preserve Universal product identity
 

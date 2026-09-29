@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: universal-trusted-tools-fixtures
-# implements: ADR-0005, ADR-0007, ADR-0008
+# implements: ADR-0005, ADR-0007, ADR-0008, ADR-0028, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P01.md
 # constraints: no personal state, network, hook registration or real CLI updates
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-29
 """Behavioral acceptance for P01, including hostile target code and preserved policy."""
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -813,6 +814,168 @@ class ShellStepRunner(Fixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse(self.marker.exists(), "li-run executed target code")
         self.assertEqual(result.stdout.strip(), "trusted source|target project|advisory")
+
+
+class WorkflowSourceExamples(unittest.TestCase):
+    SKILLS = ("review", "ship", "usage-log", "orientator", "frontend-style-extract")
+    HELPERS = ("bin/_audit.sh", "lib/state.sh", "lib/pack-resolver.sh",
+               "lib/orientator-routing.sh", "lib/cycle-footer.sh")
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="lintel-workflow-source-")
+        self.addCleanup(self.temp.cleanup)
+        self.base = Path(self.temp.name)
+        self.source = self.base / "trusted source"
+        self.plugin = self.base / "plugin source"
+        self.target = self.base / "target"
+        self.home = self.base / "home"
+        self.target.mkdir()
+        self.home.mkdir()
+        for root, label in ((self.source, "explicit"), (self.plugin, "plugin")):
+            for helper in self.HELPERS:
+                body = f"printf '%s\\n' '{label}:{helper}'\n"
+                if helper == "lib/cycle-footer.sh":
+                    body = f"render_cycle_footer() {{ printf '%s\\n' '{label}:footer'; }}\n"
+                write(root / helper, body)
+        self.env = {
+            key: value for key, value in os.environ.items()
+            if not key.startswith(("LINTEL_", "CLAUDE_", "COPILOT_", "GIT_", "BASH_FUNC_"))
+            and key not in ("BASH_ENV", "ENV", "CDPATH")
+        }
+        self.env.update(
+            HOME=self.home.as_posix(), USERPROFILE=self.home.as_posix(),
+            APPDATA=(self.home / "AppData" / "Roaming").as_posix(),
+            LOCALAPPDATA=(self.home / "AppData" / "Local").as_posix(),
+            XDG_CONFIG_HOME=(self.home / ".config").as_posix(),
+            LINTEL_REPO_ROOT=self.target.as_posix(),
+            LINTEL_HOME=(self.home / ".lintel").as_posix(),
+        )
+
+    def blocks(self, skill: str) -> list[str]:
+        text = (ROOT / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+        return re.findall(r"```bash[^\n]*\n(.*?)\n```", text, re.DOTALL)
+
+    def required_sources(self) -> list[tuple[str, str]]:
+        commands = []
+        for skill in self.SKILLS:
+            for block in self.blocks(skill):
+                lines = [line.strip() for line in block.splitlines()]
+                sources = [line for line in lines if line.startswith('source "$LINTEL_SOURCE_ROOT/')]
+                if not sources:
+                    continue
+                bindings = [line for line in lines if line.startswith("export LINTEL_SOURCE_ROOT=")]
+                self.assertEqual(len(bindings), 1, skill)
+                commands.extend((skill, bindings[0] + "\n" + line) for line in sources)
+        self.assertEqual({skill for skill, _ in commands}, set(self.SKILLS))
+        return commands
+
+    def run_shell(self, script: str, **bindings: str) -> subprocess.CompletedProcess[str]:
+        env = dict(self.env, **bindings)
+        return subprocess.run(
+            [BASH, "--noprofile", "--norc", "-c", script], cwd=self.target,
+            env=env, capture_output=True, text=True, timeout=15,
+        )
+
+    def test_canonical_and_native_examples_have_no_implicit_executable_root(self) -> None:
+        forbidden = re.compile(
+            r"LINTEL_SOURCE_ROOT:-[^\n]*(?:LINTEL_REPO_ROOT|LINTEL_HOME|\$HOME|git rev-parse)"
+            r'|_sl="\$HOME/\.lintel/lib/state\.sh"'
+        )
+        findings = []
+        for skills_root in (ROOT / "skills", ROOT / ".github" / "skills"):
+            for folder in skills_root.iterdir():
+                path = folder / "SKILL.md"
+                if path.is_file():
+                    findings.extend(
+                        f"{path.relative_to(ROOT).as_posix()}:{number}"
+                        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+                        if forbidden.search(line)
+                    )
+        self.assertEqual(findings, [])
+
+    def test_required_helpers_use_explicit_source_before_plugin(self) -> None:
+        for skill, command in self.required_sources():
+            with self.subTest(skill=skill, command=command):
+                result = self.run_shell(command, LINTEL_SOURCE_ROOT=self.source.as_posix(),
+                                        CLAUDE_PLUGIN_ROOT=self.plugin.as_posix())
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue(result.stdout.startswith("explicit:"), result.stdout)
+
+    def test_required_helpers_accept_the_documented_plugin_binding(self) -> None:
+        for skill, command in self.required_sources():
+            with self.subTest(skill=skill, command=command):
+                result = self.run_shell(
+                    command + '\nprintf "selected:%s\\n" "$LINTEL_SOURCE_ROOT"\n',
+                    CLAUDE_PLUGIN_ROOT=self.plugin.as_posix(),
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue(result.stdout.startswith("plugin:"), result.stdout)
+                self.assertIn("selected:" + self.plugin.as_posix(), result.stdout)
+
+    def test_required_helpers_refuse_missing_trusted_binding(self) -> None:
+        for skill, command in self.required_sources():
+            with self.subTest(skill=skill, command=command):
+                result = self.run_shell(command + "\nprintf 'consumer-ran\\n'\n")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("trusted", result.stderr.lower())
+                self.assertEqual(result.stdout, "")
+
+    def test_invalid_explicit_source_does_not_fall_back_to_plugin(self) -> None:
+        for skill, command in self.required_sources():
+            with self.subTest(skill=skill, command=command):
+                result = self.run_shell(
+                    command + "\nprintf 'consumer-ran\\n'\n",
+                    LINTEL_SOURCE_ROOT=(self.base / "missing source").as_posix(),
+                    CLAUDE_PLUGIN_ROOT=self.plugin.as_posix(),
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertTrue(result.stderr)
+                self.assertEqual(result.stdout, "")
+
+    def test_required_helper_failure_stops_the_consumer(self) -> None:
+        for helper in self.HELPERS:
+            write(self.source / helper, "return 7\n")
+        for skill, command in self.required_sources():
+            with self.subTest(skill=skill, command=command):
+                result = self.run_shell(command + "\nprintf 'consumer-ran\\n'\n",
+                                        LINTEL_SOURCE_ROOT=self.source.as_posix())
+                self.assertEqual(result.returncode, 7)
+                self.assertEqual(result.stdout, "")
+
+    def test_optional_footers_use_only_declared_sources(self) -> None:
+        for skill in ("review", "ship"):
+            blocks = [block for block in self.blocks(skill) if "render_cycle_footer" in block]
+            self.assertEqual(len(blocks), 1)
+            for bindings, expected in (
+                ({"LINTEL_SOURCE_ROOT": self.source.as_posix(),
+                  "CLAUDE_PLUGIN_ROOT": self.plugin.as_posix()}, "explicit:footer"),
+                ({"CLAUDE_PLUGIN_ROOT": self.plugin.as_posix()}, "plugin:footer"),
+            ):
+                with self.subTest(skill=skill, bindings=bindings):
+                    result = self.run_shell(blocks[0], **bindings)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout.strip(), expected)
+
+    def test_unavailable_footers_are_explicitly_unverified(self) -> None:
+        for skill in ("review", "ship"):
+            block = next(block for block in self.blocks(skill) if "render_cycle_footer" in block)
+            for bindings in ({}, {"LINTEL_SOURCE_ROOT": (self.base / "missing").as_posix(),
+                                 "CLAUDE_PLUGIN_ROOT": self.plugin.as_posix()}):
+                with self.subTest(skill=skill, bindings=bindings):
+                    result = self.run_shell(block, **bindings)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertIn("UNVERIFIED", result.stderr)
+                    self.assertIn("unavailable", result.stderr)
+
+    def test_footer_helper_failure_is_not_an_unavailable_success(self) -> None:
+        write(self.source / "lib/cycle-footer.sh", "return 9\n")
+        for skill in ("review", "ship"):
+            block = next(block for block in self.blocks(skill) if "render_cycle_footer" in block)
+            with self.subTest(skill=skill):
+                result = self.run_shell(block, LINTEL_SOURCE_ROOT=self.source.as_posix())
+                self.assertEqual(result.returncode, 9)
+                self.assertEqual(result.stdout, "")
 
 
 class Adr(Fixture):

@@ -112,7 +112,8 @@ Retain advisory violations in the report without converting them into hard stops
 A configured control is not automatically mandatory.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<open|fixed|policy-replan>
 # → .claude/runtime/audit/compliance-stops.jsonl
 ```
@@ -140,7 +141,8 @@ If the active pack activates a provenance gate (`resolve_pack_field compliance.h
 - Log AI-assistance provenance for the shipped artifact — one line via the unified writer (ts/operator/cycle_id come from the envelope; the audit dir is already repo-scoped in v5 repos, so no `<repo>-` prefix in the filename):
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 audit_log provenance-log shipped branch=<branch> commit_range=<sha>..<sha> ai_assistance=lintel-cycle \
   phases=<DEFINE,PLAN,BUILD,REVIEW,SHIP> audience=<audience> voice_tier=<tier> gates_passed=<gate1,gate2>
 # → .claude/runtime/audit/provenance-log.jsonl
@@ -279,8 +281,8 @@ checks where relevant; neither this prose nor a pack label proves a hook fired.
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `hard_rule_violations` must be 0 to reach here; gate detail lives in the compliance/provenance logs:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
+source "$LINTEL_SOURCE_ROOT/lib/state.sh" || exit $?
 state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
 ```
 
@@ -402,8 +404,13 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
+footer_source="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
+if [ -n "$footer_source" ] && [ -f "$footer_source/lib/cycle-footer.sh" ]; then
+  source "$footer_source/lib/cycle-footer.sh" || exit $?
+  render_cycle_footer
+else
+  printf '%s\n' "UNVERIFIED: shared cycle-position footer is unavailable" >&2
+fi
 ```
 
 Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

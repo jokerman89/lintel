@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/review-remediation/spec.md",
+  "plan": ".claude/plans/review-remediation/plan.md",
+  "tasks": ".claude/plans/review-remediation/plan.md",
+  "prompt": ".claude/plans/review-remediation/prompt.md"
+}
