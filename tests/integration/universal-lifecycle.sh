@@ -4,6 +4,7 @@
 # intent: .claude/plans/universal-implementation/packages/P10.md
 # constraints: isolated synthetic source, install, consumer and private state only
 # last_intent_review: 2026-09-20
+# SHARD-WEIGHT: 739
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PYTHON=""

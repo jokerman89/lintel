@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # DESCRIPTION: Explicit private-sync bindings and preserved local Git round trips.
 # TAGS: integration,private-sync,codex-compatible
+# SHARD-WEIGHT: 222
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if command -v python3 >/dev/null 2>&1; then PYTHON=python3

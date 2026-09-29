@@ -6,6 +6,7 @@
 # last_intent_review: 2026-09-24
 # DESCRIPTION: Installed caller-child profile bridge and joined profile/work/domain/review/resume.
 # TAGS: integration,p14-a23
+# SHARD-WEIGHT: 345
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PYTHON="$(command -v python || command -v python3)" || { echo "FAIL: Python required" >&2; exit 2; }

@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   plan:
@@ -46,7 +46,7 @@ jobs:
     name: Suite (${{ matrix.os }}, ${{ matrix.part }})
     needs: plan
     runs-on: ${{ matrix.os }}
-    # Sized from local Windows timings (ADR-0032); the integration shard holding the Copilot kit is the longest.
+    # Sized from local Windows timings (ADR-0032); integration shards are balanced by SHARD-WEIGHT (ADR-0041).
     timeout-minutes: ${{ matrix.timeout }}
     strategy:
       fail-fast: false

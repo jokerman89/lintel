@@ -15,6 +15,13 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 - PLAN, CAPTURE and Spec Kit call the shared owner directly. Budget advice does
   not change model settings or context capacity. Unknown, estimated and observed
   inputs remain distinct; optional handoff observations remain opt-in.
+- The Copilot kit's unchanged unittest methods are partitioned into eight disjoint
+  integration entries. Optional measured-weight headers balance the existing
+  shards; scopes without weights retain their previous modulo assignment.
+  The full OS matrix, job topology, strict coverage and timeouts remain intact.
+- A newer CI run cancels a running run only for pull requests. GitHub can still
+  replace pending runs; this does not promise a run for every intermediate commit.
+  The expected critical-path reduction remains a model until hosted measurement.
 
 ### Fixed
 

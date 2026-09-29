@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/ci-workload-balance/spec.md",
+  "plan": ".claude/plans/ci-workload-balance/plan.md",
+  "tasks": ".claude/plans/ci-workload-balance/plan.md",
+  "prompt": ".claude/plans/ci-workload-balance/prompt.md"
+}
