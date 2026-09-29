@@ -62,10 +62,14 @@ fi
 grep -q '^STALE: docs/showcase/lintel-the-harness.html' "$TMP/partial-drift"
 grep -q 'Selected showcase drift' "$showcase/docs/showcase/lintel-the-harness.html"
 
-for mode in wiki-only showcase-only; do
+for mode in wiki-only showcase-only default; do
   absent="$TMP/missing-$mode"
   rc=0
-  bash "$ROOT/bin/li-wiki-gen" --"$mode" --output "$absent" --check > "$TMP/missing-check" || rc=$?
+  if [ "$mode" = default ]; then
+    bash "$ROOT/bin/li-wiki-gen" --output "$absent" --check > "$TMP/missing-check" || rc=$?
+  else
+    bash "$ROOT/bin/li-wiki-gen" --"$mode" --output "$absent" --check > "$TMP/missing-check" || rc=$?
+  fi
   test "$rc" -eq 1
   test ! -e "$absent"
   grep -q '^STALE:' "$TMP/missing-check"
@@ -75,15 +79,24 @@ rc=0
 bash "$ROOT/bin/li-wiki-gen" --wiki-only --showcase-only --output "$TMP/conflicting" > "$TMP/invalid" 2>&1 || rc=$?
 test "$rc" -eq 2
 test ! -e "$TMP/conflicting"
+# Exercise the actual argument parser without letting a regressed empty path
+# reach generation and write to the host filesystem root.
+awk '
+  /^# Validate schema inputs before opening any generated output\.$/ { found=1; exit }
+  { print }
+  END { if (!found) exit 2 }
+' "$ROOT/bin/li-wiki-gen" > "$TMP/argument-parser.sh"
+printf '\nprintf "parser-completed\\n"\nexit 0\n' >> "$TMP/argument-parser.sh"
 for argument in missing empty; do
   rc=0
   if [ "$argument" = missing ]; then
-    bash "$ROOT/bin/li-wiki-gen" --output > "$TMP/invalid" 2>&1 || rc=$?
+    bash "$TMP/argument-parser.sh" --output > "$TMP/invalid" 2>&1 || rc=$?
   else
-    bash "$ROOT/bin/li-wiki-gen" --output "" > "$TMP/invalid" 2>&1 || rc=$?
+    bash "$TMP/argument-parser.sh" --output "" > "$TMP/invalid" 2>&1 || rc=$?
   fi
   test "$rc" -eq 2
   grep -q -- '--output' "$TMP/invalid"
+  ! grep -q 'parser-completed' "$TMP/invalid"
 done
 echo 'PASS: partial generation and checks are scoped; invalid selections refuse before writes'
 

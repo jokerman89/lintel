@@ -39,7 +39,7 @@ while [ $# -gt 0 ]; do
     --showcase-only) SHOWCASE_ONLY=1; shift ;;
     --output)
       if [ "$#" -lt 2 ] || [ -z "$2" ]; then
-        echo "ERROR: --output requires a nonempty directory" >&2
+        echo "ERROR: --output requires a nonempty directory path" >&2
         exit 2
       fi
       OUTPUT_BASE="$2"; shift 2 ;;

@@ -39,7 +39,7 @@ output trees; neither rewrites README or the other tree.
 
 `--check` compares only the selected outputs and does not modify the baseline, including
 when an output is missing. It exits non-zero when a selected generated result differs.
-`--output <dir>` selects a nonempty output directory; invalid or conflicting arguments
+`--output <dir>` requires a nonempty path, not a pre-populated directory. Invalid or conflicting arguments
 exit 2 before writes. The generator and its
 `lib/wiki-gen.sh` helper define timestamp and enumeration behavior; keep those deterministic
 when changing sources or templates.
