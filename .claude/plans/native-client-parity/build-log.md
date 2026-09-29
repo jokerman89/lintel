@@ -242,3 +242,17 @@ commits; identical trees carry their content.
   - the migration guide's `li-run` sentence;
   - the evolution frontmatter comment;
   - use a merge commit at SHIP so the bound revisions `fd151979` and `f6009076` stay reachable.
+
+## Hosted CI finding on `06e69eb6` (2026-09-29)
+
+- In CI run 36505644531, `tests/unit/wiki-gen-idempotency.sh` failed on all three systems (unit-1:
+  Ubuntu, macOS, Windows).
+- **Cause:** a stale test oracle. The P6 registry update (`2f2c382c`) gave `copilot-cli` recorded
+  observations, which the generated README capability table renders as "partial session
+  observations". The test still expected `not_run`.
+- **Why the local checks missed it:** this unit test was not in the local cheap-check set.
+- **Fix:** `1b019341` keeps the row assertion and matches it to the declared registry contract. No
+  generator, registry or observation changed, and the drift, determinism and schema-refusal
+  assertions are unchanged.
+- **Status:** the fix is on the local successor of `06e69eb6`; the published `06e69eb6` is unchanged.
+  The hosted gates stay pending on the next candidate.
