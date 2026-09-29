@@ -236,7 +236,7 @@ The following familiar names describe roles, not a second native backlog.
 
 AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
 
-**Handoff-size check (advisory).** Invoke `/li:handoff-size-check --map <same map>`
+**Handoff-size check (advisory).** Invoke `/li:context-budget --handoff --map <same map>`
 with explicitly selected P03 warming inputs. It measures the actual distinct
 artifacts and uses `context_budget`, not a fictional 500k mode capacity. Unknown
 capacity/usage stays unknown. An unavailable input is INCOMPLETE, not a zero-byte

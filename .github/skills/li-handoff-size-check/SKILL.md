@@ -1,6 +1,6 @@
 ---
 name: li-handoff-size-check
-description: Use before handoff to estimate the selected work-map artifacts and actual warming inputs against reported host headroom, keeping unknown capacity and advisory limits explicit.
+description: Use for the retained handoff-budget entry point; delegates selected artifacts and supplied observations to context-budget.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/handoff-size-check/SKILL.md`; edit the canonical file, then run
@@ -23,88 +23,25 @@ description: Use before handoff to estimate the selected work-map artifacts and 
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 
-# Handoff-size check
+# Handoff-size check compatibility
 
-Keep the two-ended scope check: SENSE's elephant hint catches broad work before
-planning; this reader measures the actual handoff after PLAN and after CAPTURE.
-It is a batch payload estimate, not monitoring, context compaction or host control.
+Use `/li-context-budget --handoff` with the supplied selection and observation
+arguments. The [context-budget owner](../../../skills/context-budget/SKILL.md#handoff---handoff)
+owns artifact admission, interpretation, policy boundaries and recovery.
+PLAN/CAPTURE invoke that owner directly; this name remains compatible.
 
-## Select the payload
+Retain explicit `--map`, the verified lifecycle's `LINTEL_WORK_MAP`, literal
+`--warm-path`, observation/reserve flags and original work/profile/task identities.
+Advisory unknown headroom remains unknown. Caller skip flags mean not run, never
+a pass or a waiver of a required bound. Do not add another routing selector.
 
-Use the [shared work-map contract](../../../skills/spec-kit/references/work-map.md) and its
-`bin/li-work-artifacts.py` reader. Select `--map <work.json>` explicitly or retain
-`LINTEL_WORK_MAP` from the verified lifecycle. No runtime/state/plan.md default,
-newest initiative, guessed sibling spec/prompt or second task store is allowed.
-For a legacy explicit plan (`<plan.md>` or `--plan <path>`), preserve that entry as
-an unmapped inspection: use P03 `context_select --path <literal-file>` and
-`context_budget` on its returned bytes. Name exactly which original linked inputs
-were supplied. Missing spec/handoff/warming remains incomplete; never guess siblings
-or create a competing backlog merely to estimate a file. Mapped lifecycle handoffs
-use the common map command below.
-
-Before policy consumption, verify the saved P07 reference through `workflow_resume`.
-Add literal `--warm-path` arguments from P03's actual context selection. Keep those
-paths bounded and preserve source/target separation. No warming input supplied
-means **not supplied**, not a verified zero-byte warming workload.
+For mapped work, the compatibility recipe calls the same owned reference:
 
 ```bash
-python="${LINTEL_PYTHON:-python3}"
-"$python" "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-work-artifacts.py" \
-  --repo "${LINTEL_REPO_ROOT:?select target}" \
-  --map "${LINTEL_WORK_MAP:?select work.json}" --view budget
+source_root="${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}"
+bash "$source_root/skills/context-budget/references/route.sh" --handoff "$@"
 ```
 
-The reader includes distinct map/spec/plan/tasks/prompt/constitution files once.
-It uses P03 `select_files` and `context_budget`; it does not infer token usage
-from optional/manual event counters. Append known inputs only when their source
-is actually available:
-
-```text
---warm-path docs/selected-adr.md
---capacity <host-reported tokens> --capacity-source <actual host source>
---used <tokens> --usage-source <actual source> --usage-kind observed|estimated
---reserve <output reserve>
-```
-
-## Interpret the result
-
-Report the original artifact paths, selected bytes, byte/4 token estimate and
-its limitations, warming selection, capacity/usage source and admission result.
-
-| Result | Meaning and next action |
-|---|---|
-| within-reported-headroom | Estimate fits supplied observations; not exact tokenizer or cost evidence |
-| estimated-fit | Headroom also depends on estimated usage; retain that uncertainty |
-| over-capacity | Split the handoff or reduce future selected reads before that load |
-| unknown | Capacity or usage was not supplied; no fit/healthy verdict is possible |
-| missing/malformed input | Incomplete check with nonzero helper exit; repair selection |
-
-The shared policy is **advisory** for PLAN and CAPTURE. An estimate/unknown result
-does not itself pause their independent work. An explicitly required task limit or
-an actual host refusal still blocks the affected load; record that source instead
-of inventing a universal 500k cap. Mode changes, disk cleanup and future exclusions
-cannot reclaim already-sent conversation context.
-
-## Retained choices and limits
-
-- For a broad handoff, propose splitting coherent packages, narrowing warming
-  inputs or checkpointing and restarting. Do not silently cut authority files.
-- Preserve `--skip-handoff-size-check`/`SKIP_HANDOFF_SIZE_CHECK=1` as an advisory
-  caller opt-out; record **not run**, never a green result or a required-policy bypass.
-- Optional observation uses the existing writer, for example
-  `audit_log handoff-size-checks size_check "work_map=$LINTEL_WORK_MAP"
-  "basis=estimated" "admission=unknown"` with actual returned values. No automatic
-  global logging or calibration is enabled.
-- Exit 0 from the mechanical reader means the estimate was computed, not that
-  capacity is known or delivery is cleared. Malformed/unreadable selections fail.
-
-## Status and recovery
-
-DONE means a reported estimate was produced; DONE_WITH_CONCERNS includes unknown
-headroom, omitted warming or an advisory excess. NEEDS_CONTEXT means missing
-selection/evidence. BLOCKED is reserved for a real required limit, denied read or
-failed required input. Keep the current map and repair that input, never silently
-fall back to another initiative or a mode-specific capacity guess.
-
-PLAN, CAPTURE and standalone callers use this same interpretation. For deeper
-resource advice use `/li-context-budget`; it does not change the model window.
+Legacy positional plans and `--plan <path>` keep the owner's
+[explicit selected-plan/manual join](../../../skills/context-budget/SKILL.md#legacy-selected-plan).
+They are not passed to the mapped reader, dropped or converted into an invented map.

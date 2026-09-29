@@ -548,7 +548,7 @@ slug_dir="$(dirname "$selected_work_map")"
 
 ### Step 11b — Handoff-size check of the selected work (advisory)
 
-Invoke `/li-handoff-size-check --map <same selected work.json>` with exact P03 warming
+Invoke `/li-context-budget --handoff --map <same selected work.json>` with exact P03 warming
 inputs. The common reader measures spec/plan/tasks/prompt and constitution without
 double-counting native plan/tasks aliases. It uses actual supplied host capacity
 and usage, or reports unknown; changing a mode never raises a model context limit.
@@ -698,7 +698,7 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
        (job auto-spawn is dormant by decision, ADR-0008 — the job-begin hook is
         not auto-registered; the trio + approval gate below run regardless)
    produces: plan.md + spec.md + prompt.md (the trio)
-   handoff-size-check against supplied headroom (or explicitly unknown)
+   context-budget --handoff against supplied headroom (or explicitly unknown)
    operator approval for unresolved scope only
    → DONE, ready for cold-executor handoff
 ```

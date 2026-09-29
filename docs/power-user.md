@@ -44,13 +44,20 @@ and buys less.
 
 ### Seeing the budget
 
-`/li:context-budget` breaks utilization down by source and recommends warming or cooling.
-`/li:context-budget --watch` runs the threshold check instead: soft at roughly 50k tokens or 80 tool
-calls, hard at 80k or 130, and it recommends `/li:clean` or `/li:pause` when a line is crossed.
+`/li:context-budget` keeps selected source size, active context usage, cumulative
+billable usage and disk storage separate. Supplied host observations carry their
+source; selected bytes produce an explicitly labeled byte/4 input estimate. Missing
+capacity or usage stays unknown rather than being reconstructed from a history log.
 
-Be clear about what this is: the numbers are **estimated** by summing the deltas in the budget log
-plus a per-turn guess for conversation history. It is not a reading of the CLI's actual context
-accounting. Treat it as a trend line, not a gauge.
+Use `/li:context-budget --handoff --map <work.json>` for the selected original
+artifacts and optional literal warming inputs. PLAN and CAPTURE call it directly.
+`/li:handoff-size-check` remains a compatibility name for this same method.
+
+`/li:context-budget --watch --budget <yaml> --mode soft|hard|both` retains the
+instruction-driven threshold check, not a background watcher. Read the selected
+configuration and actual telemetry before comparing them. The historical 50k/80k
+token and 80/130 tool-call examples are advisory warnings, not model capacity.
+`--quiet` suppresses only a known below-threshold result, never unknown/error.
 
 ### Cooling
 
@@ -60,12 +67,14 @@ mid-session. So cooling marks warmed sources as ignorable in
 the budget tracking. The only true reduction is the round trip: `/li:pause`, restart the
 session, `/li:resume --from <checkpoint>`, then warm back only what you still need.
 
-### Raising the ceiling
+### Resource advice
 
-`/li:perf-mode` lifts the session budget ceiling from the 200k default to 800k, configurable up to
-1M. It is for the moments where the outcome genuinely needs the whole picture loaded at once — a
-multi-week consolidation, or a decomposed task whose sub-tasks share deep context. It is not a
-substitute for warming the right ten files.
+`/li:context-budget --advice --budget <N> --ceiling <N>` advises on the working set
+and checkpoint strategy; `/li:perf-mode` retains the same flags as a compatibility
+entry point. Here `--budget` is numeric, unlike watch's configuration path.
+`--decay-policy`, `--cost-estimate` and `--off` remain advice only. They do not raise
+the host's limit, activate a model window, remove conversation or invent prices.
+Ordinary budgeting does not spawn an advisor agent.
 
 ---
 

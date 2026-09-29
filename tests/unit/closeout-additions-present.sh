@@ -26,10 +26,11 @@ if [ -f "$HSC" ]; then
   else
     fail "handoff-size-check frontmatter mismatch"
   fi
-  if grep -qE "500k|mode-aware|soft.*hard" "$HSC"; then
-    pass "handoff-size-check references 500k cap + mode-aware envelopes"
+  if grep -q '/li:context-budget --handoff' "$HSC" &&
+     grep -q 'required bound' "$HSC"; then
+    pass "handoff-size-check delegates while preserving required bounds"
   else
-    fail "handoff-size-check missing cap-logic reference"
+    fail "handoff-size-check lost its owner or required-bound contract"
   fi
 else
   fail "handoff-size-check SKILL.md missing"

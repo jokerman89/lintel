@@ -23,7 +23,7 @@ Total skills: 97
 | [`/li:code-freeze`](code-freeze/SKILL.md) | Use to add, list or lift advisory session freeze paths; preserves project policy and never grants or removes host write… |
 | [`/li:code-review`](code-review/SKILL.md) | Use before landing a change to review just the diff — focused on the changed code only, lighter than a full engineering… |
 | [`/li:compliance-gate`](compliance-gate/SKILL.md) | Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embar… |
-| [`/li:context-budget`](context-budget/SKILL.md) | Show observed context capacity and usage where available, clearly labeled input estimates otherwise; --watch compares a… |
+| [`/li:context-budget`](context-budget/SKILL.md) | Use before a large read or handoff, or when context headroom and resource advice are needed; keep observed usage, sourc… |
 | [`/li:context-cool`](context-cool/SKILL.md) | Exclude explicitly selected files from future context reads without claiming to remove already-sent conversation conten… |
 | [`/li:context-warm`](context-warm/SKILL.md) | Use to load bounded files, topic-related sources, ADRs or prior sessions with safe selection and honest input-size esti… |
 | [`/li:context-warm-customer`](context-warm-customer/SKILL.md) | Load customer-engagement repo state into context — their infrastructure-as-code, their CLAUDE.md, their ADRs, recent co… |
@@ -60,7 +60,7 @@ Total skills: 97
 | [`/li:generate-word`](generate-word/SKILL.md) | Produce an editable Word document through available native tools or a declared library, preserving source detail and re… |
 | [`/li:generate-write`](generate-write/SKILL.md) | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus… |
 | [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | Produce an editable, source-backed workbook through available native tools, verifying formulas, actual recalculation, p… |
-| [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Use before handoff to estimate the selected work-map artifacts and actual warming inputs against reported host headroom… |
+| [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Use for the retained handoff-budget entry point; delegates selected artifacts and supplied observations to context-budg… |
 | [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — per-hook observed records, override patterns and hooks with no observed record in a window, re… |
 | [`/li:inspect`](inspect/SKILL.md) | Use to inspect a selected plan or repository through engineering, design and developer-experience lenses. Preserve orig… |
 | [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
@@ -78,7 +78,7 @@ Total skills: 97
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
 | [`/li:pattern`](pattern/SKILL.md) | Use when recurring expectations (deployment baselines, dashboard behavior, document structure, visual language) should … |
 | [`/li:pause`](pause/SKILL.md) | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
-| [`/li:perf-mode`](perf-mode/SKILL.md) | Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capa… |
+| [`/li:perf-mode`](perf-mode/SKILL.md) | Use for the retained resource-advice entry point on heavy work; delegates to context-budget without changing model capa… |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
 | [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |

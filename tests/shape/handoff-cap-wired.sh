@@ -8,9 +8,9 @@
 # This is a structural guard, not a model/runtime invocation. The
 # regression risk is that PLAN/CAPTURE silently stop invoking it. This test
 # pins the wiring so it can't regress un-noticed:
-#   W1 — PLAN (trio-emit) invokes /li:handoff-size-check, non-blocking,
+#   W1 — PLAN (trio-emit) invokes /li:context-budget --handoff, non-blocking,
 #        with an off-switch
-#   W2 — CAPTURE (trio-reaffirm) invokes /li:handoff-size-check, non-blocking,
+#   W2 — CAPTURE (trio-reaffirm) invokes /li:context-budget --handoff, non-blocking,
 #        with an off-switch
 #   W3 — shared selected-map/P03 reader exists, with unknown/provenance semantics
 #   W4 — BUILD's per-task review is complexity-gated (mechanical → inline,
@@ -37,16 +37,16 @@ DISPATCH="$REPO_ROOT/docs/concepts/agent-dispatch-rules.md"
 echo ""
 echo "[W1] PLAN (trio-emit) wires the cap check"
 if [ -f "$PLAN" ]; then
-  grep -q "/li:handoff-size-check" "$PLAN" \
-    && pass "plan references /li:handoff-size-check (portable skill call)" \
-    || fail "plan does NOT invoke /li:handoff-size-check"
+  grep -q "/li:context-budget --handoff" "$PLAN" \
+    && pass "plan calls the budget owner directly" \
+    || fail "plan does NOT invoke context-budget --handoff"
   grep -qiE "non-?blocking|surface, don'?t block|does NOT (halt|block)" "$PLAN" \
     && pass "plan cap check is non-blocking (surfaces, does not halt)" \
     || fail "plan cap check missing non-blocking semantics"
   grep -q -- "--skip-handoff-size-check" "$PLAN" \
     && pass "plan cap check has an off-switch (--skip-handoff-size-check)" \
     || fail "plan cap check missing off-switch"
-  grep -q "/li:handoff-size-check --map" "$PLAN" \
+  grep -q "/li:context-budget --handoff --map" "$PLAN" \
     && pass "plan carries the selected map to budgeting" \
     || fail "plan budget call loses explicit work selection"
 else
@@ -57,16 +57,16 @@ fi
 echo ""
 echo "[W2] CAPTURE (trio-reaffirm) wires the cap check"
 if [ -f "$CAPTURE" ]; then
-  grep -q "/li:handoff-size-check" "$CAPTURE" \
-    && pass "capture references /li:handoff-size-check (portable skill call)" \
-    || fail "capture does NOT invoke /li:handoff-size-check"
+  grep -q "/li:context-budget --handoff" "$CAPTURE" \
+    && pass "capture calls the budget owner directly" \
+    || fail "capture does NOT invoke context-budget --handoff"
   grep -qiE "non-?blocking|surface, don'?t block|does NOT (halt|block)" "$CAPTURE" \
     && pass "capture cap check is non-blocking (surfaces, does not halt)" \
     || fail "capture cap check missing non-blocking semantics"
   grep -q -- "--skip-handoff-size-check" "$CAPTURE" \
     && pass "capture cap check has an off-switch (--skip-handoff-size-check)" \
     || fail "capture cap check missing off-switch"
-  grep -q "/li:handoff-size-check --map" "$CAPTURE" \
+  grep -q "/li:context-budget --handoff --map" "$CAPTURE" \
     && pass "capture carries the same selected map to budgeting" \
     || fail "capture budget call loses explicit work selection"
 else
@@ -78,18 +78,20 @@ echo ""
 echo "[W3] the cap mechanism exists (calls resolve to something real)"
 if [ -f "$HSC" ]; then
   pass "skills/handoff-size-check/SKILL.md exists"
-  if grep -q 'li-work-artifacts.py' "$HSC" && grep -q -- '--view budget' "$HSC" &&
-     grep -q 'context_budget' "$HSC" && grep -q 'unknown' "$HSC"; then
-    pass "handoff reader uses selected artifacts and P03 budget with unknown capacity"
+  if grep -q '/li:context-budget --handoff' "$HSC" &&
+     grep -q 'context-budget/references/route.sh' "$HSC" && grep -q 'unknown' "$HSC"; then
+    pass "retained handoff name delegates to the budget owner with unknown capacity"
   else
-    fail "handoff reader lost the actual shared budget mechanism or unknown boundary"
+    fail "handoff compatibility lost its owned route or unknown boundary"
   fi
 else
   fail "skills/handoff-size-check/SKILL.md MISSING (calls would dangle)"
 fi
 if [ -f "$CTXBUDGET" ]; then
   if grep -q 'context_budget' "$CTXBUDGET" && grep -q -- '--capacity-source' "$CTXBUDGET" &&
-     grep -q 'unknown' "$CTXBUDGET"; then
+     grep -q 'li-work-artifacts.py --view budget' "$CTXBUDGET" &&
+     grep -q 'unknown' "$CTXBUDGET" &&
+     [ -f "$REPO_ROOT/skills/context-budget/references/route.sh" ]; then
     pass "context-budget carries actual helper, observation source and unknown capacity"
   else
     fail "context-budget lost the accepted P03 observation contract"

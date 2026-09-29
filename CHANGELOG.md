@@ -5,6 +5,32 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.4 — unreleased
+
+### Changed
+
+- `context-budget` owns observation, advice and handoff-budget interpretation.
+  `perf-mode`, `handoff-size-check` and the read-only `ContextBudgetAdvisor` keep
+  their compatibility names without maintaining competing procedures.
+- PLAN, CAPTURE and Spec Kit call the shared owner directly. Budget advice does
+  not change model settings or context capacity. Unknown, estimated and observed
+  inputs remain distinct; optional handoff observations remain opt-in.
+
+### Fixed
+
+- `li-wiki-gen --wiki-only` and `--showcase-only` no longer rewrite README or the
+  unselected output tree. Checks inspect only selected artifacts and leave the
+  baseline untouched, including when outputs are missing. Default generation
+  still covers all seven artifacts.
+
+### Migration
+
+- Existing budget entry names remain available. `--advice` and `--handoff` are
+  skill routing selectors; watch and legacy-plan inspection retain their explicit
+  instruction/manual boundaries rather than claiming new automated coverage.
+- Regenerate the native kit and catalog from the canonical source. Product-version
+  changes require the existing explicit profile rebind and fresh dependent evidence.
+
 ## 0.13.3 — unreleased
 
 ### Fixed

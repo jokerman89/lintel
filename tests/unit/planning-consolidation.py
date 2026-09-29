@@ -1,8 +1,8 @@
 # component: planning-consolidation-regressions
-# implements: ADR-0026, ADR-0028, ADR-0029
+# implements: ADR-0026, ADR-0028, ADR-0029, ADR-0034
 # intent: .claude/plans/legacy-cleanup/spec.md
 # constraints: synthetic fixtures only; no client execution or independent-review claim
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-29
 """Check planning methods and their real shared work/evidence consumers."""
 from __future__ import annotations
 
@@ -138,9 +138,56 @@ class PlanningSourceTests(unittest.TestCase):
             "li-work-artifacts.py", "workflow_resume", "qa_requirements",
             "../review/references/evidence.md", "--skill inspect",
             "delegates to /li:analyze", "plan-step8",
-            "/li:handoff-size-check --map", "two-stage review",
+            "/li:context-budget --handoff --map", "two-stage review",
         ))
         self.assertIn("/li:inspect", skill("analyze"))
+
+    def test_handoff_callers_use_budget_owner_without_weakening_boundaries(self):
+        for name in ("plan", "capture", "spec-kit"):
+            with self.subTest(skill=name):
+                text = skill(name)
+                self.assertIn("/li:context-budget --handoff --map", text)
+                self.assertNotIn("/li:handoff-size-check --map", text)
+        for name in ("plan", "capture"):
+            self.assert_terms(skill(name), (
+                "--skip-handoff-size-check", "SKIP_HANDOFF_SIZE_CHECK=1",
+                "required limit", "unknown",
+            ))
+        owner = skill("context-budget")
+        self.assert_terms(owner, (
+            "workflow_resume", "original work", "leaf", "not-supplied",
+            "never a pass", "required policy", "No extra agent",
+        ))
+
+    def test_budget_optional_observation_agrees_with_catalog_producer(self):
+        catalog = json.loads(required_text(ROOT / "lib/event-catalog.json"))
+        event = catalog["categories"]["handoff-size-checks"]["kinds"]["size_check"]
+        self.assertEqual(event["producers"],
+                         ["instruction-only:skills/context-budget/SKILL.md"])
+        owner = skill("context-budget")
+        optional = section(owner, "### Optional handoff observation")
+        self.assert_terms(optional, ("separately authorized", "opt-in", "actual", "never"))
+        example = bash_block(owner, "### Optional handoff observation")
+        call = "audit_log handoff-size-checks size_check"
+        self.assertRegex(example, r"(?m)^audit_log handoff-size-checks size_check\b")
+        self.assertEqual(owner.count(call), 1)
+        for field in event["fields"]:
+            self.assertIn(field + "=", example)
+        self.assertNotIn(call, skill("handoff-size-check"))
+        route = required_text(ROOT / "skills/context-budget/references/route.sh")
+        self.assertNotIn("audit_log", route)
+
+    def test_budget_route_has_portable_empty_array_expansion(self):
+        route = required_text(ROOT / "skills/context-budget/references/route.sh")
+        portable = '${arguments[@]+' + '"${arguments[@]}"' + '}'
+        self.assertEqual(route.count(portable), 2)
+        self.assertNotIn(' "${arguments[@]}"', route)
+
+    def test_budget_owner_preserves_authority_and_small_work_guidance(self):
+        self.assert_terms(skill("context-budget"), (
+            "Do not silently cut authority files",
+            "Routine small edits need no extra",
+        ))
 
     def test_inspection_evidence_is_shared_not_heading_clearance(self):
         text = skill("inspect")

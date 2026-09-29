@@ -222,7 +222,7 @@
     "handoff-size-checks": {
       "kinds": {
         "size_check": {
-          "producers": ["instruction-only:skills/handoff-size-check/SKILL.md"],
+          "producers": ["instruction-only:skills/context-budget/SKILL.md"],
           "records_when": ["always"],
           "fields": ["work_map", "basis", "admission"],
           "aliases": {},

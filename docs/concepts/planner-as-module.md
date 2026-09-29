@@ -117,7 +117,8 @@ With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
    ↓
    workflow_root: true (job tracking only when invoked through an active integration)
    produces: plan.md + spec.md + prompt.md (the trio)
-   handoff-size-check against 500k cap
+   context-budget --handoff --map <selected work.json>
+   supplied headroom or unknown; advisory, not a universal context cap
    operator approval gate
    → DONE, ready for cold-executor handoff
 ```

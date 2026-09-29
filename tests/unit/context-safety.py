@@ -1,8 +1,8 @@
 # component: context-safety-test
-# implements: ADR-0006, ADR-0010
+# implements: ADR-0006, ADR-0010, ADR-0034
 # intent: .claude/plans/universal-implementation/packages/P03.md
 # constraints: stdlib, synthetic files and local Git only
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-29
 import ast
 import json
 from contextlib import redirect_stderr, redirect_stdout
@@ -497,6 +497,266 @@ class ContextSafetyTests(unittest.TestCase):
         self.assertEqual(safety.perf_advice(observed, budget=800000)["requested_working_set_fit"],
                          "exceeds-headroom")
         self.assertEqual(before, sorted(str(p) for p in self.root.rglob("*")))
+
+    def budget_env(self, source=SOURCE):
+        return dict(
+            os.environ, LINTEL_SOURCE_ROOT=str(source), LINTEL_REPO_ROOT=str(self.root),
+            LINTEL_HOME=str(self.base / "home"), LINTEL_WORK_MAP="",
+            LINTEL_PYTHON=sys.executable, PYTHONDONTWRITEBYTECODE="1",
+        )
+
+    def budget_route(self, *args, env=None, source=SOURCE):
+        route = source / "skills/context-budget/references/route.sh"
+        return subprocess.run(
+            [BASH, str(route), *args], cwd=self.root,
+            env=self.budget_env(source) if env is None else env,
+            capture_output=True, text=True, encoding="utf-8",
+        )
+
+    def budget_recipe(self, name, args, *, source=SOURCE, native_root=None):
+        path = ((native_root / ".github/skills" / ("li-" + name) / "SKILL.md")
+                if native_root else source / "skills" / name / "SKILL.md")
+        body = path.read_text(encoding="utf-8")
+        recipe = re.search(r"```bash\n(.*?)\n```", body, re.S)
+        self.assertIsNotNone(recipe, name)
+        script = self.base / (name + "-budget-recipe.sh")
+        script.write_text(recipe[1], encoding="utf-8")
+        return subprocess.run(
+            [BASH, str(script), *args], cwd=self.root, env=self.budget_env(source),
+            capture_output=True, text=True, encoding="utf-8",
+        )
+
+    def budget_work_map(self):
+        for relative, text in {
+            "spec.md": "# Spec\n\nR1: Keep the selected outcome.\n",
+            "plan.md": "# Plan\n\n- [ ] T017 Implement R1\n",
+            "prompt.md": "# Handoff\n\nContinue T017, not another task.\n",
+            "constitution.md": "# Rules\n\nPreserve authority.\n",
+        }.items():
+            (self.root / relative).write_text(text, encoding="utf-8")
+        mapping = {
+            "schema_version": 1, "workflow": "lintel", "status": "APPROVED",
+            "spec": "spec.md", "plan": "plan.md", "tasks": "plan.md",
+            "prompt": "prompt.md", "constitution": "constitution.md",
+        }
+        (self.root / "work.json").write_text(json.dumps(mapping), encoding="utf-8")
+        return mapping
+
+    def test_budget_owner_observation_and_advice_equal_existing_providers(self):
+        samples = (
+            ["--bytes", "400"],
+            ["--bytes", "40", "--capacity", "150", "--capacity-source", "fixture host",
+             "--used", "80", "--usage-source", "fixture host"],
+            ["--bytes", "40", "--capacity", "150", "--capacity-source", "fixture host",
+             "--used", "80", "--usage-source", "fixture estimate", "--usage-kind", "estimated"],
+            ["--bytes", "400", "--capacity", "150", "--capacity-source", "fixture host",
+             "--used", "80", "--usage-source", "fixture host"],
+        )
+        before = sorted(str(path) for path in self.root.rglob("*"))
+        for selector, command, extra in (
+            ([], "budget", []),
+            (["--advice"], "perf",
+             ["--budget", "800000", "--ceiling", "1000000",
+              "--decay-policy", "retain-all", "--cost-estimate"]),
+            (["--advice"], "perf", ["--off"]),
+        ):
+            for args in samples:
+                with self.subTest(command=command, args=args, extra=extra):
+                    expected = subprocess.run(
+                        [sys.executable, "-B", str(SOURCE / "lib/context_safety.py"),
+                         command, *args, *extra],
+                        env=self.budget_env(), capture_output=True, text=True, encoding="utf-8",
+                    )
+                    actual = self.budget_route(*selector, *args, *extra)
+                    self.assertEqual(expected.returncode, 0, expected.stderr)
+                    self.assertEqual(actual.returncode, expected.returncode, actual.stderr)
+                    self.assertEqual(json.loads(actual.stdout), json.loads(expected.stdout))
+        self.assertEqual(before, sorted(str(path) for path in self.root.rglob("*")))
+
+    def test_budget_owner_refuses_conflicting_modes_and_preserves_provider_errors(self):
+        for args in (
+            ["--advice", "--handoff"], ["--handoff", "--advice"],
+            ["--advice", "--advice"], ["--advice", "--watch"],
+            ["--watch", "--handoff"], ["--handoff", "--watch"],
+        ):
+            with self.subTest(args=args):
+                run = self.budget_route(*args)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn("route", run.stderr.lower())
+                self.assertEqual(run.stdout, "")
+        for command, selector, args in (
+            ("budget", [], ["--capacity", "100"]),
+            ("budget", [], ["--bytes", "-1"]),
+            ("perf", ["--advice"], ["--budget", "watch.yaml"]),
+            ("perf", ["--advice"], ["--budget", "200", "--ceiling", "100"]),
+            ("perf", ["--advice"], ["--decay-policy", "invented"]),
+        ):
+            with self.subTest(command=command, args=args):
+                expected = subprocess.run(
+                    [sys.executable, "-B", str(SOURCE / "lib/context_safety.py"), command, *args],
+                    env=self.budget_env(), capture_output=True, text=True, encoding="utf-8",
+                )
+                actual = self.budget_route(*selector, *args)
+                self.assertNotEqual(expected.returncode, 0)
+                self.assertEqual(actual.returncode, expected.returncode, actual.stderr)
+                self.assertEqual(actual.stdout, expected.stdout)
+                self.assertEqual(actual.stderr, expected.stderr)
+
+    def test_budget_route_uses_own_bundle_and_keeps_literal_observation_arguments(self):
+        foreign = self.base / "foreign source"
+        foreign.mkdir()
+        env = self.budget_env()
+        env["LINTEL_SOURCE_ROOT"] = str(foreign)
+        run = self.budget_route(
+            "--advice", "--bytes", "4", "--budget", "30", "--capacity", "100",
+            "--capacity-source", "fixture host; literal text", "--used", "10",
+            "--usage-source", "fixture observation with spaces", env=env,
+        )
+        self.assertEqual(run.returncode, 0, run.stderr)
+        report = json.loads(run.stdout)
+        self.assertEqual(report["capacity_source"], "fixture host; literal text")
+        self.assertEqual(report["usage_source"], "fixture observation with spaces")
+        self.assertEqual(report["requested_working_set_fit"], "within-reported-headroom")
+        self.assertEqual(list(foreign.iterdir()), [])
+
+    def test_budget_owner_handoff_keeps_map_counting_warming_and_capacity(self):
+        mapping = self.budget_work_map()
+        capacity = ["--capacity", "10000", "--capacity-source", "fixture host",
+                    "--used", "20", "--usage-source", "fixture heuristic",
+                    "--usage-kind", "estimated", "--reserve", "12"]
+        for warming in ([], ["--warm-path", "docs/one file.md"]):
+            args = ["--map", "work.json", *capacity, *warming]
+            expected = subprocess.run(
+                [sys.executable, "-B", str(SOURCE / "bin/li-work-artifacts.py"),
+                 "--repo", str(self.root), "--view", "budget", *args],
+                env=self.budget_env(), capture_output=True, text=True, encoding="utf-8",
+            )
+            actual = self.budget_route("--handoff", *args)
+            self.assertEqual(expected.returncode, 0, expected.stderr)
+            self.assertEqual(actual.returncode, 0, actual.stderr)
+            report = json.loads(actual.stdout)
+            self.assertEqual(report, json.loads(expected.stdout))
+            selected = {"work.json", *(mapping[key] for key in
+                        ("spec", "plan", "tasks", "prompt", "constitution"))}
+            if warming:
+                selected.add("docs/one file.md")
+            self.assertEqual(report["selected_bytes"],
+                             sum((self.root / path).stat().st_size for path in selected))
+            self.assertEqual(report["work_map"], "work.json")
+            self.assertEqual(report["artifacts"]["tasks"], "plan.md")
+            self.assertEqual(report["warming"], "selected" if warming else "not-supplied")
+            self.assertEqual(report["admission"], "estimated-fit")
+            self.assertFalse(report["release_clearance"])
+
+    def test_budget_owner_handoff_selection_is_explicit_or_preserved_not_inferred(self):
+        self.budget_work_map()
+        missing = self.budget_route("--handoff")
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertEqual(missing.stdout, "")
+        env = self.budget_env()
+        env["LINTEL_WORK_MAP"] = "work.json"
+        inherited = self.budget_route("--handoff", env=env)
+        self.assertEqual(inherited.returncode, 0, inherited.stderr)
+        self.assertEqual(json.loads(inherited.stdout)["work_map"], "work.json")
+        for args in (
+            ["--map", "missing.json"],
+            ["--map", "work.json", "--warm-path", "missing.md"],
+            ["--map", "work.json", "--max-bytes", "1"],
+            ["--map", "work.json", "--max-files", "1"],
+            ["--map", "work.json", "--repo", str(self.base)],
+            ["--map", "work.json", "--rep", str(self.base)],
+            ["--map", "work.json", "--view", "map"],
+            ["--map", "work.json", "--vi=map"],
+        ):
+            with self.subTest(args=args):
+                run = self.budget_route("--handoff", *args, env=env)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertEqual(run.stdout, "")
+        (self.root / "work.json").write_text("{broken", encoding="utf-8")
+        malformed = self.budget_route("--handoff", env=env)
+        self.assertNotEqual(malformed.returncode, 0)
+        self.assertEqual(malformed.stdout, "")
+
+    def test_budget_owner_keeps_watch_and_legacy_plan_as_explicit_workflow_steps(self):
+        self.budget_work_map()
+        (self.root / "watch.yaml").write_text("soft_token: 50\nhard_token: 80\n", encoding="utf-8")
+        before = sorted(str(path) for path in self.root.rglob("*"))
+        watch = self.budget_route("--watch", "--budget", "watch.yaml", "--mode", "both", "--quiet")
+        self.assertNotEqual(watch.returncode, 0)
+        self.assertIn("watch", watch.stderr.lower())
+        self.assertIn("workflow", watch.stderr.lower())
+        for selector in (["--plan", "plan.md"], ["plan.md"]):
+            run = self.budget_route("--handoff", *selector)
+            self.assertNotEqual(run.returncode, 0)
+            self.assertIn("legacy", run.stderr.lower())
+            self.assertIn("manual", run.stderr.lower())
+            self.assertEqual(run.stdout, "")
+        # The retained manual join uses the real selector and reader, not a guessed map.
+        selected = safety.select_files(self.root, paths=["plan.md"])
+        self.assertEqual([item["path"] for item in selected["files"]], ["plan.md"])
+        budget = self.budget_route("--bytes", str(selected["bytes"]))
+        self.assertEqual(budget.returncode, 0, budget.stderr)
+        self.assertEqual(json.loads(budget.stdout)["admission"], "unknown")
+        self.assertEqual(before, sorted(str(path) for path in self.root.rglob("*")))
+
+    def test_budget_compatibility_recipes_delegate_to_owner_and_keep_tools(self):
+        self.budget_work_map()
+        for name, selector, args in (
+            ("perf-mode", "--advice", ["--budget", "800000", "--off"]),
+            ("handoff-size-check", "--handoff", ["--map", "work.json"]),
+        ):
+            direct = self.budget_route(selector, *args)
+            alias = self.budget_recipe(name, args)
+            self.assertEqual(direct.returncode, 0, direct.stderr)
+            self.assertEqual(alias.returncode, 0, alias.stderr)
+            self.assertEqual(json.loads(alias.stdout), json.loads(direct.stdout))
+            refused = self.budget_recipe(name, ["--watch"])
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn("route", refused.stderr.lower())
+            self.assertEqual(refused.stdout, "")
+        advisor = (SOURCE / "agents/engineering/ContextBudgetAdvisor.md").read_text(encoding="utf-8")
+        self.assertRegex(advisor, r"(?m)^tools: Read, Grep, Glob$")
+        self.assertIn("context-budget", advisor)
+
+    def test_budget_generated_kit_contains_and_executes_the_owned_route(self):
+        self.budget_work_map()
+        generator = runpy.run_path(str(SOURCE / "bin/li-copilot.py"))
+        kit = self.base / "kit"
+        files, _, _ = generator["generate"](SOURCE, kit)
+        bundled = ".github/lintel/skills/context-budget/references/route.sh"
+        self.assertIn(bundled, files)
+        self.assertEqual(files[bundled],
+                         (SOURCE / "skills/context-budget/references/route.sh").read_bytes()
+                         .replace(b"\r\n", b"\n"))
+        retained = {
+            ".github/lintel/bin/_context.sh",
+            ".github/lintel/bin/li-work-artifacts.py",
+            ".github/lintel/lib/paths.sh",
+            ".github/lintel/lib/context_safety.py",
+            ".github/lintel/lib/native_paths.py",
+            bundled,
+            ".github/skills/li-context-budget/SKILL.md",
+            ".github/skills/li-perf-mode/SKILL.md",
+            ".github/skills/li-handoff-size-check/SKILL.md",
+        }
+        retained.update(path for path in files if path.startswith(".github/lintel/lib/"))
+        for relative in retained:
+            path = kit / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(files[relative])
+        source = kit / ".github/lintel"
+        run = self.budget_recipe("perf-mode", ["--budget", "800000"],
+                                 source=source, native_root=kit)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertIsNone(result["capacity_tokens"])
+        self.assertEqual(result["local_working_set_budget"], 800000)
+        self.assertFalse(result["host_settings_changed"])
+        handoff = self.budget_recipe("handoff-size-check", ["--map", "work.json"],
+                                     source=source, native_root=kit)
+        self.assertEqual(handoff.returncode, 0, handoff.stderr)
+        self.assertEqual(json.loads(handoff.stdout)["work_map"], "work.json")
+        self.assertFalse(json.loads(handoff.stdout)["release_clearance"])
 
     def test_markdown_yaml_and_unknown_adr_metadata_remain_visible(self):
         adrs = self.root / "decisions"
