@@ -117,7 +117,11 @@ class PatternPortabilityTests(unittest.TestCase):
                     self.assertEqual(native(self.kit.bundle / relative).read_bytes(), (ROOT / relative).read_bytes(),
                                      "byte-bound example files ship raw, unchanged by kit normalization")
         wrapper = (self.kit.kit_repo / ".github" / "skills" / "li-pattern" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("../../lintel/skills/pattern/SKILL.md", wrapper)
+        # ADR-0039 native skill: the full canonical body, with links rebased into the vendored bundle.
+        self.assertIn("Generated from `skills/pattern/SKILL.md`", wrapper)
+        self.assertIn("# Pattern: reusable, data-only expectations", wrapper)
+        self.assertIn("](../../lintel/skills/pattern/references/consumer-contract.md)", wrapper)
+        self.assertNotIn("](../pattern/references/consumer-contract.md)", wrapper, "no unrebased canonical link")
         skill = (self.kit.bundle / "skills" / "pattern" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("references/consumer-contract.md", skill)
         self.assertTrue((self.kit.bundle / "skills" / "pattern" / "references" / "consumer-contract.md").is_file())
