@@ -1314,7 +1314,7 @@ This is a local preparation branch only; nothing was pushed. Commits on top of `
 | `50047570` | Ordinary merge of native `06e69eb6` (tree `9772ad3a`, includes main `1cf7d099` and release 0.13.0) |
 | `279d9b80` | Ordinary merge of lesson `ef48d7a0` (L-053 correction) |
 | `77eb3794` | Join fix: a bare `<style>` in `skills/generate-style-learn/SKILL.md` opened an unclosed raw HTML region in the shared Markdown classifier. The native renderer then left the later consumer-contract link unrebased, and the command-surface guard reported a missing path. The tag is now code and the output is regenerated |
-| `58c41fb2` | 0.13.1: the six plugin manifests (0.13.0 → 0.13.1), the changelog entry and the neutral-pack rebind migration row. The 0.13.0 native history is unchanged |
+| `4c6ce841` | 0.13.1: the six plugin manifests (0.13.0 → 0.13.1), the changelog entry and the neutral-pack rebind migration row. The 0.13.0 native history is unchanged |
 | `a2d53e92` | `pattern-portability.py` asserts the native full-body `li-pattern` skill (source note, body, rebased link) instead of the retired pointer |
 | `430c12c6` | Ordinary merge of the granted native follow-up `394ed0b8` (via `1b019341`): the wiki-idempotency oracle and a native build note. No conflicts |
 
