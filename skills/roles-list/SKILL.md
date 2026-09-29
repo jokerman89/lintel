@@ -5,7 +5,7 @@ description: List all available roles (public + private, if accessible). Shows i
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the roles-list skill.

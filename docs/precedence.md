@@ -13,7 +13,7 @@ The operator named a specific agent in the prompt. Use that agent. Do not second
 Examples:
 - "Use the ReadOnly agent for this audit"
 - "Run CodeReviewer on the diff"
-- "Run `verify` on this branch" (`/li:verify` in the Claude plugin; adapter routes have no `verify` wrapper, so read `skills/verify/SKILL.md`)
+- "Run `verify` on this branch" (`/li:verify` in the Claude plugin, `/li-verify` on GitHub Copilot; the other adapter routes have no `verify` wrapper, so read `skills/verify/SKILL.md`)
 
 If the named agent does not exist: surface that, ask for the right name. Do not silently substitute.
 

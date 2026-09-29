@@ -1,7 +1,7 @@
 # Lintel
 
 [Presentation, demos & technical reference](https://jokerman89.github.io/lintel/) · [Presentation source](presentations/tech-shots-2026-09-25/README.md)
-(a 2026-09-25 event snapshot; its client matrix predates the four supported client families)
+(refreshed 2026-09-28 against the 0.12.0 source, including the four supported client families)
 
 **A shared engineering workflow across coding agents.** Turn an issue into a
 reviewed plan, small build cards, verified changes and a handoff the next session can use.
@@ -93,10 +93,11 @@ build it, review the result, ship within the authorized scope, and capture what 
 Small fixes can use a shorter route. A larger change can span multiple sessions and build cards.
 
 Every client reaches the same skills; only the invocation form differs. The Claude plugin uses
-`/li:<skill>`, portable adapter wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review`
-and related skills where the host discovers them, and the Universal adapter uses explicit file
-handoff. The Copilot kit also installs `lintel-planner`, `lintel-builder` and `lintel-reviewer`
-agent profiles.
+`/li:<skill>`. GitHub Copilot gets a complete native `li-<skill>` skill for every workflow and a
+custom agent for every Lintel role, plus the `lintel-planner`, `lintel-builder` and
+`lintel-reviewer` profiles. Other portable adapter wrappers expose `li-cycle`, `li-plan`,
+`li-build`, `li-review` and related skills where the host discovers them, and the Universal
+adapter uses explicit file handoff.
 Common entrypoints include `define` to shape a request, `inspect` for plan or repository
 lenses, `verify` for read-only checks, `diagnose` for bugs, `cross-check` for an independent
 second review, and `pause`/`resume` for continuity. The full catalog contains architecture, data,
@@ -167,7 +168,7 @@ conservative hints, not runtime grants.
 |---|---|---|---|
 | Claude Code CLI | .claude/skills | documented | not_run |
 | Claude Desktop Code local | .claude/skills | unknown | not_run |
-| GitHub Copilot CLI | .github/skills | documented | not_run |
+| GitHub Copilot CLI | .github/skills | documented | partial session observations |
 | GitHub Copilot App | .github/skills | conditional | partial session observations |
 | GitHub Copilot VS Code | .github/skills | conditional | not_run |
 | GitHub Copilot cloud agent | .github/skills | unknown | not_run |

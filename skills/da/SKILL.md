@@ -6,7 +6,7 @@ description: Use for data-architecture depth — schema design, migrations, shar
 color: blue
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Data-touching work lacks explicit schema evolution, recovery, retention and query evidence; consumers can break or data can be lost."
 navigation:

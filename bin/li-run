@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# component: lintel-shell-step-runner
+# implements: ADR-0039
+# intent: .claude/plans/native-client-parity/spec.md
+# constraints: trusted source helpers only; the step runs in the working repository with its own status
+# last_intent_review: 2026-09-28
+#
+# Runs one Bash step from a native workflow with the Lintel environment prepared:
+# LINTEL_SOURCE_ROOT is this runner's own source tree, LINTEL_REPO_ROOT the working
+# repository, LINTEL_SKILLS_DIR the source's skills folder (both source values are pinned,
+# never inherited), and lib/copilot-env.sh bootstraps the profile context. No set -e/-u or
+# pipefail here: the sourced step keeps default Bash semantics, like `bash <file>`.
+
+_li_run_usage() {
+  echo 'Usage: bash li-run [--repo <dir>] <script>|-'
+  echo 'Sources <script> (or stdin for -) in the working repository after preparing'
+  echo 'LINTEL_SOURCE_ROOT, LINTEL_REPO_ROOT, LINTEL_SKILLS_DIR and the profile context;'
+  echo 'exits with its status. LINTEL_SOURCE_ROOT and LINTEL_SKILLS_DIR always name the'
+  echo 'source of this runner and its skills folder; inherited values are ignored.'
+  echo 'Exit 2: usage error or missing script; 1: environment preparation failed.'
+}
+
+_li_run_fail() {
+  echo "li-run: $1" >&2
+  [ "${2:-}" = usage ] && _li_run_usage >&2
+  exit 2
+}
+
+_li_run_repo=""
+_li_run_script=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --repo)
+      [ $# -ge 2 ] && [ -n "$2" ] || _li_run_fail "--repo needs a directory" usage
+      _li_run_repo="$2"; shift 2 ;;
+    -h|--help) _li_run_usage; exit 0 ;;
+    -*) [ "$1" = "-" ] || _li_run_fail "unknown option: $1" usage
+      [ -z "$_li_run_script" ] || _li_run_fail "expected exactly one script" usage
+      _li_run_script="-"; shift ;;
+    *) [ -z "$_li_run_script" ] || _li_run_fail "expected exactly one script" usage
+      _li_run_script="$1"; shift ;;
+  esac
+done
+[ -n "$_li_run_script" ] || _li_run_fail "a script path or - (stdin) is required" usage
+
+_li_run_buffer=""
+_li_run_discard() { [ -z "$_li_run_buffer" ] || rm -f -- "$_li_run_buffer"; }
+if [ "$_li_run_script" = "-" ]; then
+  _li_run_buffer="$(mktemp "${TMPDIR:-/tmp}/lintel-step.XXXXXX")" || _li_run_fail "cannot buffer stdin"
+  cat > "$_li_run_buffer" || { _li_run_discard; _li_run_fail "cannot read the step from stdin"; }
+  _li_run_step="$_li_run_buffer"
+else
+  [ -f "$_li_run_script" ] || _li_run_fail "script not found: $_li_run_script"
+  # Resolve a relative step before changing into the working repository.
+  case "$_li_run_script" in
+    /*|[A-Za-z]:[\\/]*|\\\\*) _li_run_step="$_li_run_script" ;;
+    *) _li_run_step="$PWD/$_li_run_script" ;;
+  esac
+fi
+
+_li_run_source="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" || {
+  _li_run_discard; echo 'li-run: cannot locate the Lintel source root' >&2; exit 1
+}
+# The step uses the source it was launched from, never an inherited or target copy.
+export LINTEL_SOURCE_ROOT="$_li_run_source"
+# Canonical steps name sibling skills as ${LINTEL_SKILLS_DIR:-skills}/<name>. Pin it to this source
+# like LINTEL_SOURCE_ROOT: it selects scripts the step executes, and an inherited relative value
+# would resolve inside the working repository. To use another checkout's skills, run its bin/li-run.
+export LINTEL_SKILLS_DIR="$LINTEL_SOURCE_ROOT/skills"
+# shellcheck source=../lib/copilot-env.sh
+source "$_li_run_source/lib/copilot-env.sh" || { _li_run_discard; exit 1; }
+lintel_copilot_env "${_li_run_repo:-${LINTEL_REPO_ROOT:-$PWD}}" || { _li_run_discard; exit 1; }
+cd "$LINTEL_REPO_ROOT" || { _li_run_discard; exit 1; }
+
+# A subshell keeps the step's own exit or traps from skipping the stdin cleanup.
+( . "$_li_run_step" )
+_li_run_status=$?
+_li_run_discard
+exit "$_li_run_status"

@@ -3,9 +3,526 @@ name: li-cycle
 description: Use for a multi-step initiative that needs the complete Lintel planning, implementation, review and capture cycle.
 ---
 
-# Lintel cycle
+> **Lintel on GitHub Copilot.** Generated from `skills/cycle/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/cycle/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/cycle/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
 
-Read the [Copilot adapter contract](../../../shims/copilot/COPILOT.md) first, then execute the
-[canonical cycle workflow](../../../skills/cycle/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
+You are the CYCLE orchestrator — the entry point for running the full Lintel cycle or operator-specified subset.
+
+## What this skill does
+
+Coordinates execution of the Lintel cycle (8 core phases + the light SCOPE phase between SENSE and DEFINE). Operator picks granularity via flags:
+- Full: `/li-cycle` → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+- Mode preset: `/li-cycle --mode hotfix` → runs preset's phase-subset
+- Custom: `/li-cycle --from <phase> --to <phase> --skip <phases>` → operator-specified subset
+- Auto: `/li-cycle --mode auto` → SENSE detects intent + recommends mode
+
+SCOPE is a light, skippable phase (like DEFINE): it sizes + disambiguates the request before DEFINE burns tokens. Light modes (hotfix) skip it.
+
+Each phase is its own skill (`/li-sense`, `/li-define`, etc.). CYCLE chains them with gates between, propagates context, handles pause-points.
+
+### Select a bounded route
+
+Use one cycle identity and the same selected work map across these routes:
+
+| Intent | Invocation | Preserved boundary |
+|---|---|---|
+| Research without implementation | `/li-cycle --mode research-dive` | SENSE, DEFINE and DISCOVER produce sourced findings and uncertainty, not BUILD approval |
+| Plan and execute an approved design | `/li-cycle --from PLAN --to BUILD` | Original task IDs and BUILD package reviews remain required; integrated REVIEW/SHIP/CAPTURE are deferred |
+| Review and deliver a built candidate | `/li-cycle --from REVIEW --to CAPTURE` | Same-context review/QA, existing publication authority and CAPTURE remain required |
+
+A selected Spec Kit map keeps its original artifacts; a route never creates another
+backlog or upgrades a missing review. After a partial range, `/li-resume` returns to
+the actual unfinished phase. Research framing remains task-relevant, not a mandatory
+venture interview, and artifact writes still require authority.
+
+## When to use
+
+- Full feature/cycle work where operator wants the structured path
+- When operator types `/li-cycle` (cold start)
+- When `/li-resume` decides to re-orchestrate from a phase
+
+## When NOT to use
+
+- Single skill invocation (just call the phase-skill directly: `/li-review`)
+- Operator already knows exactly which 1-2 phases they want — invoke them standalone
+- Inside another cycle (cycles don't nest)
+
+## Mode presets (operator picks via --mode)
+
+```yaml
+hotfix:
+  phases: [SENSE, BUILD, REVIEW, SHIP]
+  skip: [SCOPE, DEFINE, DISCOVER, PLAN, CAPTURE]
+  audience: solo
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
+  compliance: pack-minimal  # resolve_pack_field compliance.hooks (none by default)
+  cost_estimate: ~5k tokens, 10-30 min
+  use_when: known bug + fix path clear + ship now
+
+internal-tool:
+  phases: ALL_8 (+ SCOPE; lighter REVIEW)
+  audience: team
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
+  compliance: pack-standard # resolve_pack_field compliance.hooks (none by default)
+  cost_estimate: ~25-50k tokens, 45 min - 2 hours
+  use_when: internal tool / scaffolding
+
+research-dive:
+  phases: [SENSE, DEFINE, DISCOVER]
+  skip: [SCOPE, PLAN, BUILD, REVIEW, SHIP, CAPTURE]
+  audience: solo
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
+  compliance: none
+  cost_estimate: ~10-20k tokens, 20-40 min
+  use_when: explore + understand, no code yet
+
+meta-infra:
+  phases: ALL_8  # + SCOPE; heavier REVIEW + CAPTURE
+  audience: operator + future-operator
+  voice_tier: internal
+  compliance: scaffolding-only  # skip customer-facing gates; activate Gates M1-M4
+  cap_soft: 600k
+  cap_hard: 900k
+  cost_estimate: ~80-200k tokens, 2-6 hours
+  gates_active: [M1_structure_impact, M2_compatibility_audit, M3_shape_tests, M4_future_operator_clarity]
+  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, docs/architecture.md, lib/, packs/, core templates
+  detection: auto-detected by SENSE Step 0c (path-glob on cwd diff); operator can override
+
+auto:
+  phases: SENSE recommends, operator confirms before chain
+  use_when: operator unsure which preset fits
+```
+
+### Pack-contributed modes
+
+The presets above ship with Lintel and are company-neutral. A pack may contribute
+additional modes with their own voice/compliance posture — e.g. an installed
+company pack can add `customer-engagement` or `demo-prep` modes that set a
+customer audience, a non-internal voice tier, and the pack's compliance gates.
+CYCLE merges pack-contributed modes into the preset list at invocation; their
+voice/compliance behavior resolves through `resolve_pack_field`
+(voice.default_tier, voice.gates_active, compliance.hooks), never hardcoded here.
+
+### Swarm is an execution profile, not a phase
+
+`/li-cycle --swarm` records the operator's request for PLAN to evaluate and emit the optional
+swarm artifacts. It does not add a phase, skip the PLAN approval gates, or make parallel execution
+the default. The phase chain remains SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW →
+SHIP → CAPTURE.
+
+The profile becomes active only when the approved schema-version-1 work map contains both
+`execution_mode: "swarm"` and a valid `coordination` pointer. BUILD then follows `/li-swarm run`,
+REVIEW applies the integrated close gate, and CAPTURE preserves the evidence. Without both fields,
+CYCLE invokes ordinary sequential BUILD exactly as before. Sequenced/no-subagent hosts consume the
+same artifacts serially and report the actual limitation.
+
+### Meta-infra mode mechanics
+
+`meta-infra` is the operator's mode when modifying Lintel itself (scaffolding). Lintel changes ripple across every downstream cycle, so REVIEW + CAPTURE run heavier and four meta-gates activate:
+
+**M1 — Structure-impact assessment** (in DEFINE)
+Before merging design, write a structure-changes/<date>-<slug>.md entry documenting: what changed, backward-compat, migration path, forward-compat, verification, rollback. Template: `.claude/engineering/evolution/_TEMPLATE.md`.
+
+**M2 — Compatibility audit** (in REVIEW)
+Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across four questions:
+1. Did any frontmatter contract change? (REQUIRED_SKILL_FIELDS, REQUIRED_AGENT_FIELDS)
+2. Were skills/agents/hooks renamed or moved?
+3. Did defaults change for any existing field?
+4. Did any shared helper signature change? (lib/*.sh)
+
+Output: `.claude/engineering/compat-audits/<date>-<slug>.md`. RED requires explicit override.
+
+**M3 — Shape-tests** (in REVIEW)
+Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
+
+**M4 — Future-operator clarity** (in CAPTURE)
+CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/migrations/_INDEX.md` if any migration ships.
+
+## Workflow
+
+**Host and authorization:** use the active host's native tools and model choice. On Copilot,
+`li-*` adapters map these workflows to canonical skills; see `.github/copilot-instructions.md`.
+Record existing operator authorization before phase gates and avoid repeating the same approval
+question. A new scope or irreversible action still requires authorization for that action.
+Use [task-relevant intake](../../../skills/define/references/intake.md) and the
+[selected work-map contract](../../../skills/spec-kit/references/work-map.md). A read/review
+operation never becomes BUILD/SHIP because its topic mentions a release or deployment.
+
+### Explicit confirmation and owned recovery
+
+For high-stakes work, state the mutation scope and expected effect, show the intended
+command, and identify a verified owned baseline or approved recovery path before
+acting. A requested per-mutation confirmation cadence applies to that scope; ask
+only unresolved decisions or new permission boundaries, never repeat settled approval.
+Keep mutations sequential when that cadence was requested, then verify the actual
+result before proceeding. A backup, a valid rollback and permission to run it are
+separate facts. Never use a whole-tree reset to undo an owned change.
+
+Use the trusted shared audit writer for sanitized reason/scope/result where required.
+An unavailable mandatory audit or failed validation blocks the affected continuation;
+do not silently roll back or treat an advisory check as enforcement. This guidance
+does not switch host modes, register hooks or override host/enterprise controls.
+
+### Step 0 — Dry-run mode (v3.6 cohort 3 item 2.5)
+
+If `--dry-run` flag present, this skill SHOWS what cycle would do without executing:
+
+```
+LINTEL CYCLE DRY-RUN — would-execute plan
+==========================================
+
+Mode:           <preset>
+Phases:         <list>
+Skipped:        <list>
+Context limit:  <host-reported value and source, or unknown>
+Estimated cost: <X k tokens total>
+
+Per-phase forecast:
+  [1/N] SENSE     est ~0.5k tokens   agents-wake: none
+  [2/N] SCOPE     est ~0.5k tokens   agents-wake: none (1 gate only if bimodal)
+  [3/N] DEFINE    est ~3k tokens     agents-wake: DesignReviewer
+  [4/N] DISCOVER  est ~2k tokens     agents-wake: ArchitectureScout
+  [5/N] PLAN      est ~5k tokens     agents-wake: PlanReviewer, CostAnalyzer
+  ...
+
+No state mutated. Exit.
+```
+
+Paired with Step 4 phase-progress output (v3.6 cohort 2 item 1.5) — dry-run and progress show the same format but dry-run does not run phases.
+
+### Step 1 — Parse invocation
+
+```bash
+# Parse flags from operator's invocation
+mode="${flag_mode:-auto}"        # --mode <preset>
+from_phase="${flag_from:-SENSE}" # --from <phase>
+to_phase="${flag_to:-CAPTURE}"   # --to <phase>
+skip_phases="${flag_skip:-}"     # --skip PHASE1,PHASE2
+auto_decide="${flag_auto:-no}"   # --auto (skip pause gates at recommended choice)
+execution_profile="${flag_execution_profile:-sequential}" # --swarm requests PLAN opt-in
+```
+
+If conflicting flags (e.g., --mode hotfix AND --from DEFINE): surface conflict, ask operator.
+
+### Step 2 — Resolve the requested range without running a phase
+
+Resolve `auto` from the requested operation and available project/pack evidence.
+Use `classify_intent` from `lib/orientator-routing.sh`, not topic-first keyword
+ordering. Plan/design-only ends at PLAN; review-only selects REVIEW; research selects research-dive; known fixes
+may select hotfix. Unknown/compound intent needs only the unresolved scope decision.
+Retain explicit mode/from/to choices when consistent with authorization.
+
+Read startup context here, but do not invoke SENSE or SCOPE yet. A hop-in at PLAN
+needs SENSE-equivalent context, not an extra SENSE phase outside its selected range.
+Resolve declared pack modes from their actual data rather than inventing a mode.
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
+phases_to_run=$(state_cycle_phases "$mode" "$from_phase" "$to_phase" "$skip_phases") || exit $?
+first_phase=$(printf '%s\n' "$phases_to_run" | head -1)
+```
+
+Validate prerequisites before their dependent phase: BUILD needs approved selected
+tasks (a bounded hotfix uses FIX's minimal work map), REVIEW needs attributable
+implementation, SHIP needs the exact shared review/QA clearance plus delivery authority.
+A skipped PLAN does not invalidate an already approved mapped task source.
+
+Surface to operator:
+```
+Cycle plan:
+  Mode: <preset>
+  Execution profile requested: <sequential|swarm>
+  Phases to run: [<list>]
+  Phases skipped: [<list>]
+  Token estimate: <X tokens; CALIBRATED actuals or UNCALIBRATED planning guess>
+  
+  Authority: <existing approved scope, or the unresolved material decision>
+```
+
+Ask only for an unresolved material choice; existing authorization is not asked twice.
+
+### Step 3 — Establish cycle identity before every phase
+
+Persist the explicitly chosen stable cycle ID once, before any SENSE/SCOPE/other
+phase entry. `state_cycle_begin` performs the `state_append CYCLE STARTING` write
+idempotently and refuses conflicting metadata or historical-ID reuse. Resume keeps
+the original ID and selected map; it never emits a new start marker.
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/workflow.sh"
+workflow_begin "${LINTEL_CYCLE_ID:?choose and retain the cycle ID}" "$mode" "${LINTEL_WORK_MAP:-}" \
+  "first_phase=$first_phase" "operation=$intent" \
+  "phases_selected=$(printf '%s' "$phases_to_run" | tr '\n' ' ')" \
+  "branch=$(git -C "$LINTEL_REPO_ROOT" branch --show-current)" \
+  "commit=$(git -C "$LINTEL_REPO_ROOT" rev-parse HEAD)" || exit $?
+```
+
+An unavailable writer blocks resumable phase execution; do not silently write a
+different ledger under `/tmp`. Profile/map binding is carried by the shared lifecycle
+entry in the work-map contract. It verifies the P07 reference before consumption.
+
+### Step 4 — Run phases sequentially (with phase-progress per v3.6 cohort 2 item 1.5)
+
+For each phase in phases_to_run order:
+
+```
+0. Phase-progress output: "Phase N/M <PHASE> — next <NEXT> — est ~<X>k tokens"
+   (text-only, no graphics per 1.5 spec)
+1. Pre-phase: `state_phase_begin <PHASE> next=<NEXT>`
+2. Invoke /li-<phase>
+3. Phase runs (with its own pause-gates per phase-skill)
+4. Post-phase: `state_phase_record <PHASE> | state_field status` (still `STARTING` = interrupted,
+   never completed; later RESUME metadata cannot conceal it)
+5. If status=DONE or DONE_WITH_CONCERNS: continue to next phase
+6. If status=BLOCKED: pause cycle, surface to operator
+7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
+```
+
+`state_phase_begin` returns 3 for an already completed phase: skip its invocation,
+not its evidence. It returns 2 for interrupted/blocked work: reconcile its owned
+output and use `--retry` only for the explicitly selected retry or loop-back.
+It does not execute tools or choose a retry. Run SENSE and SCOPE only through this
+one loop, at most once on ordinary entry. SENSE supplies the scale pre-read; SCOPE
+resolves any material ambiguity and writes the selected scope. A changed route can
+replan the remaining range but cannot enlarge operation authority.
+
+Source `lib/state.sh` from the trusted bundle once; never fall back to target-supplied
+helper code. `render_cycle_footer` and RESUME share this ledger. Optional compatible
+continuity hooks also consume it, but hook files are not proof of host registration.
+The STARTING marker is essential even when no hooks run.
+See [ADR-0003](../../../.claude/decisions/0003-cycle-position-footer.md) + [ADR-0023](../../../.claude/decisions/0023-turn-start-continuity-inject.md) + L-016/L-018.
+
+**Phase-progress format** (printed to stdout at each phase boundary):
+
+```
+─────────────────────────────────────────────────────────
+[3/8] DISCOVER → next: PLAN
+Token est this phase: ~3k (default — not yet calibrated)  |  cycle total so far: ~9k (uncalibrated)
+─────────────────────────────────────────────────────────
+```
+
+The token-est numbers come from the phase-skill's frontmatter `tokens_est_typical:` **when the skill
+declares it**. Today **zero skills declare it**, so the value falls back to the `~3k per phase`
+default — which is a placeholder, not a measurement. When the fallback is in play, label it
+**`~3k (default — not yet calibrated)`** rather than printing a bare `~3.5k` that implies precision
+the system does not have. (Calibration lands when CAPTURE records actuals; see
+`lib/scale-estimator.sh` `scale_calibrated_prior`.)
+
+Between phases:
+- Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
+- Check if mode-specific gates apply (e.g., a pack-contributed customer mode may auto-run the active pack's voice gates after SHIP — `resolve_pack_field voice.gates_active`)
+
+**Cycle-position footer.** Each phase skill closes its own report with the shared position footer
+(see [ADR-0003](../../../.claude/decisions/0003-cycle-position-footer.md)), so the operator always knows where
+they are and the one logical next action — regardless of where they entered the cycle. The
+orchestrator does **not** double-render between phases; it renders the footer only at its **own
+gates** (mode-confirm, the cost-estimate gate) and at **cycle completion**:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
+render_cycle_footer --awaiting "Proceed with BUILD? [Y/n/edit-plan]"   # at a gate
+render_cycle_footer                                                    # at completion
+```
+
+The footer is mode-aware (skipped phases render `⊘`) and auto-falls to a thin ambient line when no
+cycle is active. Glyphs degrade to ASCII under `LINTEL_ASCII=1`.
+
+### Step 5 — Pre-BUILD confirm gate (BEFORE BUILD)
+
+If BUILD is in phases_to_run, before invoking it, confirm with the operator using the **honest
+signals PLAN recorded** — task count, the phase list, and the labelled token estimate. No dollar
+figure (Lintel has no pricing table); no bare-number duration unless `--with-time` was set. Pull the
+values PLAN wrote to state (`tasks_count`, `tokens_est`, `tokens_est_basis`):
+
+```
+Plan signals (from PLAN):
+- Tasks: <N>
+- Phases remaining: <phase list>
+- Token estimate: ~<total> (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>)
+  (only when --with-time:  Duration: ~<hours>)
+
+Proceed with BUILD? [Y/n/edit-plan]
+```
+
+This is a pre-BUILD scope/budget check, not a second request for the same approval.
+Surface the task count and labeled estimate. Ask only if the actual plan or resource
+boundary requires a new decision. The estimate stays UNCALIBRATED without measured
+samples; it is neither current context usage nor a known model capacity.
+
+**MARS is offered once, at PLAN.** PLAN's approval gate (Step 10) owns the cycle's single
+optional [MARS](../../../skills/mars/SKILL.md) offer, and only for the canonical nine-phase route after
+every mode, range, skip and reroute. Surface PLAN's recorded `mars_offer` with the plan
+signals when present. This gate never makes, repeats or upgrades that offer; `--auto`,
+silence and an unknown host capability never count as acceptance.
+
+If the approved work map selected the swarm profile, validate it and its coordination document at
+this same boundary, surface the ready frontier and actual host tier, then hand BUILD to
+`/li-swarm run`. Validation failure blocks BUILD and returns to PLAN. If no valid swarm fields are
+present, invoke ordinary BUILD; a `--swarm` request alone never enables fan-out.
+
+Helper validation uses explicit `LINTEL_SOURCE_ROOT`, then Claude's `CLAUDE_PLUGIN_ROOT`; every
+other adapter exports its known installed bundle. If no trusted source root exists, return
+`NEEDS_CONTEXT`. The working repository is only a `--repo` argument. Tests/self-checks export
+`LINTEL_SOURCE_ROOT` explicitly.
+
+If `--auto`, routine reversible choices can proceed only inside existing authority.
+The existing pattern classifier is an advisory signal for potentially irreversible
+decisions, not an authorization engine or an automatic host question API:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/auto-decide.sh"
+is_one_way_door "$decision_text"
+```
+
+Inspect the classification and the actual task's policy. Use the host question
+channel for unresolved material scope or missing one-way authority; do not call
+fictional shell functions to ask or approve. Existing answers remain valid.
+
+### Step 6 — Pause-points between phases (operator can interrupt)
+
+At meaningful boundaries, a brief progress report (example values are illustrative):
+```
+LINTEL CYCLE — <cycle-id>
+
+✓ SENSE (30 sec, 500 tokens)
+✓ SCOPE (20 sec, 400 tokens) — size=M, depth_schema=phased
+✓ DEFINE (5 min, 4k tokens) — design APPROVED
+✓ DISCOVER (3 min, 2k tokens) — 8 ADRs identified
+→ PLAN (in progress, est. 10 min)
+
+Next: PLAN within the existing authorization; the operator may pause or abort.
+```
+
+If operator pauses: state saved to .claude/runtime/state/00-state.md with `cycle_paused: true`. Resume via `/li-resume`.
+
+If operator aborts: clean shutdown, save state for next time.
+
+### Step 7 — Failure recovery (per phase BLOCKED)
+
+If a phase returns BLOCKED:
+1. Read phase's BLOCKED reason from 00-state.md
+2. Surface to operator: phase + reason + recovery options
+3. Options:
+   - Retry (with same args)
+   - Skip (to next phase, document why)
+   - Loop-back (to earlier phase, e.g., BUILD blocked → loop to PLAN to re-plan)
+   - Abort cycle (save state, exit)
+
+Adopts Architect image's FAILURE RECOVERY PROTOCOL: retry → operator-choice → stub-doc + issue-log → continue.
+
+### Step 8 — Cycle complete
+
+After the last selected phase has an actual DONE/DONE_WITH_CONCERNS record:
+- Surface cycle summary (per CAPTURE phase output if CAPTURE ran)
+- If CAPTURE didn't run (e.g., custom subset without CAPTURE): write light summary
+- For a finished objective, `state_append CYCLE DONE cycle_complete=true`.
+  A range ending at BUILD is only `state_append CYCLE PAUSED range_complete=true next=REVIEW`;
+  leave the cycle open for its deferred review/delivery/capture. An interrupted or blocked
+  phase never closes because a next-phase hint exists. CYCLE's closing metadata retains,
+  rather than replaces, the original segment history.
+- Telemetry — one mechanical line via the unified writer (ts/operator/cycle_id come from the envelope):
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh"
+audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED|ABORTED>
+# → .claude/runtime/audit/cycle.jsonl
+```
+
+> No `cost_estimate_dollars` field: Lintel has no pricing table, so a dollar figure here would be
+> fabricated (K6). Token actuals for estimator calibration are CAPTURE Step 1b's stream
+> (`granularity.jsonl` — dormant by decision, ADR-0008), not this one.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../../../skills/pattern/references/consumer-contract.md). The
+cycle adds no separate pattern loader: each phase applies its own obligation, and cycle entry
+and direct phase entry run the same command with the same inputs, so they produce the same
+`selection_digest`. When the runtime reports no patterns (per the contract), the cycle adds no
+prompt, phase, lock or artifact, and the phase/approval protocol above is unchanged. When PLAN
+has written a lock, pass its path and the saved context file to BUILD, REVIEW, SHIP and RESUME
+instead of re-resolving.
+
+## Status protocol
+
+- **DONE** — all phases in chain DONE, cycle complete
+- **DONE_WITH_CONCERNS** — chain complete but some phases returned WITH_CONCERNS
+- **BLOCKED** — phase BLOCKED, cycle paused, awaiting operator decision
+- **ABORTED** — operator aborted mid-cycle, state saved
+
+## Pause-points
+
+- After SENSE: reconcile the mode with existing authority; ask only for an unresolved material choice
+- Pre-BUILD: cost-estimate gate
+- Between every phase: optional pause (if operator interrupts)
+- On any phase BLOCKED: pause for failure-recovery decision
+
+## Hop-in support
+
+YES — `/li-cycle --from <phase>` enters at specified phase.
+
+Verify dependencies:
+- BUILD requires PLAN (or existing plan.md)
+- REVIEW requires BUILD (or existing diff)
+- SHIP requires REVIEW PASS
+
+If dependency not met: surface, ask operator to satisfy or pick different `--from`.
+
+## Integration
+
+**Reads:**
+- `~/.lintel/profile.yaml` (defaults)
+- `.claude/runtime/state/00-state.md` (resume state)
+- Each phase's outputs as inputs to next
+- optional approved work map and swarm coordination emitted by PLAN
+
+**Writes:**
+- `.claude/runtime/state/00-state.md` (orchestrator entries per phase)
+- `.claude/runtime/audit/cycle.jsonl` (one `audit_log cycle ...` line at cycle complete; failure events use the same stream)
+
+**Triggers:**
+- Each phase-skill in sequence: `/li-sense`, `/li-scope`, `/li-define`, etc.
+
+## Anti-patterns
+
+- **Skipping startup context** — read the relevant bootstrap on hop-in, without
+  invoking SENSE twice or outside the selected phase range
+- **Skipping the pre-BUILD scope/budget check** — surface the estimate; seek confirmation
+  only for a new material decision, not for already authorized work
+- **Auto-mode that expands authority** — material unanswered decisions still need the
+  actual host question channel; answered decisions do not need another confirmation
+- **Nesting cycles** — one cycle at a time, no recursive /li-cycle from within
+- **Ignoring phase BLOCKED status** — never silently continue past a blocked phase
+- **Losing operator's --skip choice** — respect operator decisions, don't override "for safety"
+- **Treating swarm as a tenth phase or a default** — it is an opt-in PLAN/BUILD/REVIEW profile and
+  the sequential phase chain stays intact
+
+## Failure recovery (per Architect FAILURE RECOVERY PROTOCOL)
+
+1. Phase returns BLOCKED → orchestrator surfaces issue
+2. ask_user: retry / skip / loop-back / abort
+3. If skip: write stub-doc + issue-log entry, document gap
+4. If loop-back: re-invoke target earlier phase with corrected input
+5. If abort: clean state, save resume point, exit
+
+Failure events get one line in the same stream as Step 8 — `audit_log cycle cycle_failure phase=<phase> action=<retry|skip|loop-back|abort>` → `.claude/runtime/audit/cycle.jsonl`.
+
+## Voice tier behavior
+
+`voice: internal`. Cycle orchestrator output is operator-internal coordination. Individual phases inherit the voice tier of the active mode, which resolves through the active pack (`resolve_pack_field voice.default_tier`; default: internal). Pack-contributed customer modes can raise it for customer-facing phases.

@@ -3,9 +3,176 @@ name: li-pattern
 description: Use when recurring expectations should be captured, reviewed, versioned, shared or applied to named work as data-only patterns with explicit applicability, provenance and review traceability.
 ---
 
-# Lintel pattern
+> **Lintel on GitHub Copilot.** Generated from `skills/pattern/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/pattern/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/pattern/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
 
-Read the [Copilot adapter contract](../../../shims/copilot/COPILOT.md) first, then execute the
-[canonical pattern workflow](../../../skills/pattern/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
+# Pattern: reusable, data-only expectations
+
+A pattern records expectations as clauses (`must`, `default`, `recommendation`). Each pattern
+also has a selector saying where it applies, the sources it came from, and optional hashed local
+assets. A blueprint is a pattern that includes other patterns by exact reference. Bindings state
+which patterns a context requires or defaults to.
+
+Patterns complement accepted policy. They grant no authority and never execute, fetch or install
+anything.
+
+This skill drives the reasoning: which sources to read, what the operator actually confirmed, and
+what needs review. The deterministic work is done only by the launcher `bin/li-pattern` and its
+CLI `bin/li-pattern.py` over
+`lib/patterns.py`: validation, resolution, locking and safe persistence. Never re-implement
+validation, hashing or precedence in prose or in another script. The frozen interface is
+`.claude/plans/reusable-patterns/contract.md` in the Lintel source; the decision is ADR-0038.
+
+## When to use
+
+- The operator states an expectation that should hold for future work of a given kind or target.
+- A repository, team pack or person wants to reuse a known-good structure across work, such as a
+  dashboard, a report, a deployment topology or a visual language.
+- Work must show which expectations applied, at which version, and whether review covered them.
+- An existing pattern needs an update, deprecation, retirement, revocation, export or import.
+
+## When not to use
+
+- One-off preferences for the current task. State them in the brief instead.
+- Enterprise enforcement. A repository can forge a binding, so patterns are advisory structure
+  under host policy and branch rules, not a control.
+- Inferring an organization's policy from generic public guidance, such as cloud landing-zone
+  recommendations. An inaccessible mandatory source stays unknown; it is never guessed.
+
+## Scopes and roots
+
+| Scope | Catalog | Activation |
+| --- | --- | --- |
+| Repository | `.claude/patterns/catalog.json`, with bindings in `.claude/patterns/bindings.json` | Bindings and catalog bindings apply at repository scope |
+| Active pack | The effective pack's `patterns.source` and its pinned includes | Pack catalog bindings apply at pack scope |
+| Personal | `$LINTEL_HOME/patterns/catalog.json` | Never automatic; selected only by an explicit reference or a repository binding |
+
+Default precedence runs in this order:
+
+1. Explicit authorized task choice
+2. Repository
+3. Active pack
+4. Explicitly selected personal pattern
+5. The existing corpus/model fallback
+
+Mandatory clauses constrain the whole chain. With no selected pattern, existing behavior is
+unchanged, including Design DNA's brief > profile > corpus order.
+
+A linked (junction or symlink) home, repository, `.claude` or pattern root is refused. Pass the
+real path instead.
+
+Windows path length: the runtime opens pattern files with ordinary paths, so without Windows long-path support a pattern file whose full path exceeds about 260 characters is reported missing (fail-closed, never success). The bundled kit's deepest path is the example asset directory, so on Windows PowerShell 5.1 with `LongPathsEnabled=0` the bare installer needs a correspondingly short Lintel home: a home near 108 characters was observed to work and near 134 characters to fail, recoverably, with `-Recover`. The exact budget depends on the host. Keep pattern sources and the Lintel home at ordinary depths, or enable long paths; full long-path support is not claimed.
+
+## Running the helper
+
+Call the launcher from the trusted source root with its interpreter; never run a relative
+`bin/li-pattern` from the working tree, which an installed target repository does not contain.
+The launcher resolves the repository root, `LINTEL_HOME` and the ADR-0029 profile record, and
+passes them to the Python CLI as a JSON envelope on stdin:
+
+```bash
+bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" list
+bash "$LINTEL_SOURCE_ROOT/bin/li-pattern" --repo "$LINTEL_REPO_ROOT" resolve --context "$ctx"
+```
+
+Use `--repo DIR` outside a Git checkout. Runtime operations need the optional Python 3.10+
+toolchain. If Python, Bash or the helper is missing, report "pattern check unavailable" once; that
+is never "no patterns". See the [consumer contract](../../../skills/pattern/references/consumer-contract.md) for which work
+may continue and which must stop. The exact invocations, status handling, phase obligations and
+evidence rules consumers follow are all in that [consumer contract](../../../skills/pattern/references/consumer-contract.md).
+
+A successful runtime prints exactly one JSON report on stdout, with its error diagnostics on stderr.
+Act on the reported `status`, not only on whether the exit code is zero. **No JSON report on stdout
+means "pattern check unavailable", whatever the exit code.** That covers a missing runtime (exit 5), a
+partial kit, or a missing helper. It is never "no patterns" and never permission to continue dependent
+work; see the consumer contract's "Missing runtime" rule. The table applies only when a report was
+printed:
+
+| Exit | Status | Meaning for the workflow |
+| --- | --- | --- |
+| 0 | `ok`, `ready`, `empty` | Proceed. `empty` means no pattern applies and behavior is unchanged |
+| 2 | `invalid` | Fix the input; nothing was written |
+| 3 | `needs-context` | Ask for or cite the missing facts; do not guess them |
+| 4 | `conflict` | Resolve the named conflict: settings, applicability or mandatory baseline |
+| 5 | `unavailable` | A configured source is missing, changed, revoked, retired or unverified. Dependent work stops |
+| 6 | `collision` | Another writer, or a stale digest. Re-read and retry deliberately |
+| 7 | `review-unmet` | Mandatory clause evidence is missing or failing |
+
+## Operations
+
+| Command | Use it to | Notes |
+| --- | --- | --- |
+| `list`, `show --ref <source:id@version>`, `check` | Inspect catalogs or one pattern; validate a document or all sources | `list` reads no pattern bodies |
+| `resolve`, `explain` (`--context`, optional `--refs`, `--overrides`, `--exceptions`, `--preview-draft`) | Select the patterns that apply to evidenced context facts | Advisory candidates are never requirements. `explain` adds the binding decisions |
+| `resolve --lock <path>` | Freeze a ready or empty selection beside the initiative | Never overwrites an existing lock. Conflicts and unknown context never lock |
+| `verify-lock --lock --context` | Check pins, lifecycle, revocations and the mandatory baseline before continuing | Never upgrades a pin silently |
+| `map`, `project` | Map clauses to existing task IDs, and project one package's clauses | Regrouping never changes the selection |
+| `capture --input --scope repo\|personal --name` | Register a new draft | Drafts are never selected for execution |
+| `index --source-root` | Re-check registered entries and regenerate their metadata | Never discovers or blesses unregistered files |
+| `approve --path --version --approval --expected-digest` | Publish a reviewed, strictly newer approved version | The draft stays unchanged, and every dependency must be approved |
+| `update --path --input --expected-digest [--write]` | Create a strictly newer draft of the same pattern | Previews the clause diff and dependents; the old version and current pins stay unchanged |
+| `deprecate`, `retire`, `revoke --ref --record [--write]` | Record a lifecycle event with its impact | Deprecated pins warn; retired and revoked pins block; there is no un-revoke |
+| `apply --change [--write]` | Add, replace or remove one repository binding | Shows the reduced mandatory baseline before a required binding is weakened |
+| `remove --ref [--write]` | Unregister an entry nothing references | Files and history are never deleted |
+| `resolve`/`verify-lock --attestations` | Supply reviewed source attestations | Needed for URL sources of required patterns and for overdue patterns; renewal never changes the selection |
+| `export --refs --out`, `import --bundle --scope --destination-source --version-map [--write]` | Share patterns as a local bundle | Import stages drafts with inert provenance; approve children first after review |
+| `review --lock --context --evidence` | Check per-clause evidence coverage after verifying the lock | Exit 7 on unmet mandatory coverage; never a pass or release clearance |
+
+Every write follows the same rules: explicit inputs, previews before writes, compare-and-swap
+digests, and no silent change to active work.
+
+## Capture procedure
+
+1. Read only the sources the operator authorized: documents, policy exports, code, screenshots or
+   an interview. Record each one as a source with its `kind`, `root`, `section`, `observed_at`,
+   `confidence` and reuse limits. A URL is provenance, not a fetch instruction.
+2. Separate what the operator confirmed from what you observed or inferred. Confirmed sources are
+   `operator-statement` or `approved-standard` with confidence `confirmed`. Observed or inferred
+   ones are `observation` or `inferred`. Observations become `default` or `recommendation`
+   clauses unless the operator confirms a `must`.
+3. Write a narrow selector from evidenced facts. An empty selector means "everywhere" and must be
+   deliberate. Give each clause a `verify` statement that a reviewer can actually check.
+4. Capture the pattern as a draft, and show the operator its clauses and provenance. Approve only
+   after review, with a new version and an approval reference. Approval records provenance; it
+   does not prove the approver's authority.
+5. Keep each declared asset, and any `root: pattern` source, next to the draft file you capture,
+   or pass `--files-from <dir>`. Every version carries exactly those files, digest-checked. Nothing
+   else is copied, and a missing or changed file stops publication.
+6. Before a pattern source is tracked in Git, protect its raw bytes with a source-scoped
+   `.gitattributes` containing `* -text` beside the catalog, as described in the
+   [pattern template](../../../scaffolding/01-foundation/templates/pattern/README.md). Never overwrite
+   an existing attributes file. If a repository policy already governs that path, honor it and
+   decide explicitly. `-text` stops line-ending conversion only; it does not disable filters, LFS,
+   `working-tree-encoding` or `ident`, so check those against the policy as well.
+7. Never copy credentials, private source documents or absolute home paths into a pattern, lock
+   or export.
+
+## Workflow consumers
+
+Phase and generation workflows consume patterns through the shared
+[consumer contract](../../../skills/pattern/references/consumer-contract.md).
+
+- Without configured patterns, those workflows behave exactly as before, and no prompts or files
+  are added.
+- Direct entry into any phase either resolves the current context or verifies an explicitly
+  supplied lock.
+- Assets are read with `read_asset`, bound to that selection.
+- Pattern clause coverage is supplemental evidence inside the ADR-0028 review contract, never a
+  separate pass.

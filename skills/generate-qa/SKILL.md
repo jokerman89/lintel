@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-qa` skill — final stage of the v3.5 shared content pipeline. Validates produced artifacts against brand, voice, readability, and structural standards.

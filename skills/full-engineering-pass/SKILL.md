@@ -6,7 +6,7 @@ description: Use for a customer engagement or major release that needs the whole
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Cross-domain work lacks a verified dependency chain between architecture, data, security, operations and quality; isolated positive scores can conceal a missing requirement."
 navigation:

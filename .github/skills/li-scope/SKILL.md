@@ -3,9 +3,323 @@ name: li-scope
 description: Use when an initiative needs boundaries, dependencies and an appropriate planning depth.
 ---
 
-# Lintel scope
+> **Lintel on GitHub Copilot.** Generated from `skills/scope/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/scope/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/scope/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
 
-Read the [Copilot adapter contract](../../../shims/copilot/COPILOT.md) first, then execute the
-[canonical scope workflow](../../../skills/scope/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
+You are the SCOPE skill — Phase 1.5 of the Lintel cycle, between SENSE and DEFINE.
+
+## What this skill does
+
+Turns a raw request into a **sized, disambiguated scope**. One responsibility: take the operator's prompt + the orientator's route (from SENSE) and produce a `scope.md` carrying the resolved size, the chosen reading, and the `depth_schema` that drives PLAN.
+
+SCOPE is the canonical home for the **scale axis** + the **clarifying gate** (design §3.2). It is deliberately *light* — the failure mode is ceremony (R1). It is read-only except for emitting `scope.md`, runs the mechanical estimator first, and pauses **only** when the request is genuinely bimodal.
+
+```
+SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
+            │
+            ├─ run scale-estimator (mechanical; agent judges when escalate=yes)
+            ├─ if ambiguous → CLARIFYING GATE (one ask_user):
+            │     "I read 'deploy website to azure' two ways:
+            │       A) static page on Storage/SWA  (~XS)
+            │       B) ALZ landing-zone + CI/CD + Front Door  (~XL)
+            │      Which is it?"  [A | B | other]
+            ├─ if intent-vs-scale conflict (deploy→ship but size=XL greenfield)
+            │     → OVERRIDE the orientator route, re-route to full cycle from DEFINE
+            └─ emit scope.md  →  feeds DEFINE (wedge) + PLAN (depth_schema)
+```
+
+## When to use
+
+- Always in `/li-cycle`, immediately after SENSE and before DEFINE (auto-invoked)
+- Standalone when the operator wants a request sized + disambiguated before committing to a phase
+- After a mid-cycle pivot that changes what's being asked (re-scope)
+
+## When NOT to use
+
+- intent=hotfix / trivial single-file edit — SCOPE is skippable in light modes (like DEFINE). The mechanical estimator already returns XS silently; a hotfix preset skips the phase entirely.
+- intent=research-dive — size is irrelevant to a research dive (no PLAN follows); SCOPE is silent / skipped.
+- Mid-cycle re-entry where a valid `scope.md` already exists and the request hasn't changed.
+
+## Workflow
+
+Apply [task-relevant intake](../../../skills/define/references/intake.md) and the
+[shared work-map contract](../../../skills/spec-kit/references/work-map.md). Resolve actual
+profile/policy before consumption, retain the selected original map and answers,
+and do not equate an inferred larger size with broader authority.
+DEFINE reads this same selected `scope.md`; its compact intake retains material
+risk and approval checks. PLAN uses `/li-inspect --target plan` for applicable
+review lenses, not another sizing interview.
+
+### Step 1 — Load the request + the orientator route
+
+SCOPE runs **after** SENSE, so the orientator's route already exists (SENSE step 0d). Read it so SCOPE can override a confidently-wrong one.
+
+```bash
+scope_source="${LINTEL_SOURCE_ROOT:?select the trusted source}"
+source "$scope_source/lib/scale-estimator.sh"
+source "$scope_source/lib/paths.sh"
+source "$scope_source/lib/state.sh"
+
+prompt_text="<operator's last message>"
+
+# The orientator route SENSE recorded (intent + workflow). SCOPE may override it.
+scope_state_dir="${LINTEL_STATE_DIR:-$(lintel_state_dir)}"
+case "$scope_state_dir" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_state_dir="$(lintel_repo_root)/$scope_state_dir" ;;
+esac
+intent=$(state_cycle_field intent_detected "$scope_state_dir/00-state.md") || exit $?
+intent="${intent:-unclear}"
+
+escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
+```
+
+If SENSE was not run, call the same `classify_intent` helper on the original prompt.
+Do not recreate a topic-first heuristic or inherit another cycle's routing.
+
+### Step 2 — Run the scale-estimator (mechanical first)
+
+```bash
+scale_size=$(classify_size "$prompt_text")
+scale_amb=$(scale_ambiguous "$prompt_text")
+scale_conf=$(scale_confidence "$prompt_text")
+scale_esc=$(scale_escalate "$prompt_text" "$escalation")
+depth_schema=$(size_to_depth_schema "$scale_size")
+```
+
+`scale_estimate "$prompt_text" "$escalation"` emits the full YAML block if you want it verbatim. The mechanical verdict is always complete on its own — it is the graceful fallback when no agent escalation / ask_user is available.
+
+### Step 3 — Clarifying gate (the substantive logic, moved here from SENSE)
+
+This is the gate that used to live inline in SENSE step 0e. SCOPE is now its canonical home (it grew past the ~40-line SENSE-substep threshold — design §6 Slice 2 trigger).
+
+**Mechanical-first, agent on escalation (decision 1B):**
+
+- **If `scale_amb=no`** (clear): **no question.** `chosen_reading` = the single reading. If `scale_size` is `L`/`XL`, note in the SCOPE report that PLAN will use a deeper `depth_schema` — but do not interrupt. Clear small requests feel nothing (success criterion 2; risk R1).
+- **If `scale_amb=yes`** (bimodal): **you (the agent) are the escalation.** Judge the request's two plausible readings, give each a sharp label + size, and fire **exactly one** ask_user — the clarifying gate. Example for "deploy a website to azure":
+  - **A)** Static page (Storage / SWA) — ~XS
+  - **B)** ALZ landing-zone + CI/CD + Front Door — ~XL
+  - **C)** other (operator describes)
+
+  Set `chosen_reading` + final `scale_size` / `depth_schema` from the answer (the operator may downsize a conservatively-large mechanical guess at the gate — R2).
+  Set `scope_decision_resolved=yes` only from that answer or the same decision's
+  existing authorized evidence; otherwise keep it `no`.
+
+**Host fallback:** use the actual question channel, not a required API name.
+If none exists, ask in conversation; denied permission cannot be bypassed.
+An unanswered material ambiguity stays NEEDS_CONTEXT for its dependent action.
+The conservative size is still useful as an explicitly uncertain estimate, not
+as approval to build the larger interpretation. Reuse an answer already supplied.
+
+### Step 4 — Route override (the smoking-gun fix)
+
+If the orientator route (from SENSE) conflicts with the resolved scale, **override** it. Concretely: `intent=ship` (→ `/li-cycle --from SHIP`) but the resolved reading is a large greenfield build (`scale_size` ∈ {L, XL} **and** no existing artifact to ship) → rewrite the route to a full cycle from DEFINE (`/li-cycle`, entry DEFINE), and say why in the SCOPE report.
+
+```bash
+override_route=""
+resolved_intent="$intent"
+# The agent sets has_artifact=yes only after identifying the requested deliverable
+# and recording its path/ref in the SCOPE report. A branch name alone is not evidence.
+has_artifact="${has_artifact:-no}"
+if { [ "$scale_size" = "L" ] || [ "$scale_size" = "XL" ]; } \
+   && { [ "$intent" = "ship" ] || [ "$intent" = "deploy" ]; }; then
+  if [ "$has_artifact" != "yes" ]; then
+    override_route="DEFINE"   # full cycle from DEFINE, not SHIP
+    resolved_intent="build"
+  fi
+fi
+```
+
+This is a routing recommendation, not new permission. A greenfield deliverable can
+need DEFINE/PLAN before deployment, but no artifact alone does not authorize BUILD.
+Confirm only missing implementation scope; preserve an explicit review/research
+operation regardless of size. Record the recommendation and its authority separately.
+
+### Step 5 — Emit scope.md
+
+Write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`.claude/runtime/jobs/<id>/scope.md`) when a job is active, else `.claude/runtime/state/scope.md`.
+
+An explicitly selected `LINTEL_SCOPE_PATH` takes precedence. Persist `scope_out` in the SCOPE
+ledger entry and link it from the selected native plan or mapped handoff. RESUME uses that
+explicit link or the same job directory; the shared jobs parent is never a scope source.
+
+```bash
+scope_source="${LINTEL_SOURCE_ROOT:?select trusted source}"
+source "$scope_source/lib/paths.sh"
+if [ -n "${LINTEL_SCOPE_PATH:-}" ]; then
+  scope_out="$LINTEL_SCOPE_PATH"  # explicitly selected scope for this initiative
+elif [ -n "${LINTEL_JOB_DIR:-}" ]; then
+  scope_out="$LINTEL_JOB_DIR/scope.md"
+elif [ -n "${JOB_ID:-}" ]; then
+  source "$scope_source/bin/_jobs.sh"
+  scope_out="$(job_path "$JOB_ID")/scope.md"
+else
+  scope_out="${LINTEL_STATE_DIR:-$(lintel_state_dir)}/scope.md"
+fi
+case "$scope_out" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_out="$(lintel_repo_root)/$scope_out" ;;
+esac
+mkdir -p "$(dirname "$scope_out")"
+cat > "$scope_out" <<EOF
+# Scope: $prompt_text
+size: $scale_size
+intent: $resolved_intent
+ambiguous: ${scale_amb}
+decision_resolved: ${scope_decision_resolved:-unknown}
+chosen_reading: "${chosen_reading:-$prompt_text}"
+surface: [<agent fills from signals: infra/ci/auth/data/api/network>]
+depth_schema: $depth_schema
+est_tokens: <agent fills from size prior; time only on --with-time>
+route_override: ${override_route:-none}
+clarifications: [ "${operator_answer:-}" ]
+EOF
+```
+
+`scope.md` fields:
+- `size` — XS / S / M / L / XL (the T-shirt axis).
+- `intent` — build / fix / ship / research / scaffold; reflects any override.
+- `ambiguous` — whether the request was bimodal; `decision_resolved` separately
+  records whether the actual material question has been answered.
+- `chosen_reading` — the disambiguated reading (sharp label, not the raw prompt, when the gate fired).
+- `depth_schema` — `flat` / `phased` / `tree`; the single signal PLAN reads to pick the WBS shape.
+- `est_tokens` — size prior; **no wall-clock time unless `--with-time`** (design §3.7).
+- `route_override` — `none`, or the phase the route was rewritten to (e.g. `DEFINE`).
+
+### Step 6 — Write 00-state.md entry + surface report
+
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/state.sh"
+[ -s "$scope_out" ] || { echo "SCOPE: selected scope was not persisted" >&2; exit 1; }
+scope_status=DONE scope_next=DEFINE
+if [ "$scale_amb" != no ] && [ "${scope_decision_resolved:-no}" != yes ]; then
+  scope_status=NEEDS_CONTEXT scope_next=SCOPE
+fi
+state_append SCOPE "$scope_status" "next=$scope_next" "size=$scale_size" \
+  "ambiguous=$scale_amb" "depth_schema=$depth_schema" "intent=$resolved_intent" \
+  "route_override=${override_route:-none}" "scope_path=$scope_out"
+```
+
+## Output format
+
+```
+LINTEL SCOPE — <timestamp>
+
+Request: <prompt, truncated>
+Size:    <XS|S|M|L|XL>   (confidence: <high|low>)
+Ambiguous: <yes → resolved as "<reading>" | no>
+Depth schema: <flat | phased | tree>  → PLAN will render <flat task list | phases+tasks | phase→task→subtask tree>
+
+<if gate fired:>
+Clarifying gate: asked "<the two readings>" — operator chose <A|B|other>
+
+<if route overridden:>
+⚠ Route override: orientator routed <intent>→<workflow>, but size=<L|XL> greenfield
+   → re-routed to full cycle from DEFINE (the work is a build, not a ship)
+
+scope.md written: <path>
+
+Next: DEFINE (inherits chosen reading as the wedge)
+```
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../../../skills/pattern/references/consumer-contract.md).
+Record which context facts the work depends on (for example artifact, audience, deployment
+target, subscription or organization), which are known with evidence, and which are unknown. An
+unknown target stays unknown in the SCOPE report and later yields `needs-context`; never fill it
+from a default, the artifact type or a generic landing-zone recommendation. When the runtime
+reports no patterns, SCOPE is unchanged.
+
+## Status protocol
+
+- **DONE** — scope.md written, size + depth_schema resolved (gate fired or silent)
+- **BLOCKED** — denied question/read/write permission or another unsatisfied required boundary
+- **NEEDS_CONTEXT** — prompt too empty to classify (no request text)
+
+## Pause-points
+
+Exactly one, and **conditional**: the clarifying gate fires **only** when `scale_amb=yes`. XS/S unambiguous requests run silent — no pause, no question (premise 2; risk R1). At most one ask_user per SCOPE invocation.
+
+## Hop-in support
+
+YES:
+- From SENSE (most common): SENSE's slimmed step 0e surfaces size, then SCOPE owns the gate + scope.md.
+- Standalone `/li-scope "<request>"`: classifies intent locally if no SENSE entry exists.
+- In `/li-cycle`: runs between SENSE and DEFINE; skipped in light modes (hotfix) like DEFINE.
+
+Skip-conditions (SCOPE is skipped when):
+- intent=hotfix / trivial-edit (mechanical size is XS; no disambiguation needed)
+- intent=research-dive (size irrelevant; no PLAN follows)
+- a valid `scope.md` already exists for the unchanged request
+
+## Integration
+
+**Reads:**
+- operator's last message (the request)
+- `.claude/runtime/state/00-state.md` (SENSE's orientator route — `intent_detected`)
+- `lib/scale-estimator.sh` (the size axis — Slice 1; SCOPE sources it, never edits it)
+- active pack's `navigation.escalation_threshold` (via `resolve_pack_field`)
+
+**Writes:**
+- `scope.md` (job dir if active, else `.claude/runtime/state/scope.md`)
+- `.claude/runtime/state/00-state.md` (SCOPE entry)
+
+**Triggers (recommends, never auto-invokes):**
+- DEFINE next (inherits `chosen_reading` as the wedge)
+- PLAN later reads `scope.depth_schema` to select the WBS template variant
+
+## Anti-patterns
+
+- **Asking when the request is clear** — the gate fires ONLY on `scale_amb=yes`. A confident XS/S/L runs silent.
+- **More than one question** — exactly one ask_user, max, per invocation.
+- **Doing DEFINE's job** — SCOPE sizes + disambiguates; it does NOT run forcing questions, premise checks, or alternatives. That's DEFINE.
+- **Treating a named question API as mandatory** — use the host's actual channel.
+  Do not treat conservative sizing as a resolved material decision.
+- **Editing the estimator** — SCOPE *sources* `lib/scale-estimator.sh`; it never modifies the lib (other slices own it).
+- **Emitting wall-clock time** — size + est_tokens only, unless `--with-time` (design §3.7).
+- **Re-running on an unchanged request** — if a valid scope.md exists and the ask hasn't changed, skip.
+
+## Failure recovery
+
+- **No question tool (gate needed)**: ask in conversation. Preserve unresolved
+  ambiguity and continue only independent authorized work.
+- **scale-estimator.sh missing**: BLOCKED — SCOPE cannot size without the lib. Recommend `/li-doctor`.
+- **00-state.md unreadable (no SENSE route)**: continue; classify intent locally from the prompt, note "no prior SENSE route" in the report.
+- **Permission errors on selected scope path**: surface the failure; do not
+  claim it persisted by silently switching to an unrelated `/tmp` artifact.
+
+## Voice tier behavior
+
+`voice: internal`. The SCOPE report and scope.md are operator-internal. No customer-facing output.
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li-cycle`:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../../.claude/decisions/0003-cycle-position-footer.md).

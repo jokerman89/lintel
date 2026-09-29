@@ -5,7 +5,7 @@ description: Validate a pack before activation or after editing its manifest. Ch
 color: green
 tools: Read, Bash, Grep
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 Validate the target pack with the same parser and effective-field rules used at

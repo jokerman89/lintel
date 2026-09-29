@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-write` skill — second stage of the v3.5 shared content pipeline. Produces content.md (and speaker-notes.md if PPT in target_formats) from outline.md.

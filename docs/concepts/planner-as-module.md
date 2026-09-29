@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-08 (short leaves, bounded work packages)
 **Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/inspect/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
 
-> Invocation: commands use the Claude plugin form `/li:<skill>`. Repository adapters (Claude Code, Codex, Copilot and Cursor) expose the installed core workflows as `li-<skill>`; for any other skill, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
+> Invocation: commands use the Claude plugin form `/li:<skill>`. GitHub Copilot gets a native `li-<skill>` skill for every workflow. The other repository adapters (Claude Code, Codex and Cursor) expose the installed core workflows as `li-<skill>`; for any other skill there, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
 
 PLAN is callable on its own or within a cycle. It produces the complete cold-executor trio
 (plan.md + spec.md + prompt.md), preserves short, verifiable leaves and groups connected work

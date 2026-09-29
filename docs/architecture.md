@@ -46,9 +46,10 @@ publishing the harness possible at all.
 ### `skills/` — what your CLI can invoke
 
 Canonical skills live at `skills/<name>/SKILL.md`, one source for every client. The invocation
-form depends on the adapter: `/li:<name>` in the Claude plugin, generated `li-<name>` wrappers
-for the core workflows where a [client adapter](client-adapters.md) has a documented discovery
-root (other skills are read from their canonical file), or an explicit file handoff through the Universal adapter. The tree holds 96 skill entries (directories with a
+form depends on the adapter: `/li:<name>` in the Claude plugin, a complete generated `li-<name>`
+skill for every canonical skill on GitHub Copilot, generated `li-<name>` wrappers for the core
+workflows where another [client adapter](client-adapters.md) has a documented discovery root
+(other skills are read from their canonical file), or an explicit file handoff through the Universal adapter. The tree holds 96 skill entries (directories with a
 `SKILL.md`; `python bin/li-catalog.py --check` verifies the generated catalog against them).
 They fall into clusters:
 
@@ -289,8 +290,10 @@ Two mechanisms, one source each:
 
 1. **Instructions** — the shared `SESSION-PROTOCOL.md` is repeated inline in AGENTS.md, CLAUDE.md and both scaffold templates. `bin/li-instructions.py` keeps those marked blocks identical while preserving unique project context. `AGENT-INSTRUCTIONS.md` supplies the navigation/read order; personal global files are unnecessary for the reusable protocol. This deliberate repetition supersedes the older pointer-only direction.
 2. **Skills and agents** — written once at the repo root, exposed through native plugins,
-   generated discovery wrappers or explicit manual handoff. Existing Claude skills/agents/hooks,
-   Copilot native kit and other useful routes remain. `li-adapter.py` delegates to the same
+   generated native files (complete skills and custom agents on Copilot, core-workflow
+   wrappers elsewhere, all drift-checked against the canonical source) or explicit manual
+   handoff. Existing Claude skills/agents/hooks, the Copilot native kit and other useful
+   routes remain. `li-adapter.py` delegates to the same
    `li-copilot.py` source-bundling and ownership engine rather than duplicating an installer.
 
 `lib/cli-tiers.yaml` is schema-version-2 JSON-compatible YAML, read by the standard-library
@@ -342,9 +345,11 @@ self-description — historically this repo's dominant failure mode, and the rea
 
 ## Portable repository boundary
 
-Selected clients receive core wrappers only under their documented repository discovery roots,
-or an explicit manual `START.md` route. Copilot retains `.github/skills/li-*` and its three
-`.github/agents/` profiles. All use one `.github/lintel/` bundle, including actual source product
+Selected clients receive generated files only under their documented repository discovery
+roots, or an explicit manual `START.md` route. Copilot receives a complete `.github/skills/li-*`
+skill for every canonical skill and a `.github/agents/` custom agent for every canonical agent,
+plus three role profiles; other discovery roots receive core-workflow wrappers. All use one
+`.github/lintel/` bundle, including actual source product
 metadata, so another checkout does not depend on the originating workstation.
 
 Installation records managed files, selected surfaces and protocol blocks, preserves project prose

@@ -1,0 +1,244 @@
+---
+name: li-generate-design
+description: Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared content-pipeline sub-skill, solo-invokable.
+---
+
+> **Lintel on GitHub Copilot.** Generated from `skills/generate-design/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/generate-design/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/generate-design/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
+
+You are the `generate-design` skill — third stage of the v3.5 shared content pipeline. Produces design-spec.json from content.md.
+
+## What this skill does
+
+Reads content.md (with HTML-comment annotations for type + voice + key_message) → produces design-spec.json with per-target-format layout-mappings, palette references, font hints, logo placements, and per-format design-pass hooks for format-builders.
+
+This is the "shared design baseline." Format-builders (`generate-ppt`, `generate-web`, `generate-word`) read design-spec.json + apply their own format-specific design-pass (e.g., `PPTNarrativeArchitect` for PPT slide-narrative, `WebExperienceCritic` for web hero/flow, `WordTechnicalEditor` for word headings/style). The shared baseline gives them consistency; the per-format pass gives them format-fidelity.
+
+For web, use the [one direct design contract](../../../skills/design-dna/references/design-contract.md).
+Keep document-format mappings intact; P12 owns their rendering methods.
+
+Used by `generate` orchestrator as Step 5, or solo when operator wants to re-design existing content for different formats or different brand-palette.
+
+## When to use
+
+- Third step of `/li-generate` orchestrator chain (after write)
+- Operator wants to retarget existing content to different formats
+- Brand-palette swap (re-design with `--palette nordic-minimal` vs `default`)
+- A/B-test layout strategies for same content
+
+## When NOT to use
+
+- Operator has no content.md — invoke `/li-generate-write` first
+- Pure visual mockup without content — use HTML wireframe sketch instead
+- Format-specific design tweaks — those happen in format-builder's design-pass hook, not here
+
+## Inputs
+
+- Required `--content <path>` — content.md from generate-write
+- Required `--target-formats <ppt,web,word,...>` — per-format spec generated for each
+- Optional `--palette <name>` — explicit brief-level palette selection with source evidence
+- Optional `--brand-templates-dir <path>` — explicitly authorized template root; no personal-home scan
+- Optional `--logo <path>` — explicit logo override
+- Optional `--out <path>` — output path (default: `${run_dir}/design-spec.json`)
+
+## Design-spec.json schema
+
+```json
+{
+  "version": "1.0",
+  "schema_version": 1,
+  "source": "pipeline",
+  "generated_at": "<iso-8601>",
+  "source_content_hash": "<sha256 of content.md>",
+  "palette": {
+    "name": "default",
+    "primary": "#0078D4",
+    "secondary": "#50E6FF",
+    "accent": "#FFB900",
+    "text_dark": "#1B1B1B",
+    "text_light": "#FFFFFF",
+    "background": "#FFFFFF"
+  },
+  "fonts": {
+    "heading": "Segoe UI Semibold",
+    "body": "Segoe UI",
+    "code": "Cascadia Code",
+    "heading_size": 28,
+    "body_size": 14
+  },
+  "logo": {
+    "path": "~/.lintel/brand/logos/default.png",
+    "position": "top-right"
+  },
+  "per_format": {
+    "ppt": {
+      "template_path": "~/.lintel/brand/ppt-templates/default.pptx",
+      "layouts": [
+        {
+          "section_ref": "§1",
+          "layout_name": "Title Slide",
+          "layout_index": 0,
+          "elements": [
+            {"placeholder": "title", "content_field": "Title", "font_override": null},
+            {"placeholder": "subtitle", "content_field": "Subtitle", "font_override": null}
+          ],
+          "animation": "dissolve",
+          "design_pass_hook": "PPTNarrativeArchitect"
+        }
+      ]
+    },
+    "web": {
+      "template_path": "~/.lintel/brand/web-templates/single-file-default.html",
+      "sections": [
+        {
+          "section_ref": "§1",
+          "block_type": "hero",
+          "elements": [
+            {"slot": "h1", "content_field": "Title"},
+            {"slot": "tagline", "content_field": "Subtitle"}
+          ],
+          "design_pass_hook": "WebExperienceCritic"
+        }
+      ]
+    },
+    "word": {
+      "template_path": "~/.lintel/brand/word-templates/customer-summary.docx",
+      "sections": [
+        {
+          "section_ref": "§1",
+          "heading_level": 1,
+          "elements": [
+            {"slot": "heading", "content_field": "Title"},
+            {"slot": "body", "content_field": "Body"}
+          ],
+          "design_pass_hook": "WordTechnicalEditor"
+        }
+      ]
+    }
+  }
+}
+```
+
+The historical palette/font example above illustrates document projections, not a
+brand to impose. New web output also includes `web_design` and `binding` as defined
+by the shared schema. `web_design` uses the same common fields as the frontend v1
+envelope. Legacy pipeline files remain readable but unresolved for new rendering.
+
+Key contract points:
+- `palette` + `fonts` are shared across all target formats (consistency)
+- `per_format.<format>` is format-specific layout-mapping
+- `design_pass_hook` names the format-specific agent that applies fidelity-pass at format-builder level (not invoked by generate-design directly)
+- `section_ref` ties back to content.md `§N` sections for traceability
+
+## Workflow
+
+### Step 1 — Read content.md + parse annotations
+
+Parse content.md frontmatter + per-section HTML-comment annotations (`<!-- type: ... -->`, `<!-- voice: ... -->`, `<!-- key_message: ... -->`). Build per-section lookup table.
+
+### Step 2 — Load palette + brand templates
+
+Load the verified P07 reference and selected design-profile asset through the shared
+helper. Retain actual retrieval and asset bytes. A supplied `--palette` must resolve
+to explicitly selected source evidence; a missing custom palette blocks instead of
+silently selecting `default`. Preserve brief > profile > corpus, subject to policy
+and existing project technology.
+
+For each format in `--target-formats`: locate template at `~/.lintel/brand/<format>-templates/<default>.<ext>`. Surface staleness warning if template > 90 days old. Fall back to blank if missing and `--use-defaults` set.
+Resolve that legacy template slot only within the explicitly authorized template
+root. A path convention is not permission to inspect a personal directory.
+
+### Step 3 — Per-section layout-mapping
+
+For each content.md section (§N):
+- Per requested format, choose appropriate layout/block-type based on section's `type` annotation
+- Map content fields (Title, Subtitle, Body, Bullets) to format placeholders/slots
+- Assign `design_pass_hook` (PPT → PPTNarrativeArchitect, web → WebExperienceCritic, word → WordTechnicalEditor)
+- Apply palette + fonts (no overrides unless content explicitly differs)
+
+### Step 4 — Validate
+
+- Every §N section has a layout-mapping for every target format
+- No layout used > 3 times consecutively (rotation rule)
+- Font sizes within palette min/max
+- Logo placement consistent across all sections
+- For web, run `design_contract.validate_spec(..., "pipeline")` and then
+  `load_design` against the external P05 context before handing off to the renderer.
+  Contradictory palette/font projections, unsupported versions or unresolved
+  bindings block. No scalar `contrast_verified` flag replaces observed P05 controls.
+
+### Step 5 — Write design-spec.json + return path
+
+Write to `--out`. Surface summary (per-format layout count, palette used, font baseline) to operator.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../../../skills/pattern/references/consumer-contract.md).
+When the run has a lock, add the optional `pattern_context` attachment to design-spec.json with
+`design_attachment`; the outer `version: "1.0"` and existing fields are unchanged. Direct entry
+without a verified attachment resolves itself. Do not copy clause text into palette, fonts or
+per-format mappings as a second authoritative copy.
+
+## Status protocol
+
+- **DONE** — design-spec.json written, all sections mapped, validation passed
+- **DONE_WITH_CONCERNS** — written but some validation warnings (layout-rotation, palette-staleness)
+- **BLOCKED** — content.md missing or malformed, palette resolution failed, no template + no `--use-defaults`
+- **NEEDS_CONTEXT** — `--target-formats` empty or unparseable
+
+## Pause-points
+
+- Palette missing for `--palette <custom>` name: offer fallback to default or surface upload-instruction
+- Layout-mapping ambiguous for §N (multiple valid layouts): surface options + recommendation
+
+## Integration
+
+**Reads:**
+- `content.md` (from generate-write)
+- `~/.lintel/brand/palettes/<palette>.json`
+- `~/.lintel/brand/<format>-templates/<default>.<ext>` per target format
+
+**Writes:**
+- `design-spec.json` to `--out`
+
+**Consumed by:**
+- `/li-generate` orchestrator (Step 5)
+- `/li-generate-ppt`, `/li-generate-web`, `/li-generate-word` (canonical format-builders read design-spec.json + apply per-format design-pass)
+- `/li-generate-pdf`, `/li-generate-xlsx`, `/li-generate-visio` (⚠ slots — AI generates content at invocation using design-spec.json as scaffold)
+
+## Anti-patterns
+
+- **Apply per-format design fidelity in generate-design** — that's the design_pass_hook's job (format-builder-owned). Generate-design produces the baseline only.
+- **Override palette per-section** — palette is shared across all sections + formats. Per-section overrides only if explicitly requested.
+- **Hard-code template path** — always pull from `~/.lintel/brand/<format>-templates/<default>` or operator-specified path.
+- **Skip `design_pass_hook` field** — format-builders depend on it to know which agent to invoke for format-fidelity pass.
+
+## Failure recovery
+
+- Palette resolution fails on `--palette <name>`: BLOCKED with the exact missing
+  selection; do not substitute a different brand.
+- Template missing + no `--use-defaults`: exit BLOCKED with instruction to drop template in `~/.lintel/brand/<format>-templates/`
+- Validation rotation-rule violation: regenerate affected sections with varied layouts, flag if repeats
+
+## Recommended next steps after invocation
+
+- For full chain: orchestrator triggers format-builders next (Step 7)
+- For solo-iteration: operator inspects design-spec.json, tweaks layout assignments manually, then invokes format-builder
+- For palette A/B-test: re-invoke with different `--palette` + diff the two design-spec.json files

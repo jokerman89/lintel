@@ -5,7 +5,7 @@ description: Load customer-engagement repo state into context — their infrastr
 color: cyan
 tools: Read, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the context-warm-customer skill — customer-engagement repo loader.

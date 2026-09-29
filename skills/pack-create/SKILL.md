@@ -5,7 +5,7 @@ description: Use to create a blank, inherited, or cloned Lintel pack and validat
 color: green
 tools: Read, Write, Edit, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the PACK-CREATE skill — scaffolds a new pack in `<repo>/packs/<name>/` or `~/.lintel/packs/<name>/`.

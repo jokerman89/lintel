@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/native-client-parity/spec.md",
+  "plan": ".claude/plans/native-client-parity/plan.md",
+  "tasks": ".claude/plans/native-client-parity/plan.md",
+  "prompt": ".claude/plans/native-client-parity/prompt.md"
+}

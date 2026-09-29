@@ -5,7 +5,7 @@ description: Use to explicitly switch the effective pack through the structured 
 color: green
 tools: Read, Write, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Pack switch

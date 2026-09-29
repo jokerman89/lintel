@@ -5,7 +5,7 @@ description: Initialize an MVP around its real users and first working journey, 
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Scaffold an MVP

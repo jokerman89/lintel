@@ -24,7 +24,9 @@ install/directories.txt text eol=lf
 # Lintel portable Copilot kit
 .github/lintel/** text=auto eol=lf
 .github/skills/li-*/** text=auto eol=lf
-.github/agents/lintel-*.agent.md text eol=lf
+.github/agents/*.agent.md text eol=lf
+.github/plugin/hooks.json text eol=lf
+.github/hooks/lintel.json text eol=lf
 .github/instructions/lintel-session.instructions.md text eol=lf
 .github/copilot-instructions.md text eol=lf
 

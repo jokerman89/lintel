@@ -5,7 +5,7 @@ description: Use after a correction, insight, or recurring pattern worth remembe
 color: blue
 tools: Read, Write, Edit, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Lessons add

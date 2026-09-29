@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `frontend-style-extract` skill — pattern-level extraction for the v3.7 frontend-* family (Phase A2).

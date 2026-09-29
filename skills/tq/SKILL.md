@@ -6,7 +6,7 @@ description: Use for testing and QA-strategy depth — test-pyramid review, cove
 color: green
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Quality-bearing work lacks consumer-specific contracts, comparable performance evidence, regression coverage and verified recovery."
 navigation:

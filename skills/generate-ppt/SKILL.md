@@ -15,6 +15,8 @@ cli_support:
         strategy: auto-pick-recommended
       - capability: Browser
         strategy: degraded-output
+  - cli: copilot
+    level: full
 license_note: produces customer-bound output; honors the active pack's compliance gates for customer-facing voice tiers
 ---
 

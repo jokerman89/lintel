@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: copilot-repository-adapter
-# implements: ADR-0024, ADR-0025, ADR-0027, ADR-0028
+# implements: ADR-0024, ADR-0025, ADR-0027, ADR-0028, ADR-0039
 # intent: .claude/plans/universal-implementation/spec.md
 # constraints: stdlib only, no network, preserve project prose, preflight all writes
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-28
 """Shared repository adapter generator; preserves the Copilot entry and managed ownership."""
 import argparse
 from bisect import bisect_right
@@ -73,13 +73,18 @@ PUBLIC_SOURCE_NOTE = (
     "by the installer. Private packs, personal settings and `.claude/` "
     "knowledge/runtime content are not copied.\n\n"
 )
+# A rebased link's query keeps these characters and existing percent-escapes; anything else, such as
+# a space, parenthesis, quote or angle bracket, is percent-encoded so the destination stays intact.
+LINK_QUERY_SAFE = "=&-_.~/?:@!$*+,;%"
 SOURCE_METADATA = (".claude-plugin/plugin.json", "config/aliases.yaml", "install/upstream-sources.yaml")
 TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt",
                  ".template", ".base", ".html", ".htm", ".css", ".js", ".mjs", ".svg"}
 ATTRIBUTES = (
     ".github/lintel/** text=auto eol=lf",
     ".github/skills/li-*/** text=auto eol=lf",
-    ".github/agents/lintel-*.agent.md text eol=lf",
+    ".github/agents/*.agent.md text eol=lf",
+    ".github/plugin/hooks.json text eol=lf",
+    ".github/hooks/lintel.json text eol=lf",
     ".github/instructions/lintel-session.instructions.md text eol=lf",
 )
 WORKFLOWS = {
@@ -105,6 +110,53 @@ AGENTS = {
     "builder": ("Implement an authorized build card and produce verification evidence with focused changes.", "build"),
     "reviewer": ("Review a change independently for specification compliance, correctness and missing evidence.", "review"),
 }
+# Declarative native host profiles (ADR-0039); increment 1 renders GitHub Copilot only.
+NATIVE_HOSTS = {
+    "copilot": {
+        "skill_root": ".github/skills", "skill_name": "li-{name}",
+        "agent_root": ".github/agents", "agent_file": "{name}.agent.md",
+        "invocation": "/li-{name}",
+        "tool_rewrites": {"AskUserQuestion": "ask_user"},
+        "skill_frontmatter": ("name", "description"),
+        "agent_frontmatter": ("name", "description", "tools"),
+        "agent_body_limit": 30000, "description_limit": 1024,
+    },
+}
+NATIVE_INVOCATION = re.compile(r"/li:([A-Za-z0-9<][A-Za-z0-9<>_-]*)")
+NATIVE_SKILL_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+NATIVE_AGENT_NAME = re.compile(r"[A-Za-z0-9-]+")
+NATIVE_AGENT_PATH = re.compile(r"\.github/agents/[A-Za-z0-9-]+\.agent\.md")
+SHELL_STEPS = """> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+"""
+SKILL_PREAMBLE = """> **Lintel on GitHub Copilot.** Generated from `{canonical}`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `{root}` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `{root}/skills/{name}/` in the Lintel source, not this generated folder.
+>   `${{LINTEL_SKILLS_DIR:-skills}}` means the skills root, `{root}/skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/{name}/` there.
+""" + SHELL_STEPS + """> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
+"""
+# The spec's exact agent preamble: an agent has no skill folder, so it has no skill-relative paths
+# bullet; its Resource root is relative to the agent file's folder, followed by the shared Shell
+# steps bullet and the delegation line.
+AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory, `.github/agents/` (the Lintel source
+>   with `bin/`, `lib/`, `skills/`). Write plans, state and evidence into the working repository's
+>   `.claude/` tree, never into the resource root.
+""" + SHELL_STEPS + """>
+> You were delegated by a Lintel workflow; stay inside the supplied task and report changed files,
+> checks run, findings by severity and limitations.
+"""
 SWARM_RESOURCES = (
     "skills/swarm/SKILL.md",
     "skills/brief-forge/SKILL.md",
@@ -177,7 +229,7 @@ ADAPTER_RESOURCES = (
     "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
     "lib/native_paths.py",
     "lib/context_safety.py", "lib/managed_transaction.py",
-    "bin/li-snapshot.py", "bin/li-managed-transaction.py",
+    "bin/li-snapshot.py", "bin/li-managed-transaction.py", "bin/li-run",
     "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-scaffold", "bin/li-doctor",
@@ -533,7 +585,6 @@ def markdown_tokens(source: MarkdownSource, definitions: dict) -> tuple[list[tup
             excluded.append((cursor, end))
             cursor = end
             continue
-        limit = source.limit(cursor)
         char = text[cursor]
         if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             excluded.append((cursor, cursor + 2))
@@ -544,6 +595,8 @@ def markdown_tokens(source: MarkdownSource, definitions: dict) -> tuple[list[tup
             cursor = end
             continue
         if char == "[":
+            # Only a label consults the logical-line limit; skip the per-character lookup.
+            limit = source.limit(cursor)
             close = markdown_label_end(source, cursor, limit)
             if close != cursor:
                 label = " ".join(markdown_unescape(text[cursor + 1:close]).split()).casefold()
@@ -644,12 +697,29 @@ def public_document(relative: str) -> bool:
         and PurePosixPath(relative).suffix.lower() in PUBLIC_DOC_SUFFIXES)
 
 
-def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
-    """Close public navigation only; repository-only links never expand the data bundle."""
+def public_repository(source: Path) -> str:
     metadata = json.loads(read_file(source, ".claude-plugin/plugin.json"))
     repository = metadata.get("repository") if isinstance(metadata, dict) else None
     if not isinstance(repository, str) or not re.fullmatch(r"https://github\.com/[\w.-]+/[\w.-]+", repository):
         raise ValueError("Public source navigation requires the canonical GitHub repository URL")
+    return repository
+
+
+def public_url(repository: str, target: str, link: str) -> str:
+    """The one source-repository URL policy for links to material outside the bundle."""
+    parsed = urlsplit(link)
+    kind = "tree" if parsed.path.endswith("/") else "blob"
+    url = f"{repository}/{kind}/main/{quote(target, safe='/')}"
+    if parsed.query:
+        url += "?" + quote(parsed.query, safe=LINK_QUERY_SAFE)
+    if parsed.fragment:
+        url += "#" + quote(unquote(parsed.fragment), safe="-_")
+    return url
+
+
+def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
+    """Close public navigation only; repository-only links never expand the data bundle."""
+    repository = public_repository(source)
     pending, visited = list(DOCS), set()
     while pending:
         relative = pending.pop()
@@ -681,18 +751,218 @@ def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
                             directory and any(path.startswith(f"{BUNDLE}/{target}/") for path in files)):
                         raise ValueError(f"Missing bundled source target: {relative} -> {link}")
                 elif f"{BUNDLE}/{target}" not in files:
-                    parsed = urlsplit(link)
-                    kind = "tree" if parsed.path.endswith("/") else "blob"
-                    url = f"{repository}/{kind}/main/{quote(target, safe='/')}"
-                    if parsed.fragment:
-                        url += "#" + quote(unquote(parsed.fragment), safe="-_")
-                    replacements.append((start, end, url))
+                    replacements.append((start, end, public_url(repository, target, link)))
             for start, end, url in reversed(replacements):
                 text = text[:start] + url + text[end:]
             if replacements and not text.startswith(PUBLIC_SOURCE_NOTE):
                 text = PUBLIC_SOURCE_NOTE + text
             data = text.encode("utf-8")
         files[f"{BUNDLE}/{relative}"] = data
+
+
+def split_frontmatter(text: str, *, source: str = "document") -> tuple[list[str], str]:
+    """Return the frontmatter lines and the untouched body after the closing delimiter."""
+    lines = text.removeprefix("\ufeff").split("\n")
+    if lines[0].rstrip("\r") != "---":
+        raise ValueError(f"Missing frontmatter: {source}")
+    for index in range(1, len(lines)):
+        if lines[index].rstrip("\r") == "---":
+            return lines[1:index], "\n".join(lines[index + 1:])
+    raise ValueError(f"Unterminated frontmatter: {source}")
+
+
+def frontmatter_value(lines: list[str], key: str, source: str, *, required: bool = True) -> Optional[str]:
+    """Return one top-level scalar exactly as written; never guess at a YAML block value."""
+    found = [index for index, line in enumerate(lines) if re.match(rf"{re.escape(key)}:(?:[ \t]|$)", line)]
+    if not found:
+        if required:
+            raise ValueError(f"Missing frontmatter {key}: {source}")
+        return None
+    if len(found) > 1:
+        raise ValueError(f"Duplicate frontmatter {key}: {source}")
+    raw = lines[found[0]][len(key) + 1:].strip()
+    following = lines[found[0] + 1] if found[0] + 1 < len(lines) else ""
+    if not raw or raw[0] in "|>[{&*!%@`#" or following[:1] in (" ", "\t"):
+        raise ValueError(f"Frontmatter {key} must be a one-line scalar: {source}")
+    return raw
+
+
+def scalar_value(raw: str, key: str, source: str) -> str:
+    if raw[0] == '"':
+        try:
+            value = json.loads(raw)
+        except json.JSONDecodeError:
+            raise ValueError(f"Unsupported quoted frontmatter {key}: {source}") from None
+    elif raw[0] == "'":
+        if len(raw) < 2 or raw[-1] != "'":
+            raise ValueError(f"Unterminated frontmatter {key}: {source}")
+        value = raw[1:-1].replace("''", "'")
+    else:
+        value = raw
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Empty frontmatter {key}: {source}")
+    return value
+
+
+def yaml_scalar(value: str) -> str:
+    """Emit a curated string plainly only when YAML reads it back unchanged."""
+    if (value and value == value.strip() and value[0] not in "-?:,[]{}#&*!|>'\"%@`" and "\n" not in value
+            and ": " not in value and " #" not in value and not value.endswith(":")):
+        return value
+    return json.dumps(value, ensure_ascii=False)
+
+
+def render_frontmatter(values: dict[str, Optional[str]], allowed: tuple[str, ...]) -> str:
+    return "---\n" + "".join(f"{key}: {values[key]}\n" for key in allowed if values.get(key)) + "---\n"
+
+
+def native_text(text: str, host: dict) -> str:
+    """Rewrite invocation spelling and host tool names; every other byte is unchanged."""
+    text = NATIVE_INVOCATION.sub(lambda match: host["invocation"].format(name=match[1]), text)
+    for name, replacement in host["tool_rewrites"].items():
+        text = text.replace(name, replacement)
+    return text
+
+
+def native_link(link: str, canonical: str, generated: str, source: Path, files: dict[str, bytes],
+                local: bool, repository: Optional[str]) -> Optional[str]:
+    """Rebase one canonical destination to its generated location; None keeps it as written."""
+    target = local_link(canonical, link)
+    if not target:
+        return None
+    parsed = urlsplit(link)
+    directory = parsed.path.endswith("/")
+    if local:
+        present = native_io_path(safe_path(source, target))
+        if not present.exists():
+            raise ValueError(f"Missing canonical link target: {canonical} -> {link}")
+        # Verification accepts a directory only through a trailing '/' and a file only without one,
+        # so refuse either mismatch here, not later.
+        if present.is_dir() and not directory:
+            raise ValueError(f"Directory link needs a trailing '/': {canonical} -> {link}")
+        if directory and not present.is_dir():
+            raise ValueError(f"File link must not end with '/': {canonical} -> {link}")
+        resolved = target
+    else:
+        resolved = f"{BUNDLE}/{target}"
+        if resolved in files:
+            if directory:
+                raise ValueError(f"File link must not end with '/': {canonical} -> {link}")
+        elif not (directory and any(path.startswith(resolved + "/") for path in files)):
+            if any(target == component or target.startswith(component + "/") for component in COMPONENTS):
+                raise ValueError(f"Missing bundled source target: {canonical} -> {link}")
+            return public_url(repository, target, link)
+    relative = posixpath.relpath(resolved, posixpath.dirname(generated)) + ("/" if directory else "")
+    query = "?" + quote(parsed.query, safe=LINK_QUERY_SAFE) if parsed.query else ""
+    fragment = "#" + quote(unquote(parsed.fragment), safe="-_") if parsed.fragment else ""
+    return quote(relative, safe="/") + query + fragment
+
+
+def native_markdown(body: str, host: dict, rebase) -> str:
+    """Rebase real link destinations and rewrite only the text between them."""
+    pieces, cursor = [], 0
+    for start, end, link in document_links(body.encode("utf-8")):
+        if start < cursor:
+            raise ValueError("Overlapping link destinations cannot be rebased")
+        replacement = rebase(link)
+        pieces += [native_text(body[cursor:start], host), body[start:end] if replacement is None else replacement]
+        cursor = end
+    pieces.append(native_text(body[cursor:], host))
+    return "".join(pieces)
+
+
+def native_document(source: Path, canonical: str, generated: str, files: dict[str, bytes], local: bool,
+                    repository: Optional[str], host: dict) -> tuple[list[str], str, str]:
+    """Split one canonical file and return its header, host root and transformed body."""
+    header, body = split_frontmatter(read_file(source, canonical).decode("utf-8"), source=canonical)
+    root = posixpath.relpath("." if local else BUNDLE, posixpath.dirname(generated))
+    body = native_markdown(body if body.startswith("\n") else "\n" + body, host,
+                           lambda link: native_link(link, canonical, generated, source, files, local, repository))
+    return header, root, body
+
+
+def native_skill_file(source: Path, name: str, files: dict[str, bytes], local: bool,
+                 repository: Optional[str], host: dict) -> tuple[str, bytes]:
+    canonical = f"skills/{name}/SKILL.md"
+    skill = host["skill_name"].format(name=name)
+    generated = f"{host['skill_root']}/{skill}/SKILL.md"
+    header, root, body = native_document(source, canonical, generated, files, local, repository, host)
+    if scalar_value(frontmatter_value(header, "name", canonical), "name", canonical) != name:
+        raise ValueError(f"Canonical skill name must match its folder: {canonical}")
+    # The core workflows keep their curated discovery text; every other skill uses its own,
+    # with the same invocation and tool spelling as the body.
+    if name in WORKFLOWS:
+        description, length = yaml_scalar(WORKFLOWS[name]), len(WORKFLOWS[name])
+    else:
+        description = native_text(frontmatter_value(header, "description", canonical), host)
+        length = len(scalar_value(description, "description", canonical))
+    if length > host["description_limit"]:
+        raise ValueError(f"Skill description exceeds {host['description_limit']} characters: {canonical}")
+    text = (render_frontmatter({"name": skill, "description": description}, host["skill_frontmatter"]) + "\n"
+            + SKILL_PREAMBLE.format(canonical=canonical, root=root, name=name) + body)
+    return generated, text_bytes(text)
+
+
+def native_agent_file(source: Path, canonical: str, files: dict[str, bytes], local: bool,
+                 repository: Optional[str], host: dict) -> tuple[str, str, bytes]:
+    stem = PurePosixPath(canonical).stem
+    generated = f"{host['agent_root']}/{host['agent_file'].format(name=stem)}"
+    header, root, body = native_document(source, canonical, generated, files, local, repository, host)
+    name = scalar_value(frontmatter_value(header, "name", canonical), "name", canonical)
+    if name != stem or not NATIVE_AGENT_NAME.fullmatch(name):
+        raise ValueError(f"Canonical agent name must match its file name: {canonical}")
+    values = {"name": name, "description": native_text(frontmatter_value(header, "description", canonical), host),
+              "tools": frontmatter_value(header, "tools", canonical, required=False)}
+    if len(scalar_value(values["description"], "description", canonical)) > host["description_limit"]:
+        raise ValueError(f"Agent description exceeds {host['description_limit']} characters: {canonical}")
+    data = text_bytes(render_frontmatter(values, host["agent_frontmatter"]) + "\n"
+                      + AGENT_PREAMBLE.format(canonical=canonical, root=root) + body)
+    # The limit applies to everything Copilot reads after the frontmatter, preamble included.
+    if len(split_frontmatter(data.decode("utf-8"))[1]) > host["agent_body_limit"]:
+        raise ValueError(f"Agent body exceeds {host['agent_body_limit']} characters: {canonical}")
+    return name, generated, data
+
+
+def native_files(source: Path, files: dict[str, bytes], local: bool, host: dict) -> dict[str, bytes]:
+    """Render every canonical skill and agent as a complete, self-contained native file."""
+    repository = None if local else public_repository(source)
+    output = {}
+    skills = native_io_path(safe_path(source, "skills"))
+    names = sorted(path.name for path in skills.iterdir()
+                   if native_io_path(path / "SKILL.md").is_file())
+    for name in names:
+        if not NATIVE_SKILL_NAME.fullmatch(name):
+            raise ValueError(f"Canonical skill folder is not a portable native name: skills/{name}")
+        generated, data = native_skill_file(source, name, files, local, repository, host)
+        output[generated] = data
+    for name in WORKFLOWS:
+        if name not in names:
+            raise ValueError(f"Required source file is missing: {safe_path(source, f'skills/{name}/SKILL.md')}")
+    agents = native_io_path(safe_path(source, "agents"))
+    canonical_agents = sorted(
+        f"agents/{category.name}/{path.name}"
+        for category in agents.iterdir() if category.is_dir() and not category.name.startswith(("_", "."))
+        for path in category.iterdir()
+        if path.is_file() and path.suffix == ".md" and path.name != "README.md" and not path.name.startswith("_"))
+    owners = {f"lintel-{role}".casefold(): f"Lintel {role} role" for role in AGENTS}
+    for canonical in canonical_agents:
+        name, generated, data = native_agent_file(source, canonical, files, local, repository, host)
+        if name.casefold() in owners:
+            raise ValueError(f"Native agent name collision: {canonical} and {owners[name.casefold()]}")
+        owners[name.casefold()] = canonical
+        output[generated] = data
+    for role, (description, workflow) in AGENTS.items():
+        name = f"lintel-{role}"
+        output[f"{host['agent_root']}/{host['agent_file'].format(name=name)}"] = text_bytes(
+            render_frontmatter({"name": name, "description": yaml_scalar(description)}, ("name", "description"))
+            + f"""
+Use the native `{host['invocation'].format(name=workflow)}` skill for the supplied task and follow it completely.
+Keep the task bounded to the supplied requirements and repository context. Report
+changed files, checks actually run, findings by severity, and unresolved limitations.
+Do not claim independent review if you implemented the same change. If delegation
+is unavailable, label the pass as self-review and retain the human review gate.
+""")
+    return dict(sorted(output.items()))
 
 
 def generate(source: Path, target: Path,
@@ -744,70 +1014,40 @@ def generate(source: Path, target: Path,
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:
             raise ValueError(f"Adapter resource was not bundled: {relative}")
-    # File-relative Markdown links work after copying and in clean cloud clones.
-    skill_source = "../../.." if local else "../../lintel"
-    bridge_skill = "../../../shims/copilot/COPILOT.md" if local else "../../lintel/COPILOT.md"
-    bridge_instruction = "../shims/copilot/COPILOT.md" if local else "lintel/COPILOT.md"
-    for name, description in WORKFLOWS.items():
-        read_file(source, f"skills/{name}/SKILL.md")
-        files[f".github/skills/li-{name}/SKILL.md"] = text_bytes(f"""---
-name: li-{name}
-description: {description}
----
-
-# Lintel {name}
-
-Read the [Copilot adapter contract]({bridge_skill}) first, then execute the
-[canonical {name} workflow]({skill_source}/skills/{name}/SKILL.md) for the user's request.
-Resolve source resources relative to that canonical file; write outputs to the working
-repository. Follow the adapter's tool mapping, authorization and verification rules.
-""")
-    bridge_agent = "../../shims/copilot/COPILOT.md" if local else "../lintel/COPILOT.md"
-    for name, (description, workflow) in AGENTS.items():
-        files[f".github/agents/lintel-{name}.agent.md"] = text_bytes(f"""---
-name: lintel-{name}
-description: {description}
----
-
-Read the [Copilot adapter contract]({bridge_agent}) and use the
-[Lintel {workflow} skill](../skills/li-{workflow}/SKILL.md).
-Keep the task bounded to the supplied requirements and repository context. Report
-changed files, checks actually run, findings by severity, and unresolved limitations.
-Do not claim independent review if you implemented the same change. If delegation
-is unavailable, label the pass as self-review and retain the human review gate.
-""")
-    files[".github/instructions/lintel-session.instructions.md"] = text_bytes(f"""---
+    if copilot:
+        # Complete native skills and agents (ADR-0039); file-relative links keep working
+        # after copying and in clean cloud clones.
+        files.update(native_files(source, files, local, NATIVE_HOSTS["copilot"]))
+        bridge_instruction = "../shims/copilot/COPILOT.md" if local else "lintel/COPILOT.md"
+        files[".github/instructions/lintel-session.instructions.md"] = text_bytes(f"""---
 applyTo: "**"
 ---
 
-This repository uses Lintel. Read [the Copilot adapter]({('../' + bridge_instruction)})
-before a multi-step task. Load the repository's AGENTS.md and relevant memory and
-decisions. Keep plans and durable lessons in .claude/; the directory name is shared
-storage, not a requirement to use Claude Code. Use li-plan before substantive work,
-li-build for authorized cards and li-review before delivery. Existing user authorization
-remains valid; ask only for missing scope or a new permission boundary. Lintel instructions
-and reviews complement host permissions and branch rules; they do not enforce them.
+This repository uses Lintel. Its workflows are native skills: invoke `/li-plan` before
+substantive work, `/li-build` for authorized cards, `/li-review` before delivery and
+`/li-<name>` for any other Lintel workflow. Lintel roles such as `CodeReviewer` are custom
+agents. Read [the Copilot adapter]({('../' + bridge_instruction)}) before a multi-step task.
+Load the repository's AGENTS.md and relevant memory and decisions. Keep plans and durable
+lessons in .claude/; the directory name is shared storage, not a requirement to use Claude
+Code. Existing user authorization remains valid; ask only for missing scope or a new
+permission boundary. Lintel instructions and reviews complement host permissions and branch
+rules; they do not enforce them.
 """)
-    files[".github/copilot-instructions.md"] = text_bytes(f"""# Lintel repository instructions
+        files[".github/copilot-instructions.md"] = text_bytes(f"""# Lintel repository instructions
 
 Read [the repository instructions](../AGENTS.md), then the
 [Copilot adapter contract]({bridge_instruction}) for multi-step work.
 
-Use `/li-welcome` to inspect setup, `/li-plan` to create a spec and build cards,
-`/li-build` to execute authorized cards, and `/li-review` to verify changes.
-Use `/li-cycle` for the complete workflow and `/li-resume` to continue a saved plan.
-If slash discovery is unavailable, ask Copilot to read the corresponding
-`.github/skills/li-<name>/SKILL.md` and carry out its instructions.
+Lintel workflows are native skills. Use `/li-welcome` to inspect setup, `/li-plan` to create
+a spec and build cards, `/li-build` to execute authorized cards, and `/li-review` to verify
+changes. Use `/li-cycle` for the complete workflow, `/li-resume` to continue a saved plan and
+`/li-<name>` for any other Lintel workflow. Lintel roles such as `CodeReviewer` are custom
+agents; delegate to them by name.
 
 Read project memory and relevant decisions before edits. Verify actual behavior and
 report checks, outcomes and limitations. Keep secrets and customer data out of artifacts.
 Repository instructions do not replace enterprise policy, tool permissions or human review.
 """)
-    if not copilot:
-        for relative in tuple(files):
-            if (relative.startswith((".github/skills/", ".github/agents/", ".github/instructions/"))
-                    or relative == ".github/copilot-instructions.md"):
-                del files[relative]
     universal_bridge = "shims/universal/ADAPTER.md" if local else f"{BUNDLE}/ADAPTER.md"
     canonical_root = "" if local else BUNDLE + "/"
     for record in records:
@@ -904,7 +1144,10 @@ def load_inventory(target: Path, registry: dict, *, observed: Optional[dict] = N
         safe_path(target, relative)
         native_skill = any(re.fullmatch(re.escape(root) + r"/li-[a-z0-9-]+/SKILL\.md", relative)
                            for root in roots)
-        if not (relative.startswith(".github/lintel/") or native_skill or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md")):
+        native_agent = NATIVE_AGENT_PATH.fullmatch(relative)
+        if not (relative.startswith(".github/lintel/") or native_skill or native_agent
+                or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md",
+                                ".github/plugin/hooks.json", ".github/hooks/lintel.json")):
             raise ValueError(f"Inventory path outside managed namespaces: {relative}")
         if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
             raise ValueError(f"Invalid inventory hash: {relative}")
@@ -964,8 +1207,9 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
     missing = []
     for relative, data in files.items():
         native_skill = re.fullmatch(r"\.[a-z][a-z0-9-]*/skills/li-[a-z0-9-]+/SKILL\.md", relative)
+        native_agent = NATIVE_AGENT_PATH.fullmatch(relative)
         bundled_doc = relative.startswith(BUNDLE + "/") and public_document(relative[len(BUNDLE) + 1:])
-        if not (native_skill or bundled_doc or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md", f"{BUNDLE}/START.md")):
+        if not (native_skill or native_agent or bundled_doc or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md", f"{BUNDLE}/START.md")):
             continue
         if PurePosixPath(relative).suffix.lower() not in (".md", ".html", ".htm"):
             continue
@@ -976,12 +1220,21 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
             if bundled_doc and not key.startswith(BUNDLE + "/"):
                 missing.append(f"Bundled documentation link escapes source: {relative} -> {link}")
                 continue
-            if key.startswith(BUNDLE + "/"):
-                directory = urlsplit(link).path.endswith("/")
-                if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
+            directory = urlsplit(link).path.endswith("/")
+            # Every branch accepts a file only through a link without a trailing '/' and a
+            # directory only through a link with one, exactly as rendering does.
+            if key in files:
+                if directory:
+                    missing.append(f"File link must not end with '/': {relative} -> {link}")
+            elif key.startswith(BUNDLE + "/"):
+                if not (directory and any(path.startswith(key + "/") for path in files)):
                     missing.append(f"Missing bundled documentation target: {relative} -> {link}")
-            elif key not in files and not native_io_path(safe_path(target, key)).is_file():
-                missing.append(f"Missing generated link: {relative} -> {link}")
+            else:
+                present = native_io_path(safe_path(target, key))
+                if directory and present.is_file():
+                    missing.append(f"File link must not end with '/': {relative} -> {link}")
+                elif not (present.is_file() or (directory and present.is_dir())):
+                    missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 
 

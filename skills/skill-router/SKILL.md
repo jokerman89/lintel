@@ -5,7 +5,7 @@ description: Semantic skill router — given free-text user intent, suggests top
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the skill-router skill — Lintel's task-relevant discovery router.
