@@ -5,6 +5,7 @@
 # constraints: synthetic repository, home, profile and ledger only
 # last_intent_review: 2026-09-20
 # tag: integration universal lifecycle
+# SHARD-WEIGHT: 289
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 python="${LINTEL_PYTHON:-python3}"

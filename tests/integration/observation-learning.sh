@@ -5,6 +5,7 @@
 # constraints: synthetic fixtures; does not activate hooks or prove P10/promotion integration
 # last_intent_review: 2026-09-20
 # tag: integration observation learning
+# SHARD-WEIGHT: 148
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PYTHONDONTWRITEBYTECODE=1 "${LINTEL_PYTHON:-python3}" \

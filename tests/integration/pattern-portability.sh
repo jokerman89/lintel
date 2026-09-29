@@ -5,6 +5,7 @@
 # constraints: synthetic temporary roots only; Python 3.10+ and Git are explicit prerequisites of this test
 # last_intent_review: 2026-09-28
 # tag: integration patterns portability
+# SHARD-WEIGHT: 135
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if command -v python3 >/dev/null && python3 -c 'import sys; assert sys.version_info >= (3, 10)' 2>/dev/null; then

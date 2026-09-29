@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # DESCRIPTION: Accepted lifecycle installation, compact discovery, aliases and dependency preservation.
 # TAGS: integration,codex-compatible
+# SHARD-WEIGHT: 1008
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if command -v python3 >/dev/null 2>&1; then PYTHON=python3

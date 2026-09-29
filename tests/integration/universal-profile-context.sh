@@ -4,6 +4,7 @@
 # intent: docs/concepts/pack-resolver.md
 # constraints: synthetic fixtures and temporary homes only; no host or network activation
 # last_intent_review: 2026-09-20
+# SHARD-WEIGHT: 177
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if command -v python >/dev/null 2>&1 && python -c 'import sys; assert sys.version_info >= (3, 9)' 2>/dev/null; then

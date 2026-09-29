@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # DESCRIPTION: Swarm consumes actual accepted review/profile/domain evidence without replacing their contracts.
 # TAGS: integration,swarm,codex-compatible
+# SHARD-WEIGHT: 399
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if command -v python3 >/dev/null 2>&1; then PYTHON=python3
