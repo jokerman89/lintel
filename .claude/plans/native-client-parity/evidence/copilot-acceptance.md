@@ -9,7 +9,7 @@ part), 6.3.b and 6.4.a. Hooks are not part of PR-1a; their leaves stay open for 
 |---|---|
 | Lintel revision tested | `fd15197974908c457a495c98aeae53bdb7937c32` (branch `jokerman-microsoft-copilot-native-1a`) |
 | Plugin version reported by the host | `li` 0.13.0 |
-| Client | GitHub Copilot CLI 1.0.89-5, Windows 11, headless `-p` sessions |
+| Client | GitHub Copilot CLI 1.0.89-5 (1.0.90-0 for the agent inventory), Windows 11, headless `-p` sessions |
 | Model | `gpt-5-mini` |
 | Environment variable names used (values never recorded) | `LINTEL_POWERSHELL` |
 | Raw host event logs | kept local in the host's session store; not committed |
@@ -20,9 +20,8 @@ Lintel hooks, custom instructions or any tool beyond the one named for the probe
 ## Plugin route (`--plugin-dir` pointing at the tested revision)
 
 - **6.2.a discovery:** `copilot skill list --json` listed 96 `li-*` skills with source `plugin`, all
-  from the tested revision, including `li-pause`. The canonical source has 96 skills. The host
-  offers no headless agent listing, so the count of discoverable agents is not observed; see the
-  second correction below.
+  from the tested revision, including `li-pause`. The canonical source has 96 skills. The
+  discoverable agents were counted from the host's own inventory; see "Agent inventory" below.
 - **6.2.b whole-body delivery:** a `skill.invoked` event for `li-cycle` (source `plugin`, trigger
   `agent-invoked`) carried the generated `.github/skills/li-cycle/SKILL.md` body exactly.
   - The generated file is 26,922 bytes (SHA-256
@@ -52,7 +51,32 @@ Lintel hooks, custom instructions or any tool beyond the one named for the probe
   the remaining 26,908 bytes, byte for byte, including the final newline. Both have SHA-256
   `1c8c031ed735106f18436059c5efd7bf4eb1887cf09497e7de58146f5778483a`; the vendored preamble
   names `../../lintel`.
-- Agent selection on the kit route was not exercised; its agents are counted by file only.
+- Agent selection on the kit route was not exercised; the host's inventory below lists all its
+  agents.
+
+## Agent inventory (6.2.a agent half, review finding F3)
+
+- **Method.** One headless session per route, each in a fresh temporary repository. The model
+  called the task tool exactly once with an obviously nonexistent agent type: no retry, no valid
+  agent, no second name. The host rejected the call, and its validation error lists the valid agent
+  types. The counts come from that host error in the raw events, never from model text.
+- **Client and revision.** GitHub Copilot CLI 1.0.90-0, which the host updated to from 1.0.89-5 by
+  itself between the runs; `gpt-5-mini`; revision `f6009076648ae7f5bd275f0868eedc74d2ca6696`. The
+  agent files are identical to `fd151979`.
+
+| Route | Host-listed types | Built-in types | Lintel agents (unique) | Equals the 72 generated profile names | Duplicates or unrelated entries |
+|---|---|---|---|---|---|
+| Plugin (`--plugin-dir`) | 79 | 7 | 72 (72), named `li:<Name>` | yes | none |
+| Kit (vendored project agents) | 79 | 7 | 72 (72), unprefixed | yes | none |
+
+- The built-in types are explore, task, general-purpose, rubber-duck, code-review, research and
+  security-review.
+- SHA-256 of the host messages: plugin
+  `1ac0802de1467ad65798fb973d8553e214523501b253202371247359839294cf`, kit
+  `fd5325f81336070b00d353cb7bf0e9ccd43c5847c7ade9d126364df48fc8c593`. The raw events stay local.
+- The probe script's own log line reports an empty result. It read the call's result field, which
+  is null for a rejected call, instead of the error message. The raw events are authoritative, and
+  the log is kept unchanged as history.
 
 ## Gates (6.3.b)
 
@@ -65,8 +89,9 @@ Lintel hooks, custom instructions or any tool beyond the one named for the probe
 
 ## Limitations
 
-- One operating system, one client version and one model. The Copilot app, VS Code and the cloud
-  agent were not observed.
+- One operating system and one model, with client 1.0.89-5 and, for the agent inventory, 1.0.90-0.
+  Installed-plugin and marketplace routes, the Copilot app, VS Code and the cloud agent were not
+  observed.
 - Whole-body equality was checked for `li-cycle` only. The other skills were counted through
   discovery.
 - The agent resource root that an agent's preamble names (review note L8) is not visible in host
@@ -102,8 +127,9 @@ The raw events show no such prefix. The original script log is kept unchanged as
 
 ### Custom agent selection (second correction, 2026-09-29)
 
-The retained probe log reports the agent probe as `agentName=li:CodeReviewer -> NOT OBSERVED` and
-`plugin_agent_selected=False`. That verdict came from the script's check, not from the host. The
+The retained probe log reports the agent probe as NOT OBSERVED for agent name `li:CodeReviewer`,
+and its results line sets `plugin_agent_selected` to false. That verdict came from the script's
+check, not from the host. The
 script compared the host's agent name with the unprefixed `CodeReviewer`, while the host names
 plugin agents `<plugin>:<Name>`. Its L8 lines printed only event key names, by design.
 
@@ -116,6 +142,5 @@ The raw host events of that session support the selection claim above:
 | `subagent.selected` | tools `Read`, `Grep`, `Glob`, `Bash`, equal to the profile's declared `tools` |
 | `subagent.completed` | 5,799 ms, 0 tool calls; a second record at session end marked `cancelled` |
 
-This observes the selection of one generated agent. It is not an inventory: the host exposed no
-agent list in its events or logs, so the count of discoverable agents (plan 6.2.a) is not observed
-here.
+This observes the selection of one generated agent. It is not an inventory; the agent inventory
+section above records the host's own list of all 72 generated agents on both routes.

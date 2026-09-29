@@ -136,7 +136,7 @@ agents, on the Copilot CLI; every other live verification cell is pending observ
 
 | Surface | Delivered route | Documented by GitHub | Live verification |
 |---|---|---|---|
-| Copilot CLI | Plugin or repository kit | Skills, custom agents and plugin installation | Observed with CLI 1.0.89 on Windows, with the plugin loaded through `--plugin-dir` and with a vendored kit: all native skills discovered, `li-cycle` delivered in full, and `CodeReviewer` selected (as `li:CodeReviewer`); installed-plugin and marketplace routes, the agent inventory, other operating systems, versions and models pending |
+| Copilot CLI | Plugin or repository kit | Skills, custom agents and plugin installation | Observed on Windows with the plugin loaded through `--plugin-dir` and with a vendored kit. CLI 1.0.89: all native skills discovered, `li-cycle` delivered in full, and `CodeReviewer` selected (as `li:CodeReviewer`). CLI 1.0.90: the host listed all generated agents on both routes. Installed-plugin and marketplace routes, other operating systems, versions and models are pending |
 | GitHub Copilot app | Plugin (**Customize**, then **Plugins**) or the kit in the selected local worktree | Skills and plugin installation; the cited custom-agent reference does not name the app | Pending observation |
 | Copilot in VS Code | Repository kit | Skills and custom agents; tool names and formats may differ from the preamble's map | Pending observation |
 | Copilot cloud agent | Plugin through `enabledPlugins`, or the kit committed to the branch the agent receives | Skills, custom agents and `enabledPlugins` | Pending observation |

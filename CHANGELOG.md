@@ -56,11 +56,11 @@ separate file.
 - Regenerate after editing a canonical skill or agent, and commit the result with the change:
   `python bin/li-copilot.py init --target . --source .`, then `python bin/li-catalog.py` and
   `bash bin/li-wiki-gen`. CI enforces all three drift checks.
-- One live observation is recorded, on the Copilot CLI 1.0.89 on Windows. A plugin loaded with
-  `--plugin-dir` and a vendored kit both discovered every native skill. `li-cycle` arrived with its
-  full generated body, and the plugin selected the generated `CodeReviewer` agent. The agent
-  inventory, installed-plugin routes and the app, VS Code and cloud surfaces are still pending
-  observation in the registry
+- One live observation is recorded, on the Copilot CLI (1.0.89 and 1.0.90) on Windows. A plugin
+  loaded with `--plugin-dir` and a vendored kit both discovered every native skill and listed every
+  generated agent. `li-cycle` arrived with its full generated body, and the plugin selected the
+  generated `CodeReviewer` agent. Installed-plugin routes and the app, VS Code and cloud surfaces are
+  still pending observation in the registry
   ([evidence](.claude/plans/native-client-parity/evidence/copilot-acceptance.md)).
 
 ---
