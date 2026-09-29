@@ -1,9 +1,9 @@
 # Agent report: CORE
 
-Evidence-only consolidation of CORE's implemented and reviewed work. Product bytes frozen at
-`fdb9f27b65359d64b343aac5b0aa0e78dc73b536`; acceptance bound at metadata head
-`ebd087eca0358acde8e3cfc47703e220ec5c30f3`. Identity copied from `li-swarm.py snapshot`
-(file mode, attempt `reusable-patterns-CORE-consolidation-fdb9f27b-1`). No new implementation was done for this report.
+Current CORE report for attempt `reusable-patterns-CORE-integration-2ce4cfcc-1` at the frozen integrated candidate
+`2ce4cfcc062e6806e0b3349d5e49a443097d4737` (tree `52900c7d562dcb5aa6a6701446e98a44645e2c0d`).
+Identity is copied from `li-swarm.py snapshot` (file mode). This is a new report for a new
+attempt, not a rebinding of an earlier verdict.
 
 <!-- lintel-swarm-evidence:v2
 {
@@ -32,8 +32,8 @@ Evidence-only consolidation of CORE's implemented and reviewed work. Product byt
     "4.2.a.core",
     "4.2.b.core"
   ],
-  "attempt_id": "reusable-patterns-CORE-consolidation-ebd087ec-1",
-  "acceptance_digest": "4be8bb68642b3b4cc07b3662f9009de3b838a4a0f6eaa001809e43bb837fce7b",
+  "attempt_id": "reusable-patterns-CORE-integration-2ce4cfcc-1",
+  "acceptance_digest": "2773195fe94204ab0fb18bf6b7dceeebe7e487841d4b294af9dbc852f9f32a0f",
   "result": {
     "base": null,
     "files": {
@@ -78,168 +78,156 @@ Evidence-only consolidation of CORE's implemented and reviewed work. Product byt
   "leaf_results": {
     "2.2.a": [
       {
-        "name": "V06 python -I -B tests/unit/patterns.py PinTests",
+        "name": "V06 PinTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 14 tests, OK, 0 skipped (include, lock and mapping cases); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 9cfd1fcdf8aa9cec7fb9951671e5cbd75939bc365704f412b6101e81513c7278"
+        "observed": "14 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "2.2.b": [
       {
-        "name": "V06 python -I -B tests/unit/patterns.py PinTests",
+        "name": "V06 PinTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 14 tests, OK, 0 skipped (include, lock and mapping cases); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 9cfd1fcdf8aa9cec7fb9951671e5cbd75939bc365704f412b6101e81513c7278"
+        "observed": "14 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "2.2.c": [
       {
-        "name": "V06 python -I -B tests/unit/patterns.py PinTests",
+        "name": "V06 PinTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 14 tests, OK, 0 skipped (include, lock and mapping cases); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 9cfd1fcdf8aa9cec7fb9951671e5cbd75939bc365704f412b6101e81513c7278"
+        "observed": "14 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.1.a": [
       {
-        "name": "V07 python -I -B tests/unit/patterns.py LifecycleTests",
+        "name": "V07 LifecycleTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 9 tests, OK, 0 skipped (capture, lock/staging, index, approve); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 c99c1fd7b9d8d0c429d8b688aecc5769e865bfab8d3c2254742671f2b32e8d31"
+        "observed": "9 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.1.b": [
       {
-        "name": "V07 python -I -B tests/unit/patterns.py LifecycleTests",
+        "name": "V07 LifecycleTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 9 tests, OK, 0 skipped (capture, lock/staging, index, approve); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 c99c1fd7b9d8d0c429d8b688aecc5769e865bfab8d3c2254742671f2b32e8d31"
+        "observed": "9 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.1.c": [
       {
-        "name": "V07 python -I -B tests/unit/patterns.py LifecycleTests",
+        "name": "V07 LifecycleTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 9 tests, OK, 0 skipped (capture, lock/staging, index, approve); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 c99c1fd7b9d8d0c429d8b688aecc5769e865bfab8d3c2254742671f2b32e8d31"
+        "observed": "9 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.2.a": [
       {
-        "name": "V07 (3.2 coverage) python -I -B tests/unit/patterns.py -v MaintenanceTests",
+        "name": "V07 MaintenanceTests (in tests/unit/patterns.sh; 3.2 behavior)",
         "status": "PASS",
-        "observed": "Ran 10 tests, OK, 0 skipped (update/impact, lifecycle events, apply add/replace/remove, URL/overdue attestations, renewal digest, remove protection, bounded lock scan, CLI); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 74db1c18c1a9e51310987b2e7658bc329cf168b132c54ba1405c4a1ed6270d19"
+        "observed": "10 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.2.b": [
       {
-        "name": "V07 (3.2 coverage) python -I -B tests/unit/patterns.py -v MaintenanceTests",
+        "name": "V07 MaintenanceTests (in tests/unit/patterns.sh; 3.2 behavior)",
         "status": "PASS",
-        "observed": "Ran 10 tests, OK, 0 skipped (update/impact, lifecycle events, apply add/replace/remove, URL/overdue attestations, renewal digest, remove protection, bounded lock scan, CLI); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 74db1c18c1a9e51310987b2e7658bc329cf168b132c54ba1405c4a1ed6270d19"
+        "observed": "10 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.2.c": [
       {
-        "name": "V07 (3.2 coverage) python -I -B tests/unit/patterns.py -v MaintenanceTests",
+        "name": "V07 MaintenanceTests (in tests/unit/patterns.sh; 3.2 behavior)",
         "status": "PASS",
-        "observed": "Ran 10 tests, OK, 0 skipped (update/impact, lifecycle events, apply add/replace/remove, URL/overdue attestations, renewal digest, remove protection, bounded lock scan, CLI); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 74db1c18c1a9e51310987b2e7658bc329cf168b132c54ba1405c4a1ed6270d19"
+        "observed": "10 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.3.a": [
       {
-        "name": "V08 python -I -B tests/unit/patterns.py BundleTests",
+        "name": "V08 BundleTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 6 tests, OK, 0 skipped; clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 5db64ea98ba69abca21dce6c70daa81a0534c10f0b4fb9a3f62ba79d39398155"
+        "observed": "6 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       }
     ],
     "3.3.b": [
       {
-        "name": "V08 python -I -B tests/unit/patterns.py BundleTests",
+        "name": "V08 BundleTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 6 tests, OK, 0 skipped; clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 5db64ea98ba69abca21dce6c70daa81a0534c10f0b4fb9a3f62ba79d39398155"
+        "observed": "6 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       },
       {
         "name": "V18 independent source/diff review record",
         "status": "PASS",
-        "observed": "Reviewer c3015de8 SPEC/QUALITY PASS on the CORE interface at R9 1575a90a, R11 56d750d6 and portability 8fb265cf (0 P0/P1/P2); reports in that reviewer's session files. Milestone acceptance only, not ADR-0028 v2 clearance."
+        "observed": "Historical milestone acceptance of the CORE interface by reviewer c3015de8 at 1575a90a, 56d750d6 and 8fb265cf, and its CORE lane review of the ebd087ec-bound report; cited as history, not transferred as a verdict for this attempt. The current lane review for this attempt is pending."
       }
     ],
     "4.2.a.core": [
       {
-        "name": "V06 python -I -B tests/unit/patterns.py PinTests",
+        "name": "V06 PinTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 14 tests, OK, 0 skipped (include, lock and mapping cases); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 9cfd1fcdf8aa9cec7fb9951671e5cbd75939bc365704f412b6101e81513c7278"
+        "observed": "14 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       },
       {
-        "name": "V09 python -I -B tests/integration/pattern-workflows.py",
+        "name": "V09 tests/integration/pattern-workflows.sh",
         "status": "PASS",
-        "observed": "Ran 31 tests, OK, 0 skipped (WF-owned test exercising the core helpers); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 096c32eea6136c5d1574f589c8e3c3dfdb59ac46b6f4354789f3f6bdba22758b"
+        "observed": "Ran 31, OK, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-V09-workflows.log sha256 1342d9d40e04341a1c87bb4726614922dde4e982ac26d730453c18b06119c4a0"
       }
     ],
     "4.2.b.core": [
       {
-        "name": "python -I -B tests/unit/patterns.py -v ReviewCoverageTests",
+        "name": "ReviewCoverageTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 5 tests, OK, 0 skipped (coverage verdict, exit 7 on missing/failed/unverified/skipped mandatory, waiver needs locked exception, stale mapping, unmapped lock); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 70872376d522f326e4f6ee9128fb3c213b5635fd9459e06c54fa6112512ac03e"
+        "observed": "5 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       },
       {
-        "name": "python -I -B tests/unit/patterns.py -v SelectionReportTests",
+        "name": "SelectionReportTests (in tests/unit/patterns.sh)",
         "status": "PASS",
-        "observed": "Ran 9 tests, OK, 0 skipped (public validate_selection_report); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 9608fc1e44174623397a98851907c8ad69642dcf51af23abff463f8b4498223a"
+        "observed": "9 ok, 0 fail, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
       },
       {
-        "name": "V09 python -I -B tests/integration/pattern-workflows.py",
+        "name": "V09 tests/integration/pattern-workflows.sh",
         "status": "PASS",
-        "observed": "Ran 31 tests, OK, 0 skipped (WF-owned test exercising the core helpers); clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 096c32eea6136c5d1574f589c8e3c3dfdb59ac46b6f4354789f3f6bdba22758b"
+        "observed": "Ran 31, OK, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-V09-workflows.log sha256 1342d9d40e04341a1c87bb4726614922dde4e982ac26d730453c18b06119c4a0"
       }
     ]
   },
   "checks": [
     {
-      "name": "python -I -B tests/unit/patterns.py (all)",
+      "name": "tests/unit/patterns.sh (whole file)",
       "status": "PASS",
-      "observed": "Ran 137 tests, OK, 0 skipped; clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 c9c82f2d19c914f2766f61762dbf82ee421d1aa5b29174614cdfc0bcc3efe37b"
+      "observed": "Ran 137, OK, 0 skip; executed at 4c6ce841781bd4467a2f75d3853170cadf782549 (Windows, positive-allowlist parent+child, synthetic home/temp); CORE scope bytes identical at 2ce4cfcc; C:\\Users\\jokerman\\.copilot\\session-state\\11d27634-94dc-4a1a-8453-602cd1dbf84b\\files\\native-join\\t\\j-unit-patterns.log sha256 3d23c7d130ac7ba55d28aa28cfe024a11dcb79169a3a2d06968e9d81d665f72f"
     },
     {
-      "name": "bash tests/unit/patterns.sh (registered wrapper)",
+      "name": "CORE scope byte identity ebd087ec..2ce4cfcc",
       "status": "PASS",
-      "observed": "Ran 137 tests, OK; clean LF clone of fdb9f27b, synthetic HOME/TEMP, Windows Python 3.11.9; log sha256 a797b148be846efc7e34132b8ea32e2ce4272b511729f6803f7aa659add525af"
-    },
-    {
-      "name": "Linux python3 -I -B tests/unit/patterns.py at 8fb265cf (parent-run)",
-      "status": "PASS",
-      "observed": "Ran 137 tests, OK; parent artifact posix-8fb-patterns.log. Product core bytes unchanged from 8fb265cf to fdb9f27b except skills/pattern/SKILL.md docs."
+      "observed": "git diff ebd087ec 2ce4cfcc over the five write_scope paths is empty; result_digest 47c6960c\u2026 equals the ebd087ec-bound attempt"
     }
   ],
   "limitations": [
-    "Result is a FILE snapshot of write_scope at fdb9f27b: it proves current content, not a Git worker delta. The CORE commits are interleaved on the integration branch with coordinator/INT commits by the same actor.",
-    "skills/pattern/SKILL.md, in CORE scope, was also changed in the coordinator/INT role by 87c2b476 and ea2c139d; these are not separated out.",
-    "File-mode snapshot records 100644 for bin/li-pattern.py whose Git index mode is 100755 (core.filemode=false clone); bin-scripts-executable and git ls-files -s show 100755.",
-    "Local tests only; host acceptance of core behavior is limited to the coordinator-observed V17 cases on b8312bb7 (A, B, D). Not release clearance; no native ADR-0028 v2 review exists yet.",
-    "Known limits kept: unkeyed digests authenticate no one; Windows paths over about 260 characters report missing (R12); Unicode casefold restriction is portable-safe, not a universal filesystem guarantee.",
-    "The plan's V07 command key names only LifecycleTests; the 3.2 update/apply/attestation/remove behavior is tested in MaintenanceTests, run separately here and included in the 137. The per-leaf mapping above is explicit; a class name alone is not proof, so the reviewer should read the cited test names.",
-    "Revision 3 rebinds revision 2 (7c102292) to acceptance at ebd087ec after the plan's 5.2.a wording correction (not a CORE leaf). CORE product bytes, result and all checks are unchanged; the checks were run at fdb9f27b, whose write_scope bytes equal ebd087ec's."
+    "Result is a FILE snapshot of write_scope at 2ce4cfcc: current content, not a Git worker delta; CORE commits interleave with coordinator/INT commits by the same actor.",
+    "skills/pattern/SKILL.md, in CORE scope, was also changed in the coordinator/INT role (87c2b476, ea2c139d); not separated.",
+    "File-mode snapshot records 100644 for bin/li-pattern.py whose Git index mode is 100755 (known snapshot-layer limitation).",
+    "Tests executed at 4c6ce841, not at 2ce4cfcc; reuse rests on zero CORE-scope Git delta and a 4c6ce841..2ce4cfcc delta limited to two unrelated tests and build logs.",
+    "The P05 snapshot binds this Windows worktree's raw bytes; 8 selected files differ from HEAD only by CRLF line endings (owner decision (a)).",
+    "Not cleared: the current CORE lane review, P05 lane context/QA/corroboration, the final aggregate review, hosted Windows/Linux full suites on the candidate and publication. No release clearance."
   ]
 }
 -->
 
 ## Changed files
 
-- `lib/patterns.py` — typed data-only core: schemas, paths, selectors, authority, locks, lifecycle,
-  sharing, attestations, review coverage and the public `validate_selection_report` helper.
-- `bin/li-pattern.py` — the JSON CLI over the core (spec section 7, contract.md).
-- `tests/unit/patterns.py`, `tests/unit/patterns.sh` — 137 unit tests and the registered wrapper.
-- `skills/pattern/SKILL.md` — canonical pattern workflow (CORE-owned; also edited in the INT role).
+The CORE write scope is byte-identical to the `ebd087ec`-bound attempt (`git diff ebd087ec 2ce4cfcc`
+over the five paths is empty; result digest `47c6960c…` unchanged). The implementation history:
+
+- `lib/patterns.py`, `bin/li-pattern.py`: P0/P1 `2d750892`, review revisions R1 to R11, portability
+  fix `8fb265cf`.
+- `tests/unit/patterns.py`, `tests/unit/patterns.sh`: 137 tests and the registered wrapper.
+- `skills/pattern/SKILL.md`: the canonical workflow, also edited in the INT role.
 
 ## Checks
 
-- V06 PinTests: 14 OK (2.2.*, 4.2.a.core). V07 LifecycleTests: 9 OK (3.1.*).
-- MaintenanceTests: 10 OK (3.2.*; the V07 key names only LifecycleTests). V08 BundleTests: 6 OK (3.3.*).
-- ReviewCoverageTests: 5 OK and SelectionReportTests: 9 OK (4.2.b.core).
-- `tests/unit/patterns.py`: 137 OK; wrapper 137 OK. V09 `pattern-workflows.py`: 31 OK. No skips.
-- All run in a clean LF clone of `fdb9f27b` with synthetic roots; log digests are in the record.
-- Linux 137 OK at `8fb265cf` is the parent's run, cited, not re-run here.
-
-## Original records
-
-- P0/P1 `2d750892` (parent `7ba544a4`); review revisions R1-R11 and the portability fix
-  `8fb265cf`, each an ordinary commit; build-log.md and contract.md record every revision.
-- Independent reviewer c3015de8 accepted R9 `1575a90a`, R11 `56d750d6` and `8fb265cf`
-  (SPEC/QUALITY PASS). Those are milestone acceptances, not this lane's swarm review.
+- `tests/unit/patterns.sh` at `4c6ce841`: 137 OK, no skip. Per class: PinTests 14, LifecycleTests 9,
+  MaintenanceTests 10, BundleTests 6, ReviewCoverageTests 5, SelectionReportTests 9, all ok.
+- `tests/integration/pattern-workflows.sh` (V09) at `4c6ce841`: 31 OK.
+- Reuse proof: CORE scope unchanged since `ebd087ec`; `4c6ce841..2ce4cfcc` changes only
+  `tests/integration/pattern-portability.py`, `tests/unit/wiki-gen-idempotency.sh` and two build logs.
 
 ## Findings
 
@@ -247,11 +235,9 @@ Evidence-only consolidation of CORE's implemented and reviewed work. Product byt
 
 ## Limitations
 
-- See `limitations` above: file snapshot, not Git attribution; same-actor coordinator edits in
-  `skills/pattern/SKILL.md`; the file-mode executable-bit representation; no release clearance.
+See `limitations` in the record. Final shared gates are not cleared.
 
 ## Downstream notes
 
-- The lane review must be a real independent reviewer writing only
-  `.claude/plans/reusable-patterns/swarm/reviews/CORE.md` and its P05 JSON.
-- Committing this report changes a selected path; the final P05 context must be re-prepared.
+- The CORE lane review must come from a real independent reviewer for this attempt.
+- The repository report slot is not written yet; the coordinator publishes after all actual reports and reviews exist, then re-prepares the final P05 context.

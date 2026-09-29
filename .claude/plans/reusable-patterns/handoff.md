@@ -1,10 +1,35 @@
 # Reusable patterns: cold handoff (2026-09-28)
 
-**Status: local source candidate FROZEN pending the remaining gates; not released.** No release
-clearance, native ADR-0028 v2 review, QA, corroboration or SHIP result exists. Nothing is pushed
-and no pull request exists.
+**Status: source-complete integrated candidate `2ce4cfcc` (0.13.1, native 1a joined) with
+current local lane records; not released.** No release clearance, native ADR-0028 v2 review, QA,
+corroboration or SHIP result exists. Nothing is pushed and no pull request exists.
 
-## Current frozen candidate (2026-09-28)
+## Current integrated candidate (2026-09-29)
+
+This is the current state. The "pre-native freeze" section below is history.
+
+- **Source candidate:** `2ce4cfcc062e6806e0b3349d5e49a443097d4737` (tree `52900c7d`), release 0.13.1.
+  - Joins native 1a `06e69eb6` and its follow-up `394ed0b8`, and the lesson commit `ef48d7a0`.
+  - Runtime bytes (`lib/patterns.py`, `lib/pattern_visual.py`, `design_contract.py`,
+    `pipeline_inputs.py`, `bin/li-pattern(.py)`) are unchanged since `59f533ad`/`99de0741`.
+- **Records.** The current local lane record set is published by the coordinator batch that
+  follows `2ce4cfcc`: new CORE, PACK and WF reports plus independent reviews for attempts
+  `reusable-patterns-<lane>-integration-2ce4cfcc-1`. The swarm `inspect --check-complete` passes;
+  shared evidence is still pending.
+- **P07.** Generation 2 (`sha256:c50efdbe…ae1b`), rebound once by the parent with the reason
+  "plugin version 0.13.1"; required policy is `not_required`.
+- **Remaining gates:**
+  - a fresh final aggregate INT P05 context (attempt 4) and per-lane P05 contexts at the
+    post-batch head;
+  - current c301/24 canonical P05 decisions, QA and host corroboration, and the final aggregate
+    review;
+  - hosted full Windows and Linux CI on the final candidate (6.2.a);
+  - 6.2.b and 6.2.c;
+  - a fresh main version-collision check;
+  - Master-owned publication, with native 1a first;
+  - the `C:\lp` decision.
+
+## Pre-native frozen candidate (2026-09-28, history)
 
 - Source head: `99de0741a2d338cec0a088fd35d6b5357ccfda7d`. Its runtime and test bytes are the
   ones reviewed at `d4acf3e7`.

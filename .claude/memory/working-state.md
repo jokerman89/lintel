@@ -10,29 +10,22 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Reusable patterns (2026-09-28)
 
-**Status:** local source candidate FROZEN, not released, on branch
+**Status:** source-complete integrated candidate, not released, on branch
 `jokerman-microsoft-patterns-core-integration`.
-- Source head `99de0741`, reviewed at `d4acf3e7` by reviewer 24bf5df0: SPEC MET for A1-A7,
-  QUALITY acceptable.
-- 4.3.c and 5.2.a are ticked; 6.2.a-c are open.
-- Linux: strict full suite 169/169 on `fdb9f27b`, and targeted 29+36 on `d4acf3e7`.
-- Windows: no valid strict verdict. The local focused reds are recorded, and hosted CI is
-  required before main.
-- PDF/Word pages are artifact QA, and the six per-consumer cells are disclosed deferrals.
-- A genuine neutral P07 reference exists; verify it is current before use.
-- No P05 review, QA or release record exists. Not pushed: the branch awaits the accepted
-  integration and CI stage. Master owns the working Git/API/CI transport; the app PR tool's EMU
-  403 on the separate L-053-only attempt leaves the final feature PR route centrally unresolved.
-- The CORE owner created `C:\lp` against L-050. It was stopped and preserved untouched pending
-  the operator's recovery decision.
+- Candidate `2ce4cfcc` (0.13.1): native 1a `06e69eb6`, `394ed0b8` and `ef48d7a0` joined; runtime
+  unchanged since `99de0741`, which was reviewed at `d4acf3e7`.
+- P07 is generation 2 (`c50efdbe…`). Current local CORE, PACK and WF reports and reviews are
+  published in the coordinator batch after `2ce4cfcc`.
+- Linux: V15 kit and search checks at `2ce4cfcc`. Windows: no strict verdict, and hosted CI is
+  required.
+- Open leaves: 6.2.a-c only.
 
 **What's pending:** see [handoff](../plans/reusable-patterns/handoff.md):
-- the native 1a SHA grant and current-main merge;
-- `ef48d7a0`;
-- regeneration;
-- a fresh final P05 context;
+- fresh P05 contexts (attempt 4 and per lane);
+- canonical P05 decisions, QA and corroboration;
 - the aggregate review;
-- hosted Windows CI;
+- hosted CI;
+- the main version check;
 - Master-owned publication;
 - the `C:\lp` decision.
 

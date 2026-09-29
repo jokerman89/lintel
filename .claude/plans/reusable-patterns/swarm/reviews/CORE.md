@@ -1,19 +1,19 @@
-# Lane review: CORE (rebind to ebd087ec)
+# Lane review: CORE (attempt reusable-patterns-CORE-integration-2ce4cfcc-1)
 
-This is an independent local swarm review of CORE consolidation report revision 3.
-- Report SHA-256: `190effc22bf64bc6d9e0b07018658c44d113aa6599fe2e089fad201ee2a01bd3`.
-- Acceptance is bound at metadata head `ebd087eca0358acde8e3cfc47703e220ec5c30f3`, whose parent
-  is `fdb9f27b`.
-- Product bytes are unchanged from `fdb9f27b65359d64b343aac5b0aa0e78dc73b536`.
+This is a new independent local lane review of the actual CORE report for this attempt.
+- Report: `CORE-2ce4cfcc.md`, SHA-256 `393208e4f56503642a2c774afe0c3b4edfe251c8e63fb2c54fc4cbc8d991e0b3`.
+- Frozen integrated candidate: `2ce4cfcc062e6806e0b3349d5e49a443097d4737`, tree
+  `52900c7d562dcb5aa6a6701446e98a44645e2c0d`.
+- Reviewer: session `c3015de8-134b-499b-bd3d-fa14d965701b` (c301). It is not the implementer and is
+  distinct from report actor `11d27634`.
+- Procedure: li-review, SPEC stage then QUALITY stage.
 
-The reviewer is session `c3015de8-134b-499b-bd3d-fa14d965701b`, not the implementer.
+My earlier fdb (`cea7831d…`) and ebd (`81ac89fd…`) reviews remain verbatim history. This record
+does not transfer their PASS. It independently assesses the current acceptance, the current report
+and the current bytes, with proportional reuse disclosed below.
 
-This record supersedes nothing by editing. The earlier fdb-bound review, `CORE.md` with SHA-256
-`cea7831d994f9fde6c00cb5450c03807ed355d81149318f092ae3c458acb06d3`, is preserved unchanged as
-history. It binds the stale acceptance `1596254e…` and report `7c102292…`, and does not approve ebd.
-
-This is a local observation. It is not a P05 native v2 decision, QA, corroboration, or
-integrated/release clearance.
+This is a local observation. It is not a P05 native v2 decision, QA, corroboration, aggregate
+review or SHIP/release clearance.
 
 <!-- lintel-swarm-evidence:v2
 {
@@ -44,10 +44,10 @@ integrated/release clearance.
       "4.2.a.core",
       "4.2.b.core"
     ],
-    "attempt_id": "reusable-patterns-CORE-consolidation-ebd087ec-1",
-    "acceptance_digest": "4be8bb68642b3b4cc07b3662f9009de3b838a4a0f6eaa001809e43bb837fce7b",
+    "attempt_id": "reusable-patterns-CORE-integration-2ce4cfcc-1",
+    "acceptance_digest": "2773195fe94204ab0fb18bf6b7dceeebe7e487841d4b294af9dbc852f9f32a0f",
     "result_digest": "47c6960c1bb4368189cd4a3efe31cdca0132d1411dbb9a9e68872f708d8b1033",
-    "report_digest": "190effc22bf64bc6d9e0b07018658c44d113aa6599fe2e089fad201ee2a01bd3"
+    "report_digest": "393208e4f56503642a2c774afe0c3b4edfe251c8e63fb2c54fc4cbc8d991e0b3"
   },
   "verdict": "PASS",
   "stages": {
@@ -56,40 +56,44 @@ integrated/release clearance.
   },
   "checks": [
     {
-      "name": "Acceptance delta fdb9f27b..ebd087ec read from actual Git",
+      "name": "Input identity",
       "status": "PASS",
-      "observed": "git diff in clean clone lp64\\review\\e (HEAD ebd087ec, parent fdb9f27b): only plan.md (1 line: 5.2.a PENDING note now says V17 case A observed the li-cycle/li-build project_visual route, not generate-web; generate-web cell open) and build-log.md (INT review Info count 1->7; LF-only claim corrected to drop an unasserted trailing-newline assertion; 5.2.a deferred row). No CORE leaf text (2.2.*, 3.1.*, 3.2.*, 3.3.*, 4.2.a.core, 4.2.b.core) changed; 5.2.a is a WF/visual leaf and its pending state is not CORE coverage"
+      "observed": "Recomputed sha256: report 393208e4... (UTF-8 LF), export CORE.json 3379494e..., CORE.file-snapshot.json b68799de..., parent scratch review-input 65a2a980... (ok true, 0 diagnostics; review_requirement substantive; release_clearance false). The scratch binding equals this binding. snapshot.result equals review-input.result. Scratch clone not treated as the P05 target"
     },
     {
-      "name": "Binding and result byte identity at ebd087ec",
+      "name": "Acceptance and result recomputed on the actual target worktree (read-only)",
       "status": "PASS",
-      "observed": "report sha256 190effc2... recomputed; scratch review-input (sha256 47316c1b...) ok with no diagnostics and exact binding; result equals CORE.json snapshot; git diff --quiet fdb9f27b ebd087ec over all five write_scope paths rc 0; all five file sha256 values at ebd recomputed and equal to result (li-pattern.py 49cb6a2c, patterns.py 7742521e, SKILL.md bca7ad1e, tests/unit/patterns.py 1b247ff7, patterns.sh d9dd1c29)"
+      "observed": "Imported lib/swarm_contract.py from the 2ce4cfcc Windows worktree with python -I -B and isolated HOME/TEMP; no checkout, normalization or write. acceptance_digest(...) = 2773195f... and value_digest(capture_result(write_scope)) = 47c6960c... both match. package_sources CORE leaf_ids = the 13 IDs, review substantive. git rev-parse HEAD/tree = 2ce4cfcc/52900c7d; git status --porcelain empty before and after"
     },
     {
-      "name": "Report revision 3 difference from revision 2",
+      "name": "Current acceptance delta against the reviewer's last binding (ebd087ec..2ce4cfcc)",
       "status": "PASS",
-      "observed": "git diff --no-index r2 (7c102292) vs r3 (190effc2): only the header head wording, attempt_id, acceptance_digest and one added limitation disclosing the rebind; leaf_results, checks, result and result_digest unchanged"
+      "observed": "git diff: plan.md changes only 4.3.b, 4.3.c, 5.2.a and 6.2.b (RN-14/15/16 wording and status); spec.md, contract.md, topology.md, work.json and coordination.json are unchanged. No CORE leaf text or verification key changed. The other changed files are build-log, handoff, reconciliation and swarm reports/reviews, which are coordinator ledgers. spec.md is CRLF in the worktree (LF in the index); acceptance_digest reads it with read_text universal newlines, and the digest was reproduced on those raw worktree bytes"
     },
     {
-      "name": "Reused product tests (prior reviewer observation on identical bytes, not rerun)",
+      "name": "CORE write_scope byte identity",
       "status": "PASS",
-      "observed": "Reviewer-run at fdb9f27b (2026-09-28): Pin/Lifecycle/Maintenance/Bundle/ReviewCoverage/SelectionReport/CoreReview 62 tests OK, log sha256 8c82b6c7d2b137159a89234575686061cc20c3bd55cd80d8e468c5317acd417c; V09 pattern-workflows 31 OK, log sha256 91c0fd57845fcf4a747149475fa6ec91eea9c7b0ee928b5dd10aad8eb2e9764f. Valid for ebd only because write_scope bytes are identical (check above) and no CORE test or runtime dependency changed in fdb..ebd"
+      "observed": "At the 2ce4cfcc worktree: bin/li-pattern.py 49cb6a2c (index 100755), lib/patterns.py 7742521e, skills/pattern/SKILL.md bca7ad1e, tests/unit/patterns.py 1b247ff7, tests/unit/patterns.sh d9dd1c29; all equal the result. git diff ebd087ec..2ce4cfcc over the five paths is empty. These are the bytes this reviewer source-reviewed through 8fb265cf and its SKILL.md docs delta"
     },
     {
-      "name": "Per-leaf mapping and V18 source review (reused, unchanged inputs)",
+      "name": "Report test evidence and head validity (author-run, inspected, not executed by this reviewer)",
       "status": "PASS",
-      "observed": "The mapping verified in review cea7831d (AST of tests/unit/patterns.py; plan leaf text) is still exact. CORE plan leaf lines and test bytes are unchanged at ebd. The CORE runtime is byte-identical to the reviewer-passed 8fb265cf, apart from the already-reviewed SKILL.md docs delta"
+      "observed": "j-unit-patterns.log sha256 3d23c7d1... header ISOLATED head=4c6ce841 cwd=target worktree, cmd bash tests/unit/patterns.sh, 'Ran 137 tests' OK rc 0; per-class ok lines Pin 14, Lifecycle 9, Maintenance 10, Bundle 6, ReviewCoverage 5, SelectionReport 9, no non-ok. j-V09-workflows.log sha256 1342d9d4... head=4c6ce841, cmd bash tests/integration/pattern-workflows.sh, Ran 31 OK rc 0. 4c6ce841 is an ancestor of 2ce4cfcc; 4c6ce841..2ce4cfcc changes only tests/integration/pattern-portability.py, tests/unit/wiki-gen-idempotency.sh and two build logs, none an input of patterns.sh or V09"
+    },
+    {
+      "name": "Per-leaf mapping and SPEC/QUALITY source assessment (proportional reuse)",
+      "status": "PASS",
+      "observed": "The report maps 2.2 to Pin, 3.1 to Lifecycle, 3.2 to Maintenance, 3.3 to Bundle, 4.2.a.core to Pin+V09 and 4.2.b.core to ReviewCoverage+SelectionReport+V09. That matches the test class contents this reviewer listed by AST on the byte-identical tests/unit/patterns.py. Source correctness rests on this reviewer's independent CORE reviews P0/P1..R11 and 8fb265cf on the same runtime bytes, not on another actor's verdict"
     }
   ],
   "limitations": [
-    "The result is a FILE snapshot, not Git attribution. CORE commits are interleaved with same-actor coordinator/INT commits; skills/pattern/SKILL.md coordinator edits (87c2b476, ea2c139d) are not separated. No commit attribution is claimed.",
-    "The file snapshot records mode 100644 for bin/li-pattern.py while the Git index has 100755 (core.filemode=false); this is a helper representation limit.",
-    "No product test was rerun for ebd. Test evidence is this reviewer's fdb run, reused on byte-identical write_scope content. Windows only; the full 137-test suite was not rerun by this reviewer. Linux 137 OK at 8fb265cf is parent-observed.",
-    "The build-log corrections (INT Info count, LF claim) are coordinator/INT metadata outside CORE scope. They were read for coupling only and are not reviewed as INT work.",
-    "Leaf 5.2.a remains PENDING, with the generate-web, design-dna, typography, motion, shader and generate-app cells open. That is WF/visual and host scope; neither this PASS nor CORE coverage covers it.",
-    "Export CORE.json field evidence_level still says 'at fdb'. That is accurate for product bytes, and it is export metadata, not the bound report.",
+    "This reviewer executed no product test at 2ce4cfcc or 4c6ce841. Test evidence is the author's 4c6ce841 run on byte-identical CORE scope, inspected and hash-checked. This reviewer's own earlier runs (fdb 62 plus V09 31) are prior corroboration only. No full-suite, hosted Windows/Linux or native CI run is claimed.",
+    "The result is a FILE snapshot, not Git attribution. CORE commits interleave with same-actor coordinator/INT commits, and SKILL.md coordinator edits (87c2b476, ea2c139d) are not separated. The file-snapshot mode 100644 vs the Git index 100755 for bin/li-pattern.py is a disclosed snapshot-layer quirk. No Git actor attribution is claimed.",
+    "The P05 target is the CORE Windows worktree with raw bytes as-is. Eight selected historical md/.gitattributes files are CRLF in the worktree vs LF in HEAD (owner option a). This reviewer did not normalize, check out, or claim raw-byte equivalence with any LF clone. The committed reviews/CORE.md slot currently holds this reviewer's ebd review (worktree raw 81ac89fd), which binds stale acceptance and correctly blocks strict swarm until coordinated publication.",
+    "The report's 3.3.b V18 entry cites historical milestone reviews and says the current lane review is pending; this record is that current review. The report's changed_paths names the repository report slot, which is not yet written; the coordinator publishes it.",
+    "The non-CORE plan changes (4.3.b/c, 5.2.a MET at source/helper level with six visual host cells DEFERRED, 6.2.b) are WF/visual/host/INT scope. They are neither assessed nor covered here.",
     "Known product limits are retained: unkeyed digests authenticate no one; Windows paths over about 260 characters report missing; the casefold namespace rule is portable-safe only.",
-    "This is local swarm-review evidence only. No P05 context, QA or corroboration exists. WF, host, INT and publication gates remain open. release_clearance is false."
+    "Local swarm-review evidence only. No canonical P05 JSON, lane context, QA or corroboration exists (P07 gen2 context is the parent's). The final aggregate review, full CI and publication remain open. release_clearance is false."
   ]
 }
 -->
@@ -104,28 +108,57 @@ integrated/release clearance.
 
 No findings.
 
-The fdb..ebd acceptance change updates `plan.md:229`, the 5.2.a wording, and `build-log.md` hunks
-at about lines 997, 1010 and 1046. None of these changes any CORE member leaf, its verification
-key or a CORE-scoped file. The revision 3 per-leaf mapping is unchanged from revision 2, which
-this reviewer verified against the test class contents. It remains correct at ebd.
+The line references below are to the current `plan.md` and `tests/unit/patterns.py` at `2ce4cfcc`.
 
-The more conservative 5.2.a note, which states that generate-web is unobserved, narrows a WF/visual
-host claim. It does not create or remove any CORE obligation.
+| Leaf | Current acceptance (plan.md) | Evidence (report plus reviewer basis) | Result |
+|---|---|---|---|
+| 2.2.a | `:165` includes, cycles, depth, digest conflict | PinTests 14 (`_IncludeCases` `:932`) | met |
+| 2.2.b | `:166` lock/verify-lock, no silent pin upgrade | PinTests (`_LockCases` `:1065`) | met |
+| 2.2.c | `:167` map/project schema, unmapped blocks, no partial lock | PinTests (`_MappingCases` `:1197`) | met |
+| 3.1.a | `:175` capture draft-only in explicit scope | LifecycleTests 9 (`:1312`) | met |
+| 3.1.b | `:176` exclusive lock/CAS, catalog-last, index | LifecycleTests | met |
+| 3.1.c | `:177` approve newer, deps, deprecate/remove→index | LifecycleTests (`:1430-1432`) | met |
+| 3.2.a | `:181` update, events, impact, pins unchanged | MaintenanceTests 10 (`:2164`) | met |
+| 3.2.b | `:182` apply, attestations, renewal digest, reduction preview | MaintenanceTests | met |
+| 3.2.c | `:183` remove preview, history protection, bounded scan | MaintenanceTests | met |
+| 3.3.a | `:187` exact closure export, no private copy or root leak | BundleTests 6 (`:2429`) | met |
+| 3.3.b | `:188` children-first import; skill documents operations | BundleTests; SKILL.md names every CLI operation (unchanged bytes); this review is the V18 record | met |
+| 4.2.a.core | `:203` verify-lock/projection for BUILD/RESUME | PinTests plus V09 31 | met (core part only) |
+| 4.2.b.core | `:206` coverage verdict, exit 7, waived-not-passed | ReviewCoverageTests 5, SelectionReportTests 9, V09 | met (core part only) |
+
+**Proportionality.** No CORE leaf text changed in `ebd087ec..2ce4cfcc`, and no CORE runtime or
+test byte changed. The only acceptance change is in non-CORE leaves (RN-14/15/16 wording).
+
+**Reused source assessment.** This reviewer's source-level spec assessment of these exact bytes
+still applies:
+- ADR-0029 `profile_context` ownership;
+- ADR-0028 as the release authority;
+- no retired readers restored.
+
+WF parts (4.2.a.wf/4.2.b.wf) and the joined parents are outside this lane.
 
 ## Quality review
 
 No findings.
 
-The product bytes at ebd are identical to fdb, and CORE's runtime is identical to the reviewed
-8fb265cf. Revision 3 of the report discloses the rebind honestly and does not restate its checks
-as new runs.
+The runtime, CLI, tests and wrapper are byte-identical to the state this reviewer passed for
+QUALITY at 8fb265cf, plus the reviewed SKILL.md documentation delta.
+
+The new report is accurate:
+- it states the test head (`4c6ce841`) rather than implying execution at `2ce4cfcc`;
+- it proves the reuse delta;
+- it discloses the snapshot mode quirk, CRLF option (a) and uncleared gates;
+- it does not claim this review.
+
+Every hash and count cited in the report was independently rechecked above.
 
 ## Verification and limitations
 
-See the checks and limitations in the marker. Reused test logs are in this session's
-`files\swarm-consolidation\logs\`. The fdb review `CORE.md` (`cea7831d…`) is kept byte-identical.
-
-No source, plan, report, old review, shared-clone or P05 writes were made. There were no commits,
-network access or installs. The intended repository path is
-`.claude/plans/reusable-patterns/swarm/reviews/CORE.md`. Publishing it there, and preserving the
-history, are the parent's responsibility.
+See the checks and limitations in the marker.
+- Commands (all read-only and isolated): SHA-256 of the inputs and logs; `git rev-parse`, `diff`,
+  `merge-base --is-ancestor`, `ls-files --eol/-s` and `status` on the target; an in-process
+  recompute of the acceptance and result digests with `python -I -B`; log parsing.
+- Writes: only this file, in this reviewer's session. No write to the CORE repository, shared
+  ledger, P05, audit, report or older reviews. No commit.
+- The intended repository path `.claude/plans/reusable-patterns/swarm/reviews/CORE.md` is published
+  by the coordinator.

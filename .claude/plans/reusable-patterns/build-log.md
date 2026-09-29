@@ -1388,6 +1388,68 @@ rebind is pending.
 - the fresh main version-collision check;
 - publication, which Master owns.
 
+## Current lane record set at `2ce4cfcc` (coordinator batch, 2026-09-29)
+
+This batch publishes new CORE, PACK and WF reports and independent reviews for attempts
+`reusable-patterns-<lane>-integration-2ce4cfcc-1`. They are bound to acceptance at `2ce4cfcc`
+(CORE `2773195f…`, PACK `69da45d8…`, WF `d1b2858f…`). They are new authored records, not rehashes of
+earlier verdicts. All six are raw UTF-8 with LF line endings.
+
+| Record | Author | sha256 |
+|---|---|---|
+| `swarm/reports/CORE.md` | CORE owner 11d27634 | `393208e4f56503642a2c774afe0c3b4edfe251c8e63fb2c54fc4cbc8d991e0b3` |
+| `swarm/reviews/CORE.md` | c3015de8, SPEC/QUALITY PASS, 0 findings | `3239f285cdd7a8127a65b3c1c1a9353e35947d7ebc736f4b6c72e1395e2f289e` |
+| `swarm/reports/PACK.md` | PACK owner 5108bc3b | `ca6263d71f7bca6eb31bdc485159cd32eaefb8e7dcdeb740f592cf8c000adeda` |
+| `swarm/reviews/PACK.md` | 24bf5df0, SPEC/QUALITY PASS, 0 actionable, 5 Info | `61a86c9e6ad40784fa22968d240edc545994b2a5ba4a7f802bc46a0f07a27afd` |
+| `swarm/reports/WF.md` | WF owner a2f55ec5, r2 | `6aef024ed368222360f4ec511ecb87f5779eb97c00dadb3e83ef6b9346909aa9` |
+| `swarm/reviews/WF.md` | 24bf5df0, SPEC/QUALITY PASS | `66af7a6cec93bdd222bfd1b279ebc3427025b9cbdd92b2e54e80052b177331aa` |
+
+**Grant-label sidecar.** Reviewer 24's sidecar is
+`swarm/notes/WF-review-2ce4cfcc-r2.grant-label-note.md` (sha256 `ffe28c15…02a2`). It corrects only the
+review's wording "native grant unissued": the preparatory `06e69eb6`/`394ed0b8` grant was issued.
+Native main landing, final CI and shared clearance remain separate. The verdict and binding of
+`66af7a6c` are unchanged.
+
+**Preserved history.** The replaced slot bytes remain as Git blobs at `2ce4cfcc` (and `9e56dc79`),
+as the original actor artifacts, and as byte-exact working copies with a hash manifest in the CORE
+owner's session artifacts (`files\final-review-3\preserved-working-slots-2ce4cfcc\`):
+
+| Slot | Working sha256 | Note |
+|---|---|---|
+| reports/CORE | `190effc2…` | |
+| reports/PACK | `9b36a78f…` | |
+| reports/WF | `4719be91…` | |
+| reviews/CORE | `81ac89fd…` | CRLF |
+| reviews/PACK | `174bc85a…` | CRLF |
+| reviews/WF | `cb6f1ccd…` | CRLF |
+
+**Evidence cited by the records** (execution heads as observed):
+
+- Owner test runs at `4c6ce841`, whose runtime bytes equal `2ce4cfcc`:
+  - `patterns.sh` 137, V09 31, V10 26, V11 23, design-contract 29, document-pipeline-binding 36;
+  - document-pdf 16 plus 6 node tests (rerun after the PATH fix);
+  - pattern-portability 6 (on the committed `a2d53e92` bytes).
+- At `430c12c6`: wiki-idempotency and the generated-output checks.
+- Parent Linux at `2ce4cfcc`: design-dna-search 14 and copilot-kit 52, with no skips
+  (`posix-2ce4cfcc-v15-compat.log`, sha256 `c5cd585497f1a26faa24a88fbdaad75806267c58c024c8477795d2974414af93`).
+- Reviewer 24 reran five V14 regressions at `2ce4cfcc` for PACK.
+
+No tests were rerun for this metadata batch. Runtime, generator, test and manifest bytes are
+unchanged from `2ce4cfcc`.
+
+**Local swarm state** after the batch: `validate` ok; `inspect --check-complete` ok, with all three
+lanes complete. Shared evidence is still pending.
+
+**Still open:**
+
+- the attempt-4 aggregate and per-lane P05 contexts;
+- canonical P05 decisions, QA and corroboration;
+- the final aggregate review;
+- hosted full Windows and Linux CI on the final candidate (6.2.a);
+- 6.2.b and 6.2.c;
+- the main version-collision check;
+- publication.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
