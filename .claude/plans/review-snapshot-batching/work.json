@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/review-snapshot-batching/spec.md",
+  "plan": ".claude/plans/review-snapshot-batching/plan.md",
+  "tasks": ".claude/plans/review-snapshot-batching/plan.md",
+  "prompt": ".claude/plans/review-snapshot-batching/prompt.md"
+}

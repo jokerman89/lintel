@@ -2,13 +2,14 @@
 # implements: ADR-0028
 # intent: .claude/plans/universal-implementation/packages/P05.md
 # constraints: synthetic evidence is not an independent review of Lintel
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-29
 """Exercise real producer, audit reader and SHIP with isolated Git fixtures."""
 from copy import deepcopy
 from datetime import datetime, timezone
 import errno
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,7 @@ BASH = shutil.which("bash") or "bash"
 sys.path.insert(0, str(SOURCE / "lib"))
 from native_paths import native_io_path, path_identity
 from review_contract import CONTRACT_VERSION
+import review_contract as contract
 
 
 def encoded(value):
@@ -297,6 +299,340 @@ class Fixture(unittest.TestCase):
             "--corroboration", self.observed_file, "--qa", self.qa_file,
             "--skill", "review", ok=ok,
         )
+
+
+class BlobBatching(Fixture):
+    """C-01.blob-reads: real Git snapshots compared with the unchanged per-object path."""
+
+    class BatchProcess:
+        """Protocol double only; real Git still supplies snapshot metadata and fallback reads."""
+
+        class Input(io.BytesIO):
+            def __init__(self, events):
+                super().__init__()
+                self.events = events
+                self.requests = []
+                self.flushed = 0
+
+            def write(self, data):
+                self.events.append("write")
+                self.requests.append(data)
+                return super().write(data)
+
+            def flush(self):
+                self.events.append("flush")
+                self.flushed += 1
+                return super().flush()
+
+        class Output(io.BytesIO):
+            def __init__(self, data, events):
+                super().__init__(data)
+                self.events = events
+                self.read_sizes = []
+
+            def readline(self, size=-1):
+                self.events.append("header")
+                return super().readline(size)
+
+            def read(self, size=-1):
+                self.events.append("read")
+                self.read_sizes.append(size)
+                return super().read(size)
+
+        def __init__(self, response):
+            self.events = []
+            self.stdin = self.Input(self.events)
+            self.stdout = self.Output(response, self.events)
+            self.killed = False
+            self.waited = False
+
+        def poll(self):
+            return 0 if self.killed else None
+
+        def kill(self):
+            self.killed = True
+
+        def wait(self):
+            self.waited = True
+            return 0
+
+    def git_bytes(self, *args, data=None):
+        result = subprocess.run(
+            ["git", *args], cwd=self.repo, env=self.env, input=data,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result.stdout
+
+    def blob(self, data):
+        return self.git_bytes("hash-object", "-w", "--stdin", data=data).decode().strip()
+
+    def cache_entry(self, name, oid, mode="100644"):
+        self.git("update-index", "--add", "--cacheinfo", f"{mode},{oid},{name}")
+
+    def snap(self, selection, base=None):
+        with patch.dict(os.environ, self.env, clear=True):
+            return contract.snapshot(self.repo, base=base or self.base, selection=selection)
+
+    def reference(self, selection, base=None):
+        with patch.object(contract, "_blob_digests", return_value={}):
+            return self.snap(selection, base)
+
+    def assert_equivalent(self, selection, base=None):
+        expected = self.reference(selection, base)
+        actual = self.snap(selection, base)
+        self.assertEqual(actual, expected)
+        self.assertEqual(contract.canonical_json(actual), contract.canonical_json(expected))
+        return actual
+
+    def first_error(self, selection):
+        try:
+            self.snap(selection)
+        except contract.ContractError as error:
+            return type(error), str(error)
+        self.fail("Expected the original ContractError, not a success-shaped result")
+
+    def assert_same_error(self, selection):
+        with patch.object(contract, "_blob_digests", return_value={}):
+            expected = self.first_error(selection)
+        self.assertEqual(self.first_error(selection), expected)
+        return expected[1]
+
+    def two_blobs(self):
+        values = [b"first selected blob", b"second selected blob\r\n"]
+        oids = [self.blob(value) for value in values]
+        (self.repo / "selected").mkdir()
+        for name, oid in zip(("selected/a", "selected/b"), oids):
+            self.cache_entry(name, oid)
+        return values, oids
+
+    @staticmethod
+    def response(oid, data):
+        return f"{oid} blob {len(data)}\n".encode("ascii") + data + b"\n"
+
+    def missing_blob(self, name):
+        oid = self.blob(b"owned fixture object deliberately removed")
+        self.cache_entry(name, oid)
+        loose = self.repo / ".git" / "objects" / oid[:2] / oid[2:]
+        self.assertTrue(loose.is_relative_to(self.root))
+        self.assertTrue(loose.is_file())
+        loose.chmod(0o600)
+        loose.unlink()
+        return oid
+
+    def test_full_snapshot_states_modes_names_and_blob_bytes_are_identical(self):
+        values = {
+            "empty": b"", "crlf": b"one\r\ntwo\r\n", "binary": b"\0\xff\x80\n\r\0",
+            "no-lf": b"no trailing newline", "large": b"x" * (1024 * 1024) + b"!",
+            "fake-header": b"a" * 40 + b" blob 3\nabc\nnot a protocol header",
+            "duplicate-a": b"same", "duplicate-b": b"same", "space name": b"spaces",
+            "history": b"base", "staged": b"base staged", "unstaged": b"base dirty",
+            "deleted": b"deleted", "uncached": b"remove only from index", "executable": b"script",
+        }
+        for name, data in values.items():
+            path = self.repo / "selected" / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        self.git("add", "selected")
+        self.git("commit", "-qm", "synthetic selected base")
+        selected_base = self.git("rev-parse", "HEAD").stdout.strip()
+        (self.repo / "selected" / "history").write_bytes(b"head")
+        self.git("add", "selected/history")
+        self.git("commit", "-qm", "synthetic selected head")
+        (self.repo / "selected" / "staged").write_bytes(b"index")
+        self.git("add", "selected/staged")
+        (self.repo / "selected" / "unstaged").write_bytes(b"working")
+        (self.repo / "selected" / "untracked").write_bytes(b"new")
+        (self.repo / "selected" / "new-deleted").write_bytes(b"index only")
+        self.git("add", "selected/new-deleted")
+        (self.repo / "selected" / "new-deleted").unlink()
+        (self.repo / "selected" / "deleted").unlink()
+        self.git("rm", "--cached", "selected/uncached")
+        self.git("update-index", "--chmod=+x", "selected/executable")
+        self.cache_entry("selected/link", self.blob(b"../source.txt"), "120000")
+        for name in ("selected/caf\u00e9", "selected/cafe\u0301"):
+            self.cache_entry(name, self.blob(name.encode("utf-8")))
+        if os.name != "nt":
+            (self.repo / "selected" / "real-link").symlink_to("../source.txt")
+        actual = self.assert_equivalent(["selected"], selected_base)
+        self.assertNotEqual(actual["base"], actual["head"])
+        entries = {entry["path"]: entry for entry in actual["entries"]}
+        self.assertEqual(list(entries), sorted(entries))
+        for name in ("empty", "crlf", "binary", "no-lf", "large", "fake-header", "duplicate-a", "duplicate-b"):
+            expected = hashlib.sha256(values[name]).hexdigest()
+            self.assertEqual([entries[f"selected/{name}"][state]["sha256"]
+                              for state in ("base", "head", "index", "worktree")], [expected] * 4)
+        self.assertEqual(entries["selected/executable"]["index"]["mode"], "100755")
+        self.assertEqual(entries["selected/link"]["index"]["kind"], "symlink")
+        self.assertEqual(entries["selected/new-deleted"]["worktree"]["kind"], "absent")
+        self.assertEqual(entries["selected/uncached"]["index"]["kind"], "absent")
+
+    def test_process_count_is_seven_and_only_selected_oids_are_prefetched(self):
+        (self.repo / "selected").mkdir()
+        oids = [self.blob(f"unique selected {i}".encode()) for i in range(12)]
+        for i, oid in enumerate(oids):
+            self.cache_entry(f"selected/file-{i:02d}", oid)
+        self.cache_entry("selected/duplicate", oids[0])
+        outside = self.blob(b"not selected and never prefetched")
+        self.cache_entry("outside", outside)
+        real = subprocess.Popen
+        with patch.object(subprocess, "Popen", wraps=real) as reference_spawns:
+            expected = self.reference(["selected"])
+        with patch.object(subprocess, "Popen", wraps=real) as spawns:
+            with patch.object(contract, "_blob_digests", wraps=contract._blob_digests) as prefetch:
+                actual = self.snap(["selected"])
+        self.assertEqual(contract.canonical_json(actual), contract.canonical_json(expected))
+        self.assertEqual(reference_spawns.call_count, 6 + len(oids))
+        self.assertEqual(spawns.call_count, 7)
+        commands = [call.args[0] for call in spawns.call_args_list]
+        self.assertEqual(sum(command[-2:] == ["cat-file", "--batch"] for command in commands), 1)
+        self.assertFalse(any(command[-3:-1] == ["cat-file", "blob"] for command in commands))
+        selected = prefetch.call_args.args[1]
+        self.assertEqual(set(selected), set(oids))
+        self.assertNotIn(outside, selected)
+        batch = next(call for call in spawns.call_args_list if call.args[0][-1] == "--batch")
+        self.assertEqual(batch.args[0], ["git", "--no-pager", "-C", str(self.repo), "cat-file", "--batch"])
+        self.assertEqual(batch.kwargs["env"], {**self.env, "GIT_OPTIONAL_LOCKS": "0"})
+        self.assertEqual(batch.kwargs["stderr"], subprocess.DEVNULL)
+
+    def test_empty_selection_oid_set_does_not_start_a_batch(self):
+        self.write("untracked-only.txt", "not in any Git tree")
+        with patch.object(subprocess, "Popen", wraps=subprocess.Popen) as spawns:
+            actual = self.snap(["untracked-only.txt"])
+        self.assertEqual(actual, self.reference(["untracked-only.txt"]))
+        self.assertEqual(spawns.call_count, 6)
+        self.assertFalse(any(call.args[0][-1] == "--batch" for call in spawns.call_args_list))
+        with patch.object(subprocess, "Popen") as empty:
+            self.assertEqual(contract._blob_digests(self.repo, []), {})
+            self.assertEqual(contract._blob_digests(self.repo, ["HEAD:path\nnot-an-oid"]), {})
+        empty.assert_not_called()
+
+    def test_missing_nonblob_and_gitlink_keep_the_same_first_error(self):
+        self.missing_blob("missing-object")
+        self.assertIn("Git cat-file blob failed:", self.assert_same_error(["missing-object"]))
+        self.git("update-index", "--force-remove", "missing-object")
+        tree = self.git("write-tree").stdout.strip()
+        self.cache_entry("nonblob", tree)
+        self.assertIn("Git cat-file blob failed:", self.assert_same_error(["nonblob"]))
+        self.cache_entry("gitlink", self.base, "160000")
+        self.assertEqual(self.assert_same_error(["gitlink", "nonblob"]),
+                         "Selected submodules/special Git entries require a separate explicit review")
+
+    def test_newline_path_and_index_conflict_precede_prefetch_errors(self):
+        (self.repo / "selected").mkdir()
+        oid = self.blob(b"valid bytes")
+        self.git_bytes("-c", "core.protectNTFS=false", "update-index", "-z", "--index-info",
+                       data=f"100644 {oid}\tselected/a\ninvalid\0".encode())
+        self.missing_blob("selected/z-missing")
+        self.assertEqual(self.assert_same_error(["selected"]),
+                         "Invalid repository-relative path: 'selected/a\\ninvalid'")
+        oid = self.blob(b"conflict")
+        records = b"".join(f"100644 {oid} {stage}\tconflicted\n".encode() for stage in (1, 2, 3))
+        self.git_bytes("update-index", "--index-info", data=records)
+        with patch.object(contract, "_blob_digests", wraps=contract._blob_digests) as prefetch:
+            self.assertEqual(self.assert_same_error(["conflicted", "selected"]),
+                             "Unresolved index conflict: conflicted")
+        prefetch.assert_not_called()
+
+    def test_walk_failure_still_precedes_batch_creation(self):
+        with patch.object(contract, "_blob_digests", wraps=contract._blob_digests) as prefetch:
+            self.assertEqual(self.assert_same_error(["source.txt", "unavailable"]),
+                             "Selected input has no tracked or working content: unavailable")
+        prefetch.assert_not_called()
+
+    def test_popen_oserror_falls_back_to_the_original_snapshot(self):
+        self.two_blobs()
+        expected = self.reference(["selected"])
+        real = subprocess.Popen
+
+        def unavailable(args, **kwargs):
+            if args[-2:] == ["cat-file", "--batch"]:
+                raise OSError("synthetic batch creation failure")
+            return real(args, **kwargs)
+
+        with patch.object(subprocess, "Popen", side_effect=unavailable):
+            self.assertEqual(self.snap(["selected"]), expected)
+
+    def test_protocol_failures_preserve_prefix_and_strict_fallback(self):
+        values, oids = self.two_blobs()
+        expected = self.reference(["selected"])
+        first = self.response(oids[0], values[0])
+        bad_responses = (
+            b"", f"{oids[1]} missing\n".encode(), f"{oids[1]} tree 0\n\n".encode(),
+            self.response("f" * 40, b"wrong oid"), f"{oids[1]} blob nope\n".encode(),
+            f"{oids[1]} blob 100\nshort".encode(), f"{oids[1]} blob 2\nokX".encode(),
+            f"{oids[1]} blob ".encode() + b"9" * 5000 + b"\n",
+        )
+        real = subprocess.Popen
+        for response in bad_responses:
+            with self.subTest(response=response[:90]):
+                process = self.BatchProcess(first + response)
+
+                def fake_batch(args, **kwargs):
+                    return process if args[-2:] == ["cat-file", "--batch"] else real(args, **kwargs)
+
+                with patch.object(subprocess, "Popen", side_effect=fake_batch) as spawns:
+                    self.assertEqual(self.snap(["selected"]), expected)
+                fallback = [call.args[0][-1] for call in spawns.call_args_list
+                            if call.args[0][-3:-1] == ["cat-file", "blob"]]
+                self.assertEqual(fallback, [oids[1]])
+                self.assertEqual(process.stdin.requests, [oid.encode() + b"\n" for oid in oids])
+                self.assertEqual(process.stdin.flushed, 2)
+                self.assertEqual(process.events[:7], ["write", "flush", "header", "read", "read", "write", "flush"])
+                self.assertTrue(process.killed and process.waited)
+                self.assertTrue(process.stdin.closed and process.stdout.closed)
+
+    def test_oserror_after_a_complete_blob_preserves_only_that_prefix(self):
+        values, oids = self.two_blobs()
+        first = self.response(oids[0], values[0])
+        process = self.BatchProcess(first)
+        read_header = process.stdout.readline
+
+        def fail_second_header(size):
+            if process.stdout.tell() == len(first):
+                raise OSError("synthetic second response failure")
+            return read_header(size)
+
+        with patch.object(process.stdout, "readline", side_effect=fail_second_header):
+            with patch.object(subprocess, "Popen", return_value=process):
+                actual = contract._blob_digests(self.repo, oids)
+        self.assertEqual(actual, {oids[0]: hashlib.sha256(values[0]).hexdigest()})
+        self.assertTrue(process.killed and process.waited)
+
+    def test_batch_io_errors_preserve_the_original_error_and_cleanup(self):
+        _, oids = self.two_blobs()
+        self.missing_blob("selected/z-missing")
+        with patch.object(contract, "_blob_digests", return_value={}):
+            expected = self.first_error(["selected"])
+        real = subprocess.Popen
+        for stream_name, operation in (("stdin", "write"), ("stdin", "flush"), ("stdout", "readline"), ("stdout", "read")):
+            with self.subTest(operation=operation):
+                process = self.BatchProcess(self.response(oids[0], b"first selected blob"))
+
+                def fake_batch(args, **kwargs):
+                    return process if args[-2:] == ["cat-file", "--batch"] else real(args, **kwargs)
+
+                with patch.object(getattr(process, stream_name), operation, side_effect=OSError("synthetic pipe error")):
+                    with patch.object(subprocess, "Popen", side_effect=fake_batch):
+                        self.assertEqual(self.first_error(["selected"]), expected)
+                self.assertTrue(process.killed and process.waited)
+
+    def test_chunked_exact_reads_deduplicate_and_do_not_swallow_interrupts(self):
+        oid = "a" * 40
+        data = b"x" * (1024 * 1024) + b"\0"
+        process = self.BatchProcess(self.response(oid, data))
+        with patch.object(subprocess, "Popen", return_value=process):
+            self.assertEqual(contract._blob_digests(self.repo, [oid, oid]),
+                             {oid: hashlib.sha256(data).hexdigest()})
+        self.assertEqual(process.stdin.requests, [oid.encode() + b"\n"])
+        self.assertEqual(process.stdout.read_sizes, [1024 * 1024, 1, 1])
+        process = self.BatchProcess(b"")
+        with patch.object(process.stdout, "readline", side_effect=KeyboardInterrupt):
+            with patch.object(subprocess, "Popen", return_value=process):
+                with self.assertRaises(KeyboardInterrupt):
+                    contract._blob_digests(self.repo, [oid])
+        self.assertTrue(process.killed and process.waited)
+        self.assertTrue(process.stdin.closed and process.stdout.closed)
 
 
 class LegacyRegressions(Fixture):
@@ -2057,7 +2393,8 @@ if __name__ == "__main__":
     suite_name = sys.argv.pop(1) if len(sys.argv) > 1 else "evidence"
     classes = {
         "legacy": (LegacyRegressions,),
-        "evidence": (LegacyRegressions, ReviewEvidence, MarkdownBoundaryEvidence, NativePathEvidence),
+        "evidence": (LegacyRegressions, ReviewEvidence, MarkdownBoundaryEvidence, NativePathEvidence, BlobBatching),
+        "batching": (BlobBatching,),
         "boundaries": (MarkdownBoundaryEvidence,),
         "native": (NativePathEvidence,),
         "controls": (MandatoryControls,), "hook": (HookEvidence,),

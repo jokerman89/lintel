@@ -2,7 +2,7 @@
 # implements: ADR-0028, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P05.md
 # constraints: read-only Git/filesystem; declared identity is not authentication
-# last_intent_review: 2026-09-23
+# last_intent_review: 2026-09-29
 """Shared result validation and explicit content identity. No dispatch or audit writes."""
 from __future__ import annotations
 
@@ -41,6 +41,7 @@ path_identity = _native_paths.path_identity
 Json = dict[str, Any]
 CONTRACT_VERSION = 2
 AUDIT_RECORD = ".claude/runtime/audit/reviews.jsonl"
+_BLOB_MODES = ("100644", "100755", "120000")
 
 
 class ContractError(ValueError):
@@ -337,6 +338,59 @@ def _git(repo: Path, *args: str) -> bytes:
     return result.stdout
 
 
+def _blob_digests(repo: Path, oids: Sequence[str]) -> dict[str, str]:
+    """Prefetch complete blobs; the original per-object reader owns misses and errors."""
+    oids = tuple(dict.fromkeys(oids))
+    cache: dict[str, str] = {}
+    if not oids or any(re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", oid) is None for oid in oids):
+        return cache
+    process = None
+    try:
+        process = subprocess.Popen(
+            ["git", "--no-pager", "-C", str(repo), "cat-file", "--batch"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
+        )
+        for oid in oids:
+            request = oid.encode("ascii") + b"\n"
+            if process.stdin.write(request) != len(request):
+                break
+            process.stdin.flush()
+            header = re.fullmatch(rb"([0-9a-f]+) blob ([0-9]+)\n", process.stdout.readline(256))
+            if header is None or header[1] != oid.encode("ascii"):
+                break
+            remaining = int(header[2])
+            digest = hashlib.sha256()
+            while remaining:
+                size = min(remaining, 1024 * 1024)
+                chunk = process.stdout.read(size)
+                if len(chunk) != size:
+                    break
+                digest.update(chunk)
+                remaining -= size
+            if remaining or process.stdout.read(1) != b"\n":
+                break
+            cache[oid] = digest.hexdigest()
+    except OSError:
+        # Prefetch never determines snapshot error order or replaces strict diagnostics.
+        pass
+    finally:
+        if process is not None:
+            try:
+                process.stdin.close()
+            except OSError:
+                pass
+            try:
+                if process.poll() is None:
+                    process.kill()
+            except ProcessLookupError:
+                pass
+            finally:
+                process.wait()
+                process.stdout.close()
+    return cache
+
+
 def _root(repo: Path) -> Path:
     root = _resolved_path(repo)
     reported = _resolved_path(Path(os.fsdecode(_git(root, "rev-parse", "--show-toplevel")).strip()))
@@ -434,13 +488,15 @@ def snapshot(
         walk(repo if item == "." else _path(repo, item))
         if not any(_selected(path, [item]) for path in names):
             raise ContractError(f"Selected input has no tracked or working content: {item}")
-    cache: dict[str, str] = {}
+    cache = _blob_digests(repo, [
+        oid for table in tables.values() for mode, oid in table.values() if mode in _BLOB_MODES
+    ])
 
     def git_state(entry: Optional[tuple[str, str]]) -> Json:
         if entry is None:
             return _absent()
         mode, oid = entry
-        if mode not in ("100644", "100755", "120000"):
+        if mode not in _BLOB_MODES:
             raise ContractError("Selected submodules/special Git entries require a separate explicit review")
         if oid not in cache:
             cache[oid] = hashlib.sha256(_git(repo, "cat-file", "blob", oid)).hexdigest()
