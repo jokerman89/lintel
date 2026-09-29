@@ -1,6 +1,7 @@
 # ADR-0041: Weighted integration shards, a chunked Copilot kit and pull-request-only cancellation
 
-- **Status:** Accepted direction, 2026-09-29. Hosted runs of the candidate verify it.
+- **Status:** Accepted direction, 2026-09-29. Hosted runs verify the candidate;
+  the main-run cancellation behavior is verified after landing.
 - **Date:** 2026-09-29
 - **Deciders:** MasterCoordinator, who selected the design ("C+B" with pull-request-only
   cancellation) that the deep repository review proposed. The selection answers the operator's

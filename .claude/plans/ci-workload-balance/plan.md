@@ -55,7 +55,7 @@ leaves. No organization pack is activated.
 | Package ID | Outcome | Leaf IDs | Owner / edit boundary | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
 | P1 | The Copilot kit runs as eight disjoint chunks, and integration entries are balanced by declared Windows weights. | W2-6, TCI-02 | Coordinator, sole writer; tests/runner/unittest_chunk.py, tests/runner/run-all.sh, tests/integration/copilot-kit.sh, tests/integration/copilot-kit-1.sh, tests/integration/copilot-kit-2.sh, tests/integration/copilot-kit-3.sh, tests/integration/copilot-kit-4.sh, tests/integration/copilot-kit-5.sh, tests/integration/copilot-kit-6.sh, tests/integration/copilot-kit-7.sh, tests/integration/copilot-kit-8.sh, tests/integration/universal-adapters.sh, tests/integration/catalog-installed.sh, tests/integration/universal-lifecycle.sh, tests/integration/swarm-shared-binding.sh, tests/integration/universal-a23.sh, tests/integration/universal-work-lifecycle.sh, tests/integration/private-sync-binding.sh, tests/integration/universal-profile-context.sh, tests/integration/observation-learning.sh, tests/integration/pattern-portability.sh, tests/unit/unittest-chunk.sh, tests/unit/unittest-chunk.py, tests/unit/test-runner-contract.sh, tests/README.md, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, .claude/decisions/0032-ci-suite-sharding.md, .claude/plans/ci-workload-balance | none | R1-R5 and R7; the targeted tests below; hosted runs on the candidate |
-| P2 | A running push or dispatch run is not cancelled by a newer run; pull request runs still are. | C-09 | Coordinator, sole writer; .github/workflows/ci.yml, tests/unit/ci-matrix.py, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, .claude/decisions/0037-pr-ci-tiering.md, tests/README.md | none | R6 and R7; `tests/unit/ci-matrix.sh`; a hosted main run that is not cancelled |
+| P2 | A running push or dispatch run is not cancelled by a newer run; pull request runs still are. | C-09 | Coordinator, sole writer; .github/workflows/ci.yml, tests/unit/ci-matrix.py, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, .claude/decisions/0037-pr-ci-tiering.md, tests/README.md | none | R6 and R7; `tests/unit/ci-matrix.sh`; a hosted main run that is not cancelled (post-delivery, after landing) |
 
 Within those paths, P1 deletes `copilot-kit.sh`, adds the eight chunk wrappers, and adds only a
 `# SHARD-WEIGHT:` line to each of the ten other integration entries. P2 changes only the
@@ -132,7 +132,14 @@ Not edited:
   - `catalog.yml` is unchanged.
   - The documentation states the pending-run replacement.
 - **Verification:** `bash tests/unit/ci-matrix.sh`.
-- **Evidence:** the Build record below, and a later main run that a following push does not cancel.
+- **Evidence:** implementation - the Build record below and the current candidate's matrix.
+  Post-delivery - a later main run that a following genuine push does not cancel, observed
+  after landing. These are separate stages, not alternative evidence for one another.
+
+The implementation review accepts only the configuration, unit pins, documentation and
+current-candidate tests. It does not claim the post-delivery event as N/A, advisory or passed.
+C-09 remains open after code publication until a separate `verification_only` review observes
+the required real main-run behavior. No no-op push or duplicate dispatch is created to obtain it.
 
 ## Verification boundary
 
@@ -224,12 +231,18 @@ leading comment block:
 - the same entry count per system as found locally (183);
 - the critical path, re-measured against 124.8 minutes and reported as a measurement;
 - each chunk's time;
-- a `main` run that a later push does not cancel.
+
+**Post-delivery, after landing (not a pre-merge gate):**
+- a real `main` push run A has started when a later genuine `main` push creates run B;
+- A concludes without cancellation and B subsequently runs;
+- retain both runs' head/event/start/completion/conclusion metadata. Pending-run replacement,
+  manual cancellation and an absence of overlapping runs do not establish this observation.
 
 **Known risk.** In earlier local Windows runs, the kit's two slowest methods (the Git verification
 case and native coverage) both sort into chunk 1. The equal 865 s chunk weight may understate that
 chunk. The hosted per-chunk times decide whether to re-weight.
 
-**Status of the tasks:** the source review passed with P3 findings only. W2-6, TCI-02 and C-09 stay
-open until the reviewer's bounded recheck of the follow-up, the hosted runs and MasterCoordinator's
-integration are done.
+**Status of the tasks:** the source review passed with P3 findings only. W2-6 and TCI-02 await
+current integrated review, hosted verification and delivery. C-09's implementation has the same
+pre-publication gates, but its checkbox stays open until the real post-delivery observation.
+The broader register's enforced-checks work remains outside this slice.
