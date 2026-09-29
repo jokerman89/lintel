@@ -3,10 +3,11 @@
 # implements: ADR-0040, ADR-0036
 # intent: .claude/plans/adaptive-review/spec.md
 # constraints: synthetic local packets only; no model, network or target execution
-# last_intent_review: 2026-09-28
+# last_intent_review: 2026-09-29
 """Mandatory/advisory obligations and exact-body parity across single and panel reviews."""
 import copy
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -323,39 +324,47 @@ class PacketCliTests(unittest.TestCase):
 
     def test_deep_inventory_and_metadata_fail_explicitly_without_tracebacks(self):
         body, meta = make_packet(["SQ-U04"])
-        malformed = ('{"nested":' + "[" * 3000 + "0" + "]" * 3000 + "}")
-        broken_body = body.splitlines()[0] + "\n" + rm.INVENTORY_PREFIX + malformed + rm.INVENTORY_SUFFIX + "\n"
-        with self.assertRaises(rm.MethodError):
-            rm.validate_meta(meta, broken_body)
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            body_path, meta_path, reply = [root / name for name in ("body.md", "meta.json", "reply.md")]
-            body_path.write_bytes(broken_body.encode("utf-8"))
-            meta_path.write_text(json.dumps(meta), encoding="utf-8")
-            reply.write_text(report(meta), encoding="utf-8")
-            checked = run("check", "--body", body_path, "--meta", meta_path, "--report", reply)
-            self.assertEqual(checked.returncode, 2, checked.stderr)
-            self.assertNotIn("Traceback", checked.stderr)
-            mars = subprocess.run(
-                [sys.executable, "-B", str(MARS), "panel", "init", "--panel", str(root / "panel.json"),
-                 "--id", "deep-input", "--owner", "fixture", "--brief", str(body_path), "--consent", "fixture",
-                 "--method-meta", str(meta_path), "--requested-by", "fixture", "--trigger", "explicit",
-                 "--caller", "standalone", "--surface", "test-host"], capture_output=True, text=True)
-            self.assertEqual(mars.returncode, 2, mars.stderr)
-            self.assertNotIn("Traceback", mars.stderr)
-            self.assertIn("JSON", json.loads(mars.stderr)["error"])
-            meta_path.write_text(malformed, encoding="utf-8")
-            checked = run("check", "--body", body_path, "--meta", meta_path, "--report", reply)
-            self.assertEqual(checked.returncode, 2, checked.stderr)
-            self.assertNotIn("Traceback", checked.stderr)
-            mars = subprocess.run(
-                [sys.executable, "-B", str(MARS), "panel", "init", "--panel", str(root / "panel.json"),
-                 "--id", "deep-input", "--owner", "fixture", "--brief", str(body_path), "--consent", "fixture",
-                 "--method-meta", str(meta_path), "--requested-by", "fixture", "--trigger", "explicit",
-                 "--caller", "standalone", "--surface", "test-host"], capture_output=True, text=True)
-            self.assertEqual(mars.returncode, 2, mars.stderr)
-            self.assertNotIn("Traceback", mars.stderr)
-            self.assertIn("JSON", json.loads(mars.stderr)["error"])
+        for depth in (1, 3000):
+            with self.subTest(depth=depth), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                body_path, meta_path, reply = [root / name for name in ("body.md", "meta.json", "reply.md")]
+                invalid = '{"nested":' + "[" * depth + "0" + "]" * depth + "}"
+                # Valid JSON can reach schema validation on runtimes with a deeper decoder limit.
+                try:
+                    json.loads(invalid)
+                except RecursionError:
+                    inventory_error = r"^invalid JSON in packet obligation inventory: .+$"
+                    metadata_error = rf"^invalid JSON in {re.escape(str(meta_path))}: .+$"
+                else:
+                    inventory_error = r"^invalid packet obligation inventory$"
+                    metadata_error = r"^not a review-method meta record$"
+                broken_body = (body.splitlines()[0] + "\n" + rm.INVENTORY_PREFIX
+                               + invalid + rm.INVENTORY_SUFFIX + "\n")
+                with self.assertRaisesRegex(rm.MethodError, inventory_error):
+                    rm.validate_meta(meta, broken_body)
+                body_path.write_bytes(broken_body.encode("utf-8"))
+                reply.write_text(report(meta), encoding="utf-8")
+                panel_path = root / "panel.json"
+                for content, expected in ((json.dumps(meta), inventory_error), (invalid, metadata_error)):
+                    with self.subTest(expected=expected):
+                        meta_path.write_text(content, encoding="utf-8")
+                        checked = run("check", "--body", body_path, "--meta", meta_path, "--report", reply)
+                        mars = subprocess.run(
+                            [sys.executable, "-B", str(MARS), "panel", "init", "--panel", str(panel_path),
+                             "--id", "deep-input", "--owner", "fixture", "--brief", str(body_path),
+                             "--consent", "fixture", "--method-meta", str(meta_path),
+                             "--requested-by", "fixture", "--trigger", "explicit",
+                             "--caller", "standalone", "--surface", "test-host"],
+                            capture_output=True, text=True)
+                        for command, result in (("check", checked), ("panel-init", mars)):
+                            with self.subTest(command=command):
+                                self.assertEqual(result.returncode, 2, result.stderr)
+                                self.assertEqual(result.stdout, "")
+                                self.assertNotIn("Traceback", result.stderr)
+                                error = json.loads(result.stderr)
+                                self.assertEqual(set(error), {"error"})
+                                self.assertRegex(error["error"], expected)
+                        self.assertFalse(panel_path.exists(), "invalid inputs must not create panel state")
 
     def test_cli_binds_explicit_obligations_and_original_bytes(self):
         with tempfile.TemporaryDirectory() as tmp:

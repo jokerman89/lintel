@@ -13,6 +13,7 @@ Generated: source snapshot; see Git history by `bin/li-wiki-gen`.
 
 See [docs/concepts/](../concepts/) for canonical conceptual references:
 
+- [adaptive-review](../concepts/adaptive-review.md)
 - [agent-dispatch-rules](../concepts/agent-dispatch-rules.md)
 - [agent-memory](../concepts/agent-memory.md)
 - [brief-forge](../concepts/brief-forge.md)
