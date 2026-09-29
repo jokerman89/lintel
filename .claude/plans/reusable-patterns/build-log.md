@@ -1305,6 +1305,89 @@ there is no Git diff, so it is not committed.
 
 No other generated output changed. No full suite was run, and there was no push or CI dispatch.
 
+## Native 1a preparatory integration and 0.13.1 (Master grant 2026-09-29 03:00, follow-up 03:32)
+
+This is a local preparation branch only; nothing was pushed. Commits on top of `59f533ad`:
+
+| Commit | Change |
+|---|---|
+| `50047570` | Ordinary merge of native `06e69eb6` (tree `9772ad3a`, includes main `1cf7d099` and release 0.13.0) |
+| `279d9b80` | Ordinary merge of lesson `ef48d7a0` (L-053 correction) |
+| `77eb3794` | Join fix: a bare `<style>` in `skills/generate-style-learn/SKILL.md` opened an unclosed raw HTML region in the shared Markdown classifier. The native renderer then left the later consumer-contract link unrebased, and the command-surface guard reported a missing path. The tag is now code and the output is regenerated |
+| `58c41fb2` | 0.13.1: the six plugin manifests (0.13.0 → 0.13.1), the changelog entry and the neutral-pack rebind migration row. The 0.13.0 native history is unchanged |
+| `a2d53e92` | `pattern-portability.py` asserts the native full-body `li-pattern` skill (source note, body, rebased link) instead of the retired pointer |
+| `430c12c6` | Ordinary merge of the granted native follow-up `394ed0b8` (via `1b019341`): the wiki-idempotency oracle and a native build note. No conflicts |
+
+**Merge of `06e69eb6`.** All source files merged cleanly. The two conflicts were generated outputs:
+
+- `.github/lintel/manifest.json` was resolved to the union inventory of both sides' current bytes.
+  All 172 entries matched their files.
+- `docs/wiki/skills.md` was taken from the native side.
+
+Both were then regenerated from the joined source with `li-copilot.py init --target . --source .
+--client copilot-cli`, `bin/li-wiki-gen` and `li-catalog.py`.
+
+**Ancestry.** `59f533ad`, `06e69eb6`, `394ed0b8`, `ef48d7a0` and `1cf7d099` are ancestors of the
+head. The excluded private `f2fa4d94` is not.
+
+**Checks on the joined tree** (Windows, positive-allowlist parent and child launcher; no full,
+stress or provider run):
+
+| Check | Result |
+|---|---|
+| `li-copilot.py check` | 172 managed files |
+| `li-catalog.py --check` | clean |
+| `li-instructions.py check` | clean |
+| `li-wiki-gen --check` | clean |
+| `native-command-surface` (shape) | 0 findings |
+| `native-command-surface` (unit) | 105 OK |
+| `native-artifacts` | 21 OK |
+| `li-run` | pass |
+| `manifest-identity` | pass |
+| `plugin-manifests-valid` | pass |
+| `frontmatter-lint-all` | pass |
+| `catalog-regenerates-clean` | pass |
+| `skill-descriptions-trigger` | pass |
+| `bin-scripts-executable` | pass |
+| `pattern-contract` | pass |
+| `wiki-gen-idempotency` | pass |
+| `patterns` | 137 |
+| `pattern-pack-origins` | 13 |
+| `pattern-launcher-roots` | 13 |
+| V10 | 26 |
+| V09 | 31 |
+| V11 | 23 |
+| `design-contract` | 29 |
+| `document-pipeline-binding` | 36 |
+| `document-pdf` | 16 + node 6 |
+| `document-workbook` | 47 |
+| `generate-skills-present` | pass |
+| `design-validator` | pass |
+| `frontend-design-roundtrip` | pass |
+| `pattern-portability` | 6 |
+| Pattern work map / swarm validate | ok; 48 leaves, open only 6.2.a-c |
+| Native work map | ok |
+
+Two first attempts failed and are kept as history:
+
+- `document-pdf` exited 127 because the allowlist PATH lacked the declared Node. It was rerun
+  with Node.
+- `pattern-portability` failed on the retired pointer assertion before `a2d53e92`.
+
+**P07.** Generation 1 (`adcea18a…`) is not consumed as current. The profile-relevant input drift
+since `59f533ad` is `.claude-plugin/plugin.json` `version` 0.12.0 → 0.13.1 (and
+`.claude-plugin/marketplace.json`). There is no change to `lib/pack-schema.yaml`,
+`packs/_default/pack.yaml`, `lib/profile_context.py`, the profile schema, `lib/paths.sh`,
+`lib/pack-resolver.sh` or `.claude/profile-requirements.json`. The parent's conditional genuine
+rebind is pending.
+
+**Not cleared:**
+
+- hosted CI on this candidate;
+- the final integrated P05 context, review, QA and corroboration;
+- the fresh main version-collision check;
+- publication, which Master owns.
+
 ## Pending
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
