@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: full
+  - cli: copilot
+    level: full
 tier: permissive
 model: claude-haiku-4-5-20251001
 ---

@@ -125,6 +125,16 @@ if command -v python3 >/dev/null 2>&1; then
   copilot_out=$(LINTEL_HOME="$SANDBOX_HOME" bash "$SANDBOX_HOME/bin/li-copilot" check --target "$fixture" 2>&1) || copilot_rc=$?
   [ "$copilot_rc" -eq 0 ] || printf '%s\n' "$copilot_out"
   assert_eq "0" "$copilot_rc" "installed Copilot check"
+  # Native skills carry the complete canonical method, not a pointer to it.
+  cycle_heading="$(grep -m1 '^## ' "$REPO_ROOT/skills/cycle/SKILL.md" || true)"
+  native_cycle="$(cat "$fixture/.github/skills/li-cycle/SKILL.md" 2>/dev/null || true)"
+  if [ -n "$cycle_heading" ]; then pass "canonical cycle heading: $cycle_heading"; else fail "canonical cycle skill has no ## heading"; fi
+  assert_contains "$native_cycle" "$cycle_heading" "native li-cycle carries the canonical method"
+  assert_contains "$native_cycle" 'Generated from `skills/cycle/SKILL.md`' "native li-cycle preamble"
+  assert_not_contains "$native_cycle" "Read the [Copilot adapter contract]" "native li-cycle is not a pointer"
+  canonical_skills=$(find "$SANDBOX_HOME/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')
+  native_skills=$(find "$fixture/.github/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')
+  assert_eq "$canonical_skills" "$native_skills" "one native skill per canonical skill"
 else
   echo '  SKIP: python3 required for installed Copilot adapter assertions'
 fi

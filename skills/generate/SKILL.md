@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
@@ -128,6 +130,10 @@ For each format in `--formats`:
   Select canonical sibling files, source evidence and every template/config
   override. Preserve complete returned source and existing design projections;
   the helper neither invokes a builder nor requires a future artifact's QA.
+  For a mixed web design whose `design-spec.json` carries a `pattern_context`,
+  also pass `--pattern-lock <run lock>` and `--pattern-context <current context>`,
+  and select both files plus `.claude/patterns`. A document-only design refuses
+  these flags; each stage verifies its attachment instead.
 - Read original prerequisites and actual acceptance evidence; source checkboxes
   from the work reader cannot authorize execution. Selected upstream P09 data
   retains its own request/context/profile, not the document's new QA inventory.
@@ -180,6 +186,20 @@ ts: <iso-8601>
 
 - **Default `internal`** — no invented customer voice rule; any applicable configured internal requirements still apply.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When the runtime reports patterns, the pipeline resolves once for the brief's context before
+OUTLINE, writes the lock in the repository under
+`.claude/runtime/patterns/<run-id>/patterns.lock.json` (the run directory itself when the run
+lives there; document outputs may be elsewhere) and attaches it to `design-spec.json` as
+`pattern_context` (`$LINTEL_SOURCE_ROOT/lib/pattern_visual.py` `design_attachment`, `lock_ref`
+relative to that pattern-state directory). Every stage verifies that attachment
+(`verify_design_attachment` with the same pattern-state directory) before using clauses; a
+missing, stale or mismatched attachment is `unavailable`, never a pass. Mandatory clauses reach
+the format-builders and QA unchanged. When the runtime reports no patterns, nothing is attached
+or asked; `unavailable` or `invalid` is never treated as no patterns.
 
 ## Status protocol
 

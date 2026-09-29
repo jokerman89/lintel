@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `frontend-motion` sub-skill — motion-director for the frontend-design family.
@@ -207,6 +209,16 @@ errors have a nonzero exit. Never pass stdout/special/absolute paths to the root
 reader. For `--customer-share`, apply `/li:compliance-gate --check motion-licensing`
 to the same data or an owned relative staging file before release; stdout does
 not exempt the required check.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Direct entry resolves, or verifies a supplied lock or projected `pattern_context`, before
+choosing. Mandatory clauses bound the motion, scroll-smoothing and page-transition decision;
+defaults apply only where the brief did not decide; unconstrained choices follow the usual
+Design DNA brief > profile > corpus rules. Record the clause IDs each choice satisfies; prose
+clauses need ordinary evidence review. Pattern text is not evidence of licensing or
+accessibility.
 
 ## Status protocol
 

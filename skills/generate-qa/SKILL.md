@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-qa` skill — final stage of the v3.5 shared content pipeline. Validates produced artifacts against brand, voice, readability, and structural standards.
@@ -216,6 +218,14 @@ and respect any explicit decision/corroboration persistence denial.
 ### Step 6 — Surface summary to operator
 
 Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3 unresolved errors.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+When a design spec carries `pattern_context`, verify it first; then check each mandatory clause
+against the produced artifacts and report it by clause ID as passed, failed or unverified in
+qa-report.json. A missing required section is failed. These results feed the clause review
+evidence; QA never clears review, and an unverified clause is not passed.
 
 ## Status protocol
 

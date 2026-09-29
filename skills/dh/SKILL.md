@@ -6,7 +6,7 @@ description: Use for devops and hosting depth — deployment plans, rollback str
 color: purple
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Production-bound work lacks state-compatible recovery, observable service objectives, capacity/cost assumptions and actionable on-call evidence."
 navigation:
@@ -121,6 +121,16 @@ Observability instrumentation, SLI/SLO definitions, Cost projection, Capacity he
 measured against the observable checkpoint criteria. Scores cannot erase one missing mandatory domain. DONE means
 selected required evidence and independent acceptance; DONE_WITH_CONCERNS is only
 advisory residue. Unresolved evidence/authority is BLOCKED/NEEDS_CONTEXT.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the delivery and operations expectations bound to the current target
+context and passes each sub-capability only its projected clauses (`project` for the mapped
+package, or the clauses mapped to it). An unknown deployment environment yields `needs-context`
+and blocks the dependent design; no live cloud, tenant or environment discovery is implied, and
+requirements are never inferred from generic recommendations. When the runtime reports no
+patterns, the module is unchanged.
 
 ## Integration and dormant hooks
 

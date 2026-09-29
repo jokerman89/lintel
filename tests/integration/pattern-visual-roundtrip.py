@@ -1,0 +1,577 @@
+#!/usr/bin/env python3
+# component: reusable-patterns-visual-roundtrip-test
+# implements: ADR-0038, ADR-0016, ADR-0028, ADR-0034
+# intent: .claude/plans/reusable-patterns/plan.md
+# constraints: synthetic temporary roots only; real CLI subprocesses and the shared design validator; no renderer, browser, network or real home
+# last_intent_review: 2026-09-28
+"""V11: actual selection -> adapter -> frontend spec -> review, including negative cases.
+
+The resolution comes from the real `bin/li-pattern.py` process over synthetic catalogs; the spec
+is checked by the shared design validator and by `validate_visual` as frontend-design-review
+consumes it. This is local integration evidence, not rendering or host acceptance. The launcher
+case runs the real `bin/li-pattern` with the real neutral profile; nothing is skipped or mocked.
+"""
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+import sys
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pattern_consumer_fixtures import (  # noqa: E402
+    NOW, ROOT, TODAY, Fixture, binding, cli_options, clause, ctx, load_design_contract, make_pattern, p, pv, ref,
+    tree_digest, visual_base_spec,
+)
+
+WEBSITE = {"artifact": ["website"]}
+WEB = p.parse_context(ctx(artifact="website"))
+TOKENS = json.dumps({"accent": "#1a2b3c"}).encode("utf-8")
+GUIDE = b"# Backend guide\nSynthetic backend guidance.\n"
+
+
+class Roundtrip:
+    """A repository-bound dashboard baseline, a pack default and an explicitly selectable personal default."""
+
+    def __init__(self, testcase):
+        self.t = testcase
+        self.fx = Fixture(testcase)
+        self.dashboard = make_pattern("example.dashboard", applies_to=WEBSITE, requirements=[
+            clause("MAX", "must", "visual.layout.max-width", "1200px"),
+            clause("SMOOTH", "default", "visual.interaction.scroll-smoothing", True),
+            clause("ACCENT", "default", "visual.palette.accent", "#1A2B3C"),
+            clause("NAV", "must", text="Primary navigation stays visible on every dashboard view.")],
+            assets=[{"path": "tokens.json", "kind": "tokens", "sha256": hashlib.sha256(TOKENS).hexdigest(),
+                     "domains": ["frontend"]}])
+        self.backend = make_pattern("example.backend", applies_to={"artifact": ["service"]}, requirements=[
+            clause("LOGS", "must", text="Structured logs carry a correlation ID.")],
+            assets=[{"path": "guide.md", "kind": "guide", "sha256": hashlib.sha256(GUIDE).hexdigest()}])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.dashboard, self.backend],
+                        assets={"example.dashboard": {"tokens.json": TOKENS}, "example.backend": {"guide.md": GUIDE}})
+        self.fx.repo_bindings([
+            binding("dashboard", [ref("repo.main", self.dashboard)], when=WEBSITE),
+            binding("backend", [ref("repo.main", self.backend)], when={"artifact": ["service"]})])
+        pack_dir = self.fx.pack_source()
+        self.pack = make_pattern("team.web", applies_to=WEBSITE, requirements=[
+            clause("GRID", "default", "visual.layout.grid", "bento"),
+            clause("SMOOTH", "default", "visual.interaction.scroll-smoothing", False)])
+        self.fx.publish(pack_dir, "team.patterns", [self.pack],
+                        bindings=[binding("team-web", [ref("team.patterns", self.pack)], role="default", when=WEBSITE)])
+        self.personal = make_pattern("me.hover", applies_to=WEBSITE, requirements=[
+            clause("HOVER", "default", "visual.interaction.hover-intent", "pronounced"),
+            clause("GRID", "default", "visual.layout.grid", "12-col")])
+        self.fx.publish(self.fx.personal_patterns, "personal.me", [self.personal])
+        self.run = self.fx.repo / ".claude" / "runtime" / "patterns" / "run-1"
+        self.run.mkdir(parents=True)
+
+    def resolve(self, artifact="website", refs=None, overrides=None):
+        context = self.fx.write_json(f"context-{artifact}.json", ctx(artifact=artifact))
+        args = ["resolve", "--context", context]
+        if refs is not None:
+            args += ["--refs", self.fx.write_json("refs.json", refs)]
+        if overrides is not None:
+            args += ["--overrides", self.fx.write_json("overrides.json", overrides)]
+        return self.fx.cli(*args)
+
+    def locked(self, artifact="website", refs=None):
+        """Cross-process selection: the CLI writes a lock, then the core verifies it before use."""
+        self.locks = getattr(self, "locks", 0) + 1
+        path = self.run / f"patterns-{self.locks}.lock.json"
+        context = ctx(artifact=artifact)
+        args = ["resolve", "--context", self.fx.write_json(f"lock-context-{self.locks}.json", context),
+                "--lock", path]
+        if refs is not None:
+            args += ["--refs", self.fx.write_json(f"lock-refs-{self.locks}.json", refs)]
+        code, report, _ = self.fx.cli(*args)
+        self.t.assertEqual(code, 0, report["diagnostics"])
+        lock = json.loads(path.read_text(encoding="utf-8"))
+        verified = p.verify_lock(self.fx.roots(), lock, p.parse_context(context), today=TODAY)
+        self.t.assertEqual(verified["status"], "ok", verified["diagnostics"])
+        return lock
+
+    def personal_ref(self):
+        return [{"ref": ref("personal.me", self.personal), "role": "default", "approved_by": "operator",
+                 "approval_ref": "brief.md"}]
+
+
+class VisualRoundtripTests(unittest.TestCase):
+    def setUp(self):
+        self.rt = Roundtrip(self)
+        self.design = load_design_contract()
+
+    def project(self, report):
+        spec = pv.project_visual(visual_base_spec(), report)["spec"]
+        path = self.rt.run / "frontend-design-spec.json"
+        path.write_text(json.dumps(spec), encoding="utf-8")
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def test_selection_adapter_spec_review_roundtrip(self):
+        code, report, _ = self.rt.resolve(refs=self.rt.personal_ref())
+        self.assertEqual((code, report["status"]), (0, "ready"))
+        winners = {key: value["value"] for key, value in report["settings"].items()}
+        self.assertEqual(winners["visual.interaction.scroll-smoothing"], True, "repository default beats pack default")
+        self.assertEqual(winners["visual.layout.grid"], "bento", "pack default beats explicit personal default")
+        self.assertEqual(winners["visual.interaction.hover-intent"], "pronounced", "personal default fills a gap")
+        lock = self.rt.locked(refs=self.rt.personal_ref())
+        self.assertEqual(lock["selection_digest"], report["selection_digest"])
+        spec = self.project(lock)
+        self.assertEqual(spec["layout_grammar"], {"max_width": "1200px", "grid": "bento"})
+        self.assertEqual(spec["interaction_signature"]["hover_intent"], "pronounced")
+        self.assertEqual(spec["typography"], visual_base_spec()["typography"], "Design DNA choices stay")
+        self.assertEqual(self.design.validate_spec(spec)["kind"], "frontend")
+        review = pv.validate_visual(spec, lock)
+        self.assertEqual(review["status"], "passed")
+        self.assertFalse(review["clearance"])
+        self.assertIn("example.dashboard@1.0.0#NAV", {item["clause"] for item in review["review_required"]},
+                      "prose must clauses stay with ordinary review")
+
+    def test_review_fails_when_the_built_spec_drifts_from_the_baseline(self):
+        report = self.rt.locked()
+        spec = self.project(report)
+        drifted = copy.deepcopy(spec)
+        drifted["layout_grammar"]["max_width"] = "1440px"
+        drifted["palette"]["tokens"]["accent"] = "#000000"
+        review = pv.validate_visual(drifted, report)
+        self.assertEqual(review["status"], "failed")
+        failed = {item["winner"] for item in review["checks"] if item["status"] == "failed"}
+        self.assertEqual(failed, {"example.dashboard@1.0.0#MAX", "example.dashboard@1.0.0#ACCENT"})
+
+    def test_brief_override_cannot_bypass_a_mandatory_setting(self):
+        override = {"schema_version": 1, "items": [{
+            "setting": "visual.layout.max-width", "value": "960px", "reason": "brief", "approval_ref": "brief.md",
+            "replaces": ["example.dashboard@1.0.0#MAX"]}]}
+        code, report, _ = self.rt.resolve(overrides=override)
+        self.assertEqual((code, report["status"]), (4, "conflict"))
+        with self.assertRaises(p.PatternError):
+            pv.project_visual(visual_base_spec(), report)
+
+    def test_unrelated_backend_work_reads_zero_visual_assets(self):
+        code, report, _ = self.rt.resolve(artifact="service")
+        self.assertEqual((code, report["status"]), (0, "ready"))
+        self.assertEqual([item["ref"]["id"] for item in report["selected"]], ["example.backend"])
+        self.assertEqual(report["metrics"]["asset_reads"], 0)
+        self.assertNotIn("visual.layout.max-width", report["settings"])
+        backend = self.rt.locked(artifact="service")
+        self.assertEqual(pv.project_visual(visual_base_spec(), backend)["spec"]["layout_grammar"],
+                         visual_base_spec()["layout_grammar"])
+        self.assertEqual(p.asset_refs(report, kind="tokens"), [])
+
+    def test_assets_are_read_only_on_explicit_need_through_the_core(self):
+        _, report, _ = self.rt.resolve()
+        self.assertEqual(report["metrics"]["asset_reads"], 0, "selection alone reads no asset")
+        lock = self.rt.locked()
+        refs = pv.project_visual(visual_base_spec(), lock)["pattern_context"]["asset_refs"]
+        self.assertEqual([(item["path"], item["kind"]) for item in refs], [("tokens.json", "tokens")])
+        reader = p.Reader()
+        data = p.read_asset(self.rt.fx.roots(), refs[0], domain="frontend", reader=reader, selection=lock)
+        self.assertEqual((data, reader.count("asset")), (TOKENS, 1))
+        with self.assertRaises(p.PatternError):
+            p.read_asset(self.rt.fx.roots(), refs[0], domain="backend", selection=lock)
+
+    def test_an_edited_lock_is_refused_by_the_adapter(self):
+        tampered = copy.deepcopy(self.rt.locked())
+        tampered["settings"]["visual.layout.max-width"]["value"] = "1440px"
+        with self.assertRaises(p.PatternError) as raised:
+            pv.project_visual(visual_base_spec(), tampered)
+        self.assertEqual(raised.exception.status, "invalid")
+
+    def test_a_report_from_another_process_is_not_a_selection(self):
+        _, report, _ = self.rt.resolve()
+        for call in (pv.project_visual, pv.validate_visual):
+            with self.assertRaises(p.PatternError) as raised:
+                call(visual_base_spec(), report)
+            self.assertEqual(raised.exception.code, "selection_not_usable")
+
+    def test_foreign_assets_are_refused_for_a_selection(self):
+        lock = self.rt.locked()
+        backend = self.rt.locked(artifact="service")
+        foreign = p.asset_refs(backend)[0]
+        with self.assertRaises(p.PatternError) as raised:
+            p.read_asset(self.rt.fx.roots(), foreign, selection=lock)
+        self.assertEqual((raised.exception.code, raised.exception.status), ("asset_not_selected", "unavailable"))
+
+    def test_no_patterns_roundtrip_is_unchanged_and_writes_nothing(self):
+        fx = Fixture(self)
+        before = tree_digest(fx.repo)
+        context = fx.write_json("context.json", ctx(artifact="website"))
+        code, report, stderr = fx.cli("resolve", "--context", context)
+        self.assertEqual((code, report["status"], stderr), (0, "empty", ""))
+        self.assertEqual((report["metrics"]["pattern_reads"], report["metrics"]["asset_reads"]), (0, 0))
+        base = visual_base_spec()
+        fresh, _ = fx.resolve(ctx(artifact="website"))
+        self.assertEqual(fresh["selection_digest"], report["selection_digest"])
+        projected = pv.project_visual(base, fresh, context=WEB)["spec"]
+        self.assertEqual(projected, base)
+        self.assertEqual(self.design.validate_spec(base), self.design.validate_spec(projected))
+        self.assertEqual(tree_digest(fx.repo), before)
+
+    def test_legacy_import_roundtrip_stays_default_and_schema_only(self):
+        seed = Path(p.__file__).resolve().parents[1] / "seeds/brand/design-patterns/ultra-modern-lovable-style/pattern.json"
+        data = seed.read_bytes()
+        conversion = pv.legacy_to_draft(data, pattern_id="example.lovable", applies_to=WEBSITE, owner="design",
+                                        source_ref="seed")
+        approved = dict(conversion["draft"], status="approved", version="1.0.0",
+                        approval={"by": "design review", "reference": "synthetic-review", "at": "2026-09-02T00:00:00Z"})
+        fx = Fixture(self)
+        fx.publish(fx.repo_patterns, "repo.main", [approved],
+                   assets={"example.lovable": {"visual-legacy/pattern.json": data}})
+        fx.repo_bindings([binding("legacy", [ref("repo.main", approved)], role="default", when=WEBSITE)])
+        report, reader = fx.resolve(ctx(artifact="website"))
+        self.assertEqual({item["state"] for item in report["requirements"]}, {"default"})
+        self.assertEqual(reader.count("asset"), 0)
+        spec = pv.project_visual(visual_base_spec(), report, context=WEB)["spec"]
+        self.assertEqual(spec["layout_grammar"]["section_spacing"], "clamp(4rem, 8vw, 8rem)")
+        ref_legacy = [item for item in spec["pattern_context"]["asset_refs"] if item["kind"] == "visual-legacy"]
+        lock = p.build_lock(report, p.parse_context(ctx(artifact="website")), now=NOW)
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")), today=TODAY)["status"], "ok")
+        self.assertEqual(p.read_asset(fx.roots(), ref_legacy[0], selection=lock), data,
+                         "original bytes are preserved")
+
+    def test_legacy_capture_approve_roundtrip_reads_the_asset_after_approval(self):
+        self.assertIn("--files-from", cli_options("capture"), "asset-bearing capture is part of the joined core")
+        seed = Path(p.__file__).resolve().parents[1] / "seeds/brand/design-patterns/ultra-modern-lovable-style/pattern.json"
+        data = seed.read_bytes()
+        fx = Fixture(self)
+        conversion = pv.legacy_to_draft(data, pattern_id="example.lovable", applies_to=WEBSITE, owner="design",
+                                        source_ref="brand/design-patterns/ultra-modern-lovable-style/pattern.json")
+        staged = pv.stage_draft(conversion, data, fx.root / "scratch" / "draft")
+        code, captured, _ = fx.cli("capture", "--input", staged, "--scope", "repo", "--name", "example.lovable",
+                                   "--source-id", "repo.main")
+        self.assertEqual(code, 0, captured["diagnostics"])
+        draft_path = fx.repo_patterns / "example.lovable" / "0.1.0" / "pattern.json"
+        approval = fx.write_json("approval.json", {"by": "design review", "reference": "synthetic-review",
+                                                   "at": "2026-09-27T00:00:00Z"})
+        code, approved, _ = fx.cli("approve", "--path", draft_path, "--version", "1.0.0", "--approval", approval,
+                                   "--expected-digest", p.content_digest(conversion["draft"]))
+        self.assertEqual(code, 0, approved["diagnostics"])
+        body = json.loads((fx.repo_patterns / "example.lovable" / "1.0.0" / "pattern.json").read_text(encoding="utf-8"))
+        fx.repo_bindings([binding("legacy", [ref("repo.main", body)], role="default", when=WEBSITE)])
+        lock_path = fx.repo / ".claude" / "plans" / "demo" / "patterns.lock.json"
+        lock_path.parent.mkdir(parents=True)
+        code, report, _ = fx.cli("resolve", "--context", fx.write_json("c.json", ctx(artifact="website")),
+                                 "--lock", lock_path)
+        self.assertEqual((code, report["metrics"]["asset_reads"]), (0, 0))
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, p.parse_context(ctx(artifact="website")),
+                                       today=TODAY)["status"], "ok")
+        legacy_ref = p.asset_refs(lock, kind="visual-legacy")[0]
+        self.assertEqual(p.read_asset(fx.roots(), legacy_ref, selection=lock), data,
+                         "the approved version still carries the original legacy bytes")
+
+    def test_launcher_gives_the_same_selection_as_the_direct_cli(self):
+        fx = Fixture(self)
+        fx.publish(fx.repo_patterns, "repo.main", [self.rt.dashboard],
+                   assets={"example.dashboard": {"tokens.json": TOKENS}})
+        fx.repo_bindings([binding("dashboard", [ref("repo.main", self.rt.dashboard)], when=WEBSITE)])
+        fx.use_launcher_roots()
+        context = fx.write_json("context.json", ctx(artifact="website"))
+        lock_path = fx.repo / ".claude" / "runtime" / "patterns" / "run-l" / "patterns.lock.json"
+        lock_path.parent.mkdir(parents=True)
+        code, launched, stderr = fx.launcher("resolve", "--context", context, "--lock", lock_path)
+        _, direct, _ = fx.cli("resolve", "--context", context)
+        self.assertEqual((code, launched["status"]), (0, "ready"), stderr)
+        self.assertEqual(launched["selection_digest"], direct["selection_digest"])
+        self.assertEqual(launched["requirements"], direct["requirements"])
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(p.verify_lock(fx.roots(), lock, WEB, today=TODAY)["status"], "ok")
+        code, verified, _ = fx.launcher("verify-lock", "--lock", lock_path, "--context", context)
+        self.assertEqual((code, verified["status"]), (0, "ok"))
+        spec = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertEqual(spec["layout_grammar"]["max_width"], "1200px")
+        self.assertEqual(pv.validate_visual(spec, lock)["status"], "passed")
+        asset = p.asset_refs(lock, kind="tokens")[0]
+        self.assertEqual(p.read_asset(fx.roots(), asset, domain="frontend", selection=lock), TOKENS)
+
+
+# Card 5.2.a: one explicit acceptance case per frontend consumer. "helper" is what this suite
+# executes through the real resolver, adapter and shared design validator; "deferred" is model,
+# render or host behavior, a supplemental deferral under RN-14 (not a V17 feature gate) that stays
+# unobserved. A row is never evidence of that deferred part.
+CONSUMER_ACCEPTANCE = {
+    "design-dna": {"phase": "define (direct decision)", "test": "test_design_dna_defaults_fill_only_unset_choices",
+                   "input": "repository default visual.palette.accent; Design DNA profile tokens in the base spec",
+                   "expected": "accent projected, other profile tokens kept, profile/corpus files byte-identical",
+                   "deferred": "supplemental, unobserved (RN-14): retrieval and model choice honoring the bound palette"},
+    "frontend-typography": {"phase": "define (direct decision)", "test": "test_typography_prose_clause_stays_a_review_item",
+                            "input": "mandatory prose typography clause without a v1 setting",
+                            "expected": "typography unchanged, clause listed in review_required, validate never passes it",
+                            "deferred": "supplemental, unobserved (RN-14): model picks fonts satisfying the clause"},
+    "frontend-motion": {"phase": "define (direct decision)", "test": "test_motion_bound_setting_constrains_motion_mode",
+                        "input": "mandatory visual.interaction.scroll-smoothing=true",
+                        "expected": "shared validator refuses mode none with the projected value; a library mode passes",
+                        "deferred": "supplemental, unobserved (RN-14): model chooses a compatible motion library"},
+    "frontend-shader": {"phase": "define (direct decision)", "test": "test_shader_default_prose_leaves_shader_unconstrained",
+                        "input": "default prose shader clause, no assets",
+                        "expected": "shader field unchanged, clause in review_required, zero asset reads",
+                        "deferred": "supplemental, unobserved (RN-14): model shader decision"},
+    "generate-web": {"phase": "build (render; direct --mode mockup and --brief entries resolve themselves)",
+                     "test": "test_direct_entry_resolves_itself_before_the_first_design_choice",
+                     "input": "no handed-over lock, mandatory max-width; also a handed-over lock and projected, drifted "
+                              "and stale-context specs for target single-file",
+                     "expected": "direct entry resolves, locks in the repository run, projects before binding and "
+                                 "validates before render; drift and stale context fail before render",
+                     "deferred": "supplemental, unobserved (RN-14): actual HTML render and browser check"},
+    "generate-app": {"phase": "build (scaffold)", "test": "test_renderers_block_on_stale_or_mismatched_specs",
+                     "input": "verified lock; projected, drifted and stale-context specs for target app",
+                     "expected": "projected spec passes; drift and stale context fail before scaffolding",
+                     "deferred": "supplemental, unobserved (RN-14): actual project scaffold and build"},
+    "frontend-design": {"phase": "define (orchestrator)", "test": "test_selection_adapter_spec_review_roundtrip",
+                        "input": "repo/pack/personal defaults plus mandatory setting",
+                        "expected": "precedence winners projected into the spec with pattern_context",
+                        "deferred": "supplemental, unobserved (RN-14): end-to-end orchestrated session"},
+    "frontend-design-review": {"phase": "review", "test": "test_review_fails_when_the_built_spec_drifts_from_the_baseline",
+                               "input": "verified lock and a drifted built spec",
+                               "expected": "per-clause failures, never clearance",
+                               "deferred": "supplemental, unobserved (RN-14): review of a rendered UI"},
+    "frontend-style-extract": {"phase": "capture", "test": "test_legacy_capture_approve_roundtrip_reads_the_asset_after_approval",
+                               "input": "legacy visual pattern bytes",
+                               "expected": "draft of defaults captured with sidecar; bytes readable after approval",
+                               "deferred": "supplemental, unobserved (RN-14): real extraction from an authorized site"},
+    "generate-style-learn": {"phase": "capture", "test": "tests/unit/pattern-visual.py LegacyTests (palette tokens map to defaults)",
+                             "input": "palette observation via the legacy adapter",
+                             "expected": "only #RRGGBB tokens become defaults; no confirmed confidence",
+                             "deferred": "supplemental, unobserved (RN-14): real palette learning"},
+}
+
+
+class ConsumerAcceptanceTests(unittest.TestCase):
+    """5.2.a helper-level cases; the deferred column is a supplemental, unobserved deferral (RN-14)."""
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.design = load_design_contract()
+
+    def bind(self, requirements, role="required"):
+        pattern = make_pattern("example.consumer", applies_to=WEBSITE, requirements=requirements)
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [pattern])
+        self.fx.repo_bindings([binding("web", [ref("repo.main", pattern)], role=role, when=WEBSITE)])
+        report, reader = self.fx.resolve(ctx(artifact="website"))
+        self.assertEqual(report["status"], "ready", report["diagnostics"])
+        lock = p.build_lock(report, WEB, now=NOW)
+        self.assertEqual(p.verify_lock(self.fx.roots(), lock, WEB, today=TODAY)["status"], "ok")
+        return lock, reader
+
+    def test_every_frontend_consumer_has_a_mapped_case(self):
+        names = {"design-dna", "frontend-typography", "frontend-motion", "frontend-shader", "generate-web",
+                 "generate-app", "frontend-design", "frontend-design-review", "frontend-style-extract",
+                 "generate-style-learn"}
+        self.assertEqual(set(CONSUMER_ACCEPTANCE), names)
+        for name, row in CONSUMER_ACCEPTANCE.items():
+            self.assertTrue(all(row[key] for key in ("phase", "input", "expected", "test", "deferred")), name)
+            if row["test"].startswith("test_"):
+                self.assertTrue(any(hasattr(cls, row["test"]) for cls in
+                                    (VisualRoundtripTests, type(self), DirectEntryTests)), name)
+
+    def test_design_dna_defaults_fill_only_unset_choices(self):
+        profiles = Path(p.__file__).resolve().parents[1] / "skills" / "design-dna" / "profiles"
+        before = tree_digest(profiles)
+        lock, _ = self.bind([clause("ACCENT", "default", "visual.palette.accent", "#1A2B3C")], role="default")
+        spec = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertEqual(spec["palette"]["tokens"], {"ink": "#141413", "paper": "#faf9f5", "accent": "#1a2b3c"})
+        self.assertEqual(spec["typography"], visual_base_spec()["typography"])
+        self.assertEqual(tree_digest(profiles), before, "profile files are never modified")
+
+    def test_typography_prose_clause_stays_a_review_item(self):
+        lock, _ = self.bind([clause("TYPE", "must", text="Headings use a serif family with a sans body.")])
+        result = pv.project_visual(visual_base_spec(), lock)
+        self.assertEqual(result["spec"]["typography"], visual_base_spec()["typography"])
+        self.assertEqual([item["clause"] for item in result["review_required"]], ["example.consumer@1.0.0#TYPE"])
+        check = pv.validate_visual(result["spec"], lock)
+        self.assertEqual((check["status"], check["checks"]), ("passed", []))
+        self.assertEqual([item["clause"] for item in check["review_required"]], ["example.consumer@1.0.0#TYPE"],
+                         "no mechanical check exists for prose; review must assess it")
+
+    def test_motion_bound_setting_constrains_motion_mode(self):
+        lock, _ = self.bind([clause("SMOOTH", "must", "visual.interaction.scroll-smoothing", True)])
+        still = visual_base_spec()
+        still["motion"] = {"schema_version": 1, "mode": "none", "libraries": [], "key_animations": [],
+                           "perf_budget": {"fallback_for_prefers_reduced_motion": "no-animation"}}
+        with self.assertRaises(self.design.DesignError):
+            self.design.validate_spec(pv.project_visual(still, lock)["spec"])
+        moving = pv.project_visual(visual_base_spec(), lock)["spec"]
+        self.assertIs(moving["interaction_signature"]["scroll_smoothing"], True)
+        self.assertEqual(self.design.validate_spec(moving)["kind"], "frontend")
+
+    def test_shader_default_prose_leaves_shader_unconstrained(self):
+        lock, reader = self.bind([clause("SHADER", "default", text="Prefer a low-complexity gradient backdrop.")],
+                                 role="default")
+        result = pv.project_visual(visual_base_spec(), lock)
+        self.assertIsNone(result["spec"]["shader"])
+        self.assertEqual([item["clause"] for item in result["review_required"]], ["example.consumer@1.0.0#SHADER"])
+        self.assertEqual((reader.count("asset"), result["pattern_context"]["asset_refs"]), (0, []))
+
+    def test_renderers_block_on_stale_or_mismatched_specs(self):
+        lock, _ = self.bind([clause("MAX", "must", "visual.layout.max-width", "1200px"),
+                             clause("GRID", "default", "visual.layout.grid", "12-col")])
+        for target in ("single-file", "app"):
+            with self.subTest(renderer="generate-web" if target == "single-file" else "generate-app"):
+                spec = pv.project_visual(dict(visual_base_spec(), target_format=target), lock)["spec"]
+                self.assertEqual(self.design.validate_spec(spec)["design"]["target_format"], target)
+                self.assertEqual(pv.validate_visual(spec, lock)["status"], "passed")
+                drifted = copy.deepcopy(spec)
+                drifted["layout_grammar"]["max_width"] = "100%"
+                self.assertEqual(pv.validate_visual(drifted, lock)["status"], "failed")
+                stale = copy.deepcopy(spec)
+                stale["pattern_context"]["selection_digest"] = "f" * 64
+                self.assertEqual(pv.validate_visual(stale, lock)["status"], "failed")
+
+
+class DirectEntryTests(unittest.TestCase):
+    """5.2.a direct render entries with no handed-over lock (V18 M-1 and L-4, RN-14).
+
+    Helper and source-wiring evidence only. The real CLI resolves and writes a repository lock,
+    and the adapter projects and validates in the order that generate-web's direct-entry steps
+    state. This is not an executed model route, a browser render or a host cell.
+    """
+
+    SKILL = ROOT / "skills" / "generate-web" / "SKILL.md"
+    MOCKUP = ROOT / "skills" / "generate-web" / "references" / "mockup.md"
+
+    def setUp(self):
+        self.fx = Fixture(self)
+        self.design = load_design_contract()
+        self.pattern = make_pattern("example.web", applies_to=WEBSITE, requirements=[
+            clause("MAX", "must", "visual.layout.max-width", "1200px")])
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [self.pattern])
+        self.fx.repo_bindings([binding("web", [ref("repo.main", self.pattern)], when=WEBSITE)])
+        self.context = self.fx.write_json("context.json", ctx(artifact="website"))
+        self.run = self.fx.repo / ".claude" / "runtime" / "patterns" / "mockup-1"
+        self.run.mkdir(parents=True)
+        self.lock_path = self.run / "patterns.lock.json"
+
+    def direct_entry(self, run=None):
+        """The documented order: resolve; on ready, the same command with --lock; verify-lock."""
+        lock_path = self.lock_path if run is None else run / "patterns.lock.json"
+        code, report, _ = self.fx.cli("resolve", "--context", self.context)
+        if report["status"] != "ready":
+            return code, report, None
+        code, locked, _ = self.fx.cli("resolve", "--context", self.context, "--lock", lock_path)
+        self.assertEqual((code, locked["selection_digest"]), (0, report["selection_digest"]))
+        code, verified, _ = self.fx.cli("verify-lock", "--lock", lock_path, "--context", self.context)
+        self.assertEqual((code, verified["status"]), (0, "ok"), verified["diagnostics"])
+        return code, report, json.loads(lock_path.read_text(encoding="utf-8"))
+
+    def test_direct_entry_resolves_itself_before_the_first_design_choice(self):
+        code, report, lock = self.direct_entry()
+        self.assertEqual((code, report["status"]), (0, "ready"))
+        self.assertTrue(self.lock_path.resolve().is_relative_to(self.fx.repo.resolve()),
+                        "the lock is written inside the repository run")
+        mandatory = [item["clause"] for item in report["requirements"] if item["state"] == "mandatory"]
+        self.assertEqual(mandatory, ["example.web@1.0.0#MAX"], "the required clause reaches the design choice")
+        base = visual_base_spec()
+        self.assertEqual(pv.validate_visual(base, lock)["status"], "failed",
+                         "an unprojected 1152px spec cannot reach rendering")
+        spec = pv.project_visual(base, lock)["spec"]
+        final = self.run / "frontend-design-spec.json"
+        final.write_text(json.dumps(spec), encoding="utf-8")
+        self.assertNotEqual(hashlib.sha256(json.dumps(base).encode("utf-8")).hexdigest(),
+                            hashlib.sha256(final.read_bytes()).hexdigest(),
+                            "projection changes the spec bytes, so it must precede the spec's binding")
+        loaded = json.loads(final.read_text(encoding="utf-8"))
+        self.assertEqual(loaded["layout_grammar"]["max_width"], "1200px")
+        self.assertEqual(self.design.validate_spec(loaded)["kind"], "frontend")
+        self.assertEqual(pv.validate_visual(loaded, lock)["status"], "passed")
+
+    def test_empty_direct_entry_writes_no_lock_and_keeps_rendering_unchanged(self):
+        fx = Fixture(self)
+        before = tree_digest(fx.repo)
+        context = fx.write_json("context.json", ctx(artifact="website"))
+        code, report, stderr = fx.cli("resolve", "--context", context)
+        self.assertEqual((code, report["status"], stderr), (0, "empty", ""))
+        self.assertEqual((report["metrics"]["pattern_reads"], report["metrics"]["asset_reads"]), (0, 0))
+        self.assertEqual(tree_digest(fx.repo), before, "no lock, run directory or pattern_context is forced")
+        fresh, _ = fx.resolve(ctx(artifact="website"))
+        projected = pv.project_visual(visual_base_spec(), fresh, context=WEB)["spec"]
+        self.assertEqual(projected, visual_base_spec())
+        self.assertNotIn("pattern_context", projected)
+
+    def test_unusable_profile_context_or_input_blocks_the_design_decision(self):
+        cases = []
+        self.fx.pack_context = p.pack_context_from_profile(error=("PROFILE_REQUIRED", "required pack missing"))
+        cases.append(("profile error", self.context, "unavailable"))
+        for label, context, expected in cases:
+            code, report, _ = self.fx.cli("resolve", "--context", context, "--lock", self.lock_path)
+            self.assertEqual((code, report["status"]), (p.EXIT_CODES[expected], expected), label)
+            self.assertFalse(self.lock_path.exists(), label)
+        self.fx.pack_context = dict(self.fx.neutral_context(), status="fallback",
+                                    diagnostics=[{"code": "PACK_INVALID", "message": "broken"}])
+        code, report, _ = self.fx.cli("resolve", "--context", self.context, "--lock", self.lock_path)
+        self.assertEqual((code, report["status"]), (p.EXIT_CODES["unavailable"], "unavailable"), "pack fallback")
+        self.assertFalse(self.lock_path.exists())
+        self.fx.pack_context = self.fx.neutral_context()
+        unevidenced = self.fx.write_json("unevidenced.json", {"schema_version": 1, "facts": {"artifact": "website"},
+                                                              "evidence": {}})
+        code, report, _ = self.fx.cli("resolve", "--context", unevidenced, "--lock", self.lock_path)
+        self.assertEqual((code, report["status"]), (p.EXIT_CODES["invalid"], "invalid"), "a fact without evidence")
+        self.assertFalse(self.lock_path.exists())
+        self.fx.repo_bindings([binding("web", [ref("repo.main", self.pattern)],
+                                       when={"artifact": ["website"], "deployment.target": ["prod"]})])
+        code, report, _ = self.fx.cli("resolve", "--context", self.context, "--lock", self.lock_path)
+        self.assertEqual((code, report["status"]), (p.EXIT_CODES["needs-context"], "needs-context"),
+                         "an unknown target is never inferred")
+        self.assertFalse(self.lock_path.exists())
+
+    def test_handed_over_lock_is_verified_first_and_stale_or_edited_locks_block(self):
+        _, _, lock = self.direct_entry()
+        other = self.fx.write_json("other-context.json", ctx(artifact="report"))
+        code, verified, _ = self.fx.cli("verify-lock", "--lock", self.lock_path, "--context", other)
+        self.assertNotEqual((code, verified["status"]), (0, "ok"), "a lock for another context does not continue")
+        tampered = copy.deepcopy(lock)
+        tampered["settings"]["visual.layout.max-width"]["value"] = "100%"
+        edited = self.run / "edited.lock.json"
+        edited.write_text(json.dumps(tampered), encoding="utf-8")
+        code, verified, _ = self.fx.cli("verify-lock", "--lock", edited, "--context", self.context)
+        self.assertNotEqual((code, verified["status"]), (0, "ok"), "an edited lock does not continue")
+        with self.assertRaises(p.PatternError):
+            pv.project_visual(visual_base_spec(), tampered)
+        spec = pv.project_visual(visual_base_spec(), lock)["spec"]
+        stale = copy.deepcopy(spec)
+        stale["pattern_context"]["selection_digest"] = "f" * 64
+        self.assertEqual(pv.validate_visual(stale, lock)["status"], "failed", "a mismatched supplied spec blocks")
+        changed = copy.deepcopy(self.pattern)
+        changed["requirements"][0]["value"] = "1440px"
+        self.fx.publish(self.fx.repo_patterns, "repo.main", [changed])
+        code, verified, _ = self.fx.cli("verify-lock", "--lock", self.lock_path, "--context", self.context)
+        self.assertNotEqual((code, verified["status"]), (0, "ok"), "a changed pinned source blocks continuation")
+
+    def test_mockup_and_plain_brief_entries_share_one_resolution_step(self):
+        """Source wiring plus helper parity; the instructions are asserted, not an executed model route."""
+        section = " ".join(self.SKILL.read_text(encoding="utf-8").split("## Reusable patterns", 1)[1]
+                           .split("\n## ", 1)[0].split())
+        for needle in ("Direct entry without a handed-over lock", "`--mode mockup --brief`",
+                       "plain artifact `--brief` route", "**before the first design choice**",
+                       "`empty`: continue exactly as without patterns. Write no lock",
+                       "`li-pattern verify-lock`", "before that spec's P05 binding",
+                       "Never project after binding", "**before rendering**", "never hand-write a lock"):
+            self.assertIn(needle, section, needle)
+        order = [section.index(needle) for needle in (
+            "`li-pattern resolve --context", "`project_visual`", "`design_contract.load_design`",
+            "**before rendering**")]
+        self.assertEqual(order, sorted(order), "resolve, then project, then load, then validate before render")
+        workflow = " ".join(self.SKILL.read_text(encoding="utf-8").split("## Workflow", 1)[1]
+                            .split("\n## ", 1)[0].split())
+        self.assertIn("follow the direct-entry steps in [Reusable patterns](#reusable-patterns) before the first "
+                      "design choice", workflow)
+        mockup = " ".join(self.MOCKUP.read_text(encoding="utf-8").split())
+        first = mockup.index("[direct-entry steps](../SKILL.md#reusable-patterns) before the first design choice")
+        self.assertLess(first, mockup.index("use the `frontend-design` decision method"),
+                        "the mockup resolves before its first design decision")
+        self.assertLess(mockup.index("apply `project_visual` with the verified lock"),
+                        mockup.index("3. Load the bound `frontend-design-spec.json`"))
+        _, mockup_report, _ = self.direct_entry(run=self.run)
+        brief_run = self.fx.repo / ".claude" / "runtime" / "patterns" / "brief-1"
+        brief_run.mkdir(parents=True)
+        _, brief_report, brief_lock = self.direct_entry(run=brief_run)
+        self.assertEqual(mockup_report["selection_digest"], brief_report["selection_digest"])
+        self.assertEqual(mockup_report["settings"], brief_report["settings"])
+        cycle = self.fx.repo / ".claude" / "plans" / "demo" / "patterns.lock.json"
+        cycle.parent.mkdir(parents=True)
+        code, planned, _ = self.fx.cli("resolve", "--context", self.context, "--lock", cycle)
+        self.assertEqual((code, planned["selection_digest"]), (0, brief_lock["selection_digest"]),
+                         "direct entry and cycle entry produce the same selection")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

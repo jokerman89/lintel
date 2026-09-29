@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # component: lintel-paths
-# implements: ADR-0005
+# implements: ADR-0005, ADR-0038
 # intent: .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md
 # constraints: frozen zone — ~30 skills + bin tools resolve paths through this contract
-# last_intent_review: 2026-06-12
+# last_intent_review: 2026-09-28
 #
 # lib/paths.sh — single source of truth for where Lintel reads and writes.
 # Sourced by bin tools, hooks and lib helpers. SKILL.md prose references the
@@ -14,7 +14,8 @@
 #                               working-state.md, personas.md
 #   <repo>/.claude/decisions/   committed ADRs (NNNN-*.md)
 #   <repo>/.claude/plans/       committed plans — todo.md, <slug>/{plan,spec,prompt}.md
-#   <repo>/.claude/runtime/     GITIGNORED — state/, sessions/, jobs/, audit/
+#   <repo>/.claude/patterns/    committed reusable-pattern catalog + bindings (ADR-0038)
+#   <repo>/.claude/runtime/     GITIGNORED — state/, sessions/, jobs/, audit/, patterns/<run-id>/
 # Operator identity stays in ~/.lintel (packs, profile.yaml, roles, brand, config)
 # — identity is configuration, not output.
 #
@@ -79,6 +80,34 @@ lintel_sessions_dir()  { _lintel_require_root || return 1; local r; r=$(lintel_r
 lintel_repo_audit_dir(){ _lintel_require_root || return 1; printf '%s/.claude/runtime/audit' "$(lintel_repo_root)"; }
 lintel_repo_jobs_dir() { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/jobs" "$LINTEL_HOME/jobs"; }
 
+# ── repo-scoped: reusable patterns (ADR-0038) ────────────────────────────────
+# No legacy location exists. Personal patterns live in $LINTEL_HOME/patterns and
+# are derived by lib/patterns.py from the roots envelope, never from these helpers.
+lintel_patterns_dir()  { _lintel_require_root || return 1; printf '%s/.claude/patterns' "$(lintel_repo_root)"; }
+# Scratch output is addressed by an explicit run ID, never by latest-mtime lookup.
+# Run IDs follow the core's portable segment rules (no dot/dash lead, "..",
+# trailing dot or Windows device name); the refusal never echoes the raw input.
+_lintel_pattern_run_id_ok() {
+  case "$1" in
+    ''|.*|-*|*..*|*.|*[!A-Za-z0-9._-]*) return 1 ;;
+  esac
+  [ "${#1}" -le 128 ] || return 1
+  case "${1%%.*}" in
+    [Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9]) return 1 ;;
+  esac
+}
+lintel_pattern_runtime_dir() { # [run-id] → base dir, or the run's dir
+  _lintel_require_root || return 1
+  local base
+  base="$(lintel_repo_root)/.claude/runtime/patterns"
+  if [ "$#" -eq 0 ]; then printf '%s' "$base"; return 0; fi
+  _lintel_pattern_run_id_ok "$1" || {
+    printf '[lintel/paths] invalid pattern run ID: use 1-128 of A-Z a-z 0-9 . _ -, no leading dot or dash, no "..", trailing dot or device name\n' >&2
+    return 2
+  }
+  printf '%s/%s' "$base" "$1"
+}
+
 # ── operator-global (identity + cross-repo registry — unchanged in v5) ───────
 lintel_global_audit_dir() { printf '%s/audit' "$LINTEL_HOME"; }
 lintel_jobs_registry()    { printf '%s/jobs/_active.md' "$LINTEL_HOME"; }
@@ -90,7 +119,8 @@ if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   if lintel_layout_migrated; then echo "  layout: v5 (migrated)"; else echo "  layout: legacy (un-migrated)"; fi
   for f in lintel_lessons_file lintel_working_state_file lintel_personas_file \
            lintel_decisions_dir lintel_todo_file lintel_state_dir \
-           lintel_sessions_dir lintel_repo_jobs_dir; do
+           lintel_sessions_dir lintel_repo_jobs_dir lintel_patterns_dir \
+           lintel_pattern_runtime_dir; do
     printf '  %-28s %s\n' "$f" "$($f)"
   done
 fi

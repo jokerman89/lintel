@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `frontend-typography` sub-skill — typography-curator for the frontend-design family.
@@ -187,6 +189,15 @@ CLI remains valid for an already written, explicitly owned relative file.
 For `--customer-share`, apply `/li:compliance-gate --check font-licensing` to the
 same data or an owned relative staging file before release; absence of a named
 output does not remove the required check.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Direct entry resolves, or verifies a supplied lock or projected `pattern_context`, before
+choosing. Mandatory clauses bound the typography decision; defaults apply only where the brief
+did not decide; unconstrained choices follow the usual Design DNA brief > profile > corpus
+rules. Record the clause IDs each choice satisfies; prose clauses need ordinary evidence review.
+Pattern text is not evidence of licensing or accessibility.
 
 ## Status protocol
 

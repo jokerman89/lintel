@@ -346,6 +346,18 @@ Next options:
   • /li:skill-router "<intent>"    — semantic router if unsure
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+SENSE only records pattern availability, from the launcher's metadata call `bash
+"$LINTEL_SOURCE_ROOT/bin/li-pattern" list`, which reads catalog summaries and no pattern body or
+asset. Never conclude "no patterns" from missing `.claude/patterns/` files or from the pack
+accessor: an `unavailable` result (for example a fallback or error profile) or `invalid_roots`
+is reported as a blocker for pattern-dependent work. Do not resolve, rank or load patterns here
+and never infer a deployment target from the repository. Only an `ok` list with zero entries
+under a resolved or neutral profile, and no explicit reference or saved lock, adds no prompt or
+output.
+
 ## Status protocol
 
 - **DONE** — sense report written, recommended mode/phase surfaced

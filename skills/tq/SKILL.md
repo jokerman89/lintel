@@ -6,7 +6,7 @@ description: Use for testing and QA-strategy depth — test-pyramid review, cove
 color: green
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Quality-bearing work lacks consumer-specific contracts, comparable performance evidence, regression coverage and verified recovery."
 navigation:
@@ -118,6 +118,16 @@ checkpoint criteria. Missing/failed mandatory evidence blocks despite a
 high average. DONE requires actual selected checks and independent acceptance;
 DONE_WITH_CONCERNS retains only advisory issues; BLOCKED/NEEDS_CONTEXT names required
 gaps. Module completion is not SHIP permission or enclosing-task completion.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the testing and quality expectations bound to the current target context
+and passes each sub-capability only its projected clauses (`project` for the mapped package, or
+the clauses mapped to it). An unknown target or quality tier yields `needs-context` and blocks
+the dependent design; no live cloud, tenant or environment discovery is implied, and
+requirements are never inferred from generic recommendations. When the runtime reports no
+patterns, the module is unchanged.
 
 ## Integration and dormant hooks
 

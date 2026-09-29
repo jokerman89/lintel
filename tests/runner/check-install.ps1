@@ -249,7 +249,7 @@ try {
   foreach ($path in @('scaffolding/01-foundation/.claude/memory/lessons.md',
       'hooks/shared/session-digest/run.sh', 'config.yaml', 'profile.yaml',
       'packs/_default/pack.yaml', 'lib/pack-resolver.sh', 'bin/li-scaffold',
-      'bin/li-copilot', 'skills/cycle/SKILL.md', 'shims/copilot/COPILOT.md')) {
+      'bin/li-copilot', 'bin/li-run', 'skills/cycle/SKILL.md', 'shims/copilot/COPILOT.md')) {
     Assert-Exists $path
   }
 

@@ -450,6 +450,16 @@ audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CO
 > fabricated (K6). Token actuals for estimator calibration are CAPTURE Step 1b's stream
 > (`granularity.jsonl` — dormant by decision, ADR-0008), not this one.
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+cycle adds no separate pattern loader: each phase applies its own obligation, and cycle entry
+and direct phase entry run the same command with the same inputs, so they produce the same
+`selection_digest`. When the runtime reports no patterns (per the contract), the cycle adds no
+prompt, phase, lock or artifact, and the phase/approval protocol above is unchanged. When PLAN
+has written a lock, pass its path and the saved context file to BUILD, REVIEW, SHIP and RESUME
+instead of re-resolving.
+
 ## Status protocol
 
 - **DONE** — all phases in chain DONE, cycle complete

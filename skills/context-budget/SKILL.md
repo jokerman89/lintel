@@ -5,7 +5,7 @@ description: Show observed context capacity and usage where available, clearly l
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # Context budget

@@ -22,7 +22,9 @@ grep -q 'Intentional drift' "$TMP/docs/wiki/skills.md"
 # CRLF source must not silently empty the skill index.
 grep -q '| catalog | foundation |  | internal | \[claude-code, codex, copilot\] |' "$TMP/docs/wiki/skills.md"
 grep -q '| spec-kit | foundation |' "$TMP/docs/wiki/skills.md"
-grep -q '| GitHub Copilot CLI | .github/skills | documented | not_run |' "$TMP/README.md"
+# The capability table renders a surface with recorded observations (lib/cli-tiers.yaml) as
+# "partial session observations"; copilot-cli has recorded observations since 0.13.0.
+grep -q '| GitHub Copilot CLI | .github/skills | documented | partial session observations |' "$TMP/README.md"
 
 # Different schema data must change the reference, not require a generator edit.
 source "$ROOT/lib/wiki-gen.sh"

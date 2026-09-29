@@ -129,8 +129,9 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - All substantive sections, preserving source detail rather than a fixed section cap
    - Optional: features grid, FAQ, footer
    Resolve direct brief input into the same frontend contract, pinning the existing
-   project/profile and retrieval evidence before rendering. No parallel private
-   schema for this entry point.
+   project/profile and retrieval evidence before rendering. With no handed-over lock, follow
+   the direct-entry steps in [Reusable patterns](#reusable-patterns) before the first design
+   choice. No parallel private schema for this entry point.
 
 3. **Apply the `WebExperienceCritic` method** for layout review BEFORE generation:
    - Information hierarchy
@@ -174,6 +175,50 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 7. **Optional preview** through the shared browser operations on an authorized owned
    local server. Verify health and actual session ownership first; provider availability
    and URL admission are not established by this instruction.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+generate-web still makes no design decisions of its own; it renders the projected values.
+
+**Handed-over lock** (from-frontend-design mode, or a direct run that is given a lock): run
+`li-pattern verify-lock` on it against the current context before rendering. Only `ok`
+continues. Then check the spec's `pattern_context` with `validate_visual` against that verified
+lock, never against a stored report. A stale context, a mismatched setting or an unusable
+selection blocks the render; it is not corrected here.
+
+**Direct entry without a handed-over lock** (`--mode mockup --brief`, and the plain artifact
+`--brief` route) resolves itself through the same contract. Do this **before the first design
+choice**:
+
+1. Write the evidenced context, and turn explicit brief decisions about bound settings into
+   `--overrides`. Omit unknown facts, and never infer a target.
+2. Run `li-pattern resolve --context <ctx> [--overrides <file>]` from the trusted source root.
+   - `empty`: continue exactly as without patterns. Write no lock and no `pattern_context`.
+   - `ready`: rerun the same command with `--lock
+     .claude/runtime/patterns/<run-id>/patterns.lock.json`. The lock goes inside this repository
+     even when `--out` is elsewhere. Confirm the same `selection_digest`, then run
+     `li-pattern verify-lock` on the new lock against the same context; only `ok` continues.
+     Carry the full requirements and setting winners into the design choices.
+   - Any other status blocks the dependent design decision and the render: `needs-context`,
+     `conflict`, `unavailable` (including a pack context in `fallback` or `error`) and
+     `invalid`. So does a run that prints no JSON report. Report the status; never
+     hand-write a lock, and never fall back to another source or renderer.
+3. Apply `$LINTEL_SOURCE_ROOT/lib/pattern_visual.py` `project_visual` with the verified lock to
+   the synthesized design spec. This writes the **final** `frontend-design-spec.json`, with its
+   `pattern_context`, before that spec's P05 binding is prepared.
+   - Never project after binding: that would change bytes the bound context already selected.
+4. Load the bound spec with `design_contract.load_design` and the current P07 configuration.
+   With a `ready` selection, pass `pattern_lock` and `pattern_context`, and select both files
+   plus `.claude/patterns` in the P05 context; this is what lets a verified pattern palette winner
+   outrank the pinned profile.
+   Run `validate_visual` against the verified lock **before rendering**; only `passed`
+   continues, and unknown settings stay open review items.
+
+The mockup procedure's step 2 decision method and step 3 load follow these steps; see
+[mockup mode](references/mockup.md). Direct entry and cycle entry call the same command with the
+same inputs, so they produce the same `selection_digest`. When the runtime reports no patterns,
+rendering is unchanged.
 
 ## Report format
 

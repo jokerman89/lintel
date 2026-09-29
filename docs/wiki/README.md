@@ -32,6 +32,7 @@ See [docs/concepts/](../concepts/) for canonical conceptual references:
 - [pack-defaults](../concepts/pack-defaults.md)
 - [pack-inheritance](../concepts/pack-inheritance.md)
 - [pack-resolver](../concepts/pack-resolver.md)
+- [patterns](../concepts/patterns.md)
 - [planner-as-module](../concepts/planner-as-module.md)
 - [prompt-house-style](../concepts/prompt-house-style.md)
 - [sc-module](../concepts/sc-module.md)

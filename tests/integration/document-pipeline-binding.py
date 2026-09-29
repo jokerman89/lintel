@@ -511,6 +511,102 @@ class PipelineBinding(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "projection"):
             self.inspect()
 
+    # ---- reusable patterns: the pipeline caller forwards both selection flags (ADR-0038, RN-15/RN-16)
+    def patterned(self, value="#112233"):
+        """A mixed design with a real repository pattern, lock, current context and attachment."""
+        import patterns as pat
+        import pattern_visual as pv
+        self.mixed()
+        website = {"artifact": ["website"]}
+        stamp = "2026-09-01T00:00:00Z"
+        item = {"schema_version": 1, "id": "example.brand", "version": "1.0.0", "status": "approved",
+                "summary": "Synthetic brand", "owner": "platform team", "applies_to": website, "includes": [],
+                "sources": [{"kind": "operator-statement", "ref": "The operator stated this expectation.",
+                             "root": "statement", "section": "", "observed_at": stamp,
+                             "confidence": "confirmed", "reuse": "internal use"}],
+                "requirements": [{"id": "INK", "level": "default", "text": "Ink colour", "verify": "check INK",
+                                  "setting": "visual.palette.ink", "value": value}],
+                "guidance": "", "assets": [], "approval": {"by": "board", "reference": "ADR-0038", "at": stamp}}
+        relative = f"{item['id']}/{item['version']}/pattern.json"
+        self.write(f".claude/patterns/{relative}", encoded(item))
+        pinned = {"source": "repo.main", "id": item["id"], "version": item["version"],
+                  "sha256": pat.content_digest(item)}
+        self.write_json(".claude/patterns/catalog.json", {
+            "schema_version": 1, "source_id": "repo.main", "includes": [], "bindings": [], "lifecycle": [],
+            "entries": [{"id": item["id"], "version": item["version"], "path": relative, "sha256": pinned["sha256"],
+                         "summary": item["summary"], "status": "approved", "applies_to": website}]})
+        self.write_json(".claude/patterns/bindings.json", {"schema_version": 1, "bindings": [{
+            "id": "brand", "when": website, "use": [pinned], "role": "required", "approved_by": "lead",
+            "approval_ref": "decision-1"}]})
+        profile = PROFILE.verify_profile_reference(self.reference, self.config)
+        roots = pat.parse_roots(pat.build_envelope(self.repo, self.config.home, pat.pack_context_from_profile(profile)))
+        context = {"schema_version": 1, "facts": {"artifact": "website"}, "evidence": {"artifact": "brief.md"}}
+        self.lock_path = self.run_dir + "/patterns.lock.json"
+        self.context_path = self.run_dir + "/pattern-context.json"
+        self.write_json(self.context_path, context)
+        parsed = pat.parse_context(context)
+        report = pat.resolve(roots, parsed)
+        self.assertEqual(report["status"], "ready", report["diagnostics"])
+        lock = pat.build_lock(report, parsed)
+        pat.write_lock(roots, self.repo / self.lock_path, lock)
+        self.design["web_design"]["palette"]["tokens"]["ink"] = "#112233"
+        self.design["palette"]["text_dark"] = "#112233"
+        self.design["pattern_context"] = pv.design_attachment(lock, "patterns.lock.json")
+        self.save_design()
+        self.prepare_input["selection"].append(".claude/patterns")
+        return lock
+
+    def test_patterned_mixed_design_needs_both_forwarded_flags(self):
+        self.patterned()
+        admitted = self.inspect(pattern_lock=self.lock_path, pattern_context=self.context_path)
+        self.assertEqual(admitted["design_validation"], "mixed-web-and-document-projections")
+        self.assertEqual(admitted["design"]["web_design"]["palette"]["tokens"]["ink"], "#112233")
+        with self.assertRaisesRegex(ValueError, "supply its verified pattern lock", msg="omitted flags"):
+            self.inspect()
+        with self.assertRaisesRegex(ValueError, "supplied together", msg="lock without context"):
+            self.inspect(pattern_lock=self.lock_path)
+        with self.assertRaisesRegex(ValueError, "supplied together", msg="context without lock"):
+            self.inspect(pattern_context=self.context_path)
+        self.write_json(self.run_dir + "/other-context.json", {
+            "schema_version": 1, "facts": {"artifact": "report"}, "evidence": {"artifact": "brief.md"}})
+        with self.assertRaisesRegex(ValueError, "context_changed", msg="mismatched current context"):
+            self.inspect(pattern_lock=self.lock_path, pattern_context=self.run_dir + "/other-context.json")
+        self.write(self.lock_path, (self.repo / self.lock_path).read_bytes().replace(b"#112233", b"#445566"))
+        with self.assertRaisesRegex(ValueError, r"Pattern selection is unusable \(invalid\)", msg="edited lock"):
+            self.inspect(pattern_lock=self.lock_path, pattern_context=self.context_path)
+
+    def test_patterned_pipeline_cli_forwards_both_flags(self):
+        self.patterned()
+        self.write_json(".claude/runtime/expected.json", self.prepare())
+        base = [sys.executable, "-I", "-B", SOURCE / "skills/generate/scripts/pipeline_inputs.py",
+                "--repo", self.repo, "--from-pipeline", self.run_dir, "--expected", ".claude/runtime/expected.json",
+                "--package", "P12", "--leaf", "A1.1", "--format", "word", "--format", "ppt",
+                "--profile-home", self.config.home, "--profile-packs", self.config.packs,
+                "--profile-pointer", self.config.pointer]
+        flags = ["--pattern-lock", self.lock_path, "--pattern-context", self.context_path]
+        admitted = self.command(base + flags)
+        self.assertEqual(admitted.returncode, 0, admitted.stderr)
+        self.assertEqual(json.loads(admitted.stdout)["design"]["web_design"]["palette"]["tokens"]["ink"], "#112233")
+        omitted = self.command(base)
+        self.assertEqual(omitted.returncode, 2)
+        self.assertIn("supply its verified pattern lock", json.loads(omitted.stderr)["reason"])
+        self.assertFalse(omitted.stdout.strip())
+        lock_only = self.command(base + flags[:2])
+        self.assertEqual(lock_only.returncode, 2)
+        self.assertIn("supplied together", json.loads(lock_only.stderr)["reason"])
+        self.assertEqual(self.command(base + flags + flags[:2]).returncode, 2, "a repeated flag is refused")
+        self.write(self.lock_path, (self.repo / self.lock_path).read_bytes().replace(b"#112233", b"#445566"))
+        edited = self.command(base + flags)
+        self.assertEqual(edited.returncode, 2)
+        self.assertFalse(edited.stdout.strip())
+
+    def test_document_only_design_refuses_pattern_flags(self):
+        for flags in ({"pattern_lock": "does/not/exist.json", "pattern_context": "nor/this.json"},
+                      {"pattern_lock": "does/not/exist.json"}):
+            with self.subTest(flags=sorted(flags)), self.assertRaisesRegex(ValueError, "only to a mixed web design"):
+                self.inspect(**flags)
+        self.assertEqual(self.inspect()["design"], self.design, "the ordinary document-only path is unchanged")
+
     def test_mixed_same_bytes_wrong_content_path_refuses(self):
         self.mixed()
         self.write("identical-content.md", (self.repo / self.run_dir / "content.md").read_bytes())

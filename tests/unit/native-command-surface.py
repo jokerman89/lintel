@@ -225,7 +225,8 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertEqual(phases, ["SENSE", "DEFINE", "DISCOVER"])
         self.assertTrue({"BUILD", "SHIP"} <= set(skipped))
         guide = (ROOT / "presentations/tech-shots-2026-09-25/show/field-guide.html").read_text(encoding="utf-8")
-        self.assertIn("/li:research", guide.splitlines()[3])
+        # The retained shortcut must be documented, independent of page layout.
+        self.assertIn("<code>/li:research</code>", guide)
         self.skill("cycle")
         self.write("skills/research/SKILL.md", source)
         self.assertEqual(self.findings("Run /li:research for the survey.\n"), [])
@@ -333,9 +334,9 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
         review_path.write_bytes(original)
         register = self.root / guard.RESIDUAL_REGISTER
-        value = json.loads(re.search(r"lintel-reviewed-source-spans:v1\n([\s\S]*?)\n-->", register.read_text())[1])
+        value = json.loads(re.search(r"lintel-reviewed-source-spans:v1\n([\s\S]*?)\n-->", register.read_text(encoding="utf-8"))[1])
         value["entries"][0]["end"] = "Retained record boundary."
-        register.write_text("# Residuals\n<!-- lintel-reviewed-source-spans:v1\n" + json.dumps(value) + "\n-->\n")
+        register.write_text("# Residuals\n<!-- lintel-reviewed-source-spans:v1\n" + json.dumps(value) + "\n-->\n", encoding="utf-8")
         self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
 
     def test_semantic_report_fields_do_not_hide_new_runtime_routing(self):
@@ -402,7 +403,7 @@ class CommandSurfaceTests(unittest.TestCase):
         contract.validate_review(decision)
         self.write(entry["review"], json.dumps(decision))
         corroboration_path = self.root / entry["corroboration"]
-        corroboration = json.loads(corroboration_path.read_text())
+        corroboration = json.loads(corroboration_path.read_text(encoding="utf-8"))
         corroboration["record_digest"] = contract.content_digest(decision)
         corroboration_path.write_text(json.dumps(corroboration), encoding="utf-8")
         self.assertEqual(guard.scan(self.root), [])
@@ -1277,8 +1278,8 @@ class CommandSurfaceTests(unittest.TestCase):
         self.skill("qa")
         self.assertTrue(any(item.code == "retired-entry" for item in guard.scan(self.root)))
 
-    def test_generated_retired_wrapper_is_not_exempt(self):
-        self.write(".github/skills/li-qa/SKILL.md", "---\nname: li-qa\n---\n")
+    def test_generated_retired_native_skill_is_not_exempt(self):
+        self.write(".github/skills/li-qa/SKILL.md", "---\nname: li-qa\ndescription: A generated native skill.\n---\n")
         self.assertTrue(any(item.code == "retired-entry" for item in guard.scan(self.root)))
 
     def test_missing_skill_file_and_nested_asset_are_reported(self):
@@ -1314,7 +1315,7 @@ class CommandSurfaceTests(unittest.TestCase):
     def test_native_relative_links_resolve_at_the_discovery_root(self):
         self.write(".github/skills/li-plan/SKILL.md", "---\nname: li-plan\n---\n")
         self.assertEqual(self.findings("Use [plan](../skills/li-plan/SKILL.md).\n",
-                                      ".github/agents/planner.md"), [])
+                                      ".github/agents/lintel-planner.agent.md"), [])
 
     def test_external_urls_templates_and_generic_host_commands_are_not_local_paths(self):
         self.assertEqual(self.findings(
@@ -1322,7 +1323,7 @@ class CommandSurfaceTests(unittest.TestCase):
             "[external](https://example.invalid/skills/qa/SKILL.md).\n"
             "Use `skills/<name>/SKILL.md`, `/skills reload`, and `/help` in the host UI.\n"
             "The helper is `${SOURCE}/skills/${name}/SKILL.md`.\n"
-            "Generate `.github/skills/li-*` wrappers from canonical skills/agents.\n"
+            "Generate `.github/skills/li-*` native skills from canonical skills/agents.\n"
             "Keep the skills/agents/hooks interfaces consistent.\n"
             "An example utility can be named `li-example`.\n"), [])
 

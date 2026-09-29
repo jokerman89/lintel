@@ -64,7 +64,7 @@ class UniversalAdapters(unittest.TestCase):
         clients = sorted(self.registry["surfaces"])
         self.run_cli(extra=tuple(value for client in clients for value in ("--client", client)))
         self.run_cli("check")
-        inventory = json.loads((self.target / ".github/lintel/manifest.json").read_text())
+        inventory = json.loads((self.target / ".github/lintel/manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(inventory["clients"], clients)
         self.assertFalse(inventory["hooks_installed"])
         for client, record in self.registry["surfaces"].items():
@@ -74,7 +74,7 @@ class UniversalAdapters(unittest.TestCase):
                     self.assertIn(f"{expected_root}/li-plan/SKILL.md", inventory["files"])
                     self.assertTrue((self.target / expected_root / "li-plan/SKILL.md").is_file())
                 else:
-                    self.assertIn(f"`{client}`: manual", (self.target / ".github/lintel/START.md").read_text())
+                    self.assertIn(f"`{client}`: manual", (self.target / ".github/lintel/START.md").read_text(encoding="utf-8"))
                 result = subprocess.run([sys.executable, "-S", str(self.target / ".github/lintel/bin/li-client-capabilities.py"),
                                          "show", "--client", client], capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stderr)
@@ -84,6 +84,7 @@ class UniversalAdapters(unittest.TestCase):
         actual_roots = {str(Path(p).parent.parent).replace("\\", "/") for p in inventory["files"]
                         if p.endswith("/li-plan/SKILL.md")}
         self.assertEqual(actual_roots, expected_roots)
+        self.assertIn(".github/agents/CodeReviewer.agent.md", inventory["files"])
         self.assertTrue((self.target / ".github/lintel/.claude-plugin/plugin.json").is_file())
         self.assertFalse((self.target / ".github/hooks").exists())
         self.assertFalse((self.target / ".github/lintel/hooks").exists())
@@ -91,46 +92,53 @@ class UniversalAdapters(unittest.TestCase):
     def test_multiple_clients_share_one_bundle_and_preserve_copilot(self):
         (self.target / "AGENTS.md").write_bytes(b"# Existing rules\r\nRun our real tests.\r\n")
         (self.target / ".github").mkdir()
-        (self.target / ".github/copilot-instructions.md").write_text("Existing team policy.\n")
+        (self.target / ".github/copilot-instructions.md").write_text("Existing team policy.\n", encoding="utf-8")
         self.run_cli(client="copilot-cli")
         copilot = (self.target / ".github/skills/li-plan/SKILL.md").read_bytes()
+        # Copilot receives the complete native method; other roots keep Universal wrappers.
+        self.assertIn(b"> **Lintel on GitHub Copilot.** Generated from `skills/plan/SKILL.md`", copilot)
+        self.assertNotIn(b"/li:", copilot)
         self.run_cli(client="codex-cli")
         self.run_cli(client="cursor-cli")
+        for root in (".agents/skills", ".cursor/skills"):
+            wrapper = (self.target / root / "li-plan/SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("[Universal adapter](", wrapper)
+            self.assertNotIn("Lintel on GitHub Copilot", wrapper)
         before = self.snapshot()
         self.run_cli(client="codex-cli")
         self.assertEqual(before, self.snapshot())
         self.run_cli("check")
         self.assertEqual((self.target / ".github/skills/li-plan/SKILL.md").read_bytes(), copilot)
-        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(), "Existing team policy.\n")
+        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(encoding="utf-8"), "Existing team policy.\n")
         self.assertTrue((self.target / "AGENTS.md").read_bytes().startswith(b"# Existing rules\r\n"))
-        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text())
+        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["clients"], ["codex-cli", "copilot-cli", "cursor-cli"])
 
     def test_same_native_root_is_shared_without_surface_alias_collapse(self):
         for client in ("codex-cli", "codex-desktop", "codex-ide"):
             self.run_cli(client=client)
         self.run_cli("check")
-        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text())
+        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(len(manifest["clients"]), 3)
         self.assertEqual(sum(p == ".agents/skills/li-plan/SKILL.md" for p in manifest["files"]), 1)
 
     def test_managed_and_unmanaged_native_collisions_refuse_all_writes(self):
         collision = self.target / ".cursor/skills/li-plan/SKILL.md"
         collision.parent.mkdir(parents=True)
-        collision.write_text("Project-owned plan.\n")
+        collision.write_text("Project-owned plan.\n", encoding="utf-8")
         before = self.snapshot()
         self.assertIn("Unmanaged collision", self.run_cli(client="cursor-cli", success=False).stderr)
         self.assertEqual(before, self.snapshot())
         collision.unlink()
         self.run_cli(client="cursor-cli")
-        collision.write_text(collision.read_text() + "\nLocal customization.\n")
+        collision.write_text(collision.read_text(encoding="utf-8") + "\nLocal customization.\n", encoding="utf-8")
         before = self.snapshot()
         self.assertIn("Modified managed file", self.run_cli(client="copilot-app", success=False).stderr)
         self.assertEqual(before, self.snapshot())
 
     def test_fresh_clone_manual_handoff_and_operation_selection(self):
         self.run_cli(client="other")
-        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text())
+        manifest = json.loads((self.target / ".github/lintel/manifest.json").read_text(encoding="utf-8"))
         self.assertFalse(any(p.endswith("/li-plan/SKILL.md") for p in manifest["files"]))
         clone = self.base / "manual-clone"
         shutil.copytree(self.target, clone)
@@ -144,7 +152,7 @@ class UniversalAdapters(unittest.TestCase):
             "work_map": ".claude/plans/example/work.json", "profile_ref": profile_ref,
             "bindings": {"question": {"tool": "different_host.ask", "available": True, "permission": "allowed"}},
             "isolation": {"kind": "none", "attributable": False, "evidence": None},
-        }))
+        }), encoding="utf-8")
         result = subprocess.run([sys.executable, "-S", str(bundle / "bin/li-client-capabilities.py"), "resolve",
                                  "--session", str(binding)], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -156,7 +164,7 @@ class UniversalAdapters(unittest.TestCase):
         for resource in ("skills/plan/SKILL.md", "skills/build/SKILL.md", "skills/resume/SKILL.md",
                          "scaffolding/01-foundation/templates/swarm/agent-brief.template.md"):
             self.assertTrue((bundle / resource).is_file(), resource)
-        self.assertIn("AGENTS.md", (bundle / "START.md").read_text())
+        self.assertIn("AGENTS.md", (bundle / "START.md").read_text(encoding="utf-8"))
         for workflow in ("cli-fingerprint", "cross-check"):
             canonical = bundle / "skills" / workflow / "SKILL.md"
             self.assertIn("../../shims/universal/ADAPTER.md", canonical.read_text(encoding="utf-8"))
@@ -187,15 +195,15 @@ class UniversalAdapters(unittest.TestCase):
             for relative in ("LICENSE", "CODE_OF_CONDUCT.md", "skills/design-dna/ATTRIBUTION.md"):
                 self.assertEqual((bundle / relative).read_bytes(),
                                  (ROOT / relative).read_bytes().replace(b"\r\n", b"\n"), relative)
-            self.assertIn("source-repository links", (bundle / "CONTRIBUTING.md").read_text())
+            self.assertIn("source-repository links", (bundle / "CONTRIBUTING.md").read_text(encoding="utf-8"))
             self.assertFalse((bundle / ".claude").exists())
         bundle = clone / ".github/lintel"
         missing = bundle / "docs/faq.md"
         missing.unlink()
         manifest_path = bundle / "manifest.json"
-        manifest = json.loads(manifest_path.read_text())
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         del manifest["files"][".github/lintel/docs/faq.md"]
-        manifest_path.write_text(json.dumps(manifest))
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         before = {str(path.relative_to(clone)): path.read_bytes() for path in clone.rglob("*")
                   if path.is_file() and ".git" not in path.parts}
         result = self.run_cli("check", target=clone, source=bundle, success=False)
@@ -212,7 +220,7 @@ class UniversalAdapters(unittest.TestCase):
             output.write("\n[Another public guide][next]\n\n[next]: extra/next.md\n")
         downstream = self.base / "navigation-downstream"
         downstream.mkdir()
-        (downstream / "keep.txt").write_text("Project content.\n")
+        (downstream / "keep.txt").write_text("Project content.\n", encoding="utf-8")
         result = self.run_cli(client="other", source=source, target=downstream, success=False)
         self.assertIn("next.md", result.stderr)
         self.assertEqual([p.name for p in downstream.iterdir()], ["keep.txt"])
@@ -222,13 +230,13 @@ class UniversalAdapters(unittest.TestCase):
             "[Image](chart.svg)\n\n```md\n[Example](not-a-resource.md)\n```\n"
             "[Template](<name>.md)\n[Source only](../../.claude/runtime/not-copied.md)\n",
             encoding="utf-8")
-        (next_guide.parent / "chart.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>\n')
+        (next_guide.parent / "chart.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>\n', encoding="utf-8")
         self.run_cli(client="other", source=source, target=downstream)
         self.run_cli("check", target=downstream, source=downstream / ".github/lintel")
         installed = downstream / ".github/lintel/docs/extra/next.md"
         self.assertTrue(installed.is_file())
         self.assertTrue(installed.with_name("chart.svg").is_file())
-        self.assertIn("not fetched or live-verified", installed.read_text())
+        self.assertIn("not fetched or live-verified", installed.read_text(encoding="utf-8"))
         self.assertFalse((downstream / ".github/lintel/.claude").exists())
         original = installed.read_bytes()
         installed.write_bytes(original + b"\nProject-owned change must survive.\n")
@@ -260,7 +268,7 @@ class UniversalAdapters(unittest.TestCase):
         self.clone_project(consumer, clone)
         self.run_cli("check", source=clone / ".github/lintel", target=clone)
         for target in (consumer, clone):
-            manifest = json.loads((target / ".github/lintel/manifest.json").read_text())["files"]
+            manifest = json.loads((target / ".github/lintel/manifest.json").read_text(encoding="utf-8"))["files"]
             for name, content in expected.items():
                 relative = f".github/lintel/docs/review-fixture/{name}"
                 self.assertEqual((target / relative).read_bytes(), content)
@@ -314,7 +322,7 @@ class UniversalAdapters(unittest.TestCase):
                 self.run_cli(client="other", source=source, target=consumer)
                 bundle = consumer / ".github/lintel"
                 self.run_cli("check", source=bundle, target=consumer)
-                manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["files"]
                 self.assertEqual((bundle / "docs/review-fixture/a_b.md").is_file(), included)
                 self.assertEqual(".github/lintel/docs/review-fixture/a_b.md" in manifest, included)
                 self.assertFalse((bundle / "docs/review-fixture/does-not-exist.md").exists())
@@ -351,7 +359,7 @@ class UniversalAdapters(unittest.TestCase):
                 bundle = consumer / ".github/lintel"
                 self.run_cli("check", source=bundle, target=consumer)
                 relative = ".github/lintel/docs/review-fixture/guide.md"
-                manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["files"]
                 self.assertIn(relative, manifest)
                 self.assertEqual((consumer / relative).read_bytes(), b"# Real local guide")
                 expected_guides.add(tuple(path for path in manifest if "review-fixture/" in path))
@@ -361,7 +369,7 @@ class UniversalAdapters(unittest.TestCase):
                 self.assertEqual((clone / relative).read_bytes(), b"# Real local guide")
                 (clone / relative).unlink()
                 manifest_path = clone / ".github/lintel/manifest.json"
-                document = json.loads(manifest_path.read_text())
+                document = json.loads(manifest_path.read_text(encoding="utf-8"))
                 del document["files"][relative]
                 manifest_path.write_text(json.dumps(document), encoding="utf-8")
                 result = self.run_cli("check", source=clone / ".github/lintel", target=clone, success=False)
@@ -411,7 +419,7 @@ class UniversalAdapters(unittest.TestCase):
                 self.run_cli("check", source=clone / ".github/lintel", target=clone)
                 for target in (consumer, clone):
                     bundle = target / ".github/lintel"
-                    manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["files"]
                     self.assertIn(".github/lintel/docs/review-fixture/guide.md", manifest)
                     self.assertNotIn(".github/lintel/docs/review-fixture/does-not-exist.md", manifest)
                     self.assertEqual((bundle / "docs/review-fixture/guide.md").read_bytes(), b"# Real local guide")
@@ -433,7 +441,7 @@ class UniversalAdapters(unittest.TestCase):
         relative = ".github/lintel/lib/markdown_source.py"
         expected = (ROOT / "lib/markdown_source.py").read_bytes().replace(b"\r\n", b"\n")
         self.assertEqual((self.target / relative).read_bytes(), expected)
-        manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+        manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["files"]
         self.assertEqual(manifest[relative], hashlib.sha256(expected).hexdigest())
         marker = self.target / "untrusted-import-executed"
         untrusted = self.target / "lib"
@@ -531,7 +539,7 @@ class UniversalAdapters(unittest.TestCase):
                 self.run_cli("check", source=clone / ".github/lintel", target=clone)
                 for target in (consumer, clone):
                     bundle = target / ".github/lintel"
-                    manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["files"]
                     self.assertIn(".github/lintel/docs/review-fixture/guide.md", manifest)
                     self.assertNotIn(".github/lintel/docs/review-fixture/code-only.js", manifest)
                     self.assertEqual((bundle / "docs/review-fixture/guide.md").read_bytes(), b"# Real local guide")
@@ -576,16 +584,16 @@ class UniversalAdapters(unittest.TestCase):
     def test_tampered_inventory_cannot_claim_other_project_files(self):
         self.run_cli(client="codex-cli")
         inventory_path = self.target / ".github/lintel/manifest.json"
-        original = json.loads(inventory_path.read_text())
+        original = json.loads(inventory_path.read_text(encoding="utf-8"))
         for malicious in (".agents/settings.json", ".agents/skills/company/SKILL.md", "../escape",
                           ".agents/skills/li-plan/../outside", ".agents\\skills\\li-plan\\SKILL.md"):
             manifest = dict(original)
             manifest["files"] = {malicious: "0" * 64}
-            inventory_path.write_text(json.dumps(manifest))
+            inventory_path.write_text(json.dumps(manifest), encoding="utf-8")
             before = self.snapshot()
             self.run_cli(client="codex-cli", success=False)
             self.assertEqual(before, self.snapshot())
-        inventory_path.write_text(json.dumps(original))
+        inventory_path.write_text(json.dumps(original), encoding="utf-8")
 
 
 if __name__ == "__main__":

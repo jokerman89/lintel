@@ -284,6 +284,18 @@ _sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2
 state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
 ```
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). If
+the delivery has a pattern lock, re-run the clause review (`li-pattern review`, which verifies
+the lock against the current context at use) immediately before the shared SHIP gate. A stored
+review output is not enough, and a non-`ok` lock blocks. List the failed, waived and unverified
+mandatory clauses from that review by clause ID, with any exception reference, in the delivery
+summary.
+State the limits: patterns are data checked for structure and declared provenance, not platform
+enforcement, and clause coverage is not review clearance. A missing or stale clause review
+blocks that claim; it does not silently pass.
+
 ## Status protocol
 
 - **DONE** — PR opened / deployed / handoff complete, all applicable mandatory controls verified

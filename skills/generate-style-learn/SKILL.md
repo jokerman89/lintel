@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-style-learn` skill — v3.5 Phase 3 of the doc-generation-pipeline. Extracts palettes from existing artifacts.
@@ -63,7 +65,7 @@ Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an
 - Header/footer styles
 
 **Web (HTML/CSS):**
-- Parse <style> + linked CSS
+- Parse `<style>` + linked CSS
 - Extract :root CSS variables (preferred source)
 - Fall back: most-frequent computed colors in DOM
 - Typography from font-family declarations
@@ -184,6 +186,14 @@ Style 'nordic-minimal' extracted.
 
 To use: /li:generate ... --palette nordic-minimal
 ```
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). The
+palette and STYLE.md output is unchanged and is observation, not policy. Palette tokens can
+reach a universal draft only through the `frontend-style-extract` adapter as
+`visual.palette.<token>` defaults with exact `#RRGGBB` values. Fonts, licensing and
+accessibility are never inferred as confirmed from an image or page.
 
 ## Status protocol
 

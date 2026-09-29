@@ -5,7 +5,7 @@ description: Scaffold a new role file from template via guided interview — IDE
 color: cyan
 tools: Read, Bash, Edit, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the role-new skill — creation and evolution of role files.

@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 ## ⚠ TEMPLATE ONLY — Slot for Visio generation
@@ -50,11 +52,21 @@ Per `skills/generate/agent-mapping.yaml`:
 
 If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) on any text labels in diagram (orchestrator-level gate).
 
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+This skill stays a template slot. The at-invocation contract resolves, or verifies a supplied
+attachment, and records each mandatory clause as unverified unless its presence in the produced
+diagram was inspected. Patterns never promote the slot, and diagrams are not verified cloud
+state.
+
 ## Status protocol
 
-- **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful
+- **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful, and no selected
+  mandatory pattern clause is failed or unverified. The slot stays a template slot either way.
 - **DONE_WITH_CONCERNS** — produced but qa flagged stencil-inconsistency or label issues
-- **BLOCKED** — content.md has no diagrammable sections + no fresh-architecture strategy declared
+- **BLOCKED** — content.md has no diagrammable sections + no fresh-architecture strategy
+  declared, or a selected mandatory pattern clause is failed or unverified in the produced diagram
 - **NEEDS_CONTEXT** — `--from-pipeline` directory missing, design-spec absent, or output-format unspecified for ambiguous content
 
 ## When to promote from slot to curated

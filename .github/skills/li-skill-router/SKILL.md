@@ -1,0 +1,143 @@
+---
+name: li-skill-router
+description: Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale.
+---
+
+> **Lintel on GitHub Copilot.** Generated from `skills/skill-router/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/skill-router/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/skill-router/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
+
+You are the skill-router skill — Lintel's task-relevant discovery router.
+
+## When to use
+
+- Operator doesn't remember exact skill name
+- New Lintel user exploring capabilities
+- Ambiguous intent — multiple skills might apply, want disambiguation
+
+## When NOT to use
+
+- Operator already knows the skill — wastes a turn
+- For agent selection (use catalog's agent metadata and the host's actual delegation mechanism)
+
+## Workflow
+
+1. **Read operator intent.** Use the supplied request. Ask only for a missing decision
+   through the current host's available question tool; conversation is a fallback only
+   when there is no question tool, never when permission was denied.
+
+2. **Query compact metadata first.** Resolve `LINTEL_SOURCE_ROOT` from the loaded trusted
+   adapter or explicitly selected Lintel source, separately from the working project.
+   Use an available permitted shell and Python 3.9+:
+
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=skill-router
+   ```
+
+   Select a nonempty keyword from the intent, not a fabricated regex or shell fragment.
+   Pass it as one quoted literal argument; never use `eval` or interpolate a command.
+   Use `python` if that is the Python 3 command. If a keyword is too narrow, broaden it
+   or request `--json` without filters: that still returns metadata, not prompt bodies.
+   Use the [single metadata contract](../../../skills/catalog/references/metadata.md); do not glob
+   and parse the corpus separately.
+
+   If the request already names a capability selection, use its existing projection:
+
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection="$selection"
+   ```
+
+   `selection` is an exact nonempty ID from `--json --list-selections`, not an inferred
+   installation or policy choice. Keep ordinary routing unchanged without it. Follow
+   the [selection contract](../../../skills/catalog/references/selections.md); do not turn its
+   closure into a second routing graph or read every dependency body. A role-oriented
+   selection such as `demo-script` uses help's agent-selection path rather than
+   relabeling roles as skills. Invalid selection data stops the affected discovery.
+
+3. **Shortlist at most three skills.** Match names, descriptions, families and existing
+   aliases. This is model judgment over source metadata, not a new routing engine or a
+   measured confidence score. Preserve staged/template warnings. A `full` hint does not
+   establish maturity, implemented formats, permission or live host support.
+
+4. **Read only selected candidates.** Read the shortlisted canonical bodies (at most
+   three) via their returned paths under the same trusted `source_root`. Check their
+   actual when-to-use, exclusions, prerequisites and failure behavior before recommending
+   a method. Preserve alias notes and arguments; do not invent an alias rewrite or silently
+   retire an alias because its recorded date passed. Never load all skill/role bodies.
+
+5. **Present up to three recommendations.** Explain fit, important limitations and the
+   actual invocation/fallback. Native wrapper and agent registration require current host
+   evidence; use explicit canonical-file reading when permitted instead of made-up tools.
+   Recommendation alone does not execute the selected workflow or authorize new work.
+
+## Output format
+
+```
+MATCH: <operator intent quoted>
+
+Top match (confidence H):
+  <canonical name, retained alias if used>
+  → <one-line why, plus source/body limitations>
+  → Invocation: <verified host entrypoint or explicit canonical-file path>
+
+Alternative #2 (confidence M):
+  <canonical name>
+  → <rationale>
+  → When this is better: <condition>
+
+Alternative #3 (confidence M):
+  <canonical name>
+  → <rationale>
+  → When this is better: <condition>
+
+If none of these fit, your intent might need:
+- A new skill (`/li-skill-new`, if authoring is authorized)
+- An agent instead (see agents/<category>/)
+- A direct conversation (no skill needed)
+```
+
+## Edge cases
+
+- **No good match** — broaden the metadata query before suggesting new authoring or direct conversation.
+- **Match is an agent, not a skill** — query `--json --kind=agent` through the same helper,
+  then read only the selected role. Use actual host delegation or an honest serial/manual
+  handoff; a role file is not a registered agent or independent reviewer.
+- **Intent is multi-step workflow** — consider the existing `/li-cycle` and its authorized
+  entry phase. The nine phases remain SENSE, SCOPE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW,
+  SHIP and CAPTURE. Resume is a utility returning to saved work, not another phase.
+- **Customer-data in intent** — strip before processing; flag to operator.
+- **Invalid source or helper/parser failure** — report the failure, not an empty success.
+  Do not regenerate, install, activate, change roots or skip malformed entries.
+- **Execution unavailable** — the trusted `skills/CATALOG.md` is a disclosed skills-only
+  snapshot fallback. Read only selected canonical files afterward, through permitted tools.
+  Missing source or denied reads block the affected work.
+
+## Discovery cost
+
+Selection uses one maintained metadata inventory before any candidate prompt reads.
+No personal telemetry is consulted. Metadata tests establish this file/query behavior,
+not a measured improvement in model accuracy or time to first use.
+
+## Privacy note
+
+The helper performs local data reads and no network calls. Model processing still follows
+the actual host's service and policy; do not promise offline processing or that intent
+never leaves the machine. Keep secrets and customer data out of queries and reports.

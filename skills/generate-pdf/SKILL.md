@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: degraded
+  - cli: copilot
+    level: full
 ---
 
 # /generate-pdf
@@ -153,6 +155,16 @@ guarded origin with no personal cookies or credential transfer. These are invoca
 examples, not executed conversion or inspection evidence. Use
 `/li:web-session --mode browse` for page interaction without PDF output and
 `/li:generate-web --mode mockup` for an editable single-file HTML source.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+This remains the working PDF writer described above; patterns do not change its status or
+procedure. Resolve, or verify a supplied attachment, before preparing the HTML source.
+Conversion must preserve every section and clause required by the source document. Check each
+required section in the readable source and in the prepared HTML before printing: a section
+absent there is **failed** at the source, not unknown. No PDF reader is added: report required
+content not inspected in the produced PDF as unverified.
 
 ## Roles, status and evidence
 

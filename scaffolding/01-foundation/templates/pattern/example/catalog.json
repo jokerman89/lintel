@@ -1,0 +1,48 @@
+{
+  "bindings": [
+    {
+      "approval_ref": "example approval record",
+      "approved_by": "example reviewer",
+      "id": "internal-dashboards",
+      "role": "required",
+      "use": [
+        {
+          "id": "example.internal-dashboard",
+          "sha256": "ec1759e01d31abbea28934243d3934224d401fc3b2a52f44fee927971bf6cecd",
+          "source": "example.patterns",
+          "version": "1.0.0"
+        }
+      ],
+      "when": {
+        "artifact": [
+          "dashboard"
+        ],
+        "audience": [
+          "internal"
+        ]
+      }
+    }
+  ],
+  "entries": [
+    {
+      "applies_to": {
+        "artifact": [
+          "dashboard"
+        ],
+        "audience": [
+          "internal"
+        ]
+      },
+      "id": "example.internal-dashboard",
+      "path": "example.internal-dashboard/1.0.0/pattern.json",
+      "sha256": "ec1759e01d31abbea28934243d3934224d401fc3b2a52f44fee927971bf6cecd",
+      "status": "approved",
+      "summary": "Synthetic example: internal analytics dashboards with persistent filters, CSV export and a restrained palette.",
+      "version": "1.0.0"
+    }
+  ],
+  "includes": [],
+  "lifecycle": [],
+  "schema_version": 1,
+  "source_id": "example.patterns"
+}

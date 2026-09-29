@@ -6,7 +6,7 @@ description: Use for data-architecture depth — schema design, migrations, shar
 color: blue
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Data-touching work lacks explicit schema evolution, recovery, retention and query evidence; consumers can break or data can be lost."
 navigation:
@@ -131,6 +131,16 @@ each against the observable checkpoint criteria with evidence and uncertainty. S
 clear a failed/unknown mandatory control. DONE requires actual selected checks and
 independent acceptance; DONE_WITH_CONCERNS only allows advisory residuals. Missing
 authority/evidence is BLOCKED or NEEDS_CONTEXT, never a green partial pass.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Module entry resolves the data expectations bound to the current target context and passes each
+sub-capability only its projected clauses (`project` for the mapped package, or the clauses
+mapped to it). An unknown data classification or store yields `needs-context` and blocks the
+dependent design; no live cloud, tenant or environment discovery is implied, and requirements
+are never inferred from generic recommendations. When the runtime reports no patterns, the
+module is unchanged.
 
 ## Integration and dormant hooks
 

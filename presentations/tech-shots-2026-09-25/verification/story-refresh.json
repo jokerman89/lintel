@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-28",
+  "source_commit": "49f2d15260f096213086f02dfeb1fae6cbe62d45",
+  "scope": "Presentation content and browser behavior; no live agent-host certification or new model benchmark",
+  "slides": 50,
+  "main_minutes": 50,
+  "products_minutes": 6,
+  "technical_minutes": 18,
+  "source_inventory": {
+    "skills": 96,
+    "agent_roles": 69,
+    "hook_scripts": 33,
+    "client_families": 4,
+    "named_surfaces": 13,
+    "registry_records": 14,
+    "starter_wrappers": 15
+  },
+  "checks": {
+    "desktop_slide_theme_renders": 150,
+    "mobile_slide_theme_checks": 150,
+    "technical_tab_states": 54,
+    "presenter_window_assertions": 40,
+    "retired_slide_aliases": 12,
+    "public_local_links": 4349,
+    "source_review_open_findings": 0
+  },
+  "historical_evidence": "Original helper demonstrations keep their historical source pins; they were not rerun as current acceptance.",
+  "kitchen": {
+    "source_commit": "e31f80ac411b6a0a6bea6de2afb5bd1d7199f1ed",
+    "protocol": "runtime-v2",
+    "completed_controlled_three_arm_comparison": false
+  }
+}

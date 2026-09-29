@@ -5,7 +5,7 @@ description: Validate a pack before activation or after editing its manifest. Ch
 color: green
 tools: Read, Bash, Grep
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 Validate the target pack with the same parser and effective-field rules used at
@@ -68,6 +68,12 @@ For an already selected profile, `profile_field_provenance <dotted.path>` and
 `profile_context_reference` report verified origins and bound identity. They are
 not a reason to activate a different target as part of validation. Repo-required
 policy is declared outside its manifest; a failed required load remains an error.
+
+When the pack declares `patterns.source`, run `li-pattern check` against the effective profile
+(see the [pattern workflow](../pattern/SKILL.md)) to validate the catalog, every registered
+version and its declared files. A pack that declares a `root: pattern` source it does not ship
+reports `unavailable`. Pack validation and pattern checks are separate results, so report both.
+Missing Python is "pattern check unavailable", never a passing pattern check.
 
 ### 3. Return the observed result
 

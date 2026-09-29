@@ -1,0 +1,2 @@
+# Keep pattern files and assets byte-exact: their sha256 digests cover the raw bytes.
+* -text

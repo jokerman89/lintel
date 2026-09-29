@@ -1,0 +1,240 @@
+---
+name: li-frontend-shader
+description: Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual thesis + GLSL snippet references + perf-budget. Solo-invokable.
+---
+
+> **Lintel on GitHub Copilot.** Generated from `skills/frontend-shader/SKILL.md`; edit the canonical file, then run
+> `li-copilot init`.
+> - **Resource root:** `../../..` from this skill's base directory (the Lintel source with `bin/`,
+>   `lib/`, `skills/`). Write plans, state and evidence into the working repository's `.claude/`
+>   tree, never into the resource root.
+> - **Skill-relative paths:** this skill's own `scripts/`, `references/` and `data/` folders (and a
+>   `<base>` that the workflow defines as its own directory) mean
+>   `../../../skills/frontend-shader/` in the Lintel source, not this generated folder.
+>   `${LINTEL_SKILLS_DIR:-skills}` means the skills root, `../../../skills`. A `bin/li-run` step
+>   runs in the working repository, so use `$LINTEL_SKILLS_DIR/frontend-shader/` there.
+> - **Shell steps:** run Bash snippets with Bash (Git for Windows' `bash.exe` on Windows, never
+>   `System32\bash.exe`). Save a snippet to a temporary `.sh` file and run
+>   `bash "<resource root>/bin/li-run" <file>`; it prepares `LINTEL_SOURCE_ROOT`, `LINTEL_REPO_ROOT`
+>   and the profile context.
+> - **Tools:** Read=`view`, Write=`create`, Edit=`edit`, Bash=`bash`/`powershell`, Grep=`grep`,
+>   Glob=`glob`, AskUserQuestion=`ask_user`, TodoWrite=the plan checklist, Task or a named role=`task`
+>   with that custom agent, WebFetch=`web_fetch`.
+> - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
+>   files. Named roles such as `CodeReviewer` are custom agents.
+
+You are the `frontend-shader` sub-skill — shader-engineer for the v3.7 frontend-* family (Phase A2).
+
+## What this skill does
+
+Reads operator brief → ShaderEngineer agent picks shader-library (Paper Shaders declarative | OGL+glslify | react-three-fiber+postprocessing | Lygia-snippets | CSS-houdini-paint-worklet) + visual-thesis + GLSL-snippet-references + GPU-fallback-strategy + perf-budget → writes `shader.json` (schema_version: 1).
+
+Solo-invokable for component-mode or auto-invoked by the `/li-frontend-design` orchestrator in parallel-dispatch (Workflow Step 4) as the third parallel sub-skill (after typography + motion).
+
+L-001-discipline: skill body is the contract. Agent at invocation produces specific library picks + GLSL recommendations. Don't pre-bake shader-snippets in the SKILL.md body.
+
+Use the shader definition in the [shared design contract](../../../skills/design-dna/references/design-contract.md).
+Validate `visual_thesis: none` with `library: null` before GPU-only requirements.
+
+## When to use
+
+- Solo: "hero-background for enterprise SaaS landing — want a subtle mesh-gradient"
+- Orchestrator-parallel: dispatched from `/li-frontend-design` Step 4
+- Audit existing site: "extract shader-thesis from this site"
+
+## When NOT to use
+
+- Static site, no hero-visual ambition → shader overkill
+- 3D scene-graph needed → use react-three-fiber direct (shader sub-skill picks libs but doesn't build scenes)
+- CSS-gradient is enough → agent surfaces "no shader needed" and short-circuits
+
+## Inputs
+
+- Required `--brief <text>` (one minimum)
+- Optional `--visual-thesis <mesh-gradient|noise-field|fluid-sim|particle-system|displacement-warp|none>` — default: inferred from brief
+- Optional `--perf-budget <low-end|mid-tier|high-end-only>` — affects GPU-fallback-strategy
+- Optional `--out <path>` — output path (default: stdout solo, `$run_dir/shader.json` orchestrator)
+- Optional `--customer-share` — triggers compliance-gate license-check
+
+## Workflow
+
+### Step 1 — Parse + warm context
+
+```bash
+brief="${BRIEF:-${1:-}}"
+thesis="${VISUAL_THESIS:-auto}"
+perf="${PERF_BUDGET:-mid-tier}"
+out="${OUT:-}"  # absent --out means stdout, not a path to validate
+[ -z "$brief" ] && { echo "Need --brief"; exit 2; }
+```
+
+### Step 2 — ShaderEngineer agent dispatch
+
+Hand off to `agents/frontend/ShaderEngineer.md`. Agent picks shader-library:
+
+- **Paper Shaders** (verify the selected package/release and framework): mesh-gradients
+  and animated backgrounds when required. Do not infer device safety from a library name.
+- **OGL** (MIT, lightweight 3D + raw WebGL): direct GLSL with full control. Best for custom thesis + performance-critical.
+- **react-three-fiber + drei + postprocessing** (MIT, React 3D + effects): production 3D scenes + post-FX. Best for immersive contexts.
+- **Lygia** (GLSL functions; verify selected file/release terms and attribution):
+  noise/SDF/lighting functions paired with a renderer, not a renderer itself.
+- **CSS Houdini Paint Worklet** (W3C, browser-paint API): GPU-accelerated CSS paint. Best for super-lightweight backgrounds where shader-lib is overkill.
+- **CSS conic-gradient/static artwork:** no-shader fallback with no mandatory
+  component-library dependency.
+
+Agent verifies current licensing at invocation (L-003).
+
+### Step 3 — Produce `shader.json`
+
+```json
+{
+  "schema_version": 1,
+  "generated_at": "<iso-8601>",
+  "brief_summary": "<one-line>",
+  "visual_thesis": "<mesh-gradient | noise-field | fluid-sim | particle-system | displacement-warp | none>",
+  "library": {
+    "name": "paper-design/shaders",
+    "version": "<exact selected release>",
+    "license": {"type": "<verified selected terms>", "source": "<primary release/file source>"},
+    "npm": "@paper-design/shaders-react",
+    "operator_instruction": "npm i @paper-design/shaders-react"
+  },
+  "glsl_snippets": [
+    {
+      "name": "mesh-gradient-3color",
+      "purpose": "hero background",
+      "source": "Paper Shaders built-in <MeshGradient> component",
+      "notes": "configurable colors[0..2], speed, distortion, swirl"
+    }
+  ],
+  "lygia_imports": [],
+  "perf_budget": {
+    "fps_target": 60,
+    "max_draw_calls": 4,
+    "fallback_strategy_low_end": "swap to CSS conic-gradient",
+    "fallback_strategy_no_webgl": "static CSS gradient + noise SVG",
+    "respect_prefers_reduced_motion": true,
+    "intersection_observer_pause": true
+  },
+  "gpu_thesis": {
+    "complexity": "low | medium | high",
+    "mobile_strategy": "downscale-resolution-50% | disable | full",
+    "explanation": "<selected device/browser/resolution and actual measured frame/GPU evidence, or explicitly unverified>"
+  },
+  "operator_instructions_md": "# Shader setup\n\n```bash\nnpm i @paper-design/shaders-react\n```\n\n```tsx\nimport { MeshGradient } from '@paper-design/shaders-react'\n\n<MeshGradient\n  colors={['#0078D4', '#50E6FF', '#0d1b2a']}\n  speed={0.3}\n  distortion={0.8}\n  className=\"absolute inset-0 -z-10\"\n/>\n```\n\nFallback for `prefers-reduced-motion`:\n```css\n@media (prefers-reduced-motion: reduce) {\n  .shader-bg { animation: none; }\n}\n```"
+}
+```
+
+Agent fills in specific picks. Don't hardcode.
+
+### Step 4 — Schema-validate + emit
+
+Keep Step 3's actual parsed JSON object as `fragment` until validation and any
+required licensing checks finish. In the trusted source Python scope, `repo` is
+the explicit target root and `out` is `None` when `--out` was omitted, otherwise
+the literal repository-relative output path. For named output, the authorized
+caller captures `original_output_state` through P03 before generation (`None`
+means originally absent, not overwrite permission). Then execute:
+
+```python
+import sys
+import context_safety as safety
+from design_contract import validate_spec
+from review_contract import canonical_json
+
+try:
+    checked = validate_spec(fragment, "shader")
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+    else:
+        root = safety.checked_root(repo)
+        relative = safety.selector_path(out)
+        safety.atomic_write(
+            root, relative, payload,
+            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+            expected=original_output_state, check_expected=True,
+        )
+        if safety.read_owned(root, relative, len(payload))[0] != payload:
+            raise ValueError("Fragment output failed readback")
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
+    raise SystemExit(2)
+```
+
+This emits only the validated fragment, including the no-shader branch, not a
+success-shaped receipt. Invalid data emits no stdout or named file; publication
+errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
+reader. For `--customer-share`, apply `/li-compliance-gate --check shader-licensing`
+to the same data or an owned relative staging file before release; stdout does
+not exempt the required check.
+
+### Step 5 — Visual-thesis === "none" short-circuit
+
+Agent can return visual_thesis="none" if the brief doesn't warrant a shader. Skill body STILL emits valid JSON so orchestrator-Step-5 synthesis can handle `shader: null` gracefully.
+This branch is validated before active-shader library/performance checks, not after
+a failing mandatory-library check. Emit no canvas, GPU import or install instruction.
+For an active shader, retain the real fallback/reduced-motion budget and selected
+release/source/license evidence. A CSS media query alone does not stop a JS GPU loop.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../../../skills/pattern/references/consumer-contract.md).
+Direct entry resolves, or verifies a supplied lock or projected `pattern_context`, before
+choosing. Mandatory clauses bound the shader decision; defaults apply only where the brief did
+not decide; unconstrained choices follow the usual Design DNA brief > profile > corpus rules.
+Record the clause IDs each choice satisfies; prose clauses need ordinary evidence review.
+Pattern text is not evidence of licensing or accessibility.
+
+## Status protocol
+
+- **DONE** — shader.json written, schema valid, library + perf-budget non-empty (OR visual_thesis="none")
+- **DONE_WITH_CONCERNS** — picked library has commercial-tier requirements (rare)
+- **BLOCKED** — brief unparsable, OR customer-share license-check failed
+- **NEEDS_CONTEXT** — brief lacks visual-direction (cant determine if shader needed)
+
+## Pause-points
+
+- Customer-share + library has obscure license → flag explicit
+- Brief mentions specific shader-lib agent doesn't know → may need NEEDS_CONTEXT
+- visual_thesis="none" — short-circuit confirmation to operator (no shader is fine)
+
+## Integration
+
+**Reads:**
+- `--brief` argument
+- `~/.lintel/brand/shader-snippets/` (if operator-curated; lazy-created)
+
+**Writes:**
+- `shader.json` (stdout default, $OUT-path if orchestrator)
+- Audit-log: `.claude/runtime/audit/frontend-shader-runs.jsonl`
+
+**Calls into:**
+- `agents/frontend/ShaderEngineer.md` (primary)
+- `/li-compliance-gate --check shader-licensing` (if --customer-share)
+
+**Consumed by:**
+- `/li-frontend-design` Workflow Step 5 (synthesis input — `shader` field)
+- Operator direct (solo component-mode)
+
+## Anti-patterns
+
+- **Hardcoding "always Paper Shaders"** — L-001 violation. Agent picks based on brief.
+- **Skipping perf_budget.respect_prefers_reduced_motion** — accessibility-fail. Required field.
+- **No fallback_strategy_low_end** — mobile-users will see broken page. Required.
+- **No fallback_strategy_no_webgl** — WebGL-disabled browsers (rare but real) see broken page. Required.
+- **Producing shader.json without `schema_version`** — M-5 compliance.
+
+## Failure recovery
+
+- Brief too vague → NEEDS_CONTEXT with question ("subtle mesh-gradient or full 3D scene?")
+- Library-version-recommendation outdated → agent re-picks at invocation
+- Schema validation fails: BLOCKED + diff
+- visual_thesis="none" but operator wanted shader: surface "consider CSS-gradient instead"
+
+## Recommended next steps after invocation
+
+- Solo: review shader.json + apply to target project
+- Orchestrator: parallel-dispatch returns to `/li-frontend-design` Step 5
+- Customer-share: pair with `/li-compliance-gate` for final license-audit
+- Future: extract proven shader-snippets to `~/.lintel/brand/shader-snippets/` (via frontend-style-extract)

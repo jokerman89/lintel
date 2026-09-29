@@ -10,6 +10,11 @@ cli_support:
     level: full
   - cli: codex
     level: full
+  - cli: copilot
+    level: degraded
+    degradation:
+      - capability: AgentMemory
+        strategy: degraded-output
 tier: permissive
 memory: project
 ---

@@ -10,6 +10,8 @@ cli_support:
     level: full
   - cli: codex
     level: full
+  - cli: copilot
+    level: full
 ---
 
 You are the `audit` skill — read-only window onto the unified Lintel audit trail (v4.0 Phase 1).

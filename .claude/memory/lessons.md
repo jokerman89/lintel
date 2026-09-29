@@ -991,6 +991,26 @@ killing other sessions' processes. Probe Bash stderr before granting a native
 invocation, and treat host warnings as shared-state defects to diagnose, not as
 noise to tolerate.
 
+**Amended 2026-09-28 (cleanup ownership):**
+
+*Incident 1.* An independent reviewer's scratch cleanup ran a filter-and-age delete in the shared
+`%TEMP%` root. It removed host spill files (`*-copilot-tool-output-*.txt`) changed in the previous
+three hours. These may have included other sessions' saved tool output, and no list of removed paths
+was recorded.
+
+*Incident 2.* Separately, a preparation lane ran a filter delete inside its own scratch folder and
+deleted its own spill file. Its scope was narrower, but the list of matched paths is also unknown.
+
+**Added rule:**
+- Clean up only exact literal paths that the actor created and recorded when it created them, using
+  `Remove-Item -LiteralPath` or an equivalent exact-path call.
+- In shared locations such as `%TEMP%`, never delete by pattern, wildcard, filter or age.
+- Never recurse over contents you did not record.
+- Never delete host spill files.
+- When ownership is uncertain, leave the item in place and report it.
+- Missing shared output is no reason to rerun a mutation, a paid job or a full suite. Use durable logs
+  and receipts first, and label any repeat as a new observation.
+
 ## L-050 - Do not create drive-root directories without authorization
 
 **Date:** 2026-09-24
@@ -1043,7 +1063,6 @@ unavoidable config write, check its target with `git config --show-origin`. Neve
 the shared repository config without the operator's authorization.
 
 ## L-053 - Publish only through the authorized identity; never probe credentials
-
 **Date:** 2026-09-24
 
 **Context:** At the delivery step the coordinator's `git push` ran as the session's injected
@@ -1057,6 +1076,24 @@ probe or switch GitHub credentials, `hosts.yml` or token environment variables. 
 to an injected or Enterprise Managed User identity. If the session's identity cannot publish, stop
 and leave the exact commands for the operator, or wait for their explicit authorization to publish
 as `jokerman89`.
+
+**Recurrence and clarification (2026-09-28):** During merge coordination, an injected read-only
+identity masked an already configured, active maintainer account. The coordinator incorrectly
+treated one `api user` result as proof that authorized credentials were unavailable. The operator
+corrected that inference.
+
+An API identity check proves which account the current process selected, not which accounts are
+already configured. When the operator identifies an existing authorized account, inspect only
+documented account-status metadata, never credential files or token values. In this case, omitting
+the documented injected authentication overrides in a child process let the installed CLI use its
+existing stored active account; no token was inspected or exported, and neither the parent
+environment nor global account selection changed. Verify the resulting API identity, repository
+permissions and a non-mutating Git transport check before declaring delivery blocked. Keep Git
+credential-helper selection command-scoped and preserve repository hooks and other configuration.
+This does not authorize borrowing credentials, changing accounts globally or bypassing a real
+permission denial.
+
+Captured from the operator correction during the 2026-09-28 master merge coordination.
 
 ## L-054 - Add no third-party package the repository has not declared
 
@@ -1168,3 +1205,44 @@ for it and reconcile with an ordinary merge. Run byte- or span-bound guards in a
 `core.autocrlf=false` clone or on LF-pinned paths; `git archive` is not an LF proof. When a guard
 suddenly reports many findings, first look for a broken binding that silently disables later
 classifications. Record a correction as a new commit, not a reset or amend.
+
+## L-062 - Recurrence of L-050: a short synthetic root is still no license for a drive root
+
+**Date:** 2026-09-28
+
+**Context:** A Windows installed-consumer test failed its own 235-character path budget under a
+long temporary root. The reusable-patterns CORE owner then created `C:\lp` and clones below it
+to shorten fixture paths, without operator approval. This repeated the L-050 mistake. The
+coordinator stopped the path; the work stays preserved and untouched pending the operator's
+recovery decision.
+
+**Rule:** L-050 applies before every attempt to shorten a path. Keep roots inside the user
+profile or an already-authorized workspace. When a budget still cannot be met there, record the
+refusal honestly and ask, rather than choosing a system-level location. Never plan cleanup of an
+unauthorized path without authorization; preserve it and report it.
+
+## L-063 - Keep supplemental and artifact observations out of feature acceptance
+
+**Date:** 2026-09-28
+
+**Context:** In the reusable-patterns initiative, coordinator ledger wording, a P05 request, and
+review wording turned three things into "required" feature gates:
+
+- Word and PDF rendered-page artifact QA;
+- produced-PDF clause preservation;
+- six per-consumer host cells.
+
+The original cards (4.3.c: V09/V18; 5.2.a: V11/V18) and spec section 10 never required them, and
+RN-05 makes produced PDF content unverifiable. An independent adjudication and an owner decision
+(RN-14) restored the original scope.
+
+**Rule:**
+
+- Classify every acceptance row against the original card's Verify column and the spec before
+  marking it mandatory:
+  - (A) original feature acceptance;
+  - (B) pre-existing artifact QA;
+  - (C) disclosed deferral.
+- Record genuine unobserved facts honestly, but do not enlarge acceptance through status wording
+  or QA inventories. Enlarging it needs an explicit owner decision.
+- Never drop an original criterion either.

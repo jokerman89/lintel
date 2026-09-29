@@ -133,6 +133,8 @@ class CopilotKit(unittest.TestCase):
         for name in adapter.COMPONENTS:
             shutil.copytree(ROOT / name, cls.source / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         shutil.copytree(ROOT / "docs", cls.source / "docs")
+        # Local (dogfood) generation requires every canonical link target to exist.
+        shutil.copytree(ROOT / ".claude/decisions", cls.source / ".claude/decisions")
         for name in adapter.DOCS + adapter.SOURCE_METADATA + ("LICENSE", "shims/copilot/COPILOT.md", "shims/universal/ADAPTER.md"):
             if (ROOT / name).is_file():
                 (cls.source / name).parent.mkdir(parents=True, exist_ok=True)
@@ -492,6 +494,22 @@ class CopilotKit(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Symlink/reparse"):
             adapter.verify_links(files, target)
         self.assertEqual(outside.read_bytes(), b"Outside selected target.\n")
+
+    def test_generated_native_skill_and_agent_links_are_verified(self):
+        files = {".github/skills/li-verify/SKILL.md": b"[Guide](../../../user-guide.md)\n",
+                 ".github/agents/CodeReviewer.agent.md": (b"[Method](../lintel/skills/review/references/method.md)\n"
+                                                          b"[Guide](../../user-guide.md)\n"
+                                                          b"[Absent](../lintel/skills/review/references/absent.md)\n"),
+                 ".github/lintel/skills/review/references/method.md": b"# Method\n"}
+        self.assertEqual(adapter.verify_links(files, self.target), [
+            "Missing generated link: .github/skills/li-verify/SKILL.md -> ../../../user-guide.md",
+            "Missing generated link: .github/agents/CodeReviewer.agent.md -> ../../user-guide.md",
+            "Missing bundled documentation target: .github/agents/CodeReviewer.agent.md -> "
+            "../lintel/skills/review/references/absent.md"])
+        (self.target / "user-guide.md").write_bytes(b"User-owned guide.\n")
+        files[".github/agents/CodeReviewer.agent.md"] = files[".github/agents/CodeReviewer.agent.md"].replace(
+            b"references/absent.md", b"references/method.md")
+        self.assertEqual(adapter.verify_links(files, self.target), [])
 
     def test_long_public_directory_index_is_selected_from_the_real_source(self):
         source = self.long_metadata_root()
@@ -1421,10 +1439,10 @@ except (ValueError,OSError) as error:
         self.assertEqual(before, self.snapshot())
         self.run_cli("check")
         self.assertTrue((self.target / ".github/lintel/scaffolding/01-foundation/templates/plan/spec.template.md").is_file())
-        self.assertIn(".claude/runtime/", (self.target / ".gitignore").read_text())
+        self.assertIn(".claude/runtime/", (self.target / ".gitignore").read_text(encoding="utf-8"))
         self.assertFalse((self.target / ".github/hooks").exists())
         self.assertFalse((self.target / ".github/lintel/hooks").exists())
-        self.assertFalse(json.loads((self.target / adapter.INVENTORY).read_text())["hooks_installed"])
+        self.assertFalse(json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["hooks_installed"])
         # A different clone with only committed artifacts remains independently usable.
         clone = self.base / "fresh-clone"
         shutil.copytree(self.target, clone)
@@ -1437,12 +1455,75 @@ except (ValueError,OSError) as error:
         self.run_cli()
         wrapper = self.target / ".github/skills/li-swarm/SKILL.md"
         self.assertTrue(wrapper.is_file())
-        self.assertIn("../../lintel/skills/swarm/SKILL.md", wrapper.read_text(encoding="utf-8"))
+        native = wrapper.read_text(encoding="utf-8")
+        self.assertIn("Generated from `skills/swarm/SKILL.md`", native)
+        self.assertIn("`../../lintel` from this skill's base directory", native)
+        canonical = (self.source / "skills/swarm/SKILL.md").read_text(encoding="utf-8").splitlines()
+        self.assertIn(next(line for line in canonical if line.startswith("## ")), native.splitlines())
         inventory = json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["files"]
         for relative in adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES + adapter.SOURCE_METADATA:
             installed = f"{adapter.BUNDLE}/{relative}"
             self.assertIn(installed, inventory)
             self.assertTrue((self.target / installed).is_file(), installed)
+
+    def test_native_skills_and_agents_cover_every_canonical_source(self):
+        self.run_cli()
+        skills = sorted(path.parent.name for path in (self.source / "skills").glob("*/SKILL.md"))
+        agents = sorted(path.stem for path in (self.source / "agents").glob("*/*.md")
+                        if path.name != "README.md" and not path.name.startswith("_"))
+        roles = [f"lintel-{role}" for role in adapter.AGENTS]
+        native_skills = sorted(path.parent.name for path in (self.target / ".github/skills").glob("*/SKILL.md"))
+        native_agents = sorted(path.name for path in (self.target / ".github/agents").iterdir())
+        self.assertEqual(native_skills, [f"li-{name}" for name in skills])
+        self.assertEqual(native_agents, sorted(f"{name}.agent.md" for name in agents + roles))
+        print(f"Observed native counts: skills={len(native_skills)} agents={len(native_agents)} "
+              f"(canonical skills={len(skills)}, canonical agents={len(agents)} + {len(roles)} roles)")
+        inventory = json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["files"]
+        instructions = (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md")
+        generated = [f".github/skills/{name}/SKILL.md" for name in native_skills] + \
+                    [f".github/agents/{name}" for name in native_agents] + list(instructions)
+        for relative in generated:
+            data = (self.target / relative).read_bytes()
+            self.assertIn(relative, inventory)
+            self.assertNotIn(b"/li:", data, relative)
+            self.assertNotIn(b"\r", data, relative)
+            self.assertNotIn(b"AskUserQuestion", data.split(b"AskUserQuestion=`ask_user`")[-1], relative)
+        for name in skills:
+            header, body = adapter.split_frontmatter(
+                (self.target / f".github/skills/li-{name}/SKILL.md").read_text(encoding="utf-8"))
+            self.assertEqual([line.split(":", 1)[0] for line in header], ["name", "description"], name)
+            self.assertEqual(header[0], f"name: li-{name}")
+            self.assertTrue(body.startswith("\n> **Lintel on GitHub Copilot.** Generated from "
+                                            f"`skills/{name}/SKILL.md`"), name)
+        for name in agents:
+            header, body = adapter.split_frontmatter(
+                (self.target / f".github/agents/{name}.agent.md").read_text(encoding="utf-8"))
+            self.assertEqual([line.split(":", 1)[0] for line in header], ["name", "description", "tools"], name)
+            self.assertIn("`../lintel` from this agent's directory", body)
+            self.assertLessEqual(len(body), adapter.NATIVE_HOSTS["copilot"]["agent_body_limit"], name)
+        for role, workflow in (("planner", "plan"), ("builder", "build"), ("reviewer", "review")):
+            text = (self.target / f".github/agents/lintel-{role}.agent.md").read_text(encoding="utf-8")
+            self.assertIn(f"Use the native `/li-{workflow}` skill", text)
+            for pointer in ("Copilot adapter contract", "SKILL.md", "](", "canonical"):
+                self.assertNotIn(pointer, text)
+        for relative in instructions:
+            text = (self.target / relative).read_text(encoding="utf-8")
+            self.assertIn("native skills", text)
+            self.assertNotIn("corresponding", text)
+            self.assertNotIn("SKILL.md", text)
+        cycle = (self.target / ".github/skills/li-cycle/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("\n## What this skill does\n", cycle)
+        # Missing adapter attributes for the native agent and hook paths are reported, then repaired.
+        attributes = self.target / ".gitattributes"
+        rules = attributes.read_text(encoding="utf-8").splitlines()
+        for rule in adapter.ATTRIBUTES[2:5]:
+            self.assertIn(rule, rules)
+        attributes.write_text("\n".join(line for line in rules if line not in adapter.ATTRIBUTES[2:5]) + "\n",
+                              encoding="utf-8")
+        self.assertIn("Missing adapter .gitattributes rules; run init", self.run_cli("check", success=False).stderr)
+        self.run_cli()
+        self.run_cli("check")
+        self.assertTrue(set(adapter.ATTRIBUTES[2:5]) <= set(attributes.read_text(encoding="utf-8").splitlines()))
 
     def test_missing_mandatory_swarm_dependency_refuses_before_writes(self):
         broken = self.base / "missing-swarm-dependency-source"
@@ -1622,22 +1703,22 @@ else:
 
     def test_preserves_existing_project_instructions_and_memory(self):
         (self.target / ".github").mkdir()
-        (self.target / ".github/copilot-instructions.md").write_text("Team policy stays.\n")
-        (self.target / "AGENTS.md").write_text("Existing project agent rules.\n")
+        (self.target / ".github/copilot-instructions.md").write_text("Team policy stays.\n", encoding="utf-8")
+        (self.target / "AGENTS.md").write_text("Existing project agent rules.\n", encoding="utf-8")
         self.run_cli()
-        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(), "Team policy stays.\n")
-        self.assertTrue((self.target / "AGENTS.md").read_text().startswith("Existing project agent rules.\n"))
-        self.assertIn(adapter.PROTOCOL_START.decode(), (self.target / "AGENTS.md").read_text())
+        self.assertEqual((self.target / ".github/copilot-instructions.md").read_text(encoding="utf-8"), "Team policy stays.\n")
+        self.assertTrue((self.target / "AGENTS.md").read_text(encoding="utf-8").startswith("Existing project agent rules.\n"))
+        self.assertIn(adapter.PROTOCOL_START.decode(), (self.target / "AGENTS.md").read_text(encoding="utf-8"))
         memory = self.target / ".claude/memory/lessons.md"
-        memory.write_text("Our durable lesson.\n")
+        memory.write_text("Our durable lesson.\n", encoding="utf-8")
         self.run_cli()
         self.run_cli("check")
-        self.assertEqual(memory.read_text(), "Our durable lesson.\n")
+        self.assertEqual(memory.read_text(encoding="utf-8"), "Our durable lesson.\n")
 
     def test_modified_managed_file_refuses_entire_update(self):
         self.run_cli()
         path = self.target / ".github/skills/li-plan/SKILL.md"
-        path.write_text(path.read_text() + "\nTeam modification.\n")
+        path.write_text(path.read_text(encoding="utf-8") + "\nTeam modification.\n", encoding="utf-8")
         before = self.snapshot()
         self.assertIn("Modified managed file", self.run_cli(success=False).stderr)
         self.assertEqual(before, self.snapshot())
@@ -1669,13 +1750,17 @@ else:
         self.assertEqual(before, self.snapshot())
 
     def test_unmanaged_collision_refuses_before_foundation_writes(self):
-        collision = self.target / ".github/agents/lintel-builder.agent.md"
-        collision.parent.mkdir(parents=True)
-        collision.write_text("Our own builder.\n")
-        before = self.snapshot()
-        self.assertIn("Unmanaged collision", self.run_cli(success=False).stderr)
-        self.assertEqual(before, self.snapshot())
-        self.assertFalse((self.target / "AGENTS.md").exists())
+        for relative in (".github/agents/lintel-builder.agent.md", ".github/agents/CodeReviewer.agent.md",
+                         ".github/skills/li-verify/SKILL.md"):
+            with self.subTest(relative=relative):
+                collision = self.target / relative
+                collision.parent.mkdir(parents=True, exist_ok=True)
+                collision.write_text("Our own file.\n", encoding="utf-8")
+                before = self.snapshot()
+                self.assertIn(f"Unmanaged collision (preserved): {relative}", self.run_cli(success=False).stderr)
+                self.assertEqual(before, self.snapshot())
+                self.assertFalse((self.target / "AGENTS.md").exists())
+                collision.unlink()
 
     def test_missing_managed_file_detected_and_repaired(self):
         self.run_cli()
@@ -1691,11 +1776,11 @@ else:
         self.assertIn("runtime/ ignore rule", self.run_cli("check", success=False).stderr)
         self.run_cli()
         self.run_cli("check")
-        ignore.write_text("# Project ignores\n*.local\n")
+        ignore.write_text("# Project ignores\n*.local\n", encoding="utf-8")
         self.assertIn("runtime/ ignore rule", self.run_cli("check", success=False).stderr)
         self.run_cli()
         self.run_cli("check")
-        self.assertIn("*.local", ignore.read_text())
+        self.assertIn("*.local", ignore.read_text(encoding="utf-8"))
 
     def test_source_update_is_reviewable_and_deterministic(self):
         self.run_cli()
@@ -1714,19 +1799,26 @@ else:
     def test_inventory_traversal_and_windows_paths_refused(self):
         self.run_cli()
         manifest = self.target / adapter.INVENTORY
-        original = json.loads(manifest.read_text())
-        for unsafe in ("../../escape", "/absolute", "C:/escape", ".github/../escape", ".github\\escape", "AGENTS.md", ".github/skills/li-plan/./SKILL.md", ".github/skills//li-plan/SKILL.md"):
+        original = json.loads(manifest.read_text(encoding="utf-8"))
+        for unsafe in ("../../escape", "/absolute", "C:/escape", ".github/../escape", ".github\\escape", "AGENTS.md", ".github/skills/li-plan/./SKILL.md", ".github/skills//li-plan/SKILL.md",
+                       ".github/agents/../x", ".github/other.json", ".github/agents/x.md", ".github/agents/x_y.agent.md",
+                       ".github/agents/sub/x.agent.md", ".github/plugin/plugin.json", ".github/hooks/other.json"):
             forged = dict(original)
             forged["files"] = {unsafe: "0" * 64}
-            manifest.write_text(json.dumps(forged))
-            self.run_cli(success=False)
-        manifest.write_text(json.dumps(original))
+            manifest.write_text(json.dumps(forged), encoding="utf-8")
+            self.assertIn("ERROR:", self.run_cli(success=False).stderr)
+        registry = adapter.load_registry(adapter.native_io_path(adapter.safe_path(self.source, "lib/cli-tiers.yaml")))
+        accepted = {path: "0" * 64 for path in (".github/agents/CodeReviewer.agent.md", ".github/plugin/hooks.json",
+                                                ".github/hooks/lintel.json", ".github/agents/lintel-planner.agent.md")}
+        manifest.write_text(json.dumps(dict(original, files=accepted)), encoding="utf-8")
+        self.assertEqual(adapter.load_inventory(self.target, registry)[0], accepted)
+        manifest.write_text(json.dumps(original), encoding="utf-8")
 
     def test_invalid_inventory_root_types_are_clean_errors(self):
         self.run_cli()
         manifest = self.target / adapter.INVENTORY
         for value in (None, [], "invalid", 7, {"schema_version": True, "files": {}}):
-            manifest.write_text(json.dumps(value))
+            manifest.write_text(json.dumps(value), encoding="utf-8")
             before = self.snapshot()
             for command in ("init", "check"):
                 result = self.run_cli(command, success=False)
@@ -1747,12 +1839,16 @@ else:
     def test_dogfood_has_no_recursive_source_copy(self):
         local = self.base / "dogfood"
         shutil.copytree(self.source, local)
-        (local / "AGENTS.md").write_text("Read canonical repository instructions.\n")
+        (local / "AGENTS.md").write_text("Read canonical repository instructions.\n", encoding="utf-8")
         self.run_cli(source=local, target=local)
         self.run_cli("check", source=local, target=local)
         self.assertFalse((local / ".github/lintel/skills").exists())
         self.assertFalse((local / "CORE-PRINCIPLES.md").exists())
-        self.assertIn("../../../skills/plan/SKILL.md", (local / ".github/skills/li-plan/SKILL.md").read_text())
+        native = (local / ".github/skills/li-plan/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("`../../..` from this skill's base directory", native)
+        self.assertIn("](../../../skills/define/references/intake.md)", native)
+        self.assertIn("`../..` from this agent's directory",
+                      (local / ".github/agents/CodeReviewer.agent.md").read_text(encoding="utf-8"))
 
     def test_pack_resolver_uses_bundled_code_and_project_state(self):
         self.run_cli()
@@ -1784,10 +1880,10 @@ test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
         shutil.copytree(self.source, crlf)
         source_skill = crlf / "skills/plan/SKILL.md"
         source_skill.write_bytes(source_skill.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
-        (self.target / ".gitattributes").write_text("*.custom binary\n")
+        (self.target / ".gitattributes").write_text("*.custom binary\n", encoding="utf-8")
         self.run_cli(source=crlf)
         self.assertNotIn(b"\r\n", (self.target / ".github/lintel/skills/plan/SKILL.md").read_bytes())
-        self.assertIn("*.custom binary", (self.target / ".gitattributes").read_text())
+        self.assertIn("*.custom binary", (self.target / ".gitattributes").read_text(encoding="utf-8"))
         self.run_cli("check", source=self.source)
         git = shutil.which("git")
         self.assertTrue(git, "Git is required for the real autocrlf clone test")
@@ -1877,7 +1973,7 @@ bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$PWD/downstream-scaffo
         validator = bundle / "bin/li-envelope-validate"
         validator.chmod(0o600)
         invalid = self.target / "invalid-envelope.yaml"
-        invalid.write_text("not-an-envelope: true\n")
+        invalid.write_text("not-an-envelope: true\n", encoding="utf-8")
         bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
         self.assertTrue(bash)
         env = {key: value for key, value in os.environ.items() if not key.startswith("LINTEL_")}

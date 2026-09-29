@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 ---
 
 You are the `generate-outline` skill — first stage of the v3.5 shared content pipeline. Produces an outline.md from a brief.
@@ -155,6 +157,14 @@ For each section/slide:
 ### Step 7 — Write outline.md + return path
 
 Write to `--out` path. Surface summary (slide_count, section types, language, arc) to operator.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md). Use
+the clauses of a verified run attachment; on direct entry without one, resolve for the brief's
+context. Sections required by mandatory clauses become outline sections tagged with their clause
+IDs before other structure choices; defaults inform only unconstrained choices. `needs-context`,
+`conflict` and `unavailable` stop the outline.
 
 ## Status protocol
 

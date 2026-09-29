@@ -31,10 +31,14 @@ invent or reinterpret profile evidence. Missing required policy blocks its affec
 
 ## Bind the current session
 
-Invocation differs per route: the Claude Code plugin uses `/li:<skill>`; generated native
-wrappers use `li-<skill>` through the host's own skill mechanism; a manual route reads
-`START.md` and the canonical `skills/<skill>/SKILL.md` explicitly. Canonical references to
-`/li:<skill>` in workflows name the skill, not a required syntax.
+Invocation differs per route: the Claude Code plugin uses `/li:<skill>`. On GitHub Copilot,
+every canonical skill is a complete generated native skill invoked as `/li-<skill>`, and
+named roles are custom agents (see `shims/copilot/COPILOT.md` in the source checkout, or
+`COPILOT.md` beside this file in an installed bundle). On other documented discovery roots,
+generated wrappers for the core workflows use `li-<skill>` through the host's own skill
+mechanism. A manual route reads `START.md` and the canonical `skills/<skill>/SKILL.md`
+explicitly. Canonical references to `/li:<skill>` in workflows name the skill, not a
+required syntax.
 
 Read `lib/cli-tiers.yaml` through `bin/li-client-capabilities.py show --client <surface>`.
 Choose the exact CLI, desktop, IDE or cloud surface. Legacy aliases select one explicit

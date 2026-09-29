@@ -37,6 +37,10 @@ python <trusted-source>\skills\generate\scripts\pipeline_inputs.py --repo <targe
 
 Repeat `--leaf`, `--format` and `--selected-input <relative-path>` as needed.
 `--profile-context-file` retains an explicitly selected P07 context file.
+For a mixed web design with a `pattern_context`, add `--pattern-lock <relative-lock>
+--pattern-context <relative-context>`. Both must be supplied together, and both,
+plus `.claude/patterns`, must be selected by the external input context. A
+document-only design refuses them.
 Other data paths are literal target-relative paths, with Windows separators
 accepted at the input boundary. Single-valued options cannot repeat. There is no
 `--out`, renderer command, installation or review-record writer.
@@ -44,7 +48,7 @@ accepted at the input boundary. Single-valued options cannot repeat. There is no
 The Python entry is `load_pipeline_inputs(repo, run_dir, *, expected,
 profile_config, package_id, leaf_ids, formats, selected_inputs=(),
 linked_authority=None, upstream_request=None, upstream_expected=None,
-upstream_profile=None)`. It uses P03 rooted reads, P05 strict JSON/current
+upstream_profile=None, pattern_lock=None, pattern_context=None)`. It uses P03 rooted reads, P05 strict JSON/current
 context, P07 live reference/policy and the shared Markdown source classifier.
 It recognizes only the existing section/field markers in eligible source
 positions; fenced/quoted/raw/comment examples do not become section definitions.

@@ -8,6 +8,27 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Reusable patterns (2026-09-28)
+
+**Status:** source-complete integrated candidate, not released, on branch
+`jokerman-microsoft-patterns-core-integration`.
+- Candidate `2ce4cfcc` (0.13.1): native 1a `06e69eb6`, `394ed0b8` and `ef48d7a0` joined; runtime
+  unchanged since `99de0741`, which was reviewed at `d4acf3e7`.
+- P07 is generation 2 (`c50efdbe…`). Current local CORE, PACK and WF reports and reviews are
+  published in the coordinator batch after `2ce4cfcc`.
+- Linux: V15 kit and search checks at `2ce4cfcc`. Windows: no strict verdict, and hosted CI is
+  required.
+- Open leaves: 6.2.a-c only.
+
+**What's pending:** see [handoff](../plans/reusable-patterns/handoff.md):
+- fresh P05 contexts (attempt 4 and per lane);
+- canonical P05 decisions, QA and corroboration;
+- the aggregate review;
+- hosted CI;
+- the main version check;
+- Master-owned publication;
+- the `C:\lp` decision.
+
 ## Active - Supported clients narrowed to four families (2026-09-25)
 
 **Status:** delivered. After converging onto #104 with ordinary merge `66b56aa4` of `22d502be`,

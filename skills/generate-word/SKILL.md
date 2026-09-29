@@ -13,6 +13,8 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
+  - cli: copilot
+    level: full
 license_note: produces customer-bound output; honors the active pack's compliance gates for customer-facing variants
 ---
 
@@ -178,6 +180,16 @@ acceptance stays separate; never fabricate design-spec.json to unblock it.
    Persist P05 evidence bound to the final artifact and current P07 reference.
    Keep incomplete output at its explicit owned path, clearly marked unverified;
    do not move it through an implicit personal draft directory.
+
+## Reusable patterns
+
+Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
+Brief mode resolves for the brief's context; from-pipeline mode verifies the run's
+`pattern_context` attachment. Both receive the same clauses before structure and content
+choices: sections required by mandatory clauses become headings, and the clauses go to the
+existing quality review and the QA report. Removing a required section is a failed clause. A
+helper fixture proves only this integration; a real generated-document case is separate host
+evidence.
 
 ## Report format
 

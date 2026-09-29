@@ -157,8 +157,10 @@ class Fixture(unittest.TestCase):
         paths = [
             *RESOLVER_RESOURCES,
             "bin/li-adr-new",
+            "bin/li-run",
             "bin/li-update",
             "bin/li-vault-init",
+            "lib/copilot-env.sh",
             "templates/obsidian/sessions.base",
             "hooks/shared/_input.sh",
             "hooks/hooks.json",
@@ -748,8 +750,8 @@ class Vault(Fixture):
             (self.vault / "sessions.base").read_bytes(),
             (self.source / "templates/obsidian/sessions.base").read_bytes(),
         )
-        self.assertIn("type: repo-hub", (self.vault / "target project.md").read_text())
-        self.assertIn("type: session-index", (self.vault / "00-index.md").read_text())
+        self.assertIn("type: repo-hub", (self.vault / "target project.md").read_text(encoding="utf-8"))
+        self.assertIn("type: session-index", (self.vault / "00-index.md").read_text(encoding="utf-8"))
         for path in self.vault.iterdir():
             with path.open("a", encoding="utf-8") as handle:
                 handle.write("\nOperator customization.\n")
@@ -793,6 +795,24 @@ class Vault(Fixture):
         self.assertIn("vault sessions dir not found", missing.stderr)
         self.assertFalse(self.marker.exists())
         self.assertEqual(snapshot(self.vault), {})
+
+
+class ShellStepRunner(Fixture):
+    def test_step_runner_uses_its_own_source_and_never_target_code(self) -> None:
+        write(self.target / "AGENTS.md", "# Target project\n")
+        write(self.target / "lib/copilot-env.sh", HOSTILE_RESOLVER)
+        write(self.target / "bin/_audit.sh", HOSTILE_RESOLVER)
+        write(self.source / "origin.txt", "trusted source\n")
+        write(self.target / "origin.txt", "target project\n")
+        step = self.base / "step.sh"
+        write(step, 'printf "%s|%s|%s\\n" "$(cat "$LINTEL_SOURCE_ROOT/origin.txt")" '
+                    '"$(cat origin.txt)" "$(resolve_pack_field compliance.mode)"\n')
+        # A stale source environment pointing at the target must not select its helpers.
+        result = self.bash(self.source / "bin/li-run", step.as_posix(), cwd=self.base,
+                           extra={"LINTEL_SOURCE_ROOT": self.target.as_posix()})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.marker.exists(), "li-run executed target code")
+        self.assertEqual(result.stdout.strip(), "trusted source|target project|advisory")
 
 
 class Adr(Fixture):
@@ -879,8 +899,8 @@ class Adr(Fixture):
                 content = paths[0].read_text(encoding="utf-8")
                 self.assertIn(f"# ADR-{number}: {title}", content)
                 self.assertIn(f"- **Status:** {status}", content)
-        self.assertEqual((directory / "0007-old.md").read_text(), "Keep seven.\n")
-        self.assertEqual((directory / "0009-later.md").read_text(), "Keep nine.\n")
+        self.assertEqual((directory / "0007-old.md").read_text(encoding="utf-8"), "Keep seven.\n")
+        self.assertEqual((directory / "0009-later.md").read_text(encoding="utf-8"), "Keep nine.\n")
 
     def test_custom_template_and_hostile_title_are_literal_data(self) -> None:
         directory = self.prepare_store(
@@ -932,7 +952,7 @@ class Adr(Fixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(
             "# ADR-0001: Legacy fixture",
-            (directory / "0001-legacy-fixture.md").read_text(),
+            (directory / "0001-legacy-fixture.md").read_text(encoding="utf-8"),
         )
         self.assertFalse((self.target / ".claude/decisions").exists())
 
@@ -967,7 +987,7 @@ class Updater(Fixture):
         return [
             f"{tool} {args}"
             for tool, _, args in (
-                line.split("\t") for line in self.log.read_text().splitlines()
+                line.split("\t") for line in self.log.read_text(encoding="utf-8").splitlines()
             )
         ]
 
@@ -984,7 +1004,7 @@ class Updater(Fixture):
             self.assertIn(guidance, result.stdout)
         for removed in ("gemini:", "droid:"):
             self.assertNotIn(removed, result.stdout)
-        for line in self.log.read_text().splitlines():
+        for line in self.log.read_text(encoding="utf-8").splitlines():
             tool, cwd, _ = line.split("\t")
             expected = "/synthetic home/.lintel" if tool == "git" else "/target project"
             self.assertTrue(cwd.endswith(expected), line)
@@ -1007,7 +1027,7 @@ class Updater(Fixture):
         result = self.update(COPILOT_STATUS="22")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("copilot plugin install li@jokerman-lintel --force", self.calls())
-        self.assertEqual(self.install_marker.read_text(), "installed\n")
+        self.assertEqual(self.install_marker.read_text(encoding="utf-8"), "installed\n")
         self.assert_scriptable_host_runs()
 
     def test_copilot_failed_fallback_is_not_success(self) -> None:
