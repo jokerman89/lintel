@@ -20,7 +20,9 @@ Lintel hooks, custom instructions or any tool beyond the one named for the probe
 ## Plugin route (`--plugin-dir` pointing at the tested revision)
 
 - **6.2.a discovery:** `copilot skill list --json` listed 96 `li-*` skills with source `plugin`, all
-  from the tested revision, including `li-pause`. The canonical source has 96 skills.
+  from the tested revision, including `li-pause`. The canonical source has 96 skills. The host
+  offers no headless agent listing, so the count of discoverable agents is not observed; see the
+  second correction below.
 - **6.2.b whole-body delivery:** a `skill.invoked` event for `li-cycle` (source `plugin`, trigger
   `agent-invoked`) carried the generated `.github/skills/li-cycle/SKILL.md` body exactly.
   - The generated file is 26,922 bytes (SHA-256
@@ -30,7 +32,8 @@ Lintel hooks, custom instructions or any tool beyond the one named for the probe
     newline, with no carriage returns. Both have SHA-256
     `9c88c9039b3df4e42a4fa07ba4766211417ff6104e58fea50c8436083d3a73d4`.
 - **Custom agent selection:** asked to delegate to `CodeReviewer`, the model called the task tool
-  with agent type `li:CodeReviewer`.
+  with agent type `li:CodeReviewer`. The raw host events support this; the probe script's own
+  "NOT OBSERVED" line was a naming defect in its check (second correction below).
   - The host names plugin agents `<plugin>:<Name>` and shows the display name `CodeReviewer`.
   - The selected agent's description equals the generated profile's description, and the host's
     selected tool list (`Read`, `Grep`, `Glob`, `Bash`) equals the profile's declared `tools`.
@@ -93,6 +96,26 @@ content.
 
 The probe script's own log line compared other hashes (`b1e97363…` and `f4e8bd19…` on the plugin
 route) and fell back to ordered line coverage. That comparison is void: a PowerShell function
-returned its provenance note together with the invoked text, which prepended 252 bytes, and its
-expected side kept the blank separator line. The raw events show no such prefix. The original
-script log is kept unchanged as history.
+returned its provenance note together with the invoked text, which prepended 252 bytes on the
+plugin route and 198 bytes on the kit route, and its expected side kept the blank separator line.
+The raw events show no such prefix. The original script log is kept unchanged as history.
+
+### Custom agent selection (second correction, 2026-09-29)
+
+The retained probe log reports the agent probe as `agentName=li:CodeReviewer -> NOT OBSERVED` and
+`plugin_agent_selected=False`. That verdict came from the script's check, not from the host. The
+script compared the host's agent name with the unprefixed `CodeReviewer`, while the host names
+plugin agents `<plugin>:<Name>`. Its L8 lines printed only event key names, by design.
+
+The raw host events of that session support the selection claim above:
+
+| Event | Recorded values |
+|---|---|
+| `tool.execution_start` (task) | `agent_type` `li:CodeReviewer`, `name` `CodeReviewer`, mode `sync` |
+| `subagent.started` | `agentName` and `agentType` `li:CodeReviewer`, `agentDisplayName` `CodeReviewer`; its description equals the generated profile's (SHA-256 prefix `fb5e6b532bedf0cb`) |
+| `subagent.selected` | tools `Read`, `Grep`, `Glob`, `Bash`, equal to the profile's declared `tools` |
+| `subagent.completed` | 5,799 ms, 0 tool calls; a second record at session end marked `cancelled` |
+
+This observes the selection of one generated agent. It is not an inventory: the host exposed no
+agent list in its events or logs, so the count of discoverable agents (plan 6.2.a) is not observed
+here.
