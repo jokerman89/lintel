@@ -5,6 +5,43 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.1 — unreleased
+
+Reusable patterns (ADR-0038): a data-only way to capture, review, version, share and apply recurring
+expectations as patterns, with explicit applicability, provenance and review traceability. It is
+built on the 0.13.0 native Copilot kit.
+
+### Added
+
+- **Runtime.** `lib/patterns.py`, the `bin/li-pattern.py` JSON CLI and the `bin/li-pattern`
+  launcher. Python 3.10+ is an optional runtime: a missing runtime reports "pattern check
+  unavailable", never "no patterns", and the bare installer gains no Python prerequisite.
+- **Workflow.** The canonical `pattern` workflow (native `/li-pattern`) and its single
+  [consumer contract](skills/pattern/references/consumer-contract.md), with consumer wiring in the
+  cycle, document-pipeline, engineering and frontend skills.
+- **Records.** Versioned locks, per-package clause projections, review coverage and local
+  sharing.
+- **Visual adapter.** `lib/pattern_visual.py`. A selected pattern palette winner outranks the
+  pinned Design DNA profile only through a lock the core verifies and P05 selects.
+- **Pack field.** The optional pack manifest field `patterns.source`. The neutral pack declares
+  it `null`.
+- **Template.** An authoring template with one neutral example.
+
+### Changed
+
+- **Currentness at use.** Pattern-dependent review, QA, render, SHIP and resume re-verify the
+  pattern lock at use, before the shared P05, P07 and QA gates. It is enforced in code in the
+  design loader, the pipeline input loader and `li-pattern`; the other consumers carry it as a
+  workflow obligation.
+- **Stricter loader.** A design spec that carries a `pattern_context` without its lock is refused.
+
+### Migration
+
+- **Rebind profile contexts.** Adding `patterns.source: null` changes the neutral pack manifest, so
+  bound profile contexts report drift until they are rebound explicitly with a reason. See the
+  [patterns upgrade notice](docs/concepts/patterns.md). There is no data migration and no
+  automatic rebind.
+
 ## 0.13.0 — unreleased
 
 GitHub Copilot receives Lintel as complete native skills and custom agents generated from the
