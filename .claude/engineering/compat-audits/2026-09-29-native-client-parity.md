@@ -121,4 +121,11 @@ The independent review status is recorded below.
   and marked in the evolution entry (`breaking_change: true`).
 
 Audit snapshot: `against` main `1cf7d099`, candidate branch `jokerman-microsoft-copilot-native-1a`.
-Independent review: pending the final PR-1a candidate review.
+
+Independent review: `e3fe3231` (read-only; view, grep and glob only) reviewed this disposition on
+pin `78e2e046`, tree `96328279`, on 2026-09-29: **M2 DISPOSITION = ACCEPTED**. The raw RED verdict
+and all 61 hits stay as generated. Caveats recorded with the review:
+- The delivery owner's explicit acceptance of the override is still required before SHIP, because
+  ADR-0039 does not name M2.
+- The evolution entry now carries a landing-split note.
+- The registry units run again on the final candidate.

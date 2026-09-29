@@ -25,6 +25,14 @@ breaking_change: true   # behavior change: updating the Copilot plugin activates
 > [design.md](../../plans/native-client-parity/design.md). Increment 2 (Claude, Codex, Cursor)
 > adds its own section before it ships.
 
+> **Landing split (2026-09-28, recorded 2026-09-29).** Increment 1 lands in two pull requests
+> (plan "Landing split and execution boundaries"). PR-1a, version 0.13.0, carries the native skills
+> and agents and installs no hooks. The hook adapter, the hook registrations and the hook statements
+> below (activation, `LINTEL_HOOKS_DISABLED`, `--hooks`, the vendored `hooks/` bundle) belong to
+> PR-1b and its own version. The breaking change for PR-1a is the one the migration guide
+> describes: generated native files replace the pointer wrappers, and a consumer agent with a
+> generic Lintel agent name blocks the update.
+
 ## What changed (shape)
 
 - Copilot native skills move from 15 generated pointer files to one self-contained generated

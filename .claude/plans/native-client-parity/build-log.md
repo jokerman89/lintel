@@ -159,9 +159,11 @@ commits; identical trees carry their content.
     `jq` is absent locally.
   - The native units, and the LF guard: PASS, 0 findings, on the clean clone
     (`join-lf-guard-clean-595026e4.log`, `72363b49`).
-  - EOL note on 6.1.a: after regeneration, only `docs/wiki/schemas.md` differs, and only in line
-    endings. On Windows `li-wiki-gen` writes CRLF for the schema summaries, and its own `--check`
-    strips CR by design.
+  - 6.1.a on this Windows host: after regeneration, `docs/wiki/schemas.md` differed from the committed
+    file by carriage returns only (`git diff --ignore-cr-at-eol` is empty; li-wiki-gen writes the
+    schema summaries with CR on Windows, and its own `--check` strips CR by design). The strict
+    "regeneration leaves no diff" criterion is therefore not met locally. It is pending in hosted
+    CI, whose drift gate runs on Linux.
 - `fd151979`: an ordinary merge of `origin/main` `1cf7d099` (PR #111 and #112; 14 presentation
   paths only).
 - **P6A live acceptance** on `fd151979` with Copilot CLI 1.0.89-5, recorded in
