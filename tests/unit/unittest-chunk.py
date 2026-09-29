@@ -199,6 +199,14 @@ class HelperContract(unittest.TestCase):
         passing = run([self.failing], chunk="1/2")
         self.assertEqual(passing.returncode, 0, passing.stdout + passing.stderr)
 
+    def test_loading_by_path_leaves_no_bytecode_beside_the_module(self):
+        env = environment()
+        env.pop("PYTHONDONTWRITEBYTECODE", None)
+        result = subprocess.run([sys.executable, str(HELPER), str(self.module), "--list"], env=env,
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((self.module.parent / "__pycache__").exists())
+
 
 class CopilotKitChunks(unittest.TestCase):
     """The kit's wrappers are one complete, disjoint cover of its tests, listed through the real entries."""

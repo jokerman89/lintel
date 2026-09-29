@@ -27,6 +27,8 @@ import sys
 from typing import Iterator, NoReturn
 import unittest
 
+# Loading the module by path must not leave a __pycache__ beside it; running it directly does not.
+sys.dont_write_bytecode = True
 VARIABLE = "LINTEL_TEST_CHUNK"
 USAGE = "usage: unittest_chunk.py MODULE.py [--list | unittest arguments ...]"
 _CHUNK = re.compile(r"([1-9][0-9]*)/([1-9][0-9]*)")
