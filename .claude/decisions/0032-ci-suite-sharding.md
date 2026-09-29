@@ -6,7 +6,8 @@
   authorization
 - **Supersedes:** —
 - **Superseded by (in part):** ADR-0037, which selects the operating systems of a pull request's
-  suite matrix. The parts, shards, timeouts and steps below still apply.
+  suite matrix; ADR-0041, which weights the shard assignment, splits the Copilot kit into chunks and
+  stops cancelling running push and dispatch runs. The parts, shards, timeouts and steps below still apply.
 
 ## Context
 
