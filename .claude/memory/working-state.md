@@ -8,26 +8,33 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
-## Active - Reusable patterns (2026-09-28)
+## Partial delivery - Native client parity (2026-09-29)
 
-**Status:** source-complete integrated candidate, not released, on branch
-`jokerman-microsoft-patterns-core-integration`.
-- Candidate `2ce4cfcc` (0.13.1): native 1a `06e69eb6`, `394ed0b8` and `ef48d7a0` joined; runtime
-  unchanged since `99de0741`, which was reviewed at `d4acf3e7`.
-- P07 is generation 2 (`c50efdbe…`). Current local CORE, PACK and WF reports and reviews are
-  published in the coordinator batch after `2ce4cfcc`.
-- Linux: V15 kit and search checks at `2ce4cfcc`. Windows: no strict verdict, and hosted CI is
-  required.
-- Open leaves: 6.2.a-c only.
+**Status:** native 1a (Copilot native skills and agents, 0.13.0, ADR-0039) landed on
+main as `394ed0b8`, before Patterns and Adaptive review. The
+[delivery record](../plans/native-client-parity/review.md) covers only this increment.
 
-**What's pending:** see [handoff](../plans/reusable-patterns/handoff.md):
-- fresh P05 contexts (attempt 4 and per lane);
-- canonical P05 decisions, QA and corroboration;
-- the aggregate review;
-- hosted CI;
-- the main version check;
-- Master-owned publication;
-- the `C:\lp` decision.
+**What's pending:**
+- **Native 1b (hooks):** blocked at the recorded host boundary. Do not resume, reword
+  or reassign the refused work without a supported, authorized resolution.
+- **ADV-1 (Low):** `bin/li-run` can leave its stdin temporary file after signal
+  termination. This advisory remains recorded, not fixed.
+- **Increment 2** (Codex, Cursor, Claude): not authorized.
+
+## Delivered - Reusable patterns (2026-09-29)
+
+**Status:** delivered to main as `d89385f2`, version 0.13.1, after native `394ed0b8`.
+The exact candidate passed all 23 CI jobs and 171 registered suite files per OS,
+with no failed, skipped or partial suites. Final SPEC covered 80/80 rows; the
+independent review, actual corroboration, current QA and SHIP gates passed.
+The [delivery handoff](../plans/reusable-patterns/handoff.md) records the source,
+profile, byte boundaries and the separately verified operational handoff.
+
+**What's pending:** no reusable-patterns feature acceptance work. Artifact pages,
+the supplemental host cells and the preserved drive-root workspace decision remain
+separate limitations, not passed controls or permission for new runs or cleanup.
+This documentation is later continuity, not a claim that its own commit ran the
+candidate's CI. Future work must establish its own current evidence.
 
 ## Active - Supported clients narrowed to four families (2026-09-25)
 
@@ -845,20 +852,15 @@ L-011 captured (structural estimates are ceilings).
 
 **Last touched:** 2026-05-29
 
-## Active - Adaptive review (2026-09-28)
+## Completed - Adaptive review (2026-09-29)
 
-**Status:** local source freeze `f01294db` on `jokerman-microsoft-adaptive-review`;
-final independent SPEC/QUALITY PASS with zero open P1/P2/P3. The unchanged P05
-regression entry was interrupted after 53 passing cases and has no full-suite verdict.
-The two isolated implementation lanes have independent spec/quality acceptance.
-**What's pending:** see [handoff](../plans/adaptive-review/handoff.md) and
-[verification](../plans/adaptive-review/verification.md). Landing remains
-native1a -> patterns -> adaptive through the portfolio coordinator. No new
-version, private pack, native-host acceptance or release clearance is claimed.
-T12 remains open for the current-tree join, full hosted matrix (all 117 P05
-cases required), shared evidence and publication; local source work is complete.
-The optional evaluator reads imported records only; the small live toy pilot
-showed no detection improvement over its generic-review baseline.
+**Status:** delivered to main at `3dadebaa`, version 0.13.2, after native1a and
+patterns. T1-T12 are complete; the exact joined CI, independent canonical
+review and current readiness gates are in the
+[delivery record](../plans/adaptive-review/handoff.md#delivered-on-2026-09-29).
+**What's pending:** no feature-delivery blocker. Earlier failures and pending
+states remain historical; no deployment, live-discovery or benchmark-superiority
+claim follows from this main landing.
 
 ---
 

@@ -865,7 +865,6 @@ the task forbids activating new hooks. Existing controls remain in force.
 A rejected command is not evidence it ran and does not authorize a bypass.
 
 ## L-043 - Match reusable actors to the host's actual continuation transport
-
 **Date:** 2026-09-23
 
 **Context:** P14's neutral actor completed a real planning turn through a
@@ -879,6 +878,31 @@ first dispatch. Preserve real task IDs, completed work and failed delivery;
 never relabel a new actor as reuse. A necessary replacement requires an explicit
 bounded plan correction, truthful actor/intervention counts and preserved
 independence. Keep transport capability separate from task authority.
+
+**Amended 2026-09-29 (observed host lifecycle):**
+
+*Observation.* This was recorded for one GitHub Copilot app coordinator session on 2026-09-29. It
+is not verified for other clients, surfaces or versions.
+- The host's `subagent.started` events marked every background subagent `resumable: false`.
+- Each time the idle root session was stopped, its subagents ended with it. Each stop was a
+  `session.shutdown` event, ten minutes after the root's last recorded event.
+- The next wake-up, by automation or cross-session message, resumed the root conversation
+  (`session.resume`) but not the subagents. This coordinator's root conversation and the
+  replacement reviewer's both resumed after idle stops.
+- A read-only lookup of the reviewer then returned `{"message":"Agent not found","code":"failure"}`,
+  so the planned same-reviewer judgment and confirmation could not run.
+- The owner chose an existing independent app session, reached through cross-session messages.
+
+**Added rule:**
+- Before planning a later exchange with the same actor, check what the current host records about
+  resumability and idle stops.
+  - Where subagents are not resumable, as observed here, finish the exchange while the root session
+    stays active.
+  - Otherwise, use a transport whose context the host has been observed to resume.
+- After an idle gap, confirm the handle with one read-only lookup before relying on it.
+  - Report a lost handle with its exact error and the last preserved records.
+  - Restart, relabel or substitute an actor only on the owner's decision.
+- Bind a replacement's evidence to its own transport events; never reuse the lost actor's receipts.
 
 ## L-044 - Quiescence and successful exits are different observations
 
@@ -1029,7 +1053,6 @@ short workspace, or route the rerun to that owner. Do not create drive mappings 
 other system-level paths as a workaround.
 
 ## L-051 - Isolate diagnostic probe parents, not only their roots
-
 **Date:** 2026-09-24
 
 **Context:** The P10 owner's IC-F01 diagnostic probes, and the parent Python process of
@@ -1043,6 +1066,36 @@ correction on independently isolated checks.
 USERPROFILE, APPDATA, LOCALAPPDATA, TEMP, TMP and XDG before any import, and record that
 environment with the run. Explicit synthetic roots and interpreter isolation flags are
 not a substitute. Disclose any deviation before relying on its results.
+
+**Amended 2026-09-29 (root selection):**
+
+*Incident.* At a publication boundary, a verify-only profile check called the audited shell wrappers
+`verify_profile_context` and `profile_required_policy` without the repository's established roots.
+- `LINTEL_HOME` fell back to the operator home instead of the Copilot kit's
+  `<repo>/.claude/runtime/lintel-home`.
+- Both calls refused with `PROFILE_CONTEXT_MISSING` (exit 2) and bound nothing.
+- The wrappers' failure path still appended two `pack_resolver_fail` lines to the operator-level
+  `pack-resolver.jsonl`. That crossed a "no new audit" instruction, and the owner kept both
+  accurate lines.
+- A second check with explicit roots succeeded. Its unchanged-state comparison shows containment
+  afterwards, not that the first call had no side effect.
+
+**Added rule:**
+- Before any Lintel helper runs, select every root explicitly:
+  - source and target repository;
+  - profile reference or context;
+  - `LINTEL_HOME`, the packs directory and the active-pack pointer;
+  - the audit directory.
+
+  In a Copilot kit these are the `lib/copilot-env.sh` values. When only a check is authorized, set
+  them without running its bootstrap.
+- Verify first with the read-only Python helper. Given the full reference,
+  `lib/profile_context.py verify` and `required-policy` only verify: they never create, bind or
+  rebind.
+- Call an audited shell wrapper only after that pre-check succeeds. Never let it fall through to
+  the default operator home, or bootstrap or rebind without saying so.
+- If a wrong-root call has already written, stop, verify read-only and report. Keep accurate
+  records. Delete, roll back or clean an operator home only on the owner's decision.
 
 ## L-052 - Keep Git configuration writes out of shared repository config
 

@@ -1,5 +1,40 @@
 # Adaptive review integration handoff
 
+## Delivered on 2026-09-29
+
+**Status:** delivered to main as `3dadebaa32826cbe6be90c3e6896c730f8c013ad`,
+tree `f6a2cd703e8055d0d86c001b601297c6f56caadd`, version **0.13.2**.
+The coordinator verified the ordinary fast-forward from `d89385f2` at
+2026-09-29T08:10:02Z. The actual landing order was native1a `394ed0b8`,
+patterns `d89385f2`, then adaptive `3dadebaa`. No force, new landing commit,
+PR, tag, release or deployment was created.
+
+[Joined CI 36521753763](https://github.com/jokerman89/lintel/actions/runs/36521753763)
+attempt 1 passed all 23 jobs on that exact head. Actual runner receipts cover
+175 script entries per OS (525 total), with zero failures, skips or partial
+runs. Off-Windows platform N/A observations remain explicit. The 117 P05
+source-defined methods map to the three observed complete wrappers
+(evidence 103, controls 12, hook 2); they are not a printed method-level count.
+
+A new independent c301 post-CI P4/T11/T12 decision passed SPEC, QUALITY and all
+six required controls with no findings. Actual host corroboration, one faithful
+canonical audit record, the reviewer's recording confirmation and fresh
+latest-reader/QA/SHIP exit-0 results preceded landing. The owner-local P07
+generation 2 remained current, neutral and without required company policy.
+Canonical decision content digest: `a663bec1c89c43def81a489af158f782b9dbf79c5ded5d2efbf38cb4833eb2f0`.
+Coordinator landing receipt SHA-256: `03769141b52a2d1fa489b1bc00b343909b0faf8dffab71d375f4a7b5820bca59`.
+
+T1-T12 are delivered. [Integration decisions](integration-d89385f2.md),
+[earlier verification](verification.md) and [CI corrections](ci-repair-36500136757.md)
+retain their original scope and history. Prior failures, interrupted runs,
+pending observations and source-only verdicts are not relabeled as this result.
+No live client discovery, deployment or benchmark superiority is claimed.
+
+## Historical pre-integration handoff
+
+The remaining text preserves the earlier frozen handoff. Its pending states,
+profile and upstream pins are historical, not the current delivery baseline.
+
 **Status:** local source implemented and frozen at
 `f01294db59f4d6ca13d9c43745ef0df6c014f983`; final independent SPEC and QUALITY
 PASS, zero open P1/P2/P3. Read [the final source review](final-review.md).

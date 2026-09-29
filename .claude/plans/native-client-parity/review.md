@@ -84,3 +84,42 @@
   bound v2 decision that the REVIEW phase's final independent review requires; that review stays
   pending. No record here is an overall PASS.
 - **Hosted gates** are listed in `build-log.md` under "PR-1a verification candidate".
+
+## Final review and delivery: PR-1a (2026-09-29)
+
+This is the primary record of PR-1a's hosted gates, bound final review and landing. It covers PR-1a
+only. PR-1b, the shared leaves (5.5.a-c, 6.3.a-b) and the whole-increment final review stay open.
+
+- **Candidate:** `394ed0b8` (tree `10d2c47c`), which is `06e69eb6` plus the oracle fix `1b019341`
+  and its build-log note.
+- **Hosted CI:** run `36516745619` on that exact head passed all 23 jobs.
+  - Under `--require-all`, 489 test files passed, with 0 failed, 0 skipped and 0 partial.
+  - The 46 not-applicable results are Windows-only assertions on Ubuntu and macOS.
+  - The strict shape tier ran with `jq` on all three systems.
+  - `copilot-kit.sh` and `universal-adapters.sh` each ran once per system. Under MasterCoordinator's
+    evidence-layer decision, these whole-file runs are the execution evidence for the complete
+    suites. Their 52 and 17 test methods are counted from the source.
+  - Run `36505644531` on `06e69eb6` stays a failure and is not relabeled.
+- **6.1.a:** the literal regeneration proof on `06e69eb6` (receipt `e44a72a6`) applies at the head.
+  Only the oracle test and the build log changed since.
+- **Reviewer:** the existing independent app session `c3015de8`, chosen by MasterCoordinator.
+  - The subagent reviewer `e3fe3231` had been lost at a host idle stop. Its lookup returned
+    `{"message":"Agent not found","code":"failure"}`; see the L-043 amendment.
+  - The judgment is new. The `e3fe3231` records above are supporting history.
+- **Judgment:** PASS on spec, quality and tests for P1, P4, P5 and P6, with no blocking finding.
+  - Each review is bound to one context per original package with only that package's PR-1a
+    leaves, attempt `native-client-parity-pr1a-394ed0b8` and profile generation 2.
+  - Advisory ADV-1 (Low, not fixed): `bin/li-run` (lines 47-49, 76-78) leaves its standard-input
+    step file behind when the runner itself is killed by a signal.
+- **Recording:** the coordinator serialized the judgment unchanged into v2 decisions, and the
+  reviewer confirmed each as faithful before logging.
+  - Host corroboration binds both exchanges from the two sessions' event logs. It is
+    recorder-extracted, not authenticated.
+  - The audit log, the latest-decision reader, QA from run `36516745619` and the SHIP gate returned
+    ok for every package.
+  - Record digests: P1 `849410b0`, P4 `2d75e4d6`, P5 `4b3f0d4d` and P6 `509a061c`.
+  - Private receipts: `p05-final-receipt-394ed0b8.json` (`fc09fbb1`) and MasterCoordinator's landing
+    receipt (`f935dec6`).
+- **Landing:** MasterCoordinator fast-forwarded `main` from `1cf7d099` to `394ed0b8`, under its
+  recorded direct-main fallback. There was no new commit, pull request, tag or release.
+  `fd151979` and `f6009076` remain ancestors of `main`.

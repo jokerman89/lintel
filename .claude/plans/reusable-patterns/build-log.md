@@ -1450,7 +1450,32 @@ lanes complete. Shared evidence is still pending.
 - the main version-collision check;
 - publication.
 
-## Pending
+## Post-landing CAPTURE (2026-09-29)
+
+Master landed the verified source by a normal fast-forward `394ed0b8 -> d89385f2` on main,
+version 0.13.1, tree `586905863c7c985343d9071a20be4c98d8ec24b4`. Remote main/source readback
+matched. Native 1a landed first. No new merge commit, PR, tag, release or deployment was created.
+
+- 6.2.a: exact-head CI [36519129538](https://github.com/jokerman89/lintel/actions/runs/36519129538)
+  passed all 23 jobs, with 171/171 registered suite files per OS, 0 skipped/failed/partial suites.
+  The 23 Windows-only N/A assertions on Linux/macOS are not skipped required suites.
+- 6.2.b: final independent SPEC `5c82b7ff...` covers 80/80 acceptance rows; QUALITY `c1a37184...`
+  has 0 open findings. Earlier unable/provisional reports remain unchanged history.
+- 6.2.c: owned runtime integration handoff `4f35265c...`, owner decision `3a6afa20...` and
+  independent V18 `92429411...` completed the original recording requirement before SHIP.
+  This post-landing documentation is the separately authorized committed continuity step.
+- Actual P05 decision `d73dc05b...` / content `b0e49249...`, context `73cc44bc...`, QA `39843efc...`
+  and host corroboration passed latest-reader and SHIP (`8d00aa20...`, rc 0). Audit `b325004b...`
+  has seven lines and preserves the earlier six-line prefix, including the unverified decision.
+- All source/profile/context and historical evidence remained unchanged through landing.
+  P07 was the genuine neutral generation 2 (`c50efdbe...`), not a rebind or borrowed reference.
+
+No test is rerun or claimed for this later doc-only closeout. Its eventual commit is not the
+reviewed/tested d893 revision. Artifact pages, supplemental host cells, host-route limits and
+all previous failures retain their recorded status. `C:\lp` remains untouched under the separate
+operator decision. See the current [handoff](handoff.md) for the delivery and evidence boundary.
+
+## Pending at pre-closeout capture (history)
 
 - 6.2.a: final fixed-head strict full suite (Windows here; Linux by the parent).
 - 6.2.b: final independent aggregate review and actual ADR-0028 v2 context/QA/corroboration.

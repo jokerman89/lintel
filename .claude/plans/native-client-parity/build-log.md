@@ -256,3 +256,15 @@ commits; identical trees carry their content.
   assertions are unchanged.
 - **Status:** the fix is on the local successor of `06e69eb6`; the published `06e69eb6` is unchanged.
   The hosted gates stay pending on the next candidate.
+
+## Closure for PR-1a (2026-09-29)
+
+The PENDING items above closed for PR-1a on the final candidate `394ed0b8`: `06e69eb6` plus
+the oracle fix `1b019341` and its closing build-log record:
+- the hosted gates;
+- the bound final review of P1, P4, P5 and P6;
+- QA and the SHIP gate.
+
+At the first coordinated landing, `main` advanced to `394ed0b8`. The primary record is in
+review.md, "Final review and delivery: PR-1a"; later integrations do not change that historical
+baseline. The PR-1b gates and the whole-increment final review stay open.

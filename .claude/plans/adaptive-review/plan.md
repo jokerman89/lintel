@@ -54,7 +54,7 @@ pack or read private documents for research.
 - [x] T9 Verify mandatory/optional/N/A and single/MARS assessment parity.
 - [x] T10 Add compact workflow joins and on-demand operating/research references.
 - [x] T11 Verify exact frozen-pattern compatibility and integration boundaries.
-- [ ] T12 Complete independent review, delivery evidence and cold continuation.
+- [x] T12 Complete independent review, delivery evidence and cold continuation.
 
 ## Per-task detail
 

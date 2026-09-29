@@ -241,9 +241,9 @@ Milestone: shared patterns work with existing visual flow without replacing Desi
 
 ### 6.2 Verify behavior and prepare later integration
 
-- [ ] 6.2.a Run read-count/size boundaries, targeted compatibility and strict full suite. No claimed pass for skipped/missing tools. Files: New tests and only directly coupled fixes. Req: R13,R14,R15. Verify: V01-V16. (depends 6.1.c)
-- [ ] 6.2.b Fresh host/model acceptance for dashboard/backend/resume, or explicit deferred host gate. Independent spec and quality review closes substantive findings. Files: Own acceptance/review record. Req: R14,R15. Verify: V17, V18. **Host part recorded (V17 A, B, C1, C2, D; C-PDF is artifact history, RN-14); final independent aggregate review pending.** (depends 6.2.a)
-- [ ] 6.2.c Final diff, requirement coverage and source/target baseline recorded; no unrelated changes, no other-session contact; leave feature ready for authorized later integration. Files: Own plan, ADR/evolution evidence, integration handoff. Req: R16. Verify: V18. (depends 6.2.b)
+- [x] 6.2.a Run read-count/size boundaries, targeted compatibility and strict full suite. No claimed pass for skipped/missing tools. Files: New tests and only directly coupled fixes. Req: R13,R14,R15. Verify: V01-V16. (depends 6.1.c)
+- [x] 6.2.b Fresh host/model acceptance for dashboard/backend/resume, or explicit deferred host gate. Independent spec and quality review closes substantive findings. Files: Own acceptance/review record. Req: R14,R15. Verify: V17, V18. **Host part recorded (V17 A, B, C1, C2, D; C-PDF remains artifact history, RN-14); independent aggregate review and strict SHIP gate passed for landed `d89385f2`.** (depends 6.2.a)
+- [x] 6.2.c Final diff, requirement coverage and source/target baseline recorded; no unrelated changes, no other-session contact; leave feature ready for authorized later integration. Files: Own plan, ADR/evolution evidence, integration handoff. Req: R16. Verify: V18. (depends 6.2.b)
 
 Milestone: local system verified; deployment/host claims limited to actual evidence.
 

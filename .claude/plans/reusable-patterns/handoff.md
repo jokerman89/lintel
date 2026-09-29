@@ -1,12 +1,40 @@
 # Reusable patterns: cold handoff (2026-09-28)
 
-**Status: source-complete integrated candidate `2ce4cfcc` (0.13.1, native 1a joined) with
-current local lane records; not released.** No release clearance, native ADR-0028 v2 review, QA,
-corroboration or SHIP result exists. Nothing is pushed and no pull request exists.
+**Status: delivered to main as version 0.13.1.** Master performed the authorized normal
+fast-forward from native `394ed0b8` to `d89385f2567e490896e078de466ae3f1bedf98c4`
+(tree `586905863c7c985343d9071a20be4c98d8ec24b4`). Remote main and source refs were read back.
+No new merge commit, PR, tag, GitHub release or deployment was created by that landing.
 
-## Current integrated candidate (2026-09-29)
+## Verified delivery and capture (2026-09-29)
 
-This is the current state. The "pre-native freeze" section below is history.
+- **Tested and landed source:** `d89385f2`, after native 1a landed first at `394ed0b8`.
+  The feature diff against that baseline was 164 files, +21148/-92; all changed paths were bound.
+- **CI:** [36519129538](https://github.com/jokerman89/lintel/actions/runs/36519129538)
+  passed 23/23 jobs. Ubuntu, macOS and Windows each passed 171 registered suite files with
+  0 skipped, failed or partial suites. Linux/macOS each had 23 Windows-only assertions N/A.
+- **Independent closure:** all 80 acceptance rows passed in the final SPEC report (`5c82b7ff...`);
+  QUALITY (`c1a37184...`) had 0 open findings. V18 (`92429411...`) verified the actual owned
+  integration handoff (`4f35265c...`) under Master's explicit location/order decision
+  (`3a6afa20...`), not an acceptance waiver.
+- **Strict consumption:** canonical INT decision `d73dc05b...` / content `b0e49249...`, context
+  `73cc44bc...`, QA `39843efc...` and actual host corroboration passed the latest reader and
+  SHIP gate (`8d00aa20...`, exit 0, no mandatory blockers). The seven-line audit `b325004b...`
+  preserves all six earlier observations, including the non-clearing INT decision.
+- **Profile and bytes:** the actual neutral P07 remained generation 2 (`c50efdbe...`),
+  `not_required`. P05 bound the original Windows worktree's five EOL-only historical inputs;
+  the CI commit/tree and that working-byte binding are distinct, not transferable by inference.
+- **Continuity boundary:** the operational handoff and V18 recorded 6.2.c before SHIP. This
+  later doc-only CAPTURE records delivery afterward. Its eventual commit is not the d893 CI
+  or review identity, and no old report or failed run is rewritten as a pass.
+- **Retained limits:** Word/PDF page inspection remains unverified or blocked; the six
+  supplemental consumer-host cells remain deferred. Host evidence is one client/model and
+  Chromium, with no fresh exercise of the full-body native wrapper route. `C:\lp` remains
+  preserved pending the operator's separate disposition; no cleanup is authorized here.
+
+## Historical integrated candidate (2026-09-29, before final closure)
+
+The preparation state below is retained for chronology. Its pending labels are historical;
+the verified delivery block above is the current outcome.
 
 - **Source candidate:** `2ce4cfcc062e6806e0b3349d5e49a443097d4737` (tree `52900c7d`), release 0.13.1.
   - Joins native 1a `06e69eb6` and its follow-up `394ed0b8`, and the lesson commit `ef48d7a0`.

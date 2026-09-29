@@ -1,5 +1,11 @@
 # Adaptive review verification
 
+The [delivery record](handoff.md#delivered-on-2026-09-29) owns the final joined CI,
+canonical acceptance and actual main baseline. The observations below retain
+their original scope; old interrupted or pending results are not upgraded.
+
+## Historical pre-landing verification
+
 **Status:** final local source review PASS; hosted integration gates remain open.
 **Coordinator:** `d9057650-8028-439a-85da-5849b5470136`.
 **Source freeze:** `f01294db59f4d6ca13d9c43745ef0df6c014f983`.
