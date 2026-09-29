@@ -88,9 +88,10 @@ Does the step need conversation context to make sense?
 
 ## Operator override
 
-Commands below use the Claude plugin form `/li:<skill>`; repository adapters (Claude Code, Codex, Copilot
-and Cursor) expose the installed core workflows as `li-<skill>` (for example `li-cycle`). Other skills,
-and the Universal adapter, use an explicit `skills/<skill>/SKILL.md` handoff.
+Commands below use the Claude plugin form `/li:<skill>`. GitHub Copilot gets a native `li-<skill>`
+skill for every workflow. The other repository adapters (Claude Code, Codex and Cursor) expose the
+installed core workflows as `li-<skill>` (for example `li-cycle`); their other skills, and the
+Universal adapter, use an explicit `skills/<skill>/SKILL.md` handoff.
 
 `/li:cycle --inline-all` forces all phases inline (for context-budget pressure).
 `/li:cycle --dedicated-all` forces all phases dedicated (rare; usually wasteful).

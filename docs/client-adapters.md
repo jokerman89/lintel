@@ -25,8 +25,10 @@ enablement, model or hook command exists in this helper.
 
 `show` returns official URLs with their check dates and version/conditions, the delivered route
 and observed evidence per operation. These dates describe source checks, not client runs.
-All live workflows remain unrun here except the explicitly limited Copilot App session
-observations. Locally exercised installer fixtures do not establish discovery or model quality.
+All live workflows remain unrun here except two explicitly limited records: the Copilot App session
+observations and the Copilot CLI observation of native skill discovery, full-body delivery and
+one custom-agent selection. Locally exercised installer fixtures do not establish discovery or
+model quality.
 
 ## Client-specific routes
 
