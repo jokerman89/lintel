@@ -1,8 +1,8 @@
 # component: ci-matrix-planner-test
-# implements: ADR-0037
+# implements: ADR-0037, ADR-0041
 # intent: .claude/decisions/0037-pr-ci-tiering.md
 # constraints: temporary git repositories only; no network; never reads the operator's repository state
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-29
 from __future__ import annotations
 
 import contextlib
@@ -220,6 +220,17 @@ class WorkflowWiringTests(unittest.TestCase):
         start = triggers.index("  pull_request:")
         following = [line for line in triggers[start + 1:] if not line.lstrip().startswith("#")]
         self.assertEqual(following[0], "  workflow_dispatch:", "pull_request must have no branch filter")
+
+    def test_only_pull_request_runs_cancel_a_running_run(self):
+        # ADR-0041: a newer run cancels a running pull request run, but a running push or dispatch
+        # run (such as one on main) completes; GitHub still replaces a pending run in the group.
+        text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertEqual(text.count("concurrency:"), 1)
+        block = text.split("\nconcurrency:\n", 1)[1].split("\n\n", 1)[0].splitlines()
+        self.assertEqual(block, [
+            "  group: ci-${{ github.workflow }}-${{ github.ref }}",
+            "  cancel-in-progress: ${{ github.event_name == 'pull_request' }}",
+        ])
 
 
 class RealGitTests(unittest.TestCase):
