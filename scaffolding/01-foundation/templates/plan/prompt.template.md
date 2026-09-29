@@ -36,9 +36,10 @@ This file is a SELF-CONTAINED prompt. A fresh AI session reading only this promp
 
 ## How to re-execute
 
-Commands below use the Claude plugin form `/li:<skill>`. Generated client adapters expose
-`li-<skill>` wrappers for the core workflows (here `li-cycle` and `li-ship`; Copilot invokes
-`/li-<skill>`). `verify` has no wrapper: read the trusted `skills/verify/SKILL.md`
+Commands below use the Claude plugin form `/li:<skill>`. GitHub Copilot has a native
+`/li-<skill>` skill for every workflow, including `/li-verify`. The other generated client
+adapters expose `li-<skill>` wrappers for the core workflows (here `li-cycle` and `li-ship`);
+there `verify` has no wrapper, so read the trusted `skills/verify/SKILL.md`
 (`.github/lintel/skills/verify/SKILL.md` in a repository kit). On a manual route, read each
 trusted `skills/<skill>/SKILL.md` through the Universal adapter.
 

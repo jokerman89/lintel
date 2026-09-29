@@ -11,7 +11,7 @@ tools: <Read, Grep, Glob, Bash, Edit, Write — only what is needed>  # REQUIRED
 voice: <internal | mixed | custom>         # REQUIRED: resolves to the active pack's voice tier (default: internal)
 cli_support: [claude-code, codex, copilot] # REQUIRED: list of CLIs where this agent is supported
                                             #   Codex: degraded (no first-class subagent mechanism — runs sequentially)
-                                            #   Copilot: degraded (no subagent abstraction — operator triggers manually)
+                                            #   Copilot: full (generated custom agent); degraded only if the body needs a Claude-only facility
                                             #   omit any CLI where the agent genuinely won't work
 tier: <permissive | restricted>             # REQUIRED FOR PROMOTED AGENTS ONLY: license tier of upstream this agent ports
                                             #   permissive: MIT/Apache — safe to bundle into any repo
