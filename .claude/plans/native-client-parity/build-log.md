@@ -175,3 +175,70 @@ commits; identical trees carry their content.
   The registry observations followed in `2f2c382c`, and the docs and CHANGELOG in `269ce3d1`.
 - **Hosted gates still REQUIRED before any merge:** the seven vendored installation cases, the
   complete `copilot-kit.py` (52) and `universal-adapters.py` (17) suites, and the full CI matrix.
+
+## PR-1a verification candidate (2026-09-29)
+
+- **Final candidate source review** (`e3fe3231`, read-only, response-only):
+
+  | Pin | Tree | Decision |
+  |---|---|---|
+  | `78e2e046` | `96328279` | CHANGES-REQUIRED: F1 stale Copilot wording in six doc places, F2 agent-selection record, F3 missing agent count (all Medium); M2 disposition ACCEPTED; seven advisory Lows |
+  | `40724cb2` | `a949ed02` | F1 fix verified, F2 and F3 resolved; new R1 (Medium): stale Copilot wording in two scaffolding templates |
+  | `9ab895c6` | `e6d5f441` | SOURCE-ACCEPTED-PENDING-HOSTED: R1 and A1 closed, criterion 5.3.b met, no regression |
+
+- **Commits after the reviewed pin `78e2e046`:**
+  - `a63e4d60` (F1);
+  - `432c00a1` (F2, L1);
+  - `f6009076` (L2, L4 and the M2 review record);
+  - `40724cb2` (F3);
+  - `5dd6e0e5` (R1, A1);
+  - `9ab895c6` (A3).
+- **Agent inventory (F3, plan 6.2.a).** MasterCoordinator decision A allowed one bounded probe per
+  route: the task tool, called once with a nonexistent agent type. On CLI 1.0.90-0 at `f6009076`,
+  the host's validation error listed 79 types on each route: 7 built-in plus exactly the 72
+  generated agents (`li:<Name>` through `--plugin-dir`, unprefixed in the kit). There were no
+  duplicates and no unrelated entries. The record is in `evidence/copilot-acceptance.md`, and the
+  raw events stay local.
+- **Checks at `9ab895c6`**, run once in a fresh LF clone, all exit 0 (`final-cand-receipts-9ab895c6.txt`,
+  `fc6dda67`):
+  - frontmatter lint, catalog and wiki checks, and `li-copilot check`;
+  - the catalog, registry, manifest and native units;
+  - an in-memory vendored render (609 files, 96 skills, 72 agents, 0 link errors, the empty target
+    left empty);
+  - a clean clone after the checks, and the LF guard.
+- **Profile context:** an explicit rebind to generation 2, reference
+  `{"context_id":"repo-work:7fbf40b6-e08b-4d4d-b9ca-af8f045b196f","digest":"sha256:3f6ca790a30245560fc975e8b76ed43686d94902d7903915f935a4c891fff969","generation":2,"name":"_default","schema_version":1,"version":"1.0.0"}`.
+  - Previous generation: `sha256:a314bc87f27b23aa7d1c0829ff4d86dc90261d635d50814d1f0e1a7eb85153a6`,
+    retained in the context history.
+  - The resolver records differ only in the `.claude-plugin/plugin.json` input digest and
+    `compatibility[0].product_version` (0.12.0 to 0.13.0). The other four inputs and every policy
+    value are unchanged.
+  - `verify_profile_context` is ok, the active pack is `_default`, and there are no compliance hooks.
+  - Required policy:
+    `{"applicability":"not_applicable","required":false,"source":"bundled-neutral","status":"not_required","version":"1.0.0"}`,
+    equal to the cycle's generation 1 binding.
+- **M2:** the independent review ACCEPTED the disposition. MasterCoordinator `9854860c` explicitly
+  accepted the bounded override for the exact 61 hits against `1cf7d099` (see the audit record); it
+  is not a blanket pass for later changes.
+- **Historical path:** MasterCoordinator accepted the bounded historical workspace-reference disclosure
+  in `059dd199` (research consumer map, line 3). It names already-public handle and worktree names,
+  and it was removed at the tip in `78e2e046`. The acceptance covers no other private path.
+- **Local limits, recorded and not waived:**
+  - Strict M3 failed closed only on the missing `jq`: 42 of 42 shape tests pass, with 1 partial.
+  - 6.1.a showed a carriage-return-only local difference.
+
+  Both run in hosted CI.
+- **PENDING before any merge:**
+  - hosted CI: the seven vendored installation cases on the final candidate, the complete
+    `copilot-kit.py` (52) and `universal-adapters.py` (17) suites, the full CI matrix, strict M3 with
+    `jq`, and 6.1.a on Linux;
+  - SHIP's identity and version checks;
+  - final P1, shared QA, corroboration and aggregate clearance on the hosted results;
+  - the REVIEW phase's bound final review.
+- **Advisory, recorded without a fix cycle:**
+  - L6 (`hooks-status` and `usage-log` hints, for PR-1b) and L7 (plugin citations for app and cloud);
+  - A2 (the compound `host_version` string) and A4 (a private receipt cites the script comparison);
+  - N6 and N7, and the canonical design-dna `LINTEL_SKILLS_DIR` wording;
+  - the migration guide's `li-run` sentence;
+  - the evolution frontmatter comment;
+  - use a merge commit at SHIP so the bound revisions `fd151979` and `f6009076` stay reachable.

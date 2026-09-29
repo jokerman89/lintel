@@ -130,3 +130,14 @@ and all 61 hits stay as generated. Caveats recorded with the review:
   ADR-0039 does not name M2.
 - The evolution entry now carries a landing-split note.
 - The registry units run again on the final candidate.
+
+Delivery-owner acceptance: MasterCoordinator `9854860c`, on 2026-09-29, explicitly ACCEPTED the
+bounded compatibility override for the exact 61 mechanical hits recorded above against main
+`1cf7d099`, as classified and independently reviewed:
+- Q1 and Q3 are the same 30 `cli_support` value additions, with no field, schema or default change.
+- Q4 is additive CLI registry facts and observations, with the reader schema unchanged.
+
+The acceptance uses the documented M2 override for the authorized PR-1a batch only. It is not a
+blanket pass for later changes, missing tests, required policy or actual breaking behavior. The
+documented agent-name collision and migration limits remain, and any materially new hit needs a
+fresh assessment. The registry units passed again at the final candidate (`9ab895c6`, 17 tests).

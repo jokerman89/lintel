@@ -61,3 +61,26 @@
   implementation packages and the final review consumed at SHIP.
 - **Status:** PLAN is DONE_WITH_CONCERNS. The concerns are the narrative plan-review evidence and the
   unreviewed iteration-5 mechanical fixes.
+
+## BUILD reviews and final PR-1a candidate source review
+
+- **Reviewer:** `e3fe3231` (lintel-reviewer, separate context).
+  - After a cleanup incident (the L-049 amendment), it ran response-only: view, grep and glob on
+    named pins and evidence, with no shell, writes or deletions. Its tool receipts were checked for
+    every turn.
+  - Verbatim records are kept in the coordinator's evidence folder.
+- **P1, stage 1 and 2** (pin `4bfc4e73`): Critical 0, High 0, Medium 2 (M1, M2), Low 8.
+- **P1 deltas:**
+  - `4c2d1569`: CHANGES-REQUIRED (N1 Medium, N2 Low).
+  - `68262ccd`: SOURCE-ACCEPTED-PENDING-HOSTED.
+  - Tree `8f995fc5`: SOURCE-ACCEPTED-PENDING-HOSTED. N6 and N7 are advisory.
+- **Decision B mapping** (`5957a7ea`): VERIFIED from the Git receipts; the trees are identical.
+- **Final PR-1a candidate:**
+  - `78e2e046`: CHANGES-REQUIRED (F1-F3 Medium); M2 disposition ACCEPTED.
+  - `40724cb2`: F2 and F3 resolved; R1 Medium.
+  - `9ab895c6`, tree `e6d5f441`: **SOURCE-ACCEPTED-PENDING-HOSTED**. R1 and A1 closed, 5.3.b met,
+    no regression.
+- **Evidence form:** narrative records attributable to a read-only reviewer. None of them is the
+  bound v2 decision that the REVIEW phase's final independent review requires; that review stays
+  pending. No record here is an overall PASS.
+- **Hosted gates** are listed in `build-log.md` under "PR-1a verification candidate".
