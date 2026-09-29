@@ -108,7 +108,8 @@ The independent review status is recorded below.
   - `sources` lists on the Copilot surfaces;
   - the existing documented vendor `hooks` facts for the CLI and cloud agent now cite
     `copilot-hooks`;
-  - `copilot-cli` observations for skills (observed) and delegation (partial).
+  - `copilot-cli` observations for skills and delegation (both `observed` at the freeze; delegation was
+    `partial` when the independent review accepted this disposition).
 
   The schema version, validator, reader API and every other record are unchanged, and no
   `hook_adapter` was added (PR-1b). Every caller's check passes on the candidate:
