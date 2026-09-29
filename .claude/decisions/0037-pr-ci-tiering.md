@@ -5,7 +5,8 @@
 - **Deciders:** the operator ("reduce CI so PRs are faster"); design set by the PR-stabilization
   coordinator and implemented by its CI lane on `jokerman-microsoft-ci-pr-speedup`
 - **Supersedes:** ADR-0032 in part (the operating systems of a pull request's suite matrix)
-- **Superseded by:** —
+- **Superseded by (in part):** ADR-0041, under which a newer run cancels a running `ci.yml` run only
+  for pull requests. The rest of this decision still applies.
 
 ## Context
 

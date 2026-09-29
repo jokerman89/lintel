@@ -55,11 +55,13 @@ leaves. No organization pack is activated.
 | Package ID | Outcome | Leaf IDs | Owner / edit boundary | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
 | P1 | The Copilot kit runs as eight disjoint chunks, and integration entries are balanced by declared Windows weights. | W2-6, TCI-02 | Coordinator, sole writer; tests/runner/unittest_chunk.py, tests/runner/run-all.sh, tests/integration/copilot-kit.sh, tests/integration/copilot-kit-1.sh, tests/integration/copilot-kit-2.sh, tests/integration/copilot-kit-3.sh, tests/integration/copilot-kit-4.sh, tests/integration/copilot-kit-5.sh, tests/integration/copilot-kit-6.sh, tests/integration/copilot-kit-7.sh, tests/integration/copilot-kit-8.sh, tests/integration/universal-adapters.sh, tests/integration/catalog-installed.sh, tests/integration/universal-lifecycle.sh, tests/integration/swarm-shared-binding.sh, tests/integration/universal-a23.sh, tests/integration/universal-work-lifecycle.sh, tests/integration/private-sync-binding.sh, tests/integration/universal-profile-context.sh, tests/integration/observation-learning.sh, tests/integration/pattern-portability.sh, tests/unit/unittest-chunk.sh, tests/unit/unittest-chunk.py, tests/unit/test-runner-contract.sh, tests/README.md, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, .claude/decisions/0032-ci-suite-sharding.md, .claude/plans/ci-workload-balance | none | R1-R5 and R7; the targeted tests below; hosted runs on the candidate |
-| P2 | A running push or dispatch run is not cancelled by a newer run; pull request runs still are. | C-09 | Coordinator, sole writer; .github/workflows/ci.yml, tests/unit/ci-matrix.py, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, tests/README.md | none | R6 and R7; `tests/unit/ci-matrix.sh`; a hosted main run that is not cancelled |
+| P2 | A running push or dispatch run is not cancelled by a newer run; pull request runs still are. | C-09 | Coordinator, sole writer; .github/workflows/ci.yml, tests/unit/ci-matrix.py, .claude/decisions/0041-weighted-shards-kit-chunks-pr-cancellation.md, .claude/decisions/0037-pr-ci-tiering.md, tests/README.md | none | R6 and R7; `tests/unit/ci-matrix.sh`; a hosted main run that is not cancelled |
 
 Within those paths, P1 deletes `copilot-kit.sh`, adds the eight chunk wrappers, and adds only a
 `# SHARD-WEIGHT:` line to each of the ten other integration entries. P2 changes only the
-`cancel-in-progress` line of `ci.yml`.
+`cancel-in-progress` line of `ci.yml`. After the source review, MasterCoordinator released two more
+edits: the `ci.yml` comment on the suite timeout, and a metadata-only pointer from ADR-0037 to
+ADR-0041. ADR-0037's body is unchanged.
 
 Not edited:
 - `tests/integration/copilot-kit.py`;
@@ -87,7 +89,8 @@ Not edited:
   3. Add the unit contract `tests/unit/unittest-chunk.{sh,py}`.
 - **Acceptance:**
   - Chunk refusals exit 2.
-  - With the variable unset, a run is identical to the direct run, and selectors are kept.
+  - With the variable unset, a run gives the same tests and results as the direct run, and
+    selectors are kept.
   - `--list` through each real wrapper gives eight non-empty, pairwise disjoint chunks whose union
     equals an independent `TestLoader` discovery.
   - No unchunked or duplicate kit entry is discovered.
@@ -150,14 +153,35 @@ Not edited:
 
 **Commits on the base, in order:**
 - `3a9de3fb`: this plan and ADR-0041. It also carries the removal of `copilot-kit.sh`, which was
-  already staged. The chunk wrappers follow in the next commit, so that one intermediate commit
-  has no kit entry. It was kept as it is, without a history rewrite.
+  already staged, and its message omits that. The chunk wrappers follow in the next commit, so this
+  one intermediate commit has no kit entry (174 entries per system).
+  - A run of that commit alone would pass without any kit test: a silent false green, and a hazard
+    when bisecting. No run is expected there.
+  - The commit is kept as it is, without a history rewrite. MasterCoordinator lands the slice with
+    an ordinary `--no-ff` merge, so the first-parent history shows the complete change and every
+    SHA here stays reachable.
 - `3966bf65`: the chunk helper, the eight wrappers and the unit contract.
 - `a1427ecb`: weighted assignment, the runner contract and the ten weight headers.
 - `0b276706`: pull-request-only cancellation.
 - `0e59470b`: `tests/README.md`.
 - `5d1cc3e1`: the helper no longer writes bytecode beside the module it loads, and the contract
   covers this.
+- `4ba7bff3`: this build record.
+- **One consistency follow-up after `4ba7bff3`.** The deep repository review's source review of
+  `4ba7bff3` passed with ten P3 findings; MasterCoordinator released F2-F5, F9 and F10. The
+  follow-up changes documentation and comments only, with no algorithm or test change:
+  - **F2:** the `ci.yml` comment on the suite timeout;
+  - **F3:** the whole-kit recipe in `tests/README.md`, with its Bash and Python selection;
+  - **F4:** ADR-0037's metadata pointer to ADR-0041;
+  - **F5:** ADR-0041 no longer names the branch;
+  - **F9:** ADR-0041 records the modeled macOS trade-off and the moved unit files;
+  - **F10:** the helper's docstring, R1, the W2-6 acceptance line, ADR-0041 and `tests/README.md`
+    now state the helper's real differences from a direct run.
+- **Left unchanged:**
+  - The landing merge handles F1.
+  - MasterCoordinator's publication decision covers F6, the private register IDs.
+  - Accepted as non-blocking limits: F7, where a misplaced chunk header is silently ignored, and
+    F8, the generic receipt wording.
 
 **Local targeted checks at `5d1cc3e1`**, each run once. HOME, USERPROFILE, APPDATA, LOCALAPPDATA,
 XDG and TEMP were synthetic, and no `LINTEL_*` variable was set. All exited 0:
@@ -204,5 +228,6 @@ leading comment block:
 case and native coverage) both sort into chunk 1. The equal 865 s chunk weight may understate that
 chunk. The hosted per-chunk times decide whether to re-weight.
 
-**Status of the tasks:** W2-6, TCI-02 and C-09 stay open until the hosted runs and the independent
-review are done.
+**Status of the tasks:** the source review passed with P3 findings only. W2-6, TCI-02 and C-09 stay
+open until the reviewer's bounded recheck of the follow-up, the hosted runs and MasterCoordinator's
+integration are done.

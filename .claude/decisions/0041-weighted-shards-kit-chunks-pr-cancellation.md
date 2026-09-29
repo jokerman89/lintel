@@ -2,15 +2,16 @@
 
 - **Status:** Accepted direction, 2026-09-29. Hosted runs of the candidate verify it.
 - **Date:** 2026-09-29
-- **Deciders:**
-  - MasterCoordinator, who selected the design ("C+B" with pull-request-only cancellation) that the
-    deep repository review proposed. The selection answers the operator's request to implement the
-    review's CI findings rather than only report them.
-  - Implemented on `jokerman-microsoft-ci-workload-balance`.
-- **Supersedes:** ADR-0032 in part:
-  - its rejection "for now" of balancing shards by recorded durations and of splitting
-    `copilot-kit.py` into several entries;
-  - its trade-off that a new run cancels any running run for the same ref.
+- **Deciders:** MasterCoordinator, who selected the design ("C+B" with pull-request-only
+  cancellation) that the deep repository review proposed. The selection answers the operator's
+  request to implement the review's CI findings rather than only report them.
+- **Supersedes:**
+  - ADR-0032 in part:
+    - its rejection "for now" of balancing shards by recorded durations and of splitting
+      `copilot-kit.py` into several entries;
+    - its trade-off that a new run cancels any running run for the same ref.
+  - ADR-0037 in part: its statement that a newer run cancels an older `ci.yml` run for the same
+    ref. That now holds only for pull request runs.
 - **Superseded by:** —
 
 ## Context
@@ -75,8 +76,9 @@ Windows weights, and cancel running CI only for pull requests.
 
 - **Kit chunks.**
   - **The helper.** `tests/runner/unittest_chunk.py MODULE.py` loads a unittest module by path.
-    - **Without `LINTEL_TEST_CHUNK`:** it runs the module as `python MODULE.py` would, through
-      `unittest.main` at verbosity 2, and keeps any selectors.
+    - **Without `LINTEL_TEST_CHUNK`:** it runs the module's tests through `unittest.main` at
+      verbosity 2 with the given arguments, so selectors work and the tests and results are those
+      of `python MODULE.py`. The process differs from that direct run: see the consequences.
     - **With `LINTEL_TEST_CHUNK=K/N`:** it sorts the test IDs and runs those at positions `i` with
       `i mod N = K - 1`, through the same text runner.
     - **`--list`:** prints the selected IDs and runs nothing.
@@ -87,8 +89,8 @@ Windows weights, and cancel running CI only for pull requests.
   - **The wrappers.** `tests/integration/copilot-kit-1.sh` to `copilot-kit-8.sh` replace
     `copilot-kit.sh`.
     - Each keeps the original description and tags and sets its chunk inline.
-    - `copilot-kit.py` is not edited, so `python3 tests/integration/copilot-kit.py` still runs all
-      tests in one process.
+    - `copilot-kit.py` is not edited, so running it directly (the recipe in `tests/README.md`)
+      still runs all tests in one process.
     - `universal-adapters` stays one entry.
 - **Weighted assignment.** `tests/runner/run-all.sh` first discovers every entry in scope, in the
   order ADR-0032 defines. One `awk` process then reads each entry's leading comment block, meaning
@@ -143,7 +145,8 @@ The table gives the longest integration shard, in minutes:
 - **Kit chunks with round-robin assignment.** Rejected: about 92 minutes on Windows in the model,
   and the result depends on where the chunks sort.
 - **Per-system weights.** Rejected: the same Windows critical path in the model, with three data
-  sets to maintain.
+  sets to maintain. They would also shorten macOS's longest integration shard to about 21.4 minutes
+  in the proposal's model, against 34.1 with one partition; macOS is not on the critical path.
 - **Six integration shards.** Rejected: it changes the job set, which this decision keeps.
 - **Also split `universal-adapters` into three.** Rejected: the modeled Windows path does not
   improve (61.5 against 61.1 minutes in the proposal's model), and each chunk repeats a fixture.
@@ -170,10 +173,18 @@ The table gives the longest integration shard, in minutes:
     re-measure with the same proxy and update its header.
   - How long each chunk takes is unknown until hosted runs report it. Record the per-chunk times
     from the first runs.
+  - In the model, macOS's longest integration shard rises from the measured 30.2 minutes to about
+    34.1. One Windows-weighted partition serves every system and puts `universal-lifecycle`, the
+    heaviest macOS entry at 21.4 minutes, with three kit chunks. The run still waits for Windows.
   - Each chunk repeats the kit's class fixture. Running the eight wrappers without sharding pays it
-    eight times; `python3 tests/integration/copilot-kit.py` runs everything in one process.
-  - The helper names the module `copilot_kit`, so chunked test IDs read `copilot_kit.CopilotKit...`
-    instead of `__main__.CopilotKit...`.
+    eight times; running the module directly (the recipe in `tests/README.md`) runs everything in
+    one process.
+  - The helper's process is not the same as `python MODULE.py`. It imports the module under its
+    file stem, `copilot_kit`, rather than as `__main__`, so chunked test IDs read
+    `copilot_kit.CopilotKit...` instead of `__main__.CopilotKit...`. `sys.argv` starts with the
+    helper, `sys.path` also holds `tests/runner`, and no bytecode is written in the whole process.
+    The kit reads none of these in its own process (its `sys.argv` reads are inside subprocess
+    scripts), and it uses no `__main__` lookups or multiprocessing.
   - A newer `main` run waits for the running one, so the newest commit's result comes later.
     GitHub replaces a pending run when a newer one queues, so an intermediate commit can end with
     no run.
@@ -181,7 +192,9 @@ The table gives the longest integration shard, in minutes:
   - The 23 jobs, their names, parts, shards and timeouts, and `bin/li-ci-matrix.py` are unchanged.
   - Each system runs 183 entries instead of 175: seven more integration entries (34 to 41) and one
     new unit contract.
-  - The unit, shape, behavior and e2e tiers declare no weights, so their assignment is unchanged.
+  - The unit, shape, behavior and e2e tiers declare no weights, so they keep the modulo assignment.
+    The new unit entry still moves the unit files sorted after it to the other unit shard, as any
+    added file does (ADR-0032).
   - ADR-0037 notes that both workflows cancel an older run for the same ref. For `ci.yml` that now
     holds for pull request runs; `catalog.yml` is unchanged.
 

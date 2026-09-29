@@ -8,8 +8,12 @@
 
 usage: python unittest_chunk.py MODULE.py [--list | unittest arguments ...]
 
-Without LINTEL_TEST_CHUNK the module runs as `python MODULE.py [arguments]` would: unittest.main at
-verbosity 2, keeping any test names or -k patterns. `--list` prints every test id, sorted.
+Without LINTEL_TEST_CHUNK the module's tests run through unittest.main at verbosity 2 with the given
+arguments, so test names and -k patterns work and the tests and results are those of
+`python MODULE.py [arguments]`. The process is not identical to that direct run: the module is
+imported under its file stem rather than as __main__ (test ids change accordingly), sys.argv starts
+with this helper, sys.path also holds this helper's directory, and no bytecode is written.
+`--list` prints every test id, sorted.
 
 With LINTEL_TEST_CHUNK=K/N (1 <= K <= N) the module's tests are sorted by id, and the chunk holds the
 tests at zero-based positions i with i mod N == K - 1. The chunk runs through the same unittest text
@@ -105,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
             for test in selected:
                 print(test.id())
             return 0
-    # The same entry point as `python MODULE.py`: text runner, verbosity 2 and unittest's exit status.
+    # unittest.main, as a direct run calls it: text runner, verbosity 2 and unittest's exit status.
     unittest.main(module=module, argv=[str(path), *([] if chunk else rest)], testLoader=loader, verbosity=2)
     return 0
 

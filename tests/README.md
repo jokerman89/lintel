@@ -8,7 +8,7 @@ bash tests/runner/run-all.sh --require-all   # every tier; skipped coverage fail
 bash tests/runner/run-all.sh --scope unit    # one tier during development
 bash tests/runner/run-all.sh --scope integration --shard 2/4 --require-all   # one CI shard
 bash tests/runner/run-all.sh --shape-only    # structural contracts
-python3 tests/integration/copilot-kit.py     # portable Copilot behavior, every test in one process
+LINTEL_TEST_BASH="$BASH" python3 tests/integration/copilot-kit.py   # the whole Copilot kit, one process
 ```
 
 `--shard K/N` runs one shard of the discovered files and counts only those, so strict accounting
@@ -31,16 +31,29 @@ How files are assigned depends on weight headers (ADR-0041):
   from its `RUN` line to the next. Only the heavy integration entries declare one. After a large
   change to an entry, measure it again and update its header.
 
-`tests/runner/unittest_chunk.py MODULE.py` runs a unittest module as `python MODULE.py` would.
+`tests/runner/unittest_chunk.py MODULE.py` runs a unittest module's tests through `unittest.main`
+at verbosity 2 with the given arguments, so selectors work and the tests and results are those of
+`python MODULE.py`. The process is not identical to that direct run:
+
+- the module is imported under its file stem, with other characters turned into `_` (`copilot_kit`
+  for `copilot-kit.py`), so test IDs start with that name instead of `__main__.`;
+- `sys.argv` starts with the helper, and `sys.path` also holds `tests/runner`;
+- no bytecode is written in the whole process.
+
+It works as follows:
 
 - **Chunks.** With `LINTEL_TEST_CHUNK=K/N`, it runs only chunk `K`: the test IDs are sorted, and the
   chunk holds those at positions `i` with `i mod N = K - 1`.
 - **Listing.** `--list` prints the selected IDs without running them.
 - **Refusals.** A malformed value, an empty chunk, or a chunk combined with test selectors exits 2.
 - **The Copilot kit.** `copilot-kit-1.sh` to `copilot-kit-8.sh` run its eight chunks in separate
-  entries, so the shards can balance it. Each chunk repeats the kit's class fixture. For a local
-  run of the whole kit, use the single `python3` command above instead of the eight wrappers.
-  `bash tests/integration/copilot-kit-3.sh --list` shows one chunk's tests.
+  entries, so the shards can balance it. Each chunk repeats the kit's class fixture.
+  - `bash tests/integration/copilot-kit-3.sh --list` shows one chunk's tests.
+  - For a local run of the whole kit, use the single command above instead of the eight wrappers.
+    Run it from Bash (Git Bash on Windows). `LINTEL_TEST_BASH="$BASH"` passes that Bash to the kit,
+    as its wrappers do. Without it, the kit takes the first `bash` on `PATH`, which on Windows can
+    be System32's WSL launcher.
+  - Where `python3` is missing, use `python`, the same fallback the wrappers use.
 
 A unittest skip whose reason begins `platform: windows-only` marks a Windows-native assertion.
 Off Windows, the runner reports such skips as `N/A`, not as partial coverage, but only when every
