@@ -26,12 +26,21 @@ portable kit and plugin scope.
 
 ```bash
 bash bin/li-wiki-gen
+bash bin/li-wiki-gen --wiki-only
 bash bin/li-wiki-gen --showcase-only
 bash bin/li-wiki-gen --check
+bash bin/li-wiki-gen --wiki-only --check
 ```
 
 Generation performs local reads and writes; it does not call a model or fetch live vendor facts.
-`--check` exits non-zero when the generated result differs. The generator and its
+Without a partial selector, it updates the wiki, showcase and README capability table.
+`--wiki-only` and `--showcase-only` are mutually exclusive and affect only their named
+output trees; neither rewrites README or the other tree.
+
+`--check` compares only the selected outputs and does not modify the baseline, including
+when an output is missing. It exits non-zero when a selected generated result differs.
+`--output <dir>` selects a nonempty output directory; invalid or conflicting arguments
+exit 2 before writes. The generator and its
 `lib/wiki-gen.sh` helper define timestamp and enumeration behavior; keep those deterministic
 when changing sources or templates.
 

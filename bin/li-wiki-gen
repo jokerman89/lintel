@@ -5,8 +5,8 @@
 # Closes v3.7 gap "wiki vs showcase drift" — both outputs from the same sources.
 #
 # Usage:
-#   bin/li-wiki-gen                       # regenerate both outputs
-#   bin/li-wiki-gen --check               # exit 1 if generated output has drifted
+#   bin/li-wiki-gen                       # regenerate wiki, showcase and README
+#   bin/li-wiki-gen --check               # check selected outputs without writes
 #   bin/li-wiki-gen --wiki-only           # only docs/wiki/
 #   bin/li-wiki-gen --showcase-only       # only docs/showcase/
 #   bin/li-wiki-gen --output <dir>        # custom output base
@@ -37,16 +37,43 @@ while [ $# -gt 0 ]; do
     --check) CHECK=1; shift ;;
     --wiki-only) WIKI_ONLY=1; shift ;;
     --showcase-only) SHOWCASE_ONLY=1; shift ;;
-    --output) OUTPUT_BASE="$2"; shift 2 ;;
+    --output)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "ERROR: --output requires a nonempty directory" >&2
+        exit 2
+      fi
+      OUTPUT_BASE="$2"; shift 2 ;;
     -h|--help) usage 0 ;;
     *) echo "ERROR: unknown arg: $1" >&2; usage 2 ;;
   esac
 done
 
+if [ "$WIKI_ONLY" -eq 1 ] && [ "$SHOWCASE_ONLY" -eq 1 ]; then
+  echo "ERROR: --wiki-only and --showcase-only are mutually exclusive" >&2
+  exit 2
+fi
+README_OUTPUT=0
+if [ "$WIKI_ONLY" -eq 0 ] && [ "$SHOWCASE_ONLY" -eq 0 ]; then
+  WIKI_ONLY=1
+  SHOWCASE_ONLY=1
+  README_OUTPUT=1
+fi
+SELECTED_OUTPUTS=()
+if [ "$WIKI_ONLY" -eq 1 ]; then
+  SELECTED_OUTPUTS+=(docs/wiki/README.md docs/wiki/skills.md docs/wiki/agents.md
+    docs/wiki/packs.md docs/wiki/schemas.md)
+fi
+if [ "$SHOWCASE_ONLY" -eq 1 ]; then
+  SELECTED_OUTPUTS+=(docs/showcase/lintel-the-harness.html)
+fi
+if [ "$README_OUTPUT" -eq 1 ]; then
+  SELECTED_OUTPUTS+=(README.md)
+fi
+
 # Validate schema inputs before opening any generated output.
 # shellcheck disable=SC1091
 source "$REPO_ROOT/lib/wiki-gen.sh" || exit 2
-if [ "$CHECK" -eq 1 ] || [ "$WIKI_ONLY" -eq 1 ] || [ "$SHOWCASE_ONLY" -eq 0 ]; then
+if [ "$WIKI_ONLY" -eq 1 ]; then
   PACK_SCHEMA_SUMMARY="$(wgen_schema_summary "$REPO_ROOT/lib/pack-schema.yaml" pack-manifest)" || exit 2
   ENVELOPE_SCHEMA_SUMMARY="$(wgen_schema_summary "$REPO_ROOT/lib/envelope-schema.yaml" envelope)" || exit 2
 fi
@@ -55,8 +82,6 @@ WIKI_DIR="$OUTPUT_BASE/docs/wiki"
 SHOWCASE_FILE="$OUTPUT_BASE/docs/showcase/lintel-the-harness.html"
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
-
-mkdir -p "$WIKI_DIR" "$(dirname "$SHOWCASE_FILE")" 2>/dev/null
 
 # ─── Helpers ──────────────────────────────────────────────────────────────
 # Extract frontmatter field from a markdown file
@@ -383,22 +408,33 @@ gen_cli_table() {
   cp "$TMP_DIR/readme-generated.md" "$OUTPUT_BASE/README.md"
 }
 
+generate_selected() {
+  if [ "$WIKI_ONLY" -eq 1 ]; then
+    mkdir -p "$WIKI_DIR" || return 2
+    gen_wiki_readme && gen_wiki_skills && gen_wiki_agents &&
+      gen_wiki_packs && gen_wiki_schemas || return 2
+  fi
+  if [ "$SHOWCASE_ONLY" -eq 1 ]; then
+    mkdir -p "$(dirname "$SHOWCASE_FILE")" || return 2
+    gen_showcase || return 2
+  fi
+  if [ "$README_OUTPUT" -eq 1 ]; then
+    gen_cli_table || return 2
+  fi
+}
+
 if [ "$CHECK" -eq 1 ]; then
   BASELINE="$OUTPUT_BASE"
   OUTPUT_BASE="$TMP_DIR/generated"
   WIKI_DIR="$OUTPUT_BASE/docs/wiki"
   SHOWCASE_FILE="$OUTPUT_BASE/docs/showcase/lintel-the-harness.html"
-  mkdir -p "$WIKI_DIR" "$(dirname "$SHOWCASE_FILE")"
-  [ ! -f "$BASELINE/README.md" ] || cp "$BASELINE/README.md" "$OUTPUT_BASE/README.md"
-  gen_wiki_readme >/dev/null
-  gen_wiki_skills >/dev/null
-  gen_wiki_agents >/dev/null
-  gen_wiki_packs >/dev/null
-  gen_wiki_schemas >/dev/null
-  gen_showcase >/dev/null
-  gen_cli_table || exit 2
+  mkdir -p "$OUTPUT_BASE" || exit 2
+  if [ "$README_OUTPUT" -eq 1 ] && [ -f "$BASELINE/README.md" ]; then
+    cp "$BASELINE/README.md" "$OUTPUT_BASE/README.md" || exit 2
+  fi
+  generate_selected >/dev/null || exit 2
   CHANGED=0
-  for relative in README.md docs/wiki/README.md docs/wiki/skills.md docs/wiki/agents.md docs/wiki/packs.md docs/wiki/schemas.md docs/showcase/lintel-the-harness.html; do
+  for relative in "${SELECTED_OUTPUTS[@]}"; do
     if [ ! -f "$BASELINE/$relative" ] || ! diff -q <(tr -d '\r' < "$BASELINE/$relative") <(tr -d '\r' < "$OUTPUT_BASE/$relative") >/dev/null; then
       echo "STALE: $relative (run bash bin/li-wiki-gen)"
       CHANGED=1
@@ -408,23 +444,7 @@ if [ "$CHECK" -eq 1 ]; then
   echo 'li-wiki-gen --check: clean'
   exit 0
 fi
-if [ "$WIKI_ONLY" -eq 0 ] && [ "$SHOWCASE_ONLY" -eq 0 ]; then
-  WIKI_ONLY=1
-  SHOWCASE_ONLY=1
-fi
 
-if [ "$WIKI_ONLY" -eq 1 ]; then
-  gen_wiki_readme
-  gen_wiki_skills
-  gen_wiki_agents
-  gen_wiki_packs
-  gen_wiki_schemas
-fi
-
-if [ "$SHOWCASE_ONLY" -eq 1 ]; then
-  gen_showcase
-fi
-
+generate_selected || exit 2
 echo ""
-gen_cli_table || exit 2
 echo "li-wiki-gen: complete"

@@ -4,6 +4,89 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+
+assert_files() {
+  local output="$1"
+  shift
+  (cd "$output" && find . -type f | sed 's#^\./##' | LC_ALL=C sort) > "$TMP/actual-files"
+  printf '%s\n' "$@" | LC_ALL=C sort > "$TMP/expected-files"
+  if ! cmp -s "$TMP/expected-files" "$TMP/actual-files"; then
+    echo "FAIL: generated files escaped the selected output scope" >&2
+    diff -u "$TMP/expected-files" "$TMP/actual-files" >&2 || true
+    exit 1
+  fi
+}
+
+wiki="$TMP/wiki-only"
+bash "$ROOT/bin/li-wiki-gen" --wiki-only --output "$wiki" >/dev/null
+assert_files "$wiki" docs/wiki/README.md docs/wiki/skills.md docs/wiki/agents.md \
+  docs/wiki/packs.md docs/wiki/schemas.md
+test ! -e "$wiki/docs/showcase"
+
+showcase="$TMP/showcase-only"
+bash "$ROOT/bin/li-wiki-gen" --showcase-only --output "$showcase" >/dev/null
+assert_files "$showcase" docs/showcase/lintel-the-harness.html
+test ! -e "$showcase/docs/wiki"
+
+# Partial generation and checks leave even malformed, unselected output alone.
+printf 'Operator README without generated markers.\n' > "$wiki/README.md"
+mkdir -p "$wiki/docs/showcase"
+printf 'Operator showcase.\n' > "$wiki/docs/showcase/lintel-the-harness.html"
+cp "$wiki/README.md" "$TMP/readme-sentinel"
+cp "$wiki/docs/showcase/lintel-the-harness.html" "$TMP/showcase-sentinel"
+bash "$ROOT/bin/li-wiki-gen" --wiki-only --output "$wiki" >/dev/null
+bash "$ROOT/bin/li-wiki-gen" --wiki-only --output "$wiki" --check
+cmp "$wiki/README.md" "$TMP/readme-sentinel"
+cmp "$wiki/docs/showcase/lintel-the-harness.html" "$TMP/showcase-sentinel"
+printf '\nSelected wiki drift\n' >> "$wiki/docs/wiki/skills.md"
+if bash "$ROOT/bin/li-wiki-gen" --wiki-only --output "$wiki" --check > "$TMP/partial-drift"; then
+  echo 'FAIL: wiki-only check ignored drift in a selected artifact' >&2
+  exit 1
+fi
+grep -q '^STALE: docs/wiki/skills.md' "$TMP/partial-drift"
+grep -q 'Selected wiki drift' "$wiki/docs/wiki/skills.md"
+
+printf 'Operator README without generated markers.\n' > "$showcase/README.md"
+mkdir -p "$showcase/docs/wiki"
+printf 'Operator wiki.\n' > "$showcase/docs/wiki/README.md"
+cp "$showcase/docs/wiki/README.md" "$TMP/wiki-sentinel"
+bash "$ROOT/bin/li-wiki-gen" --showcase-only --output "$showcase" >/dev/null
+bash "$ROOT/bin/li-wiki-gen" --showcase-only --output "$showcase" --check
+cmp "$showcase/README.md" "$TMP/readme-sentinel"
+cmp "$showcase/docs/wiki/README.md" "$TMP/wiki-sentinel"
+printf '\nSelected showcase drift\n' >> "$showcase/docs/showcase/lintel-the-harness.html"
+if bash "$ROOT/bin/li-wiki-gen" --showcase-only --output "$showcase" --check > "$TMP/partial-drift"; then
+  echo 'FAIL: showcase-only check ignored drift in a selected artifact' >&2
+  exit 1
+fi
+grep -q '^STALE: docs/showcase/lintel-the-harness.html' "$TMP/partial-drift"
+grep -q 'Selected showcase drift' "$showcase/docs/showcase/lintel-the-harness.html"
+
+for mode in wiki-only showcase-only; do
+  absent="$TMP/missing-$mode"
+  rc=0
+  bash "$ROOT/bin/li-wiki-gen" --"$mode" --output "$absent" --check > "$TMP/missing-check" || rc=$?
+  test "$rc" -eq 1
+  test ! -e "$absent"
+  grep -q '^STALE:' "$TMP/missing-check"
+done
+
+rc=0
+bash "$ROOT/bin/li-wiki-gen" --wiki-only --showcase-only --output "$TMP/conflicting" > "$TMP/invalid" 2>&1 || rc=$?
+test "$rc" -eq 2
+test ! -e "$TMP/conflicting"
+for argument in missing empty; do
+  rc=0
+  if [ "$argument" = missing ]; then
+    bash "$ROOT/bin/li-wiki-gen" --output > "$TMP/invalid" 2>&1 || rc=$?
+  else
+    bash "$ROOT/bin/li-wiki-gen" --output "" > "$TMP/invalid" 2>&1 || rc=$?
+  fi
+  test "$rc" -eq 2
+  grep -q -- '--output' "$TMP/invalid"
+done
+echo 'PASS: partial generation and checks are scoped; invalid selections refuse before writes'
+
 # Build with byte ordering, then verify under a locale that collates PascalCase
 # agent names differently (e.g. AccessibilityChecker versus ADRDrafter on macOS).
 LC_ALL=C bash "$ROOT/bin/li-wiki-gen" --output "$TMP" >/dev/null
