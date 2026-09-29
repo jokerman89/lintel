@@ -148,4 +148,61 @@ Not edited:
 
 ## Build record
 
-(Filled in after BUILD with actual results.)
+**Commits on the base, in order:**
+- `3a9de3fb`: this plan and ADR-0041. It also carries the removal of `copilot-kit.sh`, which was
+  already staged. The chunk wrappers follow in the next commit, so that one intermediate commit
+  has no kit entry. It was kept as it is, without a history rewrite.
+- `3966bf65`: the chunk helper, the eight wrappers and the unit contract.
+- `a1427ecb`: weighted assignment, the runner contract and the ten weight headers.
+- `0b276706`: pull-request-only cancellation.
+- `0e59470b`: `tests/README.md`.
+- `5d1cc3e1`: the helper no longer writes bytecode beside the module it loads, and the contract
+  covers this.
+
+**Local targeted checks at `5d1cc3e1`**, each run once. HOME, USERPROFILE, APPDATA, LOCALAPPDATA,
+XDG and TEMP were synthetic, and no `LINTEL_*` variable was set. All exited 0:
+
+| Check | Result |
+|---|---|
+| `bash tests/unit/unittest-chunk.sh` | 16 tests, OK |
+| `bash tests/unit/test-runner-contract.sh` | Every existing case and the new weighted cases pass |
+| `bash tests/unit/ci-matrix.sh` | 20 tests, OK, including the pinned concurrency block |
+| `tests/shape/adr-numbers-unique.sh` | 41 unique numbers |
+| `tests/shape/no-swedish.sh` | Passed |
+| `tests/shape/observation-consumer-wording.sh` | Passed |
+| `tests/shape/native-command-surface.sh` | 0 findings |
+
+**Coverage.** Listing each real wrapper gives chunks of 7, 7, 7, 7, 6, 6, 6 and 6 tests. They are
+pairwise disjoint, and their union equals an independent `TestLoader` discovery of all 52 tests.
+
+**Actual integration assignment** for four shards, from fixture trees that keep each entry's real
+leading comment block:
+
+| Shard | Entries | Includes |
+|---|---|---|
+| 1 | 8 | `universal-adapters` |
+| 2 | 11 | `catalog-installed` and kit chunks 5 and 8 |
+| 3 | 11 | `universal-lifecycle` and kit chunks 1, 3 and 6 |
+| 4 | 11 | kit chunks 2, 4 and 7 |
+
+- The declared loads are 3782, 3740, 3754 and 3731 s.
+- An independent Python longest-first computation gives the same partition.
+- The base tree still reproduces `(i mod 4) + 1`.
+- Entries per system rise from 175 to 183: unit 94 to 95, and integration 34 to 41.
+
+**Not run locally:** any kit test, the full suite or the hosted matrix.
+
+**Still pending, from the hosted runs:**
+- all 23 jobs on the candidate;
+- each kit chunk once per system, with no skip or partial;
+- the same entry count per system as found locally (183);
+- the critical path, re-measured against 124.8 minutes and reported as a measurement;
+- each chunk's time;
+- a `main` run that a later push does not cancel.
+
+**Known risk.** In earlier local Windows runs, the kit's two slowest methods (the Git verification
+case and native coverage) both sort into chunk 1. The equal 865 s chunk weight may understate that
+chunk. The hosted per-chunk times decide whether to re-weight.
+
+**Status of the tasks:** W2-6, TCI-02 and C-09 stay open until the hosted runs and the independent
+review are done.
