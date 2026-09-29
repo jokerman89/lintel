@@ -24,24 +24,6 @@ Direct's single negative suite ran, but final pin stopped on additive MAIN
 checkpoint metadata. Private preservation accounting is being corrected;
 candidate review waits for a verified pin, without any test/QA replay.
 
-## Native client parity — 2026-09-28
-
-The [work map](native-client-parity/work.json) and [plan](native-client-parity/plan.md) are the
-task ledger. PR-1a is on `main` at `394ed0b8`. PR-1b is blocked, and increment 2 is not
-authorized; see the [working state](../memory/working-state.md).
-
-## Coordinated delivery follow-up - 2026-09-29
-
-- Reusable patterns landed at `d89385f2` after native 1a; original 6.2.a-c are
-  complete. See its [delivery handoff](reusable-patterns/handoff.md).
-- Adaptive review landed next at `3dadebaa`, version 0.13.2. T1-T12 are complete;
-  see its [delivery record](adaptive-review/handoff.md#delivered-on-2026-09-29).
-- The [sanitized skill and agent assessment](../engineering/audits/2026-09-28-skill-review-v2-summary.md)
-  records the bounded post-native delta. Its portfolio recommendations remain
-  advisory and do not authorize removals or a new implementation.
-- Native hooks remain blocked and the other-client increment is not authorized.
-  This delivery record does not reactivate unrelated historical plans below.
-
 ## Historical: first-class swarming work — 2026-09-08
 
 Historical initiative: [work map](swarming-work/work.json), [plan](swarming-work/plan.md),

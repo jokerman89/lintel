@@ -13,6 +13,7 @@ read them on demand.
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
 - **Coordinated delivery (2026-09-29):** native 1a (`394ed0b8`, 0.13.0), reusable patterns (`d89385f2`, 0.13.1) and Adaptive review (`3dadebaa`, 0.13.2) landed on main in that order. Native hooks remain blocked and the other-client increment is not authorized; see [working state](working-state.md).
+- **Post-native assessment (2026-09-29):** the [sanitized skill and agent summary](../engineering/audits/2026-09-28-skill-review-v2-summary.md) is advisory; it authorizes no portfolio reduction or new implementation.
 - **Reusable patterns (2026-09-28, ADR-0038):** data-only pattern runtime `lib/patterns.py` + `bin/li-pattern.py`; [work map](../plans/reusable-patterns/work.json), frozen [contract](../plans/reusable-patterns/contract.md). Pack provenance reuses ADR-0029 records; pattern coverage never clears ADR-0028 review.
 - **Supported clients (2026-09-25, ADR-0035):** only GitHub Copilot, Claude, Codex and Cursor, plus the manual `other` route. Adding a client family needs a new ADR first. Merged through PR #107 (`10b0eea7`); see [plan](../plans/supported-clients/plan.md).
 - **Isolation incident (2026-09-21):** P08's unisolated cycle-continuity run is invalid evidence; possible real-home effects remain unknown. The operator approved only verified synthetic-path continuation, not real-home inspection/rollback. A13 remains independently gated; see L-037 and the active handoff.
