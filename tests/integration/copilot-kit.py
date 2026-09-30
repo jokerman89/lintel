@@ -309,6 +309,7 @@ class CopilotKit(unittest.TestCase):
             "core", "demo-script", "design-knowledge", "frontend-design",
             "document-content", "document-word", "document-ppt", "document-pdf",
             "document-xlsx", "document-visio", "customer-communication", "regulatory-review",
+            "engineering-modules",
         }
         expected_bundle, _, _ = adapter.generate(self.source, target)
         before = self.snapshot(clone)
@@ -341,7 +342,7 @@ class CopilotKit(unittest.TestCase):
                     self.assertIsNone(material["import_commit"])
                     for field in ("notice", "attribution"):
                         self.assertTrue((bundle / material[field]).read_bytes())
-                if name in ("document-word", "document-pdf", "document-xlsx"):
+                if name in ("document-word", "document-pdf", "document-xlsx", "engineering-modules"):
                     self.assertEqual(selected["selection"]["order"], ["core", name])
                 if name == "document-visio":
                     stages = {item["id"]: item for item in selected["selection"]["source_stages"]}
