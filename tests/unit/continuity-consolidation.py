@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -19,6 +20,8 @@ import textwrap
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "lib"))
+from native_paths import native_io_path
 GIT = shutil.which("git")
 GIT_BASH = Path(GIT).resolve().parent.parent / "bin/bash.exe" if GIT else None
 BASH = (str(GIT_BASH) if os.name == "nt" and GIT_BASH and GIT_BASH.is_file()
@@ -103,7 +106,15 @@ class ContinuityContracts(unittest.TestCase):
                   file=sys.stderr)
         else:
             self.assertTrue(self.base.name.startswith("w3-"))
-            shutil.rmtree(self.base)
+            def remove_readonly_file(operation, path, error):
+                candidate = Path(path)
+                candidate.relative_to(native_io_path(self.base))
+                mode = candidate.lstat().st_mode
+                if not isinstance(error[1], PermissionError) or not stat.S_ISREG(mode) or mode & stat.S_IWRITE:
+                    raise error[1]
+                candidate.chmod(mode | stat.S_IWRITE)
+                operation(path)
+            shutil.rmtree(native_io_path(self.base), onerror=remove_readonly_file)
 
     def write(self, relative: str, text: str) -> Path:
         path = self.repo / relative
@@ -374,6 +385,118 @@ class ContinuityContracts(unittest.TestCase):
             self.assertIn(contract, capture)
         self.assertIn("Step 8b", capture)
         self.assertIn("no release, tag, commit, publication or approval", capture)
+
+    def bind_vault_fixture(self, *, enabled, destination):
+        self.write("packs/vault-fixture/pack.yaml",
+                   "name: vault-fixture\nversion: 1.0.0\n"
+                   "voice: {default_tier: internal}\ncompliance: {mode: advisory}\n"
+                   "navigation: {default_workflow: cycle}\n"
+                   f"capture:\n  vault_sink_enabled: {str(enabled).lower()}\n"
+                   f"  vault_sink_path: '{destination}'\n")
+        result = self.run_command([
+            sys.executable, "-B", str(ROOT / "lib/profile_context.py"),
+            "--source", str(ROOT), "--repo", str(self.repo),
+            "--home", self.env["LINTEL_HOME"], "--packs", self.env["LINTEL_PACKS_DIR"],
+            "--pointer", self.env["LINTEL_ACTIVE_PACK_FILE"],
+            "--context", "vault-fixture", "--pack", "vault-fixture", "bind", "vault-fixture",
+        ])
+        self.env["LINTEL_PROFILE_CONTEXT"] = "vault-fixture"
+        self.env["LINTEL_PROFILE_REFERENCE"] = result.stdout.strip()
+
+    def vault_recipe(self):
+        recipe = bash_block(body("capture"),
+                            "### Step 7b — Vault sink (session summary → knowledge vault)")
+        return self.shell(recipe + '\nif [ -n "${sink_dir:-}" ]; then\n'
+                          '  if command -v cygpath >/dev/null 2>&1; then\n'
+                          '    printf "SELECTED_SINK=%s\\n" "$(cygpath -m "$sink_dir")"\n'
+                          '  else printf "SELECTED_SINK=%s\\n" "$sink_dir"; fi\n'
+                          'else printf "SELECTED_SINK=\\n"; fi\n')
+
+    def test_capture_vault_relative_sink_uses_selected_repo_not_shell_cwd(self):
+        destination = self.repo / "exports" / "vault with spaces"
+        destination.mkdir(parents=True)
+        self.bind_vault_fixture(enabled=True, destination="exports/vault with spaces")
+        before = sorted(path.relative_to(destination).as_posix() for path in destination.rglob("*"))
+        result = self.vault_recipe()
+        value = next(line.split("=", 1)[1] for line in result.stdout.splitlines()
+                     if line.startswith("SELECTED_SINK="))
+        self.assertEqual(Path(value).resolve(), destination.resolve())
+        self.assertNotIn("WARN", result.stdout)
+        self.assertEqual(before, sorted(path.relative_to(destination).as_posix()
+                                       for path in destination.rglob("*")))
+        self.assertFalse((self.cwd / "exports").exists())
+
+    def test_capture_vault_disabled_does_not_select_or_create_destination(self):
+        self.bind_vault_fixture(enabled=False, destination="not-created")
+        result = self.vault_recipe()
+        self.assertIn("SELECTED_SINK=\n", result.stdout)
+        self.assertFalse((self.repo / "not-created").exists())
+        self.assertFalse((self.base / "audit" / "capture.jsonl").exists())
+
+    def test_capture_vault_missing_sink_is_nonblocking_with_actual_audit_record(self):
+        self.bind_vault_fixture(enabled=True, destination="missing-sink")
+        result = self.vault_recipe()
+        self.assertIn("WARN", result.stderr)
+        self.assertNotIn("WARN", result.stdout)
+        self.assertIn("SELECTED_SINK=\n", result.stdout)
+        self.assertFalse((self.repo / "missing-sink").exists())
+        records = [json.loads(line) for line in
+                   (self.base / "audit" / "capture.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(records[-1]["kind"], "vault_sink_skipped")
+        self.assertEqual(records[-1]["reason"], "path_missing")
+        self.assertEqual(records[-1]["path"], "missing-sink")
+
+    def test_continuity_guidance_matches_actual_selected_work_and_age_rule(self):
+        resume = body("resume")
+        self.assertIn("staleness (warn if >7 days)", resume)
+        self.assertNotIn("Ignoring stale state** (>30 days", resume)
+        self.assertNotIn("read just 00-state.md", resume)
+        self.assertNotIn("li-token-watcher", body("pause"))
+        self.assertIn("workflow_resume", resume)
+        self.assertIn("Never choose by newest timestamp", resume)
+
+    def test_resume_age_warning_does_not_request_reapproval_for_matching_identity(self):
+        self.run_command(["git", "-C", str(self.repo), "-c", "user.name=Fixture",
+                          "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false",
+                          "commit", "--allow-empty", "-qm", "fixture baseline"])
+        self.shell('source "$LINTEL_SOURCE_ROOT/lib/state.sh"\n'
+                   'state_cycle_begin fixture-cycle internal-tool "branch=shared" '
+                   '"commit=$(git -C "$LINTEL_REPO_ROOT" rev-parse HEAD)"\n')
+        state = self.repo / ".claude/runtime/state/00-state.md"
+        text = state.read_text(encoding="utf-8")
+        text = re.sub(r"(?m)^ts: .*$", "ts: 2000-01-01T00:00:00Z", text)
+        state.write_text(text, encoding="utf-8")
+        before = state.read_bytes()
+        self.env["LINTEL_CYCLE_ID"] = "fixture-cycle"
+        recipe = bash_block(body("resume"), "### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)")
+        prelude = ('source "$LINTEL_SOURCE_ROOT/lib/state.sh"\n'
+                   'resume_working_repo="$LINTEL_REPO_ROOT"\nSTATE_FILE="$(state_file)"\n')
+        result = self.shell(prelude + recipe)
+        self.assertIn("old observation", result.stdout)
+        self.assertNotIn("Continue anyway?", result.stdout)
+        self.assertEqual(state.read_bytes(), before)
+        state.write_text(text.replace("branch: shared", "branch: different"), encoding="utf-8")
+        mismatched = self.shell(prelude + recipe)
+        self.assertIn("branch-drift", mismatched.stdout)
+        self.assertIn("Continue anyway?", mismatched.stdout)
+
+    def test_status_keeps_mapped_work_visible_without_job_registry_or_writes(self):
+        self.env.pop("LINTEL_SESSION_ID", None)
+        for path, text in (("spec.md", "# Accepted requirement\n"),
+                           ("plan.md", "- [ ] T017 Original work remains pending\n"),
+                           ("prompt.md", "Continue only the original selected work.\n")):
+            self.write(path, text)
+        mapping = {"schema_version": 1, "workflow": "lintel", "status": "DRAFT",
+                   "spec": "spec.md", "plan": "plan.md", "tasks": "plan.md", "prompt": "prompt.md"}
+        self.write("work.json", json.dumps(mapping))
+        self.env["LINTEL_WORK_MAP"] = "work.json"
+        before = {path.name: path.read_bytes() for path in self.repo.glob("*.md")}
+        result = self.recipe("status", "## Workflow")
+        self.assertIn('"T017"', result.stdout)
+        self.assertIn('"status": "DRAFT"', result.stdout)
+        self.assertIn("registry is unobserved", result.stdout)
+        self.assertFalse((self.repo / ".claude/runtime").exists())
+        self.assertEqual(before, {path.name: path.read_bytes() for path in self.repo.glob("*.md")})
 
 class RetrospectiveWordingContracts(unittest.TestCase):
     def test_retrospective_wording_guard_checks_only_the_preserved_section(self):

@@ -49,6 +49,8 @@ Not a profiler — that's `PerformanceAnalyzer` subagent territory. This skill i
 4. **Measurement run.** N iterations. Capture per-iteration metrics: wall time, peak memory, allocations (if available), cold-start time (if applicable).
 5. **Aggregate.** Report sample count, raw distribution and uncertainty. Five runs
    cannot support precise p99 claims. Retain failures separately, never silently drop them.
+   An empirical percentile describes these samples, not a population guarantee.
+   Keep its estimator and sample count visible; if precision is not established, say so.
 6. **Load baseline.** Read the explicitly selected repository-local artifact and
    verify source/env/workload/build/runtime identity. Missing baseline means no comparison,
    not permission to replace history automatically.
@@ -72,24 +74,19 @@ Benchmark: <repo> / <suite>
 
 Suite: synthetic report shape; actual scenarios/samples/warmup and confidence recorded per run
 Baseline: 20260520-114000 (git: f19d388)
+Failures: <failure count and evidence>
 
 ## Results
 
-| Scenario           | Median  | p95     | Memory  | vs baseline           |
-|--------------------|---------|---------|---------|-----------------------|
-| cold-start         | 412 ms  | 487 ms  | 48 MB   | +3% time, ±0% mem ✓   |
-| list-render-1k     | 87 ms   | 102 ms  | 12 MB   | +18% time; assess impact |
-| api-roundtrip      | 234 ms  | 312 ms  | 6 MB    | -2% time ✓            |
-| db-query           | 18 ms   | 24 ms   | 2 MB    | ±0% time ✓            |
-| serialize-large    | 45 ms   | 51 ms   | 8 MB    | +32% time; assess impact |
+| Scenario | Samples | Median | Empirical p95 | Tail uncertainty | Raw samples / artifact | Estimator | Memory | vs baseline |
+|---|---|---|---|---|---|---|---|---|
+| <scenario> | <N> | <median> | <empirical p95> | <tail uncertainty> | <raw samples or immutable sample artifact> | <estimator> | <memory> | <comparison and policy context> |
 
 ## Regressions
-[Unclassified] serialize-large: 34 ms → 45 ms (+32%, rounded)
-   Hypothesis to test: validation pass; comparison alone does not isolate the cause
-   Diagnosis: /diagnose "serialize-large regression"
-
-[Unclassified] list-render-1k: 74 ms → 87 ms (+18%)
-   Hypothesis to test: new render path
+<regression rows linked to result scenarios, or none>
+For each reported regression retain the matching scenario, baseline/current sample
+references, observed effect and unverified cause hypothesis. Comparison alone does
+not establish the cause; hand an authorized investigation to /diagnose.
 
 ## Recommendation
 Assign severity from measured user impact and applicable policy; the illustrative

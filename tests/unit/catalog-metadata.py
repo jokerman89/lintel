@@ -11,6 +11,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import runpy
 import shutil
 import subprocess
 import sys
@@ -156,6 +157,42 @@ class CatalogMetadata(unittest.TestCase):
         self.assertEqual(result.stdout, b"")
         self.assertEqual(files_snapshot(self.base), before)
         return result
+
+    def test_actual_status_jobs_and_control_descriptions_preserve_authority(self):
+        expected = {
+            "status": ("selected", "read-only"),
+            "jobs": ("job", "do not replace"),
+            "compliance-gate": ("mandatory", "advisory", "unverified", "no-applicable"),
+        }
+        before = files_snapshot(self.target)
+        native = runpy.run_path(str(ROOT / "bin/li-copilot.py"))
+        files, _, _ = native["generate"](ROOT, self.target)
+        for name, terms in expected.items():
+            with self.subTest(name=name):
+                entry = self.catalog.metadata(ROOT, kind="skill", name=name)["entries"][0]
+                description = entry["description"].lower()
+                for term in terms:
+                    self.assertIn(term, description)
+                self.assertNotIn("an alias for listing jobs", description)
+                self.assertNotIn("single source of truth", description)
+                self.assertNotIn("one green/red", description)
+                generated = files[f".github/skills/li-{name}/SKILL.md"].decode("utf-8")
+                frontmatter = generated.split("---", 2)[1]
+                for term in terms:
+                    self.assertIn(term, frontmatter.lower())
+        self.assertEqual(before, files_snapshot(self.target))
+
+    def test_research_discovery_keeps_supplied_web_distinct_from_new_retrieval(self):
+        entry = self.catalog.metadata(ROOT, kind="agent", name="ResearchSynthesizer")["entries"][0]
+        description = entry["description"].lower()
+        for term in ("supplied web", "retrieval", "authorized", "not implied"):
+            self.assertIn(term, description)
+        native = runpy.run_path(str(ROOT / "bin/li-copilot.py"))
+        files, _, _ = native["generate"](ROOT, self.target)
+        generated = files[".github/agents/ResearchSynthesizer.agent.md"].decode("utf-8")
+        frontmatter = generated.split("---", 2)[1].lower()
+        self.assertIn("supplied web", frontmatter)
+        self.assertIn("not implied", frontmatter)
 
     def test_default_markdown_fixture_is_byte_exact(self):
         root = self.base / "legacy"

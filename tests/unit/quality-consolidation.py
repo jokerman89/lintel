@@ -49,6 +49,27 @@ class QualityWorkflowContracts(unittest.TestCase):
             with self.subTest(retired=name):
                 self.assertFalse((ROOT / "skills" / name / "SKILL.md").exists())
 
+    def test_frontend_share_controls_use_declared_interfaces_and_selected_assets(self):
+        for name in ("frontend-motion", "frontend-typography", "frontend-shader"):
+            text = self.skill(name)
+            self.assertNotIn("/li:compliance-gate --check", text)
+            self.assertNotIn("~/.lintel/brand/", text)
+            self.assertIn("customer-share-control-boundary", text)
+            self.assertIn("explicitly selected", text.lower())
+        owner = self.skill("frontend-design")
+        self.assertIn("### Customer-share control boundary", owner)
+        self.assertIn("mandatory", owner)
+        self.assertIn("unverified", owner)
+        self.assertNotIn("~/.lintel/brand/", owner)
+
+    def test_missing_named_reviewer_is_not_permission_to_waive_independence(self):
+        review = self.skill("review")
+        self.assertNotIn("can't ship without primary review", review)
+        self.assertNotIn("[Codex output verbatim]", review)
+        for phrase in ("permitted independent context", "permission refusal",
+                       "no eligible independent context", "remain BLOCKED", "self-review"):
+            self.assertIn(phrase, review)
+
     def test_verify_default_is_read_only_and_has_no_implicit_retry(self) -> None:
         text = self.skill("verify")
         modes = section(text, "Modes and authority")

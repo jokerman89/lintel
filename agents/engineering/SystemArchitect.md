@@ -66,22 +66,37 @@ nfr_spec:
       p50_ms: <number>
       p95_ms: <number>
       p99_ms: <number>
+      source: <requirement and measured workload/window reference>
+      verification: <case, measurement boundary and expected result>
+      evidence_state: observed | estimated | unverified
   throughput:
     endpoint_<name>:
       target_rps: <number>
       peak_rps: <number>
+      source: <requirement and load-mix reference>
+      verification: <case and expected result>
+      evidence_state: observed | estimated | unverified
   error_rate:
     endpoint_<name>:
       budget_percent: <number>
+      source: <requirement and eligible-event definition>
+      verification: <case including no-data behavior>
+      evidence_state: observed | estimated | unverified
   availability:
     yearly_sla: <percent>
     rto_minutes: <number>      # recovery time objective
     rpo_minutes: <number>      # recovery point objective
+    source: <approved requirement and recovery scope>
+    verification: <recovery case and expected result>
+    evidence_state: observed | estimated | unverified
   observability:
     per_component:
       required_metrics: [<list>]
       required_traces: [<list>]
       required_logs: [<list>]
+      source: <requirements and actual instrumentation references>
+      verification: <query or observation case and expected result>
+      evidence_state: observed | estimated | unverified
 ```
 
 Cross-system invariants:
@@ -92,6 +107,8 @@ invariants:
     spans: [<component-list>]
     guarantee: <consistency | ordering | exactly-once | at-least-once | atomic>
     failure_mode_when_violated: <description>
+    source: <original requirement and affected interface references>
+    verification: <failure-sequence case and expected result>
 ```
 
 Emergent properties:
@@ -102,6 +119,8 @@ emergent:
     derivation: <correlated end-to-end observations or explicit distribution model>
     sensitivity: <which-component-most-affects>
     mitigation_lever: <which-component-to-tune-first>
+    source: <observation or declared model reference>
+    verification: <end-to-end case and expected result>
 ```
 
 Keep evidence next to each existing spec item: requirement/source, owner, system and

@@ -1,7 +1,7 @@
 ---
 name: status
 layer: foundation
-description: Use to quickly check where you are in flight — shows what's open right now, an alias for listing jobs. The fast "what was I doing?" check at session start or any time you need orientation.
+description: Use when inspecting selected work, recorded cycle state and supplementary job observations read-only; this does not run or approve work.
 color: yellow
 tools: Read, Bash
 voice: internal

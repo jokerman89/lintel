@@ -291,6 +291,7 @@ current_branch=$(git -C "$resume_working_repo" rev-parse --abbrev-ref HEAD 2>/de
 current_commit=$(git -C "$resume_working_repo" rev-parse HEAD 2>/dev/null || echo unknown)
 
 issues=()
+age_warning=""
 
 # Check 1: branch match (or warn if state is from other branch)
 if [ -n "$state_branch" ] && [ "$state_branch" != "$current_branch" ]; then
@@ -309,13 +310,16 @@ if [ -n "$state_ts" ]; then
   if state_epoch=$(date -d "$state_ts" +%s 2>/dev/null ||
       date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$state_ts" +%s 2>/dev/null); then
     state_age_days=$(( ($(date +%s) - state_epoch) / 86400 ))
-    [ "$state_age_days" -le 7 ] || issues+=("old observation: $state_age_days days; reconcile current evidence")
+    [ "$state_age_days" -le 7 ] || age_warning="old observation: $state_age_days days; reconcile current evidence"
   else
-    issues+=("timestamp unparsed: age unknown; retain this work in the report")
+    age_warning="timestamp unparsed: age unknown; retain this work in the report"
   fi
 fi
 
 # Surface to operator
+if [ -n "$age_warning" ]; then
+  printf 'Resume observation warning: %s\n' "$age_warning"
+fi
 if [ ${#issues[@]} -gt 0 ]; then
   echo "⚠ Resume integrity warnings:"
   printf '  - %s\n' "${issues[@]}"
@@ -327,6 +331,9 @@ fi
 
 If integrity passes silently OR operator confirms continue → proceed to Step 2.
 If operator aborts → exit BLOCKED with recommendation to run `/li:sense` for fresh diagnostic.
+An age-only warning does not require re-approval or change the selected work.
+Continue the existing content/profile preconditions; a real selection or integrity
+mismatch still needs reconciliation through the host's actual question channel.
 
 ### Step 2 — Parse last state entry
 
@@ -552,8 +559,10 @@ n/a — RESUME is itself the hop-in mechanism.
 
 - **Resuming an unresolved selection or authority** — show the exact work; reuse
   existing approval, ask only for a genuinely missing decision
-- **Loading full prior session conversation history** — read just 00-state.md, not the whole context
-- **Ignoring stale state** (>30 days old) — surface age, ask operator if still valid
+- **Loading full prior conversation history** — use the selected committed work and
+  its exact ledger/checkpoint references; a ledger alone is not task authority
+- **Ignoring old observations** (>7 days old) — surface age and reconcile current
+  content/policy; age alone does not invalidate work or require re-asking settled approval
 - **Resuming with corrupt state file silently** — explicit error, don't guess
 - **Trusting a lost worker attempt as completed swarm work** — only attributable changes plus valid
   committed report/review evidence advance the frontier

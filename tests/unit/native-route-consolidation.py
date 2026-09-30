@@ -11,6 +11,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import importlib.util
 import io
 import json
+import math
 import os
 import re
 import shutil
@@ -29,6 +30,46 @@ def source(relative: str) -> str:
 
 
 class NativeRoutes(unittest.TestCase):
+    def test_cycle_preview_renders_unselected_roles_without_phantom_actors(self):
+        cycle = source("skills/cycle/SKILL.md")
+        selected = cycle.split("### Step 0 — Dry-run mode", 1)[1].split("### Step 1", 1)[0]
+        template = re.search(r"```\n(.*?)\n```", selected, re.S)[1]
+        for value in ("not selected", "CodeReviewer (declared, runtime availability unverified)"):
+            rendered = template.replace("<actual permitted bindings or not selected>", value)
+            self.assertIn("Role bindings:  " + value, rendered)
+            for phantom in ("DesignReviewer", "ArchitectureScout", "PlanReviewer"):
+                self.assertNotIn(phantom, rendered)
+            self.assertNotIn("agents-wake:", rendered)
+        self.assertNotIn("not all 78", source("skills/discover/SKILL.md"))
+
+    def test_perfbench_template_keeps_sample_count_failures_and_empirical_tail(self):
+        text = source("skills/perfbench/SKILL.md")
+        template = text.split("## Report format", 1)[1].split("## Compliance integration", 1)[0]
+        samples = [18, 20, 21, 25, 90]
+        p95 = sorted(samples)[math.ceil(.95 * len(samples)) - 1]
+        rendered = template
+        for token, value in {
+            "<scenario>": "fixture", "<N>": str(len(samples)), "<median>": "21 ms",
+            "<empirical p95>": f"{p95} ms",
+            "<tail uncertainty>": "population-tail precision not established",
+            "<raw samples or immutable sample artifact>": json.dumps(samples),
+            "<estimator>": "nearest-rank",
+            "<failure count and evidence>": "2 failures retained in fixture-errors",
+            "<regression rows linked to result scenarios, or none>":
+                "fixture: observed median changed; cause unverified",
+        }.items():
+            rendered = rendered.replace(token, value)
+        self.assertIn("| fixture | 5 | 21 ms | 90 ms | population-tail precision not established |", rendered)
+        self.assertIn(json.dumps(samples), rendered)
+        self.assertIn("nearest-rank", rendered)
+        self.assertIn("2 failures retained in fixture-errors", rendered)
+        regressions = rendered.split("## Regressions", 1)[1].split("## Recommendation", 1)[0]
+        self.assertIn("fixture:", regressions)
+        self.assertNotIn("serialize-large:", regressions)
+        self.assertNotIn("list-render-1k:", regressions)
+        self.assertIn("Empirical p95", rendered)
+        self.assertIn("not a population guarantee", text)
+
     def test_cycle_ranges_keep_the_nine_phase_model(self):
         cycle = source("skills/cycle/SKILL.md")
         for route in (

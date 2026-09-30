@@ -82,12 +82,12 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews t
    - Persistent browser storage increases XSS exposure; cookies require CSRF and
      session protections; encryption at rest does not solve access by running code
    - Public-client refresh tokens need rotation/reuse detection or sender constraint
-7. **Token validation:**
-   - Issuer check
-   - Audience check
-   - Signature verification
-   - Expiry check
-   - Nonce check (OIDC)
+7. **Token-validation handoff:** at the flow boundary, record the actual verifier
+   and evidence for issuer/audience/expiry and OIDC transaction/nonce binding.
+   JWTSecurityReviewer owns deep signing/claim validation; an authorized identity
+   administrator owns provider/tenant configuration. Request those observations
+   only through actually available permitted bindings. Missing evidence remains
+   unverified, not an automatic end-to-end pass or permission to inspect a tenant.
 
 ## Report format
 
@@ -100,7 +100,10 @@ OAuthFlowReviewer: <project>
 
 ## Flow assessment
 - Grant type: <auth code + PKCE | client creds | device code | implicit | ROPC>
-- Assessment: <pass | warning | fail>
+- Assessment: <pass | warning | fail | unverified>
+- Unverified boundaries: <token internals, provider configuration or other required observations not supplied>
+- Supplied evidence: <supplied flow evidence and source>
+- Required evidence handoff: <required evidence owner or authorized handoff; not performed here>
 
 ## PKCE
 - Used: <yes/no>
