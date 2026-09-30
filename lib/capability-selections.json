@@ -46,6 +46,50 @@
         "Source resource closure is not installed dependency closure or a live host acceptance result."
       ]
     },
+    "engineering-modules": {
+      "source": "skills/full-engineering-pass/SKILL.md",
+      "members": [
+        "skill:ta",
+        "skill:da",
+        "skill:sc",
+        "skill:dh",
+        "skill:tq",
+        "skill:full-engineering-pass"
+      ],
+      "requires": ["core"],
+      "resources": [
+        "skills/full-engineering-pass/references/domain-handoff.md",
+        "skills/ta/references/decision-methods.md",
+        "skills/da/references/decision-methods.md",
+        "skills/sc/references/decision-methods.md",
+        "skills/dh/references/decision-methods.md",
+        "skills/tq/references/decision-methods.md",
+        "bin/li-work-artifacts.py",
+        "bin/li-domain-result.py",
+        "lib/workflow.sh",
+        "lib/domain_result.py",
+        "lib/domain-result-schema.json"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Explicit full, saved loop, single capability or all-domain composition with original selected work and acceptance.",
+        "Verified P07 profile/policy, current upstream artifacts, actual host permissions and separately bound advisory preferences."
+      ],
+      "outputs": [
+        "Pointers to the retained architecture, data, security, operations and quality methods with their original checkpoint contracts.",
+        "The shared admission, evidence and recovery procedure; the authorized caller performs selected work and persists actual observations."
+      ],
+      "example": {
+        "path": "skills/catalog/SKILL.md",
+        "heading": "## Engineering module example"
+      },
+      "limitations": [
+        "Selection is source discovery only, not module execution, phase selection, role registration or independent review.",
+        "Single-module use and the full-engineering-pass dependency order remain unchanged; missing required domains or controls cannot be omitted.",
+        "No live scan, cloud read, migration, deployment, hook activation or publication is authorized by these declarations.",
+        "Unknown maturity and declared client support remain distinct from observed host behavior; source resources are not installed acceptance."
+      ]
+    },
     "demo-script": {
       "source": "agents/customer/DemoNarrativeArc.md",
       "members": [

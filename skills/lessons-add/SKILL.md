@@ -27,7 +27,7 @@ keep the same grammar across fresh sessions.
 - One-off info that won't recur — wasted bytes, signal noise
 - Code-level patterns better captured in code comments — comments belong in code
 - Something that belongs in CLAUDE.md or design docs — those are higher-authority, write there instead
-- Sensitive info (passwords, customer data, internal IDs) — Layer 2 blocks
+- Sensitive info (passwords, customer data, internal IDs) — do not persist it; the writer does not scan payloads
 
 ## Inputs
 
@@ -42,7 +42,15 @@ classification, not an instruction to invoke a removed command; no type migratio
 ## Workflow
 
 1. **Validate scope.** `project` only. The helper resolves the store with `lintel_lessons_file`, names any second store it ignores, and creates a missing store from the scaffolding template (inside a repository only). `--scope global` refuses; nothing is written to `~/.lintel/lessons.jsonl`, which stays a read-only legacy view.
-2. **Compliance scan.** Run Layer 2 patterns over the lesson body. If a secret/customer-data pattern hits: BLOCK + ask operator to rewrite without the sensitive bit.
+2. **Content-safety assessment.** Before writing even a body file, check the proposed
+   text against the no-secrets/customer-data duties and the actual applicable policy.
+   `bin/li-lessons.py` validates shape, scope and ownership; it does not scan the
+   lesson payload. A model-only assessment is not an executed scanner and leaves
+   automated content-safety evidence **unverified**. If policy requires a control,
+   require its actual authorized execution/evidence before writing: missing,
+   failed, errored or unverified mandatory evidence blocks. Do not invent a scanner
+   or infer enforcement from a hook file. If sensitive content is identified, stop
+   and request a safe rewrite without quoting the sensitive value.
 2b. **Update-phase (ADR-0006).** Before writing, check what already exists:
    `source lib/memory.sh; lessons_find_related <keywords>` — classify the candidate
    add / update / supersede / no-op exactly as CAPTURE Step 2 does.
@@ -77,6 +85,7 @@ Lesson recorded: L-042
 Scope: project (.claude/memory/lessons.md)
 Type: pattern
 Source: operator correction — a verification command inspected the wrong target
+Content-safety evidence: <actual control/result reference, or model-only assessment; automated scan unverified>
 
 Body:
 > Pass the selected repository explicitly to diagnostic helpers.
@@ -87,7 +96,11 @@ Future sessions reading the project lessons store will surface this at session s
 
 ## Compliance integration
 
-- Layer 2 secret/customer-data scan on lesson body — BLOCKS if pattern hits.
+- Report only actual content-safety observations. Model-only assessment does not
+  establish scanning or satisfy an applicable mandatory control.
+- A registered host control may provide separate evidence; its scope and result
+  must be observed. A warning or commit-time check is not proof of pre-write
+  payload enforcement by the lessons helper.
 - The project lessons store is committed to the repo — anything in it is visible to all collaborators. Sanity-scan applies.
 - No operator-global lessons sink is active, so nothing is written outside the project store.
 
@@ -95,7 +108,9 @@ Future sessions reading the project lessons store will surface this at session s
 
 - **Lesson body too vague to be useful:** WARN + ask whether to proceed. A vague lesson signals nothing actionable to future sessions.
 - **Duplicate lesson:** prefer no-op or update regardless of age; report the existing ID.
-- **Compliance scan hits:** BLOCK, surface what hit, refuse to write. Operator rewrites + retries.
+- **Sensitive content identified:** BLOCK without repeating its value; request a safe rewrite.
+- **Required content-safety evidence missing, failed or unverified:** BLOCK the write;
+  a model judgment or successful helper exit cannot substitute for that evidence.
 - **Store locked or changed during the write (exit 9):** nothing was replaced; inspect and retry.
 - **Update or supersede of an absent (exit 1) or duplicated (exit 2) ID:** refused; resolve the ID first.
 - **Project lessons file conflicts with `/code-freeze`:** the freeze is advisory; honor the operator's recorded scope and ask before writing.

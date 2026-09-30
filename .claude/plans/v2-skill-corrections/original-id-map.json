@@ -1,0 +1,19 @@
+{
+  "kind": "original-skill-review-item-mapping",
+  "selection_sha256": "17c2f01ae4a54882ced36844efd97e51fd6781bbb69e4b3c861a43cf6007bc6f",
+  "original_artifact": "all-items.json",
+  "original_artifact_sha256": "5677e8c45ebec98cc320999f1ed598f2c1a5fd06a09f7c4980608e9ce58bd595",
+  "envelope_id": "01M3RZG604HZHDR16J1GJZVWM8",
+  "envelope_sha256": "d479e62d71a938a7b5d398ed7f52eef354102ed2861b72afd51221e579e9f39a",
+  "items": [
+    {"leaf_alias": "V2-16", "original_item_id": "skills/ship/SKILL.md", "original_index": 16},
+    {"leaf_alias": "V2-43", "original_item_id": "skills/catalog/SKILL.md", "original_index": 43},
+    {"leaf_alias": "V2-47", "original_item_id": "skills/da/SKILL.md", "original_index": 47},
+    {"leaf_alias": "V2-48", "original_item_id": "skills/dh/SKILL.md", "original_index": 48},
+    {"leaf_alias": "V2-54", "original_item_id": "skills/lessons-add/SKILL.md", "original_index": 54},
+    {"leaf_alias": "V2-65", "original_item_id": "skills/sc/SKILL.md", "original_index": 65},
+    {"leaf_alias": "V2-70", "original_item_id": "skills/ta/SKILL.md", "original_index": 70},
+    {"leaf_alias": "V2-71", "original_item_id": "skills/tq/SKILL.md", "original_index": 71}
+  ],
+  "limits": "Only envelope-compatible clauses are implemented; broader extraction/scanner/ablation/perfbench recommendations are not accepted or claimed."
+}
