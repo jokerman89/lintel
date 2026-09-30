@@ -103,7 +103,7 @@ Agent verifies current licensing terms at invocation (L-003: don't trust stale c
       "license": {
         "type": "commercial",
         "source": "pangrampangram.com",
-        "operator_instruction": "License at pangrampangram.com → drop .woff2 in ~/.lintel/brand/fonts/ → frontend-design will reference by relative path"
+        "operator_instruction": "Verify the selected font release and license, then use an explicitly authorized project asset path and record its source; do not create or scan a personal asset folder"
       }
     },
     {
@@ -141,7 +141,7 @@ Agent verifies current licensing terms at invocation (L-003: don't trust stale c
     "wide": "0.05em",
     "wider": "0.1em"
   },
-  "operator_instructions_md": "# Typography setup\n\n## Pangram (heading font)\n1. License at pangrampangram.com\n2. Drop .woff2 in ~/.lintel/brand/fonts/PP-Editorial-New.woff2\n3. frontend-design will reference\n\n## Inter + JetBrains Mono\nAlready free via Google Fonts.\n```html\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap\" rel=\"stylesheet\">\n```"
+  "operator_instructions_md": "# Typography setup\n\nVerify the actual release/source/license for each selected font. Use an explicitly selected authorized project asset path or approved delivery source; record the reference and required evidence before customer sharing. Do not install, fetch, publish or create personal asset directories from this example."
 }
 ```
 
@@ -186,9 +186,9 @@ This emits only the validated fragment, not a success-shaped validation receipt.
 Invalid data emits no stdout or named file; publication errors have a nonzero exit.
 Never pass stdout/special/absolute paths to the rooted-file reader. Its existing
 CLI remains valid for an already written, explicitly owned relative file.
-For `--customer-share`, apply `/li:compliance-gate --check font-licensing` to the
-same data or an owned relative staging file before release; absence of a named
-output does not remove the required check.
+For `--customer-share`, use the [customer-share control boundary](../frontend-design/SKILL.md#customer-share-control-boundary)
+on the same data or an owned relative staging file before release. Missing
+mandatory licensing/policy evidence remains unverified; stdout is no exemption.
 
 ## Reusable patterns
 
@@ -215,7 +215,8 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/fonts/` (for operator-licensed fonts; lazy-created)
+- Explicitly selected and authorized licensed-font assets or verified profile
+  references; no personal-home discovery or lazy-created asset folder
 
 **Writes:**
 - `typography.json` (stdout default, $OUT-path if orchestrator)
@@ -223,7 +224,7 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Calls into:**
 - `agents/frontend/TypographyCurator.md` (primary)
-- `/li:compliance-gate --check font-licensing` (if --customer-share)
+- `/li:compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input)

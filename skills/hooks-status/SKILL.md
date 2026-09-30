@@ -95,6 +95,10 @@ them into a count.
 
 ### Step 3 — Aggregate per requested view
 
+The view flags select this skill's manual report over the actual reader rows.
+Pass only the reader's declared category/window arguments to the helper; do not
+invent a telemetry service or infer execution from a registration or missing row.
+
 Use the producers' actual fields: `hook`, `tier`, `blocked`, `reason` and the string
 `override: "true"`, with each record's `class` and `check`. There is no `hook_name`,
 `override_reason` or `run_id` field.

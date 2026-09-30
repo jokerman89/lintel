@@ -174,7 +174,8 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 - `/li:resume` — discovers checkpoints through `context_latest` without letting local
   history override an explicitly selected work map or committed active work
 - `/clean` — manual self-maintenance trigger (offers to call this first)
-- Layer 4 `li-token-watcher` hook — surfaces this skill when token thresholds hit
+- An actually configured host warning or an explicit `/li:context-budget` observation
+  may suggest this skill; no registered watcher or automatic invocation is implied
 
 This saves continuity notes, not a backup of source bytes or a change to the host's active
 context. Owned file rollback uses `bin/li-snapshot.py` through `/li:safe-install`; never

@@ -20,6 +20,7 @@ sys.path.insert(0, str(ROOT / "lib"))
 import review_method as rm
 import mars_contract as mc
 import review_context as rc
+import review_contract as evidence
 
 PACKET = ROOT / "bin" / "li-review-packet.py"
 MARS = ROOT / "bin" / "li-mars.py"
@@ -68,6 +69,46 @@ class ObligationTests(unittest.TestCase):
         questions = rm.load_catalog()["questions"]
         self.assertTrue(all(q.get("requirement", "advisory") == "advisory" for q in questions))
         self.assertEqual(rm.required_question_ids(questions), [])
+
+    def test_dependency_applicability_and_obligations_are_not_scanner_rank(self):
+        policy = {"required": False, "status": "not_required", "source": None,
+                  "version": None, "applicability": "not_applicable"}
+        def control(requirement, applicability, status, rank):
+            return {
+                "id": "dependency-fixture", "kind": "check", "requirement": requirement,
+                "applicability": applicability, "status": status,
+                "reason": f"Scanner rank {rank}; fixture applicability/evidence is supplied separately.",
+                "policy": {"source": "fixture-policy.md", "version": "fixture-1",
+                           "applicability": "Selected artifact and dependency scope",
+                           "jurisdiction": None, "actor": None, "effective_date": None},
+                "evidence": ["fixture-dependency-evidence.json"], "observation": {},
+            }
+        for requirement, applicability, status, rank, blocked in (
+            ("mandatory", "not_applicable", "pass", "critical", False),
+            ("mandatory", "unknown", "unverified", "low", True),
+            ("mandatory", "applicable", "fail", "low", True),
+            ("mandatory", "applicable", "error", "unknown", True),
+            ("advisory", "applicable", "fail", "critical", False),
+        ):
+            with self.subTest(requirement=requirement, applicability=applicability, status=status):
+                result = evidence.evaluate_controls(
+                    [control(requirement, applicability, status, rank)], required_policy=policy)
+                self.assertEqual(result["blocked"], blocked)
+                if requirement == "advisory":
+                    self.assertTrue(result["advisories"])
+                if applicability == "not_applicable":
+                    self.assertEqual(result["assurance"], "no_applicable_controls")
+        pattern = control("mandatory", "applicable", "pass", "not-a-scanner")
+        pattern["id"] = "pattern-clause"
+        missing_license = control("mandatory", "unknown", "unverified", "unknown")
+        missing_license["id"] = "required-license"
+        missing_license["evidence"] = []
+        combined = evidence.evaluate_controls([pattern, missing_license], required_policy=policy)
+        self.assertTrue(combined["blocked"])
+        self.assertIn("required-license", " ".join(combined["blockers"]))
+        review = (ROOT / "skills/review/SKILL.md").read_text(encoding="utf-8")
+        self.assertNotIn("P1: critical CVE or license blocker", review)
+        self.assertIn("scanner rank alone", review)
 
     def test_explicit_obligations_cannot_be_unselected_or_superseded(self):
         questions = rm.select_questions(rm.load_catalog(), "implementation", [], "quality")

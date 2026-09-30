@@ -90,6 +90,57 @@ class PlanningSourceTests(unittest.TestCase):
         ))
         self.assertIn("minimal never skips", text)
 
+    def rendered_premise_row(self, source_text):
+        self.assertIn("#### Conditional pivotal premise record", source_text)
+        block = source_text.split("#### Conditional pivotal premise record", 1)[1].split(
+            "### 7.", 1)[0]
+        row = next(line for line in block.splitlines() if line.startswith("| <premise"))
+        values = {
+            "<premise and original decision ID>": "D014: current API remains compatible",
+            "<constraint or assumption and basis>": "assumption; target runtime behavior is unknown",
+            "<evidence or source; unknown if absent>": "source contract R1; target check unrun",
+            "<observable falsifier>": "target rejects the existing response shape",
+            "<smallest authorized check or proposed-unapproved check>": "proposed owned compatibility fixture; not run",
+            "<decision consequence and owner>": "maintainer chooses adapter or defers migration",
+            "<observed, unknown or check-not-run status>": "unknown; check not run",
+        }
+        for token, value in values.items():
+            row = row.replace(token, value)
+        return row, list(values.values())
+
+    def assert_premise_row(self, row, expected):
+        self.assertEqual([cell.strip() for cell in row.strip("|").split("|")], expected)
+
+    def test_define_template_preserves_falsifier_authority_and_unknown_status(self):
+        original = skill("define")
+        row, expected = self.rendered_premise_row(original)
+        self.assert_premise_row(row, expected)
+        selected_design = "# Existing design\nOriginal task: T014\n\n" + row + "\n"
+        self.assertIn("Original task: T014", selected_design)
+        self.assertIn("check not run", selected_design)
+        for source_text in (
+            original.replace("<observable falsifier>", ""),
+            original.replace("<smallest authorized check or proposed-unapproved check>", ""),
+            original.replace("<observed, unknown or check-not-run status>", "verified"),
+        ):
+            with self.subTest(mutation=source_text[-80:]), self.assertRaises(AssertionError):
+                mutated, _ = self.rendered_premise_row(source_text)
+                self.assert_premise_row(mutated, expected)
+
+    def test_define_condition_does_not_reinterview_approved_work_or_expand_migration(self):
+        text = skill("define")
+        self.assert_terms(text, (
+            "only unsupported or contested pivotal premises",
+            "omit the table", "no additional question or proof exercise",
+            "approved T014", "proposed check is not permission",
+            "chosen_reading", "decision_resolved",
+            "compatibility-only migration", "missing compatibility facts",
+        ))
+        intake = required_text(ROOT / "skills/define/references/intake.md")
+        self.assertIn("If that list is empty, ask nothing", intake)
+        self.assertIn('"Implement approved T014"', intake)
+        self.assertIn("not questions about startup demand or payment", intake)
+
     def test_inspect_targets_and_repeatable_lenses(self):
         text = skill("inspect")
         self.assert_terms(text, (

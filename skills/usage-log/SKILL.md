@@ -32,7 +32,9 @@ audit_log usage-skill invocation skill=<name>     # optional: mode=<mode> tokens
 
 **Reader mode (solo-invokable for reports):** reads existing usage records, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine). Absent or low recorded usage is reported as unobserved or low observed usage — never as a verdict that a skill is unused.
 
-The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build on — both degrade gracefully when no records exist.
+These records support `/li:maintenance` and explicit operator-selected comparisons
+with `/li:catalog --kind=all` metadata. The catalog does not consume them as a built-in
+trend overlay; absent records remain unobserved rather than zero usage.
 
 ## When to use
 
@@ -104,6 +106,10 @@ Glob across files (the writer appends to `usage-skill.jsonl`; older `usage-<YYYY
 - **Low observed usage** (fewer than 2 recorded invocations in 30 days — review candidates only; unrecorded use is unobserved, not disuse)
 - **Override-pattern correlation** (cross-reference with hooks.jsonl override-counts)
 
+These are manual report selections over actual reader rows, not additional
+`li-events.py` flags or automatic telemetry. Keep the chosen log/window, missing
+fields and record count visible; estimates are not exact billed tokens.
+
 If no records exist: surface "No usage records observed in `<usage dir>` — the writer is manual (see writer mode)" and stop. Never invent counts.
 
 ## Integration
@@ -117,13 +123,13 @@ If no records exist: surface "No usage records observed in `<usage dir>` — the
 
 **Consumed by:**
 - `/li:maintenance` (5.3 — token-cost simulation, low-observed-usage review; falls back to defaults when no records exist)
-- `/li:catalog` (1.6 — usage-trend coloring for top-N skills)
+- Operator-selected joins with `/li:catalog --kind=all` metadata; no built-in trend overlay
 - `/li:hooks-status` (1.2 + 1.7 — sibling observation skill)
 - Operator (solo-report invocation)
 
 ## Anti-patterns
 
-- **Bespoke per-skill `>>` writers** — breaks DRY across 113 skills (Finding 2A) and skips the ts/operator/cycle_id envelope. The `audit_log usage-skill ...` one-liner is the only writer.
+- **Bespoke per-skill `>>` writers** — duplicate the shared writer and skip its ts/operator/cycle_id envelope. The `audit_log usage-skill ...` one-liner remains the writer.
 - **Claiming automatic capture** — there is no wrapper-hook; records exist only when someone ran the one-liner. Reports must say so.
 - **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
 - **Read-back for forensic purposes** — wrong skill. Use `.claude/runtime/audit/hooks.jsonl` (audit-canonical).
@@ -137,4 +143,5 @@ If no records exist: surface "No usage records observed in `<usage dir>` — the
 
 - For full observation: pair with `/li:hooks-status` (sibling skill)
 - For maintenance: `/li:maintenance` uses this as a data source (if usage records exist)
-- For catalog-trending: `/li:catalog --trends` overlays usage-frequency on discoverability
+- For metadata context: `/li:catalog --kind=all` lists declarations; any requested
+  comparison with recorded usage is explicit and does not classify unobserved entries as unused

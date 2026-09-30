@@ -188,6 +188,56 @@ class Sandbox(unittest.TestCase):
             self.assert_no_verdict(list(nested.values()) if isinstance(nested, dict) else nested)
 
 
+class UsageReportContracts(Sandbox):
+    def assert_no_catalog_trend_consumer(self, text):
+        self.assertNotIn("/li:catalog --trends", text)
+        self.assertNotRegex(text, r"/li:catalog`?\s*\([^)\n]*\btrends?\b[^)]*\)")
+
+    def test_actual_reader_retains_manual_counts_and_unobserved_boundary(self):
+        path = write(self.root / "usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", mode="fixture", tokens_est="10", cli="fixture"),
+            event("invocation", skill="alpha", mode="fixture", tokens_est="30", cli="fixture"),
+            event("invocation", skill="beta", mode="fixture", tokens_est="20", cli="fixture"),
+        ]) + "\n")
+        before = path.read_bytes()
+        _, rows = self.records(path, "--category", "usage-skill", expect=0)
+        counts, estimates = {}, {}
+        for row in rows:
+            fields = row["fields"]
+            counts[fields["skill"]] = counts.get(fields["skill"], 0) + 1
+            estimates[fields["skill"]] = estimates.get(fields["skill"], 0) + int(fields["tokens_est"])
+        self.assertEqual(counts, {"alpha": 2, "beta": 1})
+        self.assertEqual(estimates, {"alpha": 40, "beta": 20})
+        self.assertNotIn("unobserved-skill", counts)
+        self.assertEqual(path.read_bytes(), before)
+        missing = self.root / "absent" / "usage-skill.jsonl"
+        result = self.events("records", "--file", missing, "--category", "usage-skill")
+        self.assertEqual(result.returncode, 3)
+        self.assertFalse(missing.parent.exists())
+
+    def test_current_observation_routes_keep_manual_modes_without_invented_overlay(self):
+        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
+        maintenance = (ROOT / "skills/maintenance/SKILL.md").read_text(encoding="utf-8")
+        for text in (usage, maintenance):
+            self.assert_no_catalog_trend_consumer(text)
+            self.assertIn("unobserved", text)
+        for flag in ("--topn", "--days", "--tokens-by-skill"):
+            self.assertIn(flag, usage)
+        self.assertIn("manual report", usage)
+        self.assertNotIn("`skills/cycle/SKILL.md` mode_envelopes", maintenance)
+        self.assertIn("/li:context-budget --advice", maintenance)
+
+    def test_catalog_trend_guard_rejects_the_actual_prose_residual_and_flag_form(self):
+        current = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
+        self.assert_no_catalog_trend_consumer(current)
+        for residual in ("The foundation that `/li:catalog` (1.6 trends) builds on.",
+                         "Use `/li:catalog --trends` for an overlay."):
+            with self.subTest(residual=residual), self.assertRaises(AssertionError):
+                self.assert_no_catalog_trend_consumer(current + "\n" + residual)
+        self.assert_no_catalog_trend_consumer(
+            "Explicitly join `/li:catalog --kind=all` metadata; no built-in trend overlay.")
+
+
 class IsolationTests(Sandbox):
     def test_every_home_derived_path_is_synthetic(self):
         probe = self.run_cmd([PYTHON, "-c", "import os; from pathlib import Path; "

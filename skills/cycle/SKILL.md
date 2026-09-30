@@ -194,19 +194,24 @@ Phases:         <list>
 Skipped:        <list>
 Context limit:  <host-reported value and source, or unknown>
 Estimated cost: <X k tokens total>
+Role bindings:  <actual permitted bindings or not selected>
 
 Per-phase forecast:
-  [1/N] SENSE     est ~0.5k tokens   agents-wake: none
-  [2/N] SCOPE     est ~0.5k tokens   agents-wake: none (1 gate only if bimodal)
-  [3/N] DEFINE    est ~3k tokens     agents-wake: DesignReviewer
-  [4/N] DISCOVER  est ~2k tokens     agents-wake: ArchitectureScout
-  [5/N] PLAN      est ~5k tokens     agents-wake: PlanReviewer, CostAnalyzer
+  [1/N] SENSE     est ~0.5k tokens
+  [2/N] SCOPE     est ~0.5k tokens
+  [3/N] DEFINE    est ~3k tokens
+  [4/N] DISCOVER  est ~2k tokens
+  [5/N] PLAN      est ~5k tokens
   ...
 
 No state mutated. Exit.
 ```
 
 Paired with Step 4 phase-progress output (v3.6 cohort 2 item 1.5) — dry-run and progress show the same format but dry-run does not run phases.
+The numbers are an illustrative uncalibrated prior, not measured spend. Show role
+names only from the selected scope and actual permitted host bindings; otherwise
+say not selected or unavailable. A canonical role file is not proof that it can be
+dispatched, and a preview is never an actor-execution receipt.
 
 ### Step 1 — Parse invocation
 

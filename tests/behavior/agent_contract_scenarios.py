@@ -13,9 +13,11 @@ import argparse
 import math
 from pathlib import Path
 import re
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+SOURCE = ROOT
 INVENTORY = Path(".claude/engineering/audits/2026-09-20-universal-quality/agents-inventory.md")
 REPORT = Path(".claude/plans/universal-implementation/reports/P09-agent-preservation.md")
 
@@ -166,6 +168,177 @@ class SyntheticExamples(unittest.TestCase):
         self.assertEqual(3, minutes)
         self.assertGreater(minutes, 2)
         self.assertIn("240", read("agents/communication/SlideNarrationCritic.md"))
+
+class RenderedRoleContracts(unittest.TestCase):
+    """Instantiate retained source templates; these are not live-agent observations."""
+
+    def yaml_report(self, agent, root_key, source_text=None):
+        sys.path.insert(0, str(SOURCE / "lib"))
+        from profile_context import parse_manifest
+        blocks = re.findall(r"```yaml\n(.*?)\n```",
+                            read(agent) if source_text is None else source_text, re.S)
+        block = next(value for value in blocks if value.lstrip().startswith(root_key + ":"))
+        block = block.replace("<name>", "fixture").replace("<number>", "10")
+        block = block.replace("<lower>", "10").replace("<upper>", "25")
+        block = re.sub(r"<[^>\n]+>", "fixture", block)
+        if block.startswith(root_key + ":\n  - "):
+            # Check the declared single-item example, then use the existing mapping parser.
+            self.assertEqual(len(re.findall(r"(?m)^  - ", block)), 1)
+            item = "\n".join(line[4:] for line in block.splitlines()[1:])
+            return {root_key: [parse_manifest(item)]}
+        return parse_manifest(block)
+
+    def test_architect_template_accepts_two_viable_options_without_a_fixed_winner(self):
+        text = read("agents/engineering/Architect.md")
+        report = text.split("## Report format", 1)[1].split("## Edge cases", 1)[0]
+        rendered = report.replace("<viable alternatives>",
+                                  "### A - Existing component\nReuse the local invariant.\n"
+                                  "### B - New component\nAdditional operational ownership.")
+        rendered = rendered.replace("<chosen option or defer>", "A")
+        options = re.findall(r"(?m)^### ([A-Z]) [^\n]+", rendered)
+        self.assertEqual(options, ["A", "B"])
+        recommendation = rendered.split("## Recommendation", 1)[1].split("## Interface", 1)[0]
+        self.assertRegex(recommendation.strip(), r"^A because")
+        self.assertNotIn("## Three alternatives", rendered)
+
+    def test_research_template_keeps_external_unavailability_and_caller_sources_distinct(self):
+        text = read("agents/engineering/ResearchSynthesizer.md")
+        template = text.split("## Report format", 1)[1].split("## Edge cases", 1)[0]
+        for value in ("unavailable; no permitted binding",
+                      "caller supplied primary source; recorded publisher/date"):
+            rendered = template.replace("<external source status and evidence or limitation>", value)
+            self.assertIn("External: " + value, rendered)
+            self.assertNotIn("--include-web", rendered)
+        self.assertIn("does not expand this role's tools", text)
+
+    def test_capacity_template_carries_range_source_and_falsifying_check(self):
+        report = self.yaml_report("agents/engineering/CapacityPlanner.md", "capacity_model")
+        component = report["capacity_model"]["per_component"]["component_fixture"]
+        self.assertEqual(component["projection_range_ms"], [10, 25])
+        for key in ("measurement_source", "workload_window", "projection_assumptions",
+                    "falsifying_check", "evidence_state"):
+            self.assertTrue(component[key], key)
+        self.assertNotIn("top-3 components", read("agents/engineering/CapacityPlanner.md"))
+
+    def test_sli_template_preserves_denominator_and_missing_data(self):
+        report = self.yaml_report("agents/engineering/ObservabilityArchitect.md", "slis")
+        self.assert_sli_contract(report)
+
+    def assert_sli_contract(self, report):
+        sli = report["slis"][0]
+        for key in ("eligible_events", "good_events", "no_data_behavior", "verification"):
+            self.assertIn(key, sli)
+        self.assertTrue(sli["eligible_events"])
+        self.assertTrue(sli["good_events"])
+        self.assertEqual(sli["no_data_behavior"], "unknown")
+        self.assertTrue(sli["verification"])
+
+    def test_actual_sli_template_omissions_and_healthy_no_data_are_rejected(self):
+        path = "agents/engineering/ObservabilityArchitect.md"
+        original = read(path)
+        for field in ("eligible_events", "good_events", "verification"):
+            mutated, count = re.subn(rf"(?m)^    {field}:.*\n", "", original)
+            self.assertGreater(count, 0)
+            with self.subTest(removed=field), self.assertRaises(AssertionError):
+                self.assert_sli_contract(self.yaml_report(path, "slis", mutated))
+        mutated, count = re.subn(r"(?m)^    no_data_behavior:.*$", "    no_data_behavior: healthy", original)
+        self.assertEqual(count, 1)
+        with self.assertRaises(AssertionError):
+            self.assert_sli_contract(self.yaml_report(path, "slis", mutated))
+
+    def report_template(self, path, source_text=None):
+        text = read(path) if source_text is None else source_text
+        return text.split("## Report format", 1)[1].split("## Edge cases", 1)[0]
+
+    def assert_rendered_fields(self, template, values):
+        rendered = template
+        for token, value in values.items():
+            self.assertIn(token, template)
+            rendered = rendered.replace(token, value)
+        for value in values.values():
+            self.assertIn(value, rendered)
+        return rendered
+
+    def test_dependency_template_retains_contrary_exposure_and_policy_cases(self):
+        template = self.report_template("agents/security/DependencyAuditor.md")
+        common = {"<advisory id>": "fixture-advisory", "<scanner rank>": "critical",
+                  "<affected package and artifact scope>": "fixture-package / selected build"}
+        cases = (
+            {"<exposure or applicability>": "not applicable to selected runtime",
+             "<evidence state and reference>": "grounded: fixture-scope-proof",
+             "<requirement and policy source>": "advisory: fixture-policy",
+             "<disposition and next action>": "not a release clearance; retain observation"},
+            {"<exposure or applicability>": "unknown",
+             "<evidence state and reference>": "unverified: runtime inventory absent",
+             "<requirement and policy source>": "mandatory: fixture-policy",
+             "<disposition and next action>": "blocked pending required evidence"},
+        )
+        for case in cases:
+            rendered = self.assert_rendered_fields(template, {**common, **case})
+            self.assertIn(case["<exposure or applicability>"], rendered)
+        without_evidence = template.replace("<evidence state and reference>", "")
+        with self.assertRaises(AssertionError):
+            self.assert_rendered_fields(without_evidence, {**common, **cases[1]})
+
+    def test_sbom_template_does_not_hide_source_only_or_mismatched_inventory(self):
+        template = self.report_template("agents/security/SBOMAuditor.md")
+        values = {
+            "<inventory artifact digest and scope>": "source-digest-A / source-only",
+            "<requested artifact digest and scope>": "image-digest-B / runtime",
+            "<inventory coverage and unmet observations>": "unverified runtime coverage; request image inventory",
+        }
+        rendered = self.assert_rendered_fields(template, values)
+        self.assertIn("source-only", rendered)
+        self.assertIn("unverified runtime coverage", rendered)
+        with self.assertRaises(AssertionError):
+            self.assert_rendered_fields(
+                template.replace("<inventory coverage and unmet observations>", ""), values)
+
+    def test_oauth_template_keeps_missing_token_or_provider_evidence_explicit(self):
+        template = self.report_template("agents/security/OAuthFlowReviewer.md")
+        for missing in ("token signature/claims", "provider configuration"):
+            values = {
+                "<pass | warning | fail | unverified>": "unverified",
+                "<token internals, provider configuration or other required observations not supplied>": missing,
+                "<supplied flow evidence and source>": "fixture flow binding observations",
+                "<required evidence owner or authorized handoff; not performed here>": "identity owner; not performed",
+            }
+            rendered = self.assert_rendered_fields(template, values)
+            self.assertIn("- Assessment: unverified", rendered)
+            self.assertIn(missing, rendered)
+            with self.assertRaises(AssertionError):
+                self.assert_rendered_fields(
+                    template.replace("<required evidence owner or authorized handoff; not performed here>", ""),
+                    values)
+
+    def test_system_templates_emit_source_and_verification_not_just_prose(self):
+        nfr = self.yaml_report("agents/engineering/SystemArchitect.md", "nfr_spec")["nfr_spec"]
+        for item in (nfr["latency"]["critical_journey_fixture"],
+                     nfr["throughput"]["endpoint_fixture"],
+                     nfr["error_rate"]["endpoint_fixture"], nfr["availability"],
+                     nfr["observability"]["per_component"]):
+            self.assertTrue(item["source"])
+            self.assertTrue(item["verification"])
+            self.assertTrue(item["evidence_state"])
+        invariants = self.yaml_report("agents/engineering/SystemArchitect.md", "invariants")
+        self.assertTrue(invariants["invariants"][0]["verification"])
+
+    def test_pipeline_stage_contracts_retain_lateness_identity_and_lineage(self):
+        text = read("agents/engineering/DataPipelineDesigner.md")
+        report = text.split("## Report format", 1)[1].split("## Edge cases", 1)[0]
+        rows = ("| ingest | event time | wm-1 | quarantine late data | event-id | "
+                "deduplicate by event-id | intake owner | source-v1 / replay-case |\n"
+                "| aggregate | event time | wm-2 | correction pane | event-id + pane | "
+                "replace pane atomically | aggregate owner | transform-v2 / late-case |")
+        rendered = report.replace("<stage contract rows>", rows)
+        actual = [line for line in rendered.splitlines() if line.startswith("| ingest |")
+                  or line.startswith("| aggregate |")]
+        self.assertEqual(len(actual), 2)
+        for row in actual:
+            self.assertEqual(len(row.strip("|").split("|")), 8)
+        for label in ("Watermark", "Late-data policy", "Replay identity", "Sink idempotency",
+                      "Rejected/conflicting owner", "Source / verification"):
+            self.assertIn(label, rendered)
 
 
 if __name__ == "__main__":
