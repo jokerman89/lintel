@@ -101,7 +101,10 @@ Future sessions reading the project lessons store will surface this at session s
 - A registered host control may provide separate evidence; its scope and result
   must be observed. A warning or commit-time check is not proof of pre-write
   payload enforcement by the lessons helper.
-- The project lessons store is committed to the repo — anything in it is visible to all collaborators. Sanity-scan applies.
+- The project lessons store is committed to the repo, so its content is visible to
+  all collaborators. Apply step 2's manual/model-only assessment and require actual
+  evidence for applicable mandatory controls; the writer performs no automatic
+  payload scan and unexecuted scanning remains unverified.
 - No operator-global lessons sink is active, so nothing is written outside the project store.
 
 ## Failure modes

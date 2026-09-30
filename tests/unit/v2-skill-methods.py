@@ -60,7 +60,10 @@ class SourceContracts(unittest.TestCase):
 
     def test_lesson_report_distinguishes_assessment_from_enforcement(self):
         text = (ROOT / "skills/lessons-add/SKILL.md").read_text(encoding="utf-8")
-        for claim in ("Layer 2 blocks", "scan on lesson body — BLOCKS", "**Compliance scan.**"):
+        for claim in (
+            "Layer 2 blocks", "scan on lesson body — BLOCKS", "**Compliance scan.**",
+            "Sanity-scan applies",
+        ):
             self.assertNotIn(claim, text)
         self.assertIn("li-lessons.py", text)
         self.assertIn("does not scan", text)
@@ -135,6 +138,26 @@ class CatalogBehavior(unittest.TestCase):
         resources = {item["path"] for item in complete["selection"]["resources"]}
         self.assertIn("skills/full-engineering-pass/references/domain-handoff.md", resources)
         self.assertTrue({f"skills/{module}/references/decision-methods.md" for module in DOMAINS} <= resources)
+        core = next(item for item in complete["selection"]["definitions"] if item["id"] == "core")
+        inherited = set(core["resources"])
+        self.assertTrue(inherited <= resources)
+        self.assertTrue(inherited.isdisjoint(definition["resources"]))
+        reasons = {item["path"]: item["reasons"] for item in complete["selection"]["resources"]}
+        for path in inherited:
+            self.assertIn("resource-of:core", reasons[path])
+        admission_resources = {
+            "bin/li-work-artifacts.py", "bin/li-domain-result.py", "bin/li-review-evidence.py",
+            "bin/li-review-read", "bin/li-review-log", "bin/_audit.sh",
+            "lib/workflow.sh", "lib/state.sh", "lib/paths.sh", "lib/cycle-modes.sh",
+            "lib/pack-resolver.sh", "lib/pack-schema.yaml", "lib/profile_context.py",
+            "lib/profile-context-schema.json", "lib/context_safety.py", "lib/native_paths.py",
+            "lib/review_contract.py", "lib/review-schema.json", "lib/markdown_source.py",
+            "lib/domain_result.py", "lib/domain-result-schema.json", "lib/swarm_contract.py",
+            "lib/swarm_snapshot.py", "lib/swarm-schema.json", "lib/swarm_evidence.py",
+        }
+        self.assertEqual(admission_resources - resources, set())
+        for path in admission_resources - inherited:
+            self.assertIn("resource-of:engineering-modules", reasons[path])
         self.assertTrue(all(item["maturity"] == "unknown" for item in complete["entries"]))
         self.assertTrue(all(item["status"] == "unknown" and item["evidence"] is None
                             for item in complete["selection"]["source_stages"]))
@@ -224,7 +247,11 @@ class SharedFixtures(MODULES["ModuleConsumers"]):
 
     def test_ship_absent_review_and_staged_input_still_block(self):
         context = self.prepare_ship()
-        self.assertFalse(self.ship(expected=3, corroboration=False)["ok"])
+        self.assertTrue(context["independence_required"])
+        self.assertEqual(context["required_policy"], self.policy)
+        missing = self.ship(expected=3, corroboration=False)
+        self.assertFalse(missing["ok"])
+        self.assertIn("No applicable review decision", missing["problems"])
         self.review_fixture(context)
         self.assertTrue(self.ship()["ok"])
         self.git("add", "source.txt")

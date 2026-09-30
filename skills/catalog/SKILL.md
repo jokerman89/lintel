@@ -95,6 +95,11 @@ unchanged `core` selection. Its resource pointers include the shared domain
 admission contract and each module's decision methods. It does not add engineering
 to every other family, execute every module, choose phases, change the full pass,
 or promote unknown maturity/client observations. Read only the requested method.
+The effective resource closure combines inherited `core` references (including the
+P05 evidence and P07 profile documentation) with the engineering selection's
+declared admission helpers and schemas. Each returned resource's `reasons` identifies
+its owner; name/category filters do not remove those dependencies. This does not
+transfer live profile inputs or establish installed/runtime acceptance.
 
 ```bash
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json \
