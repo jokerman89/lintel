@@ -5,6 +5,29 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.6 — unreleased
+
+### Changed
+
+- REVIEW and MARS use one pure header parser and validator. Their existing
+  entrypoints, family-specific errors, field order and wire formats remain
+  compatible. The distinct schemas, conversions, renderers, model defaults
+  and review policy are unchanged.
+
+### Fixed
+
+- Both header loaders reject missing, linked, reparse-point or non-file shared
+  helpers before loading them. The helper comes from the trusted source sibling,
+  never from the target repository, working directory or personal installation.
+
+### Migration
+
+- Update the installed source bundle through the existing adapter so its MARS
+  resource closure includes `lib/review_headers.py`. Public header entrypoints
+  keep their signatures; no model or permission change is required.
+- A product-version change requires the existing explicit profile rebind and
+  fresh dependent evidence. No broader header-schema consolidation is implied.
+
 ## 0.13.5 — unreleased
 
 ### Changed
