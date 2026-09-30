@@ -108,7 +108,9 @@ Sampled / excluded / unverified: <explicit coverage>
 - Two error-handling shapes:
   - src/lib/api.ts uses Result<T, Error> monad
   - src/lib/billing.ts uses try/catch + thrown errors
-  - Recommend pick one for the repo
+  - Reconcile only if a cited shared invariant or repository rule requires one
+    shape; identify that source and the observable mismatch on both sides.
+    Otherwise record as benign variation, not a style-uniformity finding.
 
 ## Stale comments
 - src/components/Hero.tsx:14 "TODO: remove emerald-500 once tokens land" — tokens landed 2 commits ago

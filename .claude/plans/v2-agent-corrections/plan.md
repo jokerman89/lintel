@@ -220,3 +220,20 @@ are preserved unchanged in owned runtime evidence. This follow-up changes only
 three agent bodies, the existing owned behavior test and necessary mapped
 progress/handoff text. Same-c301 delta recheck is still required; no independent
 repair PASS or release clearance is issued by the writer.
+
+### Residual pattern-example consistency
+
+The same c301 recheck passed SPEC for all thirteen items and QUALITY with no
+P1/P2 findings; Q1-Q4 were resolved. One advisory D1 remained: SanityChecker's
+pattern example still recommended one implementation everywhere. The coordinator
+released only that clause, its existing SanityChecker case and this progress note.
+
+The example now requires a cited invariant or repository rule and an observable
+mismatch before reconciliation; different valid styles are benign variation.
+The existing fixture compares inert result-returning and exception-based adapters
+against the same observable error contract. Equal outputs do not justify style
+unification; a wrong error status requires a cited contract mismatch. Its report
+mutations reject both an unsupported unification and an uncited real mismatch.
+This tests the synthetic example and source/report contract, not agent behavior.
+The one-case initial red result is retained. Same-c301 D1-only verification is
+still required on the final frozen delta; the passing bdef review remains intact.

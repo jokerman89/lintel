@@ -220,6 +220,55 @@ class AgentMethodCases(unittest.TestCase):
                                      "material impact", "sampled", "not a release gate"),
                     {"units-mismatch": "MATERIAL FINDING", "domain-synonym": "NO FINDING",
                      "grep-only-unused": "UNVERIFIED"})
+        # Inert adapter examples exercise an observable contract, not an agent or live service.
+        contract = {True: (200, "ok"), False: (503, "unavailable")}
+
+        def result_style(available):
+            return (200, "ok") if available else (503, "unavailable")
+
+        def exception_style(available, failure_status=503):
+            try:
+                if not available:
+                    raise LookupError("unavailable")
+                return 200, "ok"
+            except LookupError as error:
+                return failure_status, str(error)
+
+        result_observed = {state: result_style(state) for state in contract}
+        exception_observed = {state: exception_style(state) for state in contract}
+        mismatch_observed = {state: exception_style(state, failure_status=200) for state in contract}
+        self.assertEqual(result_observed, contract)
+        self.assertEqual(exception_observed, result_observed)
+        self.assertNotEqual(mismatch_observed, contract)
+
+        def check_recommendation(report, observed):
+            if observed == contract:
+                self.assertEqual(report["outcome"], "BENIGN VARIATION")
+                self.assertFalse(report["reconcile"])
+            else:
+                self.assertEqual(report["outcome"], "INVARIANT MISMATCH")
+                self.assertTrue(report["reconcile"])
+                self.assertEqual(report["rule"], "fixture:error-status-contract")
+
+        benign = {"outcome": "BENIGN VARIATION", "reconcile": False, "rule": None}
+        mismatch = {"outcome": "INVARIANT MISMATCH", "reconcile": True,
+                    "rule": "fixture:error-status-contract"}
+        check_recommendation(benign, exception_observed)
+        check_recommendation(mismatch, mismatch_observed)
+        for report, observed in (
+            (mismatch, exception_observed), (benign, mismatch_observed),
+            ({**mismatch, "rule": None}, mismatch_observed),
+        ):
+            with self.assertRaises(AssertionError):
+                check_recommendation(report, observed)
+
+        pattern = report_template(read("SanityChecker")).split("## Pattern divergence", 1)[1]
+        pattern = " ".join(pattern.split("## Stale comments", 1)[0].split()).casefold()
+        self.assertIn("result<t, error>", pattern)
+        self.assertIn("try/catch", pattern)
+        self.assertIn("reconcile only if a cited shared invariant or repository rule requires one shape", pattern)
+        self.assertIn("otherwise record as benign variation", pattern)
+        self.assertNotIn("recommend pick one for the repo", pattern)
 
     def test_privacy(self):
         rows = self.method("PrivacyBoundaryAudit", ("supplied payload", "policy source/version",
