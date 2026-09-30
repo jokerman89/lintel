@@ -39,8 +39,9 @@ AskUserQuestion=`ask_user`, WebFetch=`web_fetch`, and a named role=`task` with t
 agent.
 
 For stdin steps (`bash bin/li-run -`), the runner removes its temporary buffer on
-normal exit and catchable HUP, INT or TERM termination. A step's own traps stay
-inside its subshell. SIGKILL and host crashes cannot run shell cleanup.
+normal exit and catchable HUP, INT or TERM termination. It preserves signal death
+so an interrupted waiting shell does not continue its calling loop. A step's own
+traps stay inside its subshell. SIGKILL and host crashes cannot run shell cleanup.
 
 Frontmatter that Copilot does not read is dropped and recorded as a degradation. Skills
 keep `name` and `description`; agents keep `name`, `description` and `tools`. Agents lose

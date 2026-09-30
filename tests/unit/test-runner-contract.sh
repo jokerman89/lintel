@@ -50,6 +50,7 @@ actual_output=$(bash "$RUNNER" 2>&1) || rc=$?
 
 mkdir -p "$TMP/tests/shape"
 cp "$ROOT/tests/shape/manifest-identity.sh" "$TMP/tests/shape/manifest-identity.sh"
+cp "$ROOT/CODEOWNERS" "$TMP/CODEOWNERS"
 (
   HIDDEN_COMMANDS=jq
   export HIDDEN_COMMANDS

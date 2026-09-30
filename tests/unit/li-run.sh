@@ -74,6 +74,21 @@ for inherited in "$TEST_TMP/operator skills" skills; do
     $'\n'"CHILD_SKILLS=$REPO_ROOT/skills"$'\n'
 done
 
+# A caller interrupted with its foreground child must observe signal death, not
+# a normal exit(130), or Bash's cooperative exit handling can continue the loop.
+cat > "$TEST_TMP/interrupt-caller.sh" <<'CALLER'
+export LINTEL_TEST_CALLER_PID=$$
+printf 'kill -INT "$LINTEL_TEST_CALLER_PID"\nkill -INT "$$"\nexit 19\n' |
+  bash "$1" --repo "$2" -
+echo "caller-continued"
+CALLER
+mkdir "$TEST_TMP/buffer-caller"
+rc=0
+out=$(TMPDIR="$TEST_TMP/buffer-caller" bash "$TEST_TMP/interrupt-caller.sh" "$RUN" "$FIXTURE" 2>&1) || rc=$?
+check "interrupted caller preserves signal termination" 130 "$rc"
+case "$out" in *caller-continued*) fail "interrupted caller continued after its child" ;; *) pass "interrupted caller stops" ;; esac
+check "interrupted caller buffer removed" "" "$(ls -A "$TEST_TMP/buffer-caller")"
+
 # 2. stdin (-) defaults to the current repository and removes its buffer.
 rc=0
 out=$(cd "$FIXTURE" && printf 'echo "stdin:$LINTEL_REPO_ROOT"\nexit 7\n' |

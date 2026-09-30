@@ -45,11 +45,16 @@ done
 
 _li_run_buffer=""
 _li_run_discard() { [ -z "$_li_run_buffer" ] || rm -f -- "$_li_run_buffer"; }
+_li_run_signal() {
+  _li_run_discard
+  trap - "$1"
+  kill -s "$1" "$$"
+}
 if [ "$_li_run_script" = "-" ]; then
   trap _li_run_discard EXIT
-  trap 'exit 129' HUP
-  trap 'exit 130' INT
-  trap 'exit 143' TERM
+  trap '_li_run_signal HUP' HUP
+  trap '_li_run_signal INT' INT
+  trap '_li_run_signal TERM' TERM
   _li_run_buffer="$(mktemp "${TMPDIR:-/tmp}/lintel-step.XXXXXX")" || _li_run_fail "cannot buffer stdin"
   cat > "$_li_run_buffer" || _li_run_fail "cannot read the step from stdin"
   _li_run_step="$_li_run_buffer"

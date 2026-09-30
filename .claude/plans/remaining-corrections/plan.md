@@ -33,7 +33,7 @@ No company controls or permissions are invented.
 | Package ID | Outcome | Leaf IDs (dependency order) | Owner / edit boundary | Dependencies | Acceptance evidence | Review |
 |---|---|---|---|---|---|---|
 | ADV-1 | Owned stdin buffer cleanup | ADV-1 | Coordinator; bin/li-run, tests/unit/li-run.sh, docs/copilot.md | none | R1 signal and normal-status checks | substantive |
-| W0-7 | Valid repository review owner | W0-7 | Coordinator; CODEOWNERS, tests/shape/manifest-identity.sh | none | R2 identity check and actual GitHub diagnostics | substantive |
+| W0-7 | Valid repository review owner | W0-7 | Coordinator; CODEOWNERS, tests/shape/manifest-identity.sh, tests/unit/test-runner-contract.sh | none | R2 identity/fixture checks and actual GitHub diagnostics | substantive |
 | DR-36.header-core.R1 | Portable controlled link fixture | DR-36.header-core.R1 | Coordinator; tests/unit/review_method.py | none | R3 dependency tests | substantive |
 
 ## Original tasks
@@ -50,7 +50,13 @@ No company controls or permissions are invented.
 
 Only the coordinator updates the six version manifests and changelog for the
 next deployable version and regenerates managed outputs through their official
-generator. Run the affected checks in a synthetic parent HOME/TEMP, then the
+generator. The changelog also corrects the previously recorded 0.13.6 wording
+advisory: a newly introduced guard is a change, and its trusted bundle may be
+installed inside the working repository. Historical product bytes and delivery
+evidence are not altered by that prose clarification.
+
+Run the affected checks in a synthetic parent HOME/TEMP, including the
+manifest guard's test-runner fixture dependency, then the
 existing source/native/instruction/catalog/wiki and command-surface checks.
 Reviewers do not write fixes. The final candidate receives its own exact-context
 QA/review/SHIP and full hosted matrix; previous dcc results are not reused as new
@@ -66,3 +72,11 @@ The coordinator checked requirements, bounded edit paths and acceptance directly
 on the known-correction/light-plan route; this is not independent plan review.
 The map reader recognizes all three original IDs. Implementation, independent
 source review and hosted acceptance remain required and unobserved.
+
+The first candidate's hosted unit-1 jobs failed on all three operating systems:
+the existing runner-contract fixture copied the new owner guard without its
+CODEOWNERS input. Independent source SPEC correctly blocked it. The coupled
+repair completes that fixture; neither the strict guard nor its unavailable-tool
+assertions is weakened. The same review's signal-death observation is addressed
+with an interrupted-caller regression, cleanup followed by restored signal
+termination, and the same independent reviewer's delta recheck.
