@@ -184,7 +184,7 @@ Selected provisional notes were addressed without expanding assurance:
   it from new authorized retrieval; tools were not expanded.
 - SLI tests now inspect the actual template and reject omitted fields/healthy no-data
   mutations. Local arithmetic was not evidence of a shipped SLI calculator.
-- F-03 report fixtures carry contrary exposure/applicability, source-only inventory
+- Dependency-report fixtures (F-03) carry contrary exposure/applicability, source-only inventory
   mismatch and missing token/provider evidence; missing coverage fields are rejected.
 - Vault warnings consistently use stderr; missing/disabled cases remain nonblocking
   with the original scoped audit behavior.
