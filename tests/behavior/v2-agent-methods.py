@@ -45,6 +45,13 @@ def read(role: str) -> str:
     return (ROOT / "agents" / ROLES[role] / f"{role}.md").read_text(encoding="utf-8")
 
 
+def report_template(source: str) -> str:
+    match = re.search(r"## Report format\s+```\n(.*?)\n```", source, re.DOTALL)
+    if match is None:
+        raise AssertionError("A report template is required")
+    return match[1]
+
+
 def worked_report(role: str) -> dict[str, dict[str, str]]:
     source = read(role)
     marker = "## Static contract examples"
@@ -76,9 +83,32 @@ def check_report(rows: dict, expected: dict[str, str]) -> None:
 
 
 def no_value_fragments(report: dict, value: str) -> None:
-    serialized = json.dumps(report)
-    if any(value[index:index + 8] in serialized for index in range(len(value) - 7)):
-        raise AssertionError("Report exposes a supplied value or fragment")
+    """Fixture-only: reject a full short value or an eight-code-point window of a longer one."""
+    if not isinstance(value, str) or not value:
+        raise AssertionError("The supplied inert fixture value must be a nonempty string")
+    width = min(8, len(value))
+    fragments = [value[index:index + width] for index in range(len(value) - width + 1)]
+
+    def check(part):
+        if isinstance(part, str):
+            if any(fragment in part for fragment in fragments):
+                raise AssertionError("Report exposes a supplied value or fragment")
+        elif isinstance(part, dict):
+            for key, item in part.items():
+                check(key)
+                check(item)
+        elif isinstance(part, (list, tuple)):
+            for item in part:
+                check(item)
+
+    check(report)
+
+
+def check_case_evidence(rows: dict, required: dict[str, tuple[str, ...]]) -> None:
+    for case, clauses in required.items():
+        evidence = rows[case]["evidence"].casefold()
+        if any(clause.casefold() not in evidence for clause in clauses):
+            raise AssertionError(f"{case}: missing source-example evidence distinction")
 
 
 def contrast(foreground: tuple[float, ...], background: tuple[float, ...]) -> float:
@@ -91,6 +121,18 @@ def contrast(foreground: tuple[float, ...], background: tuple[float, ...]) -> fl
 
 
 class AgentMethodCases(unittest.TestCase):
+    def evidence(self, rows, required):
+        check_case_evidence(rows, required)
+        for case, clauses in required.items():
+            for clause in clauses:
+                with self.subTest(case=case, evidence_clause=clause):
+                    changed = deepcopy(rows)
+                    changed[case]["evidence"] = re.sub(re.escape(clause), "[omitted]",
+                                                     rows[case]["evidence"], flags=re.IGNORECASE)
+                    self.assertNotEqual(changed, rows)
+                    with self.assertRaises(AssertionError):
+                        check_case_evidence(changed, required)
+
     def method(self, role, phrases, expected):
         text = " ".join(read(role).split())
         for phrase in phrases:
@@ -114,30 +156,33 @@ class AgentMethodCases(unittest.TestCase):
         return rows
 
     def test_accessibility(self):
-        white = (1.0, 1.0, 1.0)
-        opaque = (0.0, 0.0, 0.0)
-        blended = tuple(0.4 * fg + 0.6 * bg for fg, bg in zip(opaque, white))
-        self.assertGreater(contrast(opaque, white), 4.5)
-        self.assertLess(contrast(blended, white), 4.5)
         rows = self.method("AccessibilityChecker",
                            ("Observation precondition", "authorized operation", "composite",
                             "browser/state", "STATIC/UNVERIFIED"),
                            {"click-only": "FAIL", "alpha-text": "FAIL",
                             "keyboard-unobserved": "STATIC/UNVERIFIED", "at-unobserved": "STATIC/UNVERIFIED"})
-        self.assertIn("0.4", rows["alpha-text"]["evidence"])
+        match = re.search(r"black text at alpha ([0-9.]+) over white composites to (#[0-9a-fA-F]{6})",
+                          rows["alpha-text"]["evidence"])
+        self.assertIsNotNone(match)
+        white, black = (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)
+        alpha = float(match[1])
+        blended = tuple(alpha * fg + (1 - alpha) * bg for fg, bg in zip(black, white))
+        self.assertEqual("#" + "".join(f"{round(channel * 255):02x}" for channel in blended), match[2])
+        self.assertGreater(contrast(black, white), 4.5)
+        self.assertLess(contrast(blended, white), 4.5)
         self.assertIn("2.1.1", rows["click-only"]["evidence"])
 
     def test_api_consumers(self):
-        clients = {"generated-v1": {"queued", "done"}, "tolerant-v2": {"queued", "done", "unknown"}}
-        self.assertNotIn("paused", clients["generated-v1"])
-        self.assertIn("unknown", clients["tolerant-v2"])
         rows = self.method("APIDesigner",
                            ("Consumer inventory", "compiler", "ContractTestArchitect",
                             "no mandatory additional actor", "request and response"),
                            {"strict-enum": "BREAKING", "tolerant-unrun": "UNVERIFIED",
                             "tolerant-observed": "COMPATIBLE"})
-        self.assertIn("generated-v1", rows["strict-enum"]["evidence"])
-        self.assertIn("supplied", rows["tolerant-observed"]["evidence"])
+        self.evidence(rows, {
+            "strict-enum": ("generated-v1", "rejects unknown enum values", "owner"),
+            "tolerant-unrun": ("compiler/runtime pair", "no supplied compatibility result"),
+            "tolerant-observed": ("supplied contract result", "this exact", "no wider client claim"),
+        })
 
     def test_code_review(self):
         source = read("CodeReviewer")
@@ -152,20 +197,23 @@ class AgentMethodCases(unittest.TestCase):
                            ("Reader/writer inventory", "MigrationPlanner", "backfill",
                             "lock wait", "no mandatory additional actor"),
                            {"large-required-column": "SEQUENCING REQUIRED", "fast-default": "LOCK REVIEW REQUIRED"})
-        self.assertIn("NOT NULL", rows["large-required-column"]["evidence"])
-        self.assertNotIn("absorb SchemaArchitect", read("DatabaseDesigner"))
+        self.evidence(rows, {
+            "large-required-column": ("NOT NULL", "old writers", "MigrationPlanner", "backfill/validation"),
+            "fast-default": ("constant default", "lock wait/hold", "writer compatibility", "unverified"),
+        })
+        self.assertIn("SchemaArchitect and DataPipelineDesigner remain separate expertise",
+                      " ".join(read("DatabaseDesigner").split()))
 
     def test_forensics(self):
-        prior = {"H1": {"status": "rejected", "evidence": "E1"},
-                 "H2": {"status": "probable", "evidence": "elimination"}}
-        trial = {"owner": "fixture-owner", "state": "interrupted"}
-        self.assertEqual(prior["H1"]["evidence"], "E1")
-        self.assertNotEqual(prior["H2"]["evidence"], "direct observation")
-        self.assertEqual(trial["state"], "interrupted")
-        self.method("DebugForensics", ("Handoff packet", "prior hypotheses", "command/exit",
-                                     "owned trial", "do not repeat", "next discriminating"),
-                    {"prior-experiment": "RETAIN", "interrupted-trial": "STOP",
-                     "elimination-only": "PROBABLE"})
+        rows = self.method("DebugForensics", ("Handoff packet", "prior hypotheses", "command/exit",
+                                            "owned trial", "do not repeat", "next discriminating"),
+                           {"prior-experiment": "RETAIN", "interrupted-trial": "STOP",
+                            "elimination-only": "PROBABLE"})
+        self.evidence(rows, {
+            "prior-experiment": ("rejected by supplied E1", "same snapshot", "command/exit"),
+            "interrupted-trial": ("uncertain effects", "journal/owner", "before dependent execution"),
+            "elimination-only": ("lacks direct observation", "not a confirmed fix"),
+        })
 
     def test_sanity(self):
         self.method("SanityChecker", ("Comparison boundary", "producer", "consumer",
@@ -174,65 +222,68 @@ class AgentMethodCases(unittest.TestCase):
                      "grep-only-unused": "UNVERIFIED"})
 
     def test_privacy(self):
-        policy = {"id": "P-7", "forbidden_destinations": ["telemetry-prohibited"]}
-        payload = {"field": "email", "destination": "telemetry-prohibited", "evidence": "supplied-fixture"}
-        self.assertIn(payload["destination"], policy["forbidden_destinations"])
-        self.method("PrivacyBoundaryAudit", ("supplied payload", "policy source/version",
-                                           "UNVERIFIED", "SecurityAuditor", "no live"),
-                    {"forbidden-telemetry": "CONFIRMED GAP", "unknown-backup": "UNVERIFIED",
-                     "brand-only": "NO VIOLATION ESTABLISHED"})
+        rows = self.method("PrivacyBoundaryAudit", ("supplied payload", "policy source/version",
+                                                  "UNVERIFIED", "SecurityAuditor", "no live"),
+                           {"forbidden-telemetry": "CONFIRMED GAP", "unknown-backup": "UNVERIFIED",
+                            "brand-only": "NO VIOLATION ESTABLISHED"})
+        self.evidence(rows, {
+            "forbidden-telemetry": ("email", "configured endpoint", "forbidden", "policy P-7", "both artifacts"),
+            "unknown-backup": ("No backup destination/configuration evidence", "rather than assume"),
+            "brand-only": ("provider name alone", "neither emitted fields", "policy applicability"),
+        })
 
     def test_secrets(self):
-        sentinel = "INERT_NOT_A_CREDENTIAL_FIXTURE_ONLY_42Z"
         rows = self.method("SecretsScanReviewer",
                            ("supplied scanner", "documented inert", "never echo",
                             "no credential validation", "no history-rewrite"),
                            {"documented-marker": "FALSE POSITIVE", "unowned-value": "UNRESOLVED",
                             "rotation-with-receipt": "ROTATED"})
-        no_value_fragments(rows, sentinel)
-        for leak in (sentinel, sentinel[:10], sentinel[-10:]):
-            with self.assertRaises(AssertionError):
-                no_value_fragments({"finding_id": "S-1", "detail": leak}, sentinel)
+        self.evidence(rows, {
+            "documented-marker": ("documented inert test marker", "supplied fixture provenance", "no value or fragment"),
+            "unowned-value": ("no owner", "inertness/revocation evidence", "without trying it"),
+            "rotation-with-receipt": ("owner's rotation receipt", "same identity", "own disposition"),
+        })
         source = read("SecretsScanReviewer")
         for stale in ("BFG", "git-filter-repo", "Force-push approval", "gitleaks-action",
-                      "Train team on secrets management (Key Vault"):
+                      "Train team on secrets management (Key Vault", "keep / cleanup"):
             self.assertNotIn(stale, source)
 
     def test_security(self):
-        # This representation is data, not executable source, a payload or a scanner input.
-        flows = [
-            {"source": "constant", "sink": "query-text", "missing_control": None},
-            {"source": "untrusted-input", "sink": "process-launch", "missing_control": "structured-arguments"},
-            {"source": "request-tenant", "sink": "object-access", "missing_control": "ownership-check"},
-            {"source": "tool-result", "sink": "privileged-action", "missing_control": "authority-separation"},
-        ]
-        self.assertEqual(sum(row["missing_control"] is not None for row in flows), 3)
-        self.method("SecurityAuditor",
+        rows = self.method("SecurityAuditor",
                     ("Defensive static scope", "tenant ownership", "agent-tool trust boundary",
                      "OWASP Top 10:2021", "repair owner", "no live"),
                     {"constant-query": "NO FINDING", "untrusted-process-flow": "SOURCE FINDING",
                      "tenant-from-body": "SOURCE FINDING", "tool-result-authority": "SOURCE FINDING",
-                     "unknown-middleware": "UNVERIFIED"})
+                     "unknown-middleware": "UNVERIFIED", "crypto-storage": "SOURCE FINDING",
+                     "client-error-disclosure": "SOURCE FINDING", "dependency-license-missing": "UNVERIFIED",
+                     "zero-findings-unseen": "UNVERIFIED"})
+        self.evidence(rows, {
+            "constant-query": ("constant", "no untrusted path", "alone is not a defect"),
+            "untrusted-process-flow": ("Supplied source trace", "structured-argument boundary"),
+            "tenant-from-body": ("complete supplied path", "without an ownership check"),
+            "tool-result-authority": ("untrusted tool-result text", "without scoped authorization"),
+            "unknown-middleware": ("selected artifacts omit", "rather than assume"),
+            "crypto-storage": ("password-storage", "required", "repair owner"),
+            "client-error-disclosure": ("failure branch", "stack trace", "fail-secure"),
+            "dependency-license-missing": ("required license/provenance evidence", "coverage gap"),
+            "zero-findings-unseen": ("No findings", "not inspected", "coverage gaps"),
+        })
 
     def test_threats(self):
         source = read("ThreatModelDrafter")
         self.assertNotIn("likelihood times impact", source)
         self.assertNotIn("likelihood × impact = risk", source)
-        self.method("ThreatModelDrafter",
+        rows = self.method("ThreatModelDrafter",
                     ("mitigation or accepted risk", "verification", "Owner",
                      "privacy", "tool", "policy-defined", "static"),
                     {"inbound-webhook": "MITIGATE", "agent-tool-boundary": "MITIGATE",
                      "ownerless-acceptance": "INCOMPLETE"})
-        threats = [
-            {"boundary": "inbound-webhook", "disposition": "mitigate", "owner": "webhook-owner",
-             "verification": "authorized signature/replay contract check"},
-            {"boundary": "agent-tool-boundary", "disposition": "mitigate", "owner": "tool-owner",
-             "verification": "static permission and approval contract check"},
-        ]
-        for threat in threats:
-            self.assertTrue(all(threat[key] for key in ("boundary", "disposition", "owner", "verification")))
-        changed = {**threats[0], "owner": ""}
-        self.assertFalse(all(changed[key] for key in ("boundary", "disposition", "owner", "verification")))
+        self.evidence(rows, {
+            "inbound-webhook": ("authentication/integrity", "webhook owner", "verification criteria"),
+            "agent-tool-boundary": ("action authority", "tool owner", "static verification artifacts"),
+            "ownerless-acceptance": ("no authorized decision", "Owner or verification", "instead of treating silence"),
+        })
+        self.assertIn("| Owner | Verification / status |", report_template(source))
 
     def test_devops(self):
         source = read("DevOpsToolchain")
@@ -247,15 +298,18 @@ class AgentMethodCases(unittest.TestCase):
     def test_kubernetes(self):
         source = read("K8sManifestReviewer")
         self.assertNotIn("security-context quartet", source)
-        self.method("K8sManifestReviewer",
+        rows = self.method("K8sManifestReviewer",
                     ("Pod Security Standards", "level/version", "serviceAccountName",
                      "automountServiceAccountToken", "RoleBinding", "ClusterRoleBinding",
                      "requests", "Guaranteed", "UNVERIFIED"),
                     {"equal-resources": "NO RATIO FINDING", "admin-token": "SOURCE FINDING",
                      "unspecified-pss": "UNVERIFIED", "readonly-only": "NO PSS FINDING"})
-        fixture = {"containers": [{"request_cpu": 1, "limit_cpu": 1, "request_mem": 256, "limit_mem": 256}]}
-        self.assertTrue(all(row["request_cpu"] == row["limit_cpu"] and row["request_mem"] == row["limit_mem"]
-                            for row in fixture["containers"]))
+        self.evidence(rows, {
+            "equal-resources": ("nonzero CPU/memory requests equal limits", "every container", "not an automatic"),
+            "admin-token": ("effective token automount", "ClusterRoleBinding", "without a scoped need"),
+            "unspecified-pss": ("level/version evidence is absent", "rather than assume"),
+            "readonly-only": ("alone violates no selected PSS control", "separate applicable read-only policy"),
+        })
 
     def test_terraform(self):
         source = read("TerraformReviewer")
@@ -284,6 +338,111 @@ class CompatibilityChecks(unittest.TestCase):
                 if target.startswith(("https:", "http:", "#")):
                     continue
                 self.assertTrue((path.parent / target.split("#", 1)[0]).is_file(), f"{role}: {target}")
+
+
+class ReviewRepairCases(unittest.TestCase):
+    SECURITY_CLASSES = (
+        "input boundary", "secret exposure", "authorization and tenant ownership",
+        "agent-tool trust boundary", "cryptographic use", "security configuration",
+        "fail-secure and error disclosure", "logging and monitoring",
+        "outbound-request targets", "dependency provenance and license",
+    )
+
+    def assert_security_coverage(self, source):
+        template = report_template(source)
+        match = re.search(r"^## Coverage\n(.*?)(?=^## |\Z)", template, re.MULTILINE | re.DOTALL)
+        self.assertIsNotNone(match, "Q1: report must disclose class coverage")
+        coverage = match[1]
+        for name in self.SECURITY_CLASSES:
+            self.assertIn(f"| {name} | <traced / UNVERIFIED / n/a> |", coverage)
+        self.assertIn("zero findings do not establish coverage", template.casefold())
+
+    def test_q1_security_classes_and_coverage_are_explicit(self):
+        source = read("SecurityAuditor")
+        self.assert_security_coverage(source)
+        workflow = " ".join(source.split("## Workflow", 1)[1].split("## Report format", 1)[0].casefold().split())
+        for clause in ("password storage", "key handling", "security-relevant defaults",
+                       "fail-secure", "error/log disclosure", "outbound-request targets",
+                       "dependency provenance/license"):
+            self.assertTrue(clause in workflow, f"Q1: missing static inspection clause {clause!r}")
+        for name in self.SECURITY_CLASSES:
+            with self.subTest(coverage_class=name):
+                mutated = re.sub(rf"^\| {re.escape(name)} \|.*\n", "", source, flags=re.MULTILINE)
+                self.assertNotEqual(mutated, source)
+                with self.assertRaises(AssertionError):
+                    self.assert_security_coverage(mutated)
+
+    def assert_owner_history(self, source):
+        template = report_template(source)
+        table = template.split("### True positive — already rotated", 1)[1].split("### False positive", 1)[0]
+        self.assertIn("History disposition owner / recorded decision", table)
+        self.assertIn("<owner decision, or pending>", table)
+        self.assertNotIn("keep / cleanup", template)
+        self.assertIn("authority reference", template)
+
+    def test_q2_rotation_table_records_only_owner_disposition(self):
+        source = read("SecretsScanReviewer")
+        self.assert_owner_history(source)
+        mutated = source.replace("<owner decision, or pending>", "keep / cleanup")
+        self.assertNotEqual(mutated, source)
+        with self.assertRaises(AssertionError):
+            self.assert_owner_history(mutated)
+
+    def assert_material_report(self, source):
+        template = report_template(source)
+        material = template.find("## Material contract mismatches")
+        candidates = template.find("## Unused-code candidates")
+        self.assertGreaterEqual(material, 0, "Q3: material findings need a report slot")
+        self.assertGreater(candidates, material)
+        for field in ("Producer location", "Consumer location", "Invariant", "Consequence",
+                      "Evidence / uncertainty", "Repair owner"):
+            self.assertIn(field, template[material:candidates])
+        for line in template.splitlines():
+            if "legacy-helper.ts" in line or "useOldUser.ts" in line:
+                self.assertIn("UNVERIFIED CANDIDATE", line)
+                self.assertIn("dynamic/public-entry", line)
+        self.assertNotIn("no remaining callers)", template)
+
+    def test_q3_material_mismatch_precedes_uncertain_cleanup(self):
+        source = read("SanityChecker")
+        self.assert_material_report(source)
+        self.assertNotIn("estimates cleanup effort so", source)
+        self.assertIn("undocumented assumptions", source.split("## Workflow", 1)[1].casefold())
+        for old, new in (
+            ("## Material contract mismatches", "## Miscellaneous"),
+            ("UNVERIFIED CANDIDATE", "Dead code"),
+            ("Evidence / uncertainty", "Evidence"),
+        ):
+            mutated = source.replace(old, new)
+            self.assertNotEqual(mutated, source)
+            with self.assertRaises(AssertionError):
+                self.assert_material_report(mutated)
+
+    def test_q4_inert_report_redaction_handles_short_and_unicode_values(self):
+        # A hand-authored report fixture uses the source's row; no agent receives these values.
+        row = worked_report("SecretsScanReviewer")["documented-marker"]
+        inert_values = (
+            "~", "Z7", "inert42", "INERT_NOT_A_CREDENTIAL_FIXTURE_ONLY_42Z",
+            "\u2603", "\u6e2c\u8a66", "INERT_\u2603_\u6e2c\u8a66_\u00e4_FIXTURE",
+        )
+        for index, value in enumerate(inert_values):
+            with self.subTest(fixture=index, length=len(value)):
+                supplied = {"finding_id": "S-1", "value": value, "provenance": "documented inert fixture"}
+                report = {"finding_id": supplied["finding_id"], "triage": deepcopy(row), "value": "[redacted]"}
+                no_value_fragments(report, supplied["value"])
+                for fragment in (value, value[:8], value[-8:]):
+                    leaks = (
+                        {**report, "detail": fragment},
+                        {**report, "nested": {"messages": [fragment]}},
+                        {**report, fragment: "unexpected field"},
+                    )
+                    for leaked in leaks:
+                        # A decoded JSON report must not hide non-ASCII values behind encoding.
+                        decoded = json.loads(json.dumps(leaked, ensure_ascii=True))
+                        with self.assertRaises(AssertionError):
+                            no_value_fragments(decoded, supplied["value"])
+        with self.assertRaises(AssertionError):
+            no_value_fragments({}, "")
 
 
 if __name__ == "__main__":

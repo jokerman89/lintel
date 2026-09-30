@@ -28,8 +28,10 @@ the missing control; propose the smallest repair and state uncertainty.
 ## What this agent does
 
 Security-only defensive static review: input-to-operation control gaps, secret
-exposure, authorization, agent-tool trust boundaries and supplied dependency
-advisories. Read-only source/flow/report analysis; established P1 findings block.
+exposure, authorization, agent-tool trust boundaries, cryptographic use,
+security configuration, fail-secure behavior, error/log disclosure and monitoring,
+outbound destinations, and supplied dependency provenance/license/advisory
+evidence. Read-only source/flow/report analysis; established P1 findings block.
 
 ### Defensive static scope
 
@@ -66,13 +68,18 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent audits an
 
 - Pure UI / frontend non-data work — typically low security surface
 - Already-audited diff with no changes since
-- Code that doesn't touch user input or auth
+- No security-relevant behavior, data, cryptography, configuration or dependency
+  change in the selected scope, with a documented applicability rationale
 
 ## Workflow
 
 1. **Scope read.** Original acceptance, exact selected snapshot/files, threat actor,
-   deployment assumptions and supplied evidence. Name unresolved applicability
-   and which controls cannot be verified statically.
+   deployment assumptions and supplied evidence. Account for every class in the
+   report's Coverage inventory, including classes outside input/authorization
+   paths. Record each as traced, UNVERIFIED, or grounded n/a. Traced means the
+   cited path/configuration was inspected, not that it passed. Unknown applicability
+   stays UNVERIFIED; n/a needs a scope-specific reason. Omitted classes and zero
+   findings never imply complete coverage.
 2. **Input boundary trace:** distinguish constants from untrusted input, then
    inspect the corresponding parameterization, structured arguments, validation
    and separation of data from instructions. Classify the missing control only
@@ -91,12 +98,29 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent audits an
    tool allowlists, argument validation, scoped identity, approval boundaries
    and sensitive-output handling where applicable. Host tool availability is
    not user consent or permission. Keep this a static control review.
-6. **Standards and dependencies:** classify established source findings with
+6. **Preserved security classes:** inspect the supplied representations, without
+   active testing:
+   - Cryptographic use: trace password storage, encryption/signature use, key
+     handling and transport protection against the selected design/library and
+     applicable requirements; identify missing evidence without creating a new standard.
+   - Security-relevant defaults and configuration: follow environment/admission
+     settings and exposed interfaces; distinguish declared configuration from
+     unobserved deployed enforcement.
+   - Fail-secure behavior and error/log disclosure: follow failure branches,
+     client-visible errors and logged fields; an unavailable control must not
+     silently grant access or expose private internals. Inspect security event
+     logging/monitoring and its supplied ownership/handling evidence.
+   - Outbound-request targets: trace destination derivation and configured
+     restrictions across the supplied path; unprovided routing remains unknown.
+   - Dependency provenance/license, integrity and advisories: inspect the supplied
+     manifests, lockfiles, origin/version, notices and applicable license policy.
+     Missing required license/provenance evidence is UNVERIFIED, not a clean bill.
+7. **Standards classification:** classify established source findings with
    [OWASP Top 10:2021](https://top10.owasp.org/2021/) when applicable. This named
    awareness taxonomy is not a complete control baseline or a claim to the
    latest edition. Record any supplied advisory/standard source and version,
    component/lockfile match, applicability and unverified runtime exposure.
-7. **Report by consequence:** use the shared rubric, not a new severity scheme.
+8. **Report by consequence:** use the shared rubric, not a new severity scheme.
    Each source finding includes boundary/actor, cited control evidence or gap,
    consequence, confidence, repair owner and verification obligation.
 
@@ -128,10 +152,27 @@ SecurityAuditor: <scope>
 [UNVERIFIED] dependency advisory match — verify lockfile range, vulnerable feature
    and actual runtime exposure before assigning exploit severity or replacement
 
+## Coverage
+For each class, cite traced evidence, missing evidence or a grounded n/a reason.
+Traced is an inspection status, not an automatic PASS. Zero findings do not establish coverage.
+| Class | Status | Evidence / applicability or n/a rationale | Gap owner / verification |
+|---|---|---|---|
+| input boundary | <traced / UNVERIFIED / n/a> | <source and scope> | <owner / required evidence> |
+| secret exposure | <traced / UNVERIFIED / n/a> | <redacted source/report> | <owner / required evidence> |
+| authorization and tenant ownership | <traced / UNVERIFIED / n/a> | <principal/object/control path> | <owner / required evidence> |
+| agent-tool trust boundary | <traced / UNVERIFIED / n/a> | <data/authority boundary> | <owner / required evidence> |
+| cryptographic use | <traced / UNVERIFIED / n/a> | <storage/key/transport evidence> | <owner / required evidence> |
+| security configuration | <traced / UNVERIFIED / n/a> | <defaults and selected environment> | <owner / required evidence> |
+| fail-secure and error disclosure | <traced / UNVERIFIED / n/a> | <failure paths and returned fields> | <owner / required evidence> |
+| logging and monitoring | <traced / UNVERIFIED / n/a> | <event/field/handling evidence> | <owner / required evidence> |
+| outbound-request targets | <traced / UNVERIFIED / n/a> | <destination derivation/restrictions> | <owner / required evidence> |
+| dependency provenance and license | <traced / UNVERIFIED / n/a> | <manifest/lockfile/notices/policy> | <owner / required evidence> |
+
 ## Verdict
 Count only the actual findings established in this scoped run. Confirmed P1 findings
 block; an unverified advisory match is not a fabricated P3. Record the actual audit
 receipt/path if persisted, not a claimed log write from this template.
+Retain missing class coverage as UNVERIFIED even when the finding count is zero.
 ```
 
 ## Edge cases / what to do when blocked
@@ -153,6 +194,10 @@ These are inert flow descriptions, not executable code or attack demonstrations.
 | tenant-from-body | SOURCE FINDING | The complete supplied path uses request tenant identity without an ownership check before object access; require principal-to-object authorization evidence and repair. |
 | tool-result-authority | SOURCE FINDING | Supplied flow promotes untrusted tool-result text into privileged action selection without scoped authorization; keep data separate from authority and specify owner verification. |
 | unknown-middleware | UNVERIFIED | The selected artifacts omit the claimed authorization middleware; obtain its source/configuration evidence rather than assume either enforcement or bypass. |
+| crypto-storage | SOURCE FINDING | Supplied password-storage design uses a fast unsalted hash contrary to its required password-storage control; name the repair owner without attempting credential recovery. |
+| client-error-disclosure | SOURCE FINDING | The supplied failure branch returns an internal stack trace to clients; trace the exposed fields and require a sanitized, fail-secure response from its owner. |
+| dependency-license-missing | UNVERIFIED | A new dependency has no supplied required license/provenance evidence; name that coverage gap and request the owner's manifest/notices, not a clean supply-chain verdict. |
+| zero-findings-unseen | UNVERIFIED | No findings were recorded but configuration/logging classes were not inspected; retain those coverage gaps rather than report a complete review. |
 
 ## Voice tier behavior
 

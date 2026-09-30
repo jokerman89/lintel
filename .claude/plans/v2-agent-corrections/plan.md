@@ -161,9 +161,62 @@ already correct on the base and was not edited.
 ### Review boundary
 
 The implementer checked scope, source contracts and results; this is self-review,
-not an independent decision. Master assigns the existing independent reviewer
-to the frozen implementation. Generated native adapters/catalog/wiki and final
+not an independent decision. The initial frozen implementation subsequently
+received c301's SPEC pass and QUALITY changes-requested, recorded below.
+Generated native adapters/catalog/wiki and final
 suite-count reduction remain Master-owned; no native consistency or hosted PASS
 is claimed before those steps. Runtime verification here is Windows/Python
 3.11.9, with Python 3.9 syntax only. All broader V2, release and policy gates remain
 open outside these completed implementation checkboxes.
+
+### Independent review correction Q1-Q4
+
+c301's initial SOURCE SPEC passed all thirteen items; subsequent QUALITY
+requested changes: Q1 (P2) preserves baseline static security-class coverage,
+Q2 (P3) aligns the rotated-secret template with owner-routed history decisions,
+Q3 (P3) puts material mismatches before uncertain unused-code candidates, and
+Q4 (P3) replaces self-referential fixture assertions and covers short/non-ASCII
+inert redaction values. The initial commit, reports and test evidence remain
+unchanged history. The coordinator authorized all four repairs in this same tree.
+
+These corrections retain V2A06/V2A08/V2A09 and the original cross-item fixture
+obligation, not a new item backlog or standard. Only the three affected agent
+bodies, owned test file and necessary mapped progress/evidence change. No
+network, scanner, model, payload, live action, new actor or reducer is released.
+The earlier implementation checkboxes do not turn rejected quality into a PASS.
+
+### Evidence for the four corrections
+
+Q1 restores static inspection of cryptographic use, security configuration,
+fail-secure/error disclosure, logging/monitoring, outbound targets and dependency
+provenance/license alongside the new tenant/tool boundaries. The report now names
+each coverage class as traced, UNVERIFIED or grounded n/a; traced is not an
+automatic pass, and zero findings never clears unexamined classes.
+
+Q2 replaces the rotated-secret table's ambiguous cleanup choice with the owner's
+recorded decision or pending state, plus its authority reference. Q3 gives material
+producer/consumer mismatches the first findings slot, labels both unused-code
+examples as unverified candidates, keeps undocumented assumptions in scope and
+makes effort estimates optional and evidence-qualified.
+
+Q4 removes literal-only assertions and instead checks evidence distinctions read
+from the actual worked-report rows. Removing a required source clause or evidence
+distinction now fails. The separate test-only redaction checker inspects decoded
+string fields/keys recursively, including short and non-ASCII inert values.
+Its mechanical scope is full values shorter than eight code points and every
+eight-code-point window of a longer value, not a production secret scanner or
+proof of all possible encodings/partial disclosures.
+
+The four focused regression methods initially failed on the reviewed candidate,
+including short/non-ASCII exposure misses. A first repair run then caught a
+line-wrapped phrase mismatch in the test; whitespace was normalized without
+changing expected coverage or dispositions. The final bounded run passed 16
+methods: four review regressions, ten affected method contracts and two metadata/
+link invariants. The initial 15-method result remains exact old-head history,
+not a fresh count to add to sixteen.
+
+All initial c301 reports, the original commit and raw failed/passing observations
+are preserved unchanged in owned runtime evidence. This follow-up changes only
+three agent bodies, the existing owned behavior test and necessary mapped
+progress/handoff text. Same-c301 delta recheck is still required; no independent
+repair PASS or release clearance is issued by the writer.

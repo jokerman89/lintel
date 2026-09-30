@@ -83,9 +83,12 @@ SecretsScanReviewer: <repo>@<sha>
 | <path>:<line> | <type> | <owner> | <H/M/L> | rotate by <deadline> |
 
 ### True positive — already rotated (count: N)
-| File:line | Type | Rotation date | History action |
+| File:line | Type | Rotation date | History disposition owner / recorded decision |
 |---|---|---|---|
-| <path>:<line> | <type> | <date> | keep / cleanup |
+| <path>:<line> | <type> | <date> | <owner decision, or pending> |
+
+Record the decision's owner, authority reference and scope; absent evidence means
+pending, not a retention/cleanup choice or permission for this reviewer to act.
 
 ### False positive (count: N)
 | File:line | Type | Why FP |

@@ -27,8 +27,9 @@ no amendment, config change, remote action, version bump or all-V2 completion.
 
 ## Current state
 
-All thirteen mapped methods and the 15-test documentary/inert-fixture run are
-complete. See plan.md and the owned runtime item-coverage record for preserved
-already-met clauses, exclusions and actual observations. The implementation is
-ready to freeze for Master-assigned independent review; this is not review,
-native-generation, hosted or release clearance.
+The initial thirteen-item implementation and 15-test result are preserved at
+their original commit. c301 passed SPEC and requested four QUALITY corrections.
+Q1-Q4 are repaired with 16 passing affected checks, preserving original IDs,
+authority and failed observations; see plan.md and the owned repair evidence.
+Freeze the ordinary follow-up for the same c301 delta recheck. This is not an
+independent repair PASS, native-generation, hosted or release clearance.
