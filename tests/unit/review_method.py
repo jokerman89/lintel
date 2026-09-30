@@ -11,6 +11,7 @@ import errno
 import importlib.util
 import inspect
 import json
+import os
 import re
 import shutil
 import stat
@@ -738,6 +739,7 @@ class HeaderDependencyTests(unittest.TestCase):
             helper = root / "review_headers.py"
             helper.write_text("raise AssertionError('inert helper executed')\n", encoding="utf-8")
             original = Path.lstat
+            original_is_symlink = Path.is_symlink
             for consumer in self.consumers(root):
                 for mode, attributes in ((stat.S_IFLNK | 0o777, 0), (stat.S_IFREG | 0o644, 0x400)):
                     with self.subTest(consumer=consumer.name, mode=mode, attributes=attributes):
@@ -745,8 +747,14 @@ class HeaderDependencyTests(unittest.TestCase):
                             if path == helper:
                                 return SimpleNamespace(st_mode=mode, st_file_attributes=attributes)
                             return original(path, *args, **kwargs)
-                        with patch.object(Path, "lstat", classified):
+                        def is_symlink(path):
+                            return stat.S_ISLNK(mode) if path == helper else original_is_symlink(path)
+                        with patch.object(Path, "lstat", classified), patch.object(Path, "is_symlink", is_symlink):
                             self.assert_refused(consumer)
+
+    def test_link_classification_is_independent_of_pathlib_lstat_dispatch(self):
+        with patch.object(Path, "is_symlink", lambda path: os.path.islink(path)):
+            self.test_link_and_reparse_classifications_refuse_before_inert_helper_execution()
 
     def test_actual_nonregular_and_available_symlink_never_execute(self):
         with tempfile.TemporaryDirectory() as tmp:

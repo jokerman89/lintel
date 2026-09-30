@@ -91,5 +91,15 @@ for f in "${DOCS[@]}"; do
   done
 done
 
+if [ ! -f CODEOWNERS ]; then
+  fail "CODEOWNERS missing"
+elif grep -qF '@Azureflipper' CODEOWNERS; then
+  fail "CODEOWNERS still names the stale owner"
+elif ! awk '$1 == "*" && $2 == "@jokerman89" { found=1 } END { exit !found }' CODEOWNERS; then
+  fail "CODEOWNERS must route the default rule to the repository owner"
+else
+  pass "CODEOWNERS uses the current repository owner"
+fi
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "manifest-identity: ALL PASS"; exit 0; } || { echo "manifest-identity: FAILURES"; exit 1; }

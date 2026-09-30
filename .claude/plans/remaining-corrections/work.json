@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/remaining-corrections/spec.md",
+  "plan": ".claude/plans/remaining-corrections/plan.md",
+  "tasks": ".claude/plans/remaining-corrections/plan.md",
+  "prompt": ".claude/plans/remaining-corrections/prompt.md"
+}

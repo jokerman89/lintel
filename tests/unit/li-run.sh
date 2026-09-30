@@ -82,6 +82,25 @@ check "stdin step exit status" 7 "$rc"
 contains "stdin step runs with the current repository" "$out" "stdin:$FIXTURE"
 check "stdin buffer removed" "" "$(ls -A "$TEST_TMP/buffer")"
 
+rc=0
+out=$(cd "$FIXTURE" && printf 'trap '\''echo step-exit'\'' EXIT\nexit 11\n' |
+  TMPDIR="$TEST_TMP/buffer" bash "$RUN" - 2>&1) || rc=$?
+check "step-local EXIT trap preserves its status" 11 "$rc"
+contains "step-local EXIT trap runs" "$out" "step-exit"
+check "step-local EXIT trap cannot replace buffer cleanup" "" "$(ls -A "$TEST_TMP/buffer")"
+
+# Terminate only the fixture runner; $$ in its step subshell names that runner.
+for signal_status in HUP:129 INT:130 TERM:143; do
+  signal="${signal_status%:*}"
+  expected="${signal_status#*:}"
+  mkdir "$TEST_TMP/buffer-$signal"
+  rc=0
+  out=$(cd "$FIXTURE" && printf 'kill -%s "$$"\nexit 19\n' "$signal" |
+    TMPDIR="$TEST_TMP/buffer-$signal" bash "$RUN" - 2>&1) || rc=$?
+  check "stdin $signal exit status" "$expected" "$rc"
+  check "stdin $signal buffer removed" "" "$(ls -A "$TEST_TMP/buffer-$signal")"
+done
+
 # 3. Actionable failures.
 rc=0
 out=$(bash "$RUN" --repo "$FIXTURE" "$TEST_TMP/absent.sh" 2>&1) || rc=$?

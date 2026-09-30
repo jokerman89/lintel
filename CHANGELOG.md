@@ -5,6 +5,26 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.7 — unreleased
+
+### Fixed
+
+- The Bash step runner removes its owned stdin buffer after catchable HUP,
+  INT and TERM termination as well as normal exit. Step-local traps and
+  ordinary exit statuses remain intact; SIGKILL and host crashes are excluded.
+- CODEOWNERS routes existing review paths to the current repository owner
+  rather than an unavailable account. Review enforcement remains a separate
+  branch-policy configuration.
+- The controlled header-loader symlink fixture no longer depends on whether
+  `Path.is_symlink` internally calls `Path.lstat`. Product loader guards and
+  the distinct REVIEW/MARS contracts are unchanged.
+
+### Migration
+
+- Update managed source through the existing adapter. The version change
+  requires the existing explicit, reason-bearing profile rebind and fresh
+  dependent evidence; it does not change host permissions or policy.
+
 ## 0.13.6 — unreleased
 
 ### Changed
@@ -14,11 +34,10 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   compatible. The distinct schemas, conversions, renderers, model defaults
   and review policy are unchanged.
 
-### Fixed
-
 - Both header loaders reject missing, linked, reparse-point or non-file shared
-  helpers before loading them. The helper comes from the trusted source sibling,
-  never from the target repository, working directory or personal installation.
+  helpers before loading them. The helper is a sibling in the trusted source
+  bundle, which may itself be installed inside the working repository; no
+  unrelated target, current-directory or personal-installation fallback is used.
 
 ### Migration
 

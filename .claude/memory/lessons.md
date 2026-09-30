@@ -675,6 +675,13 @@ permission boundaries explicitly rather than calling them done or silently choos
 Branch cleanup follows the clarified implementation outcome, not the report-publication
 milestone.
 
+**Amended 2026-09-30 (independent remaining work):** Completing a release's final
+validation does not close the surrounding coordination mandate. A blocked slice
+must not stop unrelated ready work, including verification of an existing private
+deliverable or safe cleanup of demonstrably stale refs. Reconcile those outcomes
+before reporting the remaining programme blocked; never label every idle stream
+unfinished without checking its actual deliverable.
+
 ## L-030 — Adding a client adapter must preserve Universal product identity
 
 **Date:** 2026-09-20

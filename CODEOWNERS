@@ -2,46 +2,47 @@
 #
 # This file uses GitHub CODEOWNERS syntax.
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# Rules route review requests. Required review needs separately configured branch rules.
 
 # Default owner for everything
-*                                       @Azureflipper
+*                                       @jokerman89
 
-# Top-level governance files — require explicit review
-/AGENT-INSTRUCTIONS.md                  @Azureflipper
-/CHANGELOG.md                           @Azureflipper
-/LICENSE                                @Azureflipper
-/.claude/engineering/SHIP-GATE.md                           @Azureflipper
-/CODEOWNERS                             @Azureflipper
-/SECURITY.md                            @Azureflipper
+# Top-level governance files — explicit review ownership
+/AGENT-INSTRUCTIONS.md                  @jokerman89
+/CHANGELOG.md                           @jokerman89
+/LICENSE                                @jokerman89
+/.claude/engineering/SHIP-GATE.md                           @jokerman89
+/CODEOWNERS                             @jokerman89
+/SECURITY.md                            @jokerman89
 
 # Plugin manifests (Claude, Codex and Cursor; Copilot's lives under .github/plugin/)
-/.claude-plugin/                        @Azureflipper
-/.codex-plugin/                         @Azureflipper
-/.cursor-plugin/                        @Azureflipper
+/.claude-plugin/                        @jokerman89
+/.codex-plugin/                         @jokerman89
+/.cursor-plugin/                        @jokerman89
 
 # Per-CLI entrypoint context files
-/CLAUDE.md                              @Azureflipper
-/AGENTS.md                              @Azureflipper
+/CLAUDE.md                              @jokerman89
+/AGENTS.md                              @jokerman89
 
 # Skills + agents — open to team contributions
-/skills/                                @Azureflipper
-/agents/                                @Azureflipper
+/skills/                                @jokerman89
+/agents/                                @jokerman89
 
 # Hooks — security-relevant, narrower review
-/hooks/                                 @Azureflipper
+/hooks/                                 @jokerman89
 
 # Scaffolding templates — load-bearing for new repos
-/scaffolding/                           @Azureflipper
+/scaffolding/                           @jokerman89
 
 # Install scripts
-/install/                               @Azureflipper
-/bin/                                   @Azureflipper
+/install/                               @jokerman89
+/bin/                                   @jokerman89
 
 # CI
-/.github/workflows/                     @Azureflipper
+/.github/workflows/                     @jokerman89
 
 # Tests
-/tests/                                 @Azureflipper
+/tests/                                 @jokerman89
 
 # Docs
-/docs/                                  @Azureflipper
+/docs/                                  @jokerman89
