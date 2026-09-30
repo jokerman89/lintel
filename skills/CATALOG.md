@@ -22,7 +22,7 @@ Total skills: 97
 | [`/li:cli-fingerprint`](cli-fingerprint/SKILL.md) | Use to identify the current CLI, desktop, IDE or cloud surface and inspect its actual tools without inferring capabilit… |
 | [`/li:code-freeze`](code-freeze/SKILL.md) | Use to add, list or lift advisory session freeze paths; preserves project policy and never grants or removes host write… |
 | [`/li:code-review`](code-review/SKILL.md) | Use before landing a change to review just the diff — focused on the changed code only, lighter than a full engineering… |
-| [`/li:compliance-gate`](compliance-gate/SKILL.md) | Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embar… |
+| [`/li:compliance-gate`](compliance-gate/SKILL.md) | Use when evaluating declared controls with mandatory, advisory, unverified and no-applicable outcomes; this is not host… |
 | [`/li:context-budget`](context-budget/SKILL.md) | Use before a large read or handoff, or when context headroom and resource advice are needed; keep observed usage, sourc… |
 | [`/li:context-cool`](context-cool/SKILL.md) | Exclude explicitly selected files from future context reads without claiming to remove already-sent conversation conten… |
 | [`/li:context-warm`](context-warm/SKILL.md) | Use to load bounded files, topic-related sources, ADRs or prior sessions with safe selection and honest input-size esti… |
@@ -64,7 +64,7 @@ Total skills: 97
 | [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — per-hook observed records, override patterns and hooks with no observed record in a window, re… |
 | [`/li:inspect`](inspect/SKILL.md) | Use to inspect a selected plan or repository through engineering, design and developer-experience lenses. Preserve orig… |
 | [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
-| [`/li:jobs`](jobs/SKILL.md) | Use to see and steer in-flight Lintel jobs — list what's open, continue, replan, abort, or branch a job. The single sou… |
+| [`/li:jobs`](jobs/SKILL.md) | Use when listing or steering repository-local jobs; job lifecycle observations do not replace selected work-map authori… |
 | [`/li:lessons-add`](lessons-add/SKILL.md) | Use after a correction, insight, or recurring pattern worth remembering to record it as a lesson the next session will … |
 | [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote one ID-managed project lesson into an explicitly named Lintel work tree's scaffolding baseline, with recorded p… |
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task for keyword-ranked lessons, the complete index or an exact lesson ID, without changing the … |
@@ -99,7 +99,7 @@ Total skills: 97
 | [`/li:skill-new`](skill-new/SKILL.md) | Use to turn an authorized recurring task or pattern into a new Lintel skill draft using the existing scaffold and front… |
 | [`/li:skill-router`](skill-router/SKILL.md) | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | [`/li:spec-kit`](spec-kit/SKILL.md) | Use when a repository has GitHub Spec Kit artifacts and needs Lintel planning, build-card execution, review or session … |
-| [`/li:status`](status/SKILL.md) | Use to quickly check where you are in flight — shows what's open right now, an alias for listing jobs. The fast "what w… |
+| [`/li:status`](status/SKILL.md) | Use when inspecting selected work, recorded cycle state and supplementary job observations read-only; this does not run… |
 | [`/li:swarm`](swarm/SKILL.md) | Use when an approved plan has multiple dependency-independent work domains and the operator wants coordinated multi-age… |
 | [`/li:ta`](ta/SKILL.md) | Use for technical-architecture depth — service boundaries, API contracts, dependency graphs, scaling plans, complexity … |
 | [`/li:tq`](tq/SKILL.md) | Use for testing and QA-strategy depth — test-pyramid review, coverage audits, contract-test design, regression suites, … |

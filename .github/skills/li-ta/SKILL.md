@@ -23,7 +23,7 @@ description: Use for technical-architecture depth — service boundaries, API co
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 
-You are the TA (tech-architecture) module, invoked within the selected lifecycle phase.
+# Technical architecture
 
 ## What this module does
 
@@ -48,61 +48,67 @@ assumptions, read [architecture decision methods](../../../skills/ta/references/
 ## When NOT to use
 
 - Bug fix, small refactor, single-file change → use `/li-cycle --mode hotfix`
-- Data-model work without architectural impact → use `/li-da` (v4.2)
-- Pure observability/deployment work → use `/li-dh` (v4.4)
+- Data-model work without architectural impact → use `/li-da`
+- Pure observability/deployment work → use `/li-dh`
 
 ## Sub-capability dispatch
 
 The seven capabilities remain direct entry points, not separate skills. Read the
 named role from the trusted source and use the actual host's delegation operation
 or an explicit serial handoff. The caller persists returned artifacts under the
-selected attempt. Follow the [shared module procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
+selected attempt through the shared procedure required in Workflow below.
 
 | Capability | Dispatches to (agents) | Produces | Raise-help / notes |
 |---|---|---|---|
 | `api-design` | APIDesigner | REST/GraphQL/gRPC interface spec with versioning + breaking-change analysis | prefs: `api_style`, `versioning`; validation checklist below |
-| `dependency-graph` | Explorer + Architect | module dependency map + `graph.dot`, circular-detection, layering audit | owns the shared language-detect heuristic (below) |
+| `dependency-graph` | Explorer + Architect | module dependency map + `graph.dot`, circular-detection, layering audit | use project manifest clues below; distinguish static edges from observed runtime dependencies |
 | `boundary-review` | BackendArchitect + Architect | bounded-context drift and failure-isolation report | reuse dependency evidence only when its relevant input identity is unchanged; request SystemArchitect explicitly for an invariant/NFR question |
 | `complexity-audit` | Architect | per-component cyclomatic + cognitive scoring and refactor options | obtain actual project budgets or label exploratory measurements advisory; report tool/version and excluded files |
 | `scaling-plan` | CapacityPlanner + BackendArchitect | capacity model, ranked bottlenecks and priced/qualitative projection | target and baseline come from the brief; missing measurements remain unknown, not default 3x growth |
 | `contract-collision` | APIDesigner + Architect | impact across actual consumer versions and migration options | requires named interface/change; even one mandatory consumer break needs a decision; no universal deprecation window |
 | `quality-attributes` | SystemArchitect + Architect | non-functional requirement spec + verification path per NFR | backs the `non_functionals_specified` checkpoint; dims: latency p50/p95/p99 per journey, throughput RPS, error-rate %, availability SLA, observability signals per component |
 
-### api-design — validation checklist
+### api-design — invariant and consumer checks
 
-- [ ] Each endpoint has method, path, request schema, response schema, error responses
-- [ ] Versioning strategy applied consistently
-- [ ] Breaking-change analysis present (if v2.x or higher)
-- [ ] Authentication/authorization noted
-- [ ] Rate-limit / quota notes per endpoint
-- [ ] Example payload(s)
-- [ ] OpenAPI/Protobuf/SDL artifact if applicable
+- [ ] Name the invariant, authoritative writer and transaction boundary before choosing endpoints or topology.
+- [ ] Define method/path, request/response/error schema and allowed state transitions in the applicable OpenAPI/Protobuf/SDL contract.
+- [ ] Check actual consumer versions and migration needs even for a first-version or nominally additive change.
+- [ ] Bind authentication and object/tenant authorization to the protected action, not merely a noted mechanism.
+- [ ] Define idempotency, end-to-end deadlines, retry ownership and overload/quota behavior from actual requirements.
+- [ ] Give representative payloads and observable failure cases for duplicate effects, partial completion and consumer compatibility.
 
-### complexity-audit — per-language tools
+### complexity-audit — available analysis
 
-go → `gocyclo -over <budget>` · python → `radon cc -n B -s` · rust → `cargo-complexity` ·
-node → `npx eslintcc --rule complexity` · other → `lizard`
+Inspect project manifests and installed analyzer documentation/version before
+selecting a command. Use only an available, authorized analyzer with a metric and
+language scope that answer the question; do not install a guessed tool or invoke
+a package-fetching runner by default. Record command, version, exclusions and the
+applicable budget. Missing analyzer/output is unverified; source inspection may
+support an explicitly advisory assessment, not measured complexity.
 
-### dependency-graph — language detection (shared helper)
+### dependency-graph — project manifest clues
 
 `package.json` → node · `go.mod` → go · `Cargo.toml` → rust ·
 `pyproject.toml`/`requirements.txt` → python · `pom.xml`/`build.gradle` → jvm · `*.csproj`/`*.sln` → dotnet
 
 ## Workflow
+
+Read and execute the [shared module caller procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+before domain work. It is the sole owner of original work/package/leaf admission,
+live P07/policy checks, immutable obligations, checkpoint publication, cold continuation
+and final QA/independent acceptance. Apply the following architecture method inside
+that procedure, not as a substitute for it.
+
 1. Select `full`, an explicitly saved `loop`, or one named capability/`single --action`.
    Unknown capability or absent saved iteration is NEEDS_CONTEXT, not a new guessed run.
-2. Follow shared **Select original work and live policy**: actual `work_context`/
-   `workflow_inspect`, original package/leaves and verified P07 reference. Read
-   `engineering.tech_architecture.*` only from the verified pack or explicit advisory
-   invocation inputs. Preserve the existing API style/framework and accepted ADRs.
-3. Prepare immutable P05 obligations and a domain request with the checkpoint table
-   below. Record original output states before start. Supply actual role/mode/scope.
-4. Perform the method with real available tools; persist design, consumer evidence and
-   checks, then record the result. Explorer locates; Architect synthesizes/designs;
-   independent reviewers assess, not repair. Lack of a measurement is unverified.
-5. Freshly verify each required result, externally prepare the final P05 context and
-   obtain independent spec then quality/QA. Only the original task owner updates status.
-   Numeric rubrics are advice, never review or release clearance.
+2. Start from the observable invariant and its writer/transaction/retry boundaries.
+   Trace dependencies and consumers before choosing topology. Preserve existing API
+   style/framework, accepted ADRs and verified `engineering.tech_architecture.*`
+   preferences; explicit invocation advice does not replace policy.
+3. Use the capability and checkpoint tables to compare alternatives, failure
+   isolation, deadlines, capacity assumptions and consumer transitions. Explorer
+   locates; Architect synthesizes/designs; independent reviewers assess, not repair.
+   Missing measurements remain unverified, not invented budget compliance.
 
 ## Checkpoint ownership
 
@@ -168,8 +174,7 @@ patterns, the module is unchanged.
 **Reads:**
 - Original mapped artifacts and pinned pack fields; explicit advisory inputs, no automatic personal preference read
 - `lib/pack-resolver.sh` for pack policy
-- Existing arch agents: Architect, BackendArchitect, APIDesigner
-- New agents: SystemArchitect, CapacityPlanner
+- Architecture roles: Architect, BackendArchitect, APIDesigner, SystemArchitect, CapacityPlanner
 - Existing ADRs in the repository's declared decision location
 
 **Writes:**
@@ -187,6 +192,9 @@ patterns, the module is unchanged.
 - `hooks/shared/ta-arch-drift-warn/` (pre-edit on ADR-claimed files)
 - `hooks/shared/ta-contract-collision-warn/` (pre-edit on interface files)
 - `hooks/shared/ta-complexity-budget-warn/` (pre-commit)
+
+These optional warnings are unobserved unless actual host registration and execution
+are evidenced. They neither supply architectural measurements nor clear a required gate.
 
 ## Anti-patterns
 

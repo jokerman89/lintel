@@ -303,21 +303,41 @@ layer. The repo's own capture artifacts (Steps 1–7) are unaffected — this is
 sink, not a move. Nothing is ever read back from the vault into the repo.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/pack-resolver.sh"
-sink_enabled=$(resolve_pack_field capture.vault_sink_enabled)
-sink_path=$(resolve_pack_field capture.vault_sink_path)    # relative to repo root
-
-if [ "$sink_enabled" != "true" ]; then
-  : # disabled — skip silently
-elif { case "$sink_path" in /*|[A-Za-z]:*) sink_dir="$sink_path" ;; *) sink_dir="$REPO_ROOT/$sink_path" ;; esac; [ ! -d "$sink_dir" ]; }; then
-  echo "[lintel/capture] WARN: vault_sink path not found: $sink_path — skipping vault export"
-  audit_log capture vault_sink_skipped "reason=path_missing" "path=$sink_path"
+source_root="${LINTEL_SOURCE_ROOT:?select trusted source}"
+sink_dir=""
+if ! source "$source_root/lib/pack-resolver.sh"; then
+  echo "[lintel/capture] WARN: vault policy helper unavailable — export not performed" >&2
+elif ! sink_enabled=$(resolve_pack_field capture.vault_sink_enabled); then
+  echo "[lintel/capture] WARN: vault policy unresolved — export not performed" >&2
+elif [ "$sink_enabled" != "true" ]; then
+  : # disabled — no destination lookup or write
+elif [ -z "${LINTEL_REPO_ROOT:-}" ]; then
+  echo "[lintel/capture] WARN: working repository is not selected — export not performed" >&2
+elif ! source "$source_root/bin/_audit.sh"; then
+  echo "[lintel/capture] WARN: vault audit writer unavailable — export not performed" >&2
+elif ! sink_path=$(resolve_pack_field capture.vault_sink_path); then
+  echo "[lintel/capture] WARN: vault destination unresolved — export not performed" >&2
+else
+  capture_repo="$(lintel_repo_root)"
+  if [ -n "$sink_path" ]; then
+    case "$sink_path" in
+      /*|[A-Za-z]:*) sink_dir="$sink_path" ;;
+      *) sink_dir="$capture_repo/$sink_path" ;;
+    esac
+  fi
+  if [ -z "$sink_dir" ] || [ ! -d "$sink_dir" ]; then
+    echo "[lintel/capture] WARN: vault_sink path not found: $sink_path — skipping vault export" >&2
+    audit_log capture vault_sink_skipped "reason=path_missing" "path=$sink_path"
+    sink_dir=""
+  fi
 fi
 # A missing or disabled vault must NEVER fail CAPTURE — one-line warn, then move on.
 ```
 
-When enabled and the path exists, write exactly ONE file per session,
-`<sink_path>/YYYY-MM-DD-<repo>-<short-slug>.md`:
+Only when `sink_dir` is nonempty and this destination is already authorized, write
+exactly ONE file per session at `<sink_dir>/YYYY-MM-DD-<repo>-<short-slug>.md`.
+Do not create a destination, search a personal vault, or depend on dormant
+calibration initializing shell variables:
 
 ```markdown
 ---
@@ -353,10 +373,10 @@ installed by `bin/li-vault-init`) and the vault's own skills query these exact p
 `outcome` uses the controlled vocabulary above, nothing else.
 
 **After writing the note, maintain the two navigation surfaces (same sink dir):**
-1. **Hub note** `<sink_path>/<repo-name>.md` — create a minimal one if missing (frontmatter:
+1. **Hub note** `<sink_dir>/<repo-name>.md` — create a minimal one if missing (frontmatter:
    `created:`, `tags: [hub]`, `type: repo-hub`, `repo:`; one line of prose — same shape
    bin/li-vault-init writes). Never overwrite an existing hub.
-2. **Index** `<sink_path>/00-index.md` — create it if missing (frontmatter `type: session-index`
+2. **Index** `<sink_dir>/00-index.md` — create it if missing (frontmatter `type: session-index`
    + one intro line), then maintain the list under its heading: carry the existing entries
    forward, PREPEND this session's line, truncate to 15:
    `- [[<note-name>]] - <one-line title> (<repo>)`. Keep frontmatter + intro intact; touch only

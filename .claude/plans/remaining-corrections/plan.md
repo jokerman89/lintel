@@ -38,11 +38,11 @@ No company controls or permissions are invented.
 
 ## Original tasks
 
-- [ ] ADV-1 Add a failing catchable-signal buffer regression, install caller-owned
+- [x] ADV-1 Add a failing catchable-signal buffer regression, install caller-owned
   cleanup while preserving step semantics, and verify the existing shell suite.
-- [ ] W0-7 Retain every CODEOWNERS path rule, correct the owner and enforcement
+- [x] W0-7 Retain every CODEOWNERS path rule, correct the owner and enforcement
   wording, add the focused stale-owner regression and verify actual GitHub parsing.
-- [ ] DR-36.header-core.R1 Exercise the alternate `is_symlink` implementation
+- [x] DR-36.header-core.R1 Exercise the alternate `is_symlink` implementation
   before fixing the fixture at the public-method boundary; retain both physical
   refusal observations and the unrun-runtime limitation.
 
@@ -69,9 +69,13 @@ operator correction and verified outcome.
 ## Review
 
 The coordinator checked requirements, bounded edit paths and acceptance directly
-on the known-correction/light-plan route; this is not independent plan review.
-The map reader recognizes all three original IDs. Implementation, independent
-source review and hosted acceptance remain required and unobserved.
+on the known-correction/light-plan route; this was not independent plan review.
+The map reader recognizes all three original IDs. Implementation and independent
+source SPEC/QUALITY passed after the actual fixture and signal-death corrections.
+The missing CODEOWNERS fixture and the initial failed hosted run remain history.
+The published feature's actual CODEOWNERS query returned zero errors. These
+checkboxes record source implementation and acceptance, not main delivery:
+fresh integrated generation, hosted QA and release review remain separate gates.
 
 The first candidate's hosted unit-1 jobs failed on all three operating systems:
 the existing runner-contract fixture copied the new owner guard without its

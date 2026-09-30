@@ -94,7 +94,7 @@ class PlanningSourceTests(unittest.TestCase):
         self.assertIn("#### Conditional pivotal premise record", source_text)
         block = source_text.split("#### Conditional pivotal premise record", 1)[1].split(
             "### 7.", 1)[0]
-        row = next(line for line in block.splitlines() if line.startswith("| <premise"))
+        row = next(line for line in block.splitlines() if line.startswith("| `<premise"))
         values = {
             "<premise and original decision ID>": "D014: current API remains compatible",
             "<constraint or assumption and basis>": "assumption; target runtime behavior is unknown",
@@ -109,7 +109,7 @@ class PlanningSourceTests(unittest.TestCase):
         return row, list(values.values())
 
     def assert_premise_row(self, row, expected):
-        self.assertEqual([cell.strip() for cell in row.strip("|").split("|")], expected)
+        self.assertEqual([cell.strip().strip("`") for cell in row.strip("|").split("|")], expected)
 
     def test_define_template_preserves_falsifier_authority_and_unknown_status(self):
         original = skill("define")

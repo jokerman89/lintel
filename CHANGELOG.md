@@ -22,6 +22,16 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 - SHIP summaries report the actual applicable review and its limitations.
   Lesson-safety guidance distinguishes manual assessment from an executed content
   scan; an unavailable required control does not become a successful scan.
+- DEFINE records a falsifier, an authorized or proposed check and a decision
+  consequence for pivotal unsupported premises inside the selected design.
+  Existing approval and resolved scope do not trigger another interview.
+- Status, jobs, continuity and usage guidance distinguish selected work from
+  supplementary registries, missing observations and unavailable capabilities.
+  Optional vault export uses explicit repository/source roots, and performance
+  reports retain raw sample counts, estimators, failures and uncertainty.
+- Retained role report templates preserve viable alternatives, capacity ranges,
+  SLI denominators/no-data, stage contracts and source/verification limits.
+  Supplied external material is not evidence of a live research capability.
 
 ### Fixed
 

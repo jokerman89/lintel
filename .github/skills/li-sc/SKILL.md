@@ -62,19 +62,19 @@ transport loss handling and queryability. Policy sources, not templates, set ret
 
 ## Workflow
 
-1. Use [shared module admission](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure):
-   original work/package/leaves, actual `work_context`/`workflow_inspect`, live P07
-   reference and actual required-policy bridge. Unresolved policy stops its action.
-2. Read full selected requirements and threat/data boundaries. Obtain typed verified
-   pack fields or explicit advisory inputs, never grep personal preferences or execute
-   a manifest. No framework is mandatory merely because the module knows it.
-3. Prepare immutable P05 QA obligations and explicit domain checkpoints/receivers/
-   artifact paths with original file states. Select actual review versus planning mode.
-4. Record start; perform authorized synthetic/local observations or design work;
-   persist redacted evidence and result. A reviewer reports and does not fix.
-5. After artifacts exist, externally prepare the final P05 context, fresh domain
-   verify/summary and actual QA, then independent spec and quality. All mandatory
-   unknown/error/failure stays visible. Do not silently accept residual risk.
+Read and execute the [shared module caller procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+before domain work. It is the sole owner of original work/package/leaf admission,
+live P07/policy checks, immutable obligations, checkpoint publication, cold continuation
+and final QA/independent acceptance. Apply this security method inside that procedure:
+
+1. Read the selected requirements and actual threat/data boundaries. Obtain typed
+   verified pack fields or explicit advice; no framework is mandatory merely because
+   the module knows it. Unresolved applicable policy stops its affected action.
+2. Use the capability and checkpoint tables to distinguish design, implementation
+   evidence and legal/control applicability. Keep actual review versus planning mode;
+   only authorized synthetic/local observations are evidence, not suggested scans.
+3. Retain redacted findings, missing observations and the residual-risk owner's
+   decision. A reviewer reports and does not fix or silently accept the risk.
 
 ## Checkpoint ownership
 
@@ -133,4 +133,6 @@ No active control is inferred from these opt-in domain files (ADR-0008):
 - `hooks/shared/sc-compliance-gap-warn/`
 
 Existing secret/customer-data hooks retain their host-specific registration and
-permission boundaries. Never claim a fictional no-production-mutation hook fired.
+permission boundaries. Optional domain warnings remain unobserved without actual
+execution evidence and cannot replace the required review or control outcome.
+Never claim a fictional no-production-mutation hook fired.

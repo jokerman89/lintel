@@ -74,6 +74,16 @@ DataPipelineDesigner: <pipeline goal>
 4. Orchestration: select existing scheduler; separate live and backfill intervals
 5. Serving: publish freshness, correction state and lineage with the aggregate
 
+## Stage contracts
+
+| Stage | Time basis | Watermark | Late-data policy | Replay identity | Sink idempotency | Rejected/conflicting owner | Source / verification |
+|---|---|---|---|---|---|---|---|
+<stage contract rows>
+
+Name each actual stage, its event/ingestion-time boundary and source revision.
+Include a concrete duplicate, out-of-order and late-event validation case; missing
+observations remain unverified rather than inheriting a broker's delivery claim.
+
 ## Compliance
 - PII: hashing user_id is pseudonymization unless anonymization is actually established
 - Retention: purpose/policy-derived per layer; an aggregate is not automatically permanent

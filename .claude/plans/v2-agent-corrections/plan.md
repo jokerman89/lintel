@@ -125,6 +125,13 @@ metadata/notice/ownership checks. A source read alone never completes a leaf.
 
 ## Review and handoff
 
+Independent source SPEC and QUALITY passed after the four recorded corrections,
+with only the small pattern-example concern remaining. Its final deterministic
+clause/fixture delta received direct coordinator SPEC/QUALITY review; the same
+independent reviewer must still cover that delta in final integrated review.
+The unchanged historical reports are not relabelled as a review of later bytes.
+Source progress does not assert generated, hosted, canonical or main clearance.
+
 Independent review is assigned by Master after implementation freezes; no actor
 is spawned by this lane. Capture a per-item correction/already-satisfied-clause
 matrix and exclusions, exact source/test hashes, actual fixture receipts and

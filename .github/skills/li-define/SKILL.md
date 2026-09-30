@@ -89,6 +89,10 @@ The existing `scope.md` fields retain their meanings: `size`, `intent`,
 `chosen_reading`, `depth_schema`, `ambiguous` and `decision_resolved`. An unresolved
 material ambiguity stays unresolved even if the estimator supplied a size.
 Absence of SCOPE means size is unknown; it does not select strategy questions.
+If that same SCOPE still has two materially different readings, carry both and
+their consequences forward and ask only the unresolved reading through the actual
+host channel. Reuse `chosen_reading`, `decision_resolved` and prior answers; do not
+replace a settled reading or infer strategy from a missing scope.
 
 State the intended outcome, the requested operation and known boundaries:
 ownership, compatibility, data sensitivity, production impact, secrets, required
@@ -200,6 +204,27 @@ The design records the following substance, in the existing document's structure
 | Success criteria | Observable acceptance, verification procedure and required evidence. |
 | Adoption and handoff | How users receive the result, exact PLAN inputs and next authorized action. |
 | Review and approval | Actual review-report path, unresolved findings, approval source and scope. |
+
+#### Conditional pivotal premise record
+
+Within the already-selected design, record only unsupported or contested pivotal premises
+whose truth would change the selected decision. Reuse original decision/requirement IDs;
+distinguish an evidenced constraint from an assumption and name the source or gap.
+
+| Premise / decision ID | Constraint or assumption / basis | Evidence / source | Falsifier | Authorized or proposed check | Decision consequence / owner | Observation status |
+|---|---|---|---|---|---|---|
+| `<premise and original decision ID>` | `<constraint or assumption and basis>` | `<evidence or source; unknown if absent>` | `<observable falsifier>` | `<smallest authorized check or proposed-unapproved check>` | `<decision consequence and owner>` | `<observed, unknown or check-not-run status>` |
+
+The falsifier names a concrete contrary result, not another confidence score.
+A proposed check is not permission to run it or evidence that it ran; mark unrun
+checks and unresolved premises unknown. The named owner decides only the affected
+consequence within existing authority.
+
+When premises are accepted and the scope is settled, omit the table and preserve
+the existing evidence/decision references: no additional question or proof exercise.
+Continuing approved T014 does not reopen intake or approval. A compatibility-only
+migration asks only for missing compatibility facts, not strategy or market demand.
+This is part of the original design, not a new file, question ledger or phase.
 
 New exploratory designs are DRAFT. Preserve APPROVED only for unchanged authorized
 scope. A material revision identifies exactly which decisions, tasks and reviews

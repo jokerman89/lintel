@@ -214,8 +214,14 @@ not a neutral exemption. A pack contributes its own gate skills/agents; examples
 
 **Dependency audit** (dispatch the `DependencyAuditor` agent — ships with the plugin fleet):
 - CVE check, license compatibility, supply-chain risk
-- P1: critical CVE or license blocker → BLOCK
-- P2: outdated lib with known issues → fix recommended
+- Keep scanner rank, affected version/path, demonstrated exposure/applicability and
+  the actual policy requirement separate. A scanner rank alone is not a blocking verdict.
+- Use the shared control outcome: an applicable mandatory failure, error or unresolved
+  requirement blocks; grounded non-applicability is distinct from missing evidence.
+  Advisory findings remain visible advice, not implicit permission to waive obligations.
+- DependencyAuditor owns advisory/license triage. SBOMAuditor checks the supplied
+  artifact inventory/provenance; token/OAuth and privacy specialists keep their
+  distinct boundaries. Unknown runtime coverage must not become a clean dependency result.
 
 ### Step 5 — Cross-artifact analyze (adopted from speckit)
 
@@ -288,7 +294,7 @@ unless the operator asked for MARS.
 [gaps / coverage / consistency]
 
 ## Outside voice (if run)
-[Codex output verbatim]
+[Actual independent reviewer output verbatim]
 
 ## MARS (multi-model, if run)
 [synthesis header, adjudicated findings, preserved dissent, inspection record path]
@@ -433,7 +439,12 @@ review, not an exemption from selected-content and acceptance binding.
 
 ## Failure recovery
 
-- **Subagent unavailable (529 overload)**: skip that specific reviewer, note in report. If primary CodeReviewer unavailable: BLOCKED — can't ship without primary review.
+- **Reviewer binding unavailable:** retain the missing observation. Prefer the
+  named qualified role when available; otherwise select another actually available,
+  permitted independent context within the same approved review scope and contract.
+  A permission refusal is not permission to change actor, host or provider.
+  If no eligible independent context can satisfy a mandatory review, remain BLOCKED;
+  self-review or omission of a specialist cannot waive its required controls.
 - **Voice gate persistent fail** (3 iterations <85%): escalate. May indicate voice tier wrong for artifact OR corpus needs recalibration.
 - **Compliance-gate violation found**: NEVER silently proceed. Hard stop. Operator must fix or explicitly override (rare, never recommended).
 - **Cross-artifact analyze finds critical gap**: loop-back to DEFINE (scope problem) or PLAN (decomposition problem), not just BUILD fix.

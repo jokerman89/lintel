@@ -1,6 +1,6 @@
 ---
 name: li-compliance-gate
-description: Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embarrassment protection for compliance (6.10).
+description: Use when evaluating declared controls with mandatory, advisory, unverified and no-applicable outcomes; this is not host enforcement.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/compliance-gate/SKILL.md`; edit the canonical file, then run
@@ -49,8 +49,10 @@ review and delivery. A required profile declaration is external to the potential
 broken manifest; missing/invalid required policy cannot silently become `_default`.
 `PROFILE_REQUIRED` or `PROFILE_DRIFT` remains a nonzero unresolved requirement.
 
-Gates and their mandatory/advisory requirements come from actual policy and scope,
-not a built-in list of favored gate names. Record source, version and applicability.
+Read gate declarations from the active pack (`resolve_pack_field compliance.hooks`;
+none by default). Their mandatory/advisory requirements come from actual policy
+and scope, not a built-in list of favored gate names. A declaration alone is not
+an installed or executed control. Record source, version and applicability.
 If those are unknown, keep the affected mandatory requirement unverified.
 Neutral first use with no requested organization policy and no applicable controls
 is a valid **no-applicable-controls** result, not verified compliance.

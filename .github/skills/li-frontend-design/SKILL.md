@@ -99,7 +99,10 @@ Reject missing, unknown, duplicate or conflicting options before creating output
 Preserve the brief as literal data. `--skip-shader` records a no-shader decision.
 The application stack and output path must reach the renderer unchanged.
 
-Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body preserves contract, agent at invocation produces actual content.
+Voice-tier resolution: default `internal`. If `--customer-share`, resolve the active
+pack's actual voice requirements (`resolve_pack_field voice.gates_active`; none by
+default) and retain any unverified mandatory observation before sharing. A declared
+gate is not evidence that a host mechanism executed.
 
 ### Step 1.5 — Design DNA pass (REQUIRED — ADR-0015/0016)
 
@@ -256,7 +259,9 @@ Next:
 
 ## Voice tier behavior
 
-`voice: mixed`. Default `internal`. `--customer-share` triggers the active pack's compliance-gate + voice-gate (`resolve_pack_field compliance.hooks`; none by default).
+`voice: mixed`. Default `internal`. `--customer-share` selects applicable compliance
+and voice review (`resolve_pack_field voice.gates_active` for voice; none by default),
+not an assertion that a gate executed.
 
 ## Reusable patterns
 
@@ -299,7 +304,7 @@ legacy lookup and map only to defaults; colliding names need a qualified referen
 - `/li-frontend-typography` (sub-skill, parallel)
 - `/li-frontend-motion` (sub-skill, parallel)
 - `/li-generate-web --from-frontend-design <run-dir>` (Phase B)
-- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — if customer-share)
+- the active pack's voice requirements (`resolve_pack_field voice.gates_active`; none by default — if customer-share)
 - `/li-compliance-gate` (existing, if customer-share)
 
 **Boundary with the generate-* family:**
@@ -308,10 +313,25 @@ frontend-design is the design-director layer; generate-web/generate-app own file
 output. Direct brief/mockup rendering can use the director's decision method
 without recursively invoking its render step. No second design schema is created.
 
-**Brand-asset-slots (Phase A1 documents paths; folders lazy-created):**
-- `~/.lintel/brand/design-patterns/` — Phase A2 ships canonical `ultra-modern-lovable-style/`
-- `~/.lintel/brand/motion-libraries/` — operator-tested GSAP/Lenis-combos
-- `~/.lintel/brand/shader-snippets/` — operator-curated GLSL (Phase A2 + frontend-shader)
+**Selected brand assets:** use the already verified profile asset or explicit
+repository/pack pattern references. Personal assets require an explicitly selected
+authorized source; no home-directory discovery, default path or lazy creation.
+The bundled `ultra-modern-lovable-style` seed remains available through its
+declared source location, not an assumed personal copy.
+
+### Customer-share control boundary
+
+Use the existing `/li-compliance-gate` control contract for this exact artifact and
+actual policy source/version/applicability. No generic `--check` switch or named
+font/motion/shader licensing validator is supplied by that skill. Obtain the
+required license/source and applicable voice/policy observations through permitted
+existing methods; a missing required check remains unverified and blocks its
+affected sharing action. No-applicable-controls is not licensing clearance.
+
+Pattern coverage and a valid design fragment do not establish these observations.
+Retain mandatory clauses, notices and the same work/profile identity. A
+`--customer-share` request selects the review boundary; it does not publish, install
+tools, acquire a license or authorize access to unselected personal assets.
 
 ## Anti-patterns
 

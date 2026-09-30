@@ -212,9 +212,9 @@ except (ValueError, OSError, UnicodeError) as error:
 This emits only the validated fragment, including none/CSS choices, not a
 success-shaped receipt. Invalid data emits no stdout or named file; publication
 errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
-reader. For `--customer-share`, apply `/li-compliance-gate --check motion-licensing`
-to the same data or an owned relative staging file before release; stdout does
-not exempt the required check.
+reader. For `--customer-share`, use the [customer-share control boundary](../../../skills/frontend-design/SKILL.md#customer-share-control-boundary)
+on the same data or an owned relative staging file. Missing mandatory licensing
+or policy observations remain unverified; stdout does not exempt them.
 
 ## Reusable patterns
 
@@ -244,7 +244,8 @@ accessibility.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/motion-libraries/` (if vault has saved combos; lazy-created)
+- Explicitly selected and authorized motion assets or verified profile references;
+  no personal-home discovery or lazy-created asset folder
 
 **Writes:**
 - `motion.json` (stdout default, $OUT-path if orchestrator)
@@ -252,7 +253,7 @@ accessibility.
 
 **Calls into:**
 - `agents/frontend/MotionDirector.md` (primary)
-- `/li-compliance-gate --check motion-licensing` (if --customer-share)
+- `/li-compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
 
 **Consumed by:**
 - `/li-frontend-design` Workflow Step 5 (synthesis input)
@@ -276,4 +277,5 @@ accessibility.
 - Solo: review motion.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li-frontend-design` Step 5
 - Customer-share: pair with `/li-compliance-gate` for final license-audit
-- Future: extract proven motion-combos to `~/.lintel/brand/motion-libraries/` (Phase A2 + frontend-style-extract)
+- Future: propose a reviewed pattern at an explicitly selected authorized destination;
+  no automatic personal write or activation follows from a motion decision

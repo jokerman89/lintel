@@ -126,8 +126,14 @@ Manifests: package.json (top-level: 47 deps; transitive: 312)
 - node-sass@9.0.0 (deprecated) — replace with sass
 
 ## Verdict
-1 verified mandatory license-policy conflict (BLOCK), 1 HIGH CVE (fix soon), 2 deprecated.
-Estimated remediation: 4-6 hours.
+<Applicable mandatory conflicts/failures and unresolved requirements; advisory findings separately.>
+
+| Advisory | Scanner rank | Affected package / artifact scope | Exposure / applicability | Evidence state / reference | Requirement / policy source | Disposition / next action |
+|---|---|---|---|---|---|---|
+| <advisory id> | <scanner rank> | <affected package and artifact scope> | <exposure or applicability> | <evidence state and reference> | <requirement and policy source> | <disposition and next action> |
+
+Unknown exposure is not a clean result; a critical scanner label alone is not an
+automatic policy conflict. Remediation timing comes from the scoped owner's plan.
 ```
 
 ## Edge cases / what to do when blocked

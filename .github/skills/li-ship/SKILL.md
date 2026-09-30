@@ -190,6 +190,14 @@ Operator chooses path via flag or auto-detect from artifact_kind.
 
 ### Step 7 — PR creation (default path)
 
+Populate the process fields from the actual Step 1 gate result: the latest applicable
+decision, its exact record/context, and observed QA/coverage limitations. Do not
+infer a pass from entering SHIP, a report heading or an earlier decision. An absent,
+stale, blocked or unreadable review remains explicitly **unverified/blocked** in any
+draft summary; it cannot proceed through this path. Preserve advisory and unrun
+coverage even when readiness passes. Readiness is not publication permission; use
+the adapter's actual authorized publication operation.
+
 ```bash
 # Use gh CLI
 gh pr create --title "<short title>" --body "$(cat <<'EOF'
@@ -206,8 +214,10 @@ gh pr create --title "<short title>" --body "$(cat <<'EOF'
 [Bulleted checklist from plan.md acceptance criteria]
 
 ## Process
-Phases run: DEFINE → PLAN → BUILD → REVIEW → SHIP
-Review: passed
+Phases run: <actually observed phases for this work>
+Review: <actual latest applicable verdict; unverified/blocked when not established>
+Review evidence: <exact record and reviewed context/result identity>
+Review limitations: <actual advisory findings, unrun coverage and remaining gates>
 EOF
 )"
 ```

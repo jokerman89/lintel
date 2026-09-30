@@ -250,6 +250,23 @@ class NativeArtifacts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing canonical link target: skills/plan/SKILL.md"):
             self.render("plan")
 
+    def test_define_links_after_premise_template_remain_rebased(self):
+        _, canonical = adapter.split_frontmatter(
+            (ROOT / "skills/define/SKILL.md").read_text(encoding="utf-8"))
+        self.skill("define", "Defines selected work.", canonical)
+        targets = ("skills/mars/SKILL.md", "skills/review/references/evidence.md",
+                   "skills/pattern/references/consumer-contract.md")
+        for target in (*targets, "skills/spec-kit/references/work-map.md"):
+            self.write(target, "# Synthetic linked source\n")
+        files = {f"{adapter.BUNDLE}/{path.relative_to(self.source).as_posix()}": path.read_bytes()
+                 for path in self.source.rglob("*") if path.is_file()}
+        for local, root in ((True, "../../.."), (False, "../../lintel")):
+            with self.subTest(local=local):
+                body = self.body(self.render("define", local=local, files=files),
+                                 skill_preamble(root, "define"))
+                for target in targets:
+                    self.assertIn(f"]({root}/{target})", body)
+
     def test_directory_links_render_and_verify_only_when_the_directory_exists(self):  # L1
         self.skill("plan", "Plans.", "\n[References](../define/references/)\n")
         rendered = self.render("plan")

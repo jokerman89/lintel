@@ -1,6 +1,6 @@
 ---
 name: li-jobs
-description: Use to see and steer in-flight Lintel jobs — list what's open, continue, replan, abort, or branch a job. The single source of truth for "what's open right now"; reach for it when you've lost track of running work or need to redirect it.
+description: Use when listing or steering repository-local jobs; job lifecycle observations do not replace selected work-map authority or establish all open work.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/jobs/SKILL.md`; edit the canonical file, then run
@@ -29,14 +29,13 @@ You are the `jobs` skill — lifecycle controller for in-flight Lintel curated f
 
 Provides 5 subcommands to operate on `.claude/runtime/jobs/` (the repo-local job store):
 
-- `list` (default) — surface `_active.md` (regenerated from job.yaml on every state change)
+- `list` (default) — read actual selected repository job records without regenerating the derived view
 - `continue <id>` — resume the job at its `current_step` (delegates to `/li-resume` mechanic)
 - `replan <id>` — re-run the whole job or pick which steps to redo (supports build-on, not just start-over)
 - `abort <id>` — move job to `_archive/` with `status: aborted`, apply discard policy, skip keep-promotion
 - `branch <id>` — create a parallel job from the same starting point (new job-id, copies job.yaml + outputs/)
 
-Each operation regenerates `_active.md` so `/li-status` reflects current truth.
-Mutation helpers maintain that derived view; `list` reads actual job records without
+Mutation helpers regenerate their derived `_active.md` job view; `list` reads actual job records without
 regeneration. Missing records are unobserved, not proof that no mapped work is open.
 Jobs auto-spawn/hooks remain dormant unless separately activated and verified.
 Apply [task-relevant intake](../../../skills/define/references/intake.md): no fixed question API
@@ -44,7 +43,7 @@ and no automatic choice when a material decision is unresolved.
 
 ## When to use
 
-- "What's open right now?" → `list` (or invoke `/li-status` for the same)
+- "Which job records are open?" → `list`; `/li-status` also inspects selected mapped/cyclic work
 - "I want to pick up that customer-engagement cycle from Tuesday" → `continue <id>`
 - "Restart this plan but keep the discovery output" → `replan <id>` with partial-redo prompt
 - "Kill this. I started wrong." → `abort <id>`
@@ -213,7 +212,7 @@ YES — solo-invocable. Designed to be called anytime.
 
 ## See also
 
-- `/li-status` (alias for `/li-jobs list`)
+- `/li-status` (read-only selected-work/cycle inspection with supplementary job observations)
 - `/li-resume` (the underlying state-recovery mechanic)
 - `/li-cycle` (the most common workflow_root skill)
 - `/li-plan` (also workflow_root post-v3.8 Feature 2.1)

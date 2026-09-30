@@ -50,14 +50,14 @@ Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted 
 ## When NOT to use
 
 - Mid-task work (this pauses for diagnostics)
-- Single-file check — `/li-doctor --quick` is faster
+- Single-file check — select `/li-doctor --fast` or its actual scoped view
 - Pre-implementation cost estimate — `/li-cycle --dry-run` has inline cost
 
 ## Workflow per mode
 
 ### `--force-compact`
 
-Use P03 `/li-context-budget` for observed/estimated/unknown headroom, and
+Use P03 `/li-context-budget --advice` for resource advice with observed/estimated/unknown headroom, and
 `/li-pause` -> restart -> `/li-resume --from <checkpoint>` for owned checkpoint continuity.
 Retain the same [work map](../../../skills/spec-kit/references/work-map.md) and actual verified
 profile reference/required policy. Context state is not selected by a newer basename.
@@ -124,8 +124,8 @@ Cross-reference with usage records, if any exist (the usage-log writer is manual
   Do not manufacture p95 precision from a few optional records.
 
 If no compatible measured data exists: report an uncalibrated prior or unknown.
-For the actual handoff, `bin/li-work-artifacts.py --view budget` measures the
-selected original map artifacts and explicit P03 warming inputs. There is no cost
+For the actual handoff, `/li-context-budget --handoff --map <selected work.json>`
+uses the existing reader to measure original artifacts and explicit P03 warming inputs. There is no cost
 estimate without actual provider/billing inputs.
 
 ### `--rust-report`
@@ -136,7 +136,9 @@ Read usage records past 30 days, if any exist (writer is manual — without reco
 - Group observed samples separately from **unobserved/coverage unknown**
 - Surface a table for operator review
 
-Pairs naturally with `/li-catalog --trends` (Cohort 2 1.6 output).
+Use `/li-catalog --kind=all` separately for current declared metadata. If requested,
+join that metadata to these recorded samples explicitly; the catalog does not
+provide a trend overlay, and an unmatched name has unknown observation coverage.
 
 ## Pause-points
 
@@ -149,8 +151,8 @@ Pairs naturally with `/li-catalog --trends` (Cohort 2 1.6 output).
 **Reads:**
 - `usage-*.jsonl` in `$(audit_dir usage-skill)` (Cohort 2 1.1 output; operator-global)
 - `.claude/runtime/state/` (snapshot dir)
-- `~/.lintel/draft/` (clean targets)
-- `skills/cycle/SKILL.md` mode_envelopes
+- Explicitly selected owned storage candidates; no default personal-directory scan
+- `skills/context-budget/SKILL.md` advisory workload thresholds
 - Load-bearing path manifest (configurable)
 
 **Writes:**

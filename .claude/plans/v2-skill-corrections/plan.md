@@ -28,7 +28,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-16 - Truthful SHIP review summary
 
-- [ ] V2-16 Replace unconditional review success in `skills/ship/SKILL.md`.
+- [x] V2-16 Replace unconditional review success in `skills/ship/SKILL.md`.
 - Original item: `skills/ship/SKILL.md`, source index 16.
 - Acceptance: actual latest applicable verdict/identity/limits or explicit
   unverified/blocked summary; no readiness or publication bypass.
@@ -37,7 +37,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-54 - Honest lesson content assessment
 
-- [ ] V2-54 Correct automatic-scan claims in `skills/lessons-add/SKILL.md`.
+- [x] V2-54 Correct automatic-scan claims in `skills/lessons-add/SKILL.md`.
 - Original item: `skills/lessons-add/SKILL.md`, source index 54.
 - Acceptance: helper shape/ownership versus payload safety is explicit; model-only
   assessment is unverified; applicable mandatory-control failure still refuses.
@@ -46,7 +46,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-70 - Technical architecture admission and method
 
-- [ ] V2-70 Use shared admission and tighten `skills/ta/SKILL.md`.
+- [x] V2-70 Use shared admission and tighten `skills/ta/SKILL.md`.
 - Original item: `skills/ta/SKILL.md`, source index 70.
 - Acceptance: seven capabilities, five checkpoints, all rubric/authority boundaries
   and invariant-first reference retained; no stale v4/new-agent/tool prescription.
@@ -54,7 +54,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-47 - Data architecture admission
 
-- [ ] V2-47 Use shared admission in `skills/da/SKILL.md`.
+- [x] V2-47 Use shared admission in `skills/da/SKILL.md`.
 - Original item: `skills/da/SKILL.md`, source index 47.
 - Acceptance: schema/migration/retention/analytics depth and receiver modes remain;
   a dormant warning or down script is not recovery evidence.
@@ -62,7 +62,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-65 - Security and compliance admission
 
-- [ ] V2-65 Use shared admission in `skills/sc/SKILL.md`.
+- [x] V2-65 Use shared admission in `skills/sc/SKILL.md`.
 - Original item: `skills/sc/SKILL.md`, source index 65.
 - Acceptance: review versus implementation, real required-policy and independent
   review boundaries remain; no scan, credential or live target operation.
@@ -70,7 +70,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-48 - Hosting and operations admission
 
-- [ ] V2-48 Use shared admission in `skills/dh/SKILL.md`.
+- [x] V2-48 Use shared admission in `skills/dh/SKILL.md`.
 - Original item: `skills/dh/SKILL.md`, source index 48.
 - Acceptance: rollout/recovery/SLO/cost depth and explicit execution authority
   remain; live deployment or hook execution is not inferred.
@@ -78,7 +78,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-71 - Testing and QA admission
 
-- [ ] V2-71 Use shared admission in `skills/tq/SKILL.md`.
+- [x] V2-71 Use shared admission in `skills/tq/SKILL.md`.
 - Original item: `skills/tq/SKILL.md`, source index 71.
 - Acceptance: comparable evidence and consumer methods remain; zero/skipped/failed
   required outcomes block; no perfbench ownership merger.
@@ -86,7 +86,7 @@ new acceptance gates requiring unrequested actors between edits.
 
 ### V2-43 - Engineering taxonomy and selection
 
-- [ ] V2-43 Update `skills/catalog/SKILL.md`, `bin/li-catalog.py` and ordinary
+- [x] V2-43 Update `skills/catalog/SKILL.md`, `bin/li-catalog.py` and ordinary
   `lib/capability-selections.json` data.
 - Original item: `skills/catalog/SKILL.md`, source index 43.
 - Dependency: the shared module routing edits in this package precede discovery.
@@ -130,15 +130,22 @@ zero samples; this is a whole-cycle planning prior, not observed usage or billin
 
 ## Review and handoff
 
+The same independent reviewer passed source SPEC and QUALITY for all eight
+original items after the three narrowly scoped repairs, with no remaining
+findings. The initial passing-with-concerns record and actual red/green evidence
+remain preserved. These checkboxes describe verified source outcomes; central
+generation, joined/hosted QA and final integrated release review remain separate.
+
 Implementation: all eight bounded original-item corrections implemented.
 Scoped checks: the focused wrapper passed 21 tests; catalog-selection passed 29;
 all ten unchanged module routing/shape suites passed. The read-only catalog check
 matches the committed Markdown. New P07 generation 1 and required policy are unchanged.
-Independent specification/quality review: pending Master assignment after freeze.
+At the initial writer freeze, independent specification/quality review was pending
+Master assignment. The subsequent accepted source result is recorded above.
 Plan self-inspection: scope, dependencies and developer-facing guidance fit the
 existing contracts; no new architecture or rendered surface. This is not an
 independent review. P07 and policy verified before BUILD.
-Original leaf checkboxes remain open until that acceptance; local checks alone do
+Original leaf checkboxes stayed open until that acceptance; local checks alone do
 not complete the broader review programme or excluded parts of the original items.
 
 The owned runtime handoff records exact commands, exits, hashes and original-item

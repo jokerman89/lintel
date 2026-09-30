@@ -105,6 +105,10 @@ slis:
   - name: <sli-name>
     critical_journey: <name>
     signal: <metric|trace|log query>
+    eligible_events: <denominator selection and exclusions>
+    good_events: <numerator selection within the eligible population>
+    no_data_behavior: unknown
+    verification: <one good, one bad and one missing-signal interval with expected results>
     measurement_window_minutes: <number>
     data_source:
       stack: <stack-name>

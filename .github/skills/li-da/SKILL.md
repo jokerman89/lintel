@@ -59,17 +59,19 @@ Unknown business questions need clarification; they do not justify inventing a w
 
 ## Workflow
 
-1. Follow the [shared module caller procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure):
-   select the original map/package/leaves, actual `work_context` binding and live
-   P07 pin/policy. Do not grep personal preference files or select the newest report.
-2. Read the schema/version, complete selected leaf text, access patterns and prior
-   attributable evidence. Bind explicit advisory inputs separately from pack policy.
-3. Prepare P05 obligations and the existing domain request before work; list expected
-   artifacts and original output states. Name receiver mode and target authority.
-4. Record start, execute only the authorized method, persist actual outputs/checks,
-   and record result. Analysis/planning does not run production DDL/DML.
-5. Externally prepare final P05 context after artifacts exist; fresh domain verification,
-   QA and independent spec then quality remain required. Reviewers never repair their findings.
+Read and execute the [shared module caller procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+before domain work. It is the sole owner of original work/package/leaf admission,
+live P07/policy checks, immutable obligations, checkpoint publication, cold continuation
+and final QA/independent acceptance. Apply this data method inside that procedure:
+
+1. Read the actual engine/schema version, writers, access patterns and prior
+   attributable evidence. Keep explicit advice separate from required pack policy.
+2. Use the capability and checkpoint tables for constraints, mixed-version migration,
+   locking/recovery, retention and analytics choices. Analysis/planning does not run
+   production DDL/DML; receiver mode and exact-target authority remain explicit.
+3. Explain restart states, last reversible state, consumer transition and measured
+   query/replay evidence. Unknown effects require reconciliation, not an assumed
+   down migration. Reviewers assess the resulting evidence, never repair it.
 
 ## Checkpoint ownership
 
@@ -133,5 +135,7 @@ evidence; recording is not review. These hooks remain opt-in under ADR-0008:
 - `hooks/shared/da-migration-irreversible-warn/`
 - `hooks/shared/da-retention-violation-warn/`
 
+Their execution is unobserved unless separately evidenced. A warning or down-script
+check does not prove data recovery or satisfy a mandatory migration criterion.
 Do not infer that any hook fired from its presence. Retain direct single-capability
 use and supported store expertise; unknown mandatory data evidence cannot be averaged away.

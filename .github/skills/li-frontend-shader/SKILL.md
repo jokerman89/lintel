@@ -165,9 +165,9 @@ except (ValueError, OSError, UnicodeError) as error:
 This emits only the validated fragment, including the no-shader branch, not a
 success-shaped receipt. Invalid data emits no stdout or named file; publication
 errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
-reader. For `--customer-share`, apply `/li-compliance-gate --check shader-licensing`
-to the same data or an owned relative staging file before release; stdout does
-not exempt the required check.
+reader. For `--customer-share`, use the [customer-share control boundary](../../../skills/frontend-design/SKILL.md#customer-share-control-boundary)
+on the same data or an owned relative staging file. Missing mandatory licensing
+or policy observations remain unverified; stdout does not exempt them.
 
 ### Step 5 — Visual-thesis === "none" short-circuit
 
@@ -203,7 +203,8 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/shader-snippets/` (if operator-curated; lazy-created)
+- Explicitly selected and authorized shader assets or verified profile references;
+  no personal-home discovery or lazy-created asset folder
 
 **Writes:**
 - `shader.json` (stdout default, $OUT-path if orchestrator)
@@ -211,7 +212,7 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Calls into:**
 - `agents/frontend/ShaderEngineer.md` (primary)
-- `/li-compliance-gate --check shader-licensing` (if --customer-share)
+- `/li-compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
 
 **Consumed by:**
 - `/li-frontend-design` Workflow Step 5 (synthesis input — `shader` field)
@@ -237,4 +238,5 @@ Pattern text is not evidence of licensing or accessibility.
 - Solo: review shader.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li-frontend-design` Step 5
 - Customer-share: pair with `/li-compliance-gate` for final license-audit
-- Future: extract proven shader-snippets to `~/.lintel/brand/shader-snippets/` (via frontend-style-extract)
+- Future: propose a reviewed pattern at an explicitly selected authorized destination;
+  no automatic personal write or activation follows from a shader decision

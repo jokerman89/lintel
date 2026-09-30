@@ -59,14 +59,23 @@ writing a schema is not evidence that generated consumers compile or execute.
 ## Workflow
 
 1. **Read existing API.** OpenAPI / SDL / route definitions.
-2. **Restate functional requirements** in 1-2 sentences.
+2. **Consumer inventory.** Trace repository call sites, generated SDK/package
+   manifests, schema registries and supplied contract/deployment records. For each
+   actual consumer, record its owner, provider/consumer revisions, compiler and
+   serializer versions, strictness, active version overlap and evidence source.
+   Missing external-consumer evidence remains unknown; no live client discovery
+   follows from this review. Restate requirements against that inventory.
 3. **Design the surface:**
    - REST: resources, paths, methods, status codes, request/response shapes
    - GraphQL: types, queries, mutations, subscriptions, resolvers
    - gRPC: RPC/message definitions, field-number preservation, reserved removed
      numbers/names, unknown enum handling, deadlines, errors and streaming semantics
-4. **Backward compat scan:** identify exact consumer versions and test request/response,
-   serialization and behavioral expectations with ContractTestArchitect.
+4. **Compatibility matrix:** reuse
+   [ContractTestArchitect's method](../../agents/engineering/ContractTestArchitect.md) for each actual
+   provider/consumer pair and request and response direction. Supply the inventory,
+   delta and prior evidence rather than performing a second generic scan. Reuse
+   the method directly; no mandatory additional actor is required. Distinguish
+   predicted breaks, actual compiler/contract observations and unrun checks.
 5. **Versioning recommendation:** in-place addition, header-based version, path-based version, GraphQL deprecation.
 6. **Output:** schema draft plus validator/compiler/consumer checks actually run,
    source versions, unresolved consumers and implementation owner.
@@ -93,6 +102,8 @@ GET /api/v1/cases/:id
 - Existing GET /api/v1/cases retained
 - Propose optional response field `case.classification` in v1
 - Strict generated readers still need an actual compatibility check; not yet verified
+- Consumer matrix: name/version, owner, request/response direction, changed
+  guarantee, expected outcome, actual check/evidence and unresolved coverage
 
 ## Versioning recommendation
 Retain v1 if supported consumers accept the addition. If any break, choose an
@@ -122,9 +133,20 @@ paths:
 - **Operator wants v3 but v1 still serving most traffic:** push back — adding v3 with v1 + v2 already is heavy maintenance burden.
 - **Internal consumers only:** lower versioning ceremony than public APIs; suggest direct in-place changes with internal-consumer migration coordination.
 
-## Voice tier behavior
-
 Method references: [consumer-specific compatibility](../../skills/tq/references/decision-methods.md)
 and [protobuf evolution](https://protobuf.dev/programming-guides/proto3/#updating).
+
+## Static contract examples
+
+For a response enum changing from queued/done to queued/done/paused, retain
+consumer-specific rows; one successful consumer cannot clear another.
+
+| Case | Static outcome | Evidence / next action |
+|---|---|---|
+| strict-enum | BREAKING | generated-v1 rejects unknown enum values by its supplied contract; identify its owner and transition before shipping to that client. |
+| tolerant-unrun | UNVERIFIED | An unknown-value branch exists but the selected compiler/runtime pair has no supplied compatibility result. |
+| tolerant-observed | COMPATIBLE | The supplied contract result accepts paused through the fallback for this exact provider/tolerant-v2 pair; no wider client claim. |
+
+## Voice tier behavior
 
 `voice: internal`. API design is engineering-internal.

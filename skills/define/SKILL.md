@@ -200,7 +200,7 @@ distinguish an evidenced constraint from an assumption and name the source or ga
 
 | Premise / decision ID | Constraint or assumption / basis | Evidence / source | Falsifier | Authorized or proposed check | Decision consequence / owner | Observation status |
 |---|---|---|---|---|---|---|
-| <premise and original decision ID> | <constraint or assumption and basis> | <evidence or source; unknown if absent> | <observable falsifier> | <smallest authorized check or proposed-unapproved check> | <decision consequence and owner> | <observed, unknown or check-not-run status> |
+| `<premise and original decision ID>` | `<constraint or assumption and basis>` | `<evidence or source; unknown if absent>` | `<observable falsifier>` | `<smallest authorized check or proposed-unapproved check>` | `<decision consequence and owner>` | `<observed, unknown or check-not-run status>` |
 
 The falsifier names a concrete contrary result, not another confidence score.
 A proposed check is not permission to run it or evidence that it ran; mark unrun

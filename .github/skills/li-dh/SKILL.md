@@ -51,19 +51,20 @@ from reviewer assessment.
 
 ## Workflow
 
-1. Execute [shared admission and live-policy verification](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
-   against the original map/package/leaves. Reuse accepted `work_context`,
-   `workflow_inspect`/`workflow_resume`; never take a newer unrelated SLO report.
-2. Read TA architecture/scaling, DA migration and SC threat/audit evidence relevant
-   to this request. Required missing upstream evidence blocks dependent work. Inspect
-   the actual environment/version; use explicit advice and typed verified pack values.
-3. Prepare P05 obligations and expected domain checkpoints before observations.
-   Assign receiver mode/scope and exact original publication state. No personal-file parser.
-4. Record start, perform the scoped method, persist results and actual checks.
-   Suggested commands are not executed operations; local `act` or a deploy dry-run
-   may still have effects and requires command inspection/target authority.
-5. Externally prepare final P05 context, fresh domain verification, real QA and
-   independent spec then quality. Reviews report findings; the implementer repairs.
+Read and execute the [shared module caller procedure](../../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+before domain work. It is the sole owner of original work/package/leaf admission,
+live P07/policy checks, immutable obligations, checkpoint publication, cold continuation
+and final QA/independent acceptance. Apply this operations method inside that procedure:
+
+1. Read the relevant TA architecture/scaling, DA migration and SC threat/audit
+   evidence, not a newer unrelated SLO report. Required missing upstream evidence
+   blocks dependent work. Inspect the actual environment/version and policy inputs.
+2. Use the capability and checkpoint tables for rollout/state compatibility,
+   observability, SLOs, capacity/cost and recovery ownership. State assumptions and
+   unknowns; explicit advice is not a measured service objective.
+3. Inspect commands and exact-target authority before any authorized observation:
+   local `act` or a deploy dry-run may still have effects. Reviews report findings;
+   implementers repair. A suggested command is not an executed operation.
 
 ## Checkpoint ownership
 
@@ -122,4 +123,6 @@ fabricated enforcement claim. Preserve these dormant ADR-0008 hook resources:
 - `hooks/shared/dh-observability-gap-warn/`
 - `hooks/shared/dh-cost-budget-warn/`
 
+These optional warnings are unobserved without actual registration/execution
+evidence and do not establish recovery, observability or cost compliance.
 This module does not enable them, publish anything or complete the enclosing phase.

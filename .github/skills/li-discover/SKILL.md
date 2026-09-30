@@ -309,7 +309,8 @@ Skip-conditions: intent=hotfix, intent=ship-existing-branch, known territory ope
 - **Ignoring ADRs that contradict the proposed approach** — flag, don't bury
 - **Full dependency audit** — that's DependencyAuditor's job in PLAN/REVIEW, here just flag
 - **Loading found files into context automatically** — only surface paths + token estimates, let operator warm
-- **Recommending too many agents** — pick top 3-5 per category, not all 78
+- **Recommending too many agents** — select only task-relevant roles from current
+  metadata and actual permitted bindings; do not infer availability from a fixed roster count
 - **Skipping skill-overlap check** — duplication is bloat-risk
 
 ## Failure recovery

@@ -29,73 +29,73 @@ narrow allowances in spec.md; no reducer or reserved header-test changes.
 ## Original-ID tasks
 
 ### lane-A-06.vault
-- [ ] Verify and correct only optional-vault fresh-shell roots/writer dependency.
+- [x] Verify and correct only optional-vault fresh-shell roots/writer dependency.
 Dependencies: none
 Acceptance: spec.md vault row. Verify actual recipe with enabled relative, disabled
 and missing-path synthetic cases; preserve files outside the selected sink.
 
 ### lane-B-02.status
-- [ ] Align metadata and job documentation with the actual read/mutation scopes.
+- [x] Align metadata and job documentation with the actual read/mutation scopes.
 Dependencies: none
 Acceptance: spec.md status row. Verify mapped-only work, no job registry and emitted
 descriptions without creating or reconciling state.
 
 ### lane-B-09.continuity
-- [ ] Resolve watcher/age/ledger contradictions while retaining data formats.
+- [x] Resolve watcher/age/ledger contradictions while retaining data formats.
 Dependencies: none
 Acceptance: spec.md continuity row (also lane-B-08). Verify actual recovery
 selection/refusal cases and bounded source contracts.
 
 ### lane-E-07.roles
-- [ ] Correct previews, stale totals and named-role versus independence fallback.
+- [x] Correct previews, stale totals and named-role versus independence fallback.
 Dependencies: none
 Acceptance: spec.md role row (also lane-A-06). Exercise empty/available binding and
 missing independent-evidence cases; no actor launch.
 
 ### C-10.compliance
-- [ ] Make discovery describe the current per-control model.
+- [x] Make discovery describe the current per-control model.
 Dependencies: none
 Acceptance: spec.md compliance row. Verify rendered metadata and existing
 mandatory/advisory/unknown outcome cases.
 
 ### C-10.perfbench
-- [ ] Keep empirical values distinct from population guarantees in output.
+- [x] Keep empirical values distinct from population guarantees in output.
 Dependencies: none
 Acceptance: spec.md performance row. Instantiate a five-sample report retaining
 failures and uncertainty without inventing a statistical floor.
 
 ### lane-B-10.observation
-- [ ] Repair only stale cross-routes and retain manual observation semantics.
+- [x] Repair only stale cross-routes and retain manual observation semantics.
 Dependencies: none
 Acceptance: spec.md observation row (also C-04). Exercise existing reader fixtures;
 do not equate missing records or CLI flags with nonexistent manual capability.
 
 ### lane-d-04.frontend
-- [ ] Align declared controls and owned-path language in retained frontend methods.
+- [x] Align declared controls and owned-path language in retained frontend methods.
 Dependencies: none
 Acceptance: spec.md frontend row (also lane-d-05). Exercise existing pattern/workflow
 fixtures and unavailable-control cases; no publication or provider activation.
 
 ### lane-E-08.reports
-- [ ] Make actual report templates express the methods' existing invariants.
+- [x] Make actual report templates express the methods' existing invariants.
 Dependencies: none
 Acceptance: spec.md report row (also lane-E-11). Render discriminating role-output
 fixtures, not only a keyword-presence list.
 
 ### lane-E-09.research
-- [ ] Replace the unowned external flag with the actual caller capability boundary.
+- [x] Replace the unowned external flag with the actual caller capability boundary.
 Dependencies: none
 Acceptance: spec.md research row. Verify unsupported and supplied-source handoffs
 without expanding the role's tools.
 
 ### F-03.dependencies
-- [ ] Preserve applicability, evidence and mandatory policy in dependency handoffs.
+- [x] Preserve applicability, evidence and mandatory policy in dependency handoffs.
 Dependencies: lane-E-07.roles
 Acceptance: spec.md dependency row. Exercise existing method/control fixtures;
 preserve reserved header classes and distinct specialist roles.
 
 ### item-006.define-premises
-- [ ] Persist the released conditional premise/falsifier/check/consequence row inside the selected design.
+- [x] Persist the released conditional premise/falsifier/check/consequence row inside the selected design.
 Dependencies: none
 Original item: `all-items.json` index 6, `skills/define/SKILL.md`.
 Execution order: started only after F1/F2 corrections and their affected checks passed.
@@ -105,9 +105,26 @@ compatibility-only migration checks. Shared intake and SCOPE are unchanged.
 
 ## Verification and review
 
+The same independent reviewer passed all twelve source requirements and QUALITY
+after the recorded repairs. Source progress is complete; generated, hosted and
+final integrated release gates remain separate. The writer's original runtime
+batches below are historical, not claims about the recovered target. After a
+host context-capacity error, the coordinator preserved identical source bytes,
+verified a new target-local profile and ran thirteen scoped commands with 56
+unittest methods, zero failure/skip and unchanged source/index. Recovery
+provenance and that actual receipt are retained in coordinator runtime at
+`remaining-closeout/routine-capacity-recovery.json` and
+`remaining-closeout/recovery-evidence/routine-final-checks.json`.
+
+The source reviewer retained three nonblocking limits: the isolated two-reading
+paragraph lacks a dedicated mutation check; the original runtime references need
+this recovery distinction; and five vault-refusal branches are untested. A
+missing selected repository root visibly skips even an absolute optional sink.
+No live-model interview behavior or unrun refusal branch is claimed as verified.
+
 Use the smallest affected selectors, combining shared suites once. Record actual
 RED/GREEN commands, exits and log hashes in own runtime evidence. All original
-checkboxes remain open until the separately assigned reviewer completes acceptance.
+checkboxes stayed open until the separately assigned reviewer completed source acceptance.
 Generated reducers/version/joined CI belong to Master. A blocked leaf does not
 stop independent ready packages.
 
@@ -116,8 +133,9 @@ dependent work; no borrowed reference or global activation.
 
 Implementation: the original eleven scopes and the separately released original
 DEFINE item are implemented. The first independent SPEC review was blocked by
-F1/F2; QUALITY was not performed. Repairs await that same SPEC recheck and first
-QUALITY stage. Original checkboxes remain open, not inferred from test exit codes.
+F1/F2; QUALITY was not performed at that point. The same reviewer subsequently
+accepted the repaired source and completed QUALITY, as recorded above. Original
+checkboxes were not inferred from test exit codes alone.
 
 ## Implementer evidence
 
