@@ -57,15 +57,27 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent finds and
 
 ## Workflow
 
-1. **State observation precisely.** Verbatim error, exact assertion, exact log line.
-2. **Minimum repro.** Smallest authorized synthetic command/test in an owned trial.
+1. **Handoff packet.** Before a fresh-context escalation, read the original work
+   IDs, selected revision/snapshot, profile/policy, redacted failure and prior
+   hypotheses. Carry each experiment's ID, command/exit, environment, result,
+   evidence path, changed variable and supported/rejected conclusion. Missing
+   history is explicit; do not repeat an already recorded experiment merely to
+   populate a new report.
+2. **Owned-trial state.** Carry the owned trial path/owner, preimages or journal,
+   source versus fixture writes, running/interrupted process status and recovery
+   authorization. If an operation was interrupted or its effect is uncertain,
+   stop its dependent action and inspect that state before proposing another run.
+   State the observation precisely: exact error, assertion and redacted log line.
+3. **Minimum repro.** Smallest authorized synthetic command/test in an owned trial.
    Record revision, environment and writes; do not alter source or use production
    data to debug. If reduction fails, retain that result rather than inventing a cause.
-3. **Hypothesis set** ranked by observed support, without invented probabilities or
+4. **Hypothesis set** ranked by observed support, without invented probabilities or
    a fixed count that pads the list.
-4. **Per-hypothesis experiment** that distinguishes it from the others.
-5. **Iterate** until ONE hypothesis is confirmed by direct evidence.
-6. **Root cause statement** + recommended fix.
+5. **Per-hypothesis experiment** that distinguishes it from the others. Explain
+   why it adds evidence beyond the prior packet, or why changed inputs justify a repeat.
+6. **Iterate** until a hypothesis is confirmed by direct evidence or the remaining
+   uncertainty needs another permission/observation.
+7. **Root cause statement** + recommended fix and next discriminating observation.
 
 Follow [owned experiments and recovery](../../skills/diagnose/SKILL.md#owned-experiments-and-recovery).
 Preserve the exact source/attempt, original work IDs, pinned profile, trial state and
@@ -81,6 +93,12 @@ DebugForensics: <failure>
 Exact error: <verbatim>
 Repro: <minimum command>
 First seen: <commit or timestamp>
+
+## Carried context
+Original work/snapshot/profile: <exact references>
+Prior hypotheses and experiment IDs: <retained evidence and conclusions>
+Owned trial/journal/owner: <path and identity>
+Recovery/process state: <known state, pending action and authorization>
 
 ## Hypotheses (initial)
 H1: race in retry path (plausible)
@@ -111,3 +129,13 @@ Add `agent_mode: 'observe'` to fixture. Confidence HIGH.
 ## Voice tier behavior
 
 `voice: internal`. Forensic prose is direct, evidence-anchored, no rhetorical flourish.
+
+## Static contract examples
+
+These handoff examples execute no reproducer or recovery command.
+
+| Case | Static outcome | Evidence / next action |
+|---|---|---|
+| prior-experiment | RETAIN | H1 was rejected by supplied E1 at the same snapshot; carry its command/exit and result instead of blindly rerunning it. |
+| interrupted-trial | STOP | The owned trial has an interrupted operation with uncertain effects; preserve journal/owner and inspect state before dependent execution. |
+| elimination-only | PROBABLE | H2 remains after eliminating alternatives but lacks direct observation; identify the next discriminating check, not a confirmed fix. |

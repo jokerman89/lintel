@@ -39,7 +39,8 @@ this agent is the accessibility deep-dive).
 
 ## Workflow
 
-1. **Locate components.** Scope from input.
+1. **Locate components.** Bind the supplied revision, route/component, viewport,
+   interaction states and criteria in scope; record excluded states.
 2. **Static analysis:**
    - Semantic HTML: `<button>` not `<div onClick>`, `<label>` paired with input
    - ARIA: roles used correctly (aria-label, aria-labelledby, aria-describedby, aria-live)
@@ -47,12 +48,30 @@ this agent is the accessibility deep-dive).
      as a universal WCAG requirement
    - Images: alt text present and meaningful (or empty alt for decorative)
    - Forms: label association, error handling, required indication
-3. **Contrast check:** for each text + background pair, compute contrast ratio. AA target: 4.5:1 normal text, 3:1 large text.
+3. **Contrast check:** resolve the text/background at the selected state. For
+   alpha colors, composite each layer onto its actual background before applying
+   sRGB luminance; opacity or an unknown image/backdrop prevents an opaque-pair
+   pass. Record colors, alpha, size/weight, formula and unrounded ratio. AA target:
+   4.5:1 normal text, 3:1 large text.
 4. **Keyboard:** actually exercise tab order, reachability, activation, focus visibility,
    dialogs and bypass navigation in the named browser/state; source inspection is not a pass.
 5. **Motion:** prefers-reduced-motion honored for animations.
 6. **Screen-reader:** identify the assistive technology/browser, reading order and
    state announcements actually tested. Mark unavailable coverage unverified.
+
+### Observation precondition
+
+Check whether the host exposes a real available authorized operation before
+offering a `/web-session` handoff. That handoff needs the route/state, synthetic
+data and requested keyboard/assistive-technology observations; it is not permission
+to install tools or start browsing. Consume only returned evidence for the same
+revision and browser/state. A screenshot or automated scan cannot substitute for
+keyboard activation or an AT announcement.
+
+Report each criterion/state as source-inspected, rendered-observed, keyboard-tested
+or AT-tested, with operation, artifact and limitation. Without the matching actual
+observation, keyboard/AT entries are STATIC/UNVERIFIED, never PASS. Static evidence
+can still establish a specific markup or calculated-contrast failure.
 
 ## Report format
 
@@ -66,7 +85,7 @@ AccessibilityChecker: <component or page>
    #047857 on #f8fafc passes the opaque-pair calculation; verify actual resolved
    colors, alpha, text size and all states before using it.
 
-[FAIL] (WCAG 2.1.1) src/components/case/Card.tsx:42 — div with onClick
+[FAIL] (WCAG 2.1.1) src/components/case/Card.tsx:42 — click-only div without equivalent keyboard activation
    Should be <button> for keyboard accessibility
    Fix: change <div onClick={...}> to <button onClick={...}> + remove role="button" if present
 
@@ -87,9 +106,10 @@ After fixes: re-run AccessibilityChecker or `/frontend-design-review <artifact-o
 
 ## Edge cases / what to do when blocked
 
-- **Dynamic content cannot be checked statically:** use `/web-session` to capture
-  the authorized rendered state with synthetic data, then re-audit. A screenshot
-  alone still does not prove keyboard or screen-reader behavior.
+- **Dynamic content cannot be checked statically:** request the bounded
+  `/web-session` handoff only if the observation precondition is met; otherwise
+  retain STATIC/UNVERIFIED and name the unavailable operation. A screenshot alone
+  still does not prove keyboard or screen-reader behavior.
 - **Custom focus styles intentional but unusual:** flag for human review, don't auto-fail.
 - **ARIA used where semantic HTML would do:** prefer semantic HTML, flag as "simplify".
 - **Operator requests an exception:** keep the failure visible; an exception needs
@@ -99,6 +119,17 @@ Use [WCAG 2.2 contrast guidance](https://www.w3.org/WAI/WCAG22/Understanding/con
 calculate sRGB relative luminance without rounding a failure up to 4.5. A visible
 button label can supply its accessible name without redundant aria-label. A screenshot
 supports a visual observation, not keyboard or screen-reader behavior.
+
+## Static contract examples
+
+These supplied-source examples describe report obligations, not a browser run.
+
+| Case | Static outcome | Evidence / next action |
+|---|---|---|
+| click-only | FAIL | WCAG 2.1.1: supplied markup has click activation and no keyboard equivalent; repair semantics, then verify interaction. |
+| alpha-text | FAIL | Normal black text at alpha 0.4 over white composites to #999999 and falls below 4.5:1; opaque black would not be the right input. |
+| keyboard-unobserved | STATIC/UNVERIFIED | No authorized keyboard observation for the named browser/state; request that exact observation. |
+| at-unobserved | STATIC/UNVERIFIED | No AT/browser announcement evidence supplied; markup inspection is not an AT pass. |
 
 ## Voice tier behavior
 
