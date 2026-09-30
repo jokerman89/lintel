@@ -25,6 +25,12 @@ support = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(support)
 
 FAMILIES = {
+    "engineering-modules": {
+        "requires": ["core"],
+        "skills": "ta da sc dh tq full-engineering-pass",
+        "agents": "",
+        "example_path": "skills/catalog/SKILL.md",
+    },
     "design-knowledge": {
         "requires": ["core"],
         "skills": "design-dna frontend-design",
@@ -629,7 +635,10 @@ class CatalogSelection(unittest.TestCase):
         for name in FAMILIES:
             with self.subTest(selection=name):
                 example = records[name]["example"]
-                self.assertEqual(example["path"], "skills/catalog/references/selections.md")
+                self.assertEqual(
+                    example["path"],
+                    FAMILIES[name].get("example_path", "skills/catalog/references/selections.md"),
+                )
                 text = (ROOT / example["path"]).read_text(encoding="utf-8")
                 self.assertIn(example["heading"], text.splitlines())
                 section = text.split(example["heading"] + "\n", 1)[1].split("\n## ", 1)[0]

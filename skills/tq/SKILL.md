@@ -69,21 +69,19 @@ first; do not install a guessed tool, use production services or claim unrun che
 
 ## Workflow
 
-1. Follow [shared module admission](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure):
-   original work/package/leaves and public `work_context`, live profile/policy,
-   explicit invocation advice and source identity. Use `workflow_resume` for the
-   actual saved cycle rather than starting another test phase.
-2. Read relevant TA contracts/NFRs, DA query/migration invariants, SC threats and DH
+Read and execute the [shared module caller procedure](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+before domain work. It is the sole owner of original work/package/leaf admission,
+live P07/policy checks, immutable obligations, checkpoint publication, cold continuation
+and final QA/independent acceptance. Apply this testing method inside that procedure:
+
+1. Read relevant TA contracts/NFRs, DA query/migration invariants, SC threats and DH
    SLO/recovery criteria. Reuse only evidence for unchanged relevant inputs.
-3. Fix required QA controls before observations and build the accepted domain request.
-   Record starts and original output preimages. TestRunner is an independent
-   run/classify/report receiver when actually separate; it never edits failures.
-4. Execute inspected, authorized checks; retain stdout/stderr, counts, skips, exits,
-   source/env and limitations. ContractTestArchitect designs; real consumer/provider
+2. Use the capability and checkpoint tables to choose requirement assertions, actual
+   consumer/provider cases and comparable measurements. TestRunner runs/classifies/
+   reports without fixing; it is independent only when actually separate.
+3. Execute inspected, authorized checks and retain stdout/stderr, counts, skips,
+   exits, source/environment and limitations. ContractTestArchitect designs; real
    runners verify. A toy example or grep is not live compatibility evidence.
-5. Persist results, externally prepare final P05 context and consume actual QA/fresh
-   domain verification. Independent spec then quality assess the selected result;
-   no self-labelled actor or fabricated corroboration.
 
 ## Checkpoint ownership
 
@@ -140,4 +138,6 @@ Optional audit/Brief Forge use remains explicit. Preserve opt-in ADR-0008 hooks:
 - `hooks/shared/tq-perf-regression-warn/`
 - `hooks/shared/tq-contract-break-warn/`
 
-The hook file is not proof of registration, enforcement or a successful test run.
+These optional warnings are unobserved without actual execution evidence. The hook
+file is not proof of registration, enforcement or a successful test run, and cannot
+replace an applicable required check.

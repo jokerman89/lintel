@@ -13,7 +13,8 @@ cli_support: [claude-code, codex, copilot]
 `skills/CATALOG.md` is a generated view of canonical `skills/*/SKILL.md` frontmatter.
 Use the existing generator's compact metadata for discovery before reading selected canonical
 skill or role bodies. Source declarations are not native discovery, permission or verified
-host execution. Copilot's native entrypoints remain the smaller, separately verified `li-*` set.
+host execution. Native entrypoints are adapter-specific; use actual client discovery,
+not a source inventory, to establish which `li-*` entries are available.
 
 ## Discover without regeneration
 
@@ -29,6 +30,7 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=agent --query="
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=skill-router
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=skill --category=engineering
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
 ```
 
@@ -42,6 +44,13 @@ declarations by category. The category API retains `qa` as a display grouping, n
 command name. Show counts from the result, voice and declared support, and add full
 descriptions when the operator asks for detail. Registry aliases select one client
 surface, not a vendor's entire product family.
+
+The `engineering` category includes the six existing skills `ta`, `da`, `sc`, `dh`,
+`tq` and `full-engineering-pass`, separately from operational utilities. Select a
+named module for its full/loop/single-capability method, or the composition only
+when all five domains were requested. `--query` remains a literal substring filter,
+not ranked search; for example `--category=engineering --query=migration` narrows
+metadata without claiming a relevance ranking.
 
 This is not an inventory of active tools or registered hooks. A canonical agent file
 needs a real permitted host delegation binding or an explicitly labelled manual
@@ -81,6 +90,22 @@ are errors, not a reason to regenerate, prune files, activate wrappers or invent
 inventory. Preserve source-stage warnings, aliases and `maturity: unknown`. A selected
 role still needs an actual permitted host binding or explicit serial/manual handoff.
 
+`engineering-modules` selects exactly those six existing skills and requires the
+unchanged `core` selection. Its resource pointers include the shared domain
+admission contract and each module's decision methods. It does not add engineering
+to every other family, execute every module, choose phases, change the full pass,
+or promote unknown maturity/client observations. Read only the requested method.
+The effective resource closure combines inherited `core` references (including the
+P05 evidence and P07 profile documentation) with the engineering selection's
+declared admission helpers and schemas. Each returned resource's `reasons` identifies
+its owner; name/category filters do not remove those dependencies. This does not
+transfer live profile inputs or establish installed/runtime acceptance.
+
+```bash
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json \
+  --selection=engineering-modules --kind=skill --name=da
+```
+
 ### Selected capability
 
 Run one literal selection query after choosing an ID. `python_cmd` may name the
@@ -115,6 +140,26 @@ are errors; never replace a usable catalog with an empty or guessed result.
 
 A trends overlay requires separately available, authorized usage data. Do not inspect
 personal telemetry or add a transient sort order to the committed catalog.
+
+## Engineering module example
+
+**Inputs.** An approved request for a migration plan, its original work/acceptance
+and the existing store/consumer facts. No live database access is implied.
+
+**Method and output.** Query `--selection=engineering-modules --kind=skill --name=da`
+with the existing catalog helper. It returns DA metadata and the retained
+core/shared-method resource closure. Read DA's migration capability and required
+shared admission before doing the authorized planning work; a source query creates
+no plan, profile, actor or migration.
+
+**Negative.** An unknown selection is an error, not an empty success. During later
+module admission, missing original work or required policy blocks dependent work;
+neither selecting DA nor excluding displayed entries can erase those requirements.
+Selecting one capability does not silently request `full-engineering-pass`.
+
+**Evidence limit.** Metadata is source discovery, not a ranked recommendation,
+executed module, tested recovery or independent acceptance. Maturity remains unknown;
+the full pass retains all five required domains when it is explicitly selected.
 
 ## Source and output boundaries
 

@@ -157,6 +157,8 @@ def identifier(value: object, path: Path) -> str:
 
 
 def skill_category(name: str) -> str:
+    if name in ("ta", "da", "sc", "dh", "tq", "full-engineering-pass"):
+        return "engineering"
     if name.startswith("plan") or name in ("define", "inspect"):
         return "plan"
     if name.startswith("qa") or name in ("verify", "diagnose", "cross-check", "review", "code-review"):
