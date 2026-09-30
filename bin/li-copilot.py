@@ -198,6 +198,7 @@ MARS_RESOURCES = (
     "lib/mars-defaults.json",
     "lib/mars-schema.json",
     "lib/review_method.py",
+    "lib/review_headers.py",
     "lib/review-method-schema.json",
     "lib/review-questions.json",
 )

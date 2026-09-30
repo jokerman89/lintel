@@ -3,15 +3,24 @@
 # implements: ADR-0036
 # intent: skills/review/references/method.md
 # constraints: hermetic temp dirs; no sessions, models or network
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-30
 """Behavior tests for the shared Review Method: catalog, selection, packet, coverage, calibration."""
+import ast
+from copy import deepcopy
+import errno
+import importlib.util
+import inspect
 import json
+import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.dont_write_bytecode = True
@@ -335,7 +344,7 @@ class IndependenceTests(unittest.TestCase):
         """RM7b: REVIEW's packet path needs only the method files."""
         with tempfile.TemporaryDirectory() as tmp:
             tree = Path(tmp)
-            for relative in ("lib/review_method.py", "lib/review_context.py", "lib/review-questions.json", "lib/review-method-schema.json",
+            for relative in ("lib/review_method.py", "lib/review_headers.py", "lib/review_context.py", "lib/review-questions.json", "lib/review-method-schema.json",
                              "skills/review/references/method.md", "bin/li-review-packet.py"):
                 (tree / relative).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / relative, tree / relative)
@@ -376,6 +385,489 @@ class CalibrationTests(unittest.TestCase):
             cli = run(PACKET, "--repo", tmp, "outcome", "--sq", "SQ-U01", "--outcome", "accepted", "--ref", "p1")
             self.assertEqual(cli.returncode, 0, cli.stderr)
             self.assertTrue((Path(tmp) / rm.OUTCOME_LOG).is_file())
+
+
+# Frozen pre-extraction functions from a017e548; retained in tests, not a second runtime owner.
+_REVIEW_HEADERS_BEFORE = r'''
+def _header_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (list, tuple)):
+        return ", ".join(str(item) for item in value) or "none"
+    text = "none" if value is None else str(value)
+    require("\n" not in text and "\r" not in text and "```" not in text, "header values must be single-line")
+    return text
+
+def parse_header(text: str, prefix: str, kind: str) -> Dict[str, str]:
+    """Parse the fenced <prefix>-<kind> block that must open the message."""
+    body = text.lstrip("\ufeff").lstrip()
+    opener = f"```{prefix}-{kind}"
+    require(body.startswith(opener + "\n") or body.startswith(opener + "\r\n"),
+            f"message must begin with a ```{prefix}-{kind} header block")
+    end = body.find("\n```", len(opener))
+    require(end != -1, f"unterminated {prefix}-{kind} header block")
+    fields: Dict[str, str] = {}
+    for raw in body[len(opener):end].splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        key, sep, value = line.partition(":")
+        key = key.strip()
+        require(sep == ":" and HEADER_KEY.match(key) is not None, f"malformed header line: {line!r}")
+        require(key not in fields, f"duplicate header key: {key}")
+        fields[key] = value.strip()
+    return fields
+
+def validate_header(kind: str, fields: Dict[str, str], schema: Dict[str, Any]) -> Dict[str, str]:
+    spec = schema["headers"].get(kind)
+    require(spec is not None, f"unknown header kind: {kind}")
+    missing = [key for key in spec["required"] if not fields.get(key)]
+    require(not missing, f"review-{kind} header missing: {', '.join(missing)}")
+    unknown = set(fields) - set(spec["required"]) - set(spec["optional"])
+    require(not unknown, f"review-{kind} header has unknown keys: {', '.join(sorted(unknown))}")
+    require(fields["review"] == kind and fields["version"] == "1", f"not a review-{kind} v1 header")
+    for key, allowed in spec.get("enums", {}).items():
+        if key in fields:
+            require(fields[key] in allowed, f"{key} must be one of {allowed}")
+    for key in spec.get("integers", []):
+        require(re.fullmatch(r"\d+", fields.get(key, "")) is not None, f"{key} must be a non-negative integer")
+    return fields
+
+def render_header(kind: str, fields: Dict[str, Any], schema: Dict[str, Any]) -> str:
+    spec = schema["headers"][kind]
+    rendered = {key: _header_value(value) for key, value in fields.items()}
+    validate_header(kind, rendered, schema)
+    order = spec["required"] + [key for key in spec["optional"] if key in rendered]
+    return f"```review-{kind}\n" + "\n".join(f"{key}: {rendered[key]}" for key in order) + "\n```\n"
+'''
+
+_MARS_HEADERS_BEFORE = r'''
+def _header_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (list, tuple)):
+        return ", ".join(str(item) for item in value)
+    text = "none" if value is None else str(value)
+    require("\n" not in text and "\r" not in text and "```" not in text,
+            "header values must be single-line and fence-free")
+    return text
+
+def render_header(kind: str, fields: Dict[str, Any], schema: Dict[str, Any]) -> str:
+    """Render a validated header as a fenced ```mars-<kind> block in schema field order."""
+    spec = schema["headers"][kind]
+    validate_header(kind, {k: _header_value(v) for k, v in fields.items()}, schema)
+    order = spec["required"] + [k for k in spec["optional"] if k in fields]
+    lines = [f"{key}: {_header_value(fields[key])}" for key in order]
+    return "```mars-" + kind + "\n" + "\n".join(lines) + "\n```\n"
+
+def parse_header(text: str, kind: str) -> Dict[str, str]:
+    """Parse the FIRST fenced mars-<kind> block. It must open the message."""
+    body = text.lstrip("\ufeff").lstrip()
+    opener = "```mars-" + kind
+    require(body.startswith(opener + "\n") or body.startswith(opener + "\r\n"),
+            f"message must begin with a ```mars-{kind} header block")
+    end = body.find("\n```", len(opener))
+    require(end != -1, f"unterminated mars-{kind} header block")
+    fields: Dict[str, str] = {}
+    for raw in body[len(opener):end].splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        key, sep, value = line.partition(":")
+        key = key.strip()
+        require(sep == ":" and HEADER_KEY.match(key) is not None, f"malformed header line: {line!r}")
+        require(key not in fields, f"duplicate header key: {key}")
+        fields[key] = value.strip()
+    return fields
+
+def validate_header(kind: str, fields: Dict[str, str], schema: Dict[str, Any]) -> Dict[str, str]:
+    spec = schema["headers"].get(kind)
+    require(spec is not None, f"unknown header kind: {kind}")
+    missing = [key for key in spec["required"] if not fields.get(key)]
+    require(not missing, f"mars-{kind} header missing: {', '.join(missing)}")
+    unknown = set(fields) - set(spec["required"]) - set(spec["optional"])
+    require(not unknown, f"mars-{kind} header has unknown keys: {', '.join(sorted(unknown))}")
+    require(fields["mars"] == kind and fields["version"] == "1", f"not a mars-{kind} v1 header")
+    for key, allowed in spec.get("enums", {}).items():
+        if key in fields:
+            require(fields[key] in allowed, f"{key} must be one of {allowed}")
+    for key in spec.get("integers", []):
+        require(re.fullmatch(r"\d+", fields.get(key, "")) is not None, f"{key} must be a non-negative integer")
+    return fields
+'''
+
+
+class HeaderCoreTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import mars_contract
+        cls.families = {"review": rm, "mars": mars_contract}
+        cls.before = {}
+        for family, source in (("review", _REVIEW_HEADERS_BEFORE), ("mars", _MARS_HEADERS_BEFORE)):
+            namespace = {"re": re, "require": cls.families[family].require,
+                         "HEADER_KEY": re.compile(r"^[a-z][a-z0-9_]*$")}
+            exec(compile("from __future__ import annotations\n" + source,
+                         f"<frozen-{family}-headers-a017e548>", "exec"), namespace)
+            cls.before[family] = SimpleNamespace(**namespace)
+
+    @staticmethod
+    def observed(function, *args):
+        try:
+            value = function(*args)
+        except Exception as error:
+            return "error", type(error), str(error)
+        return "value", type(value), list(value.items()) if isinstance(value, dict) else value
+
+    def compare(self, family, name, *args):
+        expected = self.observed(getattr(self.before[family], name), *deepcopy(args))
+        actual = self.observed(getattr(self.families[family], name), *deepcopy(args))
+        self.assertEqual(actual, expected)
+        return actual
+
+    @staticmethod
+    def fields(family, kind, schema):
+        spec = schema["headers"][kind]
+        fields = {key: "value" for key in spec["required"]}
+        fields.update({family: kind, "version": "1"})
+        for key, values in spec.get("enums", {}).items():
+            fields[key] = values[0]
+        for key in spec.get("integers", []):
+            fields[key] = "0"
+        return fields
+
+    def test_parsing_values_order_and_first_errors_match_frozen_functions(self):
+        for family in self.families:
+            opener = f"```{family}-report"
+            good = opener + "\n" + family + ": report\nversion: 1\ncoverage: a:b:c\n```\n"
+            cases = [
+                good, good.replace("\n", "\r\n"), "\ufeff" + good,
+                "\ufeff\ufeff \t\r\n" + good, " \t\n" + good, " \ufeff" + good,
+                "", " \n", "before\n" + good, good.replace(opener, opener + " "),
+                good.replace(opener, "```other-report"), good.replace("\n", "\r"),
+                opener, opener + "\n", good.rsplit("\n```", 1)[0],
+                good.replace("\n```", "\n  ```"), good.replace("\n```", "\n````"),
+                good + good, opener + "\n\n \t\n```\n",
+                opener + "\nvalue :   a:b  \nempty:\n```\n",
+            ]
+            for line in ("bad", ": value", "Upper: value", "two words: value",
+                         "dash-key: value", "a.b: value", "a/b: value",
+                         "ok: one\n ok : two", "z: one\nz: two\nbad",
+                         "bad\nz: one\nz: two", "x:\u2028bad", "x: \x00"):
+                cases.append(opener + "\n" + line + "\n```\n")
+            for text in cases:
+                with self.subTest(family=family, text=text):
+                    args = (text, family, "report") if family == "review" else (text, "report")
+                    self.compare(family, "parse_header", *args)
+
+    def test_public_signatures_and_invalid_argument_error_order_are_preserved(self):
+        for family, module in self.families.items():
+            for name in ("parse_header", "validate_header", "render_header"):
+                self.assertEqual(str(inspect.signature(getattr(module, name))),
+                                 str(inspect.signature(getattr(self.before[family], name))))
+            for text in (None, b"header", 7, [], ""):
+                for kind in ("report", None, 3):
+                    with self.subTest(family=family, text=text, kind=kind):
+                        args = (text, family, kind) if family == "review" else (text, kind)
+                        self.compare(family, "parse_header", *args)
+        for prefix in ("custom", "", "review-report", None):
+            text = f"```{prefix}-custom\nitem: a:b\n```\n"
+            self.compare("review", "parse_header", text, prefix, "custom")
+
+    def test_family_schema_validation_and_first_errors_match(self):
+        for family, module in self.families.items():
+            schema = module.load_schema()
+            for kind, spec in schema["headers"].items():
+                good = self.fields(family, kind, schema)
+                variants = [good, dict(reversed(list(good.items())))]
+                for key in spec["required"]:
+                    missing = dict(good)
+                    missing.pop(key)
+                    variants.extend((missing, {**good, key: ""}, {**good, key: None}))
+                variants.extend(({**good, "unknown_z": "z", "unknown_a": "a"},
+                                 {**good, family: "other"}, {**good, "version": "2"},
+                                 {**good, "version": 1}, {**good, "version": True}))
+                for key in spec.get("enums", {}):
+                    variants.append({**good, key: "not-allowed"})
+                for key in spec.get("integers", []):
+                    for value in ("0", "001", "\u0661", "\uff12", "-1", "+1", "1.0",
+                                  "1e2", " 1", "1 ", "", None, 1):
+                        variants.append({**good, key: value})
+                variants.extend((
+                    {**good, spec["required"][0]: "", "unknown": "x", "version": "9"},
+                    {**good, "unknown": "x", "version": "9"},
+                    {**good, "version": "9", **{key: "bad" for key in spec.get("enums", {})}},
+                ))
+                for fields in variants:
+                    with self.subTest(family=family, kind=kind, fields=fields):
+                        self.compare(family, "validate_header", kind, fields, schema)
+                self.compare(family, "validate_header", "unknown", good, schema)
+                retained = dict(good)
+                self.assertIs(module.validate_header(kind, retained, schema), retained)
+                self.assertEqual(retained, good)
+            fields = self.fields(family, "report", schema)
+            fields["stage"] = "not-a-stage"
+            observed = self.compare(family, "validate_header", "report", fields, schema)
+            self.assertEqual(observed[0], "value" if family == "mars" else "error")
+
+    def test_custom_schemas_identity_and_native_errors_are_unchanged(self):
+        for family, module in self.families.items():
+            schema = {"headers": {"custom": {
+                "required": [family, "version", "second", "first"],
+                "optional": ["n", "first"],
+                "enums": {"second": ["b", "a"], "first": ["y", "x"]},
+                "integers": ["n"],
+            }}}
+            fields = {family: "custom", "version": "1", "second": "b", "first": "y", "n": "007"}
+            self.assertIs(module.validate_header("custom", fields, schema), fields)
+            variants = [fields, {**fields, "second": "bad", "first": "bad", "n": "-1"},
+                        {**fields, "second": "", "first": "", "z": "bad"},
+                        {family: "custom", "version": "1", "second": "b", "first": "y"}]
+            for value in variants:
+                self.compare(family, "validate_header", "custom", value, schema)
+            for value in ({}, {"headers": {}}, {"headers": {"custom": None}},
+                          {"headers": {"custom": {}}},
+                          {"headers": {"custom": {"required": [], "optional": []}}},
+                          {"headers": {"custom": {"required": [family, "version"]}}}):
+                self.compare(family, "validate_header", "custom", fields, value)
+            for value in (None, [], 0, {family: "custom", "version": "1", 1: "extra"}):
+                self.compare(family, "validate_header", "custom", value, schema)
+            self.compare(family, "validate_header", None, fields, schema)
+
+    def test_rendered_bytes_and_conversion_quirks_are_unchanged(self):
+        class ChangingString:
+            def __init__(self):
+                self.calls = 0
+
+            def __str__(self):
+                self.calls += 1
+                return f"value-{self.calls}"
+
+        for family, module in self.families.items():
+            schema = module.load_schema()
+            for kind, spec in schema["headers"].items():
+                good = self.fields(family, kind, schema)
+                self.compare(family, "render_header", kind, good, schema)
+                self.compare(family, "render_header", kind, dict(reversed(list(good.items()))), schema)
+                optional = spec["optional"][0]
+                for value in ("a:b", "", None, True, False, [], (), ["a", "b"],
+                              ["a\nb"], "bad\nline", "bad\rline", "bad```fence"):
+                    with self.subTest(family=family, kind=kind, value=value):
+                        self.compare(family, "render_header", kind, {**good, optional: value}, schema)
+            schema = {"headers": {"custom": {"required": [family, "version", "value"], "optional": []}}}
+            new_value, old_value = ChangingString(), ChangingString()
+            fields = {family: "custom", "version": "1", "value": new_value}
+            before = {**fields, "value": old_value}
+            actual = module.render_header("custom", fields, schema)
+            expected = self.before[family].render_header("custom", before, schema)
+            self.assertEqual(actual.encode("utf-8"), expected.encode("utf-8"))
+            self.assertEqual(new_value.calls, 2 if family == "mars" else 1)
+            self.assertEqual(new_value.calls, old_value.calls)
+        self.assertEqual(rm._header_value([]), "none")
+        self.assertEqual(self.families["mars"]._header_value([]), "")
+
+    def test_field_access_order_and_identity_are_preserved(self):
+        class Fields(dict):
+            def __init__(self, fields):
+                super().__init__(fields)
+                self.accesses = []
+
+            def get(self, key, default=None):
+                self.accesses.append(("get", key))
+                return super().get(key, default)
+
+            def __getitem__(self, key):
+                self.accesses.append(("item", key))
+                return super().__getitem__(key)
+
+        for family, module in self.families.items():
+            schema = module.load_schema()
+            original = self.fields(family, "report", schema)
+            for variant in (original, {**original, "verdict": "bad", "p1": "-1"},
+                            {**original, "version": "9", "unknown": "x"}):
+                before, after = Fields(variant), Fields(variant)
+                self.assertEqual(self.observed(self.before[family].validate_header, "report", before, schema),
+                                 self.observed(module.validate_header, "report", after, schema))
+                self.assertEqual(after.accesses, before.accesses)
+                self.assertEqual(dict(after), variant)
+
+    def test_public_wrappers_share_the_pure_core_and_keep_header_key(self):
+        path = ROOT / "lib" / "review_headers.py"
+        self.assertTrue(path.is_file(), "The shared neutral header implementation is required")
+        module = ast.parse(path.read_text(encoding="utf-8"), feature_version=(3, 9))
+        for node in ast.walk(module):
+            if isinstance(node, ast.Import):
+                self.assertTrue(all(alias.name == "re" for alias in node.names))
+            if isinstance(node, ast.ImportFrom):
+                self.assertIn(node.module, ("__future__", "typing"))
+        for family, consumer in self.families.items():
+            core = consumer._headers
+            self.assertEqual(Path(core.__file__).resolve(), path.resolve())
+            self.assertIs(consumer.HEADER_KEY, core.HEADER_KEY)
+            text = f"```{family}-report\nname: x\n```\n"
+            with patch.object(core, "parse_header", wraps=core.parse_header) as parsed:
+                args = (text, family, "report") if family == "review" else (text, "report")
+                self.assertEqual(consumer.parse_header(*args), {"name": "x"})
+                parsed.assert_called_once()
+            schema = consumer.load_schema()
+            fields = self.fields(family, "report", schema)
+            with patch.object(core, "validate_header", wraps=core.validate_header) as validated:
+                self.assertIs(consumer.validate_header("report", fields, schema), fields)
+                validated.assert_called_once()
+            with patch.object(consumer, "HEADER_KEY", re.compile(r"^UPPER$")):
+                text = f"```{family}-report\nUPPER: retained override\n```\n"
+                args = (text, family, "report") if family == "review" else (text, "report")
+                self.assertEqual(consumer.parse_header(*args), {"UPPER": "retained override"})
+
+
+class HeaderDependencyTests(unittest.TestCase):
+    def consumers(self, root):
+        for filename in ("review_method.py", "mars_contract.py"):
+            destination = root / filename
+            shutil.copyfile(ROOT / "lib" / filename, destination)
+            yield destination
+
+    def assert_refused(self, consumer):
+        spec = importlib.util.spec_from_file_location("inert_header_dependency_fixture", consumer)
+        module = importlib.util.module_from_spec(spec)
+        with self.assertRaisesRegex(ImportError, "trusted source helper"):
+            spec.loader.exec_module(module)
+
+    def test_link_and_reparse_classifications_refuse_before_inert_helper_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            helper = root / "review_headers.py"
+            helper.write_text("raise AssertionError('inert helper executed')\n", encoding="utf-8")
+            original = Path.lstat
+            for consumer in self.consumers(root):
+                for mode, attributes in ((stat.S_IFLNK | 0o777, 0), (stat.S_IFREG | 0o644, 0x400)):
+                    with self.subTest(consumer=consumer.name, mode=mode, attributes=attributes):
+                        def classified(path, *args, **kwargs):
+                            if path == helper:
+                                return SimpleNamespace(st_mode=mode, st_file_attributes=attributes)
+                            return original(path, *args, **kwargs)
+                        with patch.object(Path, "lstat", classified):
+                            self.assert_refused(consumer)
+
+    def test_actual_nonregular_and_available_symlink_never_execute(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            helper = root / "review_headers.py"
+            helper.mkdir()
+            for consumer in self.consumers(root):
+                self.assert_refused(consumer)
+            helper.rmdir()
+            inert = root / "inert.py"
+            inert.write_text("raise AssertionError('inert helper executed')\n", encoding="utf-8")
+            try:
+                helper.symlink_to(inert)
+            except OSError as error:
+                unavailable = error.errno in (errno.EPERM, errno.EACCES, errno.ENOSYS, errno.EOPNOTSUPP) \
+                    or getattr(error, "winerror", None) == 1314
+                if not unavailable:
+                    raise
+                print("Native helper symlink unavailable; separate lstat-classification fixtures cover refusal.")
+            else:
+                self.assertTrue(helper.is_symlink())
+                for consumer in self.consumers(root):
+                    self.assert_refused(consumer)
+                print("Native helper symlink refusal observed for both families.")
+
+
+class HeaderClosureTests(unittest.TestCase):
+    def test_each_family_loads_only_its_trusted_sibling_without_the_other_family(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for family, filename in (("review", "review_method.py"), ("mars", "mars_contract.py")):
+                with self.subTest(family=family):
+                    source = root / family / "source"
+                    target = root / family / "target"
+                    source.mkdir(parents=True)
+                    target.mkdir()
+                    for name in (filename, "review_headers.py"):
+                        shutil.copyfile(ROOT / "lib" / name, source / name)
+                    (target / "review_headers.py").write_text(
+                        "raise AssertionError('not the trusted sibling')\n", encoding="utf-8")
+                    script = r'''
+import importlib.util, json, sys, types
+from pathlib import Path
+path, family = Path(sys.argv[1]), sys.argv[2]
+sys.path.insert(0, str(Path.cwd()))
+sys.modules["review_headers"] = types.ModuleType("review_headers")
+sys.modules["lintel_review_headers"] = types.ModuleType("lintel_review_headers")
+spec = importlib.util.spec_from_file_location("isolated_family", path)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+text = "```" + family + "-custom\n" + family + ": custom\nversion: 1\nn: 007\n```\n"
+args = (text, family, "custom") if family == "review" else (text, "custom")
+fields = module.parse_header(*args)
+schema = {"headers": {"custom": {"required": [family, "version", "n"], "optional": [], "integers": ["n"]}}}
+assert module.validate_header("custom", fields, schema) is fields
+assert module.render_header("custom", fields, schema) == text
+assert "review_method" not in sys.modules and "mars_contract" not in sys.modules
+print(json.dumps(fields))
+'''
+                    result = subprocess.run([sys.executable, "-B", "-c", script, str(source / filename), family],
+                                            cwd=target, text=True, capture_output=True)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(json.loads(result.stdout), {family: "custom", "version": "1", "n": "007"})
+                    (source / "review_headers.py").unlink()
+                    missing = subprocess.run([sys.executable, "-B", "-c", script, str(source / filename), family],
+                                             cwd=target, text=True, capture_output=True)
+                    self.assertNotEqual(missing.returncode, 0)
+                    self.assertIn("review_headers.py", missing.stderr)
+                    self.assertNotIn("not the trusted sibling", missing.stderr)
+
+    def test_installed_header_closure_and_both_real_entry_points(self):
+        generator = ROOT / "bin" / "li-copilot.py"
+        tree = ast.parse(generator.read_text(encoding="utf-8"))
+        resources = next(ast.literal_eval(node.value) for node in tree.body
+                         if isinstance(node, ast.Assign)
+                         and any(isinstance(target, ast.Name) and target.id == "MARS_RESOURCES"
+                                 for target in node.targets))
+        self.assertIn("lib/review_headers.py", resources)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "installed"
+            target.mkdir()
+            store = root / "recovery"
+            for operation in ("init", "check"):
+                result = run(generator, operation, "--source", ROOT, "--target", target, "--store", store)
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            installed = target / ".github" / "lintel"
+            self.assertEqual((installed / "lib" / "review_headers.py").read_bytes(),
+                             (ROOT / "lib" / "review_headers.py").read_bytes())
+            body, meta = root / "body.md", root / "meta.json"
+            request = root / "request.md"
+            result = run(installed / "bin" / "li-review-packet.py", "--repo", target, "render",
+                         "--kind", "implementation", "--stage", "quality", "--subject-file", SUBJECT,
+                         "--subject-ref", "util.py", "--body-out", body, "--meta-out", meta,
+                         "--request-out", request, "--requested-by", "fixture", "--surface", "fixture")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            data = json.loads(meta.read_text(encoding="utf-8"))
+            reply = root / "report.md"
+            reply.write_text(report(data, [(qid, "checked", "traced fixture")
+                                          for qid in data["questions"]]), encoding="utf-8")
+            checked = run(installed / "bin" / "li-review-packet.py", "check", "--report", reply,
+                          "--meta", meta, "--body", body)
+            self.assertEqual(checked.returncode, 0, checked.stderr)
+            panel = root / "records" / "panel.json"
+            mars = installed / "bin" / "li-mars.py"
+            steps = [
+                ("panel", "init", "--panel", panel, "--id", "headers", "--owner", "owner",
+                 "--brief", body, "--consent", "fixture", "--kind", "implementation",
+                 "--requested-by", "fixture", "--trigger", "explicit", "--caller", "standalone",
+                 "--surface", "fixture", "--repository", "fixture/repo", "--branch", "fixture",
+                 "--commit", "abc123", "--method-meta", meta),
+                ("panel", "add", "--panel", panel, "--slot", "r1", "--model", "fixture",
+                 "--transport", "subagent"),
+                ("panel", "brief", "--panel", panel, "--slot", "r1", "--round", "1",
+                 "--body", body, "--out", root / "records" / "mars-request.md"),
+            ]
+            for step in steps:
+                result = run(mars, *step, cwd=target)
+                self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(rm.strip_header(request.read_text(encoding="utf-8")),
+                             rm.strip_header((root / "records" / "mars-request.md").read_text(encoding="utf-8")))
 
 
 if __name__ == "__main__":

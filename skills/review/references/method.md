@@ -142,6 +142,9 @@ question and location. See `skills/mars/references/protocol.md`.
 
 ## 7. Coordinator use (not sent to reviewers)
 
+`lib/review_headers.py` owns shared header parsing and validation. REVIEW and
+MARS retain their distinct schemas, public errors, value conversion and rendering.
+
 ```bash
 pkt="$LINTEL_SOURCE_ROOT/bin/li-review-packet.py"
 python3 "$pkt" tags --paths <changed paths> --text-file <diff>        # advisory surface tags

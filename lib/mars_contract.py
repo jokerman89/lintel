@@ -2,13 +2,14 @@
 # implements: ADR-0036, ADR-0028, ADR-0026
 # intent: .claude/plans/mars/spec.md
 # constraints: stdlib only; data selection never dispatches models, grants permission or clears release
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-09-30
 """Roster, offer and panel-state rules for Multi-Model Adversarial Review & Screening (MARS)."""
 from __future__ import annotations
 
 import datetime
 import hashlib
 import importlib
+import importlib.util
 import json
 import os
 import re
@@ -16,6 +17,17 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+_headers_path = Path(__file__).resolve().with_name("review_headers.py")
+if not _headers_path.is_file():
+    raise ImportError(f"Required trusted source helper is missing: {_headers_path}")
+if _headers_path.is_symlink() or getattr(_headers_path.lstat(), "st_file_attributes", 0) & 0x400:
+    raise ImportError(f"Linked trusted source helper is refused: {_headers_path}")
+_headers_spec = importlib.util.spec_from_file_location("lintel_review_headers", _headers_path)
+if _headers_spec is None or _headers_spec.loader is None:
+    raise ImportError("Cannot load trusted sibling review_headers.py")
+_headers = importlib.util.module_from_spec(_headers_spec)
+_headers_spec.loader.exec_module(_headers)
 
 DEFAULTS_PATH = Path(__file__).with_name("mars-defaults.json")
 SCHEMA_PATH = Path(__file__).with_name("mars-schema.json")
@@ -28,7 +40,7 @@ IDENTITY_LEVELS = ("host-usage", "host-receipt", "requested-only", "self-report"
 ORIGIN_FIELDS = ("requested_by", "trigger", "caller", "coordinator_surface",
                  "repository", "branch", "commit", "cycle_id", "work_map")
 SLOT = re.compile(r"^r[1-9][0-9]?$")
-HEADER_KEY = re.compile(r"^[a-z][a-z0-9_]*$")
+HEADER_KEY = _headers.HEADER_KEY
 
 
 class ContractError(ValueError):
@@ -120,37 +132,11 @@ def parse_header(text: str, kind: str) -> Dict[str, str]:
     """Parse the FIRST fenced mars-<kind> block. It must open the message."""
     body = text.lstrip("\ufeff").lstrip()
     opener = "```mars-" + kind
-    require(body.startswith(opener + "\n") or body.startswith(opener + "\r\n"),
-            f"message must begin with a ```mars-{kind} header block")
-    end = body.find("\n```", len(opener))
-    require(end != -1, f"unterminated mars-{kind} header block")
-    fields: Dict[str, str] = {}
-    for raw in body[len(opener):end].splitlines():
-        line = raw.strip()
-        if not line:
-            continue
-        key, sep, value = line.partition(":")
-        key = key.strip()
-        require(sep == ":" and HEADER_KEY.match(key) is not None, f"malformed header line: {line!r}")
-        require(key not in fields, f"duplicate header key: {key}")
-        fields[key] = value.strip()
-    return fields
+    return _headers.parse_header(body, opener, "mars", kind, require, HEADER_KEY)
 
 
 def validate_header(kind: str, fields: Dict[str, str], schema: Dict[str, Any]) -> Dict[str, str]:
-    spec = schema["headers"].get(kind)
-    require(spec is not None, f"unknown header kind: {kind}")
-    missing = [key for key in spec["required"] if not fields.get(key)]
-    require(not missing, f"mars-{kind} header missing: {', '.join(missing)}")
-    unknown = set(fields) - set(spec["required"]) - set(spec["optional"])
-    require(not unknown, f"mars-{kind} header has unknown keys: {', '.join(sorted(unknown))}")
-    require(fields["mars"] == kind and fields["version"] == "1", f"not a mars-{kind} v1 header")
-    for key, allowed in spec.get("enums", {}).items():
-        if key in fields:
-            require(fields[key] in allowed, f"{key} must be one of {allowed}")
-    for key in spec.get("integers", []):
-        require(re.fullmatch(r"\d+", fields.get(key, "")) is not None, f"{key} must be a non-negative integer")
-    return fields
+    return _headers.validate_header(kind, fields, schema, "mars", require)
 
 
 # ── Roster: latest model per family ──────────────────────────────────────────
