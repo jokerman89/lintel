@@ -7,6 +7,22 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ## 0.13.7 — unreleased
 
+### Changed
+
+- The six engineering modules have an explicit catalog category and an
+  `engineering-modules` selection. Its existing `core` dependency and effective
+  helper/resource closure remain visible without adding every module to core.
+- TA, DA, SC, DH and TQ consume the same selected-work admission procedure while
+  retaining their domain methods, checkpoints, role modes and required evidence.
+- Agent methods make rendered versus static accessibility evidence, consumer
+  compatibility, migration ownership, investigation handoff, material contract
+  mismatches and policy-backed data flows explicit. Security and infrastructure
+  reviews retain coverage gaps and scoped authority instead of inferring a pass
+  from a provider name, an empty finding list or a different implementation style.
+- SHIP summaries report the actual applicable review and its limitations.
+  Lesson-safety guidance distinguishes manual assessment from an executed content
+  scan; an unavailable required control does not become a successful scan.
+
 ### Fixed
 
 - The Bash step runner removes its owned stdin buffer after catchable HUP,
