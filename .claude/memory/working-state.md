@@ -8,6 +8,42 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Delivered - Review-driven corrections (2026-09-30)
+
+**Status:** the following bounded implementation outcomes are on main; report
+publication alone was not treated as completion:
+
+| Delivery | Original work | Verified outcome |
+|---|---|---|
+| `19b30eef`, 0.13.3 | [W1-1](../plans/review-remediation/work.json) | Trusted workflow helper sources; required steps fail visibly and optional unavailable footers are unverified. |
+| `0baa9a0c`, 0.13.4 | [CB1](../plans/context-budget-consolidation/work.json), [W1-6.wiki](../plans/wiki-output-isolation/work.json), [bounded CI work](../plans/ci-workload-balance/work.json) | One budget-method owner, isolated partial wiki outputs, disjoint kit chunks, weighted CI shards and PR-only active cancellation. |
+| `5df540ce`, 0.13.5 | [C-01.blob-reads](../plans/review-snapshot-batching/work.json), [SL1](../plans/spec-lifecycle/work.json) | Batched selected Git object reads with preserved snapshot/error behavior; DRAFT-first native artifacts and explicit acceptance/evidence references. |
+| `a017e548`, documentation | [W1-9.claims](../plans/architecture-claims/work.json) | Architecture describes the existing Swedish-text guard without claiming general language or company-identity enforcement. |
+| `a3ec21ed`, 0.13.6 | [DR-36.header-core](../plans/shared-header-core/work.json) | One shared header parser/validator and guarded sibling dependency loading; family schemas, rendered formats and review policy remain unchanged. |
+
+The implementation candidates passed their own independent content-bound review,
+current QA, actual host corroboration and SHIP gates, plus their exact hosted
+matrices. The small architecture correction used explicitly mechanical
+coordinator self-review, not an independent-review claim.
+C-09's running-main clause was verified after delivery from real push runs
+36650015133 and 36650171268: the older running job completed without
+cancellation, then the newer run started. That observation does not claim
+the newer run's final suite outcome or change required-check settings.
+
+**What's pending:** the broader remediation programme, required-check settings,
+larger planning/portfolio decisions and recorded host-bound work remain open.
+The delivered header-core package does not close the wider schema or registry
+recommendation. Native hooks and the ADR-drafting candidate have not completed
+their required acceptance; no unreviewed change is included here. Branch
+cleanup remains paused while unresolved work must be preserved. These notes
+describe actual prior deliveries, not a blanket authorization for the remaining
+recommendations or reuse of old evidence on new code.
+
+Installed consumers should update their managed source through the existing
+adapter. Product-version changes require an explicit reason-bearing rebind
+of affected profile inputs and fresh dependent evidence. Runtime receipts are
+target-local; a fresh clone does not inherit another target's profile or review.
+
 ## Partial delivery - Native client parity (2026-09-29)
 
 **Status:** native 1a (Copilot native skills and agents, 0.13.0, ADR-0039) landed on

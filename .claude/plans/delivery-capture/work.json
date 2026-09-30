@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/delivery-capture/spec.md",
+  "plan": ".claude/plans/delivery-capture/plan.md",
+  "tasks": ".claude/plans/delivery-capture/plan.md",
+  "prompt": ".claude/plans/delivery-capture/prompt.md"
+}

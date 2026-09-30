@@ -19,7 +19,7 @@ integrated in the recorded base; they are not unfinished package dependencies.
 
 ## Original task
 
-- [ ] W1-1 Remove executable-source fallbacks from REVIEW/SHIP and the same pattern in other canonical skills; preserve source/target separation, explicitly degrade an unavailable footer, and verify R1-R4.
+- [x] W1-1 Remove executable-source fallbacks from REVIEW/SHIP and the same pattern in other canonical skills; preserve source/target separation, explicitly degrade an unavailable footer, and verify R1-R4.
 
 ### W1-1 execution and acceptance
 
@@ -61,5 +61,11 @@ source/target and footer checks, 13 workflow-contract tests, native/catalog/wiki
 instruction drift checks and the full command-surface guard. The static pre-fix
 test failed before any affected workflow example was executed.
 
-Independent specification/quality review, current bound QA and hosted delivery
-verification remain pending. W1-1 stays open until those outcomes are verified.
+Independent specification and quality review, current bound QA, actual host
+corroboration and the shared SHIP gate passed. The exact candidate's hosted
+run [36589853696](https://github.com/jokerman89/lintel/actions/runs/36589853696)
+passed all 23 jobs and 525 strict script-file executions, with no failed,
+skipped or partial entries. W1-1 landed on main at `19b30eef` (0.13.3).
+The earlier local observations above remain their original evidence, not
+claims that this later capture commit ran that matrix. The broader remediation
+programme is not closed by this leaf.

@@ -30,7 +30,7 @@ explicit workflow steps; their limits cannot be converted into a mechanical PASS
 
 ### T1 Add executable routing, equivalence and refusal cases
 
-- [ ] Implement and verify the cases using the existing context fixtures.
+- [x] Implement and verify the cases using the existing context fixtures.
 Requirements: A, B, C, D.
 Dependencies: none
 Verify: focused new unittest cases fail on the unchanged owner, then pass after T2;
@@ -38,7 +38,7 @@ exercise actual providers, not only names in prose.
 
 ### T2 Centralize the budget method
 
-- [ ] Centralize observation/advice/handoff interpretation and preserve watch.
+- [x] Centralize observation/advice/handoff interpretation and preserve watch.
 Requirements: A, B, C, D, E.
 Dependencies: T1
 Verify: direct and compatibility cases agree for known/estimated/unknown/error inputs;
@@ -46,7 +46,7 @@ flags retain mode-specific meanings and provider state remains unchanged.
 
 ### T3 Wire retained callers and guides
 
-- [ ] Wire compatibility skills, Advisor, first-party callers and the two guides.
+- [x] Wire compatibility skills, Advisor, first-party callers and the two guides.
 Requirements: C, D, E.
 Dependencies: T2
 Verify: selected planning/shape checks pass; original names/tool boundary and
@@ -54,7 +54,7 @@ not-run versus required-limit semantics survive.
 
 ### T4 Return the verified candidate
 
-- [ ] Run focused checks and generated-artifact verification.
+- [x] Run focused checks and generated-artifact verification.
 Requirements: A, B, C, D, E, F.
 Dependencies: T3
 Verify: record exact commands/results and scope; the existing independent reviewer
@@ -74,11 +74,14 @@ No full suite or live client/model run.
 
 ## Progress and review
 
-Implementation: bounded review repair ready for the same independent reviewer;
-the task checkboxes remain open.
-Initial independent source inspection requested one P2 repair; formal package
-specification/quality acceptance remains open.
-Parent card: open. Completion follows actual leaf evidence and review, not approval.
+CB1 is delivered in `0baa9a0c` (0.13.4). The bounded P2 repair passed the same
+independent source review; the joined candidate then passed its own canonical
+specification/quality review, current QA, corroborated latest reader and SHIP.
+Hosted run [36617340336](https://github.com/jokerman89/lintel/actions/runs/36617340336)
+passed 23 jobs and 549 strict script-file executions (183 per OS), with no
+failed, skipped or partial entries. All four original leaves are complete.
+The wider portfolio parent remains open; no entry retirement or governance
+change follows from this package.
 
 | Leaf | Implementer evidence |
 |---|---|
@@ -88,9 +91,11 @@ Parent card: open. Completion follows actual leaf evidence and review, not appro
 | T4 | Local native generation and check: 172 managed files verified. Generated manifest/output is verification-only for coordinator integration. No full suite, client/model run, dependency installation, commit or publication. |
 
 The final routing run took 48.545 seconds on this host; this is test duration,
-not a performance or model-efficiency claim. Raw outputs are retained under the
-repository-local ignored `budget-tests/logs` runtime directory. The earlier green
-routing observation and expected red result remain separate records.
+not a performance or model-efficiency claim. Raw outputs remain in the
+implementing target's ignored runtime; they are not distributed with a clone.
+The earlier green routing observation and expected red result remain separate
+records. The implementer evidence table is historical local evidence, not a
+claim that it executed the later joined matrix.
 
 Own profile context: `context-budget-consolidation`, generation 1, `_default` 1.0.0,
 digest `sha256:5fb46129c94d8d05683ab765cd719ae3325e10176bbbb5a8892dc92be23f0049`.

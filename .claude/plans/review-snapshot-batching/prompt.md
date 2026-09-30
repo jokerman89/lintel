@@ -27,7 +27,8 @@ The coordinator owns publication and future aggregate acceptance.
 
 ## Current state
 
-The scoped implementation, differential proof and independent source review are
-complete; see the original completed leaves and retained P3 observations in
-plan.md. Do not restart them or reinterpret source review as aggregate/hosted
-clearance. The coordinator owns the next integration and its remaining gates.
+The scoped implementation, differential proof, independent aggregate review,
+current QA and hosted verification are complete; this package landed in
+`5df540ce` (0.13.5). See plan.md for the distinct local and hosted evidence
+and retained limitations. Do not restart completed work or transfer its
+profile or clearance to a new task. The broader C-01 and C-02 work stays open.

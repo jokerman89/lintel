@@ -30,8 +30,9 @@ validation and publication; only DR-36.header-core can be reported complete.
 
 ## Current state
 
-The local extraction, compatibility proof and independent source review are
-complete, including the coordinator-required F1 helper-admission correction
-and same-reviewer recheck. See plan.md for accepted F2/R1 limits and additive
-F3 evidence clarification. Do not repeat completed local work or treat source
-acceptance as hosted, aggregate or publication clearance.
+The extraction, compatibility proof, independent integrated review, current QA
+and hosted verification are complete. This package landed in `a3ec21ed`
+(0.13.6), including the F1 helper-admission correction. See plan.md for
+separate local and hosted observations, retained F2/R1 limits and additive
+F3 clarification. Do not restart delivered work or transfer its target-local
+profile or acceptance to a new task. The broader DR-36/LIB-04 parent stays open.

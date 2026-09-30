@@ -72,11 +72,11 @@ Not edited:
 
 ## Original tasks
 
-- [ ] W2-6 Split the Copilot kit entry. Refined here to `LINTEL_TEST_CHUNK` method chunks
+- [x] W2-6 Split the Copilot kit entry. Refined here to `LINTEL_TEST_CHUNK` method chunks
   (`copilot-kit-1..8.sh`) instead of smoke plus full. The agent-count part (DR-19) stays open.
-- [ ] TCI-02 Balance the integration shards with declared Windows weights and longest-first
+- [x] TCI-02 Balance the integration shards with declared Windows weights and longest-first
   assignment; the assignment stays `(i mod N) + 1` without weights.
-- [ ] C-09 Stop later pushes from cancelling a running main CI run; keep cancelling superseded
+- [x] C-09 Stop later pushes from cancelling a running main CI run; keep cancelling superseded
   pull request runs. The enforced-checks part (W2-2 and W2-4) stays open.
 
 ### W2-6: kit chunks
@@ -225,12 +225,15 @@ leading comment block:
 
 **Not run locally:** any kit test, the full suite or the hosted matrix.
 
-**Still pending, from the hosted runs:**
-- all 23 jobs on the candidate;
-- each kit chunk once per system, with no skip or partial;
-- the same entry count per system as found locally (183);
-- the critical path, re-measured against 124.8 minutes and reported as a measurement;
-- each chunk's time;
+**Observed on the joined candidate:**
+- Run [36617340336](https://github.com/jokerman89/lintel/actions/runs/36617340336)
+  passed all 23 jobs on `0baa9a0c`.
+- All eight kit chunks ran once per OS; 183 unique script entries per OS,
+  549 total, with no failed, skipped or partial entries.
+- Raw logs record each chunk's RUN-gap proxy. The longest Windows job took
+  74.25 minutes against the earlier rounded 124.8-minute baseline. The
+  62.3-minute model was not achieved and was not an acceptance threshold.
+- This is one actual comparison, not a statistical performance guarantee.
 
 **Post-delivery, after landing (not a pre-merge gate):**
 - a real `main` push run A has started when a later genuine `main` push creates run B;
@@ -238,11 +241,23 @@ leading comment block:
 - retain both runs' head/event/start/completion/conclusion metadata. Pending-run replacement,
   manual cancellation and an absence of overlapping runs do not establish this observation.
 
+That observation is now accepted through a separate independent
+`verification_only` review and the current corroborated reader/QA gate:
+run A [36650015133](https://github.com/jokerman89/lintel/actions/runs/36650015133)
+was a real `main` push of `5df540ce`. Run B
+[36650171268](https://github.com/jokerman89/lintel/actions/runs/36650171268)
+was the real documentation push `a017e548`, created at 00:24:25Z on 2026-09-30
+while 19 A jobs were running. A completed successfully, without cancellation,
+with its last job ending at 01:38:40Z; B jobs started at 01:38:43Z.
+This proves the selected overlap clause, not B's full-suite result or every
+future overlap. No artificial push or dispatch supplied the observation.
+
 **Known risk.** In earlier local Windows runs, the kit's two slowest methods (the Git verification
 case and native coverage) both sort into chunk 1. The equal 865 s chunk weight may understate that
 chunk. The hosted per-chunk times decide whether to re-weight.
 
-**Status of the tasks:** the source review passed with P3 findings only. W2-6 and TCI-02 await
-current integrated review, hosted verification and delivery. C-09's implementation has the same
-pre-publication gates, but its checkbox stays open until the real post-delivery observation.
-The broader register's enforced-checks work remains outside this slice.
+**Status of the tasks:** this bounded W2-6/TCI-02 implementation and C-09
+configuration landed in `0baa9a0c` (0.13.4) after current integrated review,
+hosted verification and SHIP. C-09's selected post-delivery observation is now
+verified separately. The agent-count part of W2-6, PR policy and the broader
+register's enforced-checks/settings work remain outside this completed slice.

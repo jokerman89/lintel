@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | P1 | Explicit output selection is truthful in generation and read-only checks. | W1-6.wiki | Coordinator; `bin/li-wiki-gen`, `tests/unit/wiki-gen-idempotency.sh`, `docs/concepts/wiki-generation.md`, `.claude/plans/wiki-output-isolation` | none |
 
-- [ ] W1-6.wiki Isolate partial generation/check output; preserve default artifacts and validate invalid selectors before writes. Verify R1-R5 with the existing generator and new regression cases.
+- [x] W1-6.wiki Isolate partial generation/check output; preserve default artifacts and validate invalid selectors before writes. Verify R1-R5 with the existing generator and new regression cases.
 
 ## Execution
 
@@ -28,5 +28,9 @@
 No source/target profile is borrowed. Targeted local verification is not live-host
 acceptance or proof of the full matrix. The generator and regression changes are implemented locally. The expanded unit
 script and default generated-output check pass, including selected drift refusal
-without baseline writes. Independent review and current integrated verification
-remain pending; no branch cleanup or publication is authorized by this plan.
+without baseline writes. Independent source review and the joined candidate's
+canonical review, current QA and SHIP passed. Hosted run
+[36617340336](https://github.com/jokerman89/lintel/actions/runs/36617340336)
+passed all 23 jobs and 549 strict script-file executions. W1-6.wiki landed
+in `0baa9a0c` (0.13.4). Other W1-6 helpers, broader portfolio changes and branch
+cleanup are not completed or authorized by this leaf.

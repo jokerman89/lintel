@@ -78,7 +78,8 @@ The reviewer authored the design, not the implementation; independence is
 declared, not authenticated. P0/P1/P2 counts were zero. No new ADR was needed:
 public behavior is unchanged and the existing reader remains authoritative.
 
-All four non-blocking P3 observations are retained without a source repair:
+The four source-review observations below are retained as history, without
+rewriting the original decision. Final integrated dispositions follow them.
 
 Retained observation F1 (P3): normal completion may kill the child just before
 its normal exit; the process double does not separately assert the already-exited
@@ -98,7 +99,7 @@ obligation; the scoped local selection is not a substitute.
 
 The primary private verification summary, process-count/output artifacts,
 command receipts, complete independent report and preserved failed observations
-remain under this worktree's `.claude/runtime/blob-batching/`. The initial
+remain under the implementing target's ignored runtime, not in a fresh clone. The initial
 newline-index fixture failure and two rejected handoff transports are history,
 not passing observations.
 
@@ -107,7 +108,19 @@ for syntax, not executed. No wall-time gain is claimed. The new explicit profile
 and full required policy were verified without rebinding or changing the home.
 Original Adaptive preservation is separate evidence, not acceptance of this code.
 
-This completes only the local C-01.blob-reads implementation/review scope.
-Canonical aggregate review, hosted CI and publication remain with the coordinator.
+The local implementation and source review were followed by independent
+canonical aggregate review, current QA, actual host corroboration and SHIP.
+The exact integrated candidate passed hosted run
+[36642145033](https://github.com/jokerman89/lintel/actions/runs/36642145033):
+23 successful jobs, 549 strict script-file executions (183 per OS), no failed,
+skipped or partial entries. C-01.blob-reads landed in `5df540ce` (0.13.5).
+
+F4 is closed at hosted script-file level, not by fabricated per-method output.
+The final reviewer narrowed F3: the index-only Unicode fixture is covered at
+file level across the hosted matrix; worktree-created NFD names remain
+unobserved. F1 and F2 remain disclosed. The Windows method-level observations
+above are still their original local evidence; no wall-time improvement or
+universal Python-version coverage is claimed.
+
 C-01 MARS re-snapshot frequency, C-02 ignored-file semantics and filesystem path
-cost remain OPEN; no wider completion or delivery is claimed.
+cost remain OPEN; no wider completion is claimed.

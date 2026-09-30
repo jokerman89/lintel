@@ -27,7 +27,7 @@ planned checks from observations.
 
 ### T1 Add artifact and gate regressions
 
-- [ ] Verify newly instantiated artifacts, links and actual gate behavior.
+- [x] Verify newly instantiated artifacts, links and actual gate behavior.
 Requirements: R1, R2, R3, R4.
 Dependencies: none
 Verify: new default/traceability cases fail against old templates; exercise the real
@@ -35,7 +35,7 @@ PLAN gate and work-map reader with DRAFT, text-only approval and recorded approv
 
 ### T2 Align the templates and lifecycle
 
-- [ ] Apply the minimal status, traceability and PLAN/CAPTURE changes.
+- [x] Apply the minimal status, traceability and PLAN/CAPTURE changes.
 Requirements: R1, R2, R3, R4.
 Dependencies: T1
 Verify: rendered artifacts carry correct status and observable linked criteria;
@@ -43,7 +43,7 @@ original task IDs and existing approval survive, with no schema/authority change
 
 ### T3 Return a verified candidate
 
-- [ ] Run focused checks and local native generation/check.
+- [x] Run focused checks and local native generation/check.
 Requirements: R1, R2, R3, R4.
 Dependencies: T2
 Verify: record exact commands, outcomes, scope, source hashes and actual own profile
@@ -55,8 +55,14 @@ Establish a new explicit repository-local `spec-lifecycle` profile context from 
 worktree's source and requirements. Carry its actual reference/policy unchanged.
 Never borrow another worktree's reference or initialize global state.
 
-Implementation: ready for independent source review. All task checkboxes and the
-parent card remain open until actual evidence and review satisfy acceptance.
+SL1 is delivered in `5df540ce` (0.13.5). Independent source review and the
+final integrated canonical review, current QA and SHIP passed. The joined
+local batch observed all 26 planning methods, including the six earlier
+unobserved inspect-writer cases. The whole joined batch ran 234 unittest
+methods plus the declared script/drift checks on the exact committed tree.
+Hosted run [36642145033](https://github.com/jokerman89/lintel/actions/runs/36642145033)
+passed 23 jobs and 549 strict script-file executions. T1-T3 are complete;
+the broader W5-3 policy remains open and is not changed by this slice.
 
 ## Implementer evidence
 
@@ -78,8 +84,11 @@ Actual required-policy result: `required: false`, `status: not_required`,
 `source: bundled-neutral`, `version: 1.0.0`, `applicability: not_applicable`.
 Roots and reference are local runtime evidence, not transferable approval.
 
-No shared gate/schema, timing/approval floor, governance, version or other package
-was changed. Source and generated verification outputs remain uncommitted; final
-reducers, independent review and integration are coordinator-owned. Raw logs are
-retained under `.claude/runtime/spec-tests/logs/`. No full suite, model, host,
-dependency installation or publication was performed.
+The original implementer did not change the shared gate/schema, timing/approval
+floor, governance or another package. Its local source and generated outputs
+were handed off uncommitted; the coordinator subsequently integrated them,
+regenerated the native output and verified the exact final candidate. The
+table above preserves the implementer's original observations.
+Raw logs are local to the implementing target's ignored runtime, not present
+in a fresh clone. Hosted file-level results do not imply live model obedience
+or authenticate a human grant.

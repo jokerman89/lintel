@@ -131,3 +131,28 @@ old-worktree preservation evidence are retained under
 syntax checking do not establish Linux/macOS or whole-matrix acceptance.
 Master owns hosted, aggregate, version and publication work. Only this local
 DR-36.header-core slice is complete; parent DR-36/LIB-04 remains open.
+
+## Integrated delivery
+
+The local record above is preserved as the source handoff. The integrated
+candidate `a3ec21ed` subsequently passed independent specification and quality
+review, current QA, actual host corroboration and the shared latest-reader/SHIP
+gate, then landed on main as 0.13.6.
+
+The joined local batch ran nine commands and 93 unittest methods with zero
+failures or skips on the exact tree later committed. Hosted run
+[36657454823](https://github.com/jokerman89/lintel/actions/runs/36657454823)
+passed 23 jobs and 549 strict script-file executions (183 per OS), without
+failed, skipped or partial entries. Hosted results are script-file level;
+local method-level and runtime-version limitations remain distinct.
+
+The installed bundle includes `lib/review_headers.py`; update it through the
+existing adapter rather than copying a partial dependency set. The product
+version change requires the existing explicit profile rebind and fresh
+dependent evidence. One non-blocking changelog wording observation remains:
+a trusted installed bundle can itself reside inside a target repository;
+the prohibited behavior is selecting arbitrary target code as a fallback.
+
+This completes DR-36.header-core, not the distinct schemas, registry-freshness
+recommendation or broader DR-36/LIB-04 parent. The preserved runtime evidence
+belongs to its producing targets and is not automatically available in a clone.
