@@ -12,6 +12,7 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
+- **V2 corrections delivered (2026-09-30):** `bcd041eb` (0.13.7) is on main: 36 mapped leaves across the core, routine, agent and skill correction maps. Exact-candidate CI passed all 23 jobs and 555 strict script-file executions; all 17 package review/QA/SHIP gates passed. This does not close the broader advisory portfolio or held work; see [working state](working-state.md#delivered---v2-method-corrections-2026-09-30).
 - **Coordinated delivery (2026-09-29):** native 1a (`394ed0b8`, 0.13.0), reusable patterns (`d89385f2`, 0.13.1) and Adaptive review (`3dadebaa`, 0.13.2) landed on main in that order. Native hooks remain blocked and the other-client increment is not authorized; see [working state](working-state.md).
 - **Review-driven corrections (2026-09-30):** trusted workflow sources (0.13.3), shared budget ownership/wiki isolation/CI balancing (0.13.4), snapshot batching and DRAFT-first specifications (0.13.5), and the shared header core (0.13.6) are delivered. The real main-run overlap was verified separately; parent settings and broader remediation remain open. Original maps and limits are in [working state](working-state.md#delivered---review-driven-corrections-2026-09-30).
 - **Post-native assessment (2026-09-29):** the [sanitized skill and agent summary](../engineering/audits/2026-09-28-skill-review-v2-summary.md) is advisory; it authorizes no portfolio reduction or new implementation.

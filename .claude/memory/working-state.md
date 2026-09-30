@@ -8,6 +8,40 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Delivered - V2 method corrections (2026-09-30)
+
+**Status:** the implementation landed on main as `bcd041eb`, version 0.13.7.
+These are code and canonical-method changes, not only review reports:
+
+| Original map | Delivered scope |
+|---|---|
+| [Core corrections](../plans/remaining-corrections/work.json) | Three leaves: catchable-signal stdin cleanup with signal-death preservation, valid review ownership, and a portable header-loader fixture. |
+| [Routine corrections](../plans/v2-routine-corrections/work.json) | Twelve leaves: selected-work/observation authority, optional vault dependencies, truthful controls and role availability, premise falsifiers, retained frontend interfaces and evidence-bearing report templates. |
+| [Agent methods](../plans/v2-agent-corrections/work.json) | Thirteen mapped agent items: actual consumer/flow/contract evidence, coverage gaps, defensive review boundaries and preservation of role names and capabilities. |
+| [Skill methods](../plans/v2-skill-corrections/work.json) | Eight items: truthful review/scan reporting, shared engineering admission and an explicit engineering-module catalog selection with its helper closure. |
+
+All 36 leaves passed their applicable final content-bound review, current QA,
+actual independent-review corroboration and the shared latest-reader/SHIP gates.
+The exact corrected candidate's [hosted matrix](https://github.com/jokerman89/lintel/actions/runs/36743408691)
+passed 23 jobs and 555 required script-file executions (185 per OS), with zero
+failed, skipped or partial entries. Platform-specific N/A observations are
+separate. The earlier failed candidates and the source-preservation failure remain
+history; they were not cancelled, relabelled or counted as successful evidence.
+Documentary fixtures are not live-model or all-client efficacy measurements.
+
+Native outputs were regenerated from the accepted canonical source. Update
+installed managed source through the existing adapter; a product-version change
+still needs the explicit profile rebind and fresh dependent evidence.
+Changes to catalog selection IDs must exercise both installed and portable
+consumer paths, not only source catalog queries; see [test guidance](../../tests/README.md).
+
+**What's pending:** native hooks and the ADR-drafting candidate remain held at
+their recorded host boundaries. Broader review recommendations involving default
+portfolio, retirement, licensing or governance decisions are not claimed complete.
+Verified stale remote refs were removed, leaving main at that observation; local
+checked-out, unique, held and unknown-owner work remains preserved. No private
+report, source history or worktree files were deleted to simulate completion.
+
 ## Delivered - Review-driven corrections (2026-09-30)
 
 **Status:** the following bounded implementation outcomes are on main; report
@@ -35,7 +69,8 @@ larger planning/portfolio decisions and recorded host-bound work remain open.
 The delivered header-core package does not close the wider schema or registry
 recommendation. Native hooks and the ADR-drafting candidate have not completed
 their required acceptance; no unreviewed change is included here. Branch
-cleanup remains paused while unresolved work must be preserved. These notes
+cleanup at that earlier checkpoint was paused while unresolved work had to be
+preserved; the later V2 delivery entry records the actual bounded cleanup. These notes
 describe actual prior deliveries, not a blanket authorization for the remaining
 recommendations or reuse of old evidence on new code.
 
@@ -53,8 +88,9 @@ main as `394ed0b8`, before Patterns and Adaptive review. The
 **What's pending:**
 - **Native 1b (hooks):** blocked at the recorded host boundary. Do not resume, reword
   or reassign the refused work without a supported, authorized resolution.
-- **ADV-1 (Low):** `bin/li-run` can leave its stdin temporary file after signal
-  termination. This advisory remains recorded, not fixed.
+- **ADV-1 (Low):** subsequently corrected in `bcd041eb` (0.13.7); the owned stdin
+  buffer is cleaned on catchable termination while preserving signal death.
+  SIGKILL and host crashes cannot run shell cleanup.
 - **Increment 2** (Codex, Cursor, Claude): not authorized.
 
 ## Delivered - Reusable patterns (2026-09-29)

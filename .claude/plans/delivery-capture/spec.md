@@ -13,3 +13,8 @@ This is documentation reconciliation, not another implementation backlog.
 The header candidate is a dependency, not an outcome supplied by this capture.
 Do not publish a descendant until that exact candidate has independently passed
 its required gates and actually landed.
+
+The subsequent V2 capture applies the same R1-R4 to the actually delivered
+`bcd041eb` implementation. It updates only memory navigation, factual delivery
+state and the directly related installed/portable test guidance. Historical
+CAP1 observations remain unchanged; no wider advisory recommendation is approved.

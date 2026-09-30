@@ -82,6 +82,17 @@ standard-library unittest suites. The runner discovers current tests instead of 
 fixed test count. It prints each test as it starts, aggregates failures, reports skipped coverage,
 and rejects an empty run. Use `--require-all` for release evidence.
 
+When selection IDs in `lib/capability-selections.json` change, run both
+`CopilotKit.test_optional_family_closures_survive_portable_clone` in
+`tests/integration/copilot-kit.py` and
+`InstalledDiscovery.test_optional_family_closure` in
+`tests/integration/catalog-installed.py` locally. Keep their exact inventory,
+dependency-order, resource, provenance and unchanged-consumer assertions; source
+catalog queries alone do not cover either installation route. Use the synthetic
+parent environment above and an explicitly selected short physical fixture root
+for the installed case. Write logs and review artifacts outside the inspected
+source while its preservation assertion is running.
+
 Unavailable assertions must emit a `SKIP:` line, not an informational `NOTE:`.
 For example, missing jq leaves manifest version-parity coverage unrun even when
 the other identity checks pass. The runner reports that suite as partial and
