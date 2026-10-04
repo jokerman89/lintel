@@ -45,7 +45,10 @@ installed resources, not pointer-only adapters or a hard size-limit workaround.
 ## Backward compatibility
 
 Public skill names, flags, heading anchors, task/requirement IDs and helper APIs
-are retained. Recovery recipes are preserved in full. The Swarm consumer differs
+are retained. The original recovery recipes are retained as preimages; source-review
+repairs add explicit missing-map/coordination and single-component job-ID guards,
+and stop after a failed map check. Valid recovery behavior remains unchanged.
+The Swarm consumer differs
 only in its reference context and explicit names for existing profile arguments.
 Required work/profile/QA/review/corroboration rules are not relaxed.
 
@@ -72,7 +75,9 @@ prove a model read it or that a host enforces permissions.
 
 Existing planning/coordination/continuity/core tests cover the new template shape,
 reasoned N/A, owner-aware guards, real joined setup/integrity behavior and blocked
-job/flat fallback. Preimage evidence checks the complete moved procedures.
+job/flat fallback. Negative fixtures cover a job-ID parent traversal, missing
+swarm inputs and failed-map fall-through. Preimage evidence distinguishes the
+complete original procedures from these explicitly reviewed guard additions.
 Installed-kit tests cover rebased links and missing-source refusal without target
 mutation. The existing Swarm shape test includes the new owner.
 

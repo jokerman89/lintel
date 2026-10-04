@@ -412,26 +412,29 @@ class PlanningEvidenceTests(FIXTURE["Fixture"]):
         for term in (
             "Conditional pivotal premise record", "not a new requirement",
             "no material premise", "reasoned", "N/A", "do not invent",
-            "intake question", "re-interview", "planned", "unverified",
+            "intake question", "re-interview", "observed", "unknown", "check-not-run",
         ):
             self.assertIn(term, " ".join(premise.split()))
-        columns = ["Premise / original decision", "Falsifier", "Observation status",
+        columns = ["Premise / decision ID", "Falsifier", "Observation status",
                    "Evidence / source", "Original requirement / task"]
         table_header = next(line for line in premise.splitlines() if line.startswith("| Premise"))
         self.assertEqual([cell.strip() for cell in table_header.strip("|").split("|")], columns)
         placeholders = (
             "`<premise or original decision link>`",
             "`<observation that would invalidate the premise>`",
-            "`<planned/unrun/observed>`",
+            "`<observed/unknown/check-not-run>`",
             "`<evidence or original record link>`",
             "`<original requirement/task links>`",
         )
         self.write("design.md", "## D014\n\nThe existing error code is a material compatibility premise.\n")
         self.write("plan.md", "## T017\n\nVerify original R1 without changing its identity.\n")
-        for values in (
+        carried = tuple(
             ("[D014](design.md#d014)", "The existing client observes a changed error code.",
-             "unrun", "[Existing premise](design.md#d014); no new observation",
-             "R1 / [T017](plan.md#t017)"),
+             status, f"[Existing premise](design.md#d014); inert fixture record: {status}",
+             "R1 / [T017](plan.md#t017)")
+            for status in ("observed", "unknown", "check-not-run")
+        )
+        for values in (*carried,
             ("N/A: no material premise for this bounded correction.",
              "N/A: no assumption to invalidate.", "N/A",
              "Existing acceptance applies; no new observation.",

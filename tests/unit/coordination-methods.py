@@ -439,6 +439,65 @@ steps:
         self.assertEqual(self.bash('source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; '
                                    'job_can_start example 1.1.a', expected=1).strip(), "no")
 
+    def test_job_recipe_rejects_paths_before_reading_the_runtime_parent(self):
+        self.put("jobs/example/job.yaml", "current_step: BUILD\n")
+        self.put("scope.md", "depth_schema: flat\n")
+        self.put("job.yaml", "current_step: WRONG_PARENT\n")
+        script = bash_block("skills/resume/references/state-and-job-recovery.md",
+                            "## Tree and job resume")
+        # Execute the real file form; Windows -c transport reinterprets backslashes.
+        script_path = self.root / "job-recovery.sh"
+        script_path.write_bytes((script + '\nprintf "%s" "$resume_target"\n').encode("utf-8"))
+        before = hashes(self.root)
+        for job_id in ("..", ".", "", "../outside", "..\\outside", "a/b", "a\\b"):
+            with self.subTest(job_id=job_id):
+                result = subprocess.run(
+                    [str(BASH), "--noprofile", "--norc", script_path.as_posix()],
+                    cwd=self.root, env={**self.env, "JOB_ID": job_id},
+                    capture_output=True, text=True, encoding="utf-8", check=False,
+                )
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("RESUME BLOCKED", result.stderr)
+                self.assertNotIn("WRONG_PARENT", result.stdout)
+        self.assertEqual(hashes(self.root), before)
+
+    def test_swarm_recipe_stops_on_missing_inputs_and_failed_map_validation(self):
+        source = self.root / "trusted"
+        for name in ("li-work-artifacts.py", "li-swarm.py"):
+            self.put(f"trusted/bin/{name}", "raise SystemExit(88)\n")
+        script = bash_block("skills/resume/references/state-and-job-recovery.md",
+                            "## Swarm-aware committed resume")
+        # Inert helper outcomes exercise the actual shell recipe, not live dispatch.
+        stub = (
+            "python3() {\n"
+            "  printf '%s\\n' \"$1\" >> \"$CALLS\"\n"
+            "  case \"$1\" in */li-work-artifacts.py) return 7 ;; *) return 0 ;; esac\n"
+            "}\n"
+            "[ \"$(type -t python3)\" = function ] || exit 90\n"
+        )
+        script_path = self.root / "swarm-recovery.sh"
+        script_path.write_bytes((stub + script).encode("utf-8"))
+        cases = (("", "coord.json", 1, 0), ("work.json", "", 1, 0),
+                 ("work.json", "coord.json", 7, 1))
+        for index, (mapping, coordination, expected_exit, expected_calls) in enumerate(cases):
+            with self.subTest(mapping=mapping, coordination=coordination):
+                calls = self.root / f"calls-{index}.txt"
+                result = subprocess.run(
+                    [str(BASH), "--noprofile", "--norc", script_path.as_posix()],
+                    cwd=self.root,
+                    env={**self.env, "LINTEL_SOURCE_ROOT": source.as_posix(),
+                         "selected_map": mapping, "coordination": coordination,
+                         "CALLS": calls.as_posix()},
+                    capture_output=True, text=True, encoding="utf-8", check=False,
+                )
+                self.assertEqual(result.returncode, expected_exit, result.stdout + result.stderr)
+                observed = calls.read_text(encoding="utf-8").splitlines() if calls.exists() else []
+                self.assertEqual(len(observed), expected_calls)
+                if expected_calls:
+                    self.assertTrue(observed[0].endswith("/li-work-artifacts.py"))
+                else:
+                    self.assertIn("RESUME BLOCKED", result.stderr)
+
     def test_optional_preferences_survive_with_whole_block_inheritance(self):
         parent = {"name": "parent", "version": "1.0.0", "extends": "_default",
                   "engineering": {"data_architecture": {"store": "fixture-parent", "window": "manual"}},

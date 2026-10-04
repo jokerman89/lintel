@@ -648,6 +648,16 @@ standalone consistency analysis are retained at
 proposed runtime tests are not observations. Those advisory reports do not
 replace the actual independent staged plan decision.
 
+**Source-review repair scope:** the first actual source pass identified two
+non-blocking gaps in the newly relocated/carry-forward method. Under the existing
+original-correction authority, retain DEFINE's exact premise-status vocabulary,
+reject empty/dot/parent/separator job IDs before path use, require the selected
+swarm map/coordination, and stop after a failed map check. Add negative fixtures
+and preserve valid behavior. These explicit guard additions supersede a claim
+of byte-identical final recipes; retain the original preimages and first passing
+move receipts unchanged as history. No helper API, phase, public role or new
+policy is introduced.
+
 ## Verified delivery 2026-10-04
 
 The compatible source batch was delivered by an authorized ordinary fast-forward

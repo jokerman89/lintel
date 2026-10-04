@@ -44,12 +44,13 @@ Carry the most consequential material premise from the approved design, or link 
 existing **Conditional pivotal premise record**. Preserve the original premise or
 decision ID. A premise is not a new requirement; keep it separate from the table above.
 
-| Premise / original decision | Falsifier | Observation status | Evidence / source | Original requirement / task |
+| Premise / decision ID | Falsifier | Observation status | Evidence / source | Original requirement / task |
 |---|---|---|---|---|
-| `<premise or original decision link>` | `<observation that would invalidate the premise>` | `<planned/unrun/observed>` | `<evidence or original record link>` | `<original requirement/task links>` |
+| `<premise or original decision link>` | `<observation that would invalidate the premise>` | `<observed/unknown/check-not-run>` | `<evidence or original record link>` | `<original requirement/task links>` |
 
-Use observed status only for actual evidence; otherwise retain planned, unrun or
-unverified status. Missing evidence alone does not make a material premise inapplicable.
+Carry DEFINE's `observed`, `unknown` or `check-not-run` status unchanged. Observed
+status requires actual evidence; a planned or unrun check is not an observation.
+Missing evidence alone does not make a material premise inapplicable.
 If there is no material premise, record a reasoned `N/A`; do not invent one, add an
 intake question or re-interview already approved work. This row carries existing
 design context, not new approval or evidence.

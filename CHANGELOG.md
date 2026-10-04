@@ -27,6 +27,9 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 - The enterprise snippet test extractor refuses to borrow a later section's
   Bash block. Existing positive chains and owner-aware source guards are retained.
+- Recovery rejects path-shaped job IDs before looking up a job and stops on
+  missing swarm inputs or a failed selected-map check. The premise record retains
+  DEFINE's existing observation-status values without an implicit translation.
 - The hot memory index links to the current working-state owner instead of
   duplicating a stale delivery/WIP snapshot.
 

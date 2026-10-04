@@ -15,6 +15,10 @@ If the selected map declares `execution_mode: "swarm"` and `coordination`, use t
 artifacts rather than reconstructing lane state from chat or the local ledger:
 
 ```bash
+if [ -z "${selected_map:-}" ] || [ -z "${coordination:-}" ]; then
+  echo "RESUME BLOCKED: select the original work map and its coordination before swarm recovery" >&2
+  exit 1
+fi
 repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
 if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
   source_root="$LINTEL_SOURCE_ROOT"
@@ -28,7 +32,7 @@ fi
   echo "NEEDS_CONTEXT: Lintel resume helpers missing under trusted source root" >&2
   exit 1
 }
-python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$selected_map"
+python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$selected_map" || exit $?
 python3 "$source_root/bin/li-swarm.py" status --repo "$repo" --coord "$coordination"
 python3 "$source_root/bin/li-swarm.py" wave --repo "$repo" --coord "$coordination"
 ```
@@ -123,11 +127,13 @@ mismatch still needs reconciliation through the host's actual question channel.
 
 ## Tree and job resume
 
-**Inputs from the selected job:** validated `JOB_ID`, trusted `LINTEL_SOURCE_ROOT`,
+**Inputs from the selected job:** its single-component `JOB_ID` (not a path), trusted `LINTEL_SOURCE_ROOT`,
 the working `LINTEL_REPO_ROOT`, and optional explicitly selected `LINTEL_SCOPE_PATH`.
 Step 1c and the main input classifier retain the original work/job and any
 `--from` override. Keep that selection and the main Step 3/4 preconditions;
 this procedure is not permission to select another job or skip dependencies.
+The guard rejects empty, dot, parent and separator-containing IDs before constructing
+a job path. It does not replace the original work, profile or permission checks.
 
 A flat/phased plan resumes to a **phase** (`current_step`). A `tree`-schema
 plan (L/XL, from the scale-parametric WBS) resumes to a **WBS node-path**
@@ -140,6 +146,11 @@ incomplete-and-startable step `name`; for a tree job that name *is* the
 node-path:
 
 ```bash
+case "${JOB_ID:-}" in
+  ""|"."|".."|*/*|*\\*)
+    echo "RESUME BLOCKED: select one job ID, not an empty value or path" >&2
+    exit 1 ;;
+esac
 resume_source="${LINTEL_SOURCE_ROOT:?select trusted source}"
 source "$resume_source/bin/_jobs.sh"
 resume_job_dir="$(job_path "${JOB_ID:?select the job to resume}")"
