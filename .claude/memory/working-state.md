@@ -8,11 +8,11 @@ Durable rules remain in [lessons.md](lessons.md); calibration is in
 ## Active — original V2 findings
 
 **Status:** the original 84 findings remain a separately tracked programme.
-The compatible 0.13.8 source packages landed on **main** at
-`b2516af57244017160c499558f183f95e7a9fe5c`, verified remotely at
-2026-10-04T08:17:28Z. Source presence is not proof of review, SHIP or a main
-landing; this delivery has separate source review, actual gates and readback
-evidence. Neither 0.13.7 nor 0.13.8 completes all of Skill review v2.
+The latest compatible source continuation landed on **main** as **0.13.9** at
+`8c04c7f665068b8822090a0a6254330b55dede50`, verified remotely at
+2026-10-04T18:28:29Z. Separate independent source review, actual QA/SHIP gates and
+exact-head CI precede that readback. Source presence is not proof of review or
+acceptance, and this delivery does not complete all of Skill review v2.
 
 **Authority:** [work map](../plans/v2-findings/work.json),
 [specification](../plans/v2-findings/spec.md) and
@@ -24,25 +24,25 @@ or establish comparative model/native efficacy.
 
 **Historical starting baseline:** the main revision supplied for this continuation was
 `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`, version **0.13.7**.
-It was fast-forwarded normally to the verified 0.13.8 source revision above.
+It was fast-forwarded normally through the 0.13.8 source delivery at `b2516af5`
+and its capture at `19fd4dcc`, then the verified 0.13.9 source above.
 
-**Closeout:** the [verified delivery account](../plans/v2-findings/plan.md#verified-delivery-2026-10-04)
-records the 54 compatible source clauses, jobs residual, eight independent
-acceptance records and actual QA/SHIP. Exact-source CI passed 600 scripts across
-three OSes with no required failures/skips/partials. Local method/fixture results
-and implementer self-review alone do not clear those gates.
+**Closeout:** the [current delivery account](../plans/v2-findings/plan.md#verified-method-continuation-delivery-2026-10-04)
+records the three original source closures and their current independent
+acceptance. CI 37217388629 passed 600 scripts across three OSes with no required
+failures/skips/partials; 114 local methods, all 43 shape checks and native checks also
+passed. These observations are not one combined count or model-efficacy evidence.
 
-**Remaining:** 36 original findings are source-complete/retained-guidance; 48
-retain explicit clauses. These include unimplemented method/template proposals,
-architecture/public-surface choices, live-host evidence and outcome experiments.
-Not all are host blockers. Resume the original unclosed clauses, preserving
-their authority and evidence, rather than replaying the delivered packages.
+**Remaining:** 39 original findings are source-complete/retained-guidance; 45
+retain explicit clauses. Only A-07/B-09/B-11 changed disposition in this
+continuation; the other 81 were preserved, not re-reviewed. Remaining public
+portfolio/role/phase choices, empirical comparisons and exact host holds need
+their own authority/evidence. Do not turn that into a blanket blocker or replay
+the delivered source packages.
 
-**Current continuation:** original A-07, B-09 and B-11 are being completed through
-P10 in the same work map, followed by P9 integration. The conditional premise row
-and complete recovery/evidence reference moves are implemented on the continuation
-branch; current source review and delivery are still pending. Planned 0.13.9 is
-not another main landing or a new whole-finding closure count.
+**Execution limit:** use LF recipe files through `bin/li-run`, as the native
+caller specifies. The retained P3 records that Windows `bash -c` transport can
+reinterpret backslashes; that route and live-host enforcement are not claimed.
 
 ## Recorded deliveries — read within their exact scope
 

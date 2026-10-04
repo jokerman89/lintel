@@ -16,13 +16,13 @@ Checked boxes cover these bounded clauses, not all clauses of each original
 finding. The original programme remains open; see
 [verified delivery](#verified-delivery-2026-10-04).
 
-The complete remaining inventory still contains ready implementation, not only
-external blockers. Original `lane-A-07`, `lane-B-09` and `lane-B-11` are now
-elaborated in P10. Their full claims were reread against 0.13.8. B-09/B-11 move
-from P3 into P10 for their remaining clauses, without changing their IDs or
-rewriting the prior P3 review. P9 is reopened for the next aggregate delivery.
-The current map has 56 original task IDs across ten packages; every previous ID
-is retained, with A-07 the only newly elaborated original finding.
+The remaining inventory was not treated as a blanket blocker. Original
+`lane-A-07`, `lane-B-09` and `lane-B-11` were completed through P10 and landed
+with P9's verified 0.13.9 source delivery. B-09/B-11 moved from P3 into P10
+without changing IDs or rewriting the prior P3 review. The current map retains
+56 original task IDs across ten packages; their checkboxes describe the
+elaborated scope, not completion of all 84 findings. See the
+[current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
 ## Outcome and signals
 
@@ -199,8 +199,8 @@ still open, never as a reason to omit these compatible corrections.
 - [x] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
 - [x] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
 - [x] lane-B-06 Describe built-in handoff checks and fixed accounting honestly.
-- [ ] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
-- [ ] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
+- [x] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
+- [x] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
 - [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
 - [x] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
 - [x] C-07 Ask for observed lesson efficacy/recurrence instead of inventing reference frequency.
@@ -484,7 +484,7 @@ inventory, not this first-leaf excerpt.
 
 ## Integration and review
 
-- [ ] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
+- [x] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
 
 The completed source delivery changed 0.13.7 to 0.13.8. Its explicitly reasoned
 target-local profile rebind preserves generation 1 as history and selects
@@ -519,7 +519,7 @@ worktrees is part of proving finding closure.
 
 ## Original method proposals continuation
 
-- [ ] lane-A-07 Carry a material riskiest assumption and its falsifying observation into the native spec template.
+- [x] lane-A-07 Carry a material riskiest assumption and its falsifying observation into the native spec template.
 
 **Authority and design:** the original A-07/B-09/B-11 claims and the existing
 SOURCE, TRUTH, METHOD and ACCEPTANCE requirements. These are missing compatible
@@ -658,7 +658,64 @@ of byte-identical final recipes; retain the original preimages and first passing
 move receipts unchanged as history. No helper API, phase, public role or new
 policy is introduced.
 
+## Verified method continuation delivery 2026-10-04
+
+The 0.13.9 source landed on main through an ordinary authorized fast-forward
+from `19fd4dccc44c1d7de37f5e89afca7e3c69361435` to
+`8c04c7f665068b8822090a0a6254330b55dede50`, verified remotely at
+2026-10-04T18:28:29Z. The source tree is
+`5c4596c57cd7a7d17a924d91a6f005714c35922e`. No tag, release or deployment was created.
+
+The independent reviewer assessed each full original A-07/B-09/B-11 claim as
+source-satisfied. The actual canonical P10 decision covers all three leaves and
+nine required controls. Its native request/result transport was corroborated,
+the bytes copied without reserialization, the real writer appended once, and
+the latest-reader/QA/SHIP gate passed before publication.
+
+| Evidence | Observed result or content binding |
+|---|---|
+| Current source SPEC | `cc2d3116d72814693bdf73e3f9be3b36a4c491dbc2d433139007919afea3a671`; three original rows pass, no findings |
+| Current source QUALITY | `7512435da61368870d8f22442bd3dc44d022b0cc9a6ed7114620dec011261195`; 22 questions, no P1/P2, one retained P3 |
+| Canonical source decision | `d29bff5c29329e96958e5381510a7b638b9f67f7bdfdd1c037f7c232247bb07f` |
+| Actual source QA/SHIP receipt | `8a8b70d233fc155e86b6e55e43091cef0a0b47ea35575454da7b10ff30a0266a` |
+| Same-context final QA | `00e9198e12636315877488aa5a42ea6f017cc8b6954c1487a9db937fc483d02e` |
+| Exact-head CI | run `37217388629`, attempt 1, 23 successful jobs, 27 strict invocations, 600 script files; 200 per OS, no fail/skip/partial |
+| Hosted evidence summary | `d6ad0a56187ff16665f0525555d53a14cf4baa9990e14c7c5792c94ef663f87d` |
+| Current local checks | 114 unittest methods in six selections; full M3 43/43; native 172/catalog/wiki/whitespace passed |
+| M2 | Initial and repair mechanical audits GREEN/0; semantic source review remains separately evidenced above |
+
+The local methods and hosted script-file counts are different observations,
+not one aggregate test-count claim. Old a304 source reports/CI and every failed
+attempt remain history, not evidence substituted for the corrected head.
+
+**Original inventory:** 39 source-complete/retained-guidance findings and 45
+explicit remaining clauses. Only A-07/B-09/B-11 changed disposition; the other
+81 rows were retained, not re-reviewed. All 56 elaborated mapped tasks are
+verified in their stated scopes. This does not finish the original 84-finding
+programme, supersede accepted architecture, retire public capabilities or claim
+unrun model/live-host outcomes.
+
+**Operator continuity:** update managed native resources through the existing
+adapter and perform the existing explicitly reasoned target-local profile rebind
+for the version change. This target's GEN2 is
+`sha256:0ecb238fcfd9d6bb45fa7c53a5b2a52a50c077ca7fdaa45a4f4f65aab288ec98`;
+its GEN1 and other targets' references remain separate history.
+Recovery and shared-evidence details now live in their complete named references;
+public headings, inputs and helper contracts remain.
+
+**Retained P3:** execute the supplied Bash recipes from an LF file through
+`bin/li-run`, as the native caller already specifies. Windows `bash -c` transport
+can reinterpret backslashes and is not the validated route. This is an explicit
+execution-form limitation, not host enforcement or a waived required check.
+
+Continue only original unresolved clauses with their actual decision/evidence
+requirements. The exact native-hook/ADR holds, public portfolio/role choices,
+accepted leaf/phase policy and empirical comparisons are not closed by this
+delivery. Private logs and native session evidence were not published.
+
 ## Verified delivery 2026-10-04
+
+The following 0.13.8 delivery record is retained unchanged as scoped history.
 
 The compatible source batch was delivered by an authorized ordinary fast-forward
 from `f9796bb8b3fbcdab3e235f30401933ea1b2f3162` to

@@ -1,8 +1,8 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** APPROVED for the current three-clause scope under existing authority;
-implementation still requires its independent plan-review gate. Prior delivered
-scope is not reopened or reclassified.
+**Status:** APPROVED original mapped work; the 0.13.9 three-clause source
+continuation and its integration are delivered. The original programme remains
+open; do not replay a completed source scope.
 **Work map:** [work.json](work.json).
 
 ## Context
@@ -12,8 +12,11 @@ findings. Version 0.13.7 delivered only selected corrections. The next compatibl
 batch was delivered to main as **0.13.8** at
 `b2516af57244017160c499558f183f95e7a9fe5c`, from the historical
 `f9796bb8b3fbcdab3e235f30401933ea1b2f3162` baseline. Do not restart that completed
-source batch. Read the [verified delivery account](plan.md#verified-delivery-2026-10-04)
-and the current main before selecting the next original unclosed clause.
+source batch. Its 0.13.9 continuation then landed on main at
+`8c04c7f665068b8822090a0a6254330b55dede50`, verified at
+2026-10-04T18:28:29Z. Read the
+[current delivery account](plan.md#verified-method-continuation-delivery-2026-10-04)
+and current main before selecting another original unclosed clause.
 
 Read [spec.md](spec.md) and [plan.md](plan.md). Original requirements are the
 84 finding IDs, supported by the 165 reviewed items and 37 adjudications.
@@ -21,26 +24,27 @@ Input digests are in the spec. Private originals are retained by the coordinatin
 session; request the selected unchanged source when needed, never reconstruct it
 from a memory summary or publish raw private reports.
 
-The current disposition is 36 source-complete/retained-guidance findings and 48
+The current disposition is 39 source-complete/retained-guidance findings and 45
 with remaining clauses. The plan's checked boxes cover its elaborated compatible
 clauses and source delivery, not closure of all 84 findings. Preserve the exact
 remaining clauses; distinguish unimplemented proposals from genuine authority,
 host and evidence boundaries rather than calling every open item a blocker.
 
-## Current bounded continuation
+## Completed bounded continuation
 
-Finish original A-07, B-09 and B-11 through P10, then the reopened P9 integration
-task in the same map. Carry the material premise/falsifier into the native spec
-template, extract Resume's recovery details into a complete owned reference, and
-move Swarm's shared-evidence procedure into its already named reference. Preserve
-every original control, mode, helper behavior and public entrypoint. Read the
-plan's exact acceptance and verification before editing. This is continuation of
-the original 84 findings, not a new initiative or a blanket architectural decision.
+Original A-07, B-09 and B-11 were completed through P10 and verified P9 integration:
+the separate conditional premise/falsifier record, complete reference-owned
+recovery methods and the shared-evidence consumer in its named reference. Source
+review also repaired premise vocabulary and invalid recovery-input handling.
+Actual current-source review, QA/SHIP and exact-head 600-script CI passed before
+main delivery. The plan records the checks and hashes; neither this prose nor the
+checked elaborated tasks closes the other original clauses.
 
-The coordinator owns the isolated continuation tree, resource closures, native
-generation, version and original ledger. Do not alter the completed 0.13.8 tree
-or its private evidence. Use this target's actual profile, not the prior target's
-reference. Keep whole-finding disposition changes pending actual source review.
+Preserve completed 0.13.8/0.13.9 trees, records and earlier generations as history.
+Use the actual current target's profile, never another tree's reference. Run
+the shell recipes from LF files through `bin/li-run`, as the native caller
+requires; Windows command-string `-c` transport is not the validated route.
+Further original closure needs its own actual source or outcome evidence.
 
 ## Constraints
 
@@ -68,6 +72,6 @@ finish the operator's request.
 
 ## What not to replay
 
-The native 1a, Patterns, Adaptive and 0.13.3-0.13.8 deliveries and their historical
+The native 1a, Patterns, Adaptive and 0.13.3-0.13.9 deliveries and their historical
 verification are complete for their stated scope. Reuse evidence only within its
 original applicability. The private Impact report is complete and remains private.
