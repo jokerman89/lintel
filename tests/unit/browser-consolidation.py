@@ -193,8 +193,9 @@ console.log('no-launch option/artifact/action refusals and synthetic extraction/
             "skills/frontend-design-review/references/built-review.md",
             "--url", "--routes", "--viewport", "--baseline-ref",
             "--include-copy-pillar", "1440x900,375x812",
-            "Visual polish", "Accessibility", "Motion", "Copy",
-            "Layout/density", "Brand consistency", "file:line",
+            "typography_hierarchy", "motion_coherence", "shader_perf_budget",
+            "accessibility_wcag", "brand_conformance", "responsive_fidelity",
+            "Layout/density", "copy", "file:line",
             "screenshot", "web-session --mode browse", "unverified",
             "standalone", "snapshot/inspect", "never an invented",
         )

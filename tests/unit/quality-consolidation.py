@@ -137,7 +137,8 @@ class QualityWorkflowContracts(unittest.TestCase):
         ):
             with self.subTest(requirement=phrase):
                 self.assertIn(phrase, text)
-        self.assertIn("../../agents/engineering/RegressionDetective.md#isolated-bisection-procedure", text)
+        self.assertIn("../../bin/li-isolated-bisect", text)
+        self.assertIn("five literal arguments", text)
         self.assertIn("No code mutation", text)
         self.assertIn("--cross-check", section(text, "Inputs"))
         self.assertNotIn("--with-codex", section(text, "Inputs"))
@@ -145,10 +146,13 @@ class QualityWorkflowContracts(unittest.TestCase):
     def test_bisect_method_remains_owned_and_recoverable(self) -> None:
         text = read("agents/engineering/RegressionDetective.md")
         self.assertIn("never stash/switch the caller's checkout", text)
-        self.assertIn("# lintel-isolated-bisect", text)
-        self.assertIn('trap finish_bisect EXIT', text)
-        self.assertIn('trap \'exit 130\' INT', text)
-        self.assertIn('trap \'exit 143\' TERM', text)
+        self.assertIn("](../../bin/li-isolated-bisect)", text)
+        helper = read("bin/li-isolated-bisect")
+        self.assertIn("# lintel-isolated-bisect", helper)
+        self.assertIn('trap finish_bisect EXIT', helper)
+        self.assertIn('trap \'exit 130\' INT', helper)
+        self.assertIn('trap \'exit 143\' TERM', helper)
+        self.assertIn('git "${trial_git_options[@]}" -C "$trial" bisect reset', helper)
         self.assertIn('bisect reset', text)
         self.assertIn("Recovery/reset fails", text)
         self.assertIn("Never persist it in local/global Git config", text)

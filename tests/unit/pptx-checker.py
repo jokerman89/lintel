@@ -15,6 +15,7 @@ import subprocess
 import struct
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 import warnings
@@ -239,6 +240,30 @@ class PptxChecker(unittest.TestCase):
         with patch.object(Path, "open", side_effect=AssertionError("nonregular input opened")):
             with self.assertRaises(ValueError):
                 self.checker.inspect_pptx(self.root)
+
+    def test_path_and_descriptor_metadata_are_compared_with_their_own_observations(self):
+        fields = ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns", "st_ctime_ns")
+        path_state = self.source.lstat()
+        descriptor = {field: getattr(path_state, field) for field in fields}
+        descriptor["st_mtime_ns"] -= 1
+        descriptor["st_ctime_ns"] -= 1
+        stable = SimpleNamespace(**descriptor)
+        before = self.source.read_bytes()
+        with patch.object(self.checker.os, "fstat", return_value=stable):
+            self.assertEqual(self.checker._read_file(self.source, 4096), before)
+        changed = SimpleNamespace(**{**descriptor, "st_mtime_ns": descriptor["st_mtime_ns"] + 2})
+        with patch.object(self.checker.os, "fstat", side_effect=[stable, changed]):
+            with self.assertRaisesRegex(ValueError, "changed during read"):
+                self.checker._read_file(self.source, 4096)
+        changed_path = SimpleNamespace(**{
+            **{field: getattr(path_state, field) for field in fields},
+            "st_ctime_ns": path_state.st_ctime_ns + 1,
+        })
+        with patch.object(Path, "lstat", side_effect=[path_state, changed_path]), \
+                patch.object(self.checker.os, "fstat", return_value=stable):
+            with self.assertRaisesRegex(ValueError, "changed during read"):
+                self.checker._read_file(self.source, 4096)
+        self.assertEqual(self.source.read_bytes(), before)
 
     def test_retention_uses_explicit_required_paragraphs_and_cells(self):
         parts = self.checker.document_text(self.archive())

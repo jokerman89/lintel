@@ -43,13 +43,14 @@ echo 'PASS: installed defaults and consumer packs resolve with distinct source/t
 # Execute the skill's real dispatcher. A blank pack in an ordinary consumer must
 # find _default in the installed bundle, not maintain a second copy/write recipe.
 extract_step() {
+  grep -Fq '../pack-switch/references/lifecycle.md#create' "$ROOT/skills/pack-create/SKILL.md"
   awk '
-    /^### 2\. Dispatch/ { selected=1; next }
-    selected && /^### / { exit }
+    /^## Create$/ { selected=1; next }
+    selected && /^## / { exit }
     selected && /^```bash/ { block=1; next }
     block && /^```/ { exit }
     block { print }
-  ' "$ROOT/skills/pack-create/SKILL.md"
+  ' "$ROOT/skills/pack-switch/references/lifecycle.md"
 }
 parent=""; template_pack=""; name=blank; scope=repo; target_dir="$target_repo/packs"
 dispatcher="$(extract_step)"

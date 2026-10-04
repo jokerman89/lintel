@@ -17,6 +17,7 @@ echo "================================="
 
 # Helper present + sources cleanly
 HELPER="$REPO_ROOT/bin/_jobs.sh"
+export LINTEL_JOBS_NO_INIT=1
 if [ -f "$HELPER" ]; then
   pass "bin/_jobs.sh present"
   if ( source "$HELPER" 2>/dev/null && declare -F job_create >/dev/null ); then
@@ -91,6 +92,7 @@ fi
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/.lintel"
+export LINTEL_JOBS_REGISTRY="$LINTEL_HOME/jobs/_active.md"
 mkdir -p "$LINTEL_HOME/audit"
 SBREPO="$TMP/repo"
 mkdir -p "$SBREPO/.claude"

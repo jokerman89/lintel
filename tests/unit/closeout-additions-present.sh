@@ -67,6 +67,13 @@ fi
 # M-1: working-state reviewer-concerns tracking (v5 home: .claude/memory/working-state.md)
 MEM="$REPO_ROOT/.claude/memory/working-state.md"
 if [ -f "$MEM" ]; then
+  HISTORY="$REPO_ROOT/.claude/memory/working-state-history-2026-10-03.md"
+  if grep -q 'working-state-history-2026-10-03.md' "$MEM" && [ -f "$HISTORY" ]; then
+    pass "working-state.md links its preserved historical reviewer-concerns"
+    MEM="$HISTORY"
+  else
+    fail "working-state.md lost the preserved history link"
+  fi
   if grep -q "reviewer-concerns" "$MEM"; then
     pass "working-state.md has reviewer-concerns tracking entry (M-1)"
   else

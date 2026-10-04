@@ -58,6 +58,9 @@ set -eu
 tool="${0##*/}"
 printf '%s\\t%s\\t%s\\n' "$tool" "$PWD" "$*" >> "$STUB_LOG"
 case "$tool:$*" in
+  "git:rev-parse --show-toplevel")
+    [ "${ROOT_STATUS:-0}" = 0 ] || exit "$ROOT_STATUS"
+    printf '%s\\n' "${DISCOVER_ROOT:-$PWD}" ;;
   "git:fetch -q origin") exit "${FETCH_STATUS:-0}" ;;
   "git:pull --ff-only -q") exit "${PULL_STATUS:-0}" ;;
   "copilot:plugin list")
@@ -70,6 +73,21 @@ case "$tool:$*" in
   *) printf 'ERROR: unexpected stub invocation: %s %s\\n' "$tool" "$*" >&2; exit 99 ;;
 esac
 """
+
+UPDATE_DRIVER = r'''
+set -euo pipefail
+for tool in git gemini copilot droid claude codex cursor; do
+  resolved="$(command -v "$tool")" || { echo "Fixture command unavailable: $tool" >&2; exit 97; }
+  case "$resolved" in */*) ;; *) echo "Fixture command is not a file: $tool" >&2; exit 97 ;; esac
+  [ -f "$resolved" ] && [ ! -L "$resolved" ] || exit 97
+  actual="$(cd "${resolved%/*}" && pwd -P)/${resolved##*/}"
+  expected="$(cd "$STUB_ROOT" && pwd -P)/$tool"
+  [ "$actual" = "$expected" ] || { echo "Fixture command escaped: $tool" >&2; exit 97; }
+  printf 'FIXTURE_COMMAND=%s\t%s\n' "$tool" "$actual"
+done
+if [ "${STUB_PREFLIGHT_ONLY:-0}" = 1 ]; then exit 0; fi
+source "$UPDATE_SCRIPT" "$@"
+'''
 
 
 def write(path: Path, text: str) -> None:
@@ -137,11 +155,21 @@ class Fixture(unittest.TestCase):
             GIT_CONFIG_KEY_1="commit.gpgsign",
             GIT_CONFIG_VALUE_1="false",
             GIT_TERMINAL_PROMPT="0",
+            GIT_CEILING_DIRECTORIES=self.base.as_posix(),
             GIT_AUTHOR_NAME="Lintel fixture",
             GIT_AUTHOR_EMAIL="fixture@example.invalid",
             GIT_COMMITTER_NAME="Lintel fixture",
             GIT_COMMITTER_EMAIL="fixture@example.invalid",
         )
+        for key, relative in {
+            "APPDATA": "AppData/Roaming", "LOCALAPPDATA": "AppData/Local",
+            "XDG_DATA_HOME": ".local/share", "XDG_CACHE_HOME": ".cache",
+            "XDG_STATE_HOME": ".local/state", "XDG_RUNTIME_DIR": ".run",
+            "TEMP": "tmp", "TMP": "tmp", "TMPDIR": "tmp",
+        }.items():
+            directory = self.home / relative
+            directory.mkdir(parents=True, exist_ok=True)
+            self.env[key] = directory.as_posix()
         write(self.home / "empty.gitconfig", "")
         (self.home / "no-hooks").mkdir()
         self.copy_source()
@@ -244,13 +272,14 @@ class TrustedHooks(Fixture):
         producer = (ROOT / "agents/engineering/PerfBudgetEnforcer.md").read_text(
             encoding="utf-8"
         )
-        budget = producer.split("```yaml\n", 1)[1].split("\n```", 1)[0]
+        self.assertEqual(producer.count("Per-journey budget:"), 1)
+        budget = producer.split("Per-journey budget:", 1)[1].split("```yaml\n", 1)[1].split("\n```", 1)[0]
         self.assertIn("journey: <name>", budget)
-        self.assertIn("budget:\n  p50_ms: <number>\n  p95_ms: <number>", budget)
+        self.assertIn("budget:\n  p50_ms: <number or unmeasured>\n  p95_ms: <number or unmeasured>", budget)
         return (
             budget.replace("journey: <name>", f"journey: {journey}\npath: {CUSTOM_PATH}")
-            .replace("p95_ms: <number>", f"p95_ms: {p95}")
-            .replace("<number>", "200")
+            .replace("p95_ms: <number or unmeasured>", f"p95_ms: {p95}")
+            .replace("<number or unmeasured>", "200")
             + "\n"
         )
 
@@ -818,7 +847,7 @@ class ShellStepRunner(Fixture):
 
 
 class WorkflowSourceExamples(unittest.TestCase):
-    SKILLS = ("review", "ship", "usage-log", "orientator", "frontend-style-extract")
+    SKILLS = ("review", "ship", "usage-log", "frontend-style-extract")
     HELPERS = ("bin/_audit.sh", "lib/state.sh", "lib/pack-resolver.sh",
                "lib/orientator-routing.sh", "lib/cycle-footer.sh")
 
@@ -869,6 +898,27 @@ class WorkflowSourceExamples(unittest.TestCase):
                 commands.extend((skill, bindings[0] + "\n" + line) for line in sources)
         self.assertEqual({skill for skill, _ in commands}, set(self.SKILLS))
         return commands
+
+    def test_orientator_uses_the_explicit_catalog_owner_without_target_fallback(self) -> None:
+        caller = (ROOT / "skills/orientator/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("](../catalog/references/intent.md)", caller)
+        owner = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
+        blocks = [block for block in re.findall(r"^[ \t]*```bash[^\n]*\n(.*?)^[ \t]*```[ \t]*$",
+                                                owner, re.DOTALL | re.MULTILINE)
+                  if "# lintel-catalog-intent" in block]
+        self.assertEqual(len(blocks), 1)
+        write(self.source / "bin/li-catalog.py", "import sys\nprint(repr(sys.argv[1:]))\n")
+        write(self.target / "bin/li-catalog.py", "raise RuntimeError('target code executed')\n")
+        inputs = {"keyword": "literal; query", "python_cmd": Path(sys.executable).as_posix()}
+        good = self.run_shell(blocks[0], LINTEL_SOURCE_ROOT=self.source.as_posix(), **inputs)
+        self.assertEqual(good.returncode, 0, good.stdout + good.stderr)
+        self.assertEqual(good.stdout.strip(), repr(["--json", "--kind=all", "--query=literal; query"]))
+        missing = self.run_shell(blocks[0], CLAUDE_PLUGIN_ROOT=self.plugin.as_posix(), **inputs)
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertNotIn("target code executed", missing.stderr)
+        invalid = self.run_shell(blocks[0], LINTEL_SOURCE_ROOT=(self.base / "missing").as_posix(), **inputs)
+        self.assertNotEqual(invalid.returncode, 0)
+        self.assertNotIn("target code executed", invalid.stderr)
 
     def run_shell(self, script: str, **bindings: str) -> subprocess.CompletedProcess[str]:
         env = dict(self.env, **bindings)
@@ -1138,14 +1188,45 @@ class Updater(Fixture):
             "PATH": str(self.stubs) + os.pathsep + self.env["PATH"],
             "STUB_LOG": self.log.as_posix(),
             "STUB_INSTALL_MARKER": self.install_marker.as_posix(),
+            "STUB_ROOT": self.stubs.as_posix(),
+            "UPDATE_SCRIPT": (self.source / "bin/li-update").as_posix(),
         }
 
     def update(self, *args: str, **statuses: str) -> subprocess.CompletedProcess[str]:
         if self.log.exists():
             self.log.unlink()
-        return self.bash(
-            self.source / "bin/li-update", *args, extra=dict(self.update_env, **statuses)
+        return subprocess.run(
+            [BASH, "--noprofile", "--norc", "-c", UPDATE_DRIVER, "fixture-update", *args],
+            cwd=self.target, env=dict(self.env, **self.update_env, **statuses),
+            input="", capture_output=True, text=True, encoding="utf-8", timeout=120,
         )
+
+    def test_command_resolution_preflight_only_is_nonmutating(self) -> None:
+        before = snapshot(self.home)
+        result = self.update(STUB_PREFLIGHT_ONLY="1")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual({line.split("\t", 1)[0] for line in result.stdout.splitlines()},
+                         {f"FIXTURE_COMMAND={name}" for name in
+                          ("git", "gemini", "copilot", "droid", "claude", "codex", "cursor")})
+        self.assertFalse(self.log.exists())
+        self.assertFalse(self.install_marker.exists())
+        self.assertEqual(snapshot(self.home), before)
+        print(result.stdout.strip())
+
+    def test_wrong_command_resolution_stops_before_updates(self) -> None:
+        self.update_env["PATH"] = self.env["PATH"]
+        result = self.update(STUB_PREFLIGHT_ONLY="1")
+        self.assertEqual(result.returncode, 97, result.stdout + result.stderr)
+        self.assertFalse(self.log.exists())
+        self.assertFalse(self.install_marker.exists())
+
+    def test_ancestor_repository_is_not_updated(self) -> None:
+        result = self.update(DISCOVER_ROOT=self.base.as_posix())
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn("git fetch -q origin", self.calls())
+        self.assertNotIn("git pull --ff-only -q", self.calls())
+        self.assertIn("not the selected Git working root", result.stderr)
+        self.assert_scriptable_host_runs()
 
     def calls(self) -> list[str]:
         return [
@@ -1162,7 +1243,8 @@ class Updater(Fixture):
     def test_success_preserves_all_hosts_and_operator_guidance(self) -> None:
         result = self.update()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(self.calls()[:2], ["git fetch -q origin", "git pull --ff-only -q"])
+        self.assertEqual(self.calls()[:3], ["git rev-parse --show-toplevel",
+                                          "git fetch -q origin", "git pull --ff-only -q"])
         self.assert_scriptable_host_runs()
         for guidance in ("claude code:", "codex:", "cursor:", "li-doctor"):
             self.assertIn(guidance, result.stdout)

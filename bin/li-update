@@ -6,7 +6,7 @@
 # implements: ADR-0008, ADR-0035
 # intent: .claude/plans/universal-implementation/packages/P01.md
 # constraints: preserve subprocess failure while continuing independent hosts
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-10-04
 
 set -euo pipefail
 
@@ -36,6 +36,8 @@ Note: Claude Code, Codex, and Cursor update via in-CLI commands —
       this script just lists them for you to run.
       Copilot falls back to a forced install only when its update fails.
       An unrecovered source update, host update or discovery failure exits nonzero.
+      Source updates require LINTEL_HOME itself to be the Git working root;
+      discovering an ancestor repository never authorizes updating that ancestor.
 EOF
       exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -86,7 +88,20 @@ if [ -d "$LINTEL_HOME/.git" ]; then
   if [ "$DRY_RUN" = "1" ]; then
     echo "  [dry-run] cd $LINTEL_HOME && git fetch && git pull --ff-only"
   else
-    if (cd "$LINTEL_HOME" && run git fetch -q origin && run git pull --ff-only -q); then
+    if (
+      cd "$LINTEL_HOME" || exit 1
+      selected_root="$(pwd -P)"
+      git_root="$(git rev-parse --show-toplevel)" || {
+        echo "ERROR: selected source is not a Git working root; no fetch or pull." >&2
+        exit 1
+      }
+      actual_root="$(cd "$git_root" && pwd -P)" || exit 1
+      [ "$selected_root" = "$actual_root" ] || {
+        echo "ERROR: discovered repository is not the selected Git working root; no fetch or pull." >&2
+        exit 1
+      }
+      run git fetch -q origin && run git pull --ff-only -q
+    ); then
       echo "  ✓ updated"
     else
       record_failure "$?"

@@ -251,7 +251,8 @@ class CatalogMetadata(unittest.TestCase):
         result = self.catalog.metadata(ROOT, name="generate-visio")
         self.assertEqual(result["matched"], 1)
         record = result["entries"][0]
-        self.assertIn("TEMPLATE ONLY", record["description"])
+        self.assertIn("Visio scaffolding slot", record["description"])
+        self.assertIn("no curated generation workflow", record["description"])
         self.assertTrue(any(hint["level"] == "full" for hint in record["cli_support"]))
         self.assertEqual(record["maturity"], "unknown")
         self.assertFalse(result["executed"])
@@ -491,8 +492,12 @@ class CatalogMetadata(unittest.TestCase):
         self.assertIn(b"PyYAML", result.stderr)
 
     def test_selected_callers_use_one_query_before_loading_bodies(self):
+        owner = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
         for name in ("catalog", "skill-router"):
-            body = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            caller = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            expected_link = "references/intent.md" if name == "catalog" else "../catalog/references/intent.md"
+            self.assertIn(f"]({expected_link})", caller)
+            body = owner
             self.assertIn("li-catalog.py", body)
             self.assertIn("--json", body)
             self.assertIn("selected", body)

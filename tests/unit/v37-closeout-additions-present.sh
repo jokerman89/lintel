@@ -114,8 +114,10 @@ fi
 
 # --- Reviewer-concern tracking — working-state captures v3.7 PRs (v5 home) ---
 MEM="$REPO_ROOT/.claude/memory/working-state.md"
-if [ -f "$MEM" ] && grep -q "PR #21" "$MEM"; then
-  pass "working-state.md tracks PR #21 (v3.7 design doc reviewer-concerns)"
+HISTORY="$REPO_ROOT/.claude/memory/working-state-history-2026-10-03.md"
+if [ -f "$MEM" ] && grep -q 'working-state-history-2026-10-03.md' "$MEM" &&
+   [ -f "$HISTORY" ] && grep -q "PR #21" "$HISTORY"; then
+  pass "working-state.md links retained PR #21 reviewer-concern history"
 else
   fail "working-state.md missing PR #21 reviewer-concern tracking"
 fi

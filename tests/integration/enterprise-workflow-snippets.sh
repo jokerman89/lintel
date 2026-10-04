@@ -11,10 +11,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
 TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1
 trap 'rm -rf "$TMP"' EXIT
-export LINTEL_HOME="$TMP/home" LINTEL_REPO_ROOT="$ROOT" LINTEL_SOURCE_ROOT="$ROOT"
+export LINTEL_HOME="$TMP/home" LINTEL_REPO_ROOT="$TMP/project" LINTEL_SOURCE_ROOT="$ROOT"
 export LINTEL_PACKS_DIR="$LINTEL_HOME/packs" LINTEL_AUDIT_DIR="$TMP/audit"
 export LINTEL_SESSION_ID="enterprise-workflow-test"
 mkdir -p "$LINTEL_PACKS_DIR/base" "$TMP/audit"
+mkdir -p "$LINTEL_REPO_ROOT/.claude"
+printf 'layout_version: 5\n' > "$LINTEL_REPO_ROOT/.claude/lintel-layout.yaml"
 
 # Execute the actual skill's Bash block, so a copied test implementation cannot
 # conceal a regression in the instructions that agents receive.
@@ -28,7 +30,8 @@ extract_step() {
   test -s "$3"
 }
 extract_step "$ROOT/skills/scope/SKILL.md" '### Step 4 ' "$TMP/scope.sh"
-extract_step "$ROOT/skills/pack-create/SKILL.md" '### 2. Dispatch' "$TMP/create.sh"
+grep -Fq '../pack-switch/references/lifecycle.md#create' "$ROOT/skills/pack-create/SKILL.md"
+extract_step "$ROOT/skills/pack-switch/references/lifecycle.md" '## Create' "$TMP/create.sh"
 
 # A fresh feature branch is not evidence of an existing deliverable.
 git() { printf 'codex/new-feature\n'; }

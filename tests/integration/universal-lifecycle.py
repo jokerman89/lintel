@@ -541,11 +541,16 @@ class MigrationInventory(LifecycleFixture):
         skill = self.source / "skills/migrations/SKILL.md"
         skill.parent.mkdir(parents=True)
         shutil.copyfile(ROOT / "skills/migrations/SKILL.md", skill)
+        reference = self.source / "skills/doctor/references/inspection.md"
+        reference.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / "skills/doctor/references/inspection.md", reference)
         for path in self.source.rglob("*"):
             if path.is_file():
                 self.assertEqual(path.read_bytes(), (ROOT / path.relative_to(self.source)).read_bytes())
-        text = skill.read_text(encoding="utf-8")
-        marker = "## Run the real reader\n"
+        self.assertIn("](../doctor/references/inspection.md#migrations)",
+                      skill.read_text(encoding="utf-8"))
+        text = reference.read_text(encoding="utf-8")
+        marker = "## Migrations\n"
         self.assertEqual(text.count(marker), 1, "Missing or ambiguous migration-reader section")
         section = text.split(marker, 1)[1].split("\n## ", 1)[0]
         blocks = re.findall(r"(?m)^```bash\n(.*?)^```\s*$", section, re.S)

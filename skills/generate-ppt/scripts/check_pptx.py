@@ -62,9 +62,12 @@ def _read_file(path: Path, limit: int) -> bytes:
             raise ValueError(f"Input is not a bounded regular file: {path}")
         raw = stream.read(limit + 1)
         fields = ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns", "st_ctime_ns")
-        after = path.stat()
+        # Path and descriptor timestamps can have different precision on Windows.
+        after = path.lstat()
+        after_open = os.fstat(stream.fileno())
         if (len(raw) > limit or len(raw) != before.st_size
-                or any(getattr(after, key) != getattr(before, key) for key in fields)):
+                or any(getattr(after, key) != getattr(selected, key) for key in fields)
+                or any(getattr(after_open, key) != getattr(before, key) for key in fields)):
             raise ValueError(f"Input exceeds bound or changed during read: {path}")
     return raw
 

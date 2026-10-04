@@ -1349,3 +1349,21 @@ worktree mutation after a path correction, use a read-only or write-intercepted
 probe to compare every resolved operand with its exact intended owned path.
 Preserve failed evidence and out-of-scope artifacts; continuation authorization
 does not authorize their cleanup.
+
+## L-065 - Verify simulated commands in the actual child shell
+
+**Date:** 2026-10-04
+
+**Context:** A direct Python invocation supplied the Git Bash launcher rather
+than the native shell selected by the intended test wrapper. Shell startup
+changed command resolution, so an updater fixture reached real Git instead
+of its stubs. Execution stopped; repository state and captured effects were
+checked before narrowly authorized continuation. Unobserved client-state
+effects were not declared absent or rolled back.
+
+**Rule:** Use the documented test wrapper and its actual child shell. Before
+any simulated updater runs, verify every consequential command resolves to the
+owned stub in that same shell/environment and fail closed on mismatch. Give
+fixtures complete synthetic home/config/data roots and Git ancestry ceilings.
+A selected source with an invalid `.git` directory must not discover and update
+an ancestor repository; establish exact working-root identity before fetch/pull.
