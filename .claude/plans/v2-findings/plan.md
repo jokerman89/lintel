@@ -1,17 +1,28 @@
 # Plan: complete the original V2 findings
 
-**Status:** APPROVED for the explicitly elaborated ready leaves under existing
-operator authority. Unelaborated or decision-bound leaves are not ready for BUILD.
+**Status:** APPROVED for the three-clause continuation's scope under existing
+operator authority. The previously delivered scope and its approval remain
+historical facts. BUILD still requires the current independent plan-review gate;
+this approval is not a claim that review or implementation has passed.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
 **Execution:** coordinator-owned, dependency-ordered packages; no automatic swarm.
+**Continuation baseline:** `19fd4dccc44c1d7de37f5e89afca7e3c69361435` (0.13.8).
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
 obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
 Checked boxes cover these bounded clauses, not all clauses of each original
 finding. The original programme remains open; see
 [verified delivery](#verified-delivery-2026-10-04).
+
+The complete remaining inventory still contains ready implementation, not only
+external blockers. Original `lane-A-07`, `lane-B-09` and `lane-B-11` are now
+elaborated in P10. Their full claims were reread against 0.13.8. B-09/B-11 move
+from P3 into P10 for their remaining clauses, without changing their IDs or
+rewriting the prior P3 review. P9 is reopened for the next aggregate delivery.
+The current map has 56 original task IDs across ten packages; every previous ID
+is retained, with A-07 the only newly elaborated original finding.
 
 ## Outcome and signals
 
@@ -53,13 +64,14 @@ elapsed estimates or dropping the original finding IDs.
 |---|---|---|---|---|---|
 | P1 | Artifact input/output and inspection safety | lane-d-10, lane-d-04, lane-d-05, lane-d-06, lane-d-12 | Coordinator | none | Original source/fixture and numerical contrast criteria |
 | P2 | Evidence-correct agent methods and callers | lane-E-04, lane-E-08, lane-E-09, lane-E-11, lane-E-13, F-04, F-05 | Coordinator | none | Actual role/caller and preservation checks |
-| P3 | Consistent coordination methods | lane-A-01, lane-A-02, lane-B-06, lane-B-08, lane-B-09, lane-B-11, lane-B-12, C-02, C-07, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
+| P3 | Consistent coordination methods | lane-A-01, lane-A-02, lane-B-06, lane-B-08, lane-B-12, C-02, C-07, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
 | P4 | Shared document/design fidelity | lane-d-03, lane-d-07, lane-d-08, lane-d-09, lane-d-11, lane-E-14, F-02 | Coordinator | P1 | Real checker/emitter negatives and source preservation |
 | P5 | Shared discovery/lifecycle observations | lane-B-04, lane-B-05, lane-B-07, lane-B-10, C-04, C-06 | Coordinator | P3 | Real transport, reader and retained-interface tests |
 | P6 | Preserved role/runtime capabilities | lane-E-01, lane-E-01b, lane-E-02, lane-E-03, lane-E-05, lane-E-06, lane-E-10, lane-E-12, F-06 | Coordinator | P2, P4, P5 | Actual configuration/helper tests and inventory parity |
 | P7 | Original external authority and required controls | lane-A-05, G-01, G-11, ENT-02, ENT-03 | Coordinator | P6 | Real map/profile/evidence refusal and preservation tests |
 | P8 | Conditional core methods and usable hot memory | lane-A-06, lane-d-02, ENT-05, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8 | Current local/hosted verification, independent review and actual delivery |
+| P10 | Complete original premise and recovery-method handoff | lane-A-07, lane-B-09, lane-B-11 | Coordinator | P3, P8 | Exact method preservation, real snippet regressions and native resource closure |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10 | Current local/hosted verification, independent review and actual delivery |
 
 ## First ready leaf
 
@@ -187,8 +199,8 @@ still open, never as a reason to omit these compatible corrections.
 - [x] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
 - [x] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
 - [x] lane-B-06 Describe built-in handoff checks and fixed accounting honestly.
-- [x] lane-B-09 Make resume precedence and conditional questions consistent.
-- [x] lane-B-11 Explain internal contract identifiers through their actual public method owners.
+- [ ] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
+- [ ] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
 - [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
 - [x] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
 - [x] C-07 Ask for observed lesson efficacy/recurrence instead of inventing reference frequency.
@@ -472,11 +484,11 @@ inventory, not this first-leaf excerpt.
 
 ## Integration and review
 
-- [x] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
+- [ ] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
 
-The source product changes from 0.13.7 to 0.13.8. The explicitly reasoned
+The completed source delivery changed 0.13.7 to 0.13.8. Its explicitly reasoned
 target-local profile rebind preserves generation 1 as history and selects
-generation 2 for current acceptance; the neutral pack and required policy do
+generation 2 for that acceptance; the neutral pack and required policy do
 not change. Old implementation observations are not rewritten as new-version
 checks. Required aggregate QA includes affected local tests, generated/installed
 consumer checks and complete hosted verification of the exact candidate.
@@ -502,6 +514,106 @@ invalidate affected evidence. A reviewer must not repair its own findings.
 Do not edit the byte-bound shared `todo.md` or any earlier acceptance tree.
 Link current progress from mutable working memory. No deletion of files or
 worktrees is part of proving finding closure.
+
+## Original method proposals continuation
+
+- [ ] lane-A-07 Carry a material riskiest assumption and its falsifying observation into the native spec template.
+
+**Authority and design:** the original A-07/B-09/B-11 claims and the existing
+SOURCE, TRUTH, METHOD and ACCEPTANCE requirements. These are missing compatible
+implementation clauses, not a new initiative or governance change. ADR-0026's
+short leaves, ADR-0039's complete native artifacts and the shared profile/work/
+review controls remain. No phase, public entrypoint, role, helper API or required
+control is removed. There is no new runtime engine, schema or model benchmark.
+
+**Owner and order:** the coordinator implements P10 sequentially, then P9's
+generated/verified aggregate. The three original finding IDs remain the leaves;
+the bounded edits below are their implementation steps, not a second task ledger.
+The existing original-finding granularity concern remains explicit, without a
+fabricated implementation-time claim. No swarm fields or new actors are selected.
+
+**A-07 files and acceptance:** `scaffolding/01-foundation/templates/plan/spec.template.md`
+and its existing planning/installed-template tests. Retain the six-column
+requirements table, DRAFT-first status, original acceptance links and PLAN's
+finalization ownership. Add one conditional riskiest-assumption row carrying
+the existing premise/decision link, invalidating observation, evidence state and
+original requirement/task link. If no material premise exists, state a reasoned
+N/A rather than inventing an assumption, adding a question or re-interviewing
+approved work. Missing evidence stays planned/unverified. Use an actual rendered
+template fixture with a carried premise and with no material premise; neither is
+model-efficacy evidence.
+
+**B-09 files and acceptance:** `skills/resume/SKILL.md` and the new
+`skills/resume/references/state-and-job-recovery.md`, with directly affected
+continuity, coordination, enterprise-snippet and shape checks. Move the complete
+swarm-aware resume, selected-ledger integrity and tree/job resume procedures into
+the one reference. Keep the public headings, one map-first decision table, all
+inputs/modes, checkpoint ownership, baseline selection, required preconditions,
+seven-day warning and conditional questions in the main method. Each affected
+step must require reading its exact reference section before proceeding.
+Preserve actual Bash recipes and all branch/commit/age/blocked-leaf/flat-fallback
+behavior; adapt tests to execute the real new owner, not a copied implementation.
+
+**B-11 files and acceptance:** `skills/swarm/SKILL.md` and its existing
+`references/evidence.md`. Move the complete shared-evidence consumer under the
+already named contract table; leave run/verify and essential failure/permission
+boundaries in the main method with an explicit required reference read. Remove
+the obsolete back-link claiming the procedure lives in the main body. Replace
+deictic references such as "arguments above" with the existing exact profile
+arguments or an explicit caller link. Keep every work/profile/review/QA/domain
+rule, version, later-rejection behavior and independence obligation. No helper
+semantics change. Check the complete preserved procedure, not just its title.
+
+**Coupled distribution and continuity:** include the new recovery reference in
+the existing core capability closure and direct native-resource inventory where
+needed. Regenerate wrappers rather than making pointer-only adapters or applying
+a supposed hard 20 KB limit. Existing native bodies remain complete translations
+of their canonical bodies, and required references must be available in installed
+bundles. The observed stale "uncommitted 0.13.8" hot-index claim is removed in favor
+of the existing working-state owner, avoiding two volatile delivery summaries.
+Keep the protected shared todo and exact cold archive untouched.
+
+**Verification:** start with discriminating new template/reference tests that
+fail on the baseline. Run the affected existing planning, coordination and
+continuity tests, actual enterprise workflow snippets and Swarm shape checks.
+Use complete synthetic homes/temp/data/config roots; never run an updater or
+mutate a personal profile. Preserve recipe/procedure preimages and compare them
+to the new owners, allowing only documented heading/link-context changes.
+Exercise the installed Copilot kit/resource closure and canonical/native/catalog/
+wiki checks. Changing selections/resources requires both integration consumers,
+`copilot-kit` and `catalog-installed`; do not repeat the earlier missed consumer.
+Full current-head CI and independent source acceptance precede main delivery.
+
+**P9 continuation:** the next source version is 0.13.9, with all existing version
+manifests kept in sync. The new owned target has its own verified profile context;
+it does not borrow the old target's reference. Rebind only if the declared source
+version changes, with an explicit reason, retaining the old generation. Renew
+current acceptance/QA as needed; never edit old 0.13.8 records. Update the original
+84-clause dispositions only after actual independent source review. No forecast
+of three closures is a result. Preserve all remaining architectural, empirical
+and exact host-held work.
+
+**Plan signals:** four currently open original tasks (P10's three source leaves
+and the reopened integration task), PLAN -> BUILD -> REVIEW -> VERIFY -> SHIP ->
+CAPTURE, one writer and one bounded independent reviewer. No rendered UI is
+changed. The actual bound helper reports **12,000 tokens, uncalibrated, zero
+samples**, once for this S-sized continuation; this is not measured usage or a
+budget guarantee. No dollar, time or calibrated-benefit claim is supplied.
+Independent plan review remains a separate mandatory entry gate before BUILD.
+
+**Profile impact:** this new owned target has an independently bootstrapped and
+verified `_default` 1.0.0 context. Actual required-policy is
+`not_required / bundled-neutral / 1.0.0 / not_applicable`; no enterprise control,
+private pack or old-target profile reference is imported. This produces no
+additional product behavior. Profile presence is neither approval nor evidence
+that a host hook fired.
+
+The coordinating planner's non-clearing engineering/devex inspection and
+standalone consistency analysis are retained at
+`.claude/runtime/v2-method-proposals/plan-inspection.md` and
+`.claude/runtime/v2-method-proposals/plan-analyze.md`. BUILD has not started;
+proposed runtime tests are not observations. Those advisory reports do not
+replace the actual independent staged plan decision.
 
 ## Verified delivery 2026-10-04
 

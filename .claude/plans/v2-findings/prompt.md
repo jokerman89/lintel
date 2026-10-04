@@ -1,6 +1,8 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** APPROVED only for the plan's explicitly elaborated ready leaves.
+**Status:** APPROVED for the current three-clause scope under existing authority;
+implementation still requires its independent plan-review gate. Prior delivered
+scope is not reopened or reclassified.
 **Work map:** [work.json](work.json).
 
 ## Context
@@ -24,6 +26,21 @@ with remaining clauses. The plan's checked boxes cover its elaborated compatible
 clauses and source delivery, not closure of all 84 findings. Preserve the exact
 remaining clauses; distinguish unimplemented proposals from genuine authority,
 host and evidence boundaries rather than calling every open item a blocker.
+
+## Current bounded continuation
+
+Finish original A-07, B-09 and B-11 through P10, then the reopened P9 integration
+task in the same map. Carry the material premise/falsifier into the native spec
+template, extract Resume's recovery details into a complete owned reference, and
+move Swarm's shared-evidence procedure into its already named reference. Preserve
+every original control, mode, helper behavior and public entrypoint. Read the
+plan's exact acceptance and verification before editing. This is continuation of
+the original 84 findings, not a new initiative or a blanket architectural decision.
+
+The coordinator owns the isolated continuation tree, resource closures, native
+generation, version and original ledger. Do not alter the completed 0.13.8 tree
+or its private evidence. Use this target's actual profile, not the prior target's
+reference. Keep whole-finding disposition changes pending actual source review.
 
 ## Constraints
 
