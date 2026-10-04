@@ -9,17 +9,23 @@ description: <one-line description shown when main-agent picks an agent>  # REQU
 color: <blue|purple|green|red|orange|yellow>   # REQUIRED
 tools: <Read, Grep, Glob, Bash, Edit, Write — only what is needed>  # REQUIRED
 voice: <internal | mixed | custom>         # REQUIRED: resolves to the active pack's voice tier (default: internal)
-cli_support: [claude-code, codex, copilot] # REQUIRED: list of CLIs where this agent is supported
-                                            #   Codex: degraded (no first-class subagent mechanism — runs sequentially)
-                                            #   Copilot: full (generated custom agent); degraded only if the body needs a Claude-only facility
-                                            #   omit any CLI where the agent genuinely won't work
+cli_support: [claude-code, codex, copilot] # REQUIRED: source/discovery hints, not runtime evidence
+                                            #   Bind exact CLI/desktop/IDE/cloud surfaces through lib/cli-tiers.yaml
+                                            #   Preserve documented native support; record actual host observations separately
+                                            #   Copilot: generated custom agent; degraded when a required native facility is absent
 tier: <permissive | restricted>             # REQUIRED FOR PROMOTED AGENTS ONLY: license tier of upstream this agent ports
-                                            #   permissive: MIT/Apache — safe to bundle into any repo
-                                            #   restricted: CC-BY-SA-4.0 / mixed / no-license — invoke from install path; NOT safe to copy-paste
-upstream_url: <github URL>                  # OPTIONAL: only when this agent wraps third-party work
-last_verified: YYYY-MM-DD                   # OPTIONAL: only when upstream_url is set
+                                            #   Legacy license hint, never a tool-permission grant or model tier
+                                            #   Consult actual retained licenses/notices and unknowns; no blanket reuse permission
+upstream_url: <retained source URL>         # OPTIONAL: known third-party source only; never invent for original work
+last_verified: YYYY-MM-DD                   # OPTIONAL: actual upstream verification only, not an inferred import date
 ---
 ```
+
+See [Legacy role metadata](../../shims/universal/ADAPTER.md#legacy-role-metadata)
+for the evidence boundary. Optional native `memory` and `model` fields remain valid
+where supported; they do not promise cross-host memory or force a model. Preserve
+known derivative notices and distinguish an unknown import revision from a later
+source-record check. Do not manufacture license permission from a metadata label.
 
 You are a {{role}} for this repo.
 

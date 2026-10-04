@@ -55,6 +55,28 @@ identities and revisions are recorded separately under `method_comparisons` in t
 registry. They establish which material informed that comparison, not what Lintel once
 imported, whether an upstream workflow ran successfully, or a measured performance gain.
 
+The original 2026-09-28 review's G-01/G-11 comparison pointers are retained
+separately under `method_comparison_addenda`, alongside (not replacing) those
+older pins. The [review summary](../.claude/engineering/audits/2026-09-28-skill-review-v2-summary.md)
+identifies that dated assessment; the registry records the pointers from the
+original findings. No external fetch or new upstream study was performed when
+recording this addendum.
+
+Spec Kit `c00dc0551583428a10a94443c58c6a41e5e0138c` is the original comparison
+pin, not proof of an installed local tool, enabled extension or host execution.
+Its analysis/converge/workflow overlap is handled by the
+[artifact bridge](spec-kit.md#select-reports-and-resolve-overlapping-checks).
+Native plan-mode coverage still needs actual supplied/inspected host observations,
+not a presumed capability or a fabricated comparison revision.
+
+The registry's current-facing GSD URL uses the original review's
+`open-gsd/gsd-core` reference; its historical key, install path, verification date
+and 2026-09-20 method pin remain. ECC's changing inventory counts are omitted,
+not replaced with invented current numbers. The dated comparison and import
+records, narrowed design-dna attribution and retained notices are unchanged.
+Historical method observations are not current upstream support for a planning
+prescription; Lintel's accepted planning rules retain their own authority.
+
 Product version, pack schema and capability compatibility describe different contracts.
 Their validation belongs to the corresponding profile/adapter interfaces; provenance
 remains tied to exact source components and the delivered revision.

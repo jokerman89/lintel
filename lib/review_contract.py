@@ -2,7 +2,7 @@
 # implements: ADR-0028, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P05.md
 # constraints: read-only Git/filesystem; declared identity is not authentication
-# last_intent_review: 2026-09-29
+# last_intent_review: 2026-10-04
 """Shared result validation and explicit content identity. No dispatch or audit writes."""
 from __future__ import annotations
 
@@ -68,6 +68,16 @@ def _number(value: str) -> float:
     return number
 
 
+def finite_number(value: Any) -> bool:
+    """Check numeric finiteness without leaking integer-to-float overflow."""
+    if type(value) not in (int, float):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 def load_json(text: str) -> Json:
     """Parse one object strictly, including nested duplicate keys and NaN/Infinity."""
     try:
@@ -118,7 +128,7 @@ def _validate(value: Any, schema: Json, location: str) -> None:
         "object": isinstance(value, dict), "array": isinstance(value, list),
         "string": isinstance(value, str), "boolean": type(value) is bool,
         "integer": type(value) is int,
-        "number": type(value) in (int, float) and math.isfinite(value),
+        "number": finite_number(value),
         "null": value is None,
     }
     if kind and not types[kind]:
@@ -207,7 +217,7 @@ def _observed_status(control: Json) -> tuple[str, str]:
             return "unverified", "Browser/tool/state observations are missing"
     elif control["kind"] == "contrast":
         ratio, size = observation.get("ratio"), observation.get("text_size")
-        if type(ratio) not in (int, float) or not math.isfinite(ratio) or not 1 <= ratio <= 21 or size not in ("normal", "large"):
+        if not finite_number(ratio) or not 1 <= ratio <= 21 or size not in ("normal", "large"):
             return "unverified", "A measured ratio and normal/large text classification are required"
         if ratio < (4.5 if size == "normal" else 3.0):
             return "fail", "Measured text contrast fails WCAG AA SC 1.4.3"

@@ -120,6 +120,14 @@ substitute. Full-source Markdown classification and selection-relative excerpt
 eligibility remain P05's responsibility. See
 [the accepted evidence contract](../../review/references/evidence.md).
 
+Explicit `acceptance_paths` (CLI `--acceptance`) also enter the P03 input manifest
+and budget once per original file, even when P05 binds an excerpt. They cannot evade
+the selected file/byte bounds. This does not add artifact roles or fields to the map.
+Follow [selected external authority](selected-authority.md) for original analysis,
+converge, bug/assessment reports and observed command/workflow/hook overlap.
+Use `--warm-path` for intake without acceptance binding; it does not grant approval
+or carry a report into a later P05 request automatically.
+
 ## Start and resume with verified profile references
 
 Use the host adapter's explicit P07 bootstrap for a **new** work context. Before

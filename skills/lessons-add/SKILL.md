@@ -51,9 +51,19 @@ classification, not an instruction to invoke a removed command; no type migratio
    failed, errored or unverified mandatory evidence blocks. Do not invent a scanner
    or infer enforcement from a hook file. If sensitive content is identified, stop
    and request a safe rewrite without quoting the sensitive value.
-2b. **Update-phase (ADR-0006).** Before writing, check what already exists:
-   `source lib/memory.sh; lessons_find_related <keywords>` — classify the candidate
+2b. **Update-phase (ADR-0006).** Before writing, use the trusted source's
+   existing lookup, with literal task keywords:
+   ```bash
+   source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/memory.sh" || exit $?
+   lessons_find_related "${keywords:?supply the selected lesson keywords}" || exit $?
+   ```
+   Retain lookup diagnostics; no related result is not evidence of a failed
+   write or permission to read a personal store. Classify the candidate as
    add / update / supersede / no-op exactly as CAPTURE Step 2 does.
+   Apply the shared [benefit and recurrence method](references/benefit.md): read
+   related full blocks, cite actual later application/benefit or repeat failure,
+   and label unobserved outcomes **unknown**. Propose clarification, merge or
+   supersession when evidence warrants it; keyword ranking is not an efficacy score.
 3. **Format the body.** The helper writes the `## L-NNN — <one-line summary>` heading itself;
    supply the body:
    ```markdown
@@ -61,6 +71,8 @@ classification, not an instruction to invoke a removed command; no type migratio
    **Why:** <source / what triggered it, with date>
    **How to apply:** <bullets>
    ```
+   Include observed benefit, recurrence or unknown in that prose as relevant.
+   No extra schema fields, counters or automatic promotion are required.
 4. **Write through the helper.** It allocates the next ID (one more than the highest existing ID,
    superseded and duplicated IDs included), takes the store lock and replaces the file only if it
    is unchanged since it was read:

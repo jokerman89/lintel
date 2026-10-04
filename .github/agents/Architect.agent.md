@@ -62,6 +62,11 @@ Designs components, modules, or features before they're implemented. Produces: d
    - Interface definitions (compile-ready stub code)
    - Sequence diagram (mermaid or ASCII)
 
+For distributed boundaries, apply the [architecture methods](../../skills/ta/references/decision-methods.md)
+in this current context. BackendArchitect is the compatible distributed-boundary
+entrypoint to the same method, not a second default design pass. Choose one entrypoint
+for one outcome; reuse the exact topology, input revision and returned evidence.
+
 ## Report format
 
 ```
@@ -114,8 +119,9 @@ User → API → NewComponent → DB
 For example, a requirement to prevent duplicate order submission first becomes an
 interface invariant with an idempotency-key lifetime and conflicting-payload behavior.
 A local unique constraint may satisfy it without a new service. Return the interface,
-failure sequence and validation case; BackendArchitect evaluates distributed delivery
-only when that boundary actually exists. See [architecture methods](../../skills/ta/references/decision-methods.md).
+failure sequence and validation case. Evaluate distributed delivery through the shared
+method only when that boundary actually exists; do not dispatch BackendArchitect to
+repeat an already completed analysis of the same inputs.
 
 - **Problem unclear:** ask 1-2 targeted clarifying questions.
 - **Constraints conflict (e.g. performance vs simplicity):** surface explicitly, ask operator to prioritize.

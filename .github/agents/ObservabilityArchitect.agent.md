@@ -137,4 +137,8 @@ Internal. You produce operator-facing observability specs. No customer-facing vo
 
 ## How operators read your output
 
-Metrics + trace + log specs go to `.claude/runtime/state/dh/signals-spec.md`. SLI definitions go to `.claude/runtime/state/dh/sli-definitions.md`. Operators consume via DH observability-spec + sli-slo-spec capability reports.
+Return proposed metrics, trace, log and SLI definitions with the original work map,
+package and leaf IDs and requested capability. The authorized DH caller owns the
+mapped destination, persistence and checkpoint publication through the
+[module caller procedure](../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
+Keep signal and SLI sections distinct; do not choose a filename or write files.

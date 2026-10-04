@@ -45,10 +45,18 @@ for skill in hooks-status audit usage-log capture maintenance; do
     continue
   fi
   if [ "$skill" = capture ]; then
+    grep -qF '](references/reports.md#step-8--retrospective---retrospective)' "$file" \
+      || { fail "capture: retrospective owner link missing"; continue; }
+    file="$REPO_ROOT/skills/capture/references/reports.md"
+    [ -f "$file" ] || { fail "capture: retrospective owner missing"; continue; }
     section="$(retrospective_text "$file")" || { fail "capture: missing or ambiguous retrospective section"; continue; }
     [ -n "$section" ] || { fail "capture: empty retrospective section"; continue; }
   else
     section="$(cat "$file")"
+    case "$skill" in
+      audit|hooks-status)
+        section="$section"$'\n'"$(cat "$REPO_ROOT/skills/audit/references/method.md")" ;;
+    esac
   fi
   # A historical CAPTURE note outside the retained retrospective is not its verdict.
   hits="$(printf '%s\n' "$section" | sed -E 's/not evidence that nothing ran//g' | grep -niE "$VERDICT" || true)"

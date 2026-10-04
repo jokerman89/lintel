@@ -50,7 +50,10 @@ n=$(find "$TMP/vault2/50-sessions" -type f | wc -l | tr -d ' ')
 
 echo ""
 echo "[4] locked schema pinned in CAPTURE Step 7b"
-CAP="$REPO_ROOT/skills/capture/SKILL.md"
+CALLER="$REPO_ROOT/skills/capture/SKILL.md"
+CAP="$REPO_ROOT/skills/capture/references/vault.md"
+grep -qF '](references/vault.md)' "$CALLER" \
+  && pass "CAPTURE selects the vault method" || fail "CAPTURE vault-method link missing"
 for fld in 'type: session' 'branch:' 'outcome: shipped | in-progress | blocked | exploration'; do
   grep -qF "$fld" "$CAP" && pass "schema field: $fld" || fail "schema field missing: $fld"
 done

@@ -81,7 +81,8 @@ If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
 3. **Apply format-specific design-pass via design_pass_hook:**
    - Reads `per_format.web.sections[N].design_pass_hook` (canonical: WebExperienceCritic)
-   - Invokes agent for a web-specific fidelity-pass (information-hierarchy, accessibility, motion-language)
+   - Applies the web-specific fidelity method to the selected sections; the hook
+     name does not require another default post-generation reviewer
    - Per Reviewer Concern #7: WebExperienceCritic stays web-specific, not lifted
 
 4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
@@ -119,9 +120,12 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
      library/stack; native scrolling emits no smoothing dependency
 
 4. **Design-pass hook integration:**
-   - WebExperienceCritic agent runs on produced HTML/JSX (existing pattern)
-   - `frontend-design-review` consumes actual output and the original required
-     observations; an optional review request cannot waive a mandatory control
+   - Follow [review ownership and reuse](../../../skills/frontend-design-review/references/built-review.md#review-ownership-and-reuse):
+     return actual produced output, input identity and observations to one
+     post-generation owner; do not run both critic aliases by default
+   - `frontend-design-review` consumes that handoff and the original required
+     observations. An optional request cannot waive mandatory independent review,
+     and reuse requires the existing current-context reader/QA checks
 
 5. **CLI stays backward-compat:** existing `--brief` + `--from-pipeline`-flag invocations work unchanged. `--from-frontend-design` is an additive third mode.
 

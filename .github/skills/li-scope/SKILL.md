@@ -27,14 +27,17 @@ You are the SCOPE skill — Phase 1.5 of the Lintel cycle, between SENSE and DEF
 
 ## What this skill does
 
-Turns a raw request into a **sized, disambiguated scope**. One responsibility: take the operator's prompt + the orientator's route (from SENSE) and produce a `scope.md` carrying the resolved size, the chosen reading, and the `depth_schema` that drives PLAN.
+Turns a request into a **sized, disambiguated scope**. Read the selected requirements,
+existing answers and repository evidence alongside the orientator's route (from SENSE).
+Produce `scope.md` carrying the resolved size, chosen reading and a reasoned
+`depth_schema` for PLAN to reconcile with the approved design.
 
 SCOPE is the canonical home for the **scale axis** + the **clarifying gate** (design §3.2). It is deliberately *light* — the failure mode is ceremony (R1). It is read-only except for emitting `scope.md`, runs the mechanical estimator first, and pauses **only** when the request is genuinely bimodal.
 
 ```
 SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
             │
-            ├─ run scale-estimator (mechanical; agent judges when escalate=yes)
+            ├─ run scale-estimator (lexical hints; always interpret against actual work)
             ├─ if ambiguous → CLARIFYING GATE (one ask_user):
             │     "I read 'deploy website to azure' two ways:
             │       A) static page on Storage/SWA  (~XS)
@@ -53,13 +56,15 @@ SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
 
 ## When NOT to use
 
-- intent=hotfix / trivial single-file edit — SCOPE is skippable in light modes (like DEFINE). The mechanical estimator already returns XS silently; a hotfix preset skips the phase entirely.
+- intent=hotfix / trivial single-file edit — SCOPE is skippable in an authorized
+  light route (like DEFINE), not merely because a lexical hint returned XS.
 - intent=research-dive — size is irrelevant to a research dive (no PLAN follows); SCOPE is silent / skipped.
 - Mid-cycle re-entry where a valid `scope.md` already exists and the request hasn't changed.
 
 ## Workflow
 
 Apply [task-relevant intake](../../../skills/define/references/intake.md) and the
+[scale interpretation method](../../../skills/scope/references/method.md), with the
 [shared work-map contract](../../../skills/spec-kit/references/work-map.md). Resolve actual
 profile/policy before consumption, retain the selected original map and answers,
 and do not equate an inferred larger size with broader authority.
@@ -104,21 +109,33 @@ scale_esc=$(scale_escalate "$prompt_text" "$escalation")
 depth_schema=$(size_to_depth_schema "$scale_size")
 ```
 
-`scale_estimate "$prompt_text" "$escalation"` emits the full YAML block if you want it verbatim. The mechanical verdict is always complete on its own — it is the graceful fallback when no agent escalation / ask_user is available.
+`scale_estimate "$prompt_text" "$escalation"` emits the raw hint block. Preserve
+its provenance separately from the resolved judgment. `scale_amb=no`,
+`scale_conf=high` and `scale_esc=no` describe the lexicon, not the absence of
+uncertainty in this work. Missing judgment or a question channel cannot turn a
+mechanical fallback into resolved scope.
 
 ### Step 3 — Clarifying gate (the substantive logic, moved here from SENSE)
 
 This is the gate that used to live inline in SENSE step 0e. SCOPE is now its canonical home (it grew past the ~40-line SENSE-substep threshold — design §6 Slice 2 trigger).
 
-**Mechanical-first, agent on escalation (decision 1B):**
+**Interpret every hint using the shared method, not only `escalate=yes`:**
 
-- **If `scale_amb=no`** (clear): **no question.** `chosen_reading` = the single reading. If `scale_size` is `L`/`XL`, note in the SCOPE report that PLAN will use a deeper `depth_schema` — but do not interrupt. Clear small requests feel nothing (success criterion 2; risk R1).
-- **If `scale_amb=yes`** (bimodal): **you (the agent) are the escalation.** Judge the request's two plausible readings, give each a sharp label + size, and fire **exactly one** ask_user — the clarifying gate. Example for "deploy a website to azure":
+- Read actual requirements/acceptance, owners/interfaces, uncertainty and
+  reversibility/rollback. Consider two plausible readings in any domain. A keyword
+  miss cannot establish that ambiguity is absent.
+- When the requirements and prior answers settle the reading, set `chosen_reading`,
+  resolved `scale_size`, `depth_schema`, `scale_amb` and `scope_decision_resolved`
+  from that evidence without another question, even if the helper said `yes`.
+- When a materially different reading remains unresolved, set `scale_amb=yes`
+  even if the helper said `no`. Give the two readings sharp labels and ask one
+  actual unresolved question. Example for "deploy a website to azure":
   - **A)** Static page (Storage / SWA) — ~XS
   - **B)** ALZ landing-zone + CI/CD + Front Door — ~XL
   - **C)** other (operator describes)
 
-  Set `chosen_reading` + final `scale_size` / `depth_schema` from the answer (the operator may downsize a conservatively-large mechanical guess at the gate — R2).
+  Set `chosen_reading` + final `scale_size` / `depth_schema` from the answer and
+  observed boundaries, explaining any difference from the helper's hint.
   Set `scope_decision_resolved=yes` only from that answer or the same decision's
   existing authorized evidence; otherwise keep it `no`.
 
@@ -199,7 +216,8 @@ EOF
 - `ambiguous` — whether the request was bimodal; `decision_resolved` separately
   records whether the actual material question has been answered.
 - `chosen_reading` — the disambiguated reading (sharp label, not the raw prompt, when the gate fired).
-- `depth_schema` — `flat` / `phased` / `tree`; the single signal PLAN reads to pick the WBS shape.
+- `depth_schema` — `flat` / `phased` / `tree`; the reasoned proposal PLAN checks
+  against DEFINE's design, owners/interfaces and rollback boundaries.
 - `est_tokens` — size prior; **no wall-clock time unless `--with-time`** (design §3.7).
 - `route_override` — `none`, or the phase the route was rewritten to (e.g. `DEFINE`).
 
@@ -225,7 +243,8 @@ state_append SCOPE "$scope_status" "next=$scope_next" "size=$scale_size" \
 LINTEL SCOPE — <timestamp>
 
 Request: <prompt, truncated>
-Size:    <XS|S|M|L|XL>   (confidence: <high|low>)
+Size:    <XS|S|M|L|XL>   (basis: <observed work and remaining uncertainty>)
+Raw hint: <helper size/confidence, explicitly lexical; not measured certainty>
 Ambiguous: <yes → resolved as "<reading>" | no>
 Depth schema: <flat | phased | tree>  → PLAN will render <flat task list | phases+tasks | phase→task→subtask tree>
 
@@ -254,11 +273,12 @@ reports no patterns, SCOPE is unchanged.
 
 - **DONE** — scope.md written, size + depth_schema resolved (gate fired or silent)
 - **BLOCKED** — denied question/read/write permission or another unsatisfied required boundary
-- **NEEDS_CONTEXT** — prompt too empty to classify (no request text)
+- **NEEDS_CONTEXT** — missing request or unanswered material reading/boundary decision
 
 ## Pause-points
 
-Exactly one, and **conditional**: the clarifying gate fires **only** when `scale_amb=yes`. XS/S unambiguous requests run silent — no pause, no question (premise 2; risk R1). At most one ask_user per SCOPE invocation.
+At most one, and **conditional** on actual unresolved material ambiguity, not a
+keyword flag. Clear work and already answered readings run without another question.
 
 ## Hop-in support
 
@@ -268,7 +288,8 @@ YES:
 - In `/li-cycle`: runs between SENSE and DEFINE; skipped in light modes (hotfix) like DEFINE.
 
 Skip-conditions (SCOPE is skipped when):
-- intent=hotfix / trivial-edit (mechanical size is XS; no disambiguation needed)
+- intent=hotfix / trivial-edit in the authorized light route, with no unresolved
+  material ambiguity (a small mechanical hint alone is insufficient)
 - intent=research-dive (size irrelevant; no PLAN follows)
 - a valid `scope.md` already exists for the unchanged request
 
@@ -290,7 +311,10 @@ Skip-conditions (SCOPE is skipped when):
 
 ## Anti-patterns
 
-- **Asking when the request is clear** — the gate fires ONLY on `scale_amb=yes`. A confident XS/S/L runs silent.
+- **Asking when the request is settled** — use the existing answer; neither a
+  keyword hit nor a larger hint justifies another interview.
+- **Calling a keyword miss unambiguous** — judge two readings against actual work
+  before setting the resolved ambiguity/size fields.
 - **More than one question** — exactly one ask_user, max, per invocation.
 - **Doing DEFINE's job** — SCOPE sizes + disambiguates; it does NOT run forcing questions, premise checks, or alternatives. That's DEFINE.
 - **Treating a named question API as mandatory** — use the host's actual channel.
@@ -303,7 +327,8 @@ Skip-conditions (SCOPE is skipped when):
 
 - **No question tool (gate needed)**: ask in conversation. Preserve unresolved
   ambiguity and continue only independent authorized work.
-- **scale-estimator.sh missing**: BLOCKED — SCOPE cannot size without the lib. Recommend `/li-doctor`.
+- **scale-estimator.sh missing**: report the hint unavailable; interpret actual
+  work with the shared method, without inventing helper output or settled certainty.
 - **00-state.md unreadable (no SENSE route)**: continue; classify intent locally from the prompt, note "no prior SENSE route" in the report.
 - **Permission errors on selected scope path**: surface the failure; do not
   claim it persisted by silently switching to an unrelated `/tmp` artifact.

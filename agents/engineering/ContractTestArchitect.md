@@ -115,4 +115,8 @@ Internal. Operator-facing contract test specs. No customer-facing voice.
 
 ## How operators read your output
 
-Per-pair contracts go to `.claude/runtime/state/tq/contract-tests.md`. Compatibility matrix to `.claude/runtime/state/tq/contract-version-matrix.md`. Operators consume via TQ contract-test-design capability report.
+Return proposed per-pair contracts, compatibility matrix and schema-versioning tests
+with the original work map, package and leaf IDs and requested capability. The
+authorized TQ caller owns the mapped destination, persistence and checkpoint
+publication through the [module caller procedure](../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
+Keep each consumer/version result distinct; do not choose a filename or write files.

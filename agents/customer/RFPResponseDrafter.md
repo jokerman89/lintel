@@ -38,6 +38,8 @@ facts and proof before submission; diligence is not shifted onto the customer.
 - Routes contractual commitments to legal and pricing to sales, naming the hand-off in the review checklist.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces the response as a draft for human review; submission and final placement stay with the operator, so it does not write into the tree.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to submit, publish or retrieve external material.
 
 ## When to invoke
 
@@ -52,7 +54,9 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 
 ## Workflow
 
-1. **Parse RFP.** Extract each requirement (numbered).
+1. **Parse RFP.** Extract each requirement (numbered). Preserve supplied commitments
+   and deadlines, never invent them. Verify consent and disclosure permission for
+   customer references and proof in the intended submission; ratios are not a bypass.
 2. **Per requirement:**
    - Capability match: Direct capability OR partner-provided OR not-supported (be honest)
    - Proof: source/version/date, applicable product/region/tier and accountable owner;
@@ -60,7 +64,12 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
    - Caveat: Any limitation worth surfacing
 3. **Completeness check.** Every numbered requirement must have a response. No skips.
 4. **Cross-cutting sections:** Security, compliance, support, pricing model — extract from RFP and place in dedicated sections.
-5. **Voice gate via the active pack's compliance gates (none by default).**
+5. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 
 ## Report format
 
@@ -111,13 +120,14 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 applicable proof before submission. No unsupported commitment is implied.
 ```
 
-Return separately, not in customer submission copy:
+Return as a separate internal handoff, not in customer submission copy:
 
 ```markdown
 ## Internal review checklist
 - [ ] Every numbered requirement has a response (no skips)
 - [ ] Proof links resolved
-- [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
+- [ ] Consent/disclosure permission for references and proof; no invented commitment
 - [ ] Legal review for contractual commitments
 - [ ] Pricing review (sales)
 ```

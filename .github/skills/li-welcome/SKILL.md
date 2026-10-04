@@ -67,36 +67,11 @@ workflow was tested in that host because its source is bundled.
 
 ## 3. Discover the selected method
 
-Use the accepted catalog before opening a specialist body. Resolve the trusted source
-from the loaded adapter, independently of the working target. Select a nonempty keyword
-from the actual task; do not scan personal skill trees or load all prompts for orientation.
-
-```bash
-: "${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
-: "${keyword:?select a nonempty task keyword}"
-"${python_cmd:-python3}" -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" \
-  --json --kind=all --query="$keyword"
-```
-
-The keyword is one quoted literal argument. A valid zero-match result calls for a broader
-keyword, not a made-up capability. For an explicitly requested demo-script exploration,
-use the existing projection instead:
-
-```bash
-python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=demo-script
-```
-
-Present the returned method, alias, source-relative path and unknown/staged limitations.
-Read only the selected body under that same trusted source. Retain shared dependency and
-notice obligations without warming all resource bodies. Metadata is not native discovery,
-permission or execution; actual host facts still come from step 2. No selection preserves
-normal task-first onboarding. See [metadata](../../../skills/catalog/references/metadata.md) and
-[selections](../../../skills/catalog/references/selections.md).
-
-If execution is unavailable, disclose the committed `skills/CATALOG.md` as a skills-only
-snapshot, or read a specifically selected canonical file through a permitted file tool.
-An invalid source/parser is an error, not an empty success or an instruction to regenerate.
-This orientation creates no work map, profile, cycle, draft or registration.
+Delegate to catalog's [intent narrowing](../../../skills/catalog/references/intent.md), including
+its metadata query, selected-body checks, explicit capability selections and failure
+behavior. This is the same method as `skill-router`, not another onboarding recipe.
+Carry the task and actual host observations from steps 1–2 unchanged. Orientation
+creates no work map, profile, cycle, draft or registration.
 
 ## 4. Walk through the method without implying execution
 
@@ -137,7 +112,7 @@ No browser tool means browser evidence remains missing, not a fabricated success
 | Review only | `review`, with no write escalation |
 | Continue work | `resume`, preserving the original map and IDs |
 | Diagnose installation | `doctor` plus the installed adapter's `check` |
-| Explore specialist methods | `catalog` metadata, then only selected bodies |
+| Explore specialist methods | Catalog's shared intent-narrowing method |
 
 Close with the actual next action and any missing tool, control or review. The catalog's
 size does not establish token cost or productivity. Do not quote an unmeasured time saving.

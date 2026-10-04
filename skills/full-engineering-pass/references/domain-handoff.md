@@ -96,10 +96,12 @@ N/A, or use another checkpoint's start. A started checkpoint without its result
 remains incomplete. Missing expected domains/checkpoints are not skipped into a
 high-scoring aggregate.
 
-Migrator retains **artifact-only and authorized-execution** modes. ReleaseEngineer
-retains **planning-only and authorized execution** value. The caller selects the actual
-mode and obtains its real target/action authorization. The data core records the
-declared mode without performing it; a syntactically valid execution-mode record
+Migrator retains **artifact-only and authorized-execution** modes. Legacy
+ReleaseEngineer **planning-only** receiver values remain readable data, not a dispatch
+instruction or authority. New DH/SC planning work uses DeploymentEngineer;
+ReleaseEngineer is for explicitly authorized execution. The caller selects the actual
+receiver and obtains its real target/action authorization. The data core records
+the declared mode without performing it; a syntactically valid execution-mode record
 does not establish that execution happened. Reviewers remain separate from implementers.
 
 ## Noncircular preparation and consumption
@@ -187,7 +189,14 @@ scope; none establishes installed-resource closure or P11/P12 consumer acceptanc
 
 The module's checkpoint table defines method order, not a new task backlog. Read the
 canonical role body from the trusted source before dispatch; preserve its inputs,
-mode and returned output. The caller alone persists shared request/result metadata.
+mode and returned output. Read-only specialists return proposed content with the
+original work map, package/leaf IDs and requested capability. The authorized caller
+owns the mapped destination, artifact persistence and checkpoint publication; a
+role's old example filename is not a second destination contract. Retain distinct
+sections and caller-selected compatibility artifacts, including DA's migration plan,
+risk/validation SQL and recovery evidence. Missing destination/identity requires
+caller clarification before persistence, not a guessed path or a new backlog.
+The caller alone persists shared request/result metadata.
 Do not execute slash invocations as shell commands or assume a model/agent is registered
 because a file exists. A role read into a generic native task is a **source-guided**
 invocation; identify the actual tool/context and retain that distinction.
@@ -321,8 +330,10 @@ A required independent reviewer cannot be replaced by relabelling the implemente
 
 MigrationPlanner plans; Migrator gets artifact-only for migration-plan SQL drafts,
 but a separately authorized migration invocation retains authorized-execution with
-exact target/preconditions/recovery. ReleaseEngineer gets planning-only for DH/SC
-pipeline/rollback/on-call work; authorized release execution is preserved separately.
+exact target/preconditions/recovery. DeploymentEngineer gets planning-only for DH/SC
+pipeline/rollback/on-call work; ReleaseEngineer's authorized execution remains separate.
+Older ReleaseEngineer planning receiver records remain readable history, not
+instructions to dispatch new planning work to the execution role.
 The mode itself is never permission. The data contract does not execute either.
 
 ### Checkpoint publication and cold continuation

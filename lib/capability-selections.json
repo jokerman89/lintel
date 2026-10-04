@@ -25,7 +25,28 @@
         "lib/cli-tiers.yaml",
         "docs/concepts/pack-resolver.md",
         "skills/review/references/evidence.md",
-        "bin/li-lessons.py"
+        "bin/li-lessons.py",
+        "skills/scope/references/method.md",
+        "skills/swarm/references/evidence.md",
+        "skills/lessons-add/references/benefit.md",
+        "skills/spec-kit/references/selected-authority.md",
+        "skills/build/references/documentation-fidelity.md",
+        "skills/cycle/references/maintainer.md",
+        "skills/capture/references/vault.md",
+        "skills/capture/references/reports.md",
+        "skills/ship/references/customer-delivery.md",
+        "skills/role/references/lifecycle.md",
+        "skills/catalog/SKILL.md",
+        "skills/catalog/references/intent.md",
+        "skills/catalog/references/metadata.md",
+        "skills/catalog/references/selections.md",
+        "bin/li-catalog.py",
+        "lib/envelope_contract.py",
+        "lib/client_capabilities.py",
+        "lib/envelope-requirements.txt",
+        "lib/capability-selections.json",
+        "config/aliases.yaml",
+        "install/upstream-sources.yaml"
       ],
       "provenance": [],
       "inputs": [
@@ -64,6 +85,9 @@
         "skills/sc/references/decision-methods.md",
         "skills/dh/references/decision-methods.md",
         "skills/tq/references/decision-methods.md",
+        "skills/da/references/preferences.md",
+        "bin/li-isolated-bisect",
+        "lib/migration-recovery.sh",
         "bin/li-work-artifacts.py",
         "bin/li-domain-result.py",
         "bin/li-review-evidence.py",
@@ -118,7 +142,7 @@
         "agent:SlideNarrationCritic"
       ],
       "requires": ["core"],
-      "resources": [],
+      "resources": ["skills/generate-outline/references/narrative-arc.md"],
       "provenance": [],
       "inputs": [
         "Approved brief, audience, duration, claims and supplied synthetic screens or fallback assets.",
@@ -150,11 +174,14 @@
       "requires": ["core"],
       "resources": [
         "skills/frontend-design/references/advice.md",
+        "skills/frontend-design/references/axis-ownership.md",
+        "skills/frontend-design-review/references/built-review.md",
         "skills/design-dna/scripts/core.py",
         "skills/design-dna/scripts/search.py",
         "skills/design-dna/scripts/design_system.py",
         "skills/design-dna/scripts/emit_tokens.py",
         "skills/design-dna/scripts/validate_design.py",
+        "skills/design-dna/scripts/measure_contrast.py",
         "skills/design-dna/scripts/design_contract.py",
         "skills/design-dna/references/design-contract.md",
         "skills/design-dna/references/design-contract.schema.json",
@@ -301,7 +328,11 @@
       "requires": ["design-knowledge"],
       "resources": [
         "skills/generate/agent-mapping.yaml",
+        "skills/generate-outline/references/narrative-arc.md",
         "skills/generate-write/references/fidelity-and-evidence.md",
+        "skills/build/references/documentation-fidelity.md",
+        "skills/generate-ppt/references/retention-check.md",
+        "skills/generate-ppt/scripts/check_pptx.py",
         "skills/generate/scripts/pipeline_inputs.py",
         "bin/li-review-evidence.py",
         "bin/li-work-artifacts.py",
@@ -377,6 +408,9 @@
       "requires": ["design-knowledge"],
       "resources": [
         "skills/generate-ppt/references/native-powerpoint.md",
+        "skills/generate-outline/references/narrative-arc.md",
+        "skills/generate-ppt/references/retention-check.md",
+        "skills/generate-ppt/scripts/check_pptx.py",
         "skills/generate-write/references/fidelity-and-evidence.md",
         "bin/li-review-evidence.py"
       ],
@@ -493,7 +527,10 @@
       "source": "skills/generate-visio/SKILL.md",
       "members": ["skill:generate-visio", "agent:SystemArchitect"],
       "requires": ["core"],
-      "resources": ["skills/generate/agent-mapping.yaml"],
+      "resources": [
+        "skills/generate/agent-mapping.yaml",
+        "skills/generate-write/references/fidelity-and-evidence.md"
+      ],
       "provenance": [],
       "inputs": [
         "An explicitly supplied diagram/topology request and intended editable/output format, for source-slot discovery only."
@@ -507,7 +544,7 @@
         "heading": "## Staged Visio example"
       },
       "limitations": [
-        "The exact TEMPLATE ONLY description remains digest-bound; no implemented writer or format acceptance exists.",
+        "The unavailable-writer description remains digest-bound; no bundled writer or format acceptance is inferred.",
         "A frontmatter full hint or agent-mapping entry cannot supply a renderer; the absent NetworkArchitect is not a canonical member.",
         "Do not execute speculative slot recipes or infer private stencil/template access from discovery."
       ]
@@ -555,7 +592,10 @@
         "agent:SOC2Reviewer"
       ],
       "requires": ["core"],
-      "resources": [],
+      "resources": [
+        "skills/sc/references/decision-methods.md",
+        "skills/full-engineering-pass/references/domain-handoff.md"
+      ],
       "provenance": [],
       "inputs": [
         "Intended use, jurisdiction, actor roles, effective dates, data flows and actual selected control evidence.",
@@ -585,8 +625,8 @@
       "status": "staged",
       "evidence": {
         "path": "skills/generate-visio/SKILL.md",
-        "quote": "TEMPLATE ONLY",
-        "description_sha256": "ebba5282558e2ccabf1eb5f7347468caeb4b2e2eebff35b9ad4a6cdcd29eaee9"
+        "quote": "no curated generation workflow is supplied",
+        "description_sha256": "05d463c3ffa1befd2b7578235bd60cf08be71c870e15811d243a7d4509e14f10"
       }
     },
     "skill:generate-xlsx": {

@@ -1,6 +1,6 @@
 ---
 name: li-usage-log
-description: Append-only usage log for skill/agent invocations — manual writer (one audit_log line) plus reader reports. One log, no per-skill duplicates (L-001). Solo-invokable for reports.
+description: Use to record an explicitly requested invocation or inspect authorized usage records through the shared audit reader; missing records do not prove disuse and estimates are not billed usage.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/usage-log/SKILL.md`; edit the canonical file, then run
@@ -55,7 +55,7 @@ trend overlay; absent records remain unobserved rather than zero usage.
 ## When NOT to use
 
 - Real-time telemetry — this is append-only, not streaming
-- Forensic audit — `hooks.jsonl` is audit-canonical (per L-001 premise 1: forensic logs are exempt from the read-back rule)
+- Broader audit investigation — use `/li-audit` with the relevant categories; no single log is the whole audit trail
 - Per-invocation token-counting — this estimates (tokens_est is a heuristic, not OpenAI-counted)
 
 ## Schema (per JSONL line)
@@ -96,20 +96,21 @@ audit_log usage-skill invocation skill=cycle mode=research-dive tokens_est=3500 
 
 ### Step 2 — Reader mode (solo-invokable)
 
+Follow the [shared audit read method](../../../skills/audit/references/method.md#shared-read).
+Select authorized log roots and the actual time window; no personal-home scan is
+implied. Retain the shared reader's empty/diagnostic/error distinctions.
+
 ```bash
-export LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:?trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT}}"
-source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
-usage_dir="$(audit_dir usage-skill)"   # the router's operator-global directory
-for log in "$usage_dir"/usage-*.jsonl; do
-  [ -f "$log" ] || continue
-  rc=0
-  python3 "$LINTEL_SOURCE_ROOT/bin/li-events.py" records --file "$log" --category usage-skill \
-    ${since:+--since "$since"} || rc=$?
-  case "$rc" in 0|3|4) ;; *) echo "Could not read $log (exit $rc)"; exit "$rc" ;; esac
-done
+usage_args=(--category usage-skill)
+[ -z "${days:-}" ] || usage_args+=(--since "$days")
+bash "${LINTEL_SOURCE_ROOT:?select trusted source}/skills/audit/references/read.sh" "${usage_args[@]}"
 ```
 
-Glob across files (the writer appends to `usage-skill.jsonl`; older `usage-<YYYYMMDD>.jsonl` files, if any exist, still match and are read with the same `usage-skill` catalog entry; anything else surfaces as a reader diagnostic rather than disappearing). Surface:
+The shared router selects the current/legacy category files and names paths not
+read. An explicitly selected older dated log can be inspected with the existing
+`li-events.py records --file <path> --category usage-skill` operation; do not glob
+or silently combine every personal log. Obtain the complete selected rows before
+aggregating: a bounded preview is not the full population. Surface:
 - **Top N skills by frequency** (`--topn 10 --days 7`)
 - **Token spend by skill family** (`--tokens-by-skill`)
 - **Low observed usage** (fewer than 2 recorded invocations in 30 days — review candidates only; unrecorded use is unobserved, not disuse)
@@ -119,7 +120,9 @@ These are manual report selections over actual reader rows, not additional
 `li-events.py` flags or automatic telemetry. Keep the chosen log/window, missing
 fields and record count visible; estimates are not exact billed tokens.
 
-If no records exist: surface "No usage records observed in `<usage dir>` — the writer is manual (see writer mode)" and stop. Never invent counts.
+If no records exist, name the selected paths/window and report that usage was not
+observed; the writer is manual. Never invent counts or call malformed records
+successful executions.
 
 ## Integration
 
@@ -127,13 +130,13 @@ If no records exist: surface "No usage records observed in `<usage dir>` — the
 - `$(audit_file usage-skill)` — operator-global `usage-skill.jsonl` (append, one line per recorded invocation, via `audit_log`)
 
 **Reads (reader mode):**
-- `usage-*.jsonl` in `$(audit_dir usage-skill)` (glob), through `bin/li-events.py`
-- `.claude/runtime/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
+- Explicitly authorized usage category files through the shared audit reader
+- Explicitly selected hook records through that same reader, only if correlation was requested
 
 **Consumed by:**
-- `/li-maintenance` (5.3 — token-cost simulation, low-observed-usage review; falls back to defaults when no records exist)
+- `/li-maintenance` through its shared audit route; absent measurements remain unobserved
 - Operator-selected joins with `/li-catalog --kind=all` metadata; no built-in trend overlay
-- `/li-hooks-status` (1.2 + 1.7 — sibling observation skill)
+- `/li-hooks-status` through the same observation owner
 - Operator (solo-report invocation)
 
 ## Anti-patterns
@@ -141,7 +144,7 @@ If no records exist: surface "No usage records observed in `<usage dir>` — the
 - **Bespoke per-skill `>>` writers** — duplicate the shared writer and skip its ts/operator/cycle_id envelope. The `audit_log usage-skill ...` one-liner remains the writer.
 - **Claiming automatic capture** — there is no wrapper-hook; records exist only when someone ran the one-liner. Reports must say so.
 - **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
-- **Read-back for forensic purposes** — wrong skill. Use `.claude/runtime/audit/hooks.jsonl` (audit-canonical).
+- **Treat one log as the complete audit or a cause** — use actual selected categories and distinguish temporal correlation from causation.
 
 ## Failure recovery
 

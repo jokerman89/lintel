@@ -25,6 +25,7 @@ navigation:
   auto_mode_eligible: false
   estimated_tokens: 80000
 domain:
+  # Legacy discovery hint, not a validated pack-schema field; see references/preferences.md.
   preferences_root: engineering.data_architecture.*
   granularities: [full, loop, single]
   checkpoints:
@@ -45,6 +46,9 @@ domain:
 
 # Data architecture
 
+Read the [optional preference metadata clarification](references/preferences.md);
+`preferences_root` is not a validated pack interface or a required default.
+
 Preserve logical models, SQL artifacts, migration plans, retention policies and
 analytics designs. Read [data decision methods](references/decision-methods.md)
 for locking, rollback/replay, late data, idempotency and lineage. This is agent-owned
@@ -63,13 +67,19 @@ registration. Every receiver gets the original leaf/acceptance and exact mode/sc
 
 | Capability | Dispatches to (agents) | Produces | Decisions and checks |
 |---|---|---|---|
-| `schema-design` | DatabaseDesigner; SchemaArchitect for mixed stores | versioned SQL/CQL/JSON schema, keys, relationships and index rationale | existing engine/version first; constraints, writer ownership and consumer compatibility |
-| `migration-plan` | MigrationPlanner planning; Migrator artifact-only | ordered plan, forward SQL and verified recovery instructions | approved window, lock acquisition/hold, pre/post queries and restart states; a down script is not proof of reversibility |
+| `schema-design` | DatabaseDesigner (SchemaArchitect read-only view; choose one) | versioned SQL/CQL/JSON schema, keys, relationships and index rationale | shared cross-store method for mixed stores; existing engine/version first; constraints, writer ownership and consumer compatibility |
+| `migration-plan` | MigrationPlanner, then Migrator artifact-only after the sequence is accepted | ordered plan, forward SQL and verified recovery instructions | approved window, lock acquisition/hold, pre/post queries and restart states; a down script is not proof of reversibility |
 | `retention-policy` | DatabaseDesigner + Architect | per-class active/warm/cold/archive/delete plan | applicable purpose/policy/holds; no universal 365-day rule; backups/projections and deletion propagation |
 | `query-pattern-audit` | Explorer evidence, DatabaseDesigner interpretation | read/write mix, hot queries, index gaps and N+1 candidates | actual query plans/workload, not assumed indexes; EXPLAIN ANALYZE executes the query |
-| `sharding-plan` | SchemaArchitect + DatabaseDesigner | partition key, co-location, rebalance and cross-shard plan | skew as well as cardinality; measure single-store limits, no arbitrary 1TB or shard-per-tenant mandate |
+| `sharding-plan` | DatabaseDesigner (SchemaArchitect read-only view; choose one) | partition key, co-location, rebalance and cross-shard plan | skew as well as cardinality; measure single-store limits, no arbitrary 1TB or shard-per-tenant mandate |
 | `data-contract-collision` | DatabaseDesigner + Architect | active consumer/version impact and transition | drops/type narrowing/NOT NULL/semantic changes; even one required consumer break matters |
-| `analytics-readiness` | DataPipelineDesigner + SchemaArchitect | business-question-driven ingestion/OLAP and dimensional model | fact grain, SCD/conformed dimensions, event time, correction/replay and lineage |
+| `analytics-readiness` | DataPipelineDesigner (SchemaArchitect read-only view; choose one) | business-question-driven ingestion/OLAP and dimensional model | fact grain, SCD/conformed dimensions, event time, correction/replay and lineage |
+
+The shared data method owns cross-store/partition and dimensional reasoning, with
+SchemaArchitect retained as a read-only entrypoint, not a duplicate default dispatch.
+Use its exact design-to-migration handoff: original IDs and source/schema/consumer
+identity, approved window and constraints go to one sequencing owner; that accepted
+plan goes to Migrator. No parallel sequencing or inferred live execution authority.
 
 Preserve primary-store, migration-window, schema-versioning and review-threshold
 preferences as explicit advice unless applicable policy makes a requirement mandatory.

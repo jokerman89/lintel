@@ -32,13 +32,13 @@ done
 # Scenario 3: agent dispatch (dispatch-table rows per ADR-0009)
 echo ""; echo "[3] Dispatch rows declare agent dispatch (L-001)"
 declare -A CAP_AGENT=(
-  ["deployment-plan"]="ReleaseEngineer"
+  ["deployment-plan"]="DeploymentEngineer"
   ["observability-spec"]="ObservabilityArchitect"
   ["sli-slo-spec"]="ObservabilityArchitect"
   ["cost-projection"]="CostAnalyzer"
-  ["rollback-strategy"]="ReleaseEngineer"
+  ["rollback-strategy"]="DeploymentEngineer"
   ["capacity-headroom"]="CapacityPlanner"
-  ["on-call-playbook"]="ReleaseEngineer"
+  ["on-call-playbook"]="DeploymentEngineer"
 )
 for cap in "${!CAP_AGENT[@]}"; do
   expected="${CAP_AGENT[$cap]}"
@@ -82,22 +82,20 @@ if grep -qE "preferences_root:[[:space:]]+engineering\.devops_hosting" "$DH"; th
   pass "preferences root: engineering.devops_hosting.*"
 else fail "preferences root MISSING or incorrect"; fi
 
-# Scenario 9: L-002 — 5 of 7 capabilities use existing agents
-echo ""; echo "[9] L-002: 5 of 7 reuse existing agents"
-# Existing agents at this point: ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner (from TA), SystemArchitect (from TA), SecurityAuditor, Architect
-# New: DeploymentEngineer, ObservabilityArchitect
-existing_only_caps=0
-for cap in cost-projection rollback-strategy capacity-headroom on-call-playbook; do
-  # These dispatch rows should have NO references to the new agents (DeploymentEngineer, ObservabilityArchitect)
+# Scenario 9: reuse the existing read-only planning capability, not an execution role
+echo ""; echo "[9] Planning routes and checkpoint ownership"
+for cap in deployment-plan rollback-strategy on-call-playbook deployment_plan_locked on_call_ready; do
   row=$(grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$DH" 2>/dev/null)
-  if [ -n "$row" ] && ! echo "$row" | grep -qE "DeploymentEngineer|ObservabilityArchitect"; then
-    existing_only_caps=$((existing_only_caps + 1))
+  if [ -n "$row" ] && echo "$row" | grep -q "DeploymentEngineer" && ! echo "$row" | grep -q "ReleaseEngineer"; then
+    pass "$cap uses DeploymentEngineer without ReleaseEngineer"
+  else
+    fail "$cap must not depend on ReleaseEngineer execution tools"
   fi
 done
-if [ "$existing_only_caps" -eq 4 ]; then
-  pass "L-002 win: 4 capabilities dispatch ONLY to existing agents (cost-projection, rollback-strategy, capacity-headroom, on-call-playbook)"
+if grep -qE "^tools: Read, Grep, Glob$" "$REPO_ROOT/agents/engineering/DeploymentEngineer.md"; then
+  pass "DeploymentEngineer retains its read-only tool declaration (not host-enforcement proof)"
 else
-  fail "L-002 unexpected: only $existing_only_caps of 4 expected-existing-only capabilities"
+  fail "DeploymentEngineer tool declaration changed"
 fi
 
 # Scenario 10: Pattern consistency

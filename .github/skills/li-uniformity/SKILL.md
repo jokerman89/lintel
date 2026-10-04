@@ -1,6 +1,6 @@
 ---
 name: li-uniformity
-description: Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage matrix. Reports per-kind D14 necessity adoption. Never writes.
+description: Use in a Lintel contributor source checkout or CI to inspect the uniformity floor and recorded matrix; missing trusted source tests remain unavailable.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/uniformity/SKILL.md`; edit the canonical file, then run
@@ -25,6 +25,11 @@ description: Read-only uniformity-contract dashboard — runs the Gate-M3 floor 
 
 You are the `uniformity` skill — read-only window onto the uniformity-as-contract
 mechanism (the parked `/autoplan` recommendation, now built).
+
+This is contributor-source-only, not consumer health inspection. Use
+[doctor's inspection owner](../../../skills/doctor/references/inspection.md) for installed
+files and target layout. A consumer bundle without the trusted source tests
+cannot run this floor; retain the visible limitation and never use target-code fallback.
 
 ## What this skill does
 

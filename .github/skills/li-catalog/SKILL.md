@@ -1,6 +1,6 @@
 ---
 name: li-catalog
-description: Use to discover Lintel skills and agents by name, purpose, category, voice or declared client support, or regenerate the committed skill catalog after frontmatter changes.
+description: Use to discover Lintel skills and agents by intent, name, purpose, category, voice or declared client support, or regenerate the committed skill catalog after frontmatter changes.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/catalog/SKILL.md`; edit the canonical file, then run
@@ -49,7 +49,7 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=skill --categor
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
 ```
 
-Only pass a query when the operator supplied a nonempty keyword. `--search` is an alias
+Only pass a nonempty keyword from the operator's supplied request. `--search` is an alias
 for `--query`. Family filters are literal prefixes, not globs; query/filter values are
 data, never shell fragments. Pass each as one quoted argument, without `eval` or command
 construction. Listing and filtering do not write or regenerate `skills/CATALOG.md`.
@@ -84,6 +84,14 @@ inventing an empty inventory or parsing every prompt yourself. If execution is u
 the existing trusted `skills/CATALOG.md` is a skills-only fallback; disclose that it is a
 committed snapshot without agent metadata. An explicitly named canonical file can still
 be read through a permitted file tool. Neither fallback activates a workflow.
+
+## Match intent
+
+For free-text intent, follow [intent narrowing](../../../skills/catalog/references/intent.md), the sole owner
+of the metadata-first shortlist and selected-body checks. `skill-router`, `orientator`
+and `welcome` retain their public names and delegate here. SENSE retains its actual
+mechanical navigation/high-risk confirmation, not a competing discovery method.
+No ranking engine, model selection policy or measured success rate is introduced.
 
 ## Select a capability without changing installation
 

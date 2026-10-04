@@ -40,6 +40,11 @@ Designs data pipelines: ingestion (batch + streaming), transformation (dbt, Spar
 2. **State pipeline goal:** what business question gets answered or what downstream consumer is served.
 3. **Identify constraints:** consumer freshness/correctness, peak and sustained volume,
    source schema/event identity, applicable data policy and cost ceiling.
+   Apply the dimensional-design part of the shared
+   [data decision methods](../../skills/da/references/decision-methods.md): fact grain,
+   event identity, SCD effective intervals and conformed dimensions. SchemaArchitect
+   is the compatible read-only dimensional view; do not dispatch both for the same
+   outcome or re-derive an unchanged accepted model.
 4. **Pipeline shape:**
    - Ingestion: CDC / batch dump / event stream
    - Transformation: SQL / Python / Spark

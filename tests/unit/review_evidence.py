@@ -73,6 +73,33 @@ def observed_tests():
     return tests
 
 
+class SharedNumericValidation(unittest.TestCase):
+    def test_large_integers_in_shared_text_are_controlled_errors(self):
+        for value in (10 ** 400, -(10 ** 400)):
+            with self.subTest(value_sign=value > 0), self.assertRaises(contract.ContractError):
+                contract.validate_shape(value, "text")
+
+    def test_nonfinite_or_unrepresentable_scores_are_controlled_errors(self):
+        for value in (10 ** 400, -(10 ** 400), float("inf"), float("-inf"), float("nan"), True):
+            item = control()
+            item["advisory_score"] = value
+            with self.subTest(value=value), self.assertRaises(contract.ContractError):
+                contract.validate_control(item)
+        for value in (0, 50.5, 100):
+            item = control()
+            item["advisory_score"] = value
+            self.assertEqual(contract.validate_control(item), item)
+
+    def test_unrepresentable_contrast_remains_unverified(self):
+        for value in (10 ** 400, -(10 ** 400), float("inf"), float("-inf"), float("nan"), True):
+            item = control("contrast", "contrast")
+            item["observation"] = {"ratio": value, "text_size": "normal"}
+            with self.subTest(value=value):
+                result = contract.evaluate_controls([item], required_policy=neutral_policy())
+                self.assertTrue(result["blocked"])
+                self.assertEqual(result["controls"][0]["effective_status"], "unverified")
+
+
 class Fixture(unittest.TestCase):
     native_root_length = None
 
@@ -2397,7 +2424,8 @@ if __name__ == "__main__":
         "batching": (BlobBatching,),
         "boundaries": (MarkdownBoundaryEvidence,),
         "native": (NativePathEvidence,),
-        "controls": (MandatoryControls,), "hook": (HookEvidence,),
+        "numeric": (SharedNumericValidation,),
+        "controls": (SharedNumericValidation, MandatoryControls), "hook": (HookEvidence,),
     }[suite_name]
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(cls) for cls in classes)
     result = unittest.TextTestRunner(verbosity=2).run(suite)

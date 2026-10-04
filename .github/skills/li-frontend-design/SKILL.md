@@ -76,12 +76,19 @@ actual available delegation or serial execution; a role name is not an invocatio
 - Optional `--target-format <single-file|nextjs|app>` — default: `single-file`. `app` triggers generate-app (Phase B)
 - Optional `--customer-share` — sets CUSTOMER_SHARE=1, triggers compliance-gate + voice-gate
 - Required `--out <path>` for rendering — owned repository-relative run directory
+- Optional `--overwrite` — permit replacement of the explicitly selected
+  `design-dna.md` retrieval output using its captured preimage; this does not
+  authorize replacing other outputs or choosing another destination
 - Optional `--skip-shader` — explicit no-shader choice, not an unfinished GPU feature
 - `--stack <next-app|vite-react|svelte-kit>` for `--target-format app`, selected
   explicitly or confirmed from the existing project manifest; never infer React
   for an unknown stack.
 
 ## Design mode workflow
+
+Apply the [axis ownership contract](../../../skills/frontend-design/references/axis-ownership.md) throughout:
+one decision method and one publication per fragment. A separate role context
+is optional expertise, not an automatic second execution or independent review.
 
 ### Step 1 — Parse invocation + warm context
 
@@ -109,10 +116,57 @@ gate is not evidence that a host mechanism executed.
 Retrieval before generation. Resolve the active design profile and search the corpus BEFORE any
 design decision:
 
+Bind nonempty `DESIGN_QUERY` and `PROJECT_NAME` from the actual brief/project.
+`OUT` is the selected repository-relative directory; `OVERWRITE=1` records
+only the explicit retrieval replacement permission. Capture its state before
+searching, retain failed output separately, and publish only successful UTF-8
+retrieval through the existing rooted writer. A directory is not overwrite authority.
+
 ```bash
-dna="${LINTEL_SOURCE_ROOT:?trusted source required}/skills/design-dna"
-python3 "$dna/scripts/search.py" "<product> <industry> <tone keywords from brief>" \
-  --design-system -f markdown -p "<project>" > "$out_dir/design-dna.md"
+python3 -I -B - "${LINTEL_SOURCE_ROOT:?trusted source required}" \
+  "${LINTEL_REPO_ROOT:?selected repository required}" "${OUT:?selected output required}" \
+  "${DESIGN_QUERY:?derive the retrieval query}" "${PROJECT_NAME:?select the project name}" \
+  "${OVERWRITE:-0}" <<'PY'
+from pathlib import Path
+import subprocess
+import sys
+
+source, repo, out_dir, query, project, overwrite = sys.argv[1:]
+sys.path.insert(0, str(Path(source) / "lib"))
+import context_safety as safety
+
+try:
+    if overwrite not in ("0", "1"):
+        raise ValueError("OVERWRITE must be 0 or 1.")
+    root = safety.checked_root(Path(repo))
+    relative = (Path(out_dir) / "design-dna.md").as_posix()
+    original_state = safety.file_state(root, relative)
+    if original_state is not None and overwrite != "1":
+        raise FileExistsError("Retrieval output exists; explicit replacement permission is required.")
+    result = subprocess.run(
+        [sys.executable, "-I", "-B", str(Path(source) / "skills/design-dna/scripts/search.py"),
+         query, "--design-system", "-f", "markdown", "-p", project],
+        capture_output=True,
+    )
+    if result.returncode:
+        sys.stderr.buffer.write(result.stderr)
+        print(f"ERROR [lintel/design-retrieval]: producer exited {result.returncode}", file=sys.stderr)
+        raise SystemExit(result.returncode)
+    if not result.stdout.decode("utf-8").strip():
+        raise ValueError("Retrieval returned no usable text.")
+    safety.atomic_write(
+        root, relative, result.stdout,
+        mode=original_state["mode"] if original_state is not None else 0o600,
+        expected=original_state, check_expected=True,
+    )
+    persisted, _ = safety.read_owned(root, relative)
+    if persisted != result.stdout:
+        raise ValueError("Retrieval output readback differs.")
+    print(root / relative)
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design-retrieval]: {error}", file=sys.stderr)
+    raise SystemExit(2)
+PY
 ```
 
 Use the already verified P07 `profile_ref` and `design_contract.profile_asset` to select
@@ -229,8 +283,12 @@ The gate is no longer optional. Two parts, in order:
    the lowercase values of `loaded_design["design"]["palette"]["tokens"]`.
    Preserve its returned errors/warnings separately; errors block. The standalone
    validator CLI remains available when an explicit verified asset path is used.
-2. Invoke `/li-frontend-design-review` on the actual output and the same selected
-   design/context. That consumer rechecks P07 and the original P05 obligations.
+2. Own the single post-generation handoff through
+   [review ownership and reuse](../../../skills/frontend-design-review/references/built-review.md#review-ownership-and-reuse).
+   Reuse only an actually current, applicable independent result and complete QA.
+   Otherwise invoke `/li-frontend-design-review` for the actual output and missing
+   required coverage. That consumer rechecks P07 and the original P05 obligations;
+   a renderer's self-check or advisory report does not substitute for it.
 
 Validator errors → **BLOCKED** (fix and re-render; never ship over a red gate). No rendered HTML
 yet (spec-only run) → validator runs in generate-web/generate-app when output exists;
@@ -323,10 +381,14 @@ declared source location, not an assumed personal copy.
 
 Use the existing `/li-compliance-gate` control contract for this exact artifact and
 actual policy source/version/applicability. No generic `--check` switch or named
-font/motion/shader licensing validator is supplied by that skill. Obtain the
-required license/source and applicable voice/policy observations through permitted
-existing methods; a missing required check remains unverified and blocks its
-affected sharing action. No-applicable-controls is not licensing clearance.
+font/motion/shader licensing validator is supplied by that skill. Perform the
+[selected asset evidence procedures](../../../skills/design-dna/references/design-contract.md#selected-asset-evidence):
+`font-licensing`, `motion-licensing`, `shader-licensing`, `brand-source` and
+`brand-freshness` for the actual selected assets and requirements. These are
+manual/source inspections recorded as P05 `check` controls, not active scanners.
+Retain applicable voice/policy observations as well; a missing required check
+remains unverified and blocks its affected sharing action.
+No-applicable-controls is not licensing clearance.
 
 Pattern coverage and a valid design fragment do not establish these observations.
 Retain mandatory clauses, notices and the same work/profile identity. A

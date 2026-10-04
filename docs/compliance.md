@@ -32,6 +32,43 @@ that API in this release. See [Copilot](copilot.md#hooks-and-security-controls).
 actual Lintel integration is described by the generated
 [capability table](../README.md#multi-cli-support).
 
+## Selected control conformance
+
+For each **selected required control**, retain one compact row in the existing
+work handoff or control-review evidence. This is not a new policy schema or a
+neutral mandatory-control list. Start from accepted work and the actual policy,
+before observing results; no selected company controls means no invented rows.
+
+| Required control / original task IDs / source and version | Responsible owner | Actual mechanism / enforcement level | Negative test | Evidence location | Failure behavior |
+|---|---|---|---|---|---|
+| `<existing requirement and applicable scope>` | `<named accountable person/team; unresolved if unknown>` | `<actual workflow/helper or registered host/CI control and version; unavailable if absent>` | `<authorized contrary input, missing control or denied action and expected result>` | `<exact command/result, current-content record or host/CI run; unrun if absent>` | `<affected action to stop, owner to notify and permitted recovery>` |
+
+Label the mechanism accurately:
+
+- **model-instructed:** the workflow asks the model/operator to follow a rule.
+  A source-contract test checks the instruction text, not compliance by a model
+  or a permission boundary.
+- **helper-validated-on-invocation:** an actually invoked local helper validates
+  selected inputs and returns its observed result. For example, P05 rejects
+  omitted immutable requirements when invoked; it does not intercept every edit,
+  authenticate actors or enforce a host's merge permissions.
+- **host/CI-enforced:** the responsible owner identifies the actual enabled
+  registration, required check or platform policy and retains its authorized
+  negative-test result on the named surface/version. Configuration presence
+  alone is not verified enforcement; an unrun or unavailable mechanism remains
+  unverified, not silently relabeled as enforced.
+
+For P05, derive `required_controls` and immutable `qa_requirements` from the
+selected acceptance/policy before collecting observations. Preserve the same
+IDs, applicability and policy references in QA/review; do not regenerate the
+inventory from only the effective hooks or successful results. Record negative
+outcomes and missing evidence as well as positive ones. An omitted, failed,
+error or unverified mandatory control prevents clearance of its affected action;
+continue only independent authorized preparation. An owner may resolve scope
+through the existing approval process, not by downgrading a requirement after
+seeing the result. No live IAM, SIEM, hook activation or platform mutation is
+implied by completing this row.
+
 ## Claude Code block hooks
 
 `secret-scan-block` and `customer-data-block` run on the Claude Code `PreToolUse` Bash event.

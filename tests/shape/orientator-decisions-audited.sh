@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # tests/shape/orientator-decisions-audited.sh
-# Asserts (v4.0 Phase 3): orientator skill exists + routing lib exists + SENSE
-# invokes orientator + audit path is documented.
+# Asserts: retained orientator delegates discovery; SENSE owns actual routing and audit.
 # tag: shape v4.0
 
 set -uo pipefail
@@ -43,19 +42,26 @@ else
   fail "SENSE does not document orientator invocation at Step 0d"
 fi
 
-# Skill documents audit path
-if grep -qE "orientator-decisions\.jsonl" "$REPO_ROOT/skills/orientator/SKILL.md" 2>/dev/null; then
-  pass "orientator audit path documented"
+# SENSE owns the real producer, not the discovery wrapper.
+if grep -qE "audit_log orientator-decisions orientator_decision" "$REPO_ROOT/skills/sense/SKILL.md"; then
+  pass "SENSE invokes the orientation audit producer"
 else
-  fail "orientator skill does not document audit path"
+  fail "SENSE is missing the orientation audit producer"
 fi
-
-# Skill documents pack-overridable parameters
-for f in orientator_budget_tokens escalation_threshold high_risk_workflows auto_mode_eligible; do
-  if grep -q "$f" "$REPO_ROOT/skills/orientator/SKILL.md" 2>/dev/null; then
-    pass "orientator skill references pack field $f"
+for skill in catalog skill-router orientator welcome sense; do
+  if grep -q 'references/intent.md' "$REPO_ROOT/skills/$skill/SKILL.md"; then
+    pass "$skill delegates metadata intent narrowing to catalog"
   else
-    fail "orientator skill does not document pack field $f"
+    fail "$skill is missing the shared intent method"
+  fi
+done
+
+# Existing SENSE control retains pack-overridable parameters.
+for f in orientator_budget_tokens escalation_threshold high_risk_workflows auto_mode_eligible; do
+  if grep -q "$f" "$REPO_ROOT/skills/sense/SKILL.md" 2>/dev/null; then
+    pass "SENSE references pack field $f"
+  else
+    fail "SENSE does not document pack field $f"
   fi
 done
 

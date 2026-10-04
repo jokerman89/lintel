@@ -2,7 +2,7 @@
 # implements: ADR-0010
 # intent: .claude/plans/universal-implementation/packages/P03.md
 # constraints: stdlib; transport must perform one hop without automatic redirects
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-10-03
 """Exact/wildcard host policy and a transport-independent, checked redirect loop."""
 import argparse
 from dataclasses import dataclass
@@ -72,6 +72,21 @@ class Response:
     body: bytes
 
 
+def _response_headers(items) -> dict[str, str]:
+    """Normalize response fields without accepting malformed or ambiguous Locations."""
+    headers = {}
+    for key, value in items:
+        if not isinstance(key, str) or not re.fullmatch(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+", key):
+            raise ValueError("Malformed HTTP response header name.")
+        if not isinstance(value, str) or any((ord(c) < 32 and c != "\t") or ord(c) == 127 for c in value):
+            raise ValueError("Malformed HTTP response header value.")
+        name = key.lower()
+        if name == "location" and name in headers:
+            raise ValueError("Ambiguous duplicate redirect Location.")
+        headers[name] = headers[name] + ", " + value if name in headers else value
+    return headers
+
+
 def redirect_url(current: str, location: str, allowed_hosts: list[str]) -> str:
     if not location:
         raise ValueError("Redirect response has no Location.")
@@ -98,12 +113,16 @@ def fetch_checked(url: str, allowed_hosts: list[str], request: Callable[[str], R
         response = request(current)
         if not isinstance(response, Response) or not isinstance(response.body, bytes):
             raise ValueError("Transport must return a bounded single-hop Response.")
+        if type(response.status) is not int or not 100 <= response.status <= 599:
+            raise ValueError("Malformed HTTP response status.")
+        if not isinstance(response.headers, Mapping):
+            raise ValueError("Malformed HTTP response headers.")
+        headers = _response_headers(response.headers.items())
         if len(response.body) > max_bytes:
             raise ValueError("Response exceeds the context byte bound.")
         if response.status in (301, 302, 303, 307, 308):
             if len(visited) > max_redirects:
                 raise ValueError("Redirect limit exceeded.")
-            headers = {key.lower(): value for key, value in response.headers.items()}
             current = redirect_url(current, headers.get("location", ""), allowed_hosts)
             continue
         if not 200 <= response.status < 300:

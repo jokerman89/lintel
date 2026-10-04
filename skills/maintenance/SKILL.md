@@ -14,161 +14,63 @@ cli_support:
     level: full
 ---
 
-You are the `maintenance` skill — on-demand Lintel-maintenance pass.
+# Maintenance
 
-## What this skill does
+Retained compatibility front door for four on-demand routes. Choose one requested
+mode, then follow its existing owner in full; do not run another path manifest,
+token predictor, event parser or cleanup procedure here.
 
-Operator-request 5.3 (post Cohort 2 dependency 1.1 usage-log landed): an on-demand maintenance system with 3 modes:
+| Retained mode | Owner and supported invocation | Meaning |
+|---|---|---|
+| `--force-compact` | [Context budget](../context-budget/SKILL.md): `/li:context-budget --advice` | Working-set/storage advice, not compaction |
+| `--monitor-paths` | [Doctor inspection](../doctor/references/inspection.md): `/li:doctor --layers-only` | Actual source/foundation/layout/adapter observations |
+| `--simulate-tokens <workflow>` | [Context budget](../context-budget/SKILL.md): observation, or `--handoff --map <selected work.json>` for explicit mapped inputs | Selected-input estimate, not a workflow-cost prediction |
+| `--rust-report` | [Audit observations](../audit/references/method.md): `/li:audit --category usage-skill --since 30` | Recorded usage samples, not a disuse verdict |
 
-1. **`--force-compact`** — retained compatibility name for context/storage advice.
-   It does not clear active context or invoke an unavailable host operation.
+The skill names above are workflow routes. Doctor's filtered view is presentation,
+not a `--layers-only` argument to `bin/li-doctor`; its owner supplies the real helper
+arguments and preserves the complete diagnostic exit. Audit maps its filters to the
+existing event reader. Use native entrypoints actually available on the host, or the
+same trusted owner through a permitted file handoff; never bypass a denied operation.
 
-2. **`--monitor-paths`** — watch canonical paths for drift/missing. Would have caught 0.4 (tasks/personas+memory missing per docs/architecture.md). Static-path verification.
+## Context and estimates
 
-3. **`--simulate-tokens <workflow>`** — a labeled planning estimate from real,
-   compatible observations when available, otherwise an uncalibrated prior.
-   Optional manual usage-log entries are not a full invocation/billing census.
+`--force-compact` cannot clear a conversation, enable a watcher or invoke an unavailable
+host control. Follow context-budget's advice and, if useful and authorized, its
+pause/fresh-session/resume route. Retain the same original map, verified profile and
+required policy; do not select a newer basename as the current task.
 
-Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted for paths).
+For `--simulate-tokens`, retain the supplied workflow name as a report label only.
+Do not pass it as a size or unsupported provider flag. Use actual selected bytes with
+the owner's `--bytes` observation, or explicitly selected mapped artifacts through
+`--handoff --map`. Pass `--capacity`, `--capacity-source`, `--used`, `--usage-source`
+and other owner-supported observation arguments only when those facts exist.
+No selected inputs or compatible measurements means **unknown**, not a stock token range.
+Selected input size, active context, cumulative usage and disk bytes remain separate.
+No billing/cost or p95 precision can be inferred from a few optional manual entries.
 
-## When to use
+## Path and usage results
 
-- "My Lintel feels sluggish" → `/li:maintenance --force-compact`
-- "Is everything in place?" → `/li:maintenance --monitor-paths`
-- "What would X cost?" → `/li:maintenance --simulate-tokens customer-engagement`
-- "What has low observed usage?" → `/li:maintenance --rust-report` (retained flag name: skills with <2 recorded invocations past 30 days, via usage-log)
+`--monitor-paths` returns doctor's actual results. A missing/failed required observation
+is incomplete, not a successful partial health check. Repairs, migration and profile
+changes require separate scoped authority; file presence is not host activation.
 
-## When NOT to use
+`--rust-report` uses only explicitly authorized log roots. If requested, inspect other
+actual `usage-*` categories through audit too. Count **recorded** invocations in the
+named source/window; the historical fewer-than-two samples threshold is only a review
+prompt for observed rows. An absent name/log is **unobserved/coverage unknown**, not
+unused or safe to delete. Preserve malformed-line diagnostics and preview limitations.
+Use catalog's ordinary metadata separately if an explicit join was requested, not a
+different catalog feature or an implicit personal telemetry scan.
 
-- Mid-task work (this pauses for diagnostics)
-- Single-file check — select `/li:doctor --fast` or its actual scoped view
-- Pre-implementation cost estimate — `/li:cycle --dry-run` has inline cost
+## No implicit cleanup
 
-## Workflow per mode
+All four routes are read-only/advisory. Age and partial usage never authorize archiving,
+deletion, profile changes or a global sink. Any later disk operation must name exact
+owned paths and destination, preserve unrelated content, and use the existing owned
+snapshot/recovery method under separate authority. Report storage changed only after
+observing it; active-context reclamation remains unestablished without actual host evidence.
 
-### `--force-compact`
-
-Use P03 `/li:context-budget --advice` for resource advice with observed/estimated/unknown headroom, and
-`/li:pause` -> restart -> `/li:resume --from <checkpoint>` for owned checkpoint continuity.
-Retain the same [work map](../spec-kit/references/work-map.md) and actual verified
-profile reference/required policy. Context state is not selected by a newer basename.
-
-Storage inspection can identify old checkpoints, manual usage logs, draft directories
-and provenance archives as candidates. Age alone does not make them safe to remove.
-Before an authorized archive/recovery operation, name exact owned paths and destination,
-preserve unrelated files, and use P03's owned snapshot/recovery workflow; do not copy
-whole trees, delete by wildcard or send data to an implicit global/private sink.
-
-Report disk bytes only after actual verification, separately from model context:
-"Storage archived: <observed bytes or not performed>; active context reclaimed: not
-established." No force-compaction control, watcher or cleanup daemon is enabled.
-
-### `--monitor-paths`
-
-Static-path manifest (loaded from config or hard-coded):
-
-```yaml
-load-bearing_paths:
-  - .claude/memory/lessons.md          # required per docs/architecture.md
-  - .claude/memory/personas.md          # required per docs/architecture.md (Cohort 1 0.4)
-  - .claude/memory/working-state.md            # required per docs/architecture.md (Cohort 1 0.4)
-  - <explicit configured profile context>  # P07 verification, not file-presence clearance
-  - .claude/runtime/audit/     # observation spine writes here (usage-* stays in ~/.lintel/audit/)
-  - <trusted source>/skills/   # source, not an arbitrary inspected target
-  - <trusted source>/agents/
-
-deprecated_paths_check:
-  - <explicitly selected legacy paths>  # no automatic personal-directory inspection
-
-required_files_in_paths:
-  - skills/CATALOG.md          # auto-generated, should exist post-Cohort-2 merge
-  - .claude/memory/lessons.md           # canonical lessons
-```
-
-For each path:
-- Check existence
-- Check writeable (if relevant)
-- Check non-empty (if expected)
-- Check no-drift (deprecated paths should be empty)
-
-Surface the diff vs expected state. PASS / WARN / FAIL per path.
-
-### `--simulate-tokens <workflow>`
-
-Use `lib/scale-estimator.sh::scale_token_estimate <size>` for a whole-cycle prior
-and its actual sample count/basis. Do not multiply it by task count or confuse it
-with current context usage. Historic mode examples remain illustrative estimates:
-
-```yaml
-hotfix:           ~5k tokens
-customer-engagement: ~40-80k tokens
-internal-tool:    ~25-50k tokens
-demo-prep:        ~15-25k tokens
-research-dive:    ~10-20k tokens
-```
-
-Cross-reference with usage records, if any exist (the usage-log writer is manual, operator-invoked):
-- Read `usage-*.jsonl` in `$(audit_dir usage-skill)` past 30 days, through `bin/li-events.py`
-- Filter by skill-list for the chosen workflow
-- Compute median + p95 tokens-est
-- Surface the source, sample count, missing/estimated fields and selection bias.
-  Do not manufacture p95 precision from a few optional records.
-
-If no compatible measured data exists: report an uncalibrated prior or unknown.
-For the actual handoff, `/li:context-budget --handoff --map <selected work.json>`
-uses the existing reader to measure original artifacts and explicit P03 warming inputs. There is no cost
-estimate without actual provider/billing inputs.
-
-### `--rust-report`
-
-Read usage records past 30 days, if any exist (writer is manual — without records, report "no usage records observed" instead of a low-usage table):
-- Count only **recorded** invocations in the selected source/log scope
-- Low recorded activity may prompt a review, never deletion or an unused-skill verdict
-- Group observed samples separately from **unobserved/coverage unknown**
-- Surface a table for operator review
-
-Use `/li:catalog --kind=all` separately for current declared metadata. If requested,
-join that metadata to these recorded samples explicitly; the catalog does not
-provide a trend overlay, and an unmatched name has unknown observation coverage.
-
-## Pause-points
-
-- A requested disk mutation needs exact scoped authority regardless of byte count;
-  use the actual host question channel only when that authority is missing
-- `--monitor-paths` FAIL on a load-bearing path: surface with a fix recommendation
-
-## Integration
-
-**Reads:**
-- `usage-*.jsonl` in `$(audit_dir usage-skill)` (Cohort 2 1.1 output; operator-global)
-- `.claude/runtime/state/` (snapshot dir)
-- Explicitly selected owned storage candidates; no default personal-directory scan
-- `skills/context-budget/SKILL.md` advisory workload thresholds
-- Load-bearing path manifest (configurable)
-
-**Writes:**
-- Explicitly authorized owned storage artifacts only; no default global archive
-- stdout (report); no audit record is written by this skill
-
-**Consumed by:**
-- Operator (manual periodic runs)
-- Future: scheduled-task wrapper for weekly auto-run
-
-## Anti-patterns
-
-- **Aggressive force-compact mid-engagement** — keep recent state for 30 days minimum. Operators need to resume from context that isn't just-shipped.
-- **Path-monitoring without write-safety** — this skill READS paths. Modifications go through separate ops.
-- **Token-simulation without compatible measured data** — label uncalibrated/unknown.
-- **Turning absent or partial telemetry into a health, disuse or completion verdict** — preserve the gap.
-
-## Failure recovery
-
-- Compaction targets locked (open files): skip + log
-- Path monitoring permission-deny: warn + continue (partial coverage)
-- Token simulation: heuristic fallback if no usage-log data, flag it in the report
-
-## Recommended next steps
-
-- Post-monitor-paths FAIL: address each fail individually (most likely missing config or a stale path)
-- Post-rust-report: review low-observation candidates; absence is not disuse evidence
-- Post-force-compact: run `/li:doctor --quick` to verify no inadvertent state loss
+Return the selected owner, actual command/result, observations, limitations and one
+appropriate next step. Missing tools, denied reads and parser failures remain explicit;
+there is no automatic fallback estimator, background monitor or maintenance daemon.

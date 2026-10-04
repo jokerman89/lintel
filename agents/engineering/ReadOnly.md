@@ -38,7 +38,12 @@ Pure read-only exploration. Useful when main agent needs deeper context on a cod
 ## Workflow
 
 1. **Restate question** precisely so main agent can verify scope.
-2. **Search strategy:** glob + grep, multiple passes if needed. Cite file:line for every claim.
+2. **Search strategy:** apply DISCOVER's
+   [bounded codebase-map method](../../skills/discover/SKILL.md#step-1--codebase-map-grepglob-targeted)
+   in the current context, with relevant ADR selection only when the question needs it.
+   Use the actual repository directories and literal selectors; preserve omissions.
+   Do not invoke the full DISCOVER lifecycle or dispatch Explorer to repeat a completed
+   lookup. Cite file:line for every claim.
 3. **Synthesize.** Don't dump raw matches; extract the pattern + answer.
 4. **Flag uncertainty.** If the answer is "I'm not sure", say so + name what would resolve it.
 

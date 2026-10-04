@@ -159,6 +159,7 @@ AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory,
 """
 SWARM_RESOURCES = (
     "skills/swarm/SKILL.md",
+    "skills/swarm/references/evidence.md",
     "skills/brief-forge/SKILL.md",
     "bin/li-swarm",
     "bin/li-swarm.py",
@@ -231,6 +232,7 @@ ADAPTER_RESOURCES = (
     "lib/native_paths.py",
     "lib/context_safety.py", "lib/managed_transaction.py",
     "bin/li-snapshot.py", "bin/li-managed-transaction.py", "bin/li-run",
+    "bin/li-isolated-bisect", "lib/migration-recovery.sh",
     "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-scaffold", "bin/li-doctor",
@@ -240,19 +242,38 @@ ADAPTER_RESOURCES = (
     "bin/li-events.py", "lib/event-catalog.json", "bin/li-lessons.py", "lib/memory.sh",
     "bin/li-catalog.py", "lib/capability-selections.json",
     "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
+    "skills/catalog/references/intent.md",
+    "skills/role/references/lifecycle.md",
+    "skills/pack-switch/references/lifecycle.md",
+    "skills/audit/references/method.md", "skills/audit/references/read.sh",
+    "skills/doctor/references/inspection.md",
+    "skills/scope/references/method.md",
+    "skills/cycle/references/maintainer.md",
+    "skills/capture/references/vault.md", "skills/capture/references/reports.md",
+    "skills/ship/references/customer-delivery.md",
+    "skills/lessons-add/references/benefit.md",
+    "skills/da/references/preferences.md",
+    "skills/spec-kit/references/selected-authority.md",
+    "skills/build/references/documentation-fidelity.md",
+    "skills/generate-outline/references/narrative-arc.md",
+    "skills/frontend-design/references/axis-ownership.md",
+    "skills/frontend-design-review/references/built-review.md",
     "skills/web-session/scripts/chromium.mjs", "skills/web-session/scripts/extract.mjs",
     "skills/web-session/references/browser-operations.md",
     "skills/web-session/references/browse.md", "skills/web-session/references/scrape.md",
     "skills/web-session/references/open.md", "skills/web-session/references/cookies.md",
     "skills/code-freeze/scripts/freeze.py",
-    "lib/url_policy.py",
+    "lib/url_policy.py", "lib/url_transport.py",
     "skills/design-dna/scripts/design_contract.py",
+    "skills/design-dna/scripts/measure_contrast.py",
     "skills/design-dna/references/design-contract.schema.json",
     "skills/design-dna/references/design-contract.md",
     "skills/catalog/references/consumer-checks.md",
     "skills/generate-write/references/fidelity-and-evidence.md",
     "skills/generate-word/references/native-word.md",
     "skills/generate-ppt/references/native-powerpoint.md",
+    "skills/generate-ppt/references/retention-check.md",
+    "skills/generate-ppt/scripts/check_pptx.py",
     "skills/generate-xlsx/references/native-xlsx.md",
     "skills/generate-xlsx/scripts/check_xlsx.py",
     "skills/generate-pdf/scripts/prepare_html.py",
@@ -952,14 +973,31 @@ def native_files(source: Path, files: dict[str, bytes], local: bool, host: dict)
             raise ValueError(f"Native agent name collision: {canonical} and {owners[name.casefold()]}")
         owners[name.casefold()] = canonical
         output[generated] = data
+    role_reports = {
+        "planner": """Report the selected spec.md, plan.md and prompt.md paths (or mapped equivalents),
+original card/dependency coverage, open decisions, approval status and unrun checks.
+Proposed paths are not written artifacts.""",
+        "builder": """Report actual changed files, checks actually run with results, findings by severity,
+and unresolved limitations against every supplied build card.""",
+        "reviewer": """Report a verdict bound to the original work/leaf IDs, exact source snapshot,
+profile/policy and review evidence contract, with findings by severity, supplied
+verification evidence and unresolved limitations. Make no source edits.
+Return the decision and actual reviewer identity to the authorized coordinator for
+recording through the shared evidence contract. Missing prepared context or required
+evidence is NEEDS_CONTEXT/unverified; unavailable recording must remain explicit.
+A returned decision is not recorded clearance. Do not acquire write or shell tools
+to fill the gap. Generated tool declarations are not live host-enforcement evidence.""",
+    }
     for role, (description, workflow) in AGENTS.items():
         name = f"lintel-{role}"
         output[f"{host['agent_root']}/{host['agent_file'].format(name=name)}"] = text_bytes(
-            render_frontmatter({"name": name, "description": yaml_scalar(description)}, ("name", "description"))
+            render_frontmatter({"name": name, "description": yaml_scalar(description),
+                                "tools": "read, search" if role == "reviewer" else None},
+                               host["agent_frontmatter"])
             + f"""
 Use the native `{host['invocation'].format(name=workflow)}` skill for the supplied task and follow it completely.
-Keep the task bounded to the supplied requirements and repository context. Report
-changed files, checks actually run, findings by severity, and unresolved limitations.
+Keep the task bounded to the supplied requirements and repository context.
+{role_reports[role]}
 Do not claim independent review if you implemented the same change. If delegation
 is unavailable, label the pass as self-review and retain the human review gate.
 """)

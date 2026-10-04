@@ -33,14 +33,17 @@ sources:
   # ----- TIER: permissive (MIT) -----
 
   gsd-redux:
-    repo: https://github.com/open-gsd/get-shit-done-redux
+    # Historical key/path and 2026-05-26 verification are retained. That check used
+    # https://github.com/open-gsd/get-shit-done-redux; the current-facing reference
+    # below comes from the original 2026-09-28 comparison, not a new URL/license check.
+    repo: https://github.com/open-gsd/gsd-core
     install_path: ~/.claude/get-shit-done
     last_verified: 2026-05-26
     license: MIT
     tier: permissive
     install_type: git-clone
-    description: "Get Shit Done (Redux) — meta-prompting + context engineering + spec-driven development for multi-CLI agents. Community fork of the original TÂCHES project."
-    docs: https://github.com/open-gsd/get-shit-done-redux#readme
+    description: "GSD Core — spec-driven agent workflow. Repository reference recorded by the 2026-09-28 review; historical registry key retained."
+    docs: https://github.com/open-gsd/gsd-core#readme
 
   agentshield:
     repo: https://github.com/affaan-m/agentshield
@@ -59,7 +62,7 @@ sources:
     license: MIT
     tier: permissive
     install_type: git-clone
-    description: "Everything Claude Code — 27 agents, 64 skills, 33 commands. Multi-CLI agent harness (Claude Code, Codex, OpenCode, Cursor)."
+    description: "Everything Claude Code — multi-CLI agent harness. Inventory counts are omitted rather than presented as current."
     docs: https://github.com/affaan-m/ECC#readme
 
   # ----- TIER: restricted -----
@@ -149,14 +152,17 @@ bundled_materials:
     relationship: adapted
     local_paths:
       - skills/design-dna/data
-      - skills/design-dna/references
+      - skills/design-dna/references/token-architecture.md
+      - skills/design-dna/references/primitive-tokens.md
+      - skills/design-dna/references/semantic-tokens.md
+      - skills/design-dna/references/component-tokens.md
       - skills/design-dna/scripts/core.py
       - skills/design-dna/scripts/search.py
       - skills/design-dna/scripts/design_system.py
     license: MIT
     notice: skills/design-dna/LICENSES/MIT-next-level-builder.txt
     attribution: skills/design-dna/ATTRIBUTION.md
-    modifications: "Recorded in the component attribution and ADR-0015/0017; Lintel token emitter and validator are identified separately."
+    modifications: "Recorded in the component attribution and ADR-0015/0017. Local paths clarified 2026-10-03: Lintel-authored design contract/schema, token emitter and validator are not upstream copies. No import revision or upstream lookup was added."
     evidence_checked: 2026-09-20
   design-dna-example-profile:
     source: https://github.com/anthropics/skills
@@ -182,3 +188,25 @@ method_comparisons:
   superpowers: 5bf4e78011075bcfc0dc295f0724994cd123ee71
   gsd-core: 88b5775dc8e32ffe8d50fe4db01677650e219ed2
   ecc: 934195f955cf0da847d59fcd6f68856bce112d8b
+
+# Retained original-review pointers, not a fresh study, local installation claim,
+# import update or evidence of native/model execution. The summary identifies the
+# review/date; the pins below were recorded in its original G-01/G-11 findings.
+method_comparison_addenda:
+  - reviewed: 2026-09-28
+    recorded: 2026-10-03
+    review_summary: .claude/engineering/audits/2026-09-28-skill-review-v2-summary.md
+    source_findings: [G-01, G-11]
+    spec-kit:
+      revision: c00dc0551583428a10a94443c58c6a41e5e0138c
+      commands: https://github.com/github/spec-kit/tree/c00dc0551583428a10a94443c58c6a41e5e0138c/templates/commands
+      workflows: https://github.com/github/spec-kit/blob/c00dc0551583428a10a94443c58c6a41e5e0138c/docs/reference/workflows.md
+      extensions: https://github.com/github/spec-kit/tree/c00dc0551583428a10a94443c58c6a41e5e0138c/extensions
+    gsd-redirect:
+      revision: bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815
+      reference: https://github.com/gsd-build/get-shit-done/blob/bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815/README.md
+      repository_reference: https://github.com/open-gsd/gsd-core
+    ecc:
+      revision: d3b8a3e908904e242ed2dbe66af62cca71131419
+      reference: https://github.com/affaan-m/ECC/tree/d3b8a3e908904e242ed2dbe66af62cca71131419/skills
+      note: "Dated listing pointer only; no current inventory count or import revision is asserted."

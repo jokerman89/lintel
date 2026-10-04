@@ -1,6 +1,6 @@
 ---
 name: li-frontend-typography
-description: Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + font-loading-strategy from brief. Solo-invokable.
+description: Use when a frontend brief needs font stacks, a type scale, variable-font axes or a loading strategy with source and licensing evidence.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/frontend-typography/SKILL.md`; edit the canonical file, then run
@@ -27,7 +27,10 @@ You are the `frontend-typography` sub-skill — typography-curator for the front
 
 ## What this skill does
 
-Reads operator brief → TypographyCurator agent picks font-stack from the font-recommendation-tree (Google Fonts | Pangram | Velvetyne | Recursive | Fraunces | Future Fonts) + maps variable-axes + size-scale + line-heights + font-loading-strategy → writes `typography.json` (schema_version: 1) with licensing-context.
+Reads operator brief → TypographyCurator selects font roles from the verified profile,
+retained corpus evidence and actual project constraints, then maps variable axes,
+size scale, line heights and loading strategy → writes `typography.json`
+(schema_version: 1) with licensing context.
 
 Solo-invokable for component-mode ("just typography please") or auto-invoked by the `/li-frontend-design` orchestrator in parallel-dispatch (Workflow Step 2).
 
@@ -54,7 +57,7 @@ for chosen fonts; licensed availability is not established by this example.
 - Required `--brief <text>` OR `--target-audience <description>` (one or other minimum)
 - Optional `--mood <serif-display|tight-mono|variable-experimental|editorial|techy>` — override default mood-inference
 - Optional `--out <path>` — output path (default: stdout if solo, `$run_dir/typography.json` if orchestrator-parallel)
-- Optional `--customer-share` — triggers license-validation strict-mode
+- Optional `--customer-share` — selects the customer-share control boundary; no automatic license validator
 
 ## Workflow
 
@@ -76,20 +79,23 @@ Query the design corpus first (ADR-0015 — retrieval before generation):
 python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<mood + audience keywords>" --domain typography -n 3
 ```
 
-The active design profile's font roles are the starting point (default anthropic-default:
-Poppins display / Lora body / JetBrains Mono). Corpus pairings + the brief justify deviation;
+The verified active design profile's actual font roles are the starting point.
+Corpus pairings + the brief justify deviation;
 no deviation needed → the profile stack IS the answer. python3 absent → Read
 `skills/design-dna/data/typography.csv` directly (73 pairings, greppable).
 
-Hand off to `agents/frontend/TypographyCurator.md` with the corpus hits + profile in context. Agent reads brief + (optionally) audience + mood. Picks font-stack from the recommendation-tree:
+Use `agents/frontend/TypographyCurator.md` as the decision method with the corpus
+hits + verified profile. Follow [axis ownership](../../../skills/frontend-design/references/axis-ownership.md);
+delegate only when a separate context is useful and actually available. The role
+returns a draft; this caller owns Step 3's single publication. Compare candidates
+against the actual audience, language/glyph coverage,
+heading/body/mono roles, density, available weights/axes, fallback metrics and
+project loading constraints. Prefer an already suitable selected font or system
+fallback over an unnecessary dependency. A vendor label, installed font or
+corpus hit is not a license grant; retain exact source/release evidence.
 
-- **Google Fonts (free, no-license-friction):** Inter, IBM Plex, Space Grotesk, JetBrains Mono, Fraunces (variable), Recursive (variable)
-- **Pangram Pangram (commercial license required):** PP Editorial New, PP Neue Montreal, PP Mori, PP Right Grotesk
-- **Velvetyne (free, open-source experimental):** Cirrus, Compagnon, Reross
-- **Future Fonts (early-access licensing):** various variable-axes-heavy choices
-- **System stack (zero-license):** SF Pro / Segoe UI / system-ui fallback
-
-Agent verifies current licensing terms at invocation (L-003: don't trust stale claims about font-licensing).
+Use actual supplied/verified license evidence or request an authorized lookup.
+Neither a role name nor a font recommendation proves current terms were checked.
 
 ### Step 3 — Produce `typography.json`
 
@@ -102,31 +108,31 @@ Agent verifies current licensing terms at invocation (L-003: don't trust stale c
   "font_stacks": [
     {
       "role": "heading",
-      "family": "PP Editorial New",
-      "fallback_stack": ["Fraunces", "Georgia", "serif"],
+      "family": "<selected heading family>",
+      "fallback_stack": ["<observed compatible fallback>", "serif"],
       "variable_axes": {"weight": [400, 700], "optical_size": [14, 96]},
       "loading_strategy": "self-hosted via @font-face",
       "license": {
-        "type": "commercial",
-        "source": "pangrampangram.com",
+        "type": "<verified terms for the selected release>",
+        "source": "<actual release/file source>",
         "operator_instruction": "Verify the selected font release and license, then use an explicitly authorized project asset path and record its source; do not create or scan a personal asset folder"
       }
     },
     {
       "role": "body",
-      "family": "Inter",
-      "fallback_stack": ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+      "family": "<selected body family>",
+      "fallback_stack": ["<observed compatible fallback>", "sans-serif"],
       "variable_axes": {"weight": [400, 600], "slant": [-10, 0]},
-      "loading_strategy": "Google Fonts CDN",
-      "license": {"type": "free", "source": "Google Fonts", "operator_instruction": "Include via <link> tag or @import"}
+      "loading_strategy": "<project-supported, authorized delivery strategy>",
+      "license": {"type": "<verified terms>", "source": "<actual source>", "operator_instruction": "<required setup and notices; no automatic fetch>"}
     },
     {
       "role": "mono",
-      "family": "JetBrains Mono",
-      "fallback_stack": ["Cascadia Code", "Menlo", "Consolas", "monospace"],
+      "family": "<selected mono family, if needed>",
+      "fallback_stack": ["monospace"],
       "variable_axes": {"weight": [400, 700]},
-      "loading_strategy": "Google Fonts CDN",
-      "license": {"type": "free", "source": "Google Fonts", "operator_instruction": "Include via <link> tag"}
+      "loading_strategy": "<project-supported, authorized delivery strategy>",
+      "license": {"type": "<verified terms>", "source": "<actual source>", "operator_instruction": "<required setup and notices; no automatic fetch>"}
     }
   ],
   "size_scale": {
@@ -164,25 +170,11 @@ means originally absent, not overwrite permission). Then execute:
 
 ```python
 import sys
-import context_safety as safety
-from design_contract import validate_spec
-from review_contract import canonical_json
+from design_contract import emit_fragment
 
 try:
-    checked = validate_spec(fragment, "typography")
-    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
-    if out is None:
-        sys.stdout.buffer.write(payload)
-    else:
-        root = safety.checked_root(repo)
-        relative = safety.selector_path(out)
-        safety.atomic_write(
-            root, relative, payload,
-            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
-            expected=original_output_state, check_expected=True,
-        )
-        if safety.read_owned(root, relative, len(payload))[0] != payload:
-            raise ValueError("Fragment output failed readback")
+    emit_fragment(fragment, "typography", repo=repo, out=out,
+                  original_output_state=None if out is None else original_output_state)
 except (ValueError, OSError, UnicodeError) as error:
     print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
     raise SystemExit(2)
@@ -195,6 +187,8 @@ CLI remains valid for an already written, explicitly owned relative file.
 For `--customer-share`, use the [customer-share control boundary](../../../skills/frontend-design/SKILL.md#customer-share-control-boundary)
 on the same data or an owned relative staging file before release. Missing
 mandatory licensing/policy evidence remains unverified; stdout is no exemption.
+Use its named `font-licensing` procedure for the exact font releases and intended
+use. Required obligations from the brief/profile apply even without this flag.
 
 ## Reusable patterns
 
@@ -208,7 +202,7 @@ Pattern text is not evidence of licensing or accessibility.
 ## Status protocol
 
 - **DONE** — typography.json written, schema valid
-- **DONE_WITH_CONCERNS** — font-license-check borderline (e.g., Pangram referenced without operator-confirmation of the license)
+- **DONE_WITH_CONCERNS** — an optional font's terms are unresolved; not permission to use it where licensing is mandatory
 - **BLOCKED** — brief unparsable, OR customer-share license-check failed
 - **NEEDS_CONTEXT** — brief lacks audience-direction
 
@@ -230,7 +224,8 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Calls into:**
 - `agents/frontend/TypographyCurator.md` (primary)
-- `/li-compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
+- The `font-licensing` source-inspection procedure in the customer-share control
+  boundary; `/li-compliance-gate` evaluates its recorded outcomes, not the font license
 
 **Consumed by:**
 - `/li-frontend-design` Workflow Step 5 (synthesis input)
@@ -252,4 +247,5 @@ Pattern text is not evidence of licensing or accessibility.
 
 - Solo: review typography.json + drop in target project
 - Orchestrator: parallel-dispatch returns to `/li-frontend-design` Step 5 synthesis
-- Customer-share: pair with `/li-compliance-gate` for final license-audit
+- Customer-share: obtain the required `font-licensing` evidence, then evaluate
+  the actual controls through `/li-compliance-gate`; unresolved permission blocks sharing

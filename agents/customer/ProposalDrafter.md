@@ -35,6 +35,8 @@ Out-of-scope is as load-bearing as scope — what the engagement explicitly will
 - Keeps the AI-assisted draft disclaimer attached, so no commitment is implied before human review.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces the proposal as a draft for human review; placement and sending stay with the operator, so it does not write into the tree.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to send, publish or retrieve external material.
 
 ## When to invoke
 
@@ -52,6 +54,9 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 ## Workflow
 
 1. **Read intake brief.** Customer name, industry, problem, timeline, budget signals.
+   Retain approved proof and distinguish proposed targets from commitments. Verify
+   consent and disclosure permission for customer facts and references; neither
+   anonymization nor a ratio supplies permission.
 2. **Define scope:**
    - Primary use cases supported by the brief (do not invent three to fill a quota)
    - Audience (technical / business / both)
@@ -61,7 +66,12 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 4. **Timeline:** Phased (Discovery / Design / Build / Validate / Handoff). Per phase: duration, milestones.
 5. **Success criteria:** Measurable. What's the customer-perceived outcome?
 6. **Assumptions + out-of-scope.** Reduces friction at delivery.
-7. **Voice gate.** Customer-facing copy through the active pack's voice gate (none by default).
+7. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 8. **Disclaimer.** AI-assisted-drafted note + customer review prompt.
 
 ## Report format
@@ -129,7 +139,8 @@ before authorized sharing; draft status does not authorize sending.
 
 ```markdown
 ## Internal review checklist (not customer copy)
-- [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
+- [ ] Consent/disclosure permission and supported proof; no invented commitment or deadline
 - [ ] Pricing review (sales)
 - [ ] Legal review (if regulated industry)
 - [ ] Privacy boundary if PII (`PrivacyBoundaryAudit`)

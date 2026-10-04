@@ -42,6 +42,14 @@ Invocation: `/diagnose <failure-or-selected-QA-result> [--scope <file>] [--cross
 An explicit Codex selection is supported through
 `/cross-check --hypothesis <text> --reviewer codex`; the current host is not silently changed.
 
+If an original Spec Kit bug assessment/test report is selected, follow
+[selected external authority](../spec-kit/references/selected-authority.md).
+Consume its actual repro, hypotheses, verdict and evidence; investigate only the
+remaining uncertainty instead of recreating the diagnosis. Preserve its original
+bug/task references and the mapped tasks.md authority. Selected reports are P03
+inputs and P05 acceptance/evidence, not proof that an extension is enabled or
+permission to fix, rerun a side-effecting test, or publish.
+
 ## Workflow
 
 1. **State the observation precisely.** Exact assertion/error and relevant redacted
@@ -78,10 +86,16 @@ and expected effects. A clean-HEAD trial does not represent the caller's uncommi
 work; use only an explicitly scoped copy/patch when that state matters.
 
 For a regression with verified local good/bad bounds, use
-[RegressionDetective's isolated bisection procedure](../../agents/engineering/RegressionDetective.md#isolated-bisection-procedure).
-It owns one detached trial, not the caller's checkout. Preserve the bisect log and
+[the isolated bisection helper](../../bin/li-isolated-bisect), invoked as
+`bash "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-isolated-bisect" "$source_repo" "$bad" "$good" "$reproducer" "$trial"`
+from the explicitly trusted bundle with five literal arguments. It owns one new
+detached trial, not the caller's checkout. RegressionDetective uses the same helper;
+do not extract or maintain a second script in a role body. Preserve the bisect log and
 exit/reset outcome. Missing history does not authorize fetching, and an unreliable
 reproducer does not justify calling the first selected commit the confirmed cause.
+The helper retains its trial and resets bisect there on ordinary exit/HUP/INT/TERM;
+a kill or failed reset remains a recovery gap. On Windows its `core.longpaths`
+setting is command-local for trial/admin operations, never a hook or saved config override.
 
 An experiment that changes an owned fixture needs its pre-images and attributable
 post-images. For authorized in-place recovery, reuse `bin/li-snapshot.py` from the

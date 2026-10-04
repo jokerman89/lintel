@@ -28,7 +28,8 @@ You are the PLAN skill — Phase 4 of the Lintel cycle.
 ## What this skill does
 
 Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and produces:
-1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
+1. **plan.md** — tasks with owned paths, interfaces/contracts, observable acceptance,
+   verification and dependencies; code excerpts only when needed to pin a specific contract
 2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
 3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
 4. **Operator approval gate** — resolve missing authority without repeating existing approval
@@ -96,7 +97,11 @@ Invocation: `/li-lessons-surface --keyword "planning architecture scope dependen
 Then read:
 - APPROVED design doc from DEFINE
 - discover-report.md from DISCOVER (if present)
-- `scope.md` from SCOPE (the `depth_schema` source — `flat` / `phased` / `tree`; selects the plan.template.md variant). If absent (e.g. SCOPE skipped in a light mode), default `depth_schema: flat`.
+- `scope.md` from SCOPE (the proposed `depth_schema`: `flat` / `phased` / `tree`).
+  Apply the [scale interpretation method](../../../skills/scope/references/method.md) to the
+  approved design and current work: requirements, owners/interfaces, uncertainty
+  and reversibility/rollback determine the sufficient shape, not the size lexicon.
+  If absent, choose from that evidence; do not assume a missing scope means small work.
 - the canonical templates (`scaffolding/01-foundation/templates/plan/{plan,spec,prompt}.template.md`)
 - CORE-PRINCIPLES.md (always)
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
@@ -126,7 +131,8 @@ Output: task list with for each task:
 - Requirement IDs from the approved design/spec (including applicable profile requirements)
 - Dependency on prior tasks
 - Observable acceptance outcome, verification command/procedure and expected evidence
-- Estimated tokens; keep the granularity time check internal unless time was requested
+- Estimate basis/unknowns where useful; keep the granularity time check internal
+  unless time was requested, and never allocate a whole-cycle prior once per leaf
 - Complexity (mechanical / multi-file / architecture)
 - Recommended implementer role (per discover-report's mapping; shared by its work package)
 
@@ -237,15 +243,15 @@ When selected:
 Sequenced and no-subagent hosts emit the same artifacts. They degrade execution speed, not the
 scope/evidence contract, and must not claim concurrency or independent review they did not perform.
 
-### Step 7 — Cost estimate (MANDATORY GATE)
+### Step 7 — Cost estimate (required signals, not another approval)
 
 **Time-on-request (design §3.7):** wall-clock time fields are emitted **only** when the operator asked for them (`--with-time`, or they explicitly request it). Tokens + task count + size are always shown; time is opt-in so the default estimate never anchors on a guessed duration.
 
 **Honest signals only (no invented dollar figure).** Lintel has no pricing table and the token
-estimator is **uncalibrated until CAPTURE records actuals** (`scale_calibrated_prior` falls back to
+estimator is **uncalibrated without usable recorded actuals** (`scale_calibrated_prior` falls back to
 `size_default_prior` — a hardcoded guess — when no history exists; see `lib/scale-estimator.sh`).
-So the gate presents what the system can honestly compute — **task count, the phase list, and a
-labelled token estimate** — and does **not** present a dollar number the system cannot derive.
+Prepare **task count, the phase list, and a labelled token estimate** for Step 10's
+one actual decision. Do **not** present a dollar number the system cannot derive.
 
 ```yaml
 # Plan signals (honest — task count + phases + labelled token estimate)
@@ -265,19 +271,16 @@ token_estimate:
 ```
 
 `scale_token_estimate <size>` returns `tokens basis samples` in one read; the numeric
-`scale_calibrated_prior` API remains available. CAPTURE records whole-cycle actuals, so never
+`scale_calibrated_prior` API remains available. The history reader expects whole-cycle actuals, so never
 multiply this prior by the number of tasks or sum it once per leaf. Calibration writes remain
-opt-in under ADR-0008; no usable actuals means `uncalibrated`, even if a log file exists.
+dormant under ADR-0008; no usable actuals means `uncalibrated`, even if a log file exists.
+The prior is neither measured usage nor proof a budget is sufficient or exceeded.
+Compare actual requirements and known resource limits; label unknowns. A real
+unresolved resource constraint still blocks its dependent action.
 
-When approval or a changed resource boundary is unresolved, use the actual host
-question channel; otherwise present these signals under the existing authorization:
-"Plan ready: <N> tasks across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>). Proceed?"  (append ", ~<duration>" only when `--with-time`; **never** a `$` figure)
-- A) Approve and proceed
-- B) Scope-trim (which tasks to defer)
-- C) Decompose (tasks too big, break further)
-- D) Abort (scope too large)
-
-If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
+Continue to Steps 8–9. Present these signals once with the reviewed plan at Step 10,
+not a preliminary “Proceed?” followed by another approval. If an earlier material
+decision blocks planning itself, ask that specific question and retain the answer.
 
 ### Step 8 — Cross-section-analyze (delegates to /li-analyze, ADR-0004)
 
@@ -343,8 +346,9 @@ then check that report's identity rather than falling back to a global GREEN.
 The verdict remains advisory under ADR-0004; declared mandatory controls and P05's
 immutable evidence/QA obligations remain unchanged. A report pointer is not release clearance.
 
-If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
-accept gap (record the acceptance in the report).
+If the report has findings, fix authorized routine gaps and retain their evidence.
+Ask only for an unresolved material choice (defer, change scope or accept a gap);
+record the answer rather than re-asking an already settled decision.
 
 ### Step 9 — Adversarial two-stage review with shared evidence
 
@@ -397,9 +401,12 @@ own applicable context, not borrowed planning clearance.
 
 ### Step 10 — Operator approval gate
 
-Retain existing authorization for the same reviewed scope. If it is not yet
-approved, ask through the actual host question channel:
-"Plan reviewed. <N tasks> across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED>). Final approval?"  (append ", ~<duration>" only when `--with-time`; never a `$` figure — the basis for this is Step 7)
+Present Step 7's signals once with the reviewed plan, their basis/unknowns and the
+approval source already held. Retain existing authorization for the same reviewed
+scope. Only if a scope/resource/approval decision remains unresolved, ask through
+the actual host question channel: “<specific unresolved decision>?” State the
+affected work and viable alternatives. This is the one approval decision, not a
+second “Final approval?” ceremony.
 - A) APPROVE — proceed to BUILD
 - B) REDIRECT — specific feedback (loop back)
 - C) PAUSE — save state for later, don't proceed
@@ -417,8 +424,10 @@ this plan run (after REDIRECT or after a MARS run) sends `already_offered: true`
 `mars_offer` on the cycle's pause entry (`cycle_paused: true`), so a resumed plan does not
 re-offer. A standalone plan writes no pause entry, so after a standalone PAUSE the offer gate
 runs again and may ask once more. With consent, MARS reviews the
-plan with the shared review method; its findings return to Step 9 fix/accept handling,
-then approval is asked again. Record `mars_offer` on the Step 12 PLAN entry so no later phase
+plan with the shared review method; its findings return to Step 9 fix/accept handling.
+Reopen approval only if the reviewed scope or resource boundary changed or remains
+unapproved; do not repeat signals or a settled approval after an unchanged review.
+Record `mars_offer` on the Step 12 PLAN entry so no later phase
 re-offers: `accepted` (consent given), `declined` (offered and refused or unanswered) or
 `not-offered` (the gate returned 3, so nothing was asked). `--auto` and silence never select E.
 
@@ -464,11 +473,18 @@ Read the template, strip the comment header + the unused `depth_schema` sections
 <!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
 ```
 
-**Depth-parametric rendering (design §3.3).** Read `depth_schema` from `scope.md` (emitted by the SCOPE phase) and render the `plan.template.md` section that matches. The 2-5 min granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) — hierarchy adds milestones, it does not weaken the leaf check. The inspect engineering lens retains the blocking per-leaf granularity check.
+**Depth-parametric rendering (design §3.3).** Reconcile `scope.md`'s proposed
+`depth_schema` with the approved design using the shared scale method, record the
+rationale in the original plan, and render the matching `plan.template.md` section.
+Do not change settled IDs or authority merely to match a size label. The 2-5 min
+granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) —
+hierarchy adds milestones, not an exemption. The inspect engineering lens retains
+the blocking per-leaf granularity check.
 
-- **`flat`** (XS/S — today's shape): one task table, IDs `T1, T2, …`.
-- **`phased`** (M): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
-- **`tree`** (L/XL): phases → tasks → subtasks + milestone checkpoints, `1 / 1.1 / 1.1.a` (Slice 2 — see below).
+The size associations below are the helper's defaults, not mandatory depth rules:
+- **`flat`** (XS/S prior): one task table, IDs `T1, T2, …`.
+- **`phased`** (M prior): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
+- **`tree`** (L/XL prior): phases → tasks → subtasks + milestone checkpoints, `1 / 1.1 / 1.1.a`.
 
 Use the matching tables and per-leaf detail from `plan.template.md`; it is the source of
 truth for ownership, requirement tracing, acceptance, verification and evidence fields.
@@ -601,25 +617,28 @@ adds no prompt or artifact.
 
 ## Status protocol
 
-- **DONE** — plan APPROVED with cost estimate accepted + adversarial review pass
+- **DONE** — plan APPROVED, required signals presented and adversarial review passed
 - **DONE_WITH_CONCERNS** — approved with caveats noted (reviewer concerns left in plan.md)
-- **BLOCKED** — cost exceeds operator budget OR alternative undecided OR design missing
+- **BLOCKED** — a real resource/approval boundary is unresolved, or design is missing
 - **NEEDS_CONTEXT** — design doc incomplete, return to DEFINE
 
-## Pause-points (MANDATORY)
+## Required checks and conditional pauses
 
 1. After applicable inspect lenses, reconcile required findings in the original tasks.
-2. After the cost estimate, ask only if a resource or scope decision remains unresolved.
+2. Prepare cost signals for the single Step 10 decision; pause earlier only for a
+   material resource/scope question that actually blocks further planning.
 3. After cross-section-analyze, resolve material gaps against existing authority.
 4. After two-stage review → fix gaps before next stage
-5. After full plan + reviews -> actual host question only for missing scope approval (D10)
+5. After full plan + reviews -> Step 10's actual host question only for unresolved
+   approval/resource scope. These checks are mandatory, not five permission prompts.
 
 ## Hop-in support
 
 YES — operator can /li-plan with existing APPROVED design doc.
 
 Skip-conditions:
-- intent=hotfix (light plan, skip cost-estimate gate if <5k tokens)
+- intent=hotfix (light plan under the authorized route; an uncalibrated token
+  threshold alone never waives required approval, policy or review)
 - intent=research-dive (no plan needed)
 
 ## Integration
@@ -627,7 +646,7 @@ Skip-conditions:
 **Reads:**
 - APPROVED design doc (from DEFINE)
 - discover-report.md (from DISCOVER)
-- `scope.md` (from SCOPE — the `depth_schema` that selects the WBS template variant)
+- `scope.md` (SCOPE's depth proposal, reconciled with the approved design)
 - `scaffolding/01-foundation/templates/plan/{plan,spec,prompt}.template.md` (the canonical trio templates)
 - CORE-PRINCIPLES.md
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
@@ -650,9 +669,11 @@ Skip-conditions:
 
 ## Recommended agents to dispatch (from discover-report)
 
-- **Planner** (engineering/) — primary, task decomposition
-- **Architect** (engineering/) — sanity-check tech choices
-- **BackendArchitect / FrontendBuilder / DataPipelineDesigner** (engineering/) — per domain
+- **Planner** (engineering/) — optional read-only view of this skill; do not dispatch
+  it to repeat task decomposition already performed in the current context
+- **Architect** (engineering/) — sanity-check tech choices; BackendArchitect is its
+  compatible distributed-boundary entrypoint, not a duplicate default dispatch
+- **FrontendBuilder / DataPipelineDesigner** (engineering/) — per domain
 - **APIDesigner** (engineering/) — if API surface
 - **DatabaseDesigner** (engineering/) — if schema changes
 - **TerraformReviewer / K8sManifestReviewer** (devops/) — if infra
@@ -662,7 +683,8 @@ Skip-conditions:
 
 ## Anti-patterns
 
-- **Plan that's a vague to-do list** — must be file:line:verb with complete code or precise spec
+- **Plan that's a vague to-do list** — name owned paths, interfaces, acceptance and
+  verification. Do not prewrite the implementation or invent line numbers by default.
 - **No cost estimate** — operator commits to unknown burn → wasted hours
 - **Skipping two-stage review because "it's a simple plan"** — simple plans hide assumption gaps
 - **Ignoring ADRs identified in DISCOVER** — they're constraints, not advisory
@@ -677,7 +699,9 @@ Skip-conditions:
 
 ## Failure recovery
 
-- **Cost estimate exceeds budget**: ask_user scope-trim / decompose / abort. Don't proceed silently.
+- **Resource boundary unresolved**: present actual constraints and estimate uncertainty
+  at the single decision point (scope-trim / decompose / defer). Do not claim an
+  uncalibrated prior proves the budget either sufficient or exceeded.
 - **Independent reviewer unavailable**: preserve the report/handoff, label any
   self-review, and keep the required independent review open.
 - **Cross-section analyze finds critical gap**: PAUSE, fix gap (back to DEFINE if design-level), re-plan.

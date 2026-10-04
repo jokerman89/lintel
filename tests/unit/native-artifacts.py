@@ -255,7 +255,8 @@ class NativeArtifacts(unittest.TestCase):
             (ROOT / "skills/define/SKILL.md").read_text(encoding="utf-8"))
         self.skill("define", "Defines selected work.", canonical)
         targets = ("skills/mars/SKILL.md", "skills/review/references/evidence.md",
-                   "skills/pattern/references/consumer-contract.md")
+                   "skills/pattern/references/consumer-contract.md",
+                   "skills/spec-kit/references/selected-authority.md")
         for target in (*targets, "skills/spec-kit/references/work-map.md"):
             self.write(target, "# Synthetic linked source\n")
         files = {f"{adapter.BUNDLE}/{path.relative_to(self.source).as_posix()}": path.read_bytes()
@@ -459,13 +460,61 @@ class NativeArtifacts(unittest.TestCase):
         self.assertEqual(list(output), sorted(output))
         for role, workflow in (("planner", "plan"), ("builder", "build"), ("reviewer", "review")):
             text = output[f".github/agents/lintel-{role}.agent.md"].decode("utf-8")
-            self.assertEqual(frontmatter_keys(text.encode("utf-8")), ["name", "description"])
+            expected = ["name", "description", "tools"] if role == "reviewer" else ["name", "description"]
+            self.assertEqual(frontmatter_keys(text.encode("utf-8")), expected)
             self.assertIn(f"Use the native `/li-{workflow}` skill", text)
             for pointer in ("Copilot adapter contract", "SKILL.md", "](", "/li:"):
                 self.assertNotIn(pointer, text)
         (self.source / "skills/resume/SKILL.md").unlink()
         with self.assertRaisesRegex(ValueError, "Required source file is missing"):
             adapter.native_files(self.source, {}, True, HOST)
+
+    def test_reviewer_configuration_is_read_search_only_in_both_render_modes(self):
+        self.agent("engineering", "Probe", "\nCanonical tools stay intact.\n")
+        for local in (True, False):
+            with self.subTest(local=local):
+                output = adapter.native_files(self.source, {}, local, HOST)
+                reviewer = output[".github/agents/lintel-reviewer.agent.md"].decode("utf-8")
+                header, _ = adapter.split_frontmatter(reviewer)
+                tools = adapter.frontmatter_value(header, "tools", "lintel-reviewer")
+                self.assertEqual({item.strip() for item in tools.split(",")}, {"read", "search"})
+                for role in ("planner", "builder"):
+                    header, _ = adapter.split_frontmatter(
+                        output[f".github/agents/lintel-{role}.agent.md"].decode("utf-8"))
+                    self.assertIsNone(adapter.frontmatter_value(header, "tools", role, required=False))
+                header, _ = adapter.split_frontmatter(output[".github/agents/Probe.agent.md"].decode("utf-8"))
+                self.assertEqual(adapter.frontmatter_value(header, "tools", "Probe"), "Read, Grep, Glob, Bash")
+
+    def test_orchestration_reports_are_role_specific_and_do_not_manufacture_clearance(self):
+        self.agent("engineering", "Probe", "\nCanonical body.\n")
+        output = adapter.native_files(self.source, {}, True, HOST)
+        bodies = {role: adapter.split_frontmatter(
+            output[f".github/agents/lintel-{role}.agent.md"].decode("utf-8"))[1]
+            for role in ("planner", "builder", "reviewer")}
+        self.assertEqual(len(set(bodies.values())), 3)
+        for phrase in ("spec.md", "plan.md", "prompt.md", "open decisions"):
+            self.assertIn(phrase, bodies["planner"])
+        for phrase in ("actual changed files", "checks actually run", "findings by severity"):
+            self.assertIn(phrase, bodies["builder"])
+        reviewer = bodies["reviewer"]
+        for phrase in ("no source edits", "prepared context", "authorized coordinator",
+                       "evidence contract", "unverified", "recording"):
+            self.assertIn(phrase, reviewer)
+        self.assertNotIn("changed files", reviewer)
+        for body in bodies.values():
+            self.assertIn("self-review", body)
+            self.assertIn("human review gate", body)
+
+    def test_canonical_tools_are_not_narrowed_to_the_orchestration_reviewer(self):
+        tools = "Read, Grep, Glob, Write, Edit, Bash"
+        self.agent("engineering", "BuilderProbe", "\nBuild only its owned scope.\n")
+        path = self.source / "agents/engineering/BuilderProbe.md"
+        source = path.read_text(encoding="utf-8").replace("Read, Grep, Glob, Bash", tools)
+        path.write_text(source, encoding="utf-8")
+        output = adapter.native_files(self.source, {}, True, HOST)
+        header, _ = adapter.split_frontmatter(output[".github/agents/BuilderProbe.agent.md"].decode("utf-8"))
+        self.assertEqual(adapter.frontmatter_value(header, "tools", "BuilderProbe"), tools)
+        self.assertEqual(path.read_text(encoding="utf-8"), source)
 
 
 if __name__ == "__main__":

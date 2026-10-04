@@ -1,7 +1,7 @@
 # Compact source discovery
 
 `bin/li-catalog.py` owns both the deterministic Markdown catalog and the read-only
-metadata/query view used by catalog, help and skill-router. There is no second generated
+metadata/query view used by catalog and its retained discovery front doors. There is no second generated
 inventory, cache, classifier, capability manifest or installation-selection engine.
 
 ## Operations and dependencies
@@ -117,11 +117,11 @@ its old `cli_support` says `full`. Maturity and actual execution require separat
 
 ## Selection and failure behavior
 
-Catalog can list skill and agent metadata without reading any body. Skill-router shortlists at most
-three entries, then reads only those selected canonical bodies to check applicability,
-exclusions and prerequisites. It recommends a real host invocation only when discovered
-and permitted; otherwise it names an explicit canonical-file or serial/manual fallback.
-Listing or recommendation never invokes the selected method.
+Catalog can list skill and agent metadata without reading any body. Its
+[intent-narrowing method](intent.md) owns the shortlist and selected-body checks;
+skill-router, orientator and welcome delegate rather than choosing another method.
+Native host discovery and permission remain separate from metadata or a recommendation.
+Listing or recommendation never invokes the selected workflow.
 
 The complete requested-kind inventory and alias/registry inputs are validated before
 filtering. A malformed source cannot disappear behind a no-match query. A valid no-match

@@ -61,6 +61,10 @@ schema or proof that every client supports these operations.
    aliased, preserve the failed artifact and rebuild a new owned deck with the
    serialized procedure; repeatedly overwriting the shared part is not a repair.
 
+   The shipped [read-only retention checker](retention-check.md) follows those
+   saved relationships and rejects aliasing before comparing explicit source
+   fragments. Its ZIP/XML result supplements, never replaces, these native actions.
+
    Preserve all long-form detail in notes/appendix or a delivered linked document,
    retaining the original content.md and speaker-notes.md. Keep citations and
    material limitations on visible slides when needed to qualify their claims.

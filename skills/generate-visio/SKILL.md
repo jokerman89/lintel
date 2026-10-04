@@ -1,7 +1,7 @@
 ---
 name: generate-visio
 layer: foundation
-description: ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Content not curated. AI generates fresh at invocation per L-001.
+description: Use when a request calls for architecture, network or process-flow diagrams through the Visio scaffolding slot; no curated generation workflow is supplied.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -14,71 +14,144 @@ cli_support:
     level: full
 ---
 
-## ⚠ TEMPLATE ONLY — Slot for Visio generation
+## Visio format preflight
 
-This skill is a **scaffolding slot** per L-001 (Lintel = scaffolding, not curated content). The frontmatter + agent-mapping entry exist; the workflow body does not. When an operator invokes this skill, the AI generates the appropriate workflow content at invocation time using the design-spec.json + content.md from the shared pipeline.
+Lintel has no bundled writer for this entrypoint. The public name and source
+mapping remain a staged template slot, not an implemented VSDX generator.
+This preflight establishes what the operator actually requested and what an
+available authorized writer can produce and inspect; it does not invent a
+workflow, renderer or tool. A frontmatter `full` hint is not live availability.
 
-## Why a slot exists
+The retained `--output-format <vsdx|svg|png|drawio>` spelling expresses the
+actual requested format, not a promise that all four can be written. Accept
+`--from-pipeline <run-dir>` or a directly supplied brief. No output format is
+silently substituted when the requested writer is absent.
 
-Visio diagrams are highly content-specific: architecture topology, sequence diagram, swimlane, network layout, deployment pipeline. The shared pipeline cannot pre-bake a "general Visio workflow" because what gets diagrammed depends entirely on what's being engaged. AI-at-invocation reads content.md → detects what should be diagrammed → produces appropriate stencil/connector layout.
+## Preflight before an output write
 
-Alternative consideration: Visio diagrams are often delivered as `.vsdx` (Visio format), `.svg` (vector), or `.png` (raster export). The slot accepts `--output-format <vsdx|svg|png|drawio>` to handle the spectrum.
+1. **Confirm the requested result.** Read the explicit brief and, for a selected
+   pipeline run, its current `content.md`, outline/`notes_for_writer` and
+   `design-spec.json` where applicable. Keep source facts, topology, qualifications,
+   captions and evidence pointers. Architecture sketches, network layouts,
+   deployment pipelines, swimlanes, cross-functional flowcharts and sequence
+   diagrams remain supported planning subjects, not proof of file-generation
+   capability. Confirm whether the requested result is editable VSDX/drawio or an
+   explicitly requested SVG or PNG export. Ambiguous format/content or a missing
+   required run/design input returns NEEDS_CONTEXT, not an invented architecture.
+2. **Keep source/profile authority.** Retain the selected work, current P07
+   reference and applicable controls. Use the shared
+   [source-fidelity method](../generate-write/references/fidelity-and-evidence.md).
+   GENERATE's input helper currently admits Word/PPT/PDF/XLSX, not Visio; reading
+   pipeline files here does not claim that helper accepted a Visio input or that
+   the run's other formats passed. No new admission schema or renderer is supplied.
+3. **Identify the real writer and inspection operations.** Inspect the current
+   host's actual tools, supported formats and operation permissions. Name the
+   available authorized writer for the exact requested format, plus its save,
+   reopen/edit, connector/label readback and required inspection operations.
+   Neither an agent, a catalog selection, a library name nor an installed app
+   alone supplies these operations. Missing writer/editor operations keep the
+   requested artifact blocked. This missing capability blocks only that output;
+   preserve independent supported outputs and report their separate status.
+4. **Select authorized inputs and output.** Use only explicitly supplied or
+   verified-profile template/stencil sources with actual access and applicable
+   brand/provenance permission. This method does not install libraries, search
+   personal template homes or assume a template exists. A neutral shape/stencil
+   choice needs an explicit applicable choice, not a required-brand bypass.
+   Confirm an owned output path and preserve supplied artifacts; no implicit
+   overwrite, personal-home or current-directory fallback.
+5. **Declare proof before production.** Record the required format, source
+   retention, editable reopen, connectors, labels and required inspection
+   observations under the existing evidence/profile contract. Required missing,
+   failed or unverified observations block completion. Plan the appropriate
+   diagram type, layout and connector directions from the supplied source.
+   Use the selected design palette and applicable provider stencils when present;
+   do not infer live cloud topology or choose a provider from a generic example.
 
-## At-invocation contract
+## Conditional production and actual proof
 
-When invoked (via `/li:generate-visio --from-pipeline <run-dir>` or directly):
+Proceed only through the writer established above and within its granted scope.
+This section is an evidence obligation for an externally supplied capability,
+not a bundled implementation.
 
-1. **Diagram-type detection:** AI reads content.md + identifies sections with diagrammable content (architecture sketches in §X, network topologies in §Y, process flows in §Z). Detection signals: keywords like "topology," "flow," "sequence," "deployment," explicit Visio mentions in `notes_for_writer` from outline.
-2. **Diagram-type selection:** Per detected section, AI picks the right Visio diagram-type (Cloud Architecture, Network, Cross-functional Flowchart, Sequence Diagram, etc.). For cloud-architecture content, defaults to a cloud-architecture stencil set (provider-specific stencils contributed by the active pack if present).
-3. **Stencil + connector layout:** AI lays out shapes per standard architecture-diagram reference patterns. Uses design-spec.json's palette for color-coding (primary for compute, secondary for network, accent for identity, etc.).
-4. **Output-format selection:** Default `vsdx` for editable handoff. `svg` for embedded artifacts. `png` for slide-embed. `drawio` for collaborative editing if customer prefers draw.io over Visio.
-5. **Build:** Use python-vsdx or libvsx-equivalent (or generate via draw.io XML format if more reliable). Brand-template from `~/.lintel/brand/visio-templates/` if present.
-6. **QA hand-off:** Pass produced diagram to `/li:generate-qa` for validation (mostly visual — stencil-consistency, connector-validity).
+- Record the actual writer operation, output path and result. Verify the saved
+  artifact's actual requested format; a file extension is not format evidence.
+  **No image-as-VSDX substitution:** an embedded raster, renamed SVG/PNG, preview
+  or screenshot cannot satisfy an editable VSDX/drawio request. Switching formats
+  requires an explicit changed request, never an implicit fallback.
+- For editable output, reopen the saved artifact using the available authorized
+  editor. Observe native shapes, connectors with their actual endpoint bindings
+  and directions, and editable labels. Exercise a bounded edit on an owned copy,
+  save and reopen it, then read back the changed label/connection. Preserve the
+  original supplied sources and identify which final artifact was inspected.
+  An opaque imported image or a package that merely opens is insufficient.
+- Compare every source entity, connection, label/caption and qualification with
+  the saved result. Inspect stencil consistency and visible layout at the actual
+  permitted rendering layer, recording missing, clipped or disconnected content.
+  SVG/PNG exports need actual format/content and required visual observations;
+  they do not establish editable-diagram proof or VSDX support.
+- Invoke `/li:generate-qa --artifacts <diagram-path>` only on an actually produced
+  selected artifact, retaining report-only QA and its source comparison. Repair
+  requires a distinct authorized output and renewed affected evidence.
+  **QA handoff is not completion evidence.** Consume actual QA/inspection results
+  for the same artifact, source and profile. Missing rendering, readback or required
+  independent review stays unverified; an empty issues list cannot clear it.
+- Return requested versus produced format, source/artifact identities, actual
+  operations and observations, gates, unavailable capabilities and the next
+  supported action. A preview can be reported as a preview, never as a completed
+  requested editable deliverable.
 
-## Brand template
+## Optional architecture advice
 
-`~/.lintel/brand/visio-templates/` slot exists. Templates might include: `cloud-architecture-base.vsdx`, `network-topology-base.vsdx`, `swimlane-base.vsdx`. If template present, AI uses it as starting stencil set. If empty, AI uses generic shapes (or a provider stencil set contributed by the active pack).
+Per `skills/generate/agent-mapping.yaml`, these retained names are source hints,
+not automatic dispatch:
+- Primary: SystemArchitect — architecture/topology advice when requested.
+- Conditional: SecurityAuditor — advice on trust zones/DMZ when requested and authorized.
 
-## Agent dispatch
+Use only the roles actually declared by that mapping and available on the host.
+SystemArchitect can advise on topology; neither role is a Visio writer or proof
+that a requested output format can be produced. No new actor is required to
+report an unavailable writer, and advisory work does not satisfy independent review.
 
-Per `skills/generate/agent-mapping.yaml`:
-- Primary: SystemArchitect (default architecture/topology diagrams)
-- Conditional: NetworkArchitect if topology-focused content
-- Conditional: SecurityAuditor if diagram includes security boundaries (trust zones, DMZ)
+## Voice and sharing
 
-## Voice tier
-
-`voice: internal` default. Diagrams have minimal prose (labels, captions). Voice constraints apply to labels but loosely.
-
-If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) on any text labels in diagram (orchestrator-level gate).
+`voice: internal` is the default. Labels and captions retain the applicable
+voice/source-fidelity obligations. With `--customer-share`, preserve the actual
+upstream voice-gate result on unchanged labels where the active pack requires it
+(`voice.gates_active`; none by default), plus all applicable brand, compliance,
+honest-limitations and provenance requirements. A mandatory unverified gate
+blocks that output. A produced diagram or successful QA is not distribution
+permission; this preflight sends nothing.
 
 ## Reusable patterns
 
 Follow the [reusable pattern consumer contract](../pattern/references/consumer-contract.md).
-This skill stays a template slot. The at-invocation contract resolves, or verifies a supplied
-attachment, and records each mandatory clause as unverified unless its presence in the produced
-diagram was inspected. Patterns never promote the slot, and diagrams are not verified cloud
-state.
+Resolve or verify the supplied attachment and record each mandatory pattern clause
+as unverified unless its presence in the produced diagram was actually inspected.
+Patterns never promote this staged template slot, and diagrams are not verified
+cloud state.
 
 ## Status protocol
 
-- **DONE** — diagram produced (vsdx/svg/png/drawio) + qa-handoff successful, and no selected
-  mandatory pattern clause is failed or unverified. The slot stays a template slot either way.
-- **DONE_WITH_CONCERNS** — produced but qa flagged stencil-inconsistency or label issues
-- **BLOCKED** — content.md has no diagrammable sections + no fresh-architecture strategy
-  declared, or a selected mandatory pattern clause is failed or unverified in the produced diagram
-- **NEEDS_CONTEXT** — `--from-pipeline` directory missing, design-spec absent, or output-format unspecified for ambiguous content
+- **DONE** — only the actual requested format was produced by an available
+  authorized writer, its required source/format, connector/label, QA and required
+  inspection evidence (including editable reopen for editable outputs) were
+  observed for the same artifact, and
+  every applicable mandatory control and pattern clause passed. This does not
+  claim Lintel implements a VSDX writer.
+- **DONE_WITH_CONCERNS** — the same required proof as DONE, with only explicitly
+  advisory limitations; never a missing writer, required inspection or failed
+  mandatory clause.
+- **BLOCKED** — a requested writer/operation, authority or required proof is
+  missing, failed or unverified. Keep other independent requested outputs separate.
+- **NEEDS_CONTEXT** — the requested format, diagram source, selected run/design,
+  output ownership or required template choice is unresolved.
 
-## When to promote from slot to curated
+## Next supported action
 
-If a recurring diagram-pattern emerges (e.g., always the same cloud-architecture with same shape-layout), promote that pattern into the SKILL.md body — that becomes a canonical Visio-builder for that scenario.
-
-Until then: AI generates fresh per invocation. Repo stays clean.
-
-## Recommended next steps
-
-After invocation:
-- For QA: `/li:generate-qa --artifacts <diagram-path>`
-- For embedding in deck: chain `/li:generate-ppt --include-diagram <svg-path>` after diagram approved
-- For collaborative editing: invoke with `--output-format drawio` and share .drawio file
-- For multi-format consistency: invoke parent `/li:generate` instead of solo-invocation
+Report the missing operation and preserve any source preparation. The operator
+may explicitly select a real authorized writer or change the requested output;
+neither is assumed. Feed an actually approved export into the selected deck or
+document method only through its supported input contract. For several requested
+formats, GENERATE retains the separate per-format gates and unfinished-output
+report. Repeated requests or a useful layout do not automatically promote the
+slot, install dependencies or waive format acceptance.

@@ -25,6 +25,7 @@ navigation:
   auto_mode_eligible: false
   estimated_tokens: 80000
 domain:
+  # Legacy discovery hint, not a validated pack-schema field; see DA preference reference.
   preferences_root: engineering.tech_architecture.*
   granularities: [full, loop, single]
   checkpoints:
@@ -82,11 +83,16 @@ selected attempt through the shared procedure required in Workflow below.
 |---|---|---|---|
 | `api-design` | APIDesigner | REST/GraphQL/gRPC interface spec with versioning + breaking-change analysis | prefs: `api_style`, `versioning`; validation checklist below |
 | `dependency-graph` | Explorer + Architect | module dependency map + `graph.dot`, circular-detection, layering audit | use project manifest clues below; distinguish static edges from observed runtime dependencies |
-| `boundary-review` | BackendArchitect + Architect | bounded-context drift and failure-isolation report | reuse dependency evidence only when its relevant input identity is unchanged; request SystemArchitect explicitly for an invariant/NFR question |
+| `boundary-review` | Architect (BackendArchitect compatible entrypoint; choose one) | bounded-context drift and failure-isolation report | reuse dependency evidence only when its relevant input identity is unchanged; request SystemArchitect explicitly for an invariant/NFR question |
 | `complexity-audit` | Architect | per-component cyclomatic + cognitive scoring and refactor options | obtain actual project budgets or label exploratory measurements advisory; report tool/version and excluded files |
-| `scaling-plan` | CapacityPlanner + BackendArchitect | capacity model, ranked bottlenecks and priced/qualitative projection | target and baseline come from the brief; missing measurements remain unknown, not default 3x growth |
+| `scaling-plan` | CapacityPlanner; conditional Architect or BackendArchitect for an unresolved boundary | capacity model, ranked bottlenecks and priced/qualitative projection | target and baseline come from the brief; reuse existing boundary evidence, not a second default design pass; missing measurements remain unknown |
 | `contract-collision` | APIDesigner + Architect | impact across actual consumer versions and migration options | requires named interface/change; even one mandatory consumer break needs a decision; no universal deprecation window |
 | `quality-attributes` | SystemArchitect + Architect | non-functional requirement spec + verification path per NFR | backs the `non_functionals_specified` checkpoint; dims: latency p50/p95/p99 per journey, throughput RPS, error-rate %, availability SLA, observability signals per component |
+
+Architect and BackendArchitect consume one distributed-boundary method from the
+reference above. A name chosen by the operator remains valid; the table does not
+dispatch both aliases for one result. Send exact original work/leaf IDs, topology
+revision, existing analysis and the unresolved question to any distinct specialist.
 
 ### api-design — invariant and consumer checks
 
@@ -123,8 +129,10 @@ that procedure, not as a substitute for it.
    Unknown capability or absent saved iteration is NEEDS_CONTEXT, not a new guessed run.
 2. Start from the observable invariant and its writer/transaction/retry boundaries.
    Trace dependencies and consumers before choosing topology. Preserve existing API
-   style/framework, accepted ADRs and verified `engineering.tech_architecture.*`
-   preferences; explicit invocation advice does not replace policy.
+   style/framework, accepted ADRs and actual optional preference data using the
+   [preference metadata clarification](../da/references/preferences.md).
+   The `engineering.tech_architecture.*` hint is not a validated pack interface;
+   explicit invocation advice does not replace policy.
 3. Use the capability and checkpoint tables to compare alternatives, failure
    isolation, deadlines, capacity assumptions and consumer transitions. Explorer
    locates; Architect synthesizes/designs; independent reviewers assess, not repair.

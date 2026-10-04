@@ -98,4 +98,11 @@ Internal. Operator-facing migration plans. No customer-facing voice.
 
 ## How operators read your output
 
-Plan goes to `.claude/runtime/state/da/migration-plan.md`. Risk surface to `.claude/runtime/state/da/migration-risks.md`. SQL drafts (delegated back to Migrator agent) at `.claude/runtime/state/da/up.sql` + `down.sql`. Operators consume via DA migration-plan capability report.
+Return the ordered `migration-plan.md` content, risks and proposed validation/recovery
+SQL with the original work map, package/leaf IDs, schema/consumer revision and stop
+conditions. The authorized DA caller owns the mapped destination and persistence
+through the [module caller procedure](../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
+Only then hand the accepted plan revision to Migrator for requested artifacts or
+separately authorized execution; do not start a second sequence or dispatch it in
+parallel with unresolved planning. Old `.claude/runtime/state/da/` paths remain
+selectable history, not new output defaults. This role does not choose or write files.

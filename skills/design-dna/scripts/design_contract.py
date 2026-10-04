@@ -2,7 +2,7 @@
 # implements: ADR-0015, ADR-0016, ADR-0017, ADR-0028, ADR-0029
 # intent: .claude/plans/universal-implementation/packages/P11.md
 # constraints: data-only adapters; P03 owns I/O, P05 controls/work, P07 profile identity
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-10-04
 """One compatibility boundary for design inputs, renderer arguments and advisory review."""
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ from profile_context import (
     ProfileConfig, required_policy, validate_profile_reference, verify_profile_reference,
 )
 from review_contract import (
-    canonical_json, content_digest, load_json, validate_context, validate_shape, verify_context, verify_qa,
+    canonical_json, content_digest, finite_number, load_json, validate_context, validate_shape, verify_context, verify_qa,
 )
 from emit_tokens import parse_profile
 
@@ -90,7 +90,7 @@ def _shape(value: Any, definition: dict, label: str) -> None:
         raise DesignError(f"{label}: unsupported value")
     kinds = {"object": isinstance(value, dict), "array": isinstance(value, list),
              "string": isinstance(value, str), "boolean": type(value) is bool, "null": value is None,
-             "number": type(value) in (int, float) and math.isfinite(value)}
+             "number": finite_number(value)}
     if definition.get("type") and not kinds.get(definition["type"], False):
         raise DesignError(f"{label}: wrong type")
     if "const" in definition and (
@@ -239,6 +239,32 @@ def validate_spec(data: dict, kind: Optional[str] = None) -> dict:
             raise DesignError("Pipeline has no selected web layout mapping")
     return {"kind": kind, "design": design, "binding": deepcopy(binding),
             "renderable": binding is not None}
+
+
+def emit_fragment(fragment: Any, kind: str, *, repo: Path, out: Optional[str] = None,
+                  original_output_state: Optional[dict] = None) -> None:
+    """Publish one validated partial, not a receipt or a resolved/profile-cleared design.
+
+    The caller finishes source/profile/licensing decisions before publication and
+    captures any explicitly authorized replacement's original P03 state. Preserve
+    all partial fields; common synthesis/load_design still owns binding checks.
+    """
+    if kind not in ("typography", "motion", "shader"):
+        raise DesignError("Only typography, motion or shader fragments can be emitted")
+    checked = validate_spec(fragment, kind)
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+        return
+    root = safety.checked_root(repo)
+    relative = safety.selector_path(out)
+    safety.atomic_write(
+        root, relative, payload,
+        mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+        expected=original_output_state, check_expected=True,
+    )
+    if safety.read_owned(root, relative, len(payload))[0] != payload:
+        raise DesignError("Fragment output failed readback")
 
 
 def profile_asset(record: dict, config: ProfileConfig) -> tuple[dict, dict]:

@@ -1,6 +1,6 @@
 ---
 name: li-frontend-style-extract
-description: Pattern-level extraction sister to generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts layout-grammar + motion-language + interaction-patterns + component-library-fingerprint + shader-thesis → writes ~/.lintel/brand/design-patterns/<name>/. Solo-invokable.
+description: Use to extract reusable layout, motion, interaction and component patterns from selected sites, screenshots or frontend source into an explicitly owned output.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/frontend-style-extract/SKILL.md`; edit the canonical file, then run
@@ -23,7 +23,7 @@ description: Pattern-level extraction sister to generate-style-learn. Reads arti
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 
-You are the `frontend-style-extract` skill — pattern-level extraction for the v3.7 frontend-* family (Phase A2).
+You are the `frontend-style-extract` skill — pattern-level extraction for the frontend family.
 
 ## What this skill does
 
@@ -36,7 +36,7 @@ Reads 1+ artifacts (live URLs, screenshots, Figma exports, existing .tsx/.svelte
 - **Shader thesis** (mesh-gradient? noise-field? particle? none?)
 - **Typography** (delegated to generate-style-learn for palette+fonts; this skill imports those)
 
-Writes `~/.lintel/brand/design-patterns/<name>/` with 5 files:
+Writes the explicitly selected `<out>/` with these artifacts:
 - `pattern.json` — top-level synthesis (schema_version: 1)
 - `typography.json` — embedded from generate-style-learn-output OR fresh extraction
 - `motion.json` — motion-language extraction
@@ -44,8 +44,8 @@ Writes `~/.lintel/brand/design-patterns/<name>/` with 5 files:
 - `component-imports.json` — component-library-fingerprint + import-references
 
 **Boundary with generate-style-learn:**
-- generate-style-learn extracts PALETTE + FONTS (low-level visual tokens) → `~/.lintel/brand/palettes/`
-- frontend-style-extract extracts PATTERN (high-level design grammar) → `~/.lintel/brand/design-patterns/`
+- generate-style-learn extracts PALETTE + FONTS (low-level visual tokens) → its explicit `--out-dir`
+- frontend-style-extract extracts PATTERN (high-level design grammar) → its explicit `--out`
 - Together they cover full design-DNA. Sister disciplines, disjoint output paths.
 
 L-001-discipline: skill body is the contract. Agent at invocation does the actual extraction. Don't pre-bake what "patterns" look like.
@@ -55,6 +55,8 @@ when a pattern is selected for a new design. Extraction is source evidence, not
 automatic library/license/profile approval. Preserve unknown motion/shader behavior
 as unobserved; a screenshot cannot establish absence. Choose explicit owned output,
 not a personal-home search, and bind the source bytes on later consumption.
+Follow [owned source and output selection](../../../skills/design-dna/references/design-contract.md#owned-source-and-output-selection);
+missing or unwritable output fails visibly without another destination.
 
 ## When to use
 
@@ -66,7 +68,9 @@ not a personal-home search, and bind the source bytes on later consumption.
 ## When NOT to use
 
 - Live style-edit — this is extraction, not an editor
-- Single-color-pick — `bin/li-doctor --brand-summary` faster
+- Single-color-pick — use the named `brand-source`
+  [selected asset evidence procedure](../../../skills/design-dna/references/design-contract.md#selected-asset-evidence)
+  on the explicit palette/profile instead of a diagnostic command
 - Component-library-version-pinning — that's package.json territory
 - Pure-palette extraction — use `/li-generate-style-learn` (palette ≠ pattern)
 
@@ -75,7 +79,7 @@ not a personal-home search, and bind the source bytes on later consumption.
 - Required `<artifacts>` — 1+ paths (URLs OK), space-separated. Examples: `https://example.com`, `screenshots/hero.png`, `existing-site/components/`
 - Required `--name <pattern-name>` — kebab-case identifier for vault entry
 - Optional `--overwrite` — inherits from `generate-style-learn`. Default fail-on-existing (m-3 resolution).
-- Optional `--out <path>` — override default `~/.lintel/brand/design-patterns/<name>/`
+- Required `--out <path>` — explicitly owned repository-relative pattern output directory
 - Optional `--with-palette` — chain `/li-generate-style-learn` first for palette → embed in pattern.json
 - Optional `--customer-share` — triggers compliance-gate
 
@@ -87,7 +91,7 @@ not a personal-home search, and bind the source bytes on later consumption.
 artifacts=("$@")
 name="${NAME:-}"
 overwrite="${OVERWRITE:-0}"
-out_dir="${OUT:-$HOME/.lintel/brand/design-patterns/$name}"
+out_dir="${OUT:?select an owned repository-relative output directory}"
 
 [ -z "$name" ] && { echo "Required: --name <kebab-case>"; exit 2; }
 [ "${#artifacts[@]}" -eq 0 ] && { echo "Required: 1+ artifact paths/URLs"; exit 2; }
@@ -99,8 +103,18 @@ if [ -d "$out_dir" ] && [ "$overwrite" != "1" ]; then
   exit 3
 fi
 
-mkdir -p "$out_dir/shader-snippets"
 ```
+
+Before ingestion, run the shared rooted source/output checks, validate `name` as
+a single slug and capture original output states. Do not create a directory as
+proof of permission. New children, including `shader-snippets` and `_raw`, are
+created only within the explicitly owned write set after source admission.
+An unavailable/missing root or unwritable output is an error, not a cwd fallback.
+
+Before any extraction output, `--with-palette` also requires every selected
+source to have a supported file handoff. For URL input, establish an actually
+available and authorized capture operation first; otherwise refuse this
+combination without writing partial pattern/palette output.
 
 ### Step 2 — Artifact ingestion
 
@@ -111,12 +125,35 @@ For each artifact:
 
 Output: per-artifact `raw-extraction.json` in `$out_dir/_raw/` (gitignored runtime cache).
 
+For a requested palette handoff, retain an explicitly owned, supported local
+capture for each admitted source. `palette_artifacts` contains those actual
+HTML/CSS/document files, not the original URL strings or a metadata-only JSON
+file. Keep each capture's source URL/path, content hash, permitted operation and
+coverage alongside it. Existing local files can retain their original admitted
+paths. A URL requires an available authorized capture first; if no supported
+file can be retained, refuse the URL-plus-palette combination before writing
+partial extraction output. Do not grant the child network capability or invent
+a capture from source metadata.
+
 ### Step 3 — Optional palette chain
 
 If `--with-palette` flag:
-```bash
-/li-generate-style-learn "${artifacts[@]}" --name "$name" --out-dir "$out_dir/palette"
+```text
+/li-generate-style-learn "${palette_artifacts[@]}" --name "$name" --out-dir "$out_dir/palette"
 ```
+
+Pass only the admitted capture files and their source/coverage record. The child
+remains file-only and performs its existing file admission; source provenance
+is not replaced by the cache pathname.
+
+This is a native workflow handoff, not an executable Bash command. If the parent
+received `--overwrite` and the confirmed write set includes both
+`$out_dir/palette/$name.json` and `$out_dir/palette/$name-STYLE.md`, pass
+`--overwrite` to that exact child invocation as well. The child captures and
+checks its own two preimages; a parent directory selection is not replacement
+permission. If those files are outside the confirmed replacement scope, resolve
+only that missing scope and retain the child's default refusal. Never enable
+child overwrite merely because `--with-palette` is present.
 
 Read the returned `<name>.json` palette/font evidence. It does not directly emit
 `typography.json`; the old `--embed-target` argument was not supported. Adapt the
@@ -182,6 +219,9 @@ Agent (FrontendArchitect.md — yes the Phase A1 agent — reused for extraction
 Use the shared helper for typography/motion/shader fragments. No detected JS
 library is not automatically proof of no animation; select none/CSS/library only
 from supported observation or an explicit design decision.
+Publish each artifact through P03's owned-output procedure against its captured
+preimage and read back the bytes. Retain source bytes and partial results on
+failure; no automatic new destination or completion claim.
 
 ### Step 6 — Validate emit
 
@@ -250,10 +290,10 @@ evidenced.
 
 **Reads:**
 - `<artifacts>` (URLs, files, screenshots)
-- `~/.lintel/brand/palettes/<name>.json` (if generate-style-learn ran first)
+- The explicitly selected `<palette-out>/<name>.json` returned by generate-style-learn
 
 **Writes:**
-- `~/.lintel/brand/design-patterns/<name>/` (5 files)
+- `<out>/` (pattern artifacts and explicitly scoped raw evidence)
 - Audit-log: `.claude/runtime/audit/frontend-style-extract-runs.jsonl`
 
 **Calls into:**
@@ -269,9 +309,12 @@ evidenced.
 
 Pattern from `generate-style-learn`:
 - Default: refuse to overwrite. Exit code 3.
-- `--overwrite` flag: replace existing pattern, log to audit with `previous_pattern_hash`.
+- `--overwrite` flag: replace only the confirmed pattern write set, log to audit
+  with `previous_pattern_hash`, and propagate the flag to the palette child only
+  under the two-file authorization and preimage procedure above.
 
-Operator can manually `rm -rf ~/.lintel/brand/design-patterns/<name>` if they want clean re-extract without `--overwrite` flag.
+To preserve an earlier extraction, choose a different explicit owned `--out`.
+Do not delete an existing tree to make the collision check pass.
 
 ## Anti-patterns
 
@@ -290,5 +333,5 @@ Operator can manually `rm -rf ~/.lintel/brand/design-patterns/<name>` if they wa
 ## Recommended next steps after invocation
 
 - Reuse extracted pattern: `/li-frontend-design "<brief>" --pattern <name>` (Phase A1 orchestrator supports --pattern flag)
-- Diff vs canonical: `diff ~/.lintel/brand/design-patterns/<name>/pattern.json ~/.lintel/brand/design-patterns/ultra-modern-lovable-style/pattern.json`
+- Diff vs a selected baseline: `diff <out>/pattern.json <explicit-baseline>/pattern.json`
 - L-001 vault-growth check: after 3+ operator-extracted patterns, re-evaluate whether the canonical one can be demoted to docs/samples/

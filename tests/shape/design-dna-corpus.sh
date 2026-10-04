@@ -29,7 +29,7 @@ done
 grep -q '"google-fonts"' "$DNA/scripts/core.py" && fail "core.py still registers google-fonts domain" || pass "core.py registry matches the corpus"
 
 # 3. Scripts present
-for s in core.py search.py design_system.py validate_design.py emit_tokens.py; do
+for s in core.py search.py design_system.py validate_design.py measure_contrast.py emit_tokens.py; do
   [ -f "$DNA/scripts/$s" ] && pass "scripts/$s present" || fail "scripts/$s MISSING"
 done
 

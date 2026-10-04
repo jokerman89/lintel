@@ -66,6 +66,47 @@ five redirects, rejects loops/HTTPS downgrades and returns final URL, visited de
 retrieval time and bounded bytes. The transport must cap reading at the requested byte
 bound as well; checking after an unbounded download is insufficient.
 
+### Concrete standard-library transport
+
+The source-owned `lib/url_transport.py` supplies `single_hop_request` and `fetch_url`,
+which wires that callback into the existing `fetch_checked(url, allowed_hosts, request,
+*, max_redirects=5, max_bytes=262144)` contract. Its urllib opener returns **every**
+status to that checked loop; it never auto-follows a redirect. Each body read requests
+only `max_bytes + 1` bytes before accumulation, including error/redirect bodies. The
+default positive finite socket timeout is ten seconds per operation, not a promised
+total DNS/chain deadline. TLS uses normal certificate/hostname validation.
+Premature EOF in a fixed-length body is a failure, not partial warm content.
+Chunked and bodyless responses retain urllib's framing semantics; the byte cap
+is not replaced with an unbounded completeness read.
+
+**Authority first:** this transport is callable only with actual host permission for
+the network operation and an explicit allowed-host decision. A denied WebFetch, browser,
+shell or host network request is not a missing adapter: stop it. This helper is **not**
+a workaround, fallback or reworded attempt after an actual denial. If approved routing
+cannot be honored, retrieval remains unsupported/refused.
+
+For a separately permitted retrieval, the explicit helper mode is:
+
+```bash
+python3 -B "$LINTEL_SOURCE_ROOT/lib/url_transport.py" "$url" --fetch \
+  --allow 'api.example.com' --max-bytes 262144 --max-redirects 5 --timeout 10
+```
+
+Replace the illustrative host with the actual approved entries. `url_policy.py` remains
+**validation only** with its original positional URL, `--allow` and `--redirect`; it
+never fetches. The new helper requires `--fetch`, returns the same final URL, visited
+destinations, retrieval time and trust label, and encodes the exact body as
+`content_base64` for safe JSON output. The Python `fetch_url` result retains `content`
+as bytes. Neither representation implies successful text extraction or rendering.
+
+The opener retains normal configured proxies/network routing, refuses automatic proxy
+credentials and has no cookie jar, password manager or authentication retry. It changes
+no global proxy/TLS/opener settings. Denials, timeouts, TLS errors, malformed responses,
+missing/ambiguous Location, oversized bodies and policy failures are explicit failures;
+none triggers a second transport. The trusted `opener_factory` seam is for controlled
+in-process I/O tests/integration and must retain the supplied handlers. It is not a
+license to supply an auto-following or permission-bypassing opener.
+
 Do not claim ordinary auto-following WebFetch/browser output proves this boundary. If
 the available host cannot disable/intercept redirects, stop this retrieval with an explicit
 unsupported-adapter result. Use a capable adapter or an already-authorized local copy;

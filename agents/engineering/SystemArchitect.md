@@ -149,4 +149,8 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent reads the arch
 
 ## How operators read your output
 
-NFR specs go into `.claude/runtime/state/ta/nfr-spec.md`. Invariants go into `.claude/runtime/state/ta/invariants.md`. Emergent properties go into `.claude/runtime/state/ta/emergent-properties.md`. Operators inspect via the TA module's output report.
+Return proposed NFR, invariant and emergent-property content with the original work
+map, package and leaf IDs and requested capability. The authorized caller owns the
+mapped destination, persistence and checkpoint publication through the
+[module caller procedure](../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
+Keep all requested sections and their evidence distinct; do not choose a filename or write files.

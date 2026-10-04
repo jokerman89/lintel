@@ -1,7 +1,7 @@
 ---
 name: generate-pdf
 layer: foundation
-description: Produce a PDF through an available converter and accepted browser print operation, preserving source content; Lintel does not read the produced PDF, so its text, pages and visual rendering stay unverified.
+description: Use to produce a PDF from selected source content through an available converter or accepted browser print operation; Lintel does not read the produced PDF, so its text, pages and visual rendering stay unverified.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal

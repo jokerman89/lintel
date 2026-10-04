@@ -31,7 +31,14 @@ def body(name):
 
 
 def block(name, heading):
-    section = body(name).split(heading, 1)
+    text = body(name)
+    if name == "welcome" and heading == "## 3. Discover the selected method":
+        owner = "../catalog/references/intent.md"
+        if f"]({owner})" not in text:
+            raise AssertionError("welcome must delegate to catalog's intent method")
+        text = (ROOT / "skills/welcome" / owner).resolve().read_text(encoding="utf-8")
+        heading = "2. **Query compact metadata first.**"
+    section = text.split(heading, 1)
     if len(section) != 2:
         raise AssertionError(f"{name}: missing caller section {heading}")
     found = re.search(r"(?m)^ *```bash\n(.*?)^ *```", section[1], re.S)
@@ -243,13 +250,16 @@ state_append BUILD "$fixture_status" next=REVIEW "cycle_id=$fixture_cycle"
         for name in ("catalog", "skill-router", "welcome", "status"):
             with self.subTest(name=name):
                 text = body(name)
+                if name in ("skill-router", "welcome"):
+                    self.assertIn("../catalog/references/intent.md", text)
+                    text = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
                 self.assertIn("li-catalog.py", text)
                 self.assertIn("source", text)
                 self.assertIn("selected", text)
-        for name in ("catalog", "skill-router", "welcome"):
-            self.assertIn("--selection=", body(name))
+                if name != "status":
+                    self.assertIn("--selection=", text)
         self.assertIn("--list-selections", body("catalog"))
-        self.assertIn("at most three", body("skill-router"))
+        self.assertIn("at most three", (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8"))
 
     def test_welcome_query_is_literal_and_does_not_create_state(self):
         for query in ("skill-router", "$(touch unwanted-marker)", "[$.*]", "--check"):

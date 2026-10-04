@@ -1,6 +1,6 @@
 ---
 name: li-design-dna
-description: Curated design knowledge + retrieval — BM25 search over 84 UI styles, 161 WCAG-audited palettes, 161 product reasoning rules, 73 font pairings, 99 UX guidelines and 16 per-stack rule files; composes complete design-system recommendations; resolves the active design profile (default anthropic-default); validates rendered output against the profile. Use before ANY visual decision — choosing style/palette/fonts, building pages or components, reviewing UI quality. Use proactively when a task changes how anything looks, feels, moves, or is interacted with.
+description: Use when a frontend or presentation task needs corpus-backed style, palette, typography or stack guidance, selected design-profile tokens, or static design and observed-color contrast checks.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/design-dna/SKILL.md`; edit the canonical file, then run
@@ -65,6 +65,7 @@ All searches: python3, stdlib-only, exit 0 + markdown to stdout.
 | `slide` | `python3 "<base>/scripts/search.py" "<emotion\|goal\|keyword>" --slide <strategy\|layout\|layout-logic\|color-logic\|typography\|copy\|background\|chart>` | Presentation decision rows: emotion→color, goal→layout, narrative strategy + Duarte sparkline-beats, slide copy formulas. Consumed by generate-ppt |
 | `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<verified-selected-profile-path>" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the selected pack/bundled asset |
 | `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<verified-selected-profile-path>"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
+| `contrast` | `python3 "<base>/scripts/measure_contrast.py" --foreground "<observed color>" --background "<observed solid color>" --text-size <normal\|large>` | Unrounded `ratio`/`text_size` observation; exit 0 meets AA, 1 below threshold, 2 refused/unverified; no browser or clearance claim |
 | `profile` | Read `<base>/profiles/<id>.yaml` (resolution below) + `references/token-architecture.md` for the layering doctrine | The active token set + doctrine |
 
 Domain auto-detects from the query when `--domain` is omitted. Multi-dimensional queries work
@@ -106,7 +107,9 @@ severity columns. Validation falls back to the review checklist in `frontend-des
 ## The non-negotiables (carried into every consumer)
 
 1. No emoji as icons — SVG only (Lucide, Heroicons)
-2. Body-text contrast >=4.5:1, both themes, verified not assumed
+2. Body-text contrast >=4.5:1 (large text >=3:1), both themes, verified not assumed;
+   use [measured text contrast](../../../skills/design-dna/references/design-contract.md#measured-text-contrast)
+   on actual observed colors, not a palette label or static-validator success
 3. Visible keyboard focus — never `outline: none` without replacement
 4. Micro-interactions 150-300ms; transform/opacity only; reduced-motion respected
 5. Touch targets >=44px; `cursor: pointer` on clickables

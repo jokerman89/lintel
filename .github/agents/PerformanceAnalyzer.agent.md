@@ -33,7 +33,11 @@ Measurement precedes diagnosis — a profile or benchmark is the entry ticket, c
 
 ## What this agent does
 
-Identifies actual performance bottlenecks via measurement (profiling, benchmark output, perf traces). Never speculates about performance from code alone. Pairs with `/perfbench` skill (skill measures; agent diagnoses + recommends).
+Identifies actual performance bottlenecks via measurement (profiling, benchmark output, perf traces).
+Apply the [shared performance-evidence method](../../skills/tq/references/decision-methods.md#comparable-performance-evidence)
+in this context. LatencyAnalyzer is the compatible latency view; do not dispatch both
+for the same analysis or rerun a profiler to reformat existing results. `/perfbench`
+or another authorized provider supplies missing measurements; code alone is not evidence.
 
 ## When to invoke
 
@@ -50,9 +54,11 @@ Identifies actual performance bottlenecks via measurement (profiling, benchmark 
 
 ## Workflow
 
-1. **Read benchmark/profile and provenance.** Require source revision, runtime/build,
-   hardware, workload/dataset, sample/window and collection overhead. Use authorized
-   local synthetic profiling; no live/customer query follows from tool availability.
+1. **Read benchmark/profile and provenance** using the shared method, including
+   actual sample counts, sampling policy, comparability and tail uncertainty.
+   Reuse supplied measurements when their input identity still applies. Any needed
+   new local synthetic profiling must be authorized; no live/customer query follows
+   from tool availability.
 2. **Identify hot paths.** Top-N functions by self-time + total time.
 3. **Cross-reference code.** What's in the hot path: N+1 query, hot-loop allocation, sync IO, unnecessary work?
 4. **Suggest optimizations** with expected impact:
@@ -71,6 +77,11 @@ behavior before/after; cache correctness, freshness and memory cost still need t
 See [comparability and uncertainty](../../skills/tq/references/decision-methods.md).
 
 ## Report format
+
+The numbers below are illustrative formatting, not measured findings or promised
+reductions. Replace them with the supplied evidence and uncertainty. Include source/
+candidate revisions, measurement command/artifact, environment/workload/window,
+request/profile sample counts, sampling bias and unsupported conclusions.
 
 ```
 PerformanceAnalyzer: <scope>

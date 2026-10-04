@@ -136,25 +136,14 @@ same artifacts serially and report the actual limitation.
 
 ### Meta-infra mode mechanics
 
-`meta-infra` is the operator's mode when modifying Lintel itself (scaffolding). Lintel changes ripple across every downstream cycle, so REVIEW + CAPTURE run heavier and four meta-gates activate:
-
-**M1 — Structure-impact assessment** (in DEFINE)
-Before merging design, write a structure-changes/<date>-<slug>.md entry documenting: what changed, backward-compat, migration path, forward-compat, verification, rollback. Template: `.claude/engineering/evolution/_TEMPLATE.md`.
-
-**M2 — Compatibility audit** (in REVIEW)
-Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across four questions:
-1. Did any frontmatter contract change? (REQUIRED_SKILL_FIELDS, REQUIRED_AGENT_FIELDS)
-2. Were skills/agents/hooks renamed or moved?
-3. Did defaults change for any existing field?
-4. Did any shared helper signature change? (lib/*.sh)
-
-Output: `.claude/engineering/compat-audits/<date>-<slug>.md`. RED requires explicit override.
-
-**M3 — Shape-tests** (in REVIEW)
-Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
-
-**M4 — Future-operator clarity** (in CAPTURE)
-CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/migrations/_INDEX.md` if any migration ships.
+For `meta-infra` work modifying Lintel itself, load the
+[maintainer method](references/maintainer.md) only at the applicable phase.
+It owns the complete M1–M4 procedures: M1 in DEFINE, M2/M3 in REVIEW and M4 in
+CAPTURE. They remain required when this existing mode applies, not newly optional
+or activated merely by following a link. Keep the preset's detection, override,
+fields and phase chain unchanged; an unrelated consumer cycle does not load or
+run these maintainer procedures. Missing required gate evidence still prevents
+claiming that gate complete.
 
 ## Workflow
 
@@ -328,8 +317,8 @@ The token-est numbers come from the phase-skill's frontmatter `tokens_est_typica
 declares it**. Today **zero skills declare it**, so the value falls back to the `~3k per phase`
 default — which is a placeholder, not a measurement. When the fallback is in play, label it
 **`~3k (default — not yet calibrated)`** rather than printing a bare `~3.5k` that implies precision
-the system does not have. (Calibration lands when CAPTURE records actuals; see
-`lib/scale-estimator.sh` `scale_calibrated_prior`.)
+the system does not have. CAPTURE's calibration writer remains dormant under ADR-0008;
+the existing history reader does not promise future measured calibration.
 
 Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
@@ -343,34 +332,36 @@ gates** (mode-confirm, the cost-estimate gate) and at **cycle completion**:
 
 ```bash
 source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
-render_cycle_footer --awaiting "Proceed with BUILD? [Y/n/edit-plan]"   # at a gate
+render_cycle_footer --awaiting "<actual unresolved scope/resource decision>"  # only if needed
 render_cycle_footer                                                    # at completion
 ```
 
 The footer is mode-aware (skipped phases render `⊘`) and auto-falls to a thin ambient line when no
 cycle is active. Glyphs degrade to ASCII under `LINTEL_ASCII=1`.
 
-### Step 5 — Pre-BUILD confirm gate (BEFORE BUILD)
+### Step 5 — Pre-BUILD authority and signal check (BEFORE BUILD)
 
-If BUILD is in phases_to_run, before invoking it, confirm with the operator using the **honest
+If BUILD is in phases_to_run, check retained scope approval and the **honest
 signals PLAN recorded** — task count, the phase list, and the labelled token estimate. No dollar
 figure (Lintel has no pricing table); no bare-number duration unless `--with-time` was set. Pull the
 values PLAN wrote to state (`tasks_count`, `tokens_est`, `tokens_est_basis`):
 
 ```
-Plan signals (from PLAN):
+Plan signals (from PLAN; link the original presentation rather than repeat it):
 - Tasks: <N>
 - Phases remaining: <phase list>
 - Token estimate: ~<total> (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>)
   (only when --with-time:  Duration: ~<hours>)
 
-Proceed with BUILD? [Y/n/edit-plan]
+Authority: <retained approval source, or the specific unresolved decision>
 ```
 
 This is a pre-BUILD scope/budget check, not a second request for the same approval.
-Surface the task count and labeled estimate. Ask only if the actual plan or resource
+Do not re-present unchanged signals or repeat PLAN's approval question. Ask only if the actual plan or resource
 boundary requires a new decision. The estimate stays UNCALIBRATED without measured
-samples; it is neither current context usage nor a known model capacity.
+samples; it is neither current context usage nor a known model capacity. Interpret
+it against actual work and resource evidence using the
+[scale method](../scope/references/method.md), never as an automatic budget verdict.
 
 **MARS is offered once, at PLAN.** PLAN's approval gate (Step 10) owns the cycle's single
 optional [MARS](../mars/SKILL.md) offer, and only for the canonical nine-phase route after

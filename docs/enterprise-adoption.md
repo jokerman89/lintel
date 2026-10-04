@@ -81,6 +81,19 @@ not a host permission control. Data-residency metadata does not configure where 
 Map policy requirements to platform settings, CI checks, or independently tested controls. Read
 [compliance](compliance.md) and [security](../SECURITY.md) before relying on a mechanism.
 
+For each selected required control, use the compact
+[conformance contract](compliance.md#selected-control-conformance): responsible
+owner, actual mechanism/enforcement level, negative test, evidence location and
+failure behavior. Keep missing host/CI enforcement distinct from an instruction
+or a successful local helper invocation.
+
+Source approval belongs to the organization's existing reviewed Git/release
+process. Retain its actual approval owner and approved immutable revision,
+subsequent release decision, revocation/rollback route and migration checks.
+Required named-pack selection, provenance and P07 content pinning already exist;
+they detect selection/content drift, not approval of the initial source or a
+later release. Rebinding does not supply that approval or a passed control.
+
 ## Review the data boundary
 
 Lintel has no central service that receives sessions. Its scripts and generated resources run in

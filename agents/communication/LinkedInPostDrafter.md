@@ -54,6 +54,8 @@ is not a valid feed post merely because it fits a word-count template.
 ## Workflow
 
 1. **Pick surface and length from the brief and current publishing constraints.**
+   Use approved facts and proof; never invent a commitment, deadline or performance
+   result. Customer consent and disclosure permission apply to the actual channel.
    - Short (hook-only): an observation, a number, a question
    - Mid: a story with 1 specific moment + lesson
    - Long: a POV piece, structured with multiple paragraphs + maybe a list
@@ -62,7 +64,12 @@ is not a valid feed post merely because it fits a word-count template.
 3. **Voice:** the pack's voice tier. Specific. No-jargon. No corporate speak.
 4. **Close:** use a question/link/ask only when it serves the brief, not as mandatory engagement bait.
 5. **Hashtags:** Max 3-5, relevant. No #ai #future #innovation soup.
-6. **Voice gate via the active pack's compliance gates (none by default).**
+6. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 
 ## Report format
 
@@ -86,16 +93,22 @@ is not a valid feed post merely because it fits a word-count template.
 
 [Hashtags on own line: #tag1 #tag2 #tag3]
 
----
+<Applicable approved disclosure, retained in the actual post>
 
+```
+
+Return stats and the following as a separate internal handoff, not post copy.
+The caller owns placement and publication; a checklist never proves approval.
+
+```markdown
 **Stats:**
 - Word count: <N>
 - Total character count: <N> against the verified surface limit/source/date
 - Preview opening: <observed in actual composer, or unverified>; two lines are device-dependent
 - Hashtag count: <N>
 
-**Pre-publish checklist:**
-- [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
+## Internal review checklist (pre-publish, not customer copy)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
 - [ ] Customer mentions: consent verified
 - [ ] Product claims: reviewed if applicable
 - [ ] AI-assisted disclosure: <include / not needed>
@@ -117,3 +130,5 @@ the claim or assert that the article was published.
 `voice: internal` (default; the active pack may set a customer-facing tier). Public post must pass the pack's voice gate if configured.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent drafts a post for the operator to review and publish; it does not write to the repo or post anywhere itself.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to publish or retrieve external material.

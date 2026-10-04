@@ -25,6 +25,10 @@ Persistence (Master + Overrides pattern):
 import argparse
 import sys
 import io
+from pathlib import Path
+
+# Isolated invocation still imports the trusted CLI's own modules, not target cwd.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from core import CSV_CONFIG, AVAILABLE_STACKS, AVAILABLE_SLIDE_DOMAINS, MAX_RESULTS, search, search_stack, search_slide
 from design_system import generate_design_system, persist_design_system
 

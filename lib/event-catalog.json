@@ -78,7 +78,7 @@
           ]
         },
         "vault_sink_skipped": {
-          "producers": ["instruction-only:skills/capture/SKILL.md"],
+          "producers": ["instruction-only:skills/capture/references/vault.md"],
           "records_when": ["unavailable"],
           "fields": ["reason", "path", "secrets", "pii"],
           "aliases": {},
@@ -87,7 +87,7 @@
           ]
         },
         "vault_sink_written": {
-          "producers": ["instruction-only:skills/capture/SKILL.md"],
+          "producers": ["instruction-only:skills/capture/references/vault.md"],
           "records_when": ["end"],
           "fields": ["file"],
           "aliases": {},
@@ -597,8 +597,8 @@
     "migration": {
       "kinds": {
         "surfaced": {
-          "producers": ["instruction-only:skills/migrations/SKILL.md"],
-          "records_when": ["always"],
+          "producers": ["instruction-only:skills/doctor/references/inspection.md"],
+          "records_when": ["end"],
           "fields": ["active_count"],
           "aliases": {},
           "rules": [
@@ -610,7 +610,7 @@
     "orientator-decisions": {
       "kinds": {
         "orientator_decision": {
-          "producers": ["instruction-only:skills/orientator/SKILL.md", "instruction-only:skills/sense/SKILL.md"],
+          "producers": ["instruction-only:skills/sense/SKILL.md"],
           "records_when": ["always"],
           "fields": ["intent", "workflow", "risk", "confidence", "decision", "budget_used", "escalated"],
           "aliases": {},

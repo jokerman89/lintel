@@ -3,7 +3,7 @@
 # implements: ADR-0024, ADR-0027, ADR-0028
 # intent: docs/spec-kit.md
 # constraints: read-only; paths must stay inside the working repository
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-10-03
 """Validate a committed work map without reading runtime state or executing content."""
 from __future__ import annotations
 
@@ -80,6 +80,13 @@ def work_context(
         artifacts["constitution"] = mapping["constitution"]
     coordination = mapping.get("coordination")
     context_paths = [selected, *artifacts.values(), *([coordination] if coordination else [])]
+    if acceptance_paths:
+        from review_contract import validate_shape
+        for ref in acceptance_paths:
+            # Reuse P05's reference grammar. P03 reads/counts the full original
+            # source even when P05 binds an excerpt; neither creates another map role.
+            validate_shape(ref, "acceptanceRef")
+            context_paths.append(ref if isinstance(ref, str) else ref["path"])
     if any(any(char in path for char in "\r\n\t") for path in context_paths):
         raise ValueError("Selected paths contain control characters and cannot be carried in the ledger")
     manifest = select_files(root, paths=[*context_paths, *warm_paths],

@@ -123,6 +123,13 @@ For each correction operator made during the cycle:
 - If GENERAL: candidate for the project lessons store (`lintel_lessons_file`; `.claude/memory/lessons.md` on the v5 layout)
 - If SPECIFIC: keep in this cycle's notes only
 
+Apply the shared [lesson benefit and recurrence method](../lessons-add/references/benefit.md).
+For relevant existing lessons, ask what later application actually helped, whether
+the failure recurred, and what remains unknown. Cite the selected dated outcome;
+do not infer prevention from keyword hits or the absence of a reported failure.
+Use that reasoning for the update-phase below, including proposed merge or
+supersession of ineffective/obsolete guidance without deleting history.
+
 Examples of LESSON-worthy:
 - "Don't mock the vendor SDK in tests — last 3 cycles' tests passed but prod failed because mocks diverged from real API"
 - "Always map the codebase first when planning infra work — saved 90 min on this engagement"
@@ -163,7 +170,11 @@ repository, and records an advisory `lessons` audit line after the write.
 
 ### Step 3 — Promote lesson check (NEW)
 
-For each NEW lesson captured, AskUserQuestion: "Promote to the Lintel scaffolding baseline (scaffolding/01-foundation/.claude/memory/lessons.md in an explicitly named Lintel work tree)? — applies to future scaffolded repos."
+For a lesson with observed benefit and a generalizable scope, offer promotion to
+the scaffolding baseline in an explicitly named Lintel work tree. A new lesson with
+no later application has **unknown** benefit; keep it local pending observation,
+rather than automatically offering every new entry as a proven team-wide rule.
+Only an actual unresolved promotion choice needs the question.
 
 If yes: invoke `/li:lessons-promote` (which runs `bin/li-lessons-promote` with an explicit destination and source label).
 
@@ -262,14 +273,10 @@ Only the coordinator may set the work-map status to `COMPLETE`, and only after a
 serial integration, final integrated REVIEW, and SHIP evidence pass. Local runtime attempt files and
 abandoned worktrees are not durable completion evidence.
 
-For meta-infra M4, the future-operator recap must name:
-
-- the explicit opt-in fields and coordination path;
-- the actual host tier used (`native`, `sequenced`, or `none`) and whether writers really ran
-  concurrently;
-- the isolation/attribution method and deterministic integration order;
-- lane reports/reviews plus final integrated review evidence;
-- any lost attempts, sequenced fallback, migration, deprecation, or unverified host behavior.
+When `mode=meta-infra` also applies, load the required
+[M4 swarm recap](../cycle/references/maintainer.md#m4-swarm-recap) from the
+maintainer method. It retains every future-operator field without adding this
+maintainer procedure to an ordinary consumer capture.
 
 Never claim independent review when the same identity implemented and reviewed a lane. Honest
 degradation is part of the durable outcome, not a concern to hide.
@@ -279,220 +286,52 @@ degradation is part of the durable outcome, not a concern to hide.
 If role was active during cycle:
 - Review role's OUTCOME LENS per phase against actual outcomes
 - Did role lens add value? Where did it conflict with engineering reality?
-- Update role file with any new INSIGHTS learned (operator confirms)
-- Sensitivity-aware: if role is private, updates stay in `~/.lintel/roles/private/<role-id>.md`
+- Propose any INSIGHTS update; retain the operator's confirmation for that exact change.
+- Apply confirmed updates through the [shared role lifecycle](../role/references/lifecycle.md),
+  using the actual resolved destination and reviewed digest, not a guessed home path.
+  Private role metadata/body access and transfer require their explicit consent.
+  Keep an unapproved update as a proposal; do not write a second role file or
+  turn debrief approval into permission to read, replace or export another role.
 
 ### Step 7b — Vault sink (session summary → knowledge vault)
 
-Config-gated, optional, NEVER blocking. Writes a short human-readable session summary to an
-external knowledge vault (e.g. an Obsidian vault) so the vault becomes the cross-repo memory
-layer. The repo's own capture artifacts (Steps 1–7) are unaffected — this is an additional
-sink, not a move. Nothing is ever read back from the vault into the repo.
+Config-gated, optional, NEVER blocking. Only when the current verified profile
+resolves `capture.vault_sink_enabled` to `true`, load the
+[vault method](references/vault.md). If disabled, do not load the procedure,
+look up a destination or write. If resolution is unavailable, warn that export
+was not performed; continue the independent capture.
 
-```bash
-source_root="${LINTEL_SOURCE_ROOT:?select trusted source}"
-sink_dir=""
-if ! source "$source_root/lib/pack-resolver.sh"; then
-  echo "[lintel/capture] WARN: vault policy helper unavailable — export not performed" >&2
-elif ! sink_enabled=$(resolve_pack_field capture.vault_sink_enabled); then
-  echo "[lintel/capture] WARN: vault policy unresolved — export not performed" >&2
-elif [ "$sink_enabled" != "true" ]; then
-  : # disabled — no destination lookup or write
-elif [ -z "${LINTEL_REPO_ROOT:-}" ]; then
-  echo "[lintel/capture] WARN: working repository is not selected — export not performed" >&2
-elif ! source "$source_root/bin/_audit.sh"; then
-  echo "[lintel/capture] WARN: vault audit writer unavailable — export not performed" >&2
-elif ! sink_path=$(resolve_pack_field capture.vault_sink_path); then
-  echo "[lintel/capture] WARN: vault destination unresolved — export not performed" >&2
-else
-  capture_repo="$(lintel_repo_root)"
-  if [ -n "$sink_path" ]; then
-    case "$sink_path" in
-      /*|[A-Za-z]:*) sink_dir="$sink_path" ;;
-      *) sink_dir="$capture_repo/$sink_path" ;;
-    esac
-  fi
-  if [ -z "$sink_dir" ] || [ ! -d "$sink_dir" ]; then
-    echo "[lintel/capture] WARN: vault_sink path not found: $sink_path — skipping vault export" >&2
-    audit_log capture vault_sink_skipped "reason=path_missing" "path=$sink_path"
-    sink_dir=""
-  fi
-fi
-# A missing or disabled vault must NEVER fail CAPTURE — one-line warn, then move on.
-```
-
-Only when `sink_dir` is nonempty and this destination is already authorized, write
-exactly ONE file per session at `<sink_dir>/YYYY-MM-DD-<repo>-<short-slug>.md`.
-Do not create a destination, search a personal vault, or depend on dormant
-calibration initializing shell variables:
-
-```markdown
----
-created: YYYY-MM-DD
-tags: [session]
-type: session
-repo: <repo-name>
-branch: <git-branch>
-outcome: shipped | in-progress | blocked | exploration
-session: <cycle-id-if-available>
----
-# <one-line session title>
-
-## What was done
-<3–8 lines, plain language, no code dumps>
-
-## Decisions
-<decisions taken, one line each; "None" if none>
-
-## Open threads
-<unfinished items / next steps; "None" if none>
-
-## Pointers
-- <repo-relative paths to the key files/PRs touched>
-
-## Links
-- [[<repo-name>]] <- the repo hub note (backlinks = per-repo session history)
-- [[<previous session note name>]] <- predecessor, if one exists for this repo
-```
-
-The frontmatter is a LOCKED flat schema (ADR-0007) — `sessions.base` (the Bases dashboard
-installed by `bin/li-vault-init`) and the vault's own skills query these exact properties.
-`outcome` uses the controlled vocabulary above, nothing else.
-
-**After writing the note, maintain the two navigation surfaces (same sink dir):**
-1. **Hub note** `<sink_dir>/<repo-name>.md` — create a minimal one if missing (frontmatter:
-   `created:`, `tags: [hub]`, `type: repo-hub`, `repo:`; one line of prose — same shape
-   bin/li-vault-init writes). Never overwrite an existing hub.
-2. **Index** `<sink_dir>/00-index.md` — create it if missing (frontmatter `type: session-index`
-   + one intro line), then maintain the list under its heading: carry the existing entries
-   forward, PREPEND this session's line, truncate to 15:
-   `- [[<note-name>]] - <one-line title> (<repo>)`. Keep frontmatter + intro intact; touch only
-   the list. (Carrying forward the index's own lines is the one sanctioned vault read — never
-   read other notes back.)
-
-Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets or tokens, no
-customer or employer-internal data, no full file contents — repo-relative pointers instead of
-payloads. Render the headings AND body in the session's working language (the template above is
-the canonical English form — translate it wholesale when the session ran in another language).
-Frontmatter must parse.
-
-**MANDATORY pre-write scan (battletest K4 — the vault note lands OUTSIDE the repo, where no
-git-commit hook sees it).** The "hard rules" above are not enough on their own — scan the
-rendered note body programmatically before writing, and ABORT the export (warn, never fail
-CAPTURE) on any hit:
-
-```bash
-source "${LINTEL_SOURCE_ROOT:?select the trusted source}/hooks/shared/_patterns.sh"
-note_body="$(cat "$rendered_note")"
-sec_hits="$(scan_secrets all "$note_body")"
-pii_hits="$(scan_customer "$note_body")"
-if [ -n "$sec_hits$pii_hits" ]; then
-  echo "[lintel/capture] WARN: vault export ABORTED — ${sec_hits:+secrets: $sec_hits }${pii_hits:+pii: $pii_hits}"
-  audit_log capture vault_sink_skipped "reason=sensitive_content" "secrets=$sec_hits" "pii=$pii_hits"
-  # skip the write entirely — do NOT sanitize-and-ship; an aborted export is correct
-else
-  # write the note, then:
-  audit_log capture vault_sink_written "file=<filename>"
-fi
-```
+The method owns the existing selected-repository/audit preflight, authorized
+destination, locked note schema, hub/index maintenance and mandatory sensitive-data
+check. Export still requires an existing authorized destination and acceptable
+content; enabling a field or loading the method is not transfer permission.
+Repo capture remains in place, with no vault-to-repo ingestion or personal scan.
 
 ### Step 8 — Retrospective (--retrospective)
 
-Reflect on a concrete window using actual observations. Explicit `--since` wins; otherwise
-`--scope day` means the prior 24 hours, `week` seven days, and `session` uses the latest
-owned checkpoint timestamp when available, else a labelled 24-hour fallback. Validate
-checkpoint provenance through `context_latest` / `context_checkpoint`, not a raw home scan.
-A supplied revision is resolved to a real commit/time before reading history.
-
-Gather only signals relevant to the selected work/window:
-
-- Git commits and current task status, without calling local commits deployed or merged.
-- Audit files named by `audit_read_files <category>` and read through `bin/li-events.py`
-  with `--since`; retain diagnostics and name any additional legacy source not read.
-- Recorded skill invocations in `usage-*.jsonl` under `audit_dir usage-skill`, when
-  authorized and available. Recording is optional; absence is unobserved, not disuse.
-- `state_cycle_segment` for the selected original cycle, not an unrelated ledger segment.
-
-Report **delivered**, **stuck**, **surprises**, **what worked**, **friction** and
-**patterns worth recording**, each with its actual evidence or uncertainty. Keep ledger
-`BLOCKED`/`INCOMPLETE`/`UNTRUSTED` separate from a hook decision (`tier=BLOCK`,
-`blocked="true"`, `check=performed|not_performed`). A hook block record is not evidence
-of host enforcement. No commits does not mean no work; include observed uncommitted
-progress without inventing delivery.
-
-`--emit-lessons` proposes one to three useful patterns, with an existing-ID deduplication
-check and explicit authorization per candidate before a write. Respect already explicit
-approval of named candidates; do not demand a second approval for the same scope.
-No durable pattern is a valid result. Audit failure leaves a degraded report with the
-remaining real signals, not a healthy empty history.
-
-During normal cycle CAPTURE, an authorized retrospective may be stored at
-`.claude/memory/retros/<date>-<cycle-id>.md`. For standalone `--retrospective`, persist
-only when `--out` was selected. Retain the compact observation shape:
-```yaml
-cycle_id: <id>
-duration_human: <hours>
-duration_cc: <minutes>
-tokens_used: <approx>
-usage_provenance: observed | estimated | unknown
-# billing: <actual supplied billing evidence only; omit when unknown>
-
-what_worked:
-  - <thing>
-what_friction:
-  - <thing>
-next_time:
-  - <pattern to repeat>
-  - <pattern to avoid>
-```
-
-Not always written — only if cycle was substantial enough that retro adds value (operator-driven).
+Only for `--retrospective`, or when the operator selects a useful retrospective
+for a substantial cycle, load the
+[retrospective method](references/reports.md#step-8--retrospective---retrospective).
+It owns the existing window defaults, evidence selection, observation shape and
+per-lesson authorization. Otherwise skip this optional view. The standalone
+report returns without cycle-completion or other CAPTURE mutation steps.
 
 ### Step 8b — Release report (--release-summary)
 
-Use the actual commit/tag window and delivery evidence to brief teammates or draft release
-notes. Explicit `--since`/`--until` win; otherwise use the latest reachable tag to HEAD,
-or a labelled seven-day window when no tag exists. Resolve revisions with
-`git rev-parse --verify --end-of-options "<ref>^{commit}"`; pass the resulting full IDs
-as quoted Git arguments. Pass time filters and optional literal path scope as separate
-arguments too. Never evaluate report input as shell code, assume a `main` branch or
-invent a release tag.
+Only for `--release-summary` or a requested SHIP release report, load the
+[release-report method](references/reports.md#step-8b--release-report---release-summary).
+It owns the original revision/time/scope selection, delivered-work evidence,
+statistics, draft voice and sensitive-data boundaries. A report creates no
+release, tag, commit, publication or approval, and does not invoke the other
+CAPTURE mutation steps.
 
-Gather commit subjects, scopes and actual changes. Local Git is sufficient for a local
-change summary, not for claiming a merged PR or deployment. Read selected PR/delivery
-evidence only through available authorized tools; absent authorization or tools means a
-Git-only report with that limitation. No automatic network query follows from this mode.
+#### Keep a Changelog output
 
-Group Conventional Commits by feature/fix/docs/refactor/chore and area; keep other history
-in an explicitly labelled uncategorized group rather than dropping it. Preserve these
-sections when applicable:
-
-- **Delivered work**: what verifiably landed, with commits/tags/PR evidence.
-- **Features and fixes**: capabilities and corrected behavior, not just renamed files.
-- **Migration notes**: replaced entry points, retained data/flags and operator actions.
-- **Limitations and not shipped**: open original cards, unrun checks and unmet gates.
-- **Statistics** (`--include-stats`): actual commit/file/change/contributor counts over
-  the same window/scope; no invented PR count or personal contact details.
-
-Default `--voice internal` is a concise engineering report. `--voice customer` produces
-a **DRAFT**, preserving source fidelity and using the active pack's configured voice
-policy and corpus. Missing corpus is uncalibrated; unavailable required review stays
-unverified. The draft is not approved for distribution merely because it was rendered.
-Before rendering, apply the actual applicable sensitive-data checks to ingested commit
-and PR text. On a hit, name the source without repeating the sensitive payload and stop
-that output; do not rewrite history or sanitize-and-publish as a workaround.
-
-An empty selected window is reported as empty. Missing history, denied reads or unknown
-delivery are limitations, not success. The report can feed SHIP's existing PR/release
-documentation, but it creates no release, tag, commit, publication or approval.
-
-Examples:
-
-```text
-/li:capture --retrospective --scope day --emit-lessons
-/li:capture --release-summary --since <verified-tag> --until HEAD --include-stats
-/li:capture --release-summary --scope skills --voice customer --out <authorized-draft>
-```
+This compatibility anchor for ChangelogMaintainer and SHIP selects the
+[Keep a Changelog method](references/reports.md#keep-a-changelog-output) only
+when that format/output was requested. Apply it in the current context with the
+same release evidence; do not dispatch a duplicate report or run other CAPTURE
+mutation steps.
 
 ### Step 9 — (removed in v5, ADR-0006)
 
@@ -609,7 +448,8 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 ## Recommended agents
 
 - **ADRDrafter** (engineering/) — primary, ADR drafting
-- **ChangelogMaintainer** (engineering/) — release-note polish if SHIP didn't already
+- **ChangelogMaintainer** (engineering/) — optional format-specific view of Step 8b;
+  use the same method in the current context, not a second default release-summary pass
 - **DocWriter** (engineering/) — synthesize cold-executor trio prose
 - The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) — if any CAPTURE artifact ships outside (rare)
 

@@ -1,7 +1,7 @@
 ---
 name: MotionDirector
 category: frontend
-description: Motion-language curator for the frontend-motion sub-skill. Picks GSAP/Lenis/Theatre/Rive/Motion-One based on brief energy-level + target-device. Emits motion.json with scroll-trigger-config + key-animations + perf-budget.
+description: Use when a motion decision needs interaction, reduced-motion or device-budget expertise; returns a draft that may select no animation, CSS or a justified library for the caller to publish.
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
@@ -25,7 +25,9 @@ Core principles (ADR-0015/0016):
 
 Reads brief + (optionally) energy-level + target-device → picks motion-library combination from the recommendation-tree (GSAP+ScrollTrigger, Lenis, Theatre.js, Rive, Motion-One, Framer Motion, CSS-only). Specs scroll-trigger-config + smooth-scroll-config + key-animations + perf-budget + operator-install-instructions.
 
-Emits `motion.json` (schema_version: 1) per the frontend-motion SKILL.md contract.
+Returns a draft motion fragment (schema_version: 1). Follow
+[axis ownership](../../skills/frontend-design/references/axis-ownership.md):
+the caller owns the single validated publication of `motion.json`.
 
 The [shared design contract](../../skills/design-dna/references/design-contract.md)
 now represents `mode: none|css|library`. Validate this fragment with
@@ -35,7 +37,7 @@ The substantive decision methods below remain the role's responsibility.
 
 ## When to invoke
 
-- Auto-invoked by `/li:frontend-motion` Workflow Step 2
+- When the `frontend-motion` caller actually selects a separate decision context
 - Solo: operator wants motion-language consultation for existing project
 - Pre-`/li:frontend-design` standalone: "what's the motion language for this brief?"
 
@@ -103,7 +105,8 @@ The substantive decision methods below remain the role's responsibility.
    - gsap.matchMedia() for prefers-reduced-motion
    - Tilt/skew CSS-fallback snippets
 
-8. **Emit motion.json** per frontend-motion SKILL.md contract.
+8. **Return the draft fragment** and actual source/uncertainty evidence to the
+   caller. Do not re-enter the skill's dispatch step or write a competing output.
 
 ## Report format
 
@@ -126,7 +129,7 @@ unrepresentable no-motion choice to the contract owner instead of adding schema 
 
 - Brief lacks energy-direction → NEEDS_CONTEXT with specific question ("subtle fade-ups or kinetic scroll-choreography?")
 - Library-version-recommendation outdated → re-pick at invocation
-- License-tier unclear for operator → flag DONE_WITH_CONCERNS + surface via stdout
+- License-tier unclear → retain an unverified draft obligation and request an authorized check; a required unresolved license blocks publication
 
 ## L-001/L-002/L-003 application
 

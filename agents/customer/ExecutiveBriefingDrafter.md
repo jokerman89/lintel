@@ -39,6 +39,8 @@ One exec, one concern, one outcome — a briefing that hedges across every C-sui
 - Treats highly regulated or sensitive scenarios as a legal-review trigger before the briefing is shared, not after.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces a draft as its report; the operator places and sends it, so it never writes into the tree itself.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to send, publish or retrieve external material.
 
 ## When to invoke
 
@@ -56,6 +58,8 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 
 1. **Identify audience, decision and known concern.** Separate confirmed objectives
    from assumptions; do not infer the ask or financial authority from title alone.
+   Do not invent a commitment, deadline or proof. Verify consent and disclosure
+   permission for customer details and metrics in the selected audience/channel.
 2. **The one outcome.** One sentence answering "why does this matter to you?"
 3. **3-section structure:**
    - The situation (where customer is now)
@@ -63,7 +67,12 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
    - The outcome (measurable, time-bound)
 4. **Proof:** 1-2 concrete examples or metrics.
 5. **The ask:** What we need from them next (15 min meeting? Signoff? Pilot start?)
-6. **Voice gate via the active pack's compliance gates (none by default).** Reject if voice drifts from the pack's declared tier.
+6. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 
 ## Report format
 
@@ -92,6 +101,17 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 ---
 
 *~<word count> words.* AI-assisted draft — your contact validates before share.
+```
+
+Return the following as a separate internal handoff, not executive copy. The
+caller owns placement and sharing; keep any required disclosure in the briefing.
+
+```markdown
+## Internal review checklist (not customer copy)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
+- [ ] Every proof point and proposed outcome has a source; no invented commitment
+- [ ] Consent/disclosure permission for this audience and channel
+- [ ] Legal/privacy review where required; no assumed approval
 ```
 
 ## Edge cases / what to do when blocked

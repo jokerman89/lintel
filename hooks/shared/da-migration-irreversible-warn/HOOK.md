@@ -2,40 +2,62 @@
 name: da-migration-irreversible-warn
 tier: warn-only
 event: PreToolUse (Edit|Write on migration files)
-fires_on: migration file lacks a paired down-migration OR contains destructive operations without documented data-loss acceptance
-override: pass --ignore-irreversibility flag (operator decision, logged)
+fires_on: selected filename has matching SQL text AND no down-file or down-marker hint
 audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # da-migration-irreversible-warn
 
-Surfaces when a migration commit lacks a rollback path. Warning, not block — destructive migrations exist; the warn prompts operator to acknowledge.
+An existing optional **filename/regex heuristic**, not migration analysis or a
+reversibility proof. It reads the existing file named by the hook input (or manual
+path argument); it does not inspect a commit diff or the proposed edit's future
+contents. This document does not register or enable the hook on any host.
 
 ## What it does
 
-- On commit involving files under `db/migrations/`, `supabase/migrations/`, `migrations/`, or matching `pack.data_architecture.migration_glob`:
-  - Pairs each up-migration with the corresponding down-migration (heuristic: same prefix, `.down.sql` suffix OR `down: ` section inside the file)
-  - Scans up-migration content for destructive operations (`DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `ALTER COLUMN ... TYPE`, narrowing changes)
-- If destructive AND no rollback path: WARN
+- Selects the supplied path string matching `db/migrations/*`,
+  `supabase/migrations/*`, `migrations/*`, `*.up.sql` or `*-up.sql`, or the optional
+  comma-separated `data_architecture.migration_glob` field. It does not normalize
+  every absolute path into those relative directory patterns.
+- Searches existing text case-insensitively for `DROP TABLE`, `DROP COLUMN`,
+  `TRUNCATE` and `ALTER COLUMN ... TYPE`. Comments can match; SQL syntax, indirect
+  data loss, type narrowing and execution effects are not analyzed.
+- Removes `.up.sql`/`-up.sql` from the base and checks the existing candidate names
+  `${base}.down.sql`, `${base}-down.sql`, `${base%.sql}.down.sql`, or a line matching
+  `^-- ?down|^# ?down`. Presence alone suppresses the warning.
+- Matching SQL text **and** no down hint emits WARN and exits zero. Silence,
+  including from a missing file or an unmatched filename, is not a passed review.
+- The shared text reader treats filenames as literal operands. A grep/read
+  failure emits an unavailable-observation warning and keeps the optional hook
+  non-blocking; it is not converted to a no-match or recovery result.
 
 ## Why warn-only
 
 - Some migrations are deliberately destructive (cleanup after grace window)
-- The warn forces operator to acknowledge the irreversibility, not block ship
-- Block would require operator to invent a fake down-migration; that's worse than honest documentation of irreversibility
+- The warning invites review; it does not force or log an acknowledgement.
+- A paired down file or marker is not proof of reversibility. Review real recovery,
+  retained data, rollback/replay and explicit data-loss acceptance with
+  `/li:da single --action migration-plan`.
 
-## Override path
+## Policy and scope
 
-`--ignore-irreversibility "reason"` on commit. Reason logged. CI can require an explicit override comment in the commit message for irreversible migrations.
+There is no acknowledgement/override option parser. Optional filename data is
+explained by the [preference reference](../../../skills/da/references/preferences.md);
+a missing optional field is absent advice, while an actual resolver/profile error
+keeps its nonzero failure. The lookup is conditional on filename selection, not
+a universal profile gate. Required profile/review controls remain owned by their
+real callers; this advisory hook never satisfies or bypasses them.
 
 ## What's NOT in scope
 
 - Detecting indirect data loss (e.g. column rename that loses precision) — Migrator's analysis
 - Auto-generating down-migrations — operator-driven
-- Hard-blocking destructive migrations (warn-only by design; v4.3+ may add per-pack opt-in block)
+- Hook activation, SQL execution, automatic repair or new mandatory policy
 
 ## Audit format
 
-```jsonl
-{"hook":"da-migration-irreversible-warn","tier":"warn","ts":"...","file":"db/migrations/0042_drop_legacy.sql","destructive_ops":["DROP TABLE","TRUNCATE"],"has_rollback":false,"operator":"<operator>"}
-```
+Only a warning calls the existing `audit_log hooks da_migration_irreversible_warn`
+router with string fields `hook`, `tier`, `file`, comma-separated `destructive_ops`
+and legacy `has_rollback=false` (meaning no filename/marker hint, not proven
+irreversibility). The router owns destination and common metadata. It can fail
+advisory writes; no receipt or no warning is not proof that recovery was verified.

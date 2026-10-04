@@ -43,10 +43,16 @@ done
 # ADR-0025 supersedes six similar files with one exact shared protocol and adapters.
 IPC="$REPO_ROOT/skills/instruction-parity-check/SKILL.md"
 if [ -f "$IPC" ]; then
+  if grep -Fq '../doctor/references/inspection.md#instruction-parity' "$IPC"; then
+    pass "instruction-parity-check delegates to the doctor inspection owner"
+  else
+    fail "instruction-parity-check is missing its shared owner"
+  fi
+  IPC="$REPO_ROOT/skills/doctor/references/inspection.md"
   for ref in "ADR-0025" "scaffolding/01-foundation/SESSION-PROTOCOL.md" \
     "CLAUDE.md" "AGENTS.md" "bin/li-instructions.py check" \
-    ".github/lintel/bin/li-adapter.py check --target ." "session-protocol-parity.sh"; do
-    if grep -Fq "$ref" "$IPC"; then
+    'bin/li-adapter.py" check' '--target "$LINTEL_REPO_ROOT"' "session-protocol-parity.sh"; do
+    if grep -Fq -- "$ref" "$IPC"; then
       pass "instruction-parity-check references $ref"
     else
       fail "instruction-parity-check missing reference: $ref"

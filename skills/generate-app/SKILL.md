@@ -1,7 +1,7 @@
 ---
 name: generate-app
 layer: foundation
-description: Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skeleton with motion/shader/typography wired up. Sister to generate-web — same family (rendering-engine), larger scope.
+description: Use when a resolved frontend design needs a Next.js, Vite-React or SvelteKit application scaffold that preserves the selected stack and dependency choices.
 color: green
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -54,8 +54,10 @@ library, framework migration, dependency installation or deployment is implicit.
 - Optional `--routes <comma-list>` — explicit route list (default: home + about + contact)
 - Optional `--with-api-stubs` — generate api/ folder with placeholder routes
 - Optional `--with-auth-stubs` — placeholder auth (next-auth / clerk-stub / lucia-stub)
-- Optional `--out <path>` — output dir (default: `~/.lintel/generate-runs/<run-id>/app/`)
+- Required `--out <path>` — explicitly owned repository-relative application output directory
 - Optional `--customer-share` — triggers compliance-gate
+- Optional `--review` — explicitly request the shared post-generation review;
+  this does not add a second reviewer or waive required review when omitted
 
 ## Workflow
 
@@ -76,6 +78,10 @@ out_dir="${OUT:?select an owned repository-relative output directory}"
 Reject unknown, duplicate or conflicting options before output. Validate the
 selected design and project manifests before scaffolding; do not create directories
 merely because two required strings are nonempty.
+Follow [owned source and output selection](../design-dna/references/design-contract.md#owned-source-and-output-selection).
+Missing or unwritable output fails visibly; no current-directory, personal-home
+or neighboring-run fallback is permitted. Preserve original source/manifest bytes
+and require explicit replacement authorization before touching existing output.
 
 ### Step 2 — Schema-version handshake (M-1 + M-5)
 
@@ -105,9 +111,11 @@ Apply the returned Do/Don't/Severity rules while scaffolding. python3 absent →
 
 **For `--stack next-app`:**
 
-1. Use `create-next-app` template (or in-repo template at `~/.lintel/brand/web-templates/next-app/`)
-   Use an already available scaffold and explicit output scope. A missing dependency
-   is a reported boundary, not an automatic install or a reason to replace a project.
+1. Use an already available `create-next-app` template or an explicitly selected
+   owned template, including an actual verified configured template path.
+   Record which source was used. A missing selected template/dependency is a
+   reported boundary, not an automatic download, home scan, tool fallback or
+   reason to replace a project. A different scaffold needs explicit selection.
 2. Generate dir structure:
    ```
    app/
@@ -152,7 +160,11 @@ Apply the returned Do/Don't/Severity rules while scaffolding. python3 absent →
 
 For each file generated, apply transforms from `frontend-design-spec.json`:
 
-- **layout.tsx / +layout.svelte:** inject `<link>` tags from `typography.font_stacks[].loading_strategy`, wrap children with LenisProvider if `interaction_signature.scroll_smoothing`, set up fontFamily classNames
+- **layout.tsx / +layout.svelte:** apply the selected authorized font-loading
+  strategy and font-family classes. If `interaction_signature.scroll_smoothing`
+  is true, integrate the actual bound motion runtime in a framework-compatible
+  way. `LenisProvider` is only an example when Lenis was explicitly selected;
+  do not introduce it for a different runtime or native scrolling.
 - **page.tsx / +page.svelte:** apply `visual_thesis` to hero copy + structure
 - **tailwind.config:** map `typography.size_scale.scale` + `typography.line_heights` + `layout_grammar.max_width` to Tailwind tokens
 - **Motion:** none means no animation imports; CSS-only uses CSS, not a JS library
@@ -197,14 +209,24 @@ Operator-licensed items (per frontend-design-spec.json):
   - Any selected runtime/editor/asset terms? See the source-bound dependency notes.
 ```
 
-### Step 7 — 4-gate quality pipeline
+### Step 7 — Required checks and one review owner
 
-Same as generate-web (per existing v3.5 pattern):
-0. Mechanical validator (ADR-0015): `python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/validate_design.py" <rendered html/jsx pages> --profile <active-profile>` — exit 1 BLOCKS; fix before continuing
-1. Build-test: `npm run build` smoke-test
-2. WebExperienceCritic agent: layout/hierarchy/accessibility review
-3. DesignSystemAuditor (Phase A2) optional: 6-dimension audit if `--review` flag
-4. Voice-gate via the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) if customer-share
+Run the existing mechanical validator on actual produced HTML using the verified
+profile; source JSX is not rendered HTML. Retain its errors and warnings, then
+run the declared build smoke-test. A failure remains a failure.
+
+Follow [review ownership and reuse](../frontend-design-review/references/built-review.md#review-ownership-and-reuse).
+In an enclosing frontend-design run, return artifact paths, current input identity
+and observed checks to that owner for its Step 7 review. For standalone use,
+the current app workflow owns the same `frontend-design-review` handoff.
+`--review` requests that review, not an extra DesignSystemAuditor pass after
+WebExperienceCritic. Reuse only applicable current P05/QA and independent evidence.
+
+Resolve actual `voice.gates_active` separately from compliance hooks when the
+brief/profile requires voice review. No configured voice gate is different from
+an unavailable required one; missing mandatory observations keep delivery blocked.
+An otherwise valid generated artifact can be handed to its owner for outstanding
+review without regenerating it or treating the unperformed review as passed.
 
 ## Voice tier behavior
 
@@ -222,9 +244,9 @@ patterns, scaffolding is unchanged.
 
 ## Status protocol
 
-- **DONE** — app skeleton generated, npm install + npm run dev succeed in smoke-test
-- **DONE_WITH_CONCERNS** — build succeeds but frontend-design-review reports advisory concerns (if --review)
-- **BLOCKED** — frontend-design-spec.json invalid schema, OR build fails, OR customer-share voice-fail
+- **DONE** — app output and all applicable required build, inspection and review controls are verified
+- **DONE_WITH_CONCERNS** — required controls are satisfied; advisory concerns remain explicit
+- **BLOCKED** — invalid design, failed build, or any required failed/unverified control; hand valid produced output to the selected owner for an outstanding review
 - **NEEDS_CONTEXT** — stack-choice missing or frontend-design-spec absent
 
 ## Pause-points
@@ -237,18 +259,20 @@ patterns, scaffolding is unchanged.
 
 **Reads:**
 - `<from-frontend-design>/frontend-design-spec.json` (mandatory)
-- `~/.lintel/brand/web-templates/<stack>/` (templates if exist, else use cli scaffold tools)
-- `~/.lintel/brand/design-patterns/<name>/` (if frontend-design ran with --pattern)
-- `~/.lintel/profile.yaml` (mode → voice-tier)
+- Explicitly selected owned or verified configured template source for the selected stack
+- The exact selected pattern/lock references carried by the bound design
+- The unchanged verified P07 profile reference and its actual voice requirements;
+  do not read a personal profile YAML directly
 
 **Writes:**
 - `<out_dir>/` — full repo skeleton
 - Audit-log: `.claude/runtime/audit/generate-app-runs.jsonl`
 
 **Calls into:**
-- `agents/doc-gen/WebExperienceCritic.md` (existing — design-pass review)
-- `agents/frontend/DesignSystemAuditor.md` (Phase A2 — optional 6-dimension audit if --review)
-- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — if customer-share)
+- `/li:frontend-design-review` through the single selected owner; the retained
+  WebExperienceCritic/DesignSystemAuditor methods are not two default passes
+- the active pack's actual voice requirements (`resolve_pack_field voice.gates_active`;
+  none by default, independent of compliance hooks)
 - `/li:compliance-gate` (if customer-share)
 
 **Boundary with frontend-* family (L-002):**
@@ -278,6 +302,8 @@ generate-app is the **rendering-engine** — produces files. frontend-design is 
 - Schema-version handshake fail: BLOCKED + diagnostic
 - Dependency/build failure: retain the exact diagnostic and unverified artifact
   outcome; skipping a smoke test does not make the requested app runnable.
+- Output missing/unwritable: BLOCKED with the actual error and selected path;
+  retain partial owned output and never retry at an unselected destination
 - Stack-template missing or cli scaffold tool unavailable: BLOCKED with install-instruction
 
 ## Recommended next steps after invocation

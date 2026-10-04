@@ -76,38 +76,19 @@ agent locates the cause and recommends a fix, not silently applying a repair to 
 
 The caller supplies an authorized source, full refs, an external trusted reproducer and
 a new trial path under a known scratch parent. Arguments are data, not shell snippets.
+The helper resolves relative source, reproducer and trial paths against its invocation
+directory once, before creating a worktree; later Git commands reuse those same paths.
+On MSYS/Cygwin, it requires `cygpath` and native drive/UNC path spellings; a
+POSIX `/c/...` string is never passed to native Git as if it were a Windows path.
 This procedure intentionally retains the trial and prints the bisect log for the handoff;
 cleanup requires separate verification of ownership, no active bisect and no needed work.
+The single implementation is [bin/li-isolated-bisect](../../bin/li-isolated-bisect).
+Resolve it from the explicitly trusted source bundle, never the repository under test.
 
 ```bash
-# lintel-isolated-bisect
-set -euo pipefail
-source_repo="${1:?source repository}"
-bad=$(git -C "$source_repo" rev-parse --verify --end-of-options "${2:?bad ref}^{commit}")
-good=$(git -C "$source_repo" rev-parse --verify --end-of-options "${3:?good ref}^{commit}")
-reproducer="${4:?trusted standalone reproducer path}"
-trial="${5:?new authorized trial directory}"
-git -C "$source_repo" merge-base --is-ancestor "$good" "$bad"
-[ ! -e "$trial" ] && [ ! -L "$trial" ] || { echo 'Trial path already exists.' >&2; exit 1; }
-trial_git_options=()
-case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) trial_git_options=(-c core.longpaths=true) ;; esac
-git "${trial_git_options[@]}" -C "$source_repo" worktree add --detach "$trial" "$bad"
-finish_bisect() {
-  rc=$?
-  trap - EXIT HUP INT TERM
-  if ! git "${trial_git_options[@]}" -C "$trial" bisect reset; then
-    echo "Bisect cleanup failed; preserve and inspect the trial: $trial" >&2
-    rc=1
-  fi
-  exit "$rc"
-}
-trap finish_bisect EXIT
-trap 'exit 129' HUP
-trap 'exit 130' INT
-trap 'exit 143' TERM
-git "${trial_git_options[@]}" -C "$trial" bisect start "$bad" "$good"
-git "${trial_git_options[@]}" -C "$trial" bisect run bash "$reproducer"
-git "${trial_git_options[@]}" -C "$trial" bisect log
+bash "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-isolated-bisect" \
+  "${source_repo:?authorized source}" "${bad:?bad ref}" "${good:?good ref}" \
+  "${reproducer:?trusted standalone reproducer}" "${trial:?new owned trial}"
 ```
 
 The EXIT/signal trap covers ordinary failures, not process kill or machine loss. On an
@@ -115,7 +96,7 @@ interrupted session, inspect the recorded trial and run `git -C "$trial" bisect 
 there before reuse; never run it in the coordinator's checkout. Preserve reports and
 local changes before explicitly authorized removal of that exact worktree.
 For a Windows trial, retain the same per-command `-c core.longpaths=true` option during
-that reset. The option applies only to the owned trial/admin operations above, not to
+that reset. The option applies only to the helper's owned trial/admin operations, not to
 unrelated caller commands. Never persist it in local/global Git config or export a
 session-wide override. Record caller config/index/content bytes and modes before/after.
 

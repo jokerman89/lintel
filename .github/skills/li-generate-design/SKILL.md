@@ -1,6 +1,6 @@
 ---
 name: li-generate-design
-description: Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared content-pipeline sub-skill, solo-invokable.
+description: Use when existing content needs layout mappings, a selected palette, fonts and asset placements for one or more document or web formats.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-design/SKILL.md`; edit the canonical file, then run
@@ -23,7 +23,7 @@ description: Produce design-spec.json (per-format layout-mappings + palette + fo
 > - **Other Lintel workflows** are native skills: invoke `/li-<name>` rather than reading their
 >   files. Named roles such as `CodeReviewer` are custom agents.
 
-You are the `generate-design` skill — third stage of the v3.5 shared content pipeline. Produces design-spec.json from content.md.
+You are the `generate-design` skill — the shared content pipeline's design-spec producer.
 
 ## What this skill does
 
@@ -56,7 +56,13 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 - Optional `--palette <name>` — explicit brief-level palette selection with source evidence
 - Optional `--brand-templates-dir <path>` — explicitly authorized template root; no personal-home scan
 - Optional `--logo <path>` — explicit logo override
-- Optional `--out <path>` — output path (default: `${run_dir}/design-spec.json`)
+- Required `--out <path>` — owned repository-relative output; the orchestrator may
+  explicitly supply its already authorized `${run_dir}/design-spec.json`
+- Optional `--use-defaults` — explicitly choose a blank design only when the
+  brief/profile permits it; not a missing-brand or missing-output fallback
+
+Follow [owned source and output selection](../../../skills/design-dna/references/design-contract.md#owned-source-and-output-selection).
+A missing or unwritable output fails visibly with no alternate destination.
 
 ## Design-spec.json schema
 
@@ -84,12 +90,12 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
     "body_size": 14
   },
   "logo": {
-    "path": "~/.lintel/brand/logos/default.png",
+    "path": "<explicitly-selected-logo-path>",
     "position": "top-right"
   },
   "per_format": {
     "ppt": {
-      "template_path": "~/.lintel/brand/ppt-templates/default.pptx",
+      "template_path": "<explicitly-selected-ppt-template-path>",
       "layouts": [
         {
           "section_ref": "§1",
@@ -105,7 +111,7 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
       ]
     },
     "web": {
-      "template_path": "~/.lintel/brand/web-templates/single-file-default.html",
+      "template_path": "<explicitly-selected-web-template-path>",
       "sections": [
         {
           "section_ref": "§1",
@@ -119,7 +125,7 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
       ]
     },
     "word": {
-      "template_path": "~/.lintel/brand/word-templates/customer-summary.docx",
+      "template_path": "<explicitly-selected-word-template-path>",
       "sections": [
         {
           "section_ref": "§1",
@@ -161,9 +167,14 @@ to explicitly selected source evidence; a missing custom palette blocks instead 
 silently selecting `default`. Preserve brief > profile > corpus, subject to policy
 and existing project technology.
 
-For each format in `--target-formats`: locate template at `~/.lintel/brand/<format>-templates/<default>.<ext>`. Surface staleness warning if template > 90 days old. Fall back to blank if missing and `--use-defaults` set.
-Resolve that legacy template slot only within the explicitly authorized template
-root. A path convention is not permission to inspect a personal directory.
+For each format in `--target-formats`, resolve the selected template only inside
+`--brand-templates-dir` or the actual verified configured template root. Retain
+the source/configuration path and template identity; do not derive a directory
+from a palette name. Apply the `brand-source` and `brand-freshness`
+[selected asset evidence procedures](../../../skills/design-dna/references/design-contract.md#selected-asset-evidence)
+to any required brand/version/refresh obligations. No mtime-only license/brand
+verdict or unconditional age threshold is supplied. A missing selected template
+blocks; a blank mapping needs explicit `--use-defaults` and compatible policy.
 
 ### Step 3 — Per-section layout-mapping
 
@@ -186,7 +197,10 @@ For each content.md section (§N):
 
 ### Step 5 — Write design-spec.json + return path
 
-Write to `--out`. Surface summary (per-format layout count, palette used, font baseline) to operator.
+Publish only to `--out` through the shared owned-output procedure, against the
+captured original state, and read back the written bytes. Missing/unwritable
+output or readback failure blocks without switching destination. Surface summary
+(per-format layout count, palette used, font baseline) to the operator.
 
 ## Reusable patterns
 
@@ -205,15 +219,16 @@ per-format mappings as a second authoritative copy.
 
 ## Pause-points
 
-- Palette missing for `--palette <custom>` name: offer fallback to default or surface upload-instruction
+- Palette missing for `--palette <custom>` name: report the missing selection;
+  obtain its authorized source rather than substituting another brand
 - Layout-mapping ambiguous for §N (multiple valid layouts): surface options + recommendation
 
 ## Integration
 
 **Reads:**
 - `content.md` (from generate-write)
-- `~/.lintel/brand/palettes/<palette>.json`
-- `~/.lintel/brand/<format>-templates/<default>.<ext>` per target format
+- Explicitly selected palette source or actual verified design-profile asset
+- Selected templates and logo within explicit owned or verified configured roots
 
 **Writes:**
 - `design-spec.json` to `--out`
@@ -221,20 +236,29 @@ per-format mappings as a second authoritative copy.
 **Consumed by:**
 - `/li-generate` orchestrator (Step 5)
 - `/li-generate-ppt`, `/li-generate-web`, `/li-generate-word` (canonical format-builders read design-spec.json + apply per-format design-pass)
-- `/li-generate-pdf`, `/li-generate-xlsx`, `/li-generate-visio` (⚠ slots — AI generates content at invocation using design-spec.json as scaffold)
+- `generate-pdf` and `generate-xlsx` retain their actual standalone production
+  and input-admission routes, not invented document layout projections.
+  PDF inspection remains unavailable without a separately authorized reader;
+  XLSX still requires actual recalculation/cache/reopen evidence.
+- `generate-visio` retains its explicit unavailable-writer boundary. A design
+  spec cannot create a missing writer or establish editable-format acceptance.
 
 ## Anti-patterns
 
 - **Apply per-format design fidelity in generate-design** — that's the design_pass_hook's job (format-builder-owned). Generate-design produces the baseline only.
 - **Override palette per-section** — palette is shared across all sections + formats. Per-section overrides only if explicitly requested.
-- **Hard-code template path** — always pull from `~/.lintel/brand/<format>-templates/<default>` or operator-specified path.
+- **Hard-code template path** — use only explicitly selected assets or actual
+  verified configured paths; a folder convention is not read permission.
 - **Skip `design_pass_hook` field** — format-builders depend on it to know which agent to invoke for format-fidelity pass.
 
 ## Failure recovery
 
 - Palette resolution fails on `--palette <name>`: BLOCKED with the exact missing
   selection; do not substitute a different brand.
-- Template missing + no `--use-defaults`: exit BLOCKED with instruction to drop template in `~/.lintel/brand/<format>-templates/`
+- Template missing: BLOCKED with the exact selected path and required source;
+  explicit policy-compatible `--use-defaults` is a new choice, not a silent fallback
+- Output missing/unwritable: BLOCKED; retain input and any owned partial artifact,
+  report the actual error, and request an explicit repaired destination
 - Validation rotation-rule violation: regenerate affected sections with varied layouts, flag if repeats
 
 ## Recommended next steps after invocation

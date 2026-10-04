@@ -54,7 +54,8 @@ supported argument and ending appropriate to the brief.
 
 ## Workflow
 
-1. **Pick format.** Engineering story / customer case / POV.
+1. **Pick format.** Engineering story / customer case / POV. Retain approved facts
+   and proof; do not invent a commitment, deadline, result or disclosure permission.
 2. **Find the hook.** What changed our mind? What did the data show? What surprised us?
 3. **Outline:**
    - Hook (1-2 paragraphs)
@@ -64,7 +65,12 @@ supported argument and ending appropriate to the brief.
    - What we'd do differently
    - CTA (what reader should do next)
 4. **Voice:** the active pack's voice tier (default: internal). Specific over abstract. Concrete numbers where possible.
-5. **Voice gate via the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default).**
+5. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 6. **Customer consent if case study.** Flag explicitly if customer-permission needed.
 7. **Disclaimers / legal.** AI-assisted-drafted note. If product-claims, flag for legal.
 
@@ -105,8 +111,15 @@ supported argument and ending appropriate to the brief.
 
 *<Disclosure line if applicable: customer permission, AI-assisted, product claims reviewed by legal>*
 
-**Pre-publish checklist:**
-- [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
+```
+
+Return the following as a separate internal handoff, not publication copy. Keep
+applicable disclosure in the post, but do not claim consent or legal approval
+until the actual decision is supplied. The caller owns placement and publication.
+
+```markdown
+## Internal review checklist (pre-publish, not customer copy)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
 - [ ] Customer consent (if case study)
 - [ ] Legal review (if product-claims or regulated-industry)
 - [ ] Privacy boundary (`PrivacyBoundaryAudit`) if customer details
@@ -129,3 +142,5 @@ claim pending rather than presenting an illustrative number as a customer outcom
 `voice: internal` (default; the active pack may set a customer-facing tier). Customer-facing public blog must pass the pack's voice gates.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent drafts a post for the operator to review and publish; it does not write to the repo or publish itself.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to publish or retrieve external material.

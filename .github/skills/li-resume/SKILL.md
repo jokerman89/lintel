@@ -27,12 +27,18 @@ You are the RESUME skill — cross-session continuity for Lintel cycle.
 
 ## What this skill does
 
-Reads `.claude/runtime/state/00-state.md` from cwd, determines where the prior session ended, and routes operator to the next-recommended phase (or operator-specified override). Handles:
+Selects original work map/job and committed evidence before local ledger or owned
+checkpoint hints, reconciles them with the current checkout, and resumes the
+authorized ready step (or a validated operator override). Handles:
 - Resume mid-cycle (paused/aborted before)
 - Resume new cycle starting from CAPTURE artifacts of prior cycle
 - Cross-session continuity when operator returns days/weeks later
 
 Not a true phase — utility skill that lands the operator in the right phase.
+
+The [named coordination contracts](../../../skills/swarm/references/evidence.md) explain P03
+owned context/checkpoints, P07 verified profile and the related work/evidence IDs.
+Keep their persisted identities and controls; these labels are not extra resume modes.
 
 ## When to use
 
@@ -76,6 +82,24 @@ invalid for a phase/step override.
 
 ## Workflow
 
+### Resume decision table (map first)
+
+Use this order once, not independent discovery menus. Keep all candidate sources;
+conflicts require a specific selection/recovery decision, never “newest wins.”
+
+| Available selection/evidence | Next action |
+|---|---|
+| Explicit map/job, with optional phase/step or checkpoint input | Retain that work. Validate original artifacts/IDs and dependencies (Step 1c/2.5), classify `--from` (1a), and admit a checkpoint only as supplementary context (1b). Conflicting explicit inputs remain unresolved. |
+| No explicit work, one unambiguous committed active-work link | Follow and validate it (1c) before any local hints; compare completed cards with code and evidence. |
+| Several committed initiatives or disagreement with local hints | Ask only which work/recovery is intended; preserve all sources and do not dispatch yet. |
+| No committed selection, a selected local cycle ledger | Check its integrity (1.5), canonical phase (2) and saved profile/authority before using its next-step hint. |
+| No selected work/ledger, an owned checkpoint | Surface its exact path for `--from`; read through 1b only under existing admission. No checkpoint recreation or source restoration. |
+| None of those sources | Report no prior work found; suggest a new cycle or SENSE diagnostic, not an invented continuation. |
+
+For every continuation, validate Step 4's actual evidence. Warn for observations
+older than seven days, without treating age as new approval or invalidating work.
+An explicit, already authorized ready step needs no generic choice prompt.
+
 ### Step 1 — Locate state
 
 First honor an operator-selected work map or unambiguous committed active-work links using
@@ -108,22 +132,10 @@ checkpoint="${checkpoints%%$'\n'*}"
 
 If `--from` selects a checkpoint, read it with Step 1b after reconciling the selected
 work. A phase/step override instead retains the selected work and proceeds to the
-existing resume-target/precondition checks below. Otherwise branch on what exists:
-
-- **`00-state.md` present** → proceed to Step 1.5 (the cycle-ledger path, unchanged).
-- **No `00-state.md` but `$checkpoint` set** → do **not** misdirect to `/li-cycle`. Surface the
-  checkpoint and **offer `/li-resume --from <path>`**:
-
-  ```
-  No cycle ledger found, but a session checkpoint exists for this branch:
-    <checkpoint path>  (<age>)
-  Restore it to pick up where you left off:
-    /li-resume --from <checkpoint path>
-  (Or start fresh: /li-cycle for new work · /li-sense for a diagnostic.)
-  ```
-
-- **Neither local source present** → first run Step 1c below. Only if it finds no committed work, surface "No prior state found. Run `/li-cycle` for new work or
-  `/li-sense` for diagnostic."
+resume-target/precondition checks below. Apply the decision table: a local ledger
+is not first choice merely because it exists. In the checkpoint-only case, surface
+the exact owned path and `/li-resume --from <path>`; this reads continuity context,
+not a command to restore bytes. Only the table's no-source case suggests new work.
 
 > **Paired with `/li-pause`.** Discovery and owned reads remain in `bin/_context.sh`;
 > the command consolidation does not change filename suffixes, ownership or recovery.
@@ -339,13 +351,15 @@ if [ ${#issues[@]} -gt 0 ]; then
   echo "⚠ Resume integrity warnings:"
   printf '  - %s\n' "${issues[@]}"
   echo ""
-  echo "Continue anyway? Reply YES to proceed, NO to abort and run /li-sense for diagnostic."
-  # Block on operator confirm — do not auto-continue
+  echo "Reconcile these mismatches against the selected work before continuation."
+  # Ask only for an unresolved recovery/selection decision; confirmation is not policy evidence.
 fi
 ```
 
-If integrity passes silently OR operator confirms continue → proceed to Step 2.
-If operator aborts → exit BLOCKED with recommendation to run `/li-sense` for fresh diagnostic.
+Proceed to Step 2 only when integrity is established or the specific discrepancy
+has been reconciled within authority, with evidence retained. An unresolved
+mismatch blocks the dependent continuation. If the operator aborts, exit BLOCKED
+and offer `/li-sense` for a diagnostic.
 An age-only warning does not require re-approval or change the selected work.
 Continue the existing content/profile preconditions; a real selection or integrity
 mismatch still needs reconciliation through the host's actual question channel.
@@ -427,36 +441,35 @@ job rather than the computed recommendation. Check it through the existing
 `job_can_start` and mapped-work prerequisites; do not invent a step, skip a blocked
 dependency or discard prior evidence. A phase override keeps Step 4's requirements.
 
-### Step 3 — Surface resume options
+### Step 3 — Surface the selected continuation
 
 ```
 LINTEL RESUME — <cycle-id>
 
 Last activity: <timestamp> (12 hours ago)
 Last phase: PLAN (DONE_WITH_CONCERNS)
-Cycle state: in-progress (4 of 8 phases done)
+Cycle state: <actual selected route and completed phase count>
 
-Phases done: ✓ SENSE ✓ DEFINE ✓ DISCOVER ✓ PLAN
-Phases remaining: BUILD REVIEW SHIP CAPTURE
+Phases done: <recorded canonical phases; SCOPE retained when selected>
+Phases remaining: <actual selected remaining phases>
 
 Concerns from last phase:
   - 2 reviewer concerns left in plan.md (line 142, line 187)
   
 Remaining estimate: <labeled planning estimate with source, or unknown>
 
-Options:
-  A) Resume at recommended next phase: BUILD
-  B) Restart prior phase: PLAN (address concerns first)
-  C) Jump to specific phase: pick one
-  D) Re-run full cycle from start
-  E) Abort cycle, archive state
-
-What's your choice?
+Selected work: <original map/job and exact task or node-path>
+Next action: <ready step, prerequisites and retained approval source>
+Unresolved decision: <specific question only if needed; otherwise none>
 ```
 
 Show the selected work and next action. Use the actual host question channel only
 when selection/recovery/authority is unresolved; "resume approved T014" already
 settles the routine choice. Denial is not permission to switch channels.
+Only when a real choice remains, offer the relevant existing actions: A) recommended
+continuation, B) restart prior phase, C) specific phase/step, D) explicitly start a
+full cycle, E) abort and retain history. Do not present the entire menu or restart
+work by default; no option waives prerequisites or overwrites saved data.
 
 ### Step 4 — Validate resume context
 
@@ -468,22 +481,29 @@ For BUILD resume:
   implementation plan does not require Lintel's APPROVED heading.
 - Resume the ready original leaf and its package; preserve completed evidence and recheck the
   affected package. An absent package table means singleton packages, not a duplicated backlog.
-- Branch state OK (no surprise commits) ✓
-- Test suite passes baseline ✓
+- Compare the actual branch, revision and owned diff with the saved work; report
+  unexpected changes rather than asserting that branch state is OK.
+- Select the smallest relevant baseline command from the original task or current
+  repository test entrypoint. Inspect its effects and authority before running.
+  Record the exact command, cwd, selected cases, exit, counts and output/evidence.
+  No command selected, unavailable execution or no result means **baseline unrun**,
+  not a passed checkbox. A failing required baseline blocks the dependent action;
+  retain the failure and any separately authorized unaffected preparation.
 
 For REVIEW resume:
-- BUILD output exists (commits since last DEFINE phase) ✓
+- Identify attributable BUILD output (owned commits and/or working changes) against
+  its start ref and leaf evidence, not merely a count of commits since DEFINE.
 - If swarm mode: `li-swarm.py verify` passes and all lane changes are on the declared integration
-  branch ✓
+  branch, with actual command/result evidence
 
 For SHIP resume:
 - The actual latest reader and same-context QA/SHIP gate in
   [evidence.md](../../../skills/review/references/evidence.md) pass for this exact work/profile/
   snapshot and immutable QA inventory, with genuine required corroboration
-- Voice gate passed (if customer-engagement mode) ✓
+- Required voice gate evidence for the selected profile/output is actually present
 
 For CAPTURE resume:
-- SHIP DONE or operator explicit override ✓
+- Recorded SHIP DONE evidence or an explicit authorized CAPTURE override
 
 If precondition fails: surface why, suggest correction or different phase.
 
@@ -497,11 +517,12 @@ context decision; no implicit private sync or whole-ledger copy.
 
 ### Step 6 — Invoke chosen phase
 
-Based on operator's choice (Step 3 + 4):
+Based on the selected action, including retained authorization (Steps 3 + 4):
 - If A (next recommended): `/li-<recommended-phase>`
 - If B (restart prior): `/li-<last-phase>` (re-runs from start)
 - If C (specific): `/li-<chosen-phase>`
-- If D (full cycle): `/li-cycle` (from start, ignoring prior state)
+- If D (full cycle): `/li-cycle` with a distinct explicitly selected cycle identity;
+  preserve prior state and artifacts rather than resetting them
 - If E (abort): `state_append RESUME ABORTED cycle_aborted=true`; retain the selected
   history locally rather than moving it to an implicit global destination
 
@@ -531,15 +552,16 @@ supplied.
 
 ## Status protocol
 
-- **DONE** — operator chose, next phase invoked
+- **DONE** — selected authorized continuation actually invoked with its preconditions
 - **NEEDS_CONTEXT** — state file corrupt or missing, can't determine resume point
 - **BLOCKED** — precondition for chosen phase not met, AND operator can't fix immediately
 
 ## Pause-points
 
-- After surfacing options: ask_user for choice
-- If cross-machine state: confirm before adopting
-- If precondition fails: ask_user alternative phase or fix-first
+- Ask only for unresolved selection, recovery or authority, never a settled choice.
+- Cross-machine input needs actual ownership/profile checks, not a blanket confirm.
+- A failed precondition stays open; request a decision only when its remedy is not
+  already authorized. Age alone (older than seven days) is a warning, not a pause.
 
 ## Hop-in support
 

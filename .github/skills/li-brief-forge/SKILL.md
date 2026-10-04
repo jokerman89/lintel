@@ -108,6 +108,32 @@ The shared helper performs the following ordered gates:
    return code alone cannot release an envelope. Audit failure produces no receiver output.
 8. Emit the envelope. **The caller still performs dispatch.**
 
+### What the built-ins actually establish
+
+`lib/envelope_contract.py` owns these checks; the score protocol is not a graded
+assessment of the brief's quality:
+
+| Built-in | Actual observation | Result and fixed accounting |
+|---|---|---|
+| `security` | A short regex deny-list found no known credential/shell/injection pattern, or found one | 100/PASS or 0/FAIL; `budget_used: 50` |
+| `completeness` | Envelope/content schema and required fields validate, or do not | 100/PASS or 0/FAIL; `budget_used: 30` |
+| `stale` | Local pointers exist inside the selected root; remote pointers are counted but not checked | `max(0, 100 - 30 * missing)`; any missing/out-of-root pointer is FAIL; `budget_used: 40` |
+
+One missing local pointer therefore produces **70 with FAIL**, not graded readiness.
+`status: FAIL` blocks regardless of score. Existing local files are not proof of
+fresh content or semantic relevance. The deny-list is not a prompt-injection
+defense or a security audit. Structural completeness does not prove acceptance is
+testable: the caller must read each original acceptance item for an observable
+outcome and its verification/evidence, preserving unresolved items rather than
+claiming the built-in graded them.
+
+These fixed `budget_used` constants are protocol accounting units, **not measured
+token use**. Preserve the budget checks, schema validation and audit receipt;
+do not infer model usage or cost from them. Trusted custom evaluators may provide
+graded scores through the existing validated protocol. The minimum-score/advisory
+bands apply only after every mandatory check passes; they cannot average away a
+failure or make a partial run releasable. No extra evaluator or model call is implied.
+
 ## Audit and recovery
 
 The audit destination remains the shared router's: explicit `LINTEL_AUDIT_DIR`, then a migrated
@@ -138,5 +164,7 @@ allows validated brief export and manual handoff; substantive independent review
 - **BLOCKED:** missing policy/parser/evaluator, malformed or forbidden payload, failed evaluation,
   budget exhaustion, audit failure or absent receipt. No successful handoff.
 
-Shared profile/audit/review/domain binding is the later A22.7 integration boundary. Local release
-checks do not certify a model, tenant, enterprise policy or genuinely independent actor.
+The historical A22.7 shared-consumer join and P03/P05/P07/work/domain owners are
+explained in the [named coordination contracts](../../../skills/swarm/references/evidence.md).
+Local envelope release checks do not certify a model, tenant, enterprise policy
+or genuinely independent actor, nor establish that integration card's acceptance.

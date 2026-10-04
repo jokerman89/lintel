@@ -148,6 +148,12 @@ Use the mechanical orientator over the requested operation and verified pack
 navigation. Low confidence calls for explicit judgment or a missing-decision question;
 `invoke_llm_orientation` is a dormant stub, not evidence of a paid/native model call.
 See [orientator](../../docs/concepts/orientator.md).
+For method discovery, delegate to catalog's
+[intent narrowing](../catalog/references/intent.md). SENSE owns the existing control
+below; it does not invoke the public `orientator` wrapper or run a second shortlist.
+Mechanical confidence is a heuristic label, not measured routing accuracy. Neither a
+recommendation nor `auto_mode_eligible` grants permission beyond the native host and
+the operator's authorized scope.
 
 ```bash
 # Run only when operator didn't already specify --mode/--from explicitly

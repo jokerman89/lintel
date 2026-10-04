@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
 # Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
-BASH = shutil.which("bash") or "bash"
+BASH = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash") or "bash"
 sys.path.insert(0, str(SOURCE / "lib"))
 import context_safety as safety
 
@@ -846,11 +846,8 @@ class ContextSafetyTests(unittest.TestCase):
             self.assertEqual(result["source_root"], str(self.root))
 
     def test_partial_migration_gate_does_not_auto_undo_unknown_states(self):
-        body = (SOURCE / "agents/engineering/Migrator.md").read_text(encoding="utf-8")
-        recipe = re.search(r"```bash\n(# lintel-migration-recovery-gate.*?)\n```", body, re.S)
-        self.assertIsNotNone(recipe)
-        script = self.base / "migration-gate.sh"
-        script.write_text(recipe[1] + '\nmigration_recovery_allowed "$@"\n', encoding="utf-8")
+        script = SOURCE / "lib/migration-recovery.sh"
+        self.assertTrue(script.is_file(), "the trusted standalone predicate is required")
         target = self.root / "b-partial.txt"
         target.write_text("partial local migration; user state retained")
         for args, allowed in (
@@ -859,12 +856,14 @@ class ContextSafetyTests(unittest.TestCase):
                 (["step-2", "step-2", "unverified", "exact-scope", "none"], False),
                 (["step-2", "step-2", "verified", "other-target", "none"], False),
                 (["step-2", "step-2", "verified", "exact-scope", "possible-live-write"], False)):
-            result = subprocess.run([BASH, str(script), *args], capture_output=True)
+            result = subprocess.run([BASH, str(script), *args], cwd=self.root, capture_output=True)
             self.assertEqual(result.returncode == 0, allowed)
             self.assertEqual(target.read_text(), "partial local migration; user state retained")
         self.assertEqual((self.root / "unrelated.txt").read_text(), "keep this")
 
     def test_isolated_bisect_recipe_preserves_dirty_source_on_success_and_error(self):
+        script = SOURCE / "bin/li-isolated-bisect"
+        self.assertTrue(script.is_file(), "the trusted standalone bisect helper is required")
         if os.name == "nt":
             base = self.base / "long-source"
             long_root = base / ("x" * (191 - len(str(base)) - 1))
@@ -872,7 +871,8 @@ class ContextSafetyTests(unittest.TestCase):
             shutil.copytree(self.root, long_root)
             self.root = long_root
         env = dict(os.environ, HOME=str(self.base), GIT_CONFIG_NOSYSTEM="1",
-                   GIT_CONFIG_GLOBAL=str(self.base / "no-global-config"), GIT_OPTIONAL_LOCKS="0")
+                   GIT_CONFIG_GLOBAL=str(self.base / "no-global-config"), GIT_OPTIONAL_LOCKS="0",
+                   GIT_CEILING_DIRECTORIES=str(self.base))
 
         def git(*args):
             result = subprocess.run(["git", "-C", str(self.root), *args], env=env,
@@ -882,8 +882,10 @@ class ContextSafetyTests(unittest.TestCase):
         git("init", "-q")
         git("config", "user.name", "Fixture")
         git("config", "user.email", "fixture@example.invalid")
-        git("config", "core.hooksPath", str(self.base / "no-hooks"))
         git("config", "core.autocrlf", "false")
+        self.assertFalse([p for p in (self.root / ".git/hooks").iterdir()
+                          if p.is_file() and not p.name.endswith(".sample")],
+                         "fixture has an active hook; do not override it")
         target = self.root / "value.txt"
         target.write_text("good\n")
         git("add", "value.txt")
@@ -900,11 +902,6 @@ class ContextSafetyTests(unittest.TestCase):
         caller_files = (".git/config", ".git/index", "value.txt", "unrelated.txt")
         caller_state = {name: ((self.root / name).read_bytes(), (self.root / name).stat().st_mode & 0o777)
                         for name in caller_files}
-        body = (SOURCE / "agents/engineering/RegressionDetective.md").read_text(encoding="utf-8")
-        recipe = re.search(r"```bash\n(# lintel-isolated-bisect.*?)\n```", body, re.S)
-        self.assertIsNotNone(recipe)
-        script = self.base / "bisect.sh"
-        script.write_text(recipe[1], encoding="utf-8")
         repro = self.base / "repro.sh"
         repro.write_text('test "$(cat value.txt)" = good\n')
         for name, command, expected in (("success", repro, 0), ("failure", self.base / "missing", 1)):
@@ -913,7 +910,7 @@ class ContextSafetyTests(unittest.TestCase):
             if os.name == "nt":
                 self.assertEqual(len(str(lock)), 283)
             result = subprocess.run([BASH, str(script), str(self.root), bad, good,
-                                     str(command), str(trial)], env=env, capture_output=True)
+                                     str(command), str(trial)], cwd=self.base, env=env, capture_output=True)
             self.assertEqual(result.returncode == 0, expected == 0, result.stderr)
             self.assertTrue(trial.is_dir(), "trial evidence is retained, not force-removed")
             trial_head = subprocess.run(["git", "-C", str(trial), "rev-parse", "HEAD"],
@@ -932,7 +929,8 @@ class ContextSafetyTests(unittest.TestCase):
             self.assertEqual(caller_state, {
                 name: ((self.root / name).read_bytes(), (self.root / name).stat().st_mode & 0o777)
                 for name in caller_files})
-            git("worktree", "remove", str(trial))
+            # Retain each trial through assertions; only this test's allocated
+            # temporary child is cleaned by the existing ownership-checked harness.
 
 
 if __name__ == "__main__":

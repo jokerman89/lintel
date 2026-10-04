@@ -25,6 +25,9 @@ description: Use for security and compliance depth — threat models, auth flows
 
 # Security and compliance
 
+Preference metadata only: [optional engineering preferences](../../../skills/da/references/preferences.md)
+explains the retained `preferences_root` hint; it is not a validated pack interface.
+
 Read [security decision methods](../../../skills/sc/references/decision-methods.md): implementation
 evidence, legal/policy applicability and unknowns are different. Produce threats,
 auth/secret/audit designs, compliance coverage and incident playbooks, not a blanket
@@ -50,10 +53,10 @@ customer data, credential use/rotation or incident message follows from invocati
 | `threat-model` | ThreatModelDrafter, then distinct SecurityAuditor review | STRIDE by boundary, mitigations and residual-risk decisions | actual assets/actors; platform-covered threats need deployment evidence, not omission |
 | `secret-management` | SecurityAuditor + SecretsScanReviewer; SBOMAuditor for dependency-shipped defaults | redacted inventory, owner, storage, response/rotation and default-credential triage | no values or live credential tests; cadence/provider comes from applicable risk/policy |
 | `auth-flow` | OAuthFlowReviewer for OAuth/OIDC; JWTSecurityReviewer for JWT internals; SecurityAuditor for other auth | flow diagrams, token/claim/scopes/revocation checks | one protocol is not another; grant/client-specific checks, exact library/provider versions |
-| `compliance-evidence` | ComplianceOfficer per applicable framework; Architect for system boundary | technical/procedural evidence, cross-framework reuse and gap map | source/edition/effective date/actor/scope, no default SOC2/GDPR or score-based certification |
+| `compliance-evidence` | ComplianceOfficer per applicable framework; Architect for system boundary | technical/procedural evidence, cross-framework reuse and gap map | primary/consolidated source/version, effective/application dates, verified_on, responsible owner and currency limits; no default SOC2/GDPR or score-based certification |
 | `audit-path` | Architect design + SecurityAuditor review | event/integrity/transport/retention design and checks | actor/action/target/outcome/context; UTC timestamp and ordering mechanism distinct; no blanket seven years |
 | `dependency-security` | DependencyAuditor + SBOMAuditor | ecosystem SCA and artifact-scoped SPDX/CycloneDX evidence | actual advisory range/reachability and license use/distribution policy; unavailable feed remains unverified |
-| `incident-runbook` | SecurityAuditor + ReleaseEngineer planning-only | detection, containment, eradication, recovery, escalation and postmortem | selected threat/observability evidence, named on-call/live-action authority; no real containment or notifications |
+| `incident-runbook` | SecurityAuditor + DeploymentEngineer | detection, containment, eradication, recovery, escalation and postmortem | selected threat/observability evidence, named on-call/live-action authority; no real containment or notifications |
 
 For auth, retain login/refresh/revoke/step-up diagrams, justified lifetimes, refresh/
 revocation paths, role-specific MFA and replay/rate-limit/session-fixation checks.
@@ -107,9 +110,10 @@ residuals only; missing policy/authority/evidence is BLOCKED or NEEDS_CONTEXT.
 
 Use the shared cold-attempt table. Missing result after start is interrupted;
 do not rerun scans, notify owners or rotate keys on inferred permission. Loop with
-explicit new input identity and prior evidence links. ReleaseEngineer retains
-authorized release execution for a separately authorized invocation; planning-only
-here is a receiver mode, not deletion of that role capability.
+explicit new input identity and prior evidence links. DeploymentEngineer provides
+planning-only recovery/on-call content alongside SecurityAuditor's security response
+reasoning; the caller persists it. ReleaseEngineer retains authorized release
+execution for a separately authorized invocation, not this planning dispatch.
 
 ## Reusable patterns
 

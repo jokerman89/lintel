@@ -7,7 +7,7 @@ tools: Read, Bash, Grep, Glob, Write
 voice: internal
 cli_support: [claude-code, codex, copilot]
 necessity: RECOMMENDED
-gap_if_skipped: "Plan revisions and BUILD deviations go unreconciled against the design doc — drift between what was approved and what shipped is detected only by accident (the spec-kit /analyze hole, Convergent #6)."
+gap_if_skipped: "Without an owned consistency check, plan revisions and BUILD deviations may go unreconciled against the selected design and acceptance."
 ---
 
 # /analyze
@@ -39,6 +39,15 @@ Use the [shared work-map contract](../spec-kit/references/work-map.md) and
 Verify the saved profile through `workflow_resume` before consuming its requirements.
 ANALYZE uses the same explicit selection as PLAN/BUILD/CAPTURE; it never selects
 the newest design, report or sibling file.
+
+For selected Spec Kit analysis/converge reports, follow
+[selected external authority](../spec-kit/references/selected-authority.md) first.
+Reuse their original coverage/findings and tasks.md IDs; resolve observed overlap
+to one check owner before proceeding. Do not generate a competing gap list.
+Limit any new Lintel report to uncovered traceability or changed-input checks,
+link the originals as acceptance/evidence, and keep source approval, review and
+publication distinct. Missing/unsupported capability observations are not proof
+that an external check exists or that it is absent.
 
 If a required artifact/evidence source is missing, mark the affected leg INCOMPLETE
 with its path and reason. Do not convert a skipped/missing leg into GREEN. A leg can

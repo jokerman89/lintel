@@ -112,12 +112,30 @@ recorded degradation, not a silent loss:
 - Pack-resolved identity (voice, compliance, brand) still comes from the active pack at
   runtime; only the catalog metadata is absent from the generated file.
 
+These canonical hints retain their legitimate source meaning. See the Universal
+adapter's **Legacy role metadata** section for `tier` versus retained license evidence
+and optional `memory`/`model` hints. Dropping a native field is not proof that all
+surfaces lack the facility; retaining one is not proof of an observed run. Attribution
+and notices for known derivatives remain in source and body links, not in an inferred
+license grant from `tier: permissive`.
+
 Tool scope: each generated canonical agent profile carries that agent's declared `tools`
 subset, such as `Read, Grep, Glob, Bash`. GitHub documents these names as tool aliases;
-Copilot enforces the list where the surface honors the field and ignores unrecognized
-names. The three `lintel-*` role profiles declare no `tools` field and therefore receive
-all tools. Independent review means a separate context, not read-only enforcement: keep
-a review brief report-only, and never treat an agent's name as a permission boundary.
+the source declaration does not prove how a particular live surface enforces it.
+The orchestration profile `lintel-reviewer` declares only the documented `read, search`
+aliases, with no edit or shell declaration. `lintel-planner` and `lintel-builder` keep
+their existing unrestricted declaration (no `tools` field); their planning/artifact and
+implementation needs are unchanged. No canonical agent tool list is narrowed or expanded.
+
+The planner reports trio paths and open decisions; the builder reports actual changes
+and checks; the reviewer returns source-bound findings/limits without source edits.
+The authorized coordinator supplies the prepared review context and records the actual
+reviewer's returned decision through the shared evidence contract. Missing context or
+recording ability stays unverified, not fabricated clearance or permission to acquire
+write/shell tools. Independent review still requires a separate attributable context.
+Generator tests verify emitted configuration only. Actual permitted-tool enforcement
+must be observed separately per client/version; neither a role name nor these bytes
+establish a live read-only boundary.
 
 ## Tool and workflow adaptation
 

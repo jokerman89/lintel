@@ -58,6 +58,14 @@ behavior, owned files, one stable leaf, regression check and existing scope appr
 The map's tasks points to that plan; no extra backlog or unrelated interview.
 If required planning/review is missing, the alias remains incomplete.
 
+For selected Spec Kit defect work, use
+[selected external authority](../../../skills/spec-kit/references/selected-authority.md) before
+that native-new-fix fallback. Retain the original bug assessment/test evidence
+and existing tasks.md, including converge-appended IDs; add a newly authorized
+defect task only through that original task owner. Do not create a parallel
+native bug plan or run a second fix owner, workflow gate or enabled hook over
+the same scope. A verified bug report does not itself approve repair or SHIP.
+
 ### Step 2 — Delegate to /li-cycle
 
 ```bash

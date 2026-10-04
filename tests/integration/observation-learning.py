@@ -237,6 +237,20 @@ class UsageReportContracts(Sandbox):
         self.assert_no_catalog_trend_consumer(
             "Explicitly join `/li:catalog --kind=all` metadata; no built-in trend overlay.")
 
+    def test_usage_reader_uses_the_shared_owner_and_complete_selected_rows(self):
+        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
+        reader = usage.split("### Step 2", 1)[1].split("## Integration", 1)[0]
+        self.assertIn("../audit/references/method.md#shared-read", reader)
+        self.assertIn("skills/audit/references/read.sh", reader)
+        self.assertIn("--category usage-skill", reader)
+        self.assertIn("--since", reader)
+        self.assertIn("complete selected rows", reader)
+        self.assertNotIn('for log in "$usage_dir"', reader)
+        self.assertNotIn("audit-canonical", usage)
+        method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
+        self.assertIn("job records only as supplementary observations", method)
+        self.assertNotIn("reads `_active.md`", method)
+
 
 class IsolationTests(Sandbox):
     def test_every_home_derived_path_is_synthetic(self):

@@ -9,6 +9,9 @@
 
 ## Context
 
+This section records the 2026-06-13 requirement and completeness comparison.
+The dated evidence clarification below limits what that comparison established.
+
 After v5.4 shipped (ADR-0015/0016) the operator set a hard requirement: Lintel's design tools
 must be **strictly better** than UI/UX Pro Max, not just architecturally cleaner. An adversarial
 completeness audit (a dedicated agent, byte-level data diff + check-by-check validator comparison)
@@ -65,16 +68,25 @@ existing engine — a data move, not structural):
 
 ## Consequences
 
-- **Positive:** the "strictly better" claim is now honest on every design-*intelligence* dimension
-  — retrieval-grounded slide design (which generate-ppt lacked), a real three-layer token system
-  with a generator (which no Lintel profile had), plus everything from v5.4. On the core we were
-  already ahead (a11y-first validator, swappable profiles); the periphery gaps that mattered are closed.
+### Factual evidence clarification — 2026-10-03
+
+The recorded completeness/diff comparison supports retrieval parity plus added
+validator/profile seams, slide retrieval and layered token integration within the
+selected scope. Comparative design outcomes remain unmeasured: no outcome or
+productivity experiment here establishes that Lintel produces better designs.
+The historical "strictly better" language above records the aspiration and then-
+stated interpretation, not a current measured superiority claim. This clarifies
+evidence only; the chosen design, scope-outs, alternatives and licenses are unchanged.
+
+- **Positive:** the selected slide retrieval and token-integration gaps have
+  implementations, alongside the validator/profile seams. This is source and
+  feature coverage, not demonstrated superiority of generated outcomes.
 - **Negative:** two more vendored data subsystems to re-sync from upstream (procedure in
   ATTRIBUTION.md); slide search needs the controlled emotion/goal vocabulary (documented in SKILL.md).
-- **Neutral:** the honest residual scope — google-fonts catalog + content generators — is recorded
-  as a deliberate non-goal, not a gap. The defensible claim is now: "strictly better at design
-  retrieval, slide intelligence, token architecture, and a11y validation; we deliberately do not
-  ship their Gemini-keyed content generators."
+- **Neutral:** the residual scope — google-fonts catalog + content generators —
+  remains a deliberate non-goal. The supported characterization is retrieval
+  parity plus validator/profile seams and the selected slide/token integrations;
+  outcomes remain unmeasured. The Gemini-keyed content generators are not shipped.
 
 ## References
 

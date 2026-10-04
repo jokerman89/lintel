@@ -55,6 +55,11 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses 
 1. **Scope.** Which systems/services, selected criteria edition, Type I date or
    Type II period, subservice treatment and responsible control owners? Use the
    actual authorized criteria/reference, not copied proprietary standard text.
+   Follow the [regulatory source and currency record](../../skills/sc/references/decision-methods.md#regulatory-source-and-currency-record):
+   primary criteria publication/version/updates, effective/transition dates where
+   applicable, `verified_on` and caller-confirmed `responsible_owner`. Distinguish
+   framework-source currency from the report's operating-evidence period. Missing
+   material stays unavailable/unverified; no date or owner is invented.
 2. **Category selection.** Security mandatory. Plus optional (Availability, Processing Integrity, Confidentiality, Privacy).
 3. **Per Common Criteria (CC1-CC9):**
    - CC1: Control environment (governance, ethics)
@@ -82,6 +87,17 @@ SOC2Reviewer: <organization-or-system>
 - Categories: <Security mandatory + others>
 - Audit type target: <Type I | Type II>
 - Target audit date: <YYYY-MM-DD>
+
+## Source and currency
+- primary_source: <primary source location and provision, or unavailable>
+- consolidated_version: <consolidated text or edition/amendments, or unknown>
+- effective_date: <effective date and source, or unknown>
+- application_date: <application or transition dates per obligation, or unknown>
+- verified_on: <date of actual source verification, or unknown>
+- responsible_owner: <caller-confirmed responsible owner, or unassigned>
+- currency_status: <verified for stated scope | unverified>
+- verification_limit: <retrieval/evidence limit and next verification action>
+- Evidence period/population: <actual covered period and selection, or unavailable>
 
 ## Common Criteria assessment (Security)
 | CC | Description | Controls | Evidence | Gap |

@@ -23,9 +23,13 @@ Structure is the deliverable, not copy — a strong arc with placeholder text be
 
 ## What this agent does
 
-Before `/li-generate-ppt` runs pptx-genjs, this agent designs the slide arc: opening hook → setup → escalation → payoff → close. Each slide gets a content goal + mode tag (Reveal/Inspire/Provoke/Neutral) + layout suggestion + asset suggestion.
+Before the actual selected slide writer runs, this agent applies the
+[shared narrative structure](../../skills/generate-outline/references/narrative-arc.md)
+to the brief or reuses its approved arc. Each slide gets a content goal + mode
+tag (Reveal/Inspire/Provoke/Neutral) + layout suggestion + asset suggestion.
 
-The architect doesn't write final copy — it designs the structure so pptx-genjs has clear instructions per slide.
+The architect doesn't write final copy — it supplies structure to the selected
+slide writer without implying that a particular renderer is installed or invoked.
 
 ## Behavioral traits
 
@@ -42,7 +46,7 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and re
 
 ## When to invoke
 
-- Pre-`/li-generate-ppt` (auto-invoked by the skill)
+- Before `generate-ppt` when the actual caller needs an arc, not a second default planning pass
 - Operator wants standalone slide-arc planning before doc-gen runs
 - Existing deck needs structural critique (operator drops slide outline to be reviewed)
 - New SE drafting their first customer pitch
@@ -56,12 +60,9 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and re
 ## Workflow
 
 1. **Read brief** (goal, audience, key message, duration).
-2. **Map structure** to a 5-beat narrative:
-   - **Beat 1 (Opening, 5-10% of duration)** — hook that names what's at stake. Often Reveal/Curtain or Provoke/Skewer.
-   - **Beat 2 (Setup, 15-25%)** — build the customer's current world. Often Reveal/Dream-out-loud or Reveal/Understatement.
-   - **Beat 3 (Escalation, 30-40%)** — tension rises. Often Provoke/Exception-that-rules.
-   - **Beat 4 (Payoff, 20-30%)** — solution lands. Often Inspire/Marvel or Inspire/Opposites-attractive.
-   - **Beat 5 (Close, 5-10%)** — call to action. Often Inspire/Marvel or direct CTA.
+2. **Map structure** with the shared narrative method. Keep its genre, evidence
+   and time boundaries; do not run DemoNarrativeArc as a second default planning
+   pass. Its scene/narration view can consume this same approved arc.
 3. **Per beat, generate slide list** with per-slide:
    - Slide number
    - One-line content goal (what the slide must communicate)
@@ -74,6 +75,9 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and re
 5. **Return slide list** for /li-generate-ppt to consume.
 
 ## Report format
+
+Synthetic illustration only. Replace every sample fact and timing with the
+actual supplied brief or an explicitly unresolved value.
 
 ```yaml
 slide_arc:

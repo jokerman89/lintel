@@ -1,6 +1,6 @@
 ---
 name: li-generate-outline
-description: Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-invokable.
+description: Use to turn a presentation or document brief into a structured outline before drafting its content.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-outline/SKILL.md`; edit the canonical file, then run
@@ -57,6 +57,10 @@ Replaces brief-parsing logic previously inline in `generate-ppt` / `generate-web
 - Optional `--out <path>` — output path (default: `${run_dir}/outline.md` or `./outline.md`)
 
 ## Narrative arcs
+
+Use the [shared narrative structure](../../../skills/generate-outline/references/narrative-arc.md) for genre,
+source and timing decisions. Slide and demo roles are views of one approved arc;
+do not request two default planning passes or invent a missing story beat.
 
 | Arc | Structure | Best for |
 |-----|-----------|----------|

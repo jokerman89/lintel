@@ -164,6 +164,7 @@ class Fixture(unittest.TestCase):
             "lib/copilot-env.sh",
             "templates/obsidian/sessions.base",
             "hooks/shared/_input.sh",
+            "hooks/shared/_text.sh",
             "hooks/hooks.json",
         ]
         paths.extend(f"hooks/shared/{hook}/run.sh" for hook in HOOKS)

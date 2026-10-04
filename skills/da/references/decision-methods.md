@@ -1,9 +1,27 @@
 # Data decision methods
 
 Use for schema, migration, retention or analytics decisions. DatabaseDesigner owns
-single-store schema/query design; SchemaArchitect owns cross-store and partition
-reasoning; MigrationPlanner supplies the plan; Migrator produces artifacts unless
-execution on an exact target is separately authorized. No result schema changes here.
+logical/schema/query and cross-store/partition design; DataPipelineDesigner owns
+pipeline and dimensional design. SchemaArchitect is the compatible read-only view
+of those methods and keeps its existing polyglot/partition/dimensional output shapes.
+Choose one view for the requested outcome; do not dispatch both to repeat reasoning.
+MigrationPlanner alone supplies sequencing/risk design; Migrator consumes that plan
+and produces artifacts unless execution on an exact target is separately authorized.
+No result schema or role tool changes follow from sharing these methods.
+
+## Exact design-to-migration handoff
+
+Carry the original work map, package/leaf IDs, requested capability, schema delta
+and source revision, engine/version, consumer/writer inventory, workload, approved
+window, lock/backfill constraints and known recovery evidence. DatabaseDesigner
+supplies these inputs, not a second migration sequence. MigrationPlanner returns
+one ordered plan with per-step validation, stop conditions, restart/failure states,
+last reversible state and recovery owner. Missing inputs remain named gaps.
+
+Only after that sequence is accepted does Migrator consume the same plan revision
+to prepare SQL/artifacts and synthetic rehearsals. No duplicate sequencing or
+parallel planning/execution dispatch: changed inputs return to the sequence owner.
+A plan, role handoff or artifact-only rehearsal is not live execution authority.
 
 ## Locking and recoverable states
 
@@ -47,18 +65,30 @@ Verify counts, keys and domain totals, replay the same interval, and interleave 
 late event with live processing. "Exactly once" at a broker does not establish
 exactly-once effects in an unrelated external sink.
 
-## Ownership, lineage and retention
+## Cross-store and partition design
 
 For each store, state the authoritative writer, projection version/lag, reconciliation
 query and repair owner. A search index is a projection, not a second authority by
 accident. For partitioning, compare skew as well as cardinality: one very large tenant
 can overload a tenant-key shard despite millions of tenant IDs. Preserve co-location
 where transactions need it; quantify scatter/gather and rebalance cost.
+Compare candidate keys against actual access patterns, cardinality and heavy-key
+distribution, locality and cross-shard transactions. State how a key is routed,
+split/rebalanced and migrated, and what workload would falsify the proposed fit.
+A second store needs a concrete query/retention need and its continuing coordination
+cost, not polyglot variety for its own sake.
+
+## Dimensional design, lineage and retention
 
 For analytics, name fact grain and event identity before measures. Distinguish event
 time from ingestion time and SCD effective intervals; a late event must join to the
 intended historical dimension version. Trace source fields through transforms to
 destinations, including exported files, logs, caches and backups.
+Choose SCD Type 1 for explicitly overwritable attributes, Type 2 for required history,
+or Type 6 only when its combined current/historical view is justified. Name effective
+interval and late-correction rules. Reuse conformed dimensions across facts rather
+than inventing a new dimension per fact; test grain/identity, referential joins and
+source-to-sink totals before claiming analytics readiness.
 
 Retention and deletion follow applicable purpose, policy, legal holds and contracts.
 Hashing an identifier is usually pseudonymization, not proof of anonymization.

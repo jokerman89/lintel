@@ -71,6 +71,27 @@ Run `python3 <source>/bin/li-client-capabilities.py resolve --session <file>` to
 selection. The helper does not invoke tools, execute work, clear review or prove permission.
 Its `declared-session-bindings` result must not be published as a live acceptance result.
 
+## Legacy role metadata
+
+Canonical metadata remains useful source/discovery information, not a permission grant:
+
+- `cli_support` is a source availability/degradation hint. Preserve documented native
+  bindings, including Copilot hints; resolve exact surfaces through `lib/cli-tiers.yaml`.
+  A `full` label does not prove registration, live enforcement or an observed run.
+- `memory` and `model` are optional native hints on hosts that implement them. Retain
+  their legitimate uses without forcing a model or claiming cross-host memory. Copilot
+  currently drops these fields; use supplied durable context and the host's configured
+  model, with missing observations explicit.
+- `tier` is legacy upstream-license classification, not execution privilege or model
+  selection. `permissive` alone supplies no license evidence or blanket reuse permission.
+  For known derivatives consult the retained source/notice/attribution records; record
+  unknown import revisions and do not invent upstream URLs, dates or verification.
+  Original work need not be assigned invented upstream provenance.
+
+Source hints, retained license evidence, installed configuration and actual host
+observations are distinct. Do not downgrade known native source support simply because
+a live test was not run, or upgrade a documentary check to runtime acceptance.
+
 ## Operations and fallbacks
 
 | Operation | Binding and fallback |

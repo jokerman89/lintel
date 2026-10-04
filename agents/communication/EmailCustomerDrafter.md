@@ -54,6 +54,8 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 
 1. **Read approved facts, recipients, channel and email type.** Lengths below are
    drafting defaults, not requirements that outrank the brief.
+   Do not invent a commitment, deadline or proof. Check consent and disclosure
+   permission for the actual recipients; draft status is not sharing permission.
    - Cold intro: 100-150 words, end with 15-min ask
    - Post-meeting follow-up: 150-200 words, recap + next step
    - Decision-asking: 100-150 words, single decision, clear deadline
@@ -64,7 +66,12 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 5. **Ask.** Clear, specific and time-bound when a real deadline exists; otherwise
    flag the missing decision without manufacturing urgency.
 6. **Signature.** Name + role + team. CC: list if needed.
-7. **Voice gate via the active pack's compliance gates (none by default).**
+7. **Voice review.** Ask the authorized caller to resolve
+   `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
+   The caller obtains configured criticism through an available authorized reviewer
+   and returns its actor, result and limits. No gates means not configured; an
+   unavailable required reviewer is unresolved, not PASS. Compliance controls are
+   separate and cannot substitute for voice criticism.
 
 ## Report format
 
@@ -92,14 +99,19 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 <Role>
 <Team>
 
----
+```
 
+Return stats and the checklist as a separate internal handoff, not email copy.
+The caller owns placement and sending; do not disclose working notes to recipients.
+
+```markdown
 **Stats:**
 - Word count: <N>
 - Subject char count: <N>
 
-**Pre-send checklist:**
-- [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
+## Internal review checklist (pre-send, not customer copy)
+- [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
+- [ ] Consent/disclosure permission for the selected recipients and supported proof
 - [ ] Single clear ask (not 3 buried asks)
 - [ ] Deadline/commitments grounded in supplied facts; no invented urgency
 - [ ] CC list correct (no unnecessary copies)
@@ -118,3 +130,5 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 `voice: internal` (default; the active pack may set a customer-facing tier). Customer-facing — the pack's voice gate applies if configured.
 
 Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent drafts an email for the operator to review and send; it does not edit the repo or send mail itself.
+Bash is limited by this task to inspected local reading/counting; its presence is
+not a read-only sandbox or permission to send, publish or retrieve external material.

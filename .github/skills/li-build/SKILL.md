@@ -221,6 +221,13 @@ The TDD red-green-refactor discipline:
 4. **Checkpoint:** retain leaf results; make an atomic package commit only when the logical
    change and its verification are coherent (per continuous-checkpoint if enabled)
 
+For a documentation leaf or changed documented behavior, apply
+[documentation fidelity](../../../skills/build/references/documentation-fidelity.md) as its planned
+document check. Retain the claim-to-source coverage record, accepted intent,
+frozen paths, option migrations, actual checks and unrun examples with the
+original leaf evidence. Refresh changed-source coverage before review. This is
+the existing document-validation path, not a new schema or independent review.
+
 Implementer self-reviews. Returns status:
 - **DONE** — implementation ready for review, with an evidence result for every leaf; final leaf completion waits for both package reviews
 - **DONE_WITH_CONCERNS** — concerns logged in implementer message
@@ -472,7 +479,9 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **TestRunner** (engineering/) — TDD red phase + verification
 - **Refactorer** (engineering/) — refactor phase
 - **Migrator** (engineering/) — schema/API migrations
-- **BackendArchitect / FrontendBuilder** (engineering/) — per task domain
+- **Architect / BackendArchitect** (engineering/) — choose one for an unresolved
+  design boundary, using the shared TA method; neither is a default source implementer
+- **FrontendBuilder** (engineering/) — frontend implementation within its build card
 - **K8sManifestReviewer / TerraformReviewer** (devops/) — infra tasks
 - **CostAnalyzer / LatencyAnalyzer / RegressionDetective** (engineering/) — perf-related tasks
 - **SecurityAuditor / SecretsScanReviewer / ThreatModelDrafter** (security/) — security tasks

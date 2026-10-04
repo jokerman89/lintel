@@ -78,14 +78,15 @@ Pre-check: <check>
 Post-check: <check>
 
 ## Compliance
-- Production touch: yes
-- Per-call auth: confirmed at <timestamp>
-- DPIA: linked to compliance/dpia-DRAFT.md
+- Mode: <artifact-only | authorized-execution, from the actual assignment>
+- Production touch: <not performed | actual target/action and observation>
+- Per-call auth: <not applicable to artifact-only | exact authorization evidence | missing>
+- Required privacy assessment: <actual applicable reference | not applicable with basis | unresolved>
 
 ## Execution
-Pre-check: ✓ (current state matches)
-Forward: ✓ (5 steps applied)
-Post-check: ✓ (target state confirmed)
+Pre-check: <not run | actual result and evidence>
+Forward: <not applied | actual completed steps, failure state and evidence>
+Post-check: <not run | actual result and evidence>
 
 ## Verdict
 Migration complete only for the named executed target and passing post-checks.
@@ -108,21 +109,23 @@ do not claim an audit was persisted unless its write was verified.
 
 ### Partial-failure recovery gate
 
-The following predicate consumes already-reviewed plan/evidence decisions; strings are not
+The `lintel-migration-recovery-gate` predicate in
+[lib/migration-recovery.sh](../../lib/migration-recovery.sh) consumes already-reviewed
+plan/evidence decisions; strings are not
 proof of authorization or a substitute for verification. Automatic local recovery is eligible
 only for a known, rehearsed failure state with no external side effects. Production/API/DB
 recovery still needs its actual per-call authorization and approved recovery procedure.
 
 ```bash
-# lintel-migration-recovery-gate
-migration_recovery_allowed() {
-  local approved_state="${1:-}" observed_state="${2:-}"
-  local verification="${3:-}" authorization="${4:-}" side_effects="${5:-}"
-  [ -n "$approved_state" ] && [ "$approved_state" = "$observed_state" ] &&
-    [ "$verification" = verified ] && [ "$authorization" = exact-scope ] &&
-    [ "$side_effects" = none ]
-}
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/migration-recovery.sh"
+migration_recovery_allowed "$approved_state" "$observed_state" \
+  "$verification" "$authorization" "$side_effects"
 ```
+
+The helper can also be invoked with Bash and those five literal arguments. Exit 0
+means eligible under the supplied decisions; exit 1 means not eligible. Neither
+mode restores anything. Missing trusted helper/evidence blocks recovery; do not
+reconstruct a second predicate from Markdown or an untrusted target.
 
 For local owned-file trials, capture a verified pre-image with `bin/li-snapshot.py` and
 bind only post-images produced by this migration. Its restore refuses later user edits

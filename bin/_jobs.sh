@@ -4,10 +4,10 @@
 # implements: ADR-0005
 # intent: docs/concepts/jobs-system.md
 # constraints: registry is a derived cross-repository view; job files remain authoritative
-# last_intent_review: 2026-09-23
+# last_intent_review: 2026-10-04
 #
 # Lifecycle:
-#   job_create <workflow> <mode>     → creates ~/.lintel/jobs/<id>/{job.yaml,outputs,inputs} + regenerates _active.md
+#   job_create <workflow> <mode>     → creates selected job data + regenerates its local view
 #   job_update <id> <step> <status>  → updates job.yaml current_step + step status + last_touched
 #   job_archive <id> <result>        → moves to _archive/<date>/<id>/ + applies cleanup
 #   regenerate_active                → rebuilds _active.md from all jobs/<id>/job.yaml
@@ -20,10 +20,10 @@
 #   job_create cycle internal-tool
 #
 # Scope (v5, ADR-0005): in a repo carrying the v5 layout marker, job data lives
-# in <repo>/.claude/runtime/jobs/ and ~/.lintel/jobs/_active.md becomes a thin
-# cross-repo REGISTRY (one line per job, pointing at the owning repo) so
-# /li:resume and /li:status keep their "what's open anywhere" view. Un-migrated
-# repos keep the historical global layout unchanged.
+# in <repo>/.claude/runtime/jobs/. A separately selected/authorized registry can
+# retain cross-repo pointers; repository operations do not opt into that store
+# or establish a census of mapped work. Un-migrated repos keep the historical
+# global layout unchanged.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
@@ -43,7 +43,12 @@ fi
 LINTEL_JOBS_DIR="${LINTEL_JOBS_DIR:-$LINTEL_HOME/jobs}"
 LINTEL_JOBS_ACTIVE="${LINTEL_JOBS_ACTIVE:-$LINTEL_JOBS_DIR/_active.md}"
 LINTEL_JOBS_ARCHIVE="${LINTEL_JOBS_ARCHIVE:-$LINTEL_JOBS_DIR/_archive}"
-LINTEL_JOBS_REGISTRY="${LINTEL_JOBS_REGISTRY:-$LINTEL_HOME/jobs/_active.md}"
+if [ "$_JOBS_SCOPE" = "repo" ]; then
+  # A local job mutation does not select an operator-global output.
+  LINTEL_JOBS_REGISTRY="${LINTEL_JOBS_REGISTRY:-}"
+else
+  LINTEL_JOBS_REGISTRY="${LINTEL_JOBS_REGISTRY:-$LINTEL_HOME/jobs/_active.md}"
+fi
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
 # Read-only inspection must not initialize audit/registry directories.
@@ -381,7 +386,7 @@ job_archive() {
 }
 
 # Regenerate the active-jobs view.
-# Repo scope: detailed repo-local _active.md + registry line sync.
+# Repo scope: detailed repo-local _active.md + explicitly selected registry sync.
 # Global scope: the global _active.md IS the registry — write registry format
 # there too, preserving migrated repos' lines (mixed-scope grace window must
 # not clobber either side's entries).
@@ -423,7 +428,9 @@ regenerate_active() {
         printf '_No active jobs._\n'
       fi
     } > "$out"
-    _registry_sync "$_JOBS_REPO_ROOT"
+    if [ -n "$LINTEL_JOBS_REGISTRY" ]; then
+      _registry_sync "$_JOBS_REPO_ROOT"
+    fi
   else
     # Global/legacy scope: write OUR jobs as registry lines into the shared
     # file, keeping every line owned by other scopes (migrated repos).
@@ -440,6 +447,10 @@ regenerate_active() {
 _registry_sync() (
   local scope_tag="${1:-$_JOBS_REPO_ROOT}"
   local reg="$LINTEL_JOBS_REGISTRY"
+  [ -n "$reg" ] || {
+    echo '[lintel/_jobs] registry sync requires an explicitly selected destination' >&2
+    return 1
+  }
   mkdir -p "$(dirname "$reg")" 2>/dev/null || return 1
 
   # Serialize the complete read/replace operation across processes, on every host.

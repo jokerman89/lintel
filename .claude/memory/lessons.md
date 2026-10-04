@@ -682,6 +682,20 @@ deliverable or safe cleanup of demonstrably stale refs. Reconcile those outcomes
 before reporting the remaining programme blocked; never label every idle stream
 unfinished without checking its actual deliverable.
 
+**Amended 2026-10-03 (subset closure is not finding closure):** After delivering
+36 selected correction leaves, the coordinator stopped with untouched V2 skills
+still described collectively as broader portfolio work. The operator again
+asked for the actual findings to be fixed.
+
+Keep the complete original findings inventory visible throughout implementation.
+An approved package is an execution boundary, not permission to narrow the final
+outcome. Close each finding against its own claim and current source evidence;
+partial fixes remain partial. Distinguish a concrete architectural decision from
+an ordinary implementation choice, and scope a host refusal to the exact blocked
+work. Neither a green release nor an unrelated refusal blocks ready corrections.
+Before stopping, enumerate every remaining finding with its specific reason and
+next action instead of placing unrelated work under one "portfolio" label.
+
 ## L-030 — Adding a client adapter must preserve Universal product identity
 
 **Date:** 2026-09-20
@@ -1317,3 +1331,21 @@ RN-05 makes produced PDF content unverifiable. An independent adjudication and a
 - Record genuine unobserved facts honestly, but do not enlarge acceptance through status wording
   or QA inventories. Enlarging it needs an explicit owner decision.
 - Never drop an original criterion either.
+
+## L-064 - Prove native Windows fixture paths before mutation
+
+**Date:** 2026-10-04
+
+**Context:** A V2 bisect-helper correction prefixed relative paths with Bash's
+MSYS working-directory spelling. Native Git interpreted the resulting `/c/...`
+operand differently and created synthetic trials outside the approved fixture
+root. Execution stopped; the unintended trials were preserved for separately
+authorized recovery.
+
+**Rule:** Do not treat MSYS `/c/...` as a native Windows absolute path or rely on
+implicit argument conversion. Resolve source, reproducer and trial operands once
+to observed native drive/UNC paths, then reuse those exact values. Before a new
+worktree mutation after a path correction, use a read-only or write-intercepted
+probe to compare every resolved operand with its exact intended owned path.
+Preserve failed evidence and out-of-scope artifacts; continuation authorization
+does not authorize their cleanup.

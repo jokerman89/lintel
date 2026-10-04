@@ -119,24 +119,31 @@ class NativeRoutes(unittest.TestCase):
 
     def test_audience_overlay_stays_distinct_from_persistent_role(self):
         role = source("skills/role/SKILL.md")
-        audience = role.split("## Audience context without a profile change", 1)[1]
-        audience = audience.split("## Role resolution", 1)[0]
+        self.assertIn("references/lifecycle.md", role)
+        method = source("skills/role/references/lifecycle.md")
+        audience = method.split("## Audience\n", 1)[1].split("## Safeguards", 1)[0]
+        audience = " ".join(audience.split()).lower()
         for boundary in (
-            "persona-sources", "defining manifest", "selected, authorized",
-            "Missing names stay missing", "--clear-audience",
-            "neither action edits profile files",
+            "persona-sources", "defining manifest", "selected authorized",
+            "manufacture a missing name", "--clear-audience",
+            "neither action edits packs, preferences, durable memory or host settings",
         ):
             self.assertIn(boundary, audience)
 
     def test_identity_migration_keeps_explicit_choice_and_recovery(self):
         migration = source("skills/migrations/SKILL.md")
+        self.assertIn("../doctor/references/inspection.md#migrations", migration)
+        migration = source("skills/doctor/references/inspection.md")
         for boundary in (
             "migrations --all", "profile-status", "workprofile",
-            'pack-switch "$selected_pack" --reason "$migration_reason"',
+            "pack-switch/references/lifecycle.md#switch",
             "generation-bound", "old logs, preferences, backups",
             "separate owned operation",
         ):
             self.assertIn(boundary, migration)
+        lifecycle = source("skills/pack-switch/references/lifecycle.md")
+        self.assertIn('pack-switch "$target" --reason "$reason"', lifecycle)
+        self.assertIn("PROFILE_SWITCH_INCOMPLETE", lifecycle)
 
     def test_related_archive_navigation_keeps_real_sibling_destinations(self):
         directory = ROOT / ".claude/engineering/design-archive"

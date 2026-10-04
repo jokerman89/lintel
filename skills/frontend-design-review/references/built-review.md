@@ -1,8 +1,34 @@
 # Built UI review
 
 Review the actual built surface with `/frontend-design-review --url <url>`.
-This supplements the six canonical JSON dimensions with the retained six-pillar
-human critique; it creates no competing schema or score-based release gate.
+Use the same six canonical advisory dimensions in JSON and the human report.
+Retain visual polish, copy and layout/density questions as findings, not a
+second rubric or score-based release gate.
+
+## Review ownership and reuse
+
+Choose one post-generation review owner in the existing task brief/handoff.
+An enclosing `frontend-design` run owns that review; for a standalone renderer
+request, its current workflow caller owns it. Renderers return the actual
+artifact paths, source/profile identity, build/inspection observations and
+remaining required controls to that owner. Missing final review does not require
+regenerating an otherwise valid artifact.
+
+The owner invokes `frontend-design-review` once for the current output.
+`WebExperienceCritic` can supply early design advice or the post-generation
+method; `DesignSystemAuditor` can supply the latter. Their post-generation
+coverage overlaps. The retained `design_pass_hook` names and `--review` request
+are routes to this owner, not reasons to run both reviewers by default.
+Pre-generation advice is not evidence about a rendered artifact.
+
+Reuse an existing result only through the current P05 reader/QA contract:
+source/design/artifact bytes, profile, routes/viewports, requested dimensions,
+required controls and independent reviewer provenance must still apply.
+An advisory `design-review.json` or implementer self-check cannot supply missing
+independent evidence. Changed inputs or missing controls require the affected
+review/observations; do not silently drop them or borrow another path's result.
+Additional reviewers need a distinct requested purpose or uncovered obligation,
+not merely another alias for the same artifact and rubric.
 
 ## Inputs
 
@@ -35,30 +61,37 @@ human critique; it creates no competing schema or score-based release gate.
 3. Run the existing mechanical validator against actual captured HTML using
    the resolved palette. Retain its hard errors and warnings as findings.
    Static validation does not replace required rendered measurements.
-4. Critique the six pillars, retaining advisory 1-10 scores only where evidence
-   supports a score:
+4. Critique observed behavior through the existing canonical dimensions. These
+   questions preserve the broad UX coverage without a second set of ratings:
 
-   | Pillar | Questions and canonical dimension connection |
+   | Canonical dimension | Questions |
    |---|---|
-   | Visual polish | Alignment, spacing, states, images, overflow and placeholders; typography and responsive findings |
-   | Accessibility | Normal text >=4.5:1, large text >=3:1, semantics, real focus order, keyboard access and labels; accessibility findings |
-   | Motion | Observed reduced-motion fallback, consistent timing, responsiveness; motion and shader-budget findings |
-   | Copy | Accuracy, spelling, task clarity, length and configured voice; human critique and applicable content controls, not a new JSON dimension |
-   | Layout/density | Information hierarchy, mobile use and clipping; responsive and typography findings |
-   | Brand consistency | Selected token/profile, type and signature requirements; brand findings |
+   | `typography_hierarchy` | Hierarchy, alignment, spacing, reading density, fallback and task/copy clarity |
+   | `motion_coherence` | Observed reduced-motion fallback, interaction states and consistent motion language |
+   | `shader_perf_budget` | Actual compatible device/workload measurements and observed GPU fallbacks; null without measurement |
+   | `accessibility_wcag` | Normal text >=4.5:1, large text >=3:1, semantics, real focus order, keyboard access and labels |
+   | `brand_conformance` | Selected tokens/profile, type, marks, configured voice, accuracy and spelling |
+   | `responsive_fidelity` | Layout/density, mobile use, images, placeholders, clipping, overflow and touch targets |
+
+   FPS, FOIT and scroll-jank need compatible performance measurements; source,
+   DOM and screenshots do not provide them. Follow the
+   [shared observation boundary](../../design-dna/references/design-contract.md#review-and-domain-handoff).
+   Keep absent timing unverified and required observations blocked independently.
+   Optional copy critique remains controlled by `--include-copy-pillar`; that
+   retained input name does not create another scored output dimension.
 
 5. Record each finding with P1/P2/P3 severity, route, viewport, actionable
    correction, file:line where attributable and screenshot/DOM anchors. Do not
    invent a source location for a remote-only observation. A screenshot alone
-   cannot prove interactive behavior, and an unmeasured pillar remains unscored.
+   cannot prove interactive behavior; absent performance evidence remains unverified.
 6. Emit the existing `design-review.json` using `normalize_dimensions` and
-   `validate_review`. Keep only its six canonical keys. Put the six-pillar table,
-   cross-pillar copy critique and capture coverage in the human report.
+   `validate_review`. Keep only its six canonical keys in both outputs. Put copy
+   findings under the relevant dimension and report capture/measurement coverage.
    All selected routes must be accounted for; partial capture is not full review.
 7. Use the same external P05 context/QA and current P07 reference as ordinary
    frontend review. Recheck current source/design/artifact bytes and actual
    required observations. Required failure/error/unverified blocks regardless
-   of a pillar average, advisory color or selected dimension subset.
+   of an advisory score/color or selected dimension subset.
    Persist an independent review only through the accepted P05 writer and a
    real separate actor. Implementer feedback remains self-review.
    A standalone built surface need not have a design spec: use P05's existing

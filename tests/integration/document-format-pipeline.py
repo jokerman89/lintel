@@ -3,7 +3,7 @@
 # implements: ADR-0028, ADR-0029
 # intent: .claude/plans/universal-implementation/packages/P12.md
 # constraints: synthetic local fixtures; OOXML retention is not rendered-layout acceptance
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-10-03
 """Check the standalone document instructions, accepted controls, and explicit artifacts."""
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import posixpath
 import re
 import shutil
 import subprocess
@@ -23,6 +22,9 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from zipfile import ZIP_DEFLATED, ZipFile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skills/generate-ppt/scripts"))
+import check_pptx
 
 
 TITLE = "Synthetic queue checkpoint design"
@@ -225,14 +227,12 @@ def write_fixture(target: Path) -> None:
 
 def document_text(path: Path) -> dict[str, str]:
     """Extract OOXML text for retention only; this does not render or open Office."""
+    if path.suffix == ".pptx":
+        return check_pptx.document_text(path)
     result = {}
     with ZipFile(path) as package:
         for name in package.namelist():
-            if path.suffix == ".docx":
-                selected = name == "word/document.xml"
-            else:
-                selected = bool(re.fullmatch(r"ppt/(slides/slide|notesSlides/notesSlide)\d+\.xml", name))
-            if selected:
+            if name == "word/document.xml":
                 root = ET.fromstring(package.read(name))
                 result[name] = " ".join(node.text or "" for node in root.iter()
                                        if node.tag.rsplit("}", 1)[-1] == "t")
@@ -242,36 +242,13 @@ def document_text(path: Path) -> dict[str, str]:
 
 
 def missing_content(parts: dict[str, str]) -> list[str]:
-    text = " ".join(" ".join(parts.values()).split())
     required = [p for _, paragraphs in SECTIONS for p in paragraphs]
     required += list(REFERENCES)
     required += [cell for rows in (CAPACITY, CLAIMS) for row in rows for cell in row]
-    return [part for part in required if " ".join(part.split()) not in text]
+    return check_pptx.missing_content(parts, required)
 
 
-def slide_notes(path: Path) -> list[str]:
-    """Follow the synthetic deck's real relationships, detecting native part aliasing."""
-    notes = []
-    targets = set()
-    with ZipFile(path) as package:
-        slides = sorted((name for name in package.namelist()
-                         if re.fullmatch(r"ppt/slides/slide\d+\.xml", name)),
-                        key=lambda name: int(re.search(r"slide(\d+)", name).group(1)))
-        for slide in slides:
-            relationships = ET.fromstring(package.read(
-                "ppt/slides/_rels/" + slide.rsplit("/", 1)[-1] + ".rels"))
-            links = [node for node in relationships
-                     if node.get("Type", "").endswith("/notesSlide")]
-            if len(links) != 1 or links[0].get("TargetMode") == "External":
-                raise ValueError("Each synthetic slide needs one local notes relationship")
-            target = posixpath.normpath(posixpath.join("ppt/slides", links[0].get("Target", "")))
-            if not target.startswith("ppt/notesSlides/") or target in targets:
-                raise ValueError("Missing or aliased slide notes part")
-            targets.add(target)
-            document = ET.fromstring(package.read(target))
-            notes.append(" ".join(node.text or "" for node in document.iter()
-                                  if node.tag.rsplit("}", 1)[-1] == "t"))
-    return notes
+slide_notes = check_pptx.slide_notes
 
 
 def load_module(name, path):
@@ -370,11 +347,31 @@ class SourceContracts(unittest.TestCase):
         self.assertIn("render", text.lower())
         self.assertIn("source", text.lower())
 
+    def test_qa_defaults_to_report_only_and_repairs_a_distinct_copy(self):
+        text = self.text("generate-qa")
+        self.assertRegex(text, r"--auto-fix[^\n]+default: none")
+        self.assertIn("**`none` (default):**", text)
+        self.assertNotIn("**`safe` (default):**", text)
+        self.assertIn("--fixed-out", text)
+        self.assertIn("same path", text)
+        self.assertIn("existing destination", text)
+        self.assertIn("original bytes", text)
+        self.assertNotIn("Modified artifacts (in-place)", text)
+        workflow = text.split("### Step 4", 1)[1].split("### Step 5", 1)[0]
+        for condition in ("explicit", "--fixed-out", "copy", "none", "P05"):
+            self.assertIn(condition, workflow)
+        caller = self.text("generate").split("### Step 8", 1)[1].split("### Step 9", 1)[0]
+        self.assertIn("--auto-fix none", caller)
+
     def test_orchestrator_distinguishes_available_and_unverified_formats(self):
         text = self.text("generate")
         self.assertNotIn("slot path: operator-AI generates", text)
         self.assertNotIn("Block on any gate failure or vocabulary-blocklist hits", text)
-        self.assertIn("A15.3.shared", text)
+        self.assertNotIn("A15.3.shared", text)
+        self.assertNotIn("--resume", text)
+        self.assertIn("## Continue an owned run", text)
+        self.assertIn("pipeline_inputs.py", text)
+        self.assertIn("no PDF reader", text)
         self.assertIn("mandatory", text)
 
     def test_fixture_is_long_and_bound_without_a_new_content_schema(self):
@@ -630,6 +627,7 @@ def main() -> int:
         "skills/generate-write/references/fidelity-and-evidence.md",
         "skills/generate-word/references/native-word.md",
         "skills/generate-ppt/references/native-powerpoint.md",
+        "skills/generate-ppt/scripts/check_pptx.py",
         "tests/integration/document-format-pipeline.py",
         "tests/integration/document-format-pipeline.sh",
     )

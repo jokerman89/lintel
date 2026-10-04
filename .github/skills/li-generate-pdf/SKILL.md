@@ -1,6 +1,6 @@
 ---
 name: li-generate-pdf
-description: Produce a PDF through an available converter and accepted browser print operation, preserving source content; Lintel does not read the produced PDF, so its text, pages and visual rendering stay unverified.
+description: Use to produce a PDF from selected source content through an available converter or accepted browser print operation; Lintel does not read the produced PDF, so its text, pages and visual rendering stay unverified.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-pdf/SKILL.md`; edit the canonical file, then run

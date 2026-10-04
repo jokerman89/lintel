@@ -58,6 +58,14 @@ for cap in "${!CAP_AGENT[@]}"; do
   fi
 done
 
+# Planning assistance must not borrow ReleaseEngineer's execution tools.
+incident_row=$(grep -E '^\|[[:space:]]*`incident-runbook`[[:space:]]*\|' "$SC")
+if echo "$incident_row" | grep -q "DeploymentEngineer" && ! echo "$incident_row" | grep -q "ReleaseEngineer"; then
+  pass "incident-runbook uses DeploymentEngineer for planning alongside SecurityAuditor"
+else
+  fail "incident-runbook must use DeploymentEngineer, not ReleaseEngineer"
+fi
+
 # ─── Scenario 4: 5 checkpoint pass-criteria ─────────────────────────────
 echo ""
 echo "[4] Checkpoints have pass-criteria"

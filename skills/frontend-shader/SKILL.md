@@ -1,7 +1,7 @@
 ---
 name: frontend-shader
 layer: foundation
-description: Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual thesis + GLSL snippet references + perf-budget. Solo-invokable.
+description: Use when a frontend visual brief needs a shader or no-shader decision, source-backed library choices, performance limits and GPU fallbacks.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -21,7 +21,9 @@ You are the `frontend-shader` sub-skill — shader-engineer for the v3.7 fronten
 
 ## What this skill does
 
-Reads operator brief → ShaderEngineer agent picks shader-library (Paper Shaders declarative | OGL+glslify | react-three-fiber+postprocessing | Lygia-snippets | CSS-houdini-paint-worklet) + visual-thesis + GLSL-snippet-references + GPU-fallback-strategy + perf-budget → writes `shader.json` (schema_version: 1).
+Reads operator brief → ShaderEngineer chooses no shader or an evidenced,
+project-compatible renderer, with visual thesis, source-backed snippet references,
+GPU fallbacks and performance budget → writes `shader.json` (schema_version: 1).
 
 Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` orchestrator in parallel-dispatch (Workflow Step 4) as the third parallel sub-skill (after typography + motion).
 
@@ -39,7 +41,7 @@ Validate `visual_thesis: none` with `library: null` before GPU-only requirements
 ## When NOT to use
 
 - Static site, no hero-visual ambition → shader overkill
-- 3D scene-graph needed → use react-three-fiber direct (shader sub-skill picks libs but doesn't build scenes)
+- 3D scene-graph implementation needed → use the project's supported scene tooling (this method chooses, not builds, scenes)
 - CSS-gradient is enough → agent surfaces "no shader needed" and short-circuits
 
 ## Inputs
@@ -48,7 +50,7 @@ Validate `visual_thesis: none` with `library: null` before GPU-only requirements
 - Optional `--visual-thesis <mesh-gradient|noise-field|fluid-sim|particle-system|displacement-warp|none>` — default: inferred from brief
 - Optional `--perf-budget <low-end|mid-tier|high-end-only>` — affects GPU-fallback-strategy
 - Optional `--out <path>` — output path (default: stdout solo, `$run_dir/shader.json` orchestrator)
-- Optional `--customer-share` — triggers compliance-gate license-check
+- Optional `--customer-share` — selects the customer-share control boundary; no automatic license validator
 
 ## Workflow
 
@@ -64,19 +66,23 @@ out="${OUT:-}"  # absent --out means stdout, not a path to validate
 
 ### Step 2 — ShaderEngineer agent dispatch
 
-Hand off to `agents/frontend/ShaderEngineer.md`. Agent picks shader-library:
+Use `agents/frontend/ShaderEngineer.md` as the decision method and follow
+[axis ownership](../frontend-design/references/axis-ownership.md). Delegate only
+when a separate context is useful and actually available; the role returns a
+draft and this caller owns Step 3's single publication. First test whether static
+artwork or a supported CSS treatment meets the brief: `visual_thesis: none`
+and `library: null` are successful results. For an actual GPU need, compare
+existing project tooling, required effect, framework/browser/device support,
+measured or explicitly unverified cost, and fallback behavior. Choose a renderer
+only on that evidence. A snippet/function library is not a renderer, and a
+vendor name cannot establish device safety.
 
-- **Paper Shaders** (verify the selected package/release and framework): mesh-gradients
-  and animated backgrounds when required. Do not infer device safety from a library name.
-- **OGL** (MIT, lightweight 3D + raw WebGL): direct GLSL with full control. Best for custom thesis + performance-critical.
-- **react-three-fiber + drei + postprocessing** (MIT, React 3D + effects): production 3D scenes + post-FX. Best for immersive contexts.
-- **Lygia** (GLSL functions; verify selected file/release terms and attribution):
-  noise/SDF/lighting functions paired with a renderer, not a renderer itself.
-- **CSS Houdini Paint Worklet** (W3C, browser-paint API): GPU-accelerated CSS paint. Best for super-lightweight backgrounds where shader-lib is overkill.
-- **CSS conic-gradient/static artwork:** no-shader fallback with no mandatory
-  component-library dependency.
+Retain exact selected-release/file terms and attribution for the renderer,
+snippets, imports and artwork. Keep the existing `lygia_imports` field when
+applicable; the field name does not require selecting that library.
 
-Agent verifies current licensing at invocation (L-003).
+Use actual supplied/verified license evidence or request an authorized lookup.
+A role name does not prove current terms were checked.
 
 ### Step 3 — Produce `shader.json`
 
@@ -87,18 +93,18 @@ Agent verifies current licensing at invocation (L-003).
   "brief_summary": "<one-line>",
   "visual_thesis": "<mesh-gradient | noise-field | fluid-sim | particle-system | displacement-warp | none>",
   "library": {
-    "name": "paper-design/shaders",
+    "name": "<selected project-compatible renderer>",
     "version": "<exact selected release>",
     "license": {"type": "<verified selected terms>", "source": "<primary release/file source>"},
-    "npm": "@paper-design/shaders-react",
-    "operator_instruction": "npm i @paper-design/shaders-react"
+    "npm": "<selected package, if applicable>",
+    "operator_instruction": "<authorized project-local setup; no automatic install>"
   },
   "glsl_snippets": [
     {
       "name": "mesh-gradient-3color",
       "purpose": "hero background",
-      "source": "Paper Shaders built-in <MeshGradient> component",
-      "notes": "configurable colors[0..2], speed, distortion, swirl"
+      "source": "<actual selected file/release reference>",
+      "notes": "<supported parameters and source/profile token mapping>"
     }
   ],
   "lygia_imports": [],
@@ -115,7 +121,7 @@ Agent verifies current licensing at invocation (L-003).
     "mobile_strategy": "downscale-resolution-50% | disable | full",
     "explanation": "<selected device/browser/resolution and actual measured frame/GPU evidence, or explicitly unverified>"
   },
-  "operator_instructions_md": "# Shader setup\n\n```bash\nnpm i @paper-design/shaders-react\n```\n\n```tsx\nimport { MeshGradient } from '@paper-design/shaders-react'\n\n<MeshGradient\n  colors={['#0078D4', '#50E6FF', '#0d1b2a']}\n  speed={0.3}\n  distortion={0.8}\n  className=\"absolute inset-0 -z-10\"\n/>\n```\n\nFallback for `prefers-reduced-motion`:\n```css\n@media (prefers-reduced-motion: reduce) {\n  .shader-bg { animation: none; }\n}\n```"
+  "operator_instructions_md": "<setup for the actual selected renderer only; use verified profile/brief colors, real reduced-motion and no-WebGL fallbacks, and cleanup instructions; no automatic install>"
 }
 ```
 
@@ -132,25 +138,11 @@ means originally absent, not overwrite permission). Then execute:
 
 ```python
 import sys
-import context_safety as safety
-from design_contract import validate_spec
-from review_contract import canonical_json
+from design_contract import emit_fragment
 
 try:
-    checked = validate_spec(fragment, "shader")
-    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
-    if out is None:
-        sys.stdout.buffer.write(payload)
-    else:
-        root = safety.checked_root(repo)
-        relative = safety.selector_path(out)
-        safety.atomic_write(
-            root, relative, payload,
-            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
-            expected=original_output_state, check_expected=True,
-        )
-        if safety.read_owned(root, relative, len(payload))[0] != payload:
-            raise ValueError("Fragment output failed readback")
+    emit_fragment(fragment, "shader", repo=repo, out=out,
+                  original_output_state=None if out is None else original_output_state)
 except (ValueError, OSError, UnicodeError) as error:
     print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
     raise SystemExit(2)
@@ -162,6 +154,8 @@ errors have a nonzero exit. Never pass stdout/special/absolute paths to the root
 reader. For `--customer-share`, use the [customer-share control boundary](../frontend-design/SKILL.md#customer-share-control-boundary)
 on the same data or an owned relative staging file. Missing mandatory licensing
 or policy observations remain unverified; stdout does not exempt them.
+Use its named `shader-licensing` procedure for selected renderers, snippets,
+imports and assets. Required brief/profile obligations apply without this flag too.
 
 ### Step 5 — Visual-thesis === "none" short-circuit
 
@@ -206,7 +200,8 @@ Pattern text is not evidence of licensing or accessibility.
 
 **Calls into:**
 - `agents/frontend/ShaderEngineer.md` (primary)
-- `/li:compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
+- The `shader-licensing` source-inspection procedure in the customer-share control
+  boundary; `/li:compliance-gate` evaluates its recorded outcomes, not shader licenses
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input — `shader` field)
@@ -231,6 +226,7 @@ Pattern text is not evidence of licensing or accessibility.
 
 - Solo: review shader.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li:frontend-design` Step 5
-- Customer-share: pair with `/li:compliance-gate` for final license-audit
+- Customer-share: obtain the required `shader-licensing` evidence, then evaluate
+  the actual controls through `/li:compliance-gate`; unresolved permission blocks sharing
 - Future: propose a reviewed pattern at an explicitly selected authorized destination;
   no automatic personal write or activation follows from a shader decision

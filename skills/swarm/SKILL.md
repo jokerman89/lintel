@@ -26,6 +26,11 @@ navigation:
 
 You are the SWARM skill — the opt-in execution profile over PLAN, BUILD, and REVIEW.
 
+Read the [named coordination contracts](references/evidence.md) for P03 owned
+context, P04 local observations/handoffs, P05 review/QA, P07 profile, P08 work/lifecycle,
+P09 domain evidence and the historical A22.7 integration card. The IDs below remain
+stable references; the linked implementations, not the abbreviations, own the controls.
+
 ## What this skill does
 
 Coordinates dependency-ready work without becoming a scheduler or a tenth cycle phase. The mapped
@@ -280,6 +285,9 @@ observations. Both always say `verification: local_observations_only` and `relea
 They never advance shared acceptance or convert missing corroboration into a completed lane.
 
 ## Shared-evidence consumer
+
+Use the [contract-name reference](references/evidence.md) alongside this procedure;
+it names the actual providers without duplicating or weakening these gates.
 
 The CLI first calls the accepted trusted `li-work-artifacts.py` `work_context` provider for
 `status`, `wave`, `resume` and `verify`. Optional `--map` must agree with the explicit

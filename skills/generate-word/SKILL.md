@@ -1,7 +1,7 @@
 ---
 name: generate-word
 layer: foundation
-description: Produce an editable Word document through available native tools or a declared library, preserving source detail and reporting actual inspection evidence.
+description: Use to create an editable Word document from selected source material through available native tools or a declared library, preserving detail and reporting actual inspection evidence.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -100,8 +100,9 @@ Keep this existing entry path and field names. First follow
 [existing pipeline input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
 with `--format word`, the external input context, original package/leaves and
 current profile. It verifies canonical sibling paths/hashes and the existing
-Word projection, not a web renderer or completed artifact. A15.3.shared/native
-acceptance stays separate; never fabricate design-spec.json to unblock it.
+Word projection, not a web renderer or completed artifact. Actual native/source
+inspections remain separate required P05 evidence; retired document-format
+acceptance is not a live gate. Never fabricate design-spec.json to unblock a consumer.
 
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — sections with H1/H2/H3 hierarchy + bodies + voice-annotations

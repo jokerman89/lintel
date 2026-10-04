@@ -45,7 +45,7 @@ declare -A CAP_AGENT=(
   ["migration-plan"]="MigrationPlanner"
   ["retention-policy"]="DatabaseDesigner"
   ["query-pattern-audit"]="Explorer"
-  ["sharding-plan"]="SchemaArchitect"
+  ["sharding-plan"]="DatabaseDesigner"
   ["data-contract-collision"]="DatabaseDesigner"
   ["analytics-readiness"]="DataPipelineDesigner"
 )

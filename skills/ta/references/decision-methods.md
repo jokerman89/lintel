@@ -2,8 +2,11 @@
 
 Read for boundary review, quality attributes or scaling design. These are reasoning
 methods, not a scheduler, new result format or permission to implement a topology.
-Architect owns component interfaces; BackendArchitect owns distributed interaction;
-SystemArchitect specifies cross-system invariants and measurable quality attributes.
+Architect owns component interfaces and this distributed-boundary method.
+BackendArchitect remains its compatible distributed view: choose one entrypoint in
+the current context, not both for the same outcome. SystemArchitect specifies
+cross-system invariants and measurable quality attributes. APIDesigner and
+ObservabilityArchitect retain their detailed contract and instrumentation purposes.
 
 ## Invariants before topology
 
@@ -12,11 +15,22 @@ payment per order" is an invariant; "three services and a queue" is a topology.
 Trace each writer, transaction, retry and asynchronous consumer that can violate the
 rule. A service boundary does not create a transaction boundary guarantee.
 
+For each actual boundary, record the invariant, authoritative writer, transaction,
+consistency window, failure isolation, remaining deadline, retry/idempotency owner
+and evidence needed before cutover. Include ordering, replay/deduplication and
+reconciliation/lag signals; name unknown side effects instead of assuming retries
+are harmless. Keep original work/leaf IDs and topology/source revision with the result.
+
 Compare a local transaction, an outbox plus idempotent consumer, and a compensating
 workflow only where each is viable. Name the price: local coupling, delayed delivery
 and deduplication state, or intermediate externally visible states. Do not call
 compensation a rollback of an already delivered email or captured payment. Give the
 implementer a failure-injection case and the reviewer an observable invariant.
+
+An order service committing locally and then publishing can lose the event if it
+crashes between those actions. A transactional outbox plus an idempotent consumer
+addresses that gap, but still requires atomic capture, replay, deduplication and lag
+monitoring. The outbox does not make an external effect magically exactly-once.
 
 ## Failure isolation and deadlines
 
@@ -33,6 +47,11 @@ Three layers each making three total attempts can cause 27 downstream attempts.
 Specify how tests observe cancellation, duplicate effects and load after failure.
 
 ## Synthetic worked example: composing a tail
+
+Use TQ's [comparable performance evidence](../../tq/references/decision-methods.md#comparable-performance-evidence)
+for actual samples, sampling bias and tail uncertainty. Reuse those same measurements
+for boundary, capacity and NFR views; a report transformation does not justify another
+profiling run. The arithmetic below illustrates composition, not measured performance.
 
 For 100 aligned requests, service A takes 101 ms on request 1 and 1 ms otherwise.
 Service B takes 101 ms on request 2 and 1 ms otherwise. Using nearest-rank percentiles,

@@ -59,6 +59,11 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews f
 1. **Identify processing activities and scope.** What data, subjects, purpose, actors,
    territory, recipients and sources establish GDPR applicability? Do not infer scope
    solely from where the customer or server is located.
+   Follow the [regulatory source and currency record](../../skills/sc/references/decision-methods.md#regulatory-source-and-currency-record)
+   for the actual consolidated text, amendments/derogations, effective/application
+   dates, `verified_on` and `responsible_owner`. Record unavailable currency and
+   unassigned ownership explicitly; request missing verification from the authorized
+   caller. A prior review or today's report date is not current-source verification.
 2. **Legal basis (Art 6).** Consent / contract / legitimate interest / legal obligation / vital interest / public task. Document choice per activity.
 3. **Special categories (Art 9).** Health, biometric, ethnic, political — extra protections.
 4. **Data minimization.** Trace each scoped field to necessity; if sampling, record the
@@ -105,6 +110,16 @@ GDPRReviewer: <engagement-or-system>
 - Personal data categories: <list>
 - Data subjects: <employees | customers | end-users | mixed>
 - Jurisdictions: <EU member states>
+
+## Source and currency
+- primary_source: <primary source location and provision, or unavailable>
+- consolidated_version: <consolidated text or edition/amendments, or unknown>
+- effective_date: <effective date and source, or unknown>
+- application_date: <application or transition dates per obligation, or unknown>
+- verified_on: <date of actual source verification, or unknown>
+- responsible_owner: <caller-confirmed responsible owner, or unassigned>
+- currency_status: <verified for stated scope | unverified>
+- verification_limit: <retrieval/evidence limit and next verification action>
 
 ## Legal basis per activity
 | Activity | Data | Legal basis (Art 6) | Notes |
@@ -158,7 +173,7 @@ GDPRReviewer: <engagement-or-system>
 
 ## Verdict
 <required controls verified within stated scope | unverified | needs remediation | blocked>
-Source/version/effective date, applicability and legal-review limitations: <explicit>
+Source/version/effective/application dates, currency, owner and legal-review limitations: <explicit>
 ```
 
 ## Edge cases / what to do when blocked

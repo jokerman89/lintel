@@ -52,14 +52,21 @@ linking to the authoritative Spec Kit files, not copies of requirements or a sec
 |---|---|
 | Product requirements and acceptance scenarios | Selected Spec Kit spec.md |
 | Architecture and implementation decisions | Selected Spec Kit plan.md plus referenced ADRs |
-| Build-card IDs, dependencies and completion | Selected Spec Kit tasks.md |
+| Build-card IDs, dependencies and completion | Selected Spec Kit tasks.md, including converge-appended IDs/phases |
 | Project principles | The project's constitution and repository instructions |
+| Analysis, convergence, bug and assessment decisions/evidence | Explicitly selected original reports, bound through existing input/acceptance paths |
 | Execution evidence and resume position | Lintel build log/checkpoint, linked by task ID |
 | Durable lessons and decisions | Existing repository memory and ADR locations |
 
 Trace every required outcome to a task before starting BUILD. Identify unapproved decisions or
 missing verification commands. Preserve the operator's existing authorization: do not ask for
 the same approval again. A changed requirement or action outside that authorization needs a decision.
+
+Before execution, use [selected external authority](../../../skills/spec-kit/references/selected-authority.md)
+to inspect supplied registration/known configuration and resolve overlapping checks
+to one owner. Preserve original reports and verdicts without assuming commands,
+enabled hooks or workflow gates from filenames. Unsupported versions and ambiguous
+ownership stay explicit; no duplicate Lintel analysis, design or task list is needed.
 
 ## Execute and review
 
@@ -94,8 +101,9 @@ the host's actual tools. Lintel's Claude hooks do not run on Copilot.
 
 ## Adding Spec Kit to a project
 
-Only initialize Spec Kit when requested. Check `specify init --help` for the installed release;
-the current upstream integration flag is `--integration copilot`. Review the generated changes
+Only initialize Spec Kit when separately requested and authorized. Inspect the actually
+installed release's help and supported integration flags; do not infer installation from
+these artifacts or a comparison pin. Review the generated changes
 before committing. Do not use `--force` over existing `.github/`, `.specify/` or team instructions.
 No install, network download or specification regeneration is needed for an existing feature.
 

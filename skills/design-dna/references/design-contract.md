@@ -76,12 +76,137 @@ terms and a rationale for a new dependency. An unresolved license is not a free
 license; a source-file checksum proves identity, not legal verification. No helper
 operation installs or upgrades anything.
 
+## Owned source and output selection
+
+Select sources by literal path within an explicitly authorized root, or by the
+actual configured path resolved from the unchanged verified P07 reference. A
+profile name, palette name or conventional folder name is not a directory to
+search. Use `profile_asset` for the selected design profile; for other assets,
+retain the actual configuration source and resolved path. Missing configuration
+does not authorize a personal-home scan or an invented brand/template field.
+
+Before generation, select an owned output root and the literal output path(s).
+Standalone callers supply `--out`/`--out-dir`; an orchestrator may supply an
+already authorized run path explicitly. No output selection, a missing root or
+an unwritable output is a visible failure, not permission to use the current
+directory, HOME, a neighboring artifact or another run. New children are allowed
+only inside that selected writable root, within the authorized write set.
+
+Use existing P03 `checked_root`, `selector_path`, `read_owned` and `atomic_write`
+for rooted, no-link reads and publication. Capture each destination's original
+state before generation; an absent file is `None`, not overwrite permission.
+Require explicit replacement authorization for existing outputs, compare the
+original preimage at publication (`expected=...`, `check_expected=True`), and
+read back the bytes. Preserve source files. If any publication/readback fails,
+report the exact failure and any partial output at the selected paths; do not
+report a completed artifact set, retry elsewhere or delete prior evidence.
+
+These are owned-path procedures, not a claim that a model or native provider is
+an OS sandbox. Keep each consumer's existing provider, input-admission, retention,
+collision and overwrite contract.
+
+The typography, motion and shader callers use one `emit_fragment` procedure in
+`design_contract.py`. It validates and emits the exact partial fields to stdout
+or a rooted output with expected-preimage publication and byte readback. It
+does not synthesize a binding, verify a license or clear a profile requirement.
+Retain selected source/profile evidence through synthesis; `load_design` still
+verifies the complete design against the external current P05/P07 context.
+Invalid fragments publish nothing; failed readback remains a visible partial
+output, not permission to retry in another directory.
+
+## Selected asset evidence
+
+These are named **manual/source-inspection procedures**, not a scanner, hook or
+license determination. Reuse P05's generic `kind: check`; do not invent new
+control kinds or command flags. Before observing results, select the applicable
+IDs below from the actual brief/profile, record their policy source/version and
+scope, and include any required ones in the original `qa_requirements`.
+Preserve that inventory and the same work/profile identity through consumption.
+
+| Procedure/control ID | Exact selected scope and observations |
+|---|---|
+| `font-licensing` | For each selected font/file/release, read the supplied or authorized primary license/entitlement evidence. Record the intended use (such as local use, web embedding or redistribution), applicable grants/restrictions, required notices and any missing permission. A family name, “free” label, system installation or example is not a grant. |
+| `motion-licensing` | Identify each selected runtime, plugin, editor and animation asset by source/version. Inspect their actual terms separately for the intended delivery; record attribution, distribution and entitlement requirements. No-motion/CSS-only does not establish rights to separately included assets. |
+| `shader-licensing` | Identify each selected renderer, shader snippet, import and artwork by source/version or file hash. Inspect the supplied primary terms and reuse/notice requirements, including distinct runtime versus shader/asset licenses. A no-shader choice excludes only genuinely unused GPU components. |
+| `brand-source` | Read the exact selected palette/profile/template/logo and its source/version. Compare the requested tokens or asset identity to that reference, recording the field/value and evidence location. For a one-color question, read that named token only; no extraction run, personal-library scan or diagnostic CLI is needed. Extraction describes a source; it does not approve a new brand. |
+| `brand-freshness` | Compare the selected asset's evidenced revision/effective date with the actual brief/profile's pinned version or refresh requirement. Record the requirement, observed revision/date and discrepancy. File mtime alone is not brand currency; there is no universal 90-day threshold. A permitted advisory exception records its reason and authority, without waiving a mandatory requirement. |
+
+For each selected procedure, retain the source excerpts/paths, asset identity,
+intended use, actual observer/method and observation date in an owned evidence
+note. Record what was inspected and what was not. Use `pass` only when that
+procedure was actually performed and its stated criteria were met; record a
+known mismatch as `fail`, execution/read failure as `error`, and missing terms,
+unknown applicability, unavailable inspection or unresolved permission as
+`unverified`. A source checksum is identity evidence, not legal approval.
+Refer a legal/entitlement determination to the authorized qualified owner where
+needed; do not manufacture one from a model's recommendation.
+
+Mandatory license/brand obligations stay mandatory whenever selected by the
+brief/profile, even without `--customer-share` or when emitting stdout.
+An applicable mandatory `fail`, `error` or `unverified` blocks the affected
+acceptance/sharing action. Grounded `not_applicable` requires source/version,
+scope rationale and evidence; missing tools or terms are not exemptions.
+Unrequired advice remains advisory, not silently promoted to a new policy.
+
+Attach these actual observations to the existing P05 controls and evaluate via
+the [compliance-gate procedure](../../compliance-gate/SKILL.md#aggregate-through-the-shared-implementation).
+That procedure uses `bin/li-review-evidence.py controls` with the real controls
+and unchanged `required_policy`; it does not perform the inspections above.
+Bind their evidence bytes through the existing review contract. A
+no-applicable-controls result, valid fragment, extracted palette or advisory
+exception is not licensing, brand or release clearance.
+
+## Measured text contrast
+
+Keep `validate_design.check` / `validate_design.py` for its existing static
+HTML/CSS checks. It does not compute paint, inherit backgrounds or run a browser.
+Use the read-only standard-library `../scripts/measure_contrast.py` for actual
+observed **opaque solid sRGB** color pairs, separately from those checks:
+
+```text
+python <trusted-source>/skills/design-dna/scripts/measure_contrast.py --foreground "rgb(0, 0, 0)" --background "rgb(255, 255, 255)" --text-size normal
+```
+
+The colors above are an illustrative numerical input, not evidence about an
+artifact. For a real artifact retain the exact read/provider/route/viewport,
+theme, element and color observation used; measure each required text/background
+pair in each required theme. The Python `contrast_observation(foreground,
+background, text_size=...)` returns only `{"ratio": ..., "text_size": ...}`.
+The CLI emits that same observation: exit 0 meets the normal 4.5:1 or large
+3:1 threshold, exit 1 is below it, exit 2 is refused/unverified input and emits
+no observation. Decisions use the unrounded ratio.
+
+`browser_observation(element, text_size=..., background_image=...)` reuses the
+actual `web-session` read element's `color` and `background` keys. The equivalent
+CLI accepts `--element-json` with that literal element and `--background-image`.
+The current browser read does **not** report background images or text size:
+obtain those observations separately, not by filling in a default. Only an
+observed `background_image="none"` qualifies. A computed `backgroundColor`
+alone does not rule out a painted gradient/image, ancestor opacity, an overlay,
+blending or other unresolved compositing; such cases remain unverified and
+must not be passed as a resolved solid pair. “Large” requires observed size of
+at least 18pt (24 CSS px), or 14pt bold (18 2/3 CSS px); otherwise use normal
+only with a supported classification, not from a tag name or intended token.
+
+Missing/invalid colors, transparent/translucent values, unresolved backgrounds,
+gradient/image values, unsupported color spaces or nonfinite channels are
+refused rather than clamped, composited or assumed white. The helper has no
+CSS cascade or alpha-compositing engine. Pure numerical color input can compute
+a ratio without establishing a rendered background or any browser execution.
+
+Carry the returned object unchanged as the existing P05 `contrast` control's
+`observation`, with the actual source evidence and original requirements.
+Keep browser execution as a separate control; no helper result supplies its
+`executed` field. Missing observations remain unverified. Neither a numerical
+pass nor static validation produces an independent review or clearance record.
+
 ## Actual interfaces
 
 Python:
 
 ```python
 validate_spec(data, kind=None)  # frontend/pipeline, or typography/motion/shader fragments; shape only
+emit_fragment(fragment, kind, repo=explicit_target, out=None, original_output_state=None)
 profile_asset(verified_profile_record, explicit_profile_config)  # asset ref, scalar leaves
 load_design(repo, path, expected=prepared_context, profile_config=explicit_profile_config,
             pattern_lock=None, pattern_context=None)  # optional verified pattern selection
@@ -173,19 +298,21 @@ propagates when selected. Argument mapping reports `executed: false`.
 
 Exit 0 means the requested data operation succeeded, not artifact acceptance.
 Exit 2 reports invalid/missing/drifted input; exit 3 reports mandatory QA blockers.
-The helper does not publish a result or change the task state.
+The read-only CLI does not publish a result or change the task state. The explicit
+Python `emit_fragment` procedure below publishes only its validated partial.
 
 ### Fragment emission
 
 Typography, motion and shader keep solo stdout as their default. Their Step 4
-recipes call the existing `validate_spec(fragment, kind)` on the actual parsed
-value **before** emission, then serialize only the validated fragment. Absence
+recipes call `emit_fragment(fragment, kind, repo=..., out=...,
+original_output_state=...)`, which calls `validate_spec` on the actual parsed
+value **before** emission and serializes only that validated fragment. Absence
 of `--out` is an output-stream choice, never `/dev/stdout` as an input path.
 Named output uses the same validation first, followed by existing P03 rooted
 atomic publication against the authorized original preimage and readback.
 Unknown versions/invalid choices emit neither a fragment nor a pass receipt;
 errors go to stderr with nonzero exit. Existing named-file CLI validation remains.
-No special-file/absolute exception, new flag or helper API is introduced.
+No special-file/absolute exception, new flag or design schema is introduced.
 Required licensing or other policy checks still apply to either output mode.
 
 ## Review and domain handoff
@@ -196,6 +323,19 @@ Canonical dimension keys are `typography_hierarchy`, `motion_coherence`,
 keys and incomplete selected subsets fail. A score is advisory. Null score means
 unverified feedback, not a synthetic 100. Grounded no-shader applicability belongs
 in the P05 control; it cannot remove keyboard or contrast obligations.
+
+These are the only scored dimensions, in JSON and the human report. Visual polish,
+copy and layout/density questions feed their relevant findings, not a second
+scoring system. `shader_perf_budget` remains null/unverified without compatible
+runtime measurement. FPS, FOIT and scroll-jank require actual compatible timing/
+performance evidence for the named route, device, viewport, state and workload;
+DOM, source and screenshots cannot supply those measurements. Do not deduct or
+award timing points from a declaration, library name or apparent smoothness.
+Typography/motion scores may describe observed non-timing aspects only, with
+timing coverage explicitly unverified; use null if missing timing is necessary
+for the selected dimension's judgment. Compare measured results to the actual
+brief/profile budget, not a universal timing threshold. This helper normalizes
+advice; it does not collect or authenticate performance evidence.
 
 `review_result` rechecks the selected design/profile, then calls actual P05
 `verify_qa` with the unchanged inventory and external context. A 3.5:1 normal-text result remains blocked regardless of all-green

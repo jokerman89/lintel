@@ -20,7 +20,7 @@ It is **not** Swarm, not implementation fan-out, not a scheduler and not a relea
 ## When to use
 
 - Operator asks for MARS, a multi-model review, a second/outside opinion or a model panel.
-- A full `/li:cycle` reaches its pre-BUILD gate (or `/li:plan` approval) and the offer gate
+- A full `/li:cycle` reaches PLAN's approval gate and the offer gate
   says `offer: true`.
 - A standalone review workflow (`review`, `code-review`) offers it once for a concrete
   target on a capable host.
@@ -90,7 +90,7 @@ python3 "$src/bin/li-mars.py" panel init --panel "$run/records/panel.json" --id 
   --method-meta "$run/inputs/method.json" --select <path> [--select <path>] \
   --subject-ref "<path, PR or excerpt label>" --consent "<operator turn reference>" \
   --requested-by "operator via $HOST_SESSION_ID" --trigger explicit --caller standalone \
-  --surface copilot-app            # repository/branch/commit default to read-only git facts
+  --surface "<observed-host-surface>"  # repository/branch/commit default to read-only git facts
 ```
 
 The panel's `origin` (who requested it, trigger, caller, coordinator, surface, repository,
@@ -104,8 +104,9 @@ Register each slot, render its request and dispatch that exact text — same bri
 every slot, no peer output, read-only tools, no recursion:
 
 ```bash
-python3 "$src/bin/li-mars.py" panel add --panel "$panel" --slot r1 --model claude-opus-5.5 \
-  --transport nested-session --session <child-id> --effort xhigh --context long_context
+python3 "$src/bin/li-mars.py" panel add --panel "$panel" --slot r1 --model "$resolved_model" \
+  --transport "$selected_transport" --session <child-id> \
+  --effort "$effective_effort" --context "$effective_context"
 python3 "$src/bin/li-mars.py" panel brief --panel "$panel" --slot r1 --round 1 \
   --body "$run/inputs/brief.md" --out "$run/records/r1-round1.request.md"
 ```
@@ -115,12 +116,11 @@ For nested sessions, create the child with the rendered request as its kickoff a
 session. The request opens with a ` ```mars-request ` header naming the requester,
 coordinator session, repository/commit, subject, brief hash, model, effort and context.
 
-Copilot App: `task` (subagent, `model`, `reasoning_effort`, `context_tier`) or
-`create_session` (`kickoff.model`, `kickoff.reasoning_effort`, `kickoff.context_tier`,
-`kickoff.mode: autopilot`, `coordinate_with_creator: false`, `notify_on_idle: once`).
-`always` keeps emitting idle notices even after the session is archived; for the challenge
-round, read the round-2 report from the session store instead of waiting for a notice.
-Other hosts: their native per-child model API.
+Bind model/effort/context from the consented `roster` result and the selected
+transport from actual host capability. Use the
+[host dispatch guidance](references/integration.md#host-dispatch-and-identity)
+only after inspecting the current tool schema and permission. A documented
+parameter is not proof the current host accepts it.
 
 ### 5. Collect and verify identity
 
@@ -129,8 +129,8 @@ header (verdict, P1/P2/P3 counts, confidence, `read_only: attested`, coverage, e
 panel/slot/round/brief hash). Save it to `records/<slot>-round<n>.md` and run `panel record`;
 a missing or mismatched header is refused, not repaired. Record host-observed identity
 with `panel observe --evidence host-usage` when the host shows which model actually ran
-(Copilot App: the local session store's `assistant_usage_events.model` and
-`reasoning_effort` per child session). A model's self-description is `self-report`, not
+(see the integration reference for host-specific observation paths).
+A model's self-description is `self-report`, not
 proof. A substituted model does not count toward the approved roster. An empty final
 response gets one resend request; then the slot is `failed`.
 
@@ -168,9 +168,17 @@ the owner. Subagents need no close. Abort path: `--include-incomplete`, after re
 
 ## Offer text (cycle PLAN gate or standalone review)
 
-> MARS is available: 4 reviewers (Claude Opus 5.5, GPT-6 Astra, Grok 4.7, MAI — resolved
-> now), extra-high effort, 1M context where supported, 1 blind pass + challenge only if
-> contested (≤ 8 calls). Run it on `<target>`? [yes / no]
+Render from the **actual** `li-mars.py roster` output: each `roster` entry's `model`,
+`effort`, `context_tier` and `downgraded`, plus `missing_families` and `eligible`.
+Do not substitute remembered model names, assume four usable slots, or describe
+unsupported settings as available. Preserve ADR-0036's requested defaults and
+show effective settings/downgrades. Count the selected distinct models; the
+proposed call bound is that count × the selected round bound, within existing limits.
+
+> MARS is available: `<observed count>` reviewers — `<observed roster with effective
+> effort/context and downgrades>`. Missing families: `<actual result or none>`.
+> One blind pass + challenge only if contested (`≤ selected call bound`).
+> Run it on `<target>` with this roster and budget? [yes / no]
 
 "No" is remembered for this cycle or invocation. Silence is "no".
 
@@ -184,9 +192,9 @@ the owner. Subagents need no close. Abort path: `--include-incomplete`, after re
 
 ## Integration
 
-- Offer points: full `/li:cycle` pre-BUILD gate, `/li:plan` approval option E, `/li:review`
-  Step 6b (panel mode) and `/li:code-review`. Snippets and the pending consolidated planning
-  hooks: [integration.md](references/integration.md).
+- Offer points: full-cycle `/li:plan` approval option E, standalone `/li:review`
+  Step 6b (panel mode) and `/li:code-review`. Current caller mappings and per-host
+  mechanics: [integration.md](references/integration.md). CYCLE only carries PLAN's answer.
 - One method: [Review Method](../review/references/method.md) and
   `lib/review-questions.json`; single reviews and panels send the same packet body.
 - Decision: [ADR-0036](../../.claude/decisions/0036-mars-multi-model-review.md).

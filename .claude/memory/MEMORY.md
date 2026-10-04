@@ -5,23 +5,36 @@ lines — it auto-loads at session start. Details live in the linked files;
 read them on demand.
 
 - [lessons.md](lessons.md) — durable rules from corrections (L-NNN). Read before acting.
-- [working-state.md](working-state.md) — cross-session working state (what's in flight).
+- [working-state.md](working-state.md) — concise current state and original work pointers.
+- [working-state-history-2026-10-03.md](working-state-history-2026-10-03.md) — exact cold archive;
+  historical statuses and instructions are not current authority.
 - [personas.md](personas.md) — operator calibration.
 - [../decisions/](../decisions/) — decision records (ADRs).
-- [../plans/todo.md](../plans/todo.md) — current plan.
+- [V2 work map](../plans/v2-findings/work.json) — current original-finding authority.
+- [../plans/todo.md](../plans/todo.md) — preserved shared plan; not this lane's status writer.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
-- **V2 corrections delivered (2026-09-30):** `bcd041eb` (0.13.7) is on main: 36 mapped leaves across the core, routine, agent and skill correction maps. Exact-candidate CI passed all 23 jobs and 555 strict script-file executions; all 17 package review/QA/SHIP gates passed. This does not close the broader advisory portfolio or held work; see [working state](working-state.md#delivered---v2-method-corrections-2026-09-30).
-- **Coordinated delivery (2026-09-29):** native 1a (`394ed0b8`, 0.13.0), reusable patterns (`d89385f2`, 0.13.1) and Adaptive review (`3dadebaa`, 0.13.2) landed on main in that order. Native hooks remain blocked and the other-client increment is not authorized; see [working state](working-state.md).
-- **Review-driven corrections (2026-09-30):** trusted workflow sources (0.13.3), shared budget ownership/wiki isolation/CI balancing (0.13.4), snapshot batching and DRAFT-first specifications (0.13.5), and the shared header core (0.13.6) are delivered. The real main-run overlap was verified separately; parent settings and broader remediation remain open. Original maps and limits are in [working state](working-state.md#delivered---review-driven-corrections-2026-09-30).
-- **Post-native assessment (2026-09-29):** the [sanitized skill and agent summary](../engineering/audits/2026-09-28-skill-review-v2-summary.md) is advisory; it authorizes no portfolio reduction or new implementation.
-- **Reusable patterns (2026-09-28, ADR-0038):** data-only pattern runtime `lib/patterns.py` + `bin/li-pattern.py`; [work map](../plans/reusable-patterns/work.json), frozen [contract](../plans/reusable-patterns/contract.md). Pack provenance reuses ADR-0029 records; pattern coverage never clears ADR-0028 review.
-- **Supported clients (2026-09-25, ADR-0035):** only GitHub Copilot, Claude, Codex and Cursor, plus the manual `other` route. Adding a client family needs a new ADR first. Merged through PR #107 (`10b0eea7`); see [plan](../plans/supported-clients/plan.md).
-- **Isolation incident (2026-09-21):** P08's unisolated cycle-continuity run is invalid evidence; possible real-home effects remain unknown. The operator approved only verified synthetic-path continuation, not real-home inspection/rollback. A13 remains independently gated; see L-037 and the active handoff.
-- **Universal implementation ACTIVE (updated 2026-09-23):** [work map](../plans/universal-implementation/work.json) and [handoff](../plans/universal-implementation/handoff.md) own all A01-A26; recovery88 is the sole coordinator, 79/113 original acceptance items closed. P08 MAIN and finite positive/refusal pair are verified; complete selected SPEC624 is BLOCKED on F06's unobserved rejecting-review condition, whole QUALITY not started. P08's direct negative suite ran, but its pin stopped on additive checkpoint metadata; only private preservation correction is released. P13's one native selected-method case now passes independent SPEC/QUALITY with advisory P3, without parent closure. A24's original three-profile experiment is accepted. Broader A23/P14, P10 and recorded tool/format/CI boundaries remain open or blocked, not waived. Installation remains without Python; only `jokerman89` may authenticate.
-- **Universal audit COMPLETE (2026-09-20):** all126 skills/69 agents reviewed; [26 proposed actions](../engineering/audits/2026-09-20-universal-quality/action-plan.md). Preserve valuable capabilities and all Swarming work as far as feasible (L-030–L-032). Audit is local in the isolated review worktree; product fixes/merge are pending separately.
-- **Copilot enterprise launch COMPLETE (2026-09-08, PR #83 merged):** native portable kit, explicit Spec Kit work map, complete shared startup protocol and 101/101 hosted tests on Ubuntu/macOS/Windows. Delivery evidence and beta acceptance boundaries: [launch plan](../plans/copilot-enterprise-launch/plan.md) and [review](../plans/copilot-enterprise-launch/review.md). Completed plans and older publication/history notes are records, not live instructions or standing authorization.
-- v5.x history: launch-readiness folded into PR #73; v5.0 chain #62→#65 merged. Audit records now at `.claude/engineering/audits/`.
-- Conventions in force: supersede-don't-delete (`superseded_by:`), update-before-append (CAPTURE/learn), L-NNN grammar only, MEMORY.md ≤200 lines.
-- Helpers: lib/paths.sh (all paths), lib/memory.sh (lessons), bin/_context.sh (checkpoints), bin/li-migrate-claude-home, bin/li-vault-init.
+- **Original V2 programme remains open (2026-10-03):** current packages are uncommitted WIP.
+  Last verified main baseline supplied for this continuation is `f9796bb8` / **0.13.7**.
+  The earlier `bcd041eb` delivery covered 36 mapped leaves, not all 84 findings.
+  See [current state](working-state.md#active--original-v2-findings); no new main/SHIP acceptance is claimed.
+- **Universal delivery supersedes the old recovery snapshot:** the
+  [final delivery report](../plans/universal-implementation/reports/final.md) records PR #93 /
+  `80002ed4` and 109/109 items in the final scope. **ADR-0033** removed, never accepted or
+  waived, A15.1–A15.4 and the PDF reader. This is a dated scoped record, not blanket
+  format, host, policy or model acceptance.
+- **Native parity is partial:** the [delivery record](../plans/native-client-parity/review.md)
+  covers PR-1a / `394ed0b8` only. Native-hook and ADR-drafting HOST refusals stay
+  untouched; do not retry or reword them. No other-client increment is authorized.
+- **Patterns and Adaptive review:** their [handoff](../plans/reusable-patterns/handoff.md)
+  and [delivery record](../plans/adaptive-review/handoff.md#delivered-on-2026-09-29)
+  retain actual 0.13.1/0.13.2 outcomes and limitations. Pattern coverage is not review clearance.
+- **Supported clients:** GitHub Copilot, Claude, Codex and Cursor, plus manual `other`
+  ([ADR-0035](../decisions/0035-four-supported-client-families.md)). Metadata is not live availability.
+- **History is cold:** the linked archive preserves old records, including invalid
+  isolation evidence and unknown real-home effects. It is not permission for inspection,
+  rollback, publication or cleanup. Other programmes keep their own maps and review gates.
+- **Memory scope:** this cleanup improves retrieval clarity, not proven compounding or
+  automatic promotion. Supersede-don't-delete, update-before-append, L-NNN grammar and
+  MEMORY.md ≤200 lines remain; helpers and lesson/pattern contracts are unchanged.

@@ -201,8 +201,10 @@ class AgentMethodCases(unittest.TestCase):
             "large-required-column": ("NOT NULL", "old writers", "MigrationPlanner", "backfill/validation"),
             "fast-default": ("constant default", "lock wait/hold", "writer compatibility", "unverified"),
         })
-        self.assertIn("SchemaArchitect and DataPipelineDesigner remain separate expertise",
-                      " ".join(read("DatabaseDesigner").split()))
+        source = " ".join(read("DatabaseDesigner").split())
+        self.assertIn("SchemaArchitect retains its read-only polyglot/partition view", source)
+        self.assertIn("DataPipelineDesigner owns dimensional/pipeline design", source)
+        self.assertIn("without launching them to repeat this design", source)
 
     def test_forensics(self):
         rows = self.method("DebugForensics", ("Handoff packet", "prior hypotheses", "command/exit",

@@ -1,7 +1,7 @@
 ---
 name: frontend-motion
 layer: foundation
-description: Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-config + smooth-scroll-config + key-animations-spec. Solo-invokable.
+description: Use when a frontend brief needs an animation, scrolling or reduced-motion strategy, including no-animation and CSS-only choices.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -21,7 +21,10 @@ You are the `frontend-motion` sub-skill — motion-director for the frontend-des
 
 ## What this skill does
 
-Reads operator brief → MotionDirector agent picks motion-language from the recommendation-tree (GSAP+ScrollTrigger | Lenis-smooth | Theatre.js-timeline | Rive-state | Motion-One-light) + maps scroll-trigger-config + smooth-scroll-config + key-animations-spec → writes `motion.json` (schema_version: 1) with library-install-instructions.
+Reads operator brief → MotionDirector chooses none, CSS or a justified
+project-compatible motion library, then maps scrolling, key animations and
+reduced-motion behavior → writes `motion.json` (schema_version: 1) with setup
+instructions only for the actual selected mode.
 
 Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` orchestrator in parallel-dispatch (Workflow Step 3).
 
@@ -48,7 +51,7 @@ No animation and CSS-only are first-class successful decisions, not missing work
 - Optional `--energy-level <subtle|moderate|kinetic>` — default: `moderate`. Subtle = fade/slide only. Kinetic = scroll-driven full-screen choreography.
 - Optional `--target-device <desktop-only|mobile-first|both>` — affects perf-budget
 - Optional `--out <path>` — output path (default: stdout solo, `$run_dir/motion.json` orchestrator)
-- Optional `--customer-share` — triggers compliance-gate license-check
+- Optional `--customer-share` — selects the customer-share control boundary; no automatic license validator
 - Optional `--mode <none|css|library>` — explicit decision when known; otherwise
   decide from the brief and existing project before producing the shared contract.
 
@@ -72,28 +75,28 @@ Query the design corpus first (ADR-0015 — retrieval before generation):
 python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<animation/interaction keywords>" --domain ux -n 3
 ```
 
-The active design profile's motion tokens are the default (anthropic-default: 150/220/320ms,
-ease-out enter / shorter ease-in exit, one orchestrated moment per view, transform/opacity only,
-reduced-motion respected). The brief's energy-level justifies deviation from the tokens — never
+The verified active design profile's actual motion tokens are the default.
+The brief's energy-level justifies deviation from the tokens — never
 from the reduced-motion floor.
 
-Hand off to `agents/frontend/MotionDirector.md` with the corpus hits + profile tokens in context. Agent picks motion-language from:
+Use `agents/frontend/MotionDirector.md` as the decision method with corpus hits
+and verified profile tokens. Follow [axis ownership](../frontend-design/references/axis-ownership.md);
+delegate only when a separate context is useful and actually available. The role
+returns a draft; this caller owns Step 3's single publication. Decide in this order:
 
-- **GSAP + ScrollTrigger:** scroll-choreographed reveals, scrub-tied keyframes and
-  hero-act sequences when justified. Check the selected release's actual terms;
-  do not repeat an obsolete blanket Club-plugin purchase requirement.
-- **Lenis:** smooth scrolling only when justified over native behavior; verify the
-  selected maintained package, release and license.
-- **Theatre.js:** timeline-based animation/editor; distinguish selected runtime,
-  editor and asset terms when storyboard control is needed.
-- **Rive:** state-driven vector interaction; verify runtime and authoring/asset terms separately.
-- **Motion/WAAPI candidates:** lightweight component transitions when needed; use
-  the current project-compatible package API, version and license.
-- **React motion candidates:** choose only for compatible React projects and
-  UI-bound motion; do not impose them on another framework.
-- **CSS-only** (zero-license): native transitions + `@scroll-timeline` (where supported). Best subtle-energy + perf-critical.
+- **None:** native scrolling and no animation when movement adds no necessary information.
+- **CSS:** use supported native transitions/scroll timelines when they meet the
+  brief and reduced-motion requirements without a JS dependency.
+- **Library:** only for an evidenced interaction need beyond those branches;
+  compare the existing project runtime, framework/browser support, measured or
+  explicitly unverified performance budget and maintenance/setup cost.
 
-Agent verifies current licensing at invocation (L-003).
+For a selected library, verify exact package/release/source/license and distinguish
+runtime, plugin, editor and asset terms. Native scrolling is not a missing feature,
+and a familiar vendor name is not evidence of fit or licensing.
+
+Use actual supplied/verified license evidence or request an authorized lookup.
+A role name does not prove current terms were checked.
 
 ### Step 3 — Produce `motion.json`
 
@@ -107,11 +110,11 @@ Agent verifies current licensing at invocation (L-003).
   "target_device": "desktop-only | mobile-first | both",
   "libraries": [
     {
-      "name": "gsap",
+      "name": "<selected project-compatible motion runtime>",
       "purpose": "scroll-choreography",
       "version": "<exact project-compatible release>",
       "license": {"type": "<verified terms>", "source": "<primary source for that release>"},
-      "npm": "gsap"
+      "npm": "<verified selected package name, if applicable>"
     },
     {
       "name": "<selected maintained smooth-scroll package, only if needed>",
@@ -136,19 +139,19 @@ Agent verifies current licensing at invocation (L-003).
       "name": "hero-reveal",
       "trigger": "scroll-position 0% → 30%",
       "spec": "headline scales 0.8 → 1.0 + fades in; subhead lags 100ms",
-      "library": "gsap+ScrollTrigger"
+      "library": "<selected runtime>"
     },
     {
       "name": "section-fade-up",
       "trigger": "section enters viewport 20%",
       "spec": "translateY(40px) → 0, opacity 0 → 1, duration 600ms ease-out-quart",
-      "library": "gsap"
+      "library": "<selected runtime>"
     },
     {
       "name": "image-parallax",
       "trigger": "scrub-tied",
       "spec": "background translateY(0) → translateY(-20%) over section",
-      "library": "gsap+ScrollTrigger"
+      "library": "<selected runtime>"
     }
   ],
   "perf_budget": {
@@ -179,25 +182,11 @@ means originally absent, not overwrite permission). Then execute:
 
 ```python
 import sys
-import context_safety as safety
-from design_contract import validate_spec
-from review_contract import canonical_json
+from design_contract import emit_fragment
 
 try:
-    checked = validate_spec(fragment, "motion")
-    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
-    if out is None:
-        sys.stdout.buffer.write(payload)
-    else:
-        root = safety.checked_root(repo)
-        relative = safety.selector_path(out)
-        safety.atomic_write(
-            root, relative, payload,
-            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
-            expected=original_output_state, check_expected=True,
-        )
-        if safety.read_owned(root, relative, len(payload))[0] != payload:
-            raise ValueError("Fragment output failed readback")
+    emit_fragment(fragment, "motion", repo=repo, out=out,
+                  original_output_state=None if out is None else original_output_state)
 except (ValueError, OSError, UnicodeError) as error:
     print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
     raise SystemExit(2)
@@ -209,6 +198,8 @@ errors have a nonzero exit. Never pass stdout/special/absolute paths to the root
 reader. For `--customer-share`, use the [customer-share control boundary](../frontend-design/SKILL.md#customer-share-control-boundary)
 on the same data or an owned relative staging file. Missing mandatory licensing
 or policy observations remain unverified; stdout does not exempt them.
+Use its named `motion-licensing` procedure for selected runtimes, plugins,
+editors and assets. Required brief/profile obligations apply without this flag too.
 
 ## Reusable patterns
 
@@ -247,7 +238,8 @@ accessibility.
 
 **Calls into:**
 - `agents/frontend/MotionDirector.md` (primary)
-- `/li:compliance-gate` with the exact artifact and actual policy/control inputs (if --customer-share)
+- The `motion-licensing` source-inspection procedure in the customer-share control
+  boundary; `/li:compliance-gate` evaluates its recorded outcomes, not dependency licenses
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input)
@@ -270,6 +262,7 @@ accessibility.
 
 - Solo: review motion.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li:frontend-design` Step 5
-- Customer-share: pair with `/li:compliance-gate` for final license-audit
+- Customer-share: obtain the required `motion-licensing` evidence, then evaluate
+  the actual controls through `/li:compliance-gate`; unresolved permission blocks sharing
 - Future: propose a reviewed pattern at an explicitly selected authorized destination;
   no automatic personal write or activation follows from a motion decision

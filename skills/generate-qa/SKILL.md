@@ -1,7 +1,7 @@
 ---
 name: generate-qa
 layer: foundation
-description: Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where possible. Solo-invokable on any artifact (even non-generate-produced).
+description: Use to inspect generated or supplied artifacts against source, brand, readability and structure requirements without modifying them; explicitly requested repairs use a separate owned copy.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -21,7 +21,12 @@ You are the `generate-qa` skill — final stage of the v3.5 shared content pipel
 
 ## What this skill does
 
-Reads one or more artifacts (PPTX, DOCX, HTML, PDF, XLSX, Visio — or whatever was produced) + their generating design-spec.json + voice-blocklist → runs format-appropriate checks, applies auto-fixes where safe, produces qa-report.json with severity-tagged issues + a summary.
+Inspects selected artifacts (PPTX, DOCX, HTML, PDF, XLSX or Visio) only through
+actually available format operations, with their source, optional design spec and
+configured voice requirements. Produces qa-report.json with issues, coverage and
+unavailable checks. A recognized extension is not proof of inspection support.
+Inspection is report-only by default; repairs require explicit authorization and
+a separate output.
 For standalone Word/PPT, a design-spec is optional: inspect the exact original
 brief/content and saved artifact. Follow the
 [source-fidelity and P05/P07 evidence procedure](../generate-write/references/fidelity-and-evidence.md).
@@ -40,7 +45,9 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 ## When NOT to use
 
-- Voice-gate (vocabulary-blocklist) — that's the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). QA enforces broader checks; the voice-gate is the customer-share-specific block.
+- Voice-gate execution — use the active pack's `voice.gates_active` and its actual
+  configured corpus. Compliance hooks are a separate source of controls; an empty
+  `compliance.hooks` list is not a passed or absent required voice check.
 - Brand-asset audit (template freshness across the brand directory) — that's a separate operator workflow
 - Pre-implementation design review — use `/li:inspect --target plan --lens design`
 
@@ -51,8 +58,13 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 - Optional `--source <path>` — exact source brief or content.md for standalone retention checks
 - Optional `--palette <name>` — palette for brand-color validation (default: inferred from design-spec or the active pack's default palette)
 - Optional `--vocabulary-blocklist <path>` — voice blocklist for content-text checks
-- Optional `--auto-fix <safe|aggressive|none>` — auto-fix mode (default: safe)
+- Optional `--auto-fix <safe|aggressive|none>` — auto-fix mode (default: none)
+- Optional `--fixed-out <path>` — new owned artifact path; required for `safe` or `aggressive`. Repair one artifact per invocation; inspect multiple artifacts together in report-only mode.
 - Optional `--out <path>` — qa-report.json output path (default: alongside artifacts)
+
+The report destination must also be an authorized new output. Refuse a report
+path that aliases an input, a repaired artifact or an existing unrelated file;
+report-only does not authorize overwriting an artifact with the JSON report.
 
 ## Check categories
 
@@ -71,8 +83,16 @@ a malformed slide. For PPT, inspect visible claims plus actual saved notes/appen
 and delivered linked long-form content. Missing detail in a sidecar that never
 reaches the delivered package is a fidelity finding.
 
-Reopen and edit/read back through an actual application/API where editability is
-promised. Render every required page/slide and inspect wrapping, clipping, overlap,
+In report-only `none` mode, do not perform mutating native edit/readback probes.
+Use non-mutating inspection and any applicable attributable existing editability
+evidence. A required editability check with no such evidence remains unverified,
+not waived because the file is normally editable. A new mutating probe is a
+separately authorized verification on a distinct owned copy, with its own
+path/content-bound evidence; it is not implicit QA or permission to edit the
+supplied artifact. Repairs still require their explicit mode and `--fixed-out`.
+
+Render every required page/slide through an authorized non-mutating operation
+and inspect wrapping, clipping, overlap,
 legibility, table continuation and assets at that renderer's layer. Word model/ZIP
 checks cannot prove pagination; a PowerPoint SVG render does not establish every
 Office application's behavior. Record the tool, instance, actions, paths/hashes,
@@ -114,20 +134,26 @@ coverage and unsupported features. Missing rendering is unverified, not N/A or P
 
 ## Auto-fix modes
 
-**`safe` (default):**
+**`none` (default):**
+- Report-only mode. No artifact modification, including files produced by this pipeline.
+- Report findings and proposed fixes without creating a repaired copy.
+
+**`safe` (explicit):**
 - Normalize decorative formatting only when semantics and source coverage are unchanged
 - Remove a genuinely empty unused placeholder, not a source slot awaiting content
-- Preserve the original owned artifact/version and record every edit
+- Copy the source to the explicit `--fixed-out`, preserve the original bytes and record every edit to the copy
 - Reopen and repeat affected retention/render checks after any edit; font resizing or wording changes are not automatically safe
 
-**`aggressive`:**
+**`aggressive` (explicit):**
 - All `safe` actions
 - With explicit approval, reflow/split slides, add continuation pages, or move detail to actual notes/appendix while preserving every fact and citation
 - Propose order, wording or contrast changes with a source-preserving diff
 - Never truncate bullets or delete qualifiers to meet a count or font target
 
-**`none`:**
-- Report-only mode. No artifact modification.
+Neither repair mode authorizes overwriting the source or an existing destination.
+Reject the same path, a symlink/hard-link alias, an unowned output or an unavailable
+destination before writing. Never fall back to the input path or current directory.
+`--out` is the report destination, not permission to use it for a repaired artifact.
 
 ## Qa-report.json schema
 
@@ -190,18 +216,33 @@ python-docx/python-pptx and ZIP/XML extraction provide different coverage from a
 page/slide renderer. Name the layer and do not count an extractor as rendering.
 Check all selected applicable categories and retain missing observations.
 
-PDF needs a real page renderer and text/page-fidelity check. XLSX needs actual
-recalculation plus formula/cache/reopen checks. Visio needs connector/label and
-rendered editable-reopen checks. Their planned adapters and the shared design
-binding retain their own release gates; this unit does not claim those formats
-verified. Do not install libraries automatically to make a missing tool disappear.
+For PPTX, use the shipped [`check_pptx.py` retention procedure](../generate-ppt/references/retention-check.md)
+with the actual artifact and explicit source inventory. It refuses malformed or
+aliased notes and reports missing paragraphs/cells; it is read-only ZIP/XML
+inspection, not native rendering, reopen/editability or full layout verification.
+
+PDF has an existing converter/browser-print writer but no shipped PDF reader:
+produced text, pages and visual rendering stay unverified without an actually
+available authorized inspection operation. XLSX uses its existing production
+method, actual recalculation and shipped formula/cache checker; persisted caches
+and application reopen remain separate observations. Visio has no shipped writer;
+connector/label/rendered editable-reopen checks require actual host operations.
+Do not install a reader/renderer or invent shared projections to hide these gaps.
 
 ### Step 4 — Apply auto-fixes per `--auto-fix` mode
 
-For each authorized fix, preserve the original version and record `auto_fixed`
-and `fix_applied`. Re-read the changed artifact, compare it to the full source and
-rerun affected checks. Reprepare stale P05 evidence; an auto-fix cannot retain a
-pre-edit PASS. `none` remains strictly read-only.
+With `none`, skip repairs. A check request or a suggested fix is not explicit
+repair authorization. For `safe` or `aggressive`, validate the single selected
+artifact and distinct owned `--fixed-out` before creating a copy. If authorization
+or the output is missing, report that repair is blocked; keep the original
+inspection results, and do not choose an output on the operator's behalf.
+
+Record source/output paths and hashes, `auto_fixed` and `fix_applied`. Apply edits
+only to the copy and verify the original bytes remain unchanged. Re-read the
+changed copy, compare it to the full source and rerun affected checks. Prepare
+P05 evidence for the copy's actual path and content; identical initial bytes do
+not transfer a source artifact's PASS to another path. An edit cannot retain a
+pre-edit PASS.
 
 ### Step 5 — Compose qa-report.json
 
@@ -236,7 +277,7 @@ evidence; QA never clears review, and an unverified clause is not passed.
 
 ## Pause-points
 
-- Auto-fix would substantially modify artifact (> 20% changes): confirm with operator before applying
+- A proposed repair changes intent or exceeds the explicitly authorized scope: resolve that decision before editing the copy
 - Vocabulary-blocklist match in customer-share context but operator hasn't run the active pack's compliance gates: surface recommendation to run the voice-gate
 
 ## Integration
@@ -249,7 +290,7 @@ evidence; QA never clears review, and an unverified clause is not passed.
 
 **Writes:**
 - `qa-report.json` to `--out`
-- Modified artifacts (in-place) if `--auto-fix` is `safe` or `aggressive`
+- A new artifact at explicit `--fixed-out` only when `safe` or `aggressive` repair is authorized; the original is never edited
 
 **Consumed by:**
 - `/li:generate` orchestrator (Step 8 — aggregate QA across all produced formats)
@@ -260,6 +301,7 @@ evidence; QA never clears review, and an unverified clause is not passed.
 - **Auto-fix `aggressive` without operator confirmation** — reflow/reorder can change intent. No mode permits silent content loss.
 - **Treat QA-pass as sharing permission** — applicable policy, independent review and delivery authority still govern; neutral voice advice is not an invented hard gate.
 - **Modify artifact when `--auto-fix none`** — none means report-only. Hard rule.
+- **Repair the original or silently choose a destination** — repair authority requires an explicit distinct owned output, including for teammate-supplied files.
 - **Skip cross-reference check when design-spec available** — if operator provided design-spec, validate artifact matches spec (catches drift).
 
 ## Failure recovery

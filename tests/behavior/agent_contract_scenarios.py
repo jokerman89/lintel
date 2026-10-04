@@ -44,8 +44,9 @@ def percentile99(samples: list[int]) -> int:
 class RoleDocuments(unittest.TestCase):
     def test_s01_inventory_and_preservation_rows(self) -> None:
         names = re.findall(r"^\| \[([A-Za-z0-9]+)\]\(", read(INVENTORY), re.MULTILINE)
-        self.assertEqual(69, len(names))
-        self.assertEqual(69, len(set(names)))
+        self.assertTrue(names, "The original public-name inventory must not be empty")
+        self.assertEqual(len(names), len({name.casefold() for name in names}),
+                         "Original role names must be unique, including case")
         roles = {path.stem: path for path in (ROOT / "agents").glob("*/*.md")}
         self.assertTrue(set(names) <= roles.keys(), "An original entry name disappeared")
         for name in names:

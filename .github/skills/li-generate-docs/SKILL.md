@@ -29,6 +29,9 @@ Generate Markdown documentation from selected source code and its actual behavio
 Keep engineering reference, customer-guide and tutorial outcomes. This is distinct
 from the `DocWriter` method for detecting drift and revising existing documentation,
 and from `generate`, which renders a content brief into document formats.
+Both documentation front doors directly consume BUILD's
+[documentation-fidelity method](../../../skills/build/references/documentation-fidelity.md).
+Neither delegates its checks to the other.
 
 ## Inputs
 
@@ -53,12 +56,11 @@ Never silently concatenate a second reference into an existing document.
    list before writing; read the complete selected files and their relevant
    imports, types and public exports. Missing/unreadable files remain failures,
    not empty modules. Do not execute imported source code merely to document it.
-2. **Read behavior evidence.** Inspect sibling tests, callers, existing docs and
-   relevant local history. Build an inventory of signatures, parameters/defaults,
-   return values, errors, side effects, authorization and platform/version
-   constraints. Cite actual source locations. Separate observed behavior from
-   comments, assumptions and proposed behavior. A test example is not a claim
-   that its test ran in this invocation.
+2. **Read behavior evidence.** Apply the shared documentation-fidelity source
+   inventory and intent rules to sibling tests, callers, accepted docs and
+   relevant local history. Retain cited signatures/defaults, return/errors,
+   side effects and constraints. Do not rewrite accepted intent to conceal a
+   code defect; the shared method also owns frozen paths and removed-option migration.
 3. **Draft the selected target without losing meaning.**
 
    | Target | Retained structure |
@@ -71,12 +73,11 @@ Never silently concatenate a second reference into an existing document.
    material limitations. Do not turn an example response into a guaranteed API
    response or invent a "successful" command output. Label illustrative output.
    Section counts are a presentation choice, never a reason to drop source detail.
-4. **Check coverage and policy.** Map each relevant public export/source claim to
-   its documentation section. Check signatures, defaults, errors, links and code
-   snippets against the actual sources. Run safe requested examples/tests only
-   inside their authorization and record which ran. Keep missing tests/examples
-   and unverified claims explicit. Apply the actual configured data/voice controls;
-   do not invent a neutral vocabulary gate or infer hook activation from files.
+4. **Check coverage and policy.** Use the shared method's claim-to-source
+   coverage record for every in-scope export/claim and documentation section.
+   Distinguish checked, unrun and divergent claims, preserving actual command/
+   exit evidence and missing examples. Apply the actual configured data/voice
+   controls; do not invent a neutral gate or infer hook activation from files.
 5. **Publish atomically.** Write only the selected output within ownership, retain
    the original preimage if replacement was authorized, and read it back.
    Keep source identities and coverage in the run report. Customer-guide or
@@ -118,5 +119,6 @@ stays unverified. Documentation generation cannot clear another format's gates.
 - Changed source during generation: refresh the affected coverage and evidence
   before publication. Do not reuse stale source hashes or review decisions.
 
-Use `DocWriter` for later drift checks and `lessons-add` for an explicitly
-authorized reusable documentation lesson. Neither is automatically invoked.
+Apply the same shared method to later changed-source coverage; it does not require
+a DocWriter handoff. `lessons-add` remains available for an explicitly authorized
+reusable documentation lesson, never an automatic persistence step.

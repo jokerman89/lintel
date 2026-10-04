@@ -73,6 +73,11 @@ tool availability or a staging label is not target authorization.
    - PKs, FKs, unique constraints
    - Indexes (B-tree default, GIN for full-text/JSONB, partial where appropriate)
    - RLS policies if Supabase / multi-tenant
+   - For mixed stores and partitions, apply the shared
+     [data decision methods](../../skills/da/references/decision-methods.md) in this
+     context: authoritative writer, consistency/reconciliation, key skew/co-location
+     and rebalance evidence. SchemaArchitect is the compatible read-only view, not
+     another default design pass.
 4. **Sequencing handoff:** apply [MigrationPlanner's method](../../agents/engineering/MigrationPlanner.md)
    to the schema delta, consumer inventory and approved window. There is no
    mandatory additional actor: reuse the method or hand the same evidence to an
@@ -151,8 +156,9 @@ design example, not evidence of a measured query plan or live migration.
 
 ## Static contract examples
 
-SchemaArchitect and DataPipelineDesigner remain separate expertise when their
-scope applies; this role neither absorbs them nor launches them automatically.
+SchemaArchitect retains its read-only polyglot/partition view of the shared method;
+DataPipelineDesigner owns dimensional/pipeline design. Their names and output
+boundaries remain available without launching them to repeat this design.
 
 | Case | Static outcome | Evidence / next action |
 |---|---|---|

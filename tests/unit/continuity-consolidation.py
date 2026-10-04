@@ -154,6 +154,56 @@ class ContinuityContracts(unittest.TestCase):
     def state_file(self) -> Path:
         return self.repo / ".claude/runtime/state/code-freeze/w3-fixture.yaml"
 
+    def test_repo_jobs_preserve_unselected_registry_and_personal_profile(self):
+        for key in ("LINTEL_JOBS_DIR", "LINTEL_JOBS_REGISTRY", "LINTEL_AUDIT_DIR"):
+            self.env.pop(key, None)
+        home = Path(self.env["LINTEL_HOME"])
+        registry = home / "jobs/_active.md"
+        registry.parent.mkdir()
+        registry.write_bytes(b"# Lintel jobs registry (cross-repo)\n\n- other <!-- repo:other -->\n")
+        (home / "profile.yaml").write_bytes(b"personal fixture: never read or changed\n")
+        before = {str(p.relative_to(home)): p.read_bytes() for p in home.rglob("*") if p.is_file()}
+        created = self.shell('set -euo pipefail; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; '
+                             'job_create cycle internal-tool').stdout.strip()
+        self.assertEqual(before, {str(p.relative_to(home)): p.read_bytes()
+                                  for p in home.rglob("*") if p.is_file()})
+        self.shell('set -euo pipefail; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; '
+                   'job_update "$1" BUILD IN_PROGRESS; list_jobs --read-only', created)
+        self.assertEqual(before, {str(p.relative_to(home)): p.read_bytes()
+                                  for p in home.rglob("*") if p.is_file()})
+        self.shell('set -euo pipefail; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; '
+                   'job_archive "$1" ABORTED', created)
+        self.assertEqual(before, {str(p.relative_to(home)): p.read_bytes()
+                                  for p in home.rglob("*") if p.is_file()})
+        self.assertTrue((self.repo / ".claude/runtime/jobs/_active.md").is_file())
+        self.assertTrue((self.repo / ".claude/runtime/audit/jobs.jsonl").is_file())
+        self.assertEqual(len(list((self.repo / ".claude/runtime/jobs/_archive").glob("*/*/job.yaml"))), 1)
+
+    def test_explicit_repo_registry_sync_preserves_other_scope_and_read_only_list(self):
+        self.env.pop("LINTEL_JOBS_DIR")
+        registry = Path(self.env["LINTEL_JOBS_REGISTRY"])
+        registry.parent.mkdir()
+        registry.write_bytes(b"# Lintel jobs registry (cross-repo)\n\n- other <!-- repo:other -->\n")
+        self.shell(
+            'set -euo pipefail; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; '
+            'id="$(job_create cycle internal-tool)"; job_update "$id" BUILD IN_PROGRESS'
+        )
+        text = registry.read_text(encoding="utf-8")
+        self.assertIn("<!-- repo:other -->", text)
+        self.assertIn(self.repo.as_posix(), text)
+        self.assertIn("step:BUILD", text)
+        before = registry.read_bytes()
+        self.shell('export LINTEL_JOBS_NO_INIT=1; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; list_jobs --read-only')
+        self.assertEqual(registry.read_bytes(), before)
+
+    def test_jobs_wording_matches_nonmutating_list_and_preserved_replan(self):
+        text = body("jobs")
+        self.assertNotIn("re-runs from scratch", text)
+        self.assertNotIn("destroys voice-gate provenance", text)
+        self.assertIn("LINTEL_JOBS_REGISTRY", text)
+        self.assertIn("separately authorized", text)
+        self.assertIn("list` does not regenerate", text)
+
     def test_heading_selection_does_not_take_an_unrelated_first_fence(self):
         document = "## Unrelated\n```bash\nexit 19\n```\n\n" + body("context-warm")
         selected = bash_block(document, "## Related mode")
@@ -213,6 +263,8 @@ class ContinuityContracts(unittest.TestCase):
                                         'context_checkpoint "$path"\n').stdout)
         relative = manifest["files"][0]["path"]
         self.assertTrue(relative.endswith("-context-save.md"))
+        key = self.shell('source "$LINTEL_SOURCE_ROOT/bin/_context.sh"\n_context_repo_key').stdout.strip()
+        self.assertIn(f"-r{key}-", Path(relative).name)
         path = Path(manifest["source_root"]) / relative
         selected = path.relative_to(self.repo).as_posix()
         for spelling in (selected, "./" + selected, selected.replace("/", "\\")):
@@ -236,6 +288,13 @@ class ContinuityContracts(unittest.TestCase):
         self.recipe("resume", "### Step 1b — Read a selected checkpoint", "", expected=2)
         self.assertEqual(external.read_text(encoding="utf-8"), "authorized fixture handoff")
 
+    def test_pause_examples_keep_the_repository_key_grammar(self):
+        examples = body("pause").split("## Examples", 1)[1]
+        names = re.findall(r"\b\d{8}-\d{6}-[^\s`]+-context-save\.md", examples)
+        self.assertTrue(names)
+        for name in names:
+            self.assertRegex(name, r"^\d{8}-\d{6}-r(?:[0-9a-f]{40}|[0-9a-f]{64})-.+-context-save\.md$")
+        self.assertIn("key below is synthetic", examples)
     def test_resume_retains_selected_work_profile_and_job_contract(self):
         text = body("resume")
         self.assertLess(text.index("First honor an operator-selected work map"), text.index("checkpoints="))
@@ -282,10 +341,13 @@ class ContinuityContracts(unittest.TestCase):
         self.assertIn("refusing overwrite", body("skill-new"))
 
     def test_doctor_views_run_real_helper_and_preserve_failure(self):
+        self.assertIn("](references/inspection.md)", body("doctor"))
+        reference = (ROOT / "skills/doctor/references/inspection.md").read_text(encoding="utf-8")
+        recipe = bash_block(reference, "## Run the owned diagnostic")
         for options in (("--json",), ("--fast", "--hooks-only", "--json"),
                         ("--layers-only",), ("--upstream-only",)):
             with self.subTest(options=options):
-                result = self.recipe("doctor", "## Run the owned diagnostic", *options, expected=1)
+                result = self.shell(recipe, *options, expected=1)
                 report = json.loads(result.stdout)
                 self.assertEqual(Path(report["source"]), ROOT)
                 self.assertEqual(Path(report["target"]), self.repo)
@@ -293,8 +355,8 @@ class ContinuityContracts(unittest.TestCase):
                 self.assertEqual(report["hook_execution"], "unverified")
                 self.assertTrue(report["foundation_missing"])
                 self.assertTrue(report["issues"])
-        self.recipe("doctor", "## Run the owned diagnostic", "--unknown", expected=2)
-        self.recipe("doctor", "## Run the owned diagnostic", "--hooks-only", "--layers-only", expected=2)
+        self.shell(recipe, "--unknown", expected=2)
+        self.shell(recipe, "--hooks-only", "--layers-only", expected=2)
 
     def test_freeze_state_reaches_hook_and_lift_list_preserve_unmatched_entries(self):
         self.write("src/frozen/file.txt", "unchanged\n")
@@ -378,13 +440,18 @@ class ContinuityContracts(unittest.TestCase):
 
     def test_capture_views_preserve_observations_and_do_not_complete_a_cycle(self):
         capture = body("capture")
+        reports = (ROOT / "skills/capture/references/reports.md").read_text(encoding="utf-8")
+        for target in ("#step-8--retrospective---retrospective",
+                       "#step-8b--release-report---release-summary"):
+            self.assertIn(f"](references/reports.md{target})", capture)
         for contract in ("--retrospective", "--release-summary", "--since", "--until",
                          "--include-stats", "--emit-lessons", "audit_read_files", "bin/li-events.py",
                          "check=performed|not_performed", "Migration notes", "DRAFT",
                          "Return after the selected report", "cycle_complete=false"):
-            self.assertIn(contract, capture)
+            self.assertIn(contract, capture + "\n" + reports)
         self.assertIn("Step 8b", capture)
-        self.assertIn("no release, tag, commit, publication or approval", capture)
+        self.assertIn("no release, tag, commit, publication or approval", reports)
+        self.assertNotIn("Gather only signals relevant", capture)
 
     def bind_vault_fixture(self, *, enabled, destination):
         self.write("packs/vault-fixture/pack.yaml",
@@ -404,7 +471,9 @@ class ContinuityContracts(unittest.TestCase):
         self.env["LINTEL_PROFILE_REFERENCE"] = result.stdout.strip()
 
     def vault_recipe(self):
-        recipe = bash_block(body("capture"),
+        self.assertIn("](references/vault.md)", body("capture"))
+        vault = (ROOT / "skills/capture/references/vault.md").read_text(encoding="utf-8")
+        recipe = bash_block(vault,
                             "### Step 7b — Vault sink (session summary → knowledge vault)")
         return self.shell(recipe + '\nif [ -n "${sink_dir:-}" ]; then\n'
                           '  if command -v cygpath >/dev/null 2>&1; then\n'
@@ -478,7 +547,10 @@ class ContinuityContracts(unittest.TestCase):
         state.write_text(text.replace("branch: shared", "branch: different"), encoding="utf-8")
         mismatched = self.shell(prelude + recipe)
         self.assertIn("branch-drift", mismatched.stdout)
-        self.assertIn("Continue anyway?", mismatched.stdout)
+        self.assertIn("Reconcile these mismatches against the selected work", mismatched.stdout)
+        self.assertNotIn("Continue anyway?", mismatched.stdout)
+        self.assertEqual(state.read_text(encoding="utf-8"),
+                         text.replace("branch: shared", "branch: different"))
 
     def test_status_keeps_mapped_work_visible_without_job_registry_or_writes(self):
         self.env.pop("LINTEL_SESSION_ID", None)

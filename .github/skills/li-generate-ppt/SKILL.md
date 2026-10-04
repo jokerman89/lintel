@@ -1,6 +1,6 @@
 ---
 name: li-generate-ppt
-description: Produce an editable PowerPoint deck through available native tools or pptxgenjs, retaining source detail in notes and inspecting actual rendered slides.
+description: Use to create an editable PowerPoint deck from a brief or shared pipeline, retaining source detail in notes and inspecting actual rendered slides.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-ppt/SKILL.md`; edit the canonical file, then run
@@ -79,9 +79,9 @@ Preserve this entry point and its existing fields. First follow
 [existing pipeline input admission](../../../skills/generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
 with `--format ppt`, external input context, original package/leaves and current
 profile. It verifies canonical content/notes/hash identity and the existing PPT
-projection without rendering. Shared theme/artifact acceptance remains the
-A15.3.shared gate. Standalone `--brief` still needs no generate-design output or
-new domain envelope.
+projection without rendering. Actual artifact/source-retention and required P05
+inspections remain separate; retired document-format acceptance is not a live
+gate. Standalone `--brief` still needs no generate-design output or new domain envelope.
 
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — written content (with HTML-comment annotations for voice/type/key_message per section)
@@ -176,6 +176,11 @@ words-per-minute target is not an observed rehearsal.
 
 5. **Inspect the saved artifact, then apply the familiar control categories:**
 
+   Run the shipped read-only [`check_pptx.py` source-retention procedure](../../../skills/generate-ppt/references/retention-check.md)
+   on the actual deck and explicit source paragraphs/cells. It checks bounded
+   ZIP/XML and real note relationships; keep missing detail and malformed/aliased
+   notes as findings. This does not supply application or rendered-layout evidence.
+
    First reopen through the actual available application/API, make a small scoped
    edit and read it back. Compare full source to slides plus actual saved notes.
    Render every slide using the available renderer and inspect wrapping, overflow,
@@ -188,6 +193,11 @@ words-per-minute target is not an observed rehearsal.
    **Brand:** check configured template/tokens and explicitly authorized local
    assets. No invented logo, personal library scan or claim that a blank deck is
    company-branded. Missing mandatory brand data cannot silently fall back.
+   Use the named `brand-source` and `brand-freshness`
+   [selected asset evidence procedures](../../../skills/design-dna/references/design-contract.md#selected-asset-evidence).
+   Record actual source/version and refresh requirements as P05 `check` controls;
+   unknown currency stays unverified. `--ignore-stale-brand` records only a
+   permitted advisory exception, not a passed mandatory freshness check.
 
    **Honest limitations:** check each material claim against its evidence,
    assumptions and failure boundary, including claims on pitch/workshop slides.
@@ -270,4 +280,4 @@ package extraction, native actions and render evidence separate.
 - `SlideNarrationCritic` agent — slide narration / talk-track critique (post-generation)
 - The active pack's compliance gates — Gate 1
 - `/generate-word`, `/generate-web` — sibling doc-gen skills
-- `brand-staleness-warn` hook — Phase E
+- [Brand source and freshness evidence](../../../skills/design-dna/references/design-contract.md#selected-asset-evidence) — scoped inspection, not a hook

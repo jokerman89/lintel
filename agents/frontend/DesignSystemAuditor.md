@@ -49,15 +49,22 @@ primary [WCAG 2.2 SC 1.4.3 source](https://www.w3.org/WAI/WCAG22/Understanding/c
 its version and actual applicability, not a score threshold as legal assurance.
 Emit a `contrast` control with `observation: {ratio, text_size}`.
 
-Keyboard/focus, rendered responsive behavior, FPS and runtime reduced-motion claims
-need actual browser/tool/state/viewport evidence. Missing browser means `unverified`
-for those requirements; static lint proves only the patterns it inspects. Source
-presence of a media query is not an observed runtime pass. No animation/no shader
-can be grounded N/A; an N/A display score is not verified functionality.
+Keyboard/focus, responsive behavior and runtime reduced-motion claims need actual
+interaction/tool/state/viewport evidence. FPS, FOIT and scroll-jank additionally
+require compatible performance measurements; the retained read/capture provider
+does not supply them. DOM, static source and screenshots cannot prove timing.
+Keep absent timing unverified and `shader_perf_budget` null without measurement.
+Other scores may cover observed non-timing aspects only; use null when the missing
+measurement is needed for the requested judgment. Source presence of a media query
+is not an observed runtime pass. No animation/no shader can be grounded N/A through
+P05; an N/A display score is not verified functionality.
 
 ## Non-overlap with existing agents (m-1 analogue)
 
-- **vs `agents/doc-gen/WebExperienceCritic.md`** — WebExperienceCritic is design-pass-hook DURING generate-web (in-flight critic). DesignSystemAuditor is post-gen AUDIT (scoring artifact). Disjoint phases.
+- **vs `agents/doc-gen/WebExperienceCritic.md`** — WebExperienceCritic supports
+  early advice and overlapping post-generation review with the same dimensions.
+  Use the [single review owner and reuse procedure](../../skills/frontend-design-review/references/built-review.md#review-ownership-and-reuse);
+  do not run both aliases by default or count pre-generation advice as rendered evidence.
 - **vs `agents/engineering/AccessibilityChecker.md`** — AccessibilityChecker scopes to a11y only (dimension 4 of DesignSystemAuditor). DesignSystemAuditor is broader 6-dimension audit that INCLUDES accessibility but also brand+motion+typography+shader+responsive. For accessibility-only audits, prefer the focused agent. For full design-quality gate, use this.
 - **vs `agents/engineering/CodeReviewer.md`** — CodeReviewer audits source code (logic, types, bugs). DesignSystemAuditor audits produced artifacts (visual + UX). Disjoint output-targets.
 
@@ -78,129 +85,46 @@ can be grounded N/A; an N/A display score is not verified functionality.
 
 1. **Read artifact + (optional) baseline + dimension-list:**
    - Artifact-type: url | project-dir | single-html | screenshot
-   - Baseline: vault pattern at `~/.lintel/brand/design-patterns/<name>/` (optional)
+   - Baseline: explicitly selected project/pack pattern or verified profile (optional)
    - Dimensions: subset or all 6
 
-2. **Run dimension 1 — Typography hierarchy (0-100):**
+2. **Review the six canonical dimensions (0-100 advisory, or null):**
 
-   **+points for:**
-   - Heading scale-ratio applied consistently (1.25 / 1.333 / 1.618) — 20pts
-   - Line-height bands (tight/normal/relaxed) used correctly per role — 15pts
-   - Letter-spacing applied at scale (tight for large, wide for small uppercase) — 10pts
-   - Font-loading: preload critical + swap-strategy declared — 15pts
-   - Variable-axes used (if font supports) — 15pts
-   - Fallback-stack declared per @font-face — 15pts
-   - Baseline grid/rhythm consistent — 10pts
+   | Dimension | Retained questions, tied to actual observations |
+   |---|---|
+   | `typography_hierarchy` | Heading scale, line-height and letter-spacing by role; fallback stacks, preload/swap declarations, supported variable axes, grid/rhythm, confusing hierarchy and inconsistent rendering. Declarations prove configuration, not font timing. |
+   | `motion_coherence` | Coherent motion language, concurrent work against the specified budget, reduced-motion behavior, mobile strategy, easing consistency, runtime/scroll coordination, conflicting libraries and observed layout shifts. Timing claims need measurements. |
+   | `shader_perf_budget` | Viewport-gated initialization/off-screen pause, measured device/workload budget, no-WebGL fallback, mobile downscale/disable strategy, context-loss handling and observed cleanup/leaks. Without measurements or without a shader: null; ground GPU-only N/A through P05. |
+   | `accessibility_wcag` | Measured normal/large contrast at 4.5:1/3:1, keyboard reachability, visible focus, meaningful accessible names for icon controls, skip links, semantic headings and actual reduced-motion/color-scheme behavior. A visible label can supply the accessible name; ARIA is not required redundantly. |
+   | `brand_conformance` | Verified selected palette/type/spacing/grid and brief overrides, marks only where required, configured voice, consistent token usage and evidenced brand mismatches. No personal palette lookup or invented required logo. |
+   | `responsive_fidelity` | Actual requested mobile/tablet/desktop viewports, container-dependent layout, touch targets against the selected requirements (the design guideline is ≥44px), hero clipping/overflow, layout shifts and mobile motion behavior. |
 
-   **-points (red flags):**
-   - Heading-soup (>4 size-levels in fold) — -20pts
-   - FOIT >100ms (font-loading-flash) — -15pts
-   - No fallback-stack — -20pts
-   - Font-rendering inconsistent across sections — -10pts
+   Retain these questions rather than fixed point awards for unobserved features.
+   Use the existing `measure_contrast.py` procedure for observed solid colors,
+   unchanged ratio/text-size output and its refusal cases. Any required missing
+   observation remains unverified; source lints do not supply runtime checks.
 
-3. **Run dimension 2 — Motion coherence (0-100):**
-
-   **+points for:**
-   - Single motion-language thesis (one primary library) — 25pts
-   - Scroll-trigger animations budget-respected (≤5 concurrent) — 15pts
-   - prefers-reduced-motion fallback present + verified — 25pts
-   - Mobile-strategy declared + visibly differentiated — 15pts
-   - Animation-timing consistent (same easing-family across) — 10pts
-   - GSAP-Lenis-coordination clean — 10pts
-
-   **-points:**
-   - Scroll-jank >16ms — -20pts
-   - No prefers-reduced-motion fallback — -30pts (mandatory)
-   - Mixed-library overlap on same role — -15pts
-   - Layout shift caused by animation — -15pts
-
-4. **Run dimension 3 — Shader perf-budget (0-100):**
-
-   **If no shader present:** retain null advisory score and explain the absence;
-   ground N/A for GPU-only controls through P05, without dropping other controls.
-
-   **+points for:**
-   - WebGL initialization gated by IntersectionObserver — 20pts
-   - Fragment-shader complexity within mid-tier-mobile — 20pts
-   - Fallback for no-WebGL contexts — 25pts
-   - IntersectionObserver pause for off-screen — 15pts
-   - Mobile-strategy applied (downscale or disable) — 10pts
-   - Memory-leak-free unmount — 10pts
-
-   **-points:**
-   - fps <30 on mid-tier mobile — -25pts
-   - No fallback — -30pts
-   - WebGL context-loss not handled — -15pts
-   - Always-running (no pause) — -15pts
-
-5. **Run dimension 4 — Accessibility WCAG AA (0-100):**
-
-   **+points for:**
-   - Color-contrast ≥4.5:1 for normal text — 20pts
-   - Color-contrast ≥3:1 for large text — 10pts
-   - All interactive elements keyboard-reachable — 20pts
-   - Focus-rings visible + contrast-pass — 15pts
-   - Aria-labels on icon-buttons — 10pts
-   - Skip-link present — 5pts
-   - Semantic HTML (proper heading-hierarchy) — 10pts
-   - prefers-reduced-motion + prefers-color-scheme respected — 10pts
-
-   **-points:**
-   - Contrast <3:1 on critical text — -30pts
-   - No keyboard navigation — -25pts
-   - Focus-rings stripped without replacement — -20pts
-   - Missing aria-labels on meaningful icons — -10pts
-
-6. **Run dimension 5 — Brand conformance (0-100):**
-
-   **+points for:**
-   - Palette tokens match `~/.lintel/brand/palettes/<active>.json` — 25pts
-   - Logo placement matches brand guidelines — 15pts
-   - Typography family matches brand spec — 20pts
-   - Voice-tier compliance (internal vs customer-share) — 20pts
-   - Spacing/grid matches brand grammar — 10pts
-   - Consistent token usage (no hard-coded hex) — 10pts
-
-   **-points:**
-   - Off-palette colors >20% of accents — -25pts
-   - Logo missing or misused — -20pts
-   - Voice-tier mismatch — -25pts (customer-bound output must never leak internal-voice)
-
-7. **Run dimension 6 — Responsive fidelity (0-100):**
-
-   **+points for:**
-   - Mobile (<640px) layout valid + tested — 20pts
-   - Tablet (640-1024px) layout valid — 15pts
-   - Desktop (>1024px) layout valid — 15pts
-   - Container queries used where component-context varies — 10pts
-   - Touch-targets ≥44px on mobile — 15pts
-   - Hero scales appropriately (no clipping, no overflow) — 15pts
-   - Mobile-motion-strategy applied — 10pts
-
-   **-points:**
-   - Horizontal scroll on mobile — -25pts
-   - Touch-targets <32px — -15pts
-   - Hero broken on iPhone-SE — -20pts
-   - Layout shift between breakpoints — -10pts
-
-8. **Compute per-dimension verdict:**
+3. **Compute per-dimension verdict through `validate_review`:**
    - score ≥80 → green
    - 60 ≤ score < 80 → yellow
    - score < 60 → red
+   - score null → unverified
 
-9. **Compute overall verdict:**
+4. **Compute overall advisory verdict:**
    - Evaluate mandatory shared controls first: any blocker means BLOCKED, even when
      every advisory dimension is green. Preserve unavailable/unverified coverage.
    - Any dimension red → RED
-   - No reds, any yellow → YELLOW
+   - No reds, any unverified → UNVERIFIED
+   - No reds/unverified, any yellow → YELLOW
    - All green → advisory GREEN; customer-share still requires the mandatory gate
 
-10. **Emit findings list per dimension:**
+5. **Emit findings list per dimension:**
     - 2-5 concrete findings per dimension (not just score — what's wrong + what's right)
     - Include file:line or selector when applicable
     - Order: red flags first, then yellow, then strengths
 
-11. **Output design-review.json** per frontend-design-review SKILL.md schema.
+6. **Output design-review.json** per frontend-design-review SKILL.md schema.
+   The human report uses these same canonical keys, not another rating table.
 
 ## Report format
 
@@ -225,5 +149,7 @@ See frontend-design-review SKILL.md schema — agent fills scores + findings.
 ## L-001/L-002/L-003 application
 
 - **L-001:** agent body specifies CONTRACT (the 6 dimensions + scoring rubric). Specific findings happen at invocation against actual artifact. Don't pre-bake "WCAG AA always passes."
-- **L-002:** non-overlap section above documents boundary against WebExperienceCritic + AccessibilityChecker + CodeReviewer. Disjoint phases + scopes.
+- **L-002:** the shared ownership procedure acknowledges overlapping post-generation
+  review. Reuse only applicable evidence; distinct accessibility/source questions
+  or independently required coverage may justify a separately scoped review.
 - **L-003:** WCAG criteria + browser APIs verified at invocation. WCAG 2.2 vs 3.0 status changes; container-queries support varies. Agent checks at invocation.

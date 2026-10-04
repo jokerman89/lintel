@@ -1,6 +1,6 @@
 ---
 name: li-generate-xlsx
-description: Produce an editable, source-backed workbook through available native tools, verifying formulas, actual recalculation, persisted caches and honest inspection limits.
+description: Use to create an editable workbook from selected source data through available native tools, with formula, recalculation and persisted-cache checks and explicit inspection limits.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-xlsx/SKILL.md`; edit the canonical file, then run

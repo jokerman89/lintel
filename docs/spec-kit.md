@@ -33,7 +33,8 @@ operator intent; report ambiguity before changing feature artifacts.
 | Governing principles | `.specify/memory/constitution.md` when present | Read it and reconcile with repository instructions |
 | What to build | Existing feature `spec.md` | Reference requirements and acceptance criteria during planning and review |
 | How to build | Existing feature `plan.md` and supporting design files | Use its design decisions; propose changes explicitly |
-| Work and completion | Existing feature `tasks.md` | Preserve task IDs, mark completion only after verification |
+| Work and completion | Existing feature `tasks.md`, including converge-appended IDs/phases | Preserve task IDs, mark completion only after verification |
+| Analysis, convergence, bug/test and assessment evidence | Explicitly selected original reports | Read/bind originals; retain verdicts and unresolved ownership, not duplicate Lintel reports or backlogs |
 | Artifact mapping | `.claude/plans/<feature>/work.json` | Record exact original spec, design, tasks and handoff paths with the scope status |
 | Session coordination | `.claude/plans/todo.md` | Link the active work map and next task; avoid copying the whole backlog |
 | Durable context | `.claude/memory/` and `.claude/decisions/` | Capture lessons, working state and new decisions |
@@ -42,6 +43,33 @@ Feature paths vary by Spec Kit version and repository configuration. `specs/<fea
 common layout, not a path to fabricate. If the feature already has an execution prompt, reuse it;
 otherwise a short Lintel handoff can reference the existing artifacts by path. The Lintel
 plan/spec/prompt contract is satisfied by an explicit mapping, not by keeping duplicate copies.
+
+## Select reports and resolve overlapping checks
+
+Use the bridge's [selected external authority procedure](../skills/spec-kit/references/selected-authority.md)
+before ANALYZE, DEFINE, DIAGNOSE, FIX or REVIEW. Select original reports by explicit
+path from the operator, mapped handoff or inspected project configuration.
+`tasks.md` remains the only task source, including tasks appended by convergence.
+An assessment decision or bug verdict remains an input, not source approval,
+independent review or permission to publish.
+
+Observe command registration, workflow-gate coverage and hook enablement only
+from supplied/inspected host registration or known version-specific configuration.
+A filename, extension folder or upstream comparison pin proves none of these.
+Retain disabled/unknown/unsupported observations and resolve ambiguous ownership
+before the affected action. Choose one owner for overlapping consistency, gap,
+fix or gate work; do not run both workflows, enable extensions or resume an
+external run merely to fill an observation gap.
+
+The existing work reader accepts repeated `--warm-path` inputs for read-only
+intake/budgeting. With original `--package` / `--leaf` IDs, repeated `--acceptance`
+paths bind selected reports using P05 and include their full original files in
+P03's deduplicated manifest/budget. Carry them into the review prepare request's
+`acceptance_paths` or explicit product selection; warming alone is not a binding.
+No report fields are added to `work.json`. Changed selected reports, task text/IDs
+or relevant configuration invalidate affected evidence; progress boxes are not
+verification. Uncovered Lintel-specific checks may add linked evidence, never a
+competing analysis/task list.
 
 ## A committed map for a fresh checkout
 
@@ -91,31 +119,27 @@ and Lintel's BUILD concurrently against the same feature.
 
 ## Starting with Spec Kit
 
-Install Spec Kit through its [official repository](https://github.com/github/spec-kit) using a
-version your team approves. Then inspect the locally installed CLI:
+Only when separately requested, install Spec Kit through its
+[official repository](https://github.com/github/spec-kit) using a version your team
+approves. First inspect the actually available CLI/help; this bridge neither
+requires it nor infers installation from the repository's artifacts:
 
 ```bash
 specify --help
 specify init --help
-specify version
 ```
 
-The current upstream interface uses:
+Use only integration/script flags the inspected version supports. Run authorized
+initialization on a clean branch, inspect the changes, and avoid `--force` over
+existing instructions or feature state. Verify actual host discovery afterwards;
+do not derive installed command names or an extension grammar from old examples.
+Lintel's `li-*` names do not establish which Spec Kit commands this host exposes.
 
-```bash
-specify init --here --integration copilot
-```
-
-For PowerShell feature scripts, add `--script ps` when supported. Run initialization on a clean
-branch, inspect the changes, and avoid `--force` over existing instructions or feature state.
-Older releases may expose different flags; follow the installed help instead of mixing versions.
-[Spec Kit's core reference](https://github.github.com/spec-kit/reference/core.html) documents the
-current initialization and version commands.
-
-Current Spec Kit defaults to `speckit-*` skills under `.github/skills/` for Copilot. Its optional
-commands layout uses agent/prompt files; see the [upstream integration reference](https://github.com/github/spec-kit/blob/main/docs/reference/integrations.md).
-Lintel uses separate `li-*` names. Verify discovery after installation and use the names your
-installed version exposes rather than assuming older `/speckit.*` examples apply unchanged.
+The original 2026-09-28 comparison used Spec Kit
+[`c00dc0551583428a10a94443c58c6a41e5e0138c`](https://github.com/github/spec-kit/tree/c00dc0551583428a10a94443c58c6a41e5e0138c/templates/commands).
+It records analysis/converge methods and optional extension/workflow overlap, not
+an installed local tool or a fresh upstream check. See [provenance](provenance.md)
+for dated comparison pointers and their limits.
 
 ## Adoption checks
 

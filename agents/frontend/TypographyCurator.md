@@ -1,7 +1,7 @@
 ---
 name: TypographyCurator
 category: frontend
-description: Font + variable-axes specialist for the frontend-typography sub-skill. Picks font-stacks from Google Fonts/Pangram/Velvetyne/Recursive/Fraunces/Future-Fonts. Specs size-scale + line-heights + loading-strategy + licensing-context.
+description: Use when typography decisions need font/script coverage, variable axes, fallback metrics or loading expertise; returns a source-backed draft for the caller's validated publication.
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
@@ -26,7 +26,9 @@ Core principles (ADR-0015/0016):
 
 Reads brief + (optionally) audience + mood → picks font-stack (3 roles: heading + body + mono) from the font-recommendation-tree (Google Fonts | Pangram | Velvetyne | Recursive | Fraunces | Future Fonts | system stack) + maps variable-axes-config + size-scale + line-heights + letter-spacing + font-loading-strategy + licensing-context.
 
-Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md contract.
+Returns a draft typography fragment (schema_version: 1). Follow
+[axis ownership](../../skills/frontend-design/references/axis-ownership.md):
+the caller owns the single validated publication of `typography.json`.
 
 Use the [shared design contract](../../skills/design-dna/references/design-contract.md)
 and `design_contract.validate_spec(data, "typography")`. Preserve the font-selection
@@ -35,7 +37,7 @@ the caller's bound design instead of creating a second profile interpretation.
 
 ## When to invoke
 
-- Auto-invoked by `/li:frontend-typography` Workflow Step 2
+- When the `frontend-typography` caller actually selects a separate decision context
 - Solo: operator wants typography consultation for existing project
 - Brand-update flow: "customer deck just landed, what heading-stack matches?"
 
@@ -128,7 +130,8 @@ the caller's bound design instead of creating a second profile interpretation.
     - Self-hosted `@font-face` snippet
     - Preload directive snippet for performance-critical
 
-11. **Emit typography.json** per frontend-typography SKILL.md contract.
+11. **Return the draft fragment** and actual source/uncertainty evidence to the
+    caller. Do not re-enter the skill's dispatch step or write a competing output.
 
 ## Report format
 
@@ -155,7 +158,7 @@ Spec output keeps the existing typography contract; actual rendered checks belon
 to the available browser/renderer and remain unverified until run.
 
 - Brief too vague → NEEDS_CONTEXT with question ("formal-editorial or modern-techy?")
-- Font-license-status unclear → flag DONE_WITH_CONCERNS + surface license-step to operator
+- Font-license-status unclear → retain an unverified draft obligation and request an authorized check; a required unresolved license blocks publication
 - Variable-font axes-spec incomplete → re-pick + log
 
 ## L-001/L-002/L-003 application

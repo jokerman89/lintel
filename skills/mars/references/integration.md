@@ -18,6 +18,33 @@ facts are omitted, which suppresses the offer. A caller inside a cycle always se
 route, so only PLAN's approval gate of a full nine-phase cycle can pass. The decision is
 never consent; ask with the offer text in [the skill](../SKILL.md).
 
+## Host dispatch and identity
+
+Inspect the current host's actual tools, permission and live roster before using
+these mappings. They are integration guidance, not a tool-availability claim or
+another dispatch engine. Pass the consented roster's effective model, effort and
+context settings; never infer them from a current-model example.
+
+For Copilot App, where the inspected surface exposes them:
+
+- `task`: subagent fields `model`, `reasoning_effort`, `context_tier`.
+- `create_session`: `kickoff.model`, `kickoff.reasoning_effort`,
+  `kickoff.context_tier`, `kickoff.mode: autopilot`,
+  `coordinate_with_creator: false`, `notify_on_idle: once`.
+- `always` may keep producing idle notices after archive; for the challenge round
+  read the actual round-2 report from the supported session store rather than
+  assuming another notification. Retain the same child identity.
+- Local session-store `assistant_usage_events.model` and `reasoning_effort` per
+  child can supply host-observed identity when actually available. A different
+  surface may expose different usage evidence; no observation means unverified,
+  not the reviewer's self-description upgraded to `host-usage`.
+
+Other hosts use their observed native per-child model API and identity evidence.
+Missing capability, denied permission or unsupported continuation preserves the
+limitation; no fallback to a new provider or role-played panel. Keep the accepted
+subagent default, opt-in nested sessions, exact registration and owned/collected/
+idle close checks from the main MARS method.
+
 ## Applied hooks
 
 | Workflow | Hook | Behavior |

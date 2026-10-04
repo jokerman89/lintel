@@ -1,7 +1,7 @@
 ---
 name: generate-style-learn
 layer: foundation
-description: Analyze .pptx/.docx/web-examples and extract a reusable style palette. v3.5 Phase 3 of the doc-generation-pipeline.
+description: Use to extract a reusable palette and typography reference from selected presentation, document or web artifacts without modifying the sources.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -14,28 +14,36 @@ cli_support:
     level: full
 ---
 
-You are the `generate-style-learn` skill — v3.5 Phase 3 of the doc-generation-pipeline. Extracts palettes from existing artifacts.
+You are the `generate-style-learn` skill — extracts palettes from selected existing artifacts.
 
 ## What this skill does
 
-Analyzes 1+ artifact-files (PPT/DOCX/web/PDF) and extracts a reusable style palette to `~/.lintel/brand/palettes/<name>.json` + companion `~/.lintel/brand/palettes/<name>-STYLE.md` (human-readable).
+Analyzes 1+ supported artifact-files (PPT/DOCX/web) and extracts a reusable style palette
+to `<out-dir>/<name>.json` plus companion `<out-dir>/<name>-STYLE.md` (human-readable).
+Choose the source paths and owned output explicitly; a palette name is not a
+personal-directory lookup.
 
 Never modifies input-files. Read-only analysis.
 
 Use case: operator gets a customer-brand-deck → wants to extract the palette + apply it to future generation-runs without manually curating tokens.
 
-Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an optional add-on, body-shopped after Phase 1+2 were dogfooded. This is the completion-PR.
+Follow [owned source and output selection](../design-dna/references/design-contract.md#owned-source-and-output-selection).
+Missing or unwritable output fails visibly; no destination is selected on the
+operator's behalf.
 
 ## When to use
 
 - "Customer sent a deck — extract their style so I match it in the next report" → `/li:generate-style-learn deck1.pptx --name customer-A`
 - "Compare two style-references" → run the skill on each, diff palettes
-- "Operator's own brand snapshot" → audit current `~/.lintel/brand/`-palettes against ground-truth artifacts
+- "Operator's own brand snapshot" → compare explicitly selected palettes against
+  the supplied ground-truth artifacts
 
 ## When NOT to use
 
 - Live style-edit — this is extraction, not an editor
-- Single-color-pick — `bin/li-doctor --brand-summary` is faster for a one-off
+- Single-color-pick — use the named `brand-source`
+  [selected asset evidence procedure](../design-dna/references/design-contract.md#selected-asset-evidence)
+  to read the requested token from the explicit palette/profile; no diagnostic command
 - Customer-specific live-stream — this is batch
 
 ## Inputs
@@ -44,7 +52,7 @@ Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an
 - Required `--name <slug>` — palette-name for output (e.g., `customer-A` or `nordic-minimal`)
 - Optional `--format <ppt|web|word|auto>` — explicit format hint (default: auto-detect)
 - Optional `--overwrite` — replace existing `<name>.json` if present
-- Optional `--out-dir <path>` — palette output dir (default: `~/.lintel/brand/palettes/`)
+- Required `--out-dir <path>` — explicitly owned repository-relative palette output directory
 
 ## Extraction (per format)
 
@@ -70,7 +78,16 @@ Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an
 - Fall back: most-frequent computed colors in DOM
 - Typography from font-family declarations
 
-**Auto-detect:** file extension determines format
+**PDF or another unsupported format:**
+- Lintel supplies no PDF reader here. A `.pdf` extension is not an extraction
+  capability and a print/export result is not readable source evidence.
+- Use an actually available external read operation only with explicit source
+  and operation authority, recording its coverage and limitations. Otherwise
+  report that extraction is unsupported/unverified and leave that input open.
+- Do not install a reader, restore the removed PDF dependency, invent style
+  observations or mark a partially inspected set complete.
+
+**Auto-detect:** the extension is a format hint, not proof of a reader.
 
 ## Output schema (palette JSON)
 
@@ -140,7 +157,8 @@ Logo top-right, vertical accent bar left edge, square bullets, fade animations.
 ## Use this style
 
 In future generation: `/li:generate ... --palette <name>`. Catalog at
-~/.lintel/brand/palettes/<name>.json.
+<out-dir>/<name>.json; supply this source explicitly or register it in the
+authorized configuration before name-based reuse. Extraction does not activate it.
 ```
 
 ## Workflow
@@ -148,15 +166,25 @@ In future generation: `/li:generate ... --palette <name>`. Catalog at
 ### Step 1 — Validate inputs
 
 ```bash
-[ -z "$NAME" ] && { echo "Usage: /li:generate-style-learn <files> --name <slug>"; exit 2; }
+out_dir="${OUT_DIR:?select an owned repository-relative output directory}"
+[ -z "${NAME:-}" ] && { echo "Usage: /li:generate-style-learn <files> --name <slug> --out-dir <path>"; exit 2; }
+[ "$#" -gt 0 ] || { echo "Required: 1+ artifact files"; exit 2; }
 for f in "$@"; do
   [ -f "$f" ] || { echo "Missing: $f"; exit 2; }
 done
 ```
 
+Complete the shared owned-path checks before reading or creating anything.
+Capture original output states for both named files. Validate `NAME` as a single
+slug, not a path; missing/linked/out-of-root sources or outputs fail. The actual
+configured P07 path is an alternative source only when verified and authorized.
+
 ### Step 2 — Per-file extraction
 
-Detect format from extension. Apply format-specific extraction (per above section).
+Use the extension as a hint, then establish the actual supported read operation.
+Apply the format-specific method above. Unsupported/unreadable inputs stay
+explicitly unverified; continue independent supported inputs without claiming
+that the entire requested set was processed.
 
 ### Step 3 — Aggregate across files
 
@@ -167,11 +195,43 @@ If multiple files: merge extractions:
 
 ### Step 4 — Write outputs
 
-```bash
-mkdir -p "$OUT_DIR"
-echo "$palette_json" > "$OUT_DIR/$NAME.json"
-echo "$style_md" > "$OUT_DIR/$NAME-STYLE.md"
+Keep the generated strings as `palette_json` and `style_md`. With explicit `repo`,
+`out_dir`, `name`, boolean `overwrite`, and the captured `original_output_states`
+keyed by repository-relative destination, publish through existing P03:
+
+```python
+import re
+import sys
+import context_safety as safety
+
+try:
+    root = safety.checked_root(repo)
+    directory = safety.selector_path(out_dir)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", name):
+        raise ValueError("Palette name must be a single slug")
+    outputs = {
+        f"{directory}/{name}.json": palette_json.encode("utf-8"),
+        f"{directory}/{name}-STYLE.md": style_md.encode("utf-8"),
+    }
+    for path in outputs:
+        previous = original_output_states[path]
+        if previous is not None and not overwrite:
+            raise ValueError(f"Output already exists; explicit --overwrite required: {path}")
+    for path, payload in outputs.items():
+        previous = original_output_states[path]
+        safety.atomic_write(root, path, payload,
+                            mode=previous["mode"] if previous is not None else 0o600,
+                            expected=previous, check_expected=True)
+        if safety.read_owned(root, path, len(payload))[0] != payload:
+            raise ValueError(f"Output failed readback: {path}")
+except (KeyError, ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/style-learn]: {error}", file=sys.stderr)
+    raise SystemExit(2)
 ```
+
+This is publication, not extraction or license approval. Both files must pass
+readback before reporting completion. Retain and report any partial output on
+failure at its original owned destination; do not switch folders or erase evidence.
 
 ### Step 5 — Surface confirmation
 
@@ -181,8 +241,8 @@ Style 'nordic-minimal' extracted.
   Colors: 6 roles classified
   Fonts: 2 family (Segoe UI Semibold heading, Segoe UI Light body)
   Layout distribution: 5 categories
-  Saved: ~/.lintel/brand/palettes/nordic-minimal.json
-        ~/.lintel/brand/palettes/nordic-minimal-STYLE.md
+  Saved: <out-dir>/nordic-minimal.json
+         <out-dir>/nordic-minimal-STYLE.md
 
 To use: /li:generate ... --palette nordic-minimal
 ```
@@ -197,10 +257,10 @@ accessibility are never inferred as confirmed from an image or page.
 
 ## Status protocol
 
-- **DONE** — palette + STYLE.md written, N source-files processed
-- **DONE_WITH_CONCERNS** — written but extraction partial (e.g., logo-position unreliable)
-- **BLOCKED** — source files unreadable OR no name provided OR write-permission denied
-- **NEEDS_CONTEXT** — file format unsupported AND `--format` not specified
+- **DONE** — palette + STYLE.md written and every required selected source actually processed
+- **DONE_WITH_CONCERNS** — required sources were processed; advisory details remain uncertain (e.g., logo-position reliability)
+- **BLOCKED** — any required source/reader is missing or unverified, name is absent, or output permission fails; retain partial observations without claiming the full request passed
+- **NEEDS_CONTEXT** — the format or authorized reader is unresolved; a format flag does not supply a missing reader
 
 ## Pause-points
 
@@ -213,8 +273,8 @@ accessibility are never inferred as confirmed from an image or page.
 - Source artifact files (`<paths>`)
 
 **Writes:**
-- `~/.lintel/brand/palettes/<name>.json`
-- `~/.lintel/brand/palettes/<name>-STYLE.md`
+- `<out-dir>/<name>.json`
+- `<out-dir>/<name>-STYLE.md`
 
 **Consumed by:**
 - `/li:generate --palette <name>` (downstream format-builders)
@@ -230,7 +290,9 @@ accessibility are never inferred as confirmed from an image or page.
 
 - File format-detection fails: surface available formats + ask for a `--format` hint
 - Aggregation conflict (multiple wildly-different styles): default to most-recent file's style + flag with warning
-- Output dir not writable: fall back to `./palettes/<name>.json` (current dir)
+- Output missing/unwritable: BLOCKED with the actual selected path and error;
+  preserve inputs and any owned partial output. No current-directory, HOME or
+  neighboring-run fallback; a new destination requires explicit selection.
 
 ## Recommended next steps after invocation
 

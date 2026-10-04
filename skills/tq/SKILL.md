@@ -25,6 +25,7 @@ navigation:
   auto_mode_eligible: false
   estimated_tokens: 80000
 domain:
+  # Legacy discovery hint, not a validated pack-schema field; see DA preference reference.
   preferences_root: engineering.testing_qa.*
   granularities: [full, loop, single]
   checkpoints:
@@ -45,6 +46,9 @@ domain:
 
 # Testing and quality assurance
 
+Read the [optional preference metadata clarification](../da/references/preferences.md);
+`preferences_root` is not a validated pack interface or a required default.
+
 Read [testing decision methods](references/decision-methods.md) for consumer-specific
 compatibility, comparable baselines, uncertainty and actual runtime evidence.
 `/li:tq full` covers all checkpoints; saved `/li:tq loop` revisits the affected strategy/results;
@@ -56,7 +60,7 @@ use the existing runner/QA workflow without creating a domain plan.
 | Capability | Dispatches to (agents) | Produces | Decisions and checks |
 |---|---|---|---|
 | `coverage-audit` | TestRunner + Architect | per-component requirement/line/branch/mutation gaps and backfill priorities | approved critical-path targets, observed commands/counts and exclusions; no universal 80/100% acceptance |
-| `perf-budget-spec` | LatencyAnalyzer + PerfBudgetEnforcer | per-journey budgets, detection and CI-gate design | comparable baseline, workload/environment/repetitions/uncertainty; a spec is not enforcement |
+| `perf-budget-spec` | PerfBudgetEnforcer; one PerformanceAnalyzer or LatencyAnalyzer only for missing evidence | per-journey budgets, detection and CI-gate design | consume the same comparable evidence, then propose budgets; no default parallel profiling; a spec is not enforcement |
 | `contract-test-design` | APIDesigner + ContractTestArchitect | interface surface, consumer expectations and version matrix | actual serializers and active consumers; REST/GraphQL/gRPC/events/IPC as applicable; no mandatory Pact |
 | `regression-suite` | RegressionDetective + TestRunner | fix-to-test mapping and golden-path execution health | select relevant history explicitly; isolated bisection with original-state protection, not automatic caller changes |
 | `chaos-plan` | SecurityAuditor + SystemArchitect | failure matrix, abort/recovery criteria and owners | selected threat/on-call evidence; disabled chaos is a scoped not-run/N/A decision, not a passing stub |
@@ -66,6 +70,13 @@ use the existing runner/QA workflow without creating a domain plan.
 Existing tooling can include `go test -coverprofile`, `pytest --cov`, the project's
 Jest/Vitest coverage, `cargo tarpaulin` or equivalent. Inspect manifests and effects
 first; do not install a guessed tool, use production services or claim unrun checks.
+
+Performance consumers use the one
+[comparable performance-evidence method](references/decision-methods.md#comparable-performance-evidence).
+Choose one analyzer, keep actual samples/sampling/tail uncertainty and pass its exact
+source/workload/window artifact to the read-only budget view. Do not rerun a profiler
+to reformat that result. CapacityPlanner and SystemArchitect retain projection and
+invariant/NFR purposes, not another default collection pass.
 
 ## Workflow
 
@@ -88,7 +99,7 @@ and final QA/independent acceptance. Apply this testing method inside that proce
 | Checkpoint | Method/owner | Observable acceptance |
 |---|---|---|
 | `coverage_targets_met` | TestRunner measures, Architect maps risk | exact requirement-to-assertion gaps and applicable targets, not coverage alone |
-| `perf_budgets_locked` | LatencyAnalyzer + PerfBudgetEnforcer | baseline/candidate identity, sample distributions, meaningful thresholds and real positive/negative gate evidence |
+| `perf_budgets_locked` | PerfBudgetEnforcer consumes the selected analyzer's evidence | baseline/candidate identity, sample distributions, meaningful thresholds and real positive/negative gate evidence |
 | `contract_tests_complete` | APIDesigner + ContractTestArchitect + actual runner | each supported consumer/version checked; required failed/unknown consumers remain blockers |
 | `regression_suite_curated` | RegressionDetective + TestRunner | reproduced failure, retained fix-to-test link, golden and edge paths, flake disposition |
 | `chaos_scenarios_documented` | SecurityAuditor + SystemArchitect | scenario/control/abort/owner plan; actual recovery if required, otherwise explicitly unexecuted design |

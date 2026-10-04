@@ -81,6 +81,20 @@ class URLPolicyTests(unittest.TestCase):
                               max_redirects=2, max_bytes=20)
             self.assertEqual(len(calls), 1)
 
+    def test_malformed_transport_status_headers_and_body_fail_explicitly(self):
+        responses = (
+            None, Response("200", {}, b""), Response(True, {}, b""),
+            Response(700, {}, b""), Response(200, None, b""),
+            Response(200, {"Content-Type": 3}, b""),
+            Response(200, {"bad\nname": "value"}, b""),
+            Response(200, {}, "not bytes"),
+            Response(302, {"Location": "/one", "location": "/two"}, b""),
+        )
+        for response in responses:
+            with self.subTest(response=response), self.assertRaises(ValueError):
+                fetch_checked("https://api.example.com/start", ["api.example.com"],
+                              lambda url: response)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

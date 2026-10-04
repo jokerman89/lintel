@@ -57,6 +57,12 @@ ID and acceptance check. All “plan.md requirements/tasks” below refer to the
 reference-only Lintel companions are navigation, not duplicate specifications. Compare actual
 code and evidence to the original Spec Kit tasks. A work-map approval never replaces review.
 
+For selected external analysis, converge, bug/test or assessment reports, apply
+[selected external authority](../spec-kit/references/selected-authority.md):
+bind the originals through P05 and inspect actual command/workflow/hook overlap.
+Keep tasks.md as the only task source and resolve one owner per overlapping check.
+External verdicts remain inputs, not automatic independent review or publication approval.
+
 Before reviewing, follow [the shared evidence procedure](references/evidence.md):
 prepare an explicit selection and immutable context with package/leaf acceptance,
 base, staged/unstaged/new/deleted content, attempt, profile and required controls.
@@ -210,9 +216,11 @@ not a neutral exemption. A pack contributes its own gate skills/agents; examples
   artifact inventory/provenance; token/OAuth and privacy specialists keep their
   distinct boundaries. Unknown runtime coverage must not become a clean dependency result.
 
-### Step 5 — Cross-artifact analyze (adopted from speckit)
+### Step 5 — Reconcile selected consistency evidence
 
-Verify consistency:
+Reuse the selected ANALYZE or original external analysis/converge evidence for the
+same map, original IDs and current bytes. Follow the bridge's ownership decision;
+do not run a duplicate gap-list writer. Verify uncovered or changed-scope consistency:
 - BUILD output matches PLAN tasks (already checked Stage 1, but re-verify aggregate)
 - PLAN tasks trace to DESIGN requirements (already checked in PLAN's analyze, but re-verify if BUILD changed scope)
 - BUILD didn't accidentally implement DEFERRED items

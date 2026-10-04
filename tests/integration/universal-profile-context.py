@@ -1236,7 +1236,10 @@ finally:
                      "LINTEL_HOME", "LINTEL_PACKS_DIR", "LINTEL_ACTIVE_PACK_FILE", "LINTEL_AUDIT_DIR"):
             self.assertTrue(Path(env[name]).resolve().is_relative_to(self.base.resolve()), name)
         skill = (ROOT / "skills/pack-validate/SKILL.md").read_text(encoding="utf-8")
-        blocks = re.findall(r"```bash\n(.*?)\n```", skill, re.DOTALL)
+        self.assertIn("../pack-switch/references/lifecycle.md#validate", skill)
+        method = (ROOT / "skills/pack-switch/references/lifecycle.md").read_text(encoding="utf-8")
+        validation = method.split("\n## Validate\n", 1)[1].split("\n## ", 1)[0]
+        blocks = re.findall(r"```bash\n(.*?)\n```", validation, re.DOTALL)
         self.assertEqual(len(blocks), 1)
 
         def snapshot():

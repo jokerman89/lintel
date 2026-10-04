@@ -21,12 +21,16 @@ echo "========================================="
 MIGRATED="sense scope define discover plan build review ship capture cycle resume jobs status \
 analyze brief-forge fix code-review verify diagnose cross-check lessons-add lessons-surface adr-new \
 pause context-warm inspect skill-new generate-docs web-session \
-ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate mars pattern"
+ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate mars pattern \
+design-dna frontend-design frontend-design-review frontend-motion frontend-shader frontend-style-extract \
+frontend-typography generate-app generate-design generate-outline generate-pdf generate-ppt generate-qa \
+generate-style-learn generate-visio generate-web generate-word generate-write generate-xlsx"
 
 # A trigger phrase: the description leads with / contains a Use-when form.
 TRIGGER='^(description:[[:space:]]*)?(Use (when|after|to|for|at|before|during|on|whenever)|Run (when|after|to|before)|Trigger (when|after|on))'
 # Archaeology that must not appear in a description.
-ARCH='Phase [0-9]|Cohort [0-9]|v[0-9]+\.[0-9]+ Feature|\bADR-[0-9]|\bL-[0-9]{3}|adopted from|ported from'
+ARCH='Phase [0-9]|Cohort [0-9]|v[0-9]+\.[0-9]+|\bADR-[0-9]|\bL-[0-9]{3}|adopted from|ported from'
+UNIVERSAL='Use before ANY|Use proactively|before (any|every|all) visual'
 
 for s in $MIGRATED; do
   f="skills/$s/SKILL.md"
@@ -41,8 +45,10 @@ for s in $MIGRATED; do
   fi
   if printf '%s' "$desc" | grep -qiE "$ARCH"; then
     fail "$s: description carries version-archaeology (move to body/ADR): ${desc:0:60}…"
+  elif printf '%s' "$desc" | grep -qiE "$UNIVERSAL"; then
+    fail "$s: description uses a universal proactive imperative: ${desc:0:60}…"
   else
-    pass "$s: trigger-form, no archaeology"
+    pass "$s: trigger-form, no archaeology or universal proactive imperative"
   fi
 done
 

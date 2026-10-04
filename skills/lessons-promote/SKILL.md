@@ -28,6 +28,10 @@ recipe in this skill.
 1. **Select the lesson by ID.** The source is the project store (`lintel_lessons_file`) or an
    explicit `--source <file>`. List candidates with `lessons_index` from `lib/memory.sh`, then
    choose one `L-NNN`; interactive use lists every lesson by ID, never only the first 30.
+   Apply the [benefit and recurrence method](../lessons-add/references/benefit.md):
+   explain observed application, outcome and generalizability. Unknown benefit or
+   unresolved repeat failures stay visible and can defer promotion; no automated
+   reference counter or success score exists.
 2. **Generalize the lesson.** Strip repo-specific paths, file names, project nouns and anything
    sensitive. Write the generalized text with exactly one level-two heading; the bin rewrites that
    heading to the destination's next ID.
@@ -81,7 +85,8 @@ Next (not run):
 
 ## Edge cases
 
-- **Operator can't decide which lesson** — list with frequency-of-reference and let them pick.
+- **Operator can't decide which lesson** — list IDs and the actual benefit/recurrence
+  evidence, with unknowns explicit; let them choose or defer, never invent usage counts.
 - **Lesson contains customer data** — STOP, refuse. Recommend repo-only retention.
 - **Multiple lessons could be promoted** — do one at a time. Run skill again for next.
 - **Destination or label missing** — the bin exits 2 before resolving anything; ask for them.

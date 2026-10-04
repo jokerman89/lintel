@@ -1,6 +1,6 @@
 ---
 name: li-generate-write
-description: Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus. Shared content-pipeline sub-skill, solo-invokable.
+description: Use when a presentation or document outline needs full section content and speaker notes in the selected voice.
 ---
 
 > **Lintel on GitHub Copilot.** Generated from `skills/generate-write/SKILL.md`; edit the canonical file, then run

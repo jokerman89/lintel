@@ -46,6 +46,30 @@ replaces the **whole** parent block. Copying `_default` into this child would ex
 replace the organization's controls with neutral values. `pack-create --extends` therefore
 starts with identity and ancestry only. Validate the resulting chain before activation.
 
+Use the [selected control conformance contract](compliance.md#selected-control-conformance)
+to keep each applicable obligation, owner, negative test and failure action visible.
+Keep source approval through the organization's reviewed release process separate
+from selecting/loading/pinning the pack. None of these operations proves a control passed.
+
+Whole-block replacement remains intentional resolver behavior, not an exemption
+from independently accepted work. P05's immutable `qa_requirements` and
+`required_controls` must still contain the selected mandatory obligation if a
+child replaces `compliance` with `mode: off` and `hooks: []`. Do not regenerate
+that inventory from the emptied list.
+
+The synthetic `WholeBlockRequirements` cases in
+`tests/integration/external-authority.py` load real parent/child manifests through
+`load_profile_context`, verify their P07 references and pass the resulting
+required-policy bridge into P05. The omitted child block inherits the control;
+the explicit replacement removes it from the resolved list. The latter still
+fails `verify_review` / `verify_qa` when observations omit the independently
+declared requirement. This tests helper conformance, not host enforcement or
+policy-source approval:
+
+```bash
+bash tests/integration/external-authority.sh WholeBlockRequirements
+```
+
 ## Put the effect in the plan
 
 PLAN records the loaded pack and maps each applicable requirement to existing task IDs,

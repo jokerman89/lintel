@@ -56,6 +56,14 @@ For a new cycle use the adapter's explicit bootstrap. Missing required policy or
 drift blocks its affected action; a missing saved context is not a neutral fallback.
 Pure read-only intake needs no new runtime ledger.
 
+For an explicitly selected Spec Kit assessment, apply
+[selected external authority](../spec-kit/references/selected-authority.md).
+Reuse the original decision, premises, answered questions and evidence before
+writing a design; do not create a competing Lintel design or assessment backlog.
+`go` is not source approval, independent review or publication authority.
+Unresolved/kill decisions and conflicting ownership need reconciliation only for
+the affected scope; retain the original map and task IDs through that decision.
+
 ## Workflow
 
 ### 1. Ground the request

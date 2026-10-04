@@ -11,7 +11,8 @@ modification and redistribution; notices are preserved here per their terms.
   palettes, products, reasoning rules, font pairings, UX guidelines, charts, landing
   patterns, icons, per-stack rules), `data/slides/*.csv` (the 8-CSV slide decision
   engine: emotion→color, goal→layout, narrative strategies with Duarte sparkline-beats,
-  copy formulas — ADR-0017), `references/{token-architecture,primitive,semantic,component}.md`
+  copy formulas — ADR-0017), `references/token-architecture.md` and
+  `references/{primitive,semantic,component}-tokens.md`
   (the three-layer token doctrine), and `scripts/{core,search,design_system}.py`
   (BM25 search + design-system composition + master/overrides persistence). `scripts/emit_tokens.py`
   is a Lintel rewrite of the three-layer concept (reads a Lintel profile → layered CSS), not a copy.
@@ -20,6 +21,11 @@ modification and redistribution; notices are preserved here per their terms.
   `_sync_all.py` and the Gemini-keyed generation skills not consumed; structured
   comment headers added. `scripts/validate_design.py` is a Lintel rewrite *inspired
   by* their `html-token-validator.py`, not a copy.
+- Local path clarification (2026-10-03): `references/design-contract.md`,
+  `references/design-contract.schema.json` and `scripts/design_contract.py` are
+  Lintel-authored integration, not adapted token-doctrine files. The path
+  clarification does not identify an unknown historical import commit or claim
+  a new upstream comparison.
 - Upstream re-sync: re-copy from `src/ui-ux-pro-max/{data,scripts}` (their canonical
   tree) and re-apply the registry patch documented in `scripts/core.py`.
 

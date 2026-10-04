@@ -22,6 +22,13 @@ Provides 5 subcommands to operate on `.claude/runtime/jobs/` (the repo-local job
 
 Mutation helpers regenerate their derived `_active.md` job view; `list` reads actual job records without
 regeneration. Missing records are unobserved, not proof that no mapped work is open.
+Repository jobs do not select a cross-repository registry or personal profile.
+Set `LINTEL_JOBS_REGISTRY` before sourcing the helper only for an explicitly
+selected, separately authorized registry destination. Without that selection,
+repository mutations update only their local view; existing global records are
+neither scanned nor rewritten. A path setting selects the destination, not host
+permission. The legacy global job-store layout remains available for its
+explicitly selected scope.
 Jobs auto-spawn/hooks remain dormant unless separately activated and verified.
 Apply [task-relevant intake](../define/references/intake.md): no fixed question API
 and no automatic choice when a material decision is unresolved.
@@ -132,7 +139,8 @@ lines are advisory, while a failed `job.yaml` write makes the helper return non-
 
 ## Status protocol
 
-- **DONE** — operation completed, `_active.md` regenerated
+- **DONE** — the selected operation completed; `list` does not regenerate any view,
+  while mutations report their actual local-view and selected-registry outcomes
 - **DONE_WITH_CONCERNS** — operation succeeded with warnings (e.g., source job partially missing files; branch operation proceeded with caveats)
 - **BLOCKED** — subcommand requires `<id>` but not provided, OR job doesn't exist
 - **NEEDS_CONTEXT** — `replan` asked operator to pick scope but no answer
@@ -140,7 +148,8 @@ lines are advisory, while a failed `job.yaml` write makes the helper return non-
 ## Pause-points
 
 - `abort` requires AskUserQuestion confirm (destructive — moves files out of working set)
-- `replan whole` requires AskUserQuestion confirm (re-runs from scratch)
+- `replan whole` confirms the retry/loop-back scope while preserving original
+  artifacts, map/IDs and review/voice provenance; retain existing authorization
 - `branch` proceeds without confirm (additive, non-destructive)
 
 ## Hop-in support
@@ -151,15 +160,16 @@ YES — solo-invocable. Designed to be called anytime.
 
 **Reads:**
 - `.claude/runtime/jobs/_active.md` (repo-local active list)
-- `~/.lintel/jobs/_active.md` (cross-repo registry — one line per open job across all repos, pointing at the owning repo)
+- An explicitly selected and separately authorized cross-repo registry, when requested;
+  `list` does not read it implicitly
 - `.claude/runtime/jobs/<id>/job.yaml`
 - `.claude/runtime/jobs/<id>/00-state.md`
-- `~/.lintel/profile.yaml` (mode + stale threshold)
+- Supplied job metadata and already verified mode/context; no implicit personal-profile scan
 
 **Writes:**
 - `.claude/runtime/jobs/<id>/job.yaml` (last_touched updates)
 - `.claude/runtime/jobs/_active.md` (regenerated)
-- `~/.lintel/jobs/_active.md` (cross-repo registry line updated to point at the owning repo)
+- The separately authorized `LINTEL_JOBS_REGISTRY` destination, only when explicitly selected
 - `.claude/runtime/jobs/_archive/<date>/<id>/` (on abort)
 - `.claude/runtime/audit/jobs.jsonl`
 
@@ -178,7 +188,8 @@ YES — solo-invocable. Designed to be called anytime.
 - **Direct edit of `_active.md`** — it's regenerated. Edit job.yaml instead.
 - **Manual `rm -rf jobs/<id>/`** — bypasses cleanup-policy + audit. Use `abort`.
 - **Branching to keep multiple "active" versions of same work** — branch is for divergent exploration, not version-control.
-- **Replan whole on customer-engagement jobs** — destroys voice-gate provenance. Branch instead.
+- **Erasing provenance during a replan** — preserve the original voice/review
+  evidence and mark changed-content checks stale; branch only for an actual divergent path.
 
 ## Failure recovery
 

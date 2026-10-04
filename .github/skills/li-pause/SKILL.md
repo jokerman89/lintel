@@ -168,19 +168,22 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 
 ## Examples
 
+The repository key below is synthetic. Use the exact path returned by
+`context_save_path`; do not guess a key or reuse another repository's example.
+
 **Mid-task save with label:**
 ```
 > /li-pause phase-2-skills-batch-1
 ✓ Checkpoint saved
-  Path: .claude/runtime/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
-  Resume: /li-resume --from .claude/runtime/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
+  Path: .claude/runtime/sessions/main/20260527-153022-r0123456789abcdef0123456789abcdef01234567-lintel-phase-2-skills-batch-1-context-save.md
+  Resume: /li-resume --from .claude/runtime/sessions/main/20260527-153022-r0123456789abcdef0123456789abcdef01234567-lintel-phase-2-skills-batch-1-context-save.md
 ```
 
 **No label:**
 ```
 > /li-pause
 ✓ Checkpoint saved
-  Path: .claude/runtime/sessions/main/20260527-153455-lintel-context-save.md
+  Path: .claude/runtime/sessions/main/20260527-153455-r0123456789abcdef0123456789abcdef01234567-lintel-context-save.md
 ```
 
 ## See also

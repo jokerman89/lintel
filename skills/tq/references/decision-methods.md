@@ -26,17 +26,48 @@ it into an oracle that can agree with itself while the real consumer breaks.
 
 ## Comparable performance evidence
 
+PerformanceAnalyzer owns measurement analysis; LatencyAnalyzer is its latency view
+of this same evidence method. Choose one analysis for one source/workload/window.
+PerfBudgetEnforcer transforms supplied evidence into budgets and detection proposals
+without profiling. CapacityPlanner keeps capacity projections and failure headroom;
+SystemArchitect keeps invariant/NFR design. These distinct purposes consume the
+same measurements rather than repeating collection in a new role context.
+
+Reuse the exact measurement artifact and its provenance; do not rerun a profiler
+just to reformat results for TA, TQ or another report. Request a new authorized
+measurement only for changed inputs, an unresolved measurement question or missing
+evidence, naming the required observation and owner. A file labelled "profile" is
+not sufficient evidence of its scope or comparability.
+
 Record baseline/candidate revisions, dependency/config identity, build mode, runtime,
 hardware, dataset, concurrency/arrival process, duration, warmup and cache/thermal
 conditions. Interleave or randomize repeated runs where feasible to expose drift.
 A closed-loop generator may hide stalls by sending less work when the service slows;
 state the offered load and coordinated-omission limitation.
 
+Record the actual request sample count, retained trace/profile sample count, dropped
+events/errors, histogram boundaries and head/tail sampling policy/probability.
+Distinguish an unbiased population histogram from deliberately tail-selected traces;
+the latter cannot alone establish population percentiles. Explain coverage and
+collection overhead, correlation between traces and duration boundaries, and any
+coordinated-omission correction actually used (not merely recommended).
+
 Report raw run counts and distribution summaries, effect size and uncertainty,
 not just the faster of two runs. A baseline p95 range of 95-112 ms and a candidate
 range of 101-114 ms does not establish a 5% regression from one pair. Choose a
 practically meaningful threshold, adequate sample and suitable statistical method
 before declaring the gate; do not invent precision from tiny tail samples.
+Report tail uncertainty explicitly: p99 from 100 observations has only about one
+observation beyond that rank; it does not characterize rare stalls reliably.
+Use a suitable uncertainty method or state the unsupported tail, rather than
+inventing confidence intervals. Missing baseline or zero samples is unmeasured.
+A zero baseline makes percentage drift undefined; report the absolute change with
+units and resolve the denominator before proposing a relative threshold.
+
+Rank hot paths by measured exclusive cost and critical-path wall time, not traffic
+frequency alone. Separate CPU, queue, lock and I/O waits. Inclusive spans overlap;
+component p99s and p99-minus-p50 contributor labels are not additive. Use correlated
+request evidence for end-to-end attribution and preserve multimodal workload splits.
 
 Verify a budget gate with deliberately fast and slow synthetic fixtures, plus
 missing baseline, no samples, runner error and skipped checks. The last four are

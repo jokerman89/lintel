@@ -58,6 +58,58 @@ For the AI Act, keep AI-system classification, actor duties, GPAI-model obligati
 and phased application dates distinct. Refer unsettled interpretation to counsel.
 No proprietary standard text is needed in a role body.
 
+## Regulatory source and currency record
+
+Before ComplianceOfficer maps controls, or a specialist reuses a prior assessment,
+record the actual primary/consolidated source for each selected framework and each
+material obligation. This is source evidence inside the existing report/control
+contract, not a new framework profile, pack policy or applicability engine.
+Framework names and the navigation pointers below do not establish current law,
+an applicable edition, an amendment's status or permission to retrieve a source.
+
+| Selected framework | Primary material to obtain within the authorized scope |
+|---|---|
+| SOC 2 | AICPA authorized Trust Services Criteria edition/updates and the actual report's boundary, Type I date or Type II period |
+| GDPR | EUR-Lex applicable consolidated Regulation (EU) 2016/679 text, amendments/derogations and relevant primary decisions; EDPB guidance is identified separately |
+| EU AI Act | EUR-Lex applicable consolidated Regulation (EU) 2024/1689 text and amendments, including the source for each phased application date; guidance is not the binding text |
+| HIPAA | HHS rule publications and the applicable eCFR text/version for the selected Privacy, Security or Breach Notification provisions |
+| PCI DSS | PCI SSC authorized standard edition, published updates and transition/application material for the selected assessment scope |
+| FedRAMP | Official FedRAMP authorization/baseline material and the referenced NIST control publication/revision, tailoring and agency requirements |
+| ISO/IEC 27001 | ISO authorized applicable edition/amendments plus the organization's ISMS scope and Statement of Applicability |
+
+Carry these attributes in each role's existing report, repeating date/provision
+entries where obligations differ:
+
+- `primary_source`: publisher, exact source location and provision/control reference,
+  distinguishing primary text from guidance, commentary and supplied excerpts.
+- `consolidated_version`: the actual consolidated-text date or standard edition,
+  amendments/corrigenda and their supplied provenance; unknown if unavailable.
+- `effective_date` and `application_date`: entry into force/effect separately from
+  phased application, transition or compliance dates, with the provision supporting
+  each. A publication date is not automatically either.
+- `verified_on`: the date of actual source/version verification, not the report-generation
+  date. If current currency cannot be checked, retain any prior verification as
+  historical evidence and mark current currency unverified.
+- `responsible_owner`: the caller-confirmed accountable policy/control owner.
+  Use `unassigned` when none is supplied; never invent a person, approval or deadline.
+- `currency_status` and `verification_limit`: what was actually verified for which
+  scope, missing material/retrieval capability, and the next owner/action.
+
+Use supplied cited material or an inspected, available and authorized retrieval
+operation. Offline or unavailable verification stays explicit; do not substitute
+model recollection, today's date or an old report for current consolidated text.
+Missing mandatory source/currency or an owner decision blocks the affected acceptance
+as unverified, while independent technical observations may still be reported.
+Recheck changed text/version, application dates, system/use, actor, territory and
+evidence period before carrying a prior determination forward.
+
+ComplianceOfficer consumes these records and reconciles cross-framework reuse;
+it does not replace GDPRReviewer's purpose/role/transfer analysis, EUAIActReviewer's
+separate system/model/actor analysis, or SOC2Reviewer's period/population and
+operating-evidence assessment. Refer legal interpretation to qualified legal review,
+attestation to the qualified assessor, and organizational acceptance to the actual
+owner. An agent report supplies none of those approvals.
+
 ## Sources
 
 - [RFC 8725](https://www.rfc-editor.org/rfc/rfc8725.txt), sections 3.1, 3.8-3.12:

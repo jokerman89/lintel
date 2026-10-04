@@ -1,7 +1,7 @@
 ---
 name: generate-write
 layer: foundation
-description: Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus. Shared content-pipeline sub-skill, solo-invokable.
+description: Use when a presentation or document outline needs full section content and speaker notes in the selected voice.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal

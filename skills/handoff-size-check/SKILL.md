@@ -21,6 +21,10 @@ arguments. The [context-budget owner](../context-budget/SKILL.md#handoff---hando
 owns artifact admission, interpretation, policy boundaries and recovery.
 PLAN/CAPTURE invoke that owner directly; this name remains compatible.
 
+For historical P03/P07 and related identifiers, use the
+[named coordination contracts](../swarm/references/evidence.md): owned context
+admission and the verified content-bound profile, not extra budgeting procedures.
+
 Retain explicit `--map`, the verified lifecycle's `LINTEL_WORK_MAP`, literal
 `--warm-path`, observation/reserve flags and original work/profile/task identities.
 Advisory unknown headroom remains unknown. Caller skip flags mean not run, never

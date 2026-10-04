@@ -25,6 +25,7 @@ navigation:
   auto_mode_eligible: false
   estimated_tokens: 80000
 domain:
+  # Legacy discovery hint, not a validated pack-schema field; see DA preference reference.
   preferences_root: engineering.devops_hosting.*
   granularities: [full, loop, single]
   checkpoints:
@@ -45,6 +46,9 @@ domain:
 
 # Hosting and operations
 
+Preference metadata only: [optional engineering preferences](../da/references/preferences.md)
+explains the retained `preferences_root` hint; it is not a validated pack interface.
+
 Read [operations decision methods](references/decision-methods.md) for state-compatible
 rollback, actual SLO/capacity/cost sources and uncertainty. Design artifacts do not
 deploy services. `/li:dh full`, saved `/li:dh loop` and `/li:dh <capability>` or
@@ -55,16 +59,17 @@ already-approved deployment uses its existing runbook.
 
 | Capability | Dispatches to (agents) | Produces | Decisions and checks |
 |---|---|---|---|
-| `deployment-plan` | ReleaseEngineer planning-only + DeploymentEngineer | pattern, traffic stages, feature flags and abort signals | old/new state and consumer compatibility, capacity, artifact provenance; no universal blue-green choice |
+| `deployment-plan` | DeploymentEngineer | pipeline stages, pattern, traffic stages, feature flags and abort signals | old/new state and consumer compatibility, capacity, artifact provenance; no universal blue-green choice |
 | `observability-spec` | ObservabilityArchitect + Architect | RED/USE metrics, traces, logs, dashboards and routing | real stack/SDK conventions; privacy/cardinality/sampling budgets, applicable retention |
 | `sli-slo-spec` | ObservabilityArchitect + SystemArchitect | good/eligible-event queries, objectives and burn-rate/budget policy | derive target/window from user need; no universal 99%/30-day minimum; no-data is unknown |
 | `cost-projection` | CostAnalyzer + CapacityPlanner | per-component/SKU range and anomaly thresholds | price source/date/region/currency/commitments, measured workload and egress; no invented dollar ceiling |
-| `rollback-strategy` | ReleaseEngineer planning-only + SecurityAuditor | per-failure-mode recovery, blast radius and revoke paths | binary/schema/event compatibility, in-flight effects, actual rehearsal or unverified recovery |
+| `rollback-strategy` | DeploymentEngineer + SecurityAuditor | per-failure-mode recovery, blast radius and revoke paths | binary/schema/event compatibility, in-flight effects, actual rehearsal or unverified recovery |
 | `capacity-headroom` | CapacityPlanner + LatencyAnalyzer | per-resource/failure-domain headroom and scaling triggers | current load mix, queueing, saturation and peak/failover; trigger before observed degradation |
-| `on-call-playbook` | ReleaseEngineer planning-only + SecurityAuditor | signal-to-action decision tree and escalation matrix | named owners, permitted first diagnostics, live-action approvals and failed-recovery path |
+| `on-call-playbook` | DeploymentEngineer + SecurityAuditor | signal-to-action decision tree and escalation matrix | named owners, permitted first diagnostics, live-action approvals and failed-recovery path |
 
-ReleaseEngineer retains **authorized-execution** for separately approved release work;
-this module's planning handoff is not blanket prohibition. No deployment, registry
+DeploymentEngineer returns planning content; the caller owns persistence. ReleaseEngineer
+retains **authorized-execution** for separately approved release work, not these planning
+dispatches. No deployment, registry
 push, IAM change, live database action or external notification is granted by a role name.
 DevOpsToolchain implements scoped repository configuration when requested, separately
 from reviewer assessment.
@@ -90,11 +95,11 @@ and final QA/independent acceptance. Apply this operations method inside that pr
 
 | Checkpoint | Owner/method | Observable acceptance |
 |---|---|---|
-| `deployment_plan_locked` | DeploymentEngineer + ReleaseEngineer | selected pattern, state compatibility, stage criteria/abort and actual rehearsal limits |
+| `deployment_plan_locked` | DeploymentEngineer | selected pipeline/pattern, state compatibility, stage criteria/abort and actual rehearsal limits |
 | `observability_specified` | ObservabilityArchitect | emitted/derived signal queries, cardinality/privacy/retention and missing-series handling |
 | `slos_defined` | SystemArchitect + ObservabilityArchitect | agreed journey/window/objective, source query and error-budget action |
 | `cost_projected` | CostAnalyzer + CapacityPlanner | per-component priced units, normal/peak/failure assumptions, uncertainty and applicable budget |
-| `on_call_ready` | ReleaseEngineer + SecurityAuditor | per-failure trigger, read-only diagnostics, recovery/escalation owners and approval boundaries |
+| `on_call_ready` | DeploymentEngineer + SecurityAuditor | per-failure trigger, read-only diagnostics, recovery/escalation owners and approval boundaries |
 
 Keep rollback and capacity-headroom artifacts in deployment/cost/on-call checks, not
 lost between checkpoint names. RED measures request work, USE resource consumption.

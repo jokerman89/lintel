@@ -5,6 +5,75 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.8 — unreleased
+
+### Added
+
+- A read-only WCAG contrast helper consumes observed colors, uses unrounded
+  normal/large-text thresholds and refuses unresolved paint or compositing.
+- A bounded PPTX package checker inspects actual slide/notes relationships,
+  detects missing or aliased notes and checks supplied source fragments.
+  Package inspection is not native rendering or editability verification.
+- A standard-library single-hop URL transport feeds the existing checked
+  redirect loop with explicit host policy, response bounds and timeout.
+  It grants no network permission and is not a fallback after a host denial.
+- Trusted standalone helpers own the existing isolated-bisection procedure and
+  migration-recovery eligibility predicate instead of executable Markdown copies.
+
+### Changed
+
+- Artifact QA defaults to report-only. Explicit repairs require a distinct
+  owned `--fixed-out`; originals and pre-edit evidence are preserved.
+- Planning, resume, discovery, lifecycle, audit and scaffold methods share
+  their existing owners, retain authorization and report real uncertainty
+  instead of repeated approval, invented execution or automatic telemetry.
+- Frontend partial producers share one publication function. Review uses the
+  existing six advisory dimensions; missing runtime measurements stay unverified.
+- Native `lintel-reviewer` declares read/search tools, and the three orchestration
+  profiles have role-specific reports. Generated declarations do not prove live
+  host enforcement; canonical role names and tool declarations remain.
+- Role templates and callers preserve planning/execution separation, actual
+  source evidence, uncertainty, overlapping legal obligations and voice controls.
+  Arbitrary role-count floors give way to inventory and consumer parity.
+- The Spec Kit bridge retains selected original analysis/convergence/bug/assessment
+  artifacts through existing input bindings without creating another backlog.
+- Current working memory is concise; the previous detailed state is preserved
+  byte-for-byte in a linked cold history file.
+
+### Fixed
+
+- Nonexistent brand/licensing command routes, implicit personal output paths,
+  unsupported generation-resume promises and stale source-stage fingerprints.
+- Design retrieval now captures the original output state and publishes only
+  successful text with conflict checking/readback. Its explicit `--overwrite`
+  option does not grant replacement rights over other artifacts.
+- Default stdout fragment calls no longer require named-file state. Report-only
+  artifact inspection cannot imply a mutating editability probe.
+- False Visio success through a QA handoff or image substitution. The entry
+  retains an explicit unavailable-writer boundary; no bundled writer was added.
+- Contradictory optional-hook heuristics, unparsed override advice and ineffective
+  array population, without activating hooks or changing required policy.
+- Duplicated documentation-fidelity and customer-delivery procedures, invented
+  follow-up cadence, stale provenance descriptions and unproved benefit claims.
+- Source consumers follow moved shared methods and include their actual resources.
+- Current planning receivers, trusted lesson lookup, configured role updates and
+  post-generation review ownership agree across their remaining callers.
+- Retrieval isolates both Python processes from target modules; extreme numeric
+  input has a controlled refusal, and optional text/vault checks distinguish
+  unavailable operations from clean results. Palette handoffs use admitted files,
+  app smoothing follows the selected runtime, and migration reports do not
+  preset production execution.
+
+### Migration and limits
+
+- Update managed resources through the existing adapter and explicitly rebind
+  the product-version change before obtaining fresh dependent evidence.
+- Public entrypoints, the nine phases, accepted short-leaf policy, mandatory
+  review/control contracts and pack inheritance remain. No new library dependency,
+  PDF reader, default-portfolio retirement or Copilot hook adapter is introduced.
+- Source/helper checks do not establish comparative model effectiveness, native
+  enforcement or artifact rendering. The original host-held work remains separate.
+
 ## 0.13.7 — unreleased
 
 ### Changed

@@ -12,6 +12,10 @@
 """
 Design DNA validator - mechanical pre-delivery gate for rendered HTML/CSS.
 
+Static checks below do not observe painted contrast. Use measure_contrast.py on
+actual observed opaque color pairs, following the shared design method; a clean
+static result is not a contrast observation or browser execution.
+
 Errors (exit 1) are objective violations of the non-negotiables; warnings are
 heuristics for the reviewer. Usage:
 

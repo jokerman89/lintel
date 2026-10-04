@@ -33,7 +33,7 @@ done
 echo ""; echo "[3] Dispatch rows declare agent dispatch"
 declare -A CAP_AGENT=(
   ["coverage-audit"]="TestRunner"
-  ["perf-budget-spec"]="LatencyAnalyzer"
+  ["perf-budget-spec"]="PerfBudgetEnforcer"
   ["contract-test-design"]="APIDesigner"
   ["regression-suite"]="RegressionDetective"
   ["chaos-plan"]="SecurityAuditor"

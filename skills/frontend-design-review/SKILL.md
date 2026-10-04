@@ -23,7 +23,8 @@ Solo-invokable for audit or chained from `/li:frontend-design` Workflow Step 7 (
 
 **Retained advisory scoring rubric:**
 - Per dimension: **≥80 = green**, **60-79 = yellow**, **<60 = red**
-- Overall verdict: ALL dimensions green → GREEN. Any red → RED. Otherwise YELLOW.
+- Overall advisory verdict: red first, then unverified, then yellow, otherwise green,
+  as computed by `validate_review`; missing observations never become yellow or green.
 - Scores are advisory; applicable mandatory P05 fail/error/unverified results
   block regardless of score. A requested aesthetic threshold is an explicit
   requirement, not a substitute for observed controls.
@@ -114,27 +115,39 @@ the independent review requirement remains open. A role file is not a tool call.
 
 ### Step 3 — Run 6-dimension audit
 
+Score only observed aspects. **FPS, FOIT and scroll-jank require actual compatible measurement**
+with tool, route, device, viewport, state/workload and trace/timing evidence.
+The retained browser read/capture provider does not supply performance traces or
+network timing. DOM, static source and screenshot evidence cannot establish these
+values. Compare an actual measurement with its specified budget; otherwise keep
+timing unverified, with a null `shader_perf_budget` score. Typography/motion may
+describe observed non-timing aspects only; use null if the missing measurement
+is necessary for the requested judgment. A declared target is not a measured result.
+
 **Dimension 1: Typography hierarchy (0-100)**
 - Heading scale-ratio applied consistently (1.25/1.333/1.618)
 - Line-height bands: tight for display, normal for body, relaxed for long-form
 - Letter-spacing applied at scale (tight for large, wide for small uppercase)
 - Font-loading: preload critical, swap-strategy declared
 - Variable-axes used (if font supports)
-- **Red flags (subtract):** heading-soup (>4 size-levels in fold), font-loading FOIT >100ms, no fallback-stack
+- **Observed concerns:** confusing heading hierarchy, missing fallback-stack or
+  loading strategy. A font-delay concern needs compatible measurement, not a preload tag.
 
 **Dimension 2: Motion coherence (0-100)**
-- Single motion-language thesis (not GSAP-here, Framer-Motion-there for same role)
-- Scroll-trigger animations respect viewport budgets (no >5 concurrent scroll-tracked anims)
+- Coherent motion-language thesis without competing implementations for the same role
+- Scroll-trigger animations respect the selected viewport/workload budget
 - prefers-reduced-motion fallback present + tested
 - Mobile-strategy declared + visibly differentiated
-- **Red flags:** scroll-jank >16ms, no prefers-reduced-motion fallback, mixed-library overlap
+- **Observed concerns:** failed reduced-motion fallback or mixed-library overlap;
+  timing/jank concerns require the measurement above.
 
 **Dimension 3: Shader perf-budget (0-100)**
 - WebGL initialization gated by viewport-intersection
-- Fragment-shader complexity within mid-tier-mobile budget
+- Runtime cost within the actual selected device/workload budget, only when measured
 - Fallback for no-WebGL contexts
 - IntersectionObserver pause for off-screen
-- **Red flags:** fps drops below 30 on mid-tier mobile, no fallback, WebGL crashes leak
+- **Observed concerns:** failed fallback, observed context loss/leak, or measured
+  budget exceedance. Without measurement, retain null/unverified performance advice.
 
 **Dimension 4: Accessibility WCAG AA (0-100)**
 - Color-contrast ≥4.5:1 for normal text, ≥3:1 for large text
@@ -143,6 +156,13 @@ the independent review requirement remains open. A role file is not a tool call.
 - Aria-labels on icon-buttons
 - prefers-reduced-motion + prefers-color-scheme respected
 - **Red flags:** normal-text contrast <4.5:1 or large-text contrast <3:1, no keyboard nav, focus-rings stripped without replacement
+
+For actual observed opaque solid color pairs, use the existing
+`design-dna/scripts/measure_contrast.py` and its
+[measurement/refusal procedure](../design-dna/references/design-contract.md#measured-text-contrast).
+Keep its returned ratio/text-size observation unchanged; unresolved paint or
+missing size/background observations stay unverified. A computed ratio does not
+supply browser execution, focus interaction or timing evidence.
 
 **Dimension 5: Brand conformance (0-100)**
 - Palette tokens match the verified profile and selected brief overrides
@@ -190,15 +210,15 @@ standalone inspection. Required observations remain mandatory in either route.
 FRONTEND DESIGN REVIEW — <artifact>
 ══════════════════════════════════════════════════════════════════
 
-Overall verdict:    <GREEN | YELLOW | RED>
+Overall advisory verdict: <green | yellow | red | unverified>
 
 Per-dimension:
-  Typography hierarchy:   <score>/100  <verdict>
-  Motion coherence:       <score>/100  <verdict>
-  Shader perf-budget:     <score>/100  <verdict>
-  Accessibility (WCAG):   <score>/100  <verdict>
-  Brand conformance:      <score>/100  <verdict>
-  Responsive fidelity:    <score>/100  <verdict>
+  typography_hierarchy:   <score/100 or null>  <verdict>
+  motion_coherence:       <score/100 or null>  <verdict>
+  shader_perf_budget:     <score/100 or null>  <verdict>
+  accessibility_wcag:     <score/100 or null>  <verdict>
+  brand_conformance:      <score/100 or null>  <verdict>
+  responsive_fidelity:    <score/100 or null>  <verdict>
 
 Top findings (yellow + red):
   • <dimension>: <finding>
@@ -208,6 +228,7 @@ Recommendation:
   GREEN  → advisory only; mandatory controls and independent review still apply
   YELLOW → address findings before customer-share
   RED    → BLOCKED for customer-share; must fix before re-review
+  unverified → name missing evidence; required gaps block independently
 
 Full report: $out
 ```
@@ -223,7 +244,7 @@ Full report: $out
   "artifact": "<path or URL>",
   "artifact_type": "url | project-dir | single-html | screenshot",
   "baseline_compared": "<vault-name or null>",
-  "overall_verdict": "green | yellow | red",
+  "overall_verdict": "green | yellow | red | unverified",
   "dimensions": {
     "typography_hierarchy": {
       "name": "Typography hierarchy",
@@ -232,7 +253,7 @@ Full report: $out
       "findings": ["heading-scale 1.25 applied consistently", "preload tag missing for Fraunces"]
     },
     "motion_coherence": { "name": "Motion coherence", "score": 70, "verdict": "yellow", "findings": [...] },
-    "shader_perf_budget": { ... },
+    "shader_perf_budget": { "score": null, "verdict": "unverified", "findings": ["No compatible performance measurement supplied."] },
     "accessibility_wcag": { ... },
     "brand_conformance": { ... },
     "responsive_fidelity": { ... }

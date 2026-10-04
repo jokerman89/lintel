@@ -1,9 +1,11 @@
 # Hosting and operations decision methods
 
 Use for rollout, observability, SLO, capacity, cost and on-call decisions.
-DeploymentEngineer designs traffic progression; ReleaseEngineer designs the pipeline,
-recovery/runbook and authorized release sequence; DevOpsToolchain implements scoped
-repository artifacts. None of these planning outputs authorizes deployment.
+DeploymentEngineer designs pipeline stages, traffic progression and the operational
+recovery/runbook; SecurityAuditor supplies security-response reasoning where relevant.
+ReleaseEngineer performs only the explicitly authorized release sequence;
+DevOpsToolchain implements scoped repository artifacts. None of these planning
+outputs authorizes deployment.
 
 ## Traffic reversal is not state rollback
 

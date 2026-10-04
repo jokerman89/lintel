@@ -37,9 +37,15 @@ cannot establish that no initiative is open.
 ```
 
 Job data is repo-scoped (v5 layout, ADR-0005). The thin `~/.lintel/jobs/_active.md`
-cross-repository registry is still synchronized by repository job mutations through
-`bin/_jobs.sh`. It is a supplementary derived observation source, not task or review
-authority. Reading it requires explicit selection and authority; it is not a default
+cross-repository registry remains available through `bin/_jobs.sh`. Repository
+mutations synchronize it only when the caller explicitly sets `LINTEL_JOBS_REGISTRY`
+to the separately authorized destination before sourcing the helper. Unset or empty
+means repo-local operation only; existing global records are preserved untouched.
+The destination setting is not permission. The selected legacy global job-store
+layout retains its existing derived view.
+
+The registry is a supplementary observation source, not task or review authority.
+Reading it also requires explicit selection and authority; it is not a default
 personal scan or a complete census of selected mapped work.
 
 `<job-id>` format: `<workflow>-<YYYYMMDD-HHMM>-<short-hash>`.

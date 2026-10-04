@@ -2,7 +2,7 @@
 # tests/unit/generate-skills-present.sh
 #
 # Verifies generation skill presence/frontmatter: 1 orchestrator, 4 shared
-# sub-skills, concrete PDF/XLSX methods and the remaining Visio template slot.
+# sub-skills, concrete PDF/XLSX methods and the Visio unavailable-writer preflight.
 # Existing PPT/web/Word builders are checked separately. Source presence does
 # not establish native/runtime verification.
 #
@@ -51,7 +51,7 @@ for skill in "${SHARED_SUBSKILLS[@]}"; do
   fi
 done
 
-# 3. Format source state: concrete PDF/XLSX methods and the Visio template slot
+# 3. Format source state: concrete PDF/XLSX methods; Visio has no bundled writer
 SLOT_SKILLS=(generate-pdf generate-xlsx generate-visio)
 for skill in "${SLOT_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"
@@ -67,11 +67,21 @@ for skill in "${SLOT_SKILLS[@]}"; do
     fi
 
     if [ "$skill" = "generate-visio" ]; then
-      # Verify the remaining slot marker per L-001.
-      if grep -q "TEMPLATE ONLY" "$f"; then
-        pass "slot: $skill has TEMPLATE ONLY marker (L-001 compliance)"
+      # Require truthful refusal/format proof, not an empty workflow or magic marker.
+      for condition in 'no bundled writer' 'actual requested format' \
+        'available authorized writer' 'editable reopen' 'connectors' 'labels' \
+        'required inspection' 'No image-as-VSDX' 'QA handoff is not' \
+        'blocks only that output'; do
+        if grep -qF "$condition" "$f"; then
+          pass "Visio preflight: $condition"
+        else
+          fail "Visio preflight missing: $condition"
+        fi
+      done
+      if grep -qE 'python-vsdx|libvsx|qa-handoff successful|AI generates fresh per invocation|~/\.lintel/brand/visio-templates' "$f"; then
+        fail "Visio promises an unapproved writer, personal template or false completion"
       else
-        fail "slot: $skill missing TEMPLATE ONLY marker — pre-baking content violates L-001"
+        pass "Visio has no invented writer, personal template or handoff-only success"
       fi
     elif grep -qi "TEMPLATE ONLY" "$f"; then
       fail "concrete method: $skill must not declare TEMPLATE ONLY"
