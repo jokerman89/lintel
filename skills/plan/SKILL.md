@@ -509,6 +509,9 @@ The **subtask is the LEAF** at tree depth — the verification and progress unit
 - Requirements traced to design and original task IDs, with observable acceptance
   and concrete verification/evidence references. Link the original leaf/test instead
   of duplicating its authority; planned checks remain unrun until evidence exists.
+- Conditional **Riskiest premise** carried from DEFINE's approved premise record,
+  with its falsifier and evidence state, separate from requirements. Use reasoned
+  N/A when there is no material premise; do not invent a premise or another question.
 - Status: DRAFT for new unapproved work; APPROVED only when it reflects the actual
   selected approval recorded at Step 10. CAPTURE reaffirms, never promotes a draft.
 

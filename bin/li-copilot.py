@@ -160,6 +160,7 @@ AGENT_PREAMBLE = """> - **Resource root:** `{root}` from this agent's directory,
 SWARM_RESOURCES = (
     "skills/swarm/SKILL.md",
     "skills/swarm/references/evidence.md",
+    "skills/resume/references/state-and-job-recovery.md",
     "skills/brief-forge/SKILL.md",
     "bin/li-swarm",
     "bin/li-swarm.py",

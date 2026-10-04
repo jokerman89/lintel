@@ -23,6 +23,7 @@ printf 'layout_version: 5\n' > "$LINTEL_REPO_ROOT/.claude/lintel-layout.yaml"
 extract_step() {
   awk -v heading="$2" '
     index($0, heading) == 1 { section=1; next }
+    section && !code && /^#+[[:space:]]/ { exit }
     section && /^```bash/ { code=1; next }
     code && /^```/ { exit }
     code { sub(/\r$/, ""); print }
@@ -157,7 +158,7 @@ cmp "$TMP/tasks-before.md" "$LINTEL_REPO_ROOT/specs/001-feature/tasks.md"
 # Exercise SCOPE -> RESUME with their actual snippets and the real jobs helper.
 # Poison the shared parent and a sibling so the old ../scope.md read selects wrongly.
 extract_step "$ROOT/skills/scope/SKILL.md" '### Step 5 ' "$TMP/scope-write.sh"
-extract_step "$ROOT/skills/resume/SKILL.md" '### Step 2.5 ' "$TMP/resume-job.sh"
+extract_step "$ROOT/skills/resume/references/state-and-job-recovery.md" '## Tree and job resume' "$TMP/resume-job.sh"
 export LINTEL_JOBS_DIR="$LINTEL_REPO_ROOT/.claude/runtime/jobs"
 mkdir -p "$LINTEL_JOBS_DIR/selected-job" "$LINTEL_JOBS_DIR/other-job"
 printf 'depth_schema: phased\n' > "$LINTEL_JOBS_DIR/scope.md"

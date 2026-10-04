@@ -357,6 +357,14 @@ class CoreBoundaryMethods(unittest.TestCase):
             self.assertNotIn(".claude/runtime/sessions", text)
         self.assertEqual((ROOT / HISTORY).parent, (ROOT / ".claude/memory/working-state.md").parent)
 
+    def test_hot_index_defers_current_v2_status_to_its_working_state_owner(self):
+        index = read(".claude/memory/MEMORY.md")
+        note = index.split("**Original V2 programme remains open", 1)[1].split(
+            "\n- **Universal delivery", 1)[0]
+        self.assertIn("working-state.md", note)
+        for stale in ("uncommitted WIP", "f9796bb8", "0.13.7"):
+            self.assertNotIn(stale, note)
+
     def test_core_still_preserves_nine_phase_and_independence_boundaries(self):
         cycle = read("skills/cycle/SKILL.md")
         capture = read("skills/capture/SKILL.md")

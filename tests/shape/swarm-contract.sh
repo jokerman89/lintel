@@ -37,7 +37,11 @@ workflow_markers = {
     "skills/plan/SKILL.md": ("Step 6a", "operator opts in", "li-swarm.py"),
     "skills/build/SKILL.md": ("Mapped swarm entry condition", "legacy sequential BUILD unchanged", "never dispatch from `wave` alone", "authoritative prerequisites", "check-scope"),
     "skills/review/SKILL.md": ("Swarm integrated-tree close gate", "li-swarm.py", "reconciled"),
-    "skills/resume/SKILL.md": ("Swarm-aware committed resume", "status", "Runtime loss cancels attempts"),
+    "skills/resume/SKILL.md": ("Swarm-aware committed resume", "status", "Runtime loss cancels attempts",
+                               "LINTEL_SOURCE_ROOT", "NEEDS_CONTEXT",
+                               "references/state-and-job-recovery.md#swarm-aware-committed-resume"),
+    "skills/resume/references/state-and-job-recovery.md": ("Swarm-aware committed resume",
+                                                        "Runtime loss cancels attempts", "check-scope"),
     "skills/capture/SKILL.md": ("Reaffirm swarm evidence", "M4", "COMPLETE"),
     "skills/cycle/SKILL.md": ("not a phase", "/li:cycle --swarm", "ordinary sequential BUILD"),
     "skills/full-engineering-pass/SKILL.md": ("parallel: true", "/li:swarm", "Default to serial"),
@@ -50,10 +54,12 @@ for relative, markers in workflow_markers.items():
 
 trusted_source_workflows = (
     "skills/swarm/SKILL.md",
+    "skills/swarm/references/evidence.md",
     "skills/plan/SKILL.md",
     "skills/build/SKILL.md",
     "skills/review/SKILL.md",
     "skills/resume/SKILL.md",
+    "skills/resume/references/state-and-job-recovery.md",
     "skills/capture/SKILL.md",
     "skills/cycle/SKILL.md",
     "skills/spec-kit/references/work-map.md",
@@ -66,7 +72,7 @@ for relative in (
     "skills/swarm/SKILL.md",
     "skills/build/SKILL.md",
     "skills/review/SKILL.md",
-    "skills/resume/SKILL.md",
+    "skills/resume/references/state-and-job-recovery.md",
 ):
     body = (root / relative).read_text(encoding="utf-8")
     for marker in ("LINTEL_SOURCE_ROOT", "CLAUDE_PLUGIN_ROOT", "NEEDS_CONTEXT", '--repo "$repo"'):

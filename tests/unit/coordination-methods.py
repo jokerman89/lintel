@@ -135,16 +135,86 @@ class Sources(unittest.TestCase):
         text = read("skills/resume/SKILL.md")
         self.require(text, "Resume decision table (map first)", "No committed selection",
                      "Several committed initiatives", "baseline unrun", "exact command",
-                     "seven days", "same card", "Runtime loss cancels attempts",
-                     "job_can_start", "blocked_until", "job_resume_point", "1.1.a",
-                     "current_step", "LINTEL_SCOPE_PATH", "workflow_resume",
+                     "seven days", "LINTEL_SCOPE_PATH", "workflow_resume",
                      "context/generation/digest", "--job", "--from", "--explicit",
                      "context_checkpoint", "context_select", "STARTING/BLOCKED/",
-                     "source rollback remains a separate", "shared jobs parent")
-        self.assertNotIn("Test suite passes baseline", text)
-        self.assertNotIn("What's your choice?", text)
-        self.assertNotIn(">30 days", text)
-        self.assertNotIn("ignoring prior state", text)
+                     "source rollback remains a separate")
+        recovery = read("skills/resume/references/state-and-job-recovery.md")
+        self.require(recovery, "same card", "Runtime loss cancels attempts",
+                     "job_can_start", "blocked_until", "job_resume_point", "1.1.a",
+                     "current_step", "shared jobs parent")
+        for owner in (text, recovery):
+            self.assertNotIn("Test suite passes baseline", owner)
+            self.assertNotIn("What's your choice?", owner)
+            self.assertNotIn(">30 days", owner)
+            self.assertNotIn("ignoring prior state", owner)
+
+    def test_resume_swarm_recovery_uses_its_complete_owned_reference(self):
+        main = section("skills/resume/SKILL.md", "#### Swarm-aware committed resume")
+        self.assertIn("references/state-and-job-recovery.md#swarm-aware-committed-resume", main)
+        self.require(main, "Read", "before", "Runtime loss cancels attempts", "same card")
+        self.assertNotIn("```bash", main)
+        reference = section("skills/resume/references/state-and-job-recovery.md",
+                            "## Swarm-aware committed resume")
+        self.require(reference, "Inputs", "Step 1c", "selected_map", "coordination",
+                     "LINTEL_SOURCE_ROOT", "CLAUDE_PLUGIN_ROOT", "NEEDS_CONTEXT",
+                     "Runtime loss cancels attempts", "check-scope", "same card")
+        for forbidden in ("${LINTEL_SOURCE_ROOT:-$repo}", ">30 days",
+                          "ignoring prior state", "Test suite passes baseline", "What's your choice?"):
+            self.assertNotIn(forbidden, read("skills/resume/SKILL.md"))
+            self.assertNotIn(forbidden, read("skills/resume/references/state-and-job-recovery.md"))
+
+    def test_resume_integrity_requires_declared_same_shell_inputs(self):
+        main = section("skills/resume/SKILL.md", "### Step 1.5 —")
+        self.assertIn("references/state-and-job-recovery.md#ledger-integrity", main)
+        self.assertNotIn("```bash", main)
+        reference = section("skills/resume/references/state-and-job-recovery.md",
+                            "## Ledger integrity")
+        self.require(reference, "Inputs from Step 1", "STATE_FILE", "resume_working_repo",
+                     "same Bash invocation", "state_cycle_segment", "branch-drift",
+                     "commit-unreachable", "staleness (warn if >7 days)", "age-only warning",
+                     "An unresolved mismatch blocks")
+
+    def test_resume_job_recovery_uses_the_selected_job_reference(self):
+        main = section("skills/resume/SKILL.md", "### Step 2.5 —")
+        self.assertIn("references/state-and-job-recovery.md#tree-and-job-resume", main)
+        self.assertNotIn("```bash", main)
+        reference = section("skills/resume/references/state-and-job-recovery.md",
+                            "## Tree and job resume")
+        self.require(reference, "Inputs", "JOB_ID", "LINTEL_SCOPE_PATH",
+                     "LINTEL_REPO_ROOT", "job_resume_point", "job_can_start",
+                     "blocked_until", "current_step", "shared jobs parent",
+                     "selected scope is missing or empty", "1.1.a")
+
+    def test_snippet_extractor_never_falls_through_to_another_section(self):
+        source = read("tests/integration/enterprise-workflow-snippets.sh")
+        function = re.search(r"(?ms)^extract_step\(\) \{\n.*?^\}", source)
+        self.assertIsNotNone(function)
+        cases = (
+            ("### Selected\n\n```bash\n# A shell comment\nprintf selected\n```\n"
+             "### Following\n```bash\nprintf wrong\n```\n", True,
+             "# A shell comment\nprintf selected\n"),
+            ("### Selected\nNo Bash block here.\n\n"
+             "### Following\n```bash\nprintf wrong\n```\n", False, ""),
+            ("### Unrelated\n```bash\nprintf wrong\n```\n", False, ""),
+        )
+        with tempfile.TemporaryDirectory(prefix="extract-owner-") as temporary:
+            base = Path(temporary)
+            for index, (text, passes, expected) in enumerate(cases):
+                with self.subTest(case=index):
+                    path, output = base / f"case-{index}.md", base / f"case-{index}.sh"
+                    path.write_text(text, encoding="utf-8")
+                    result = subprocess.run(
+                        [BASH, "--noprofile", "--norc", "-c",
+                         function[0] + '\nextract_step "$1" "### Selected" "$2"\n',
+                         "extractor-fixture", path.as_posix(), output.as_posix()],
+                        capture_output=True, text=True, encoding="utf-8", check=False,
+                    )
+                    if passes:
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                    else:
+                        self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(output.read_text(encoding="utf-8"), expected)
 
     def test_contract_names_link_to_existing_owners(self):
         reference = read("skills/swarm/references/evidence.md")
@@ -158,7 +228,32 @@ class Sources(unittest.TestCase):
             text = read(f"skills/{name}/SKILL.md")
             self.assertIn("references/evidence.md", text)
         self.require(read("skills/swarm/SKILL.md"), "## Shared-evidence consumer",
-                     "verify_profile_reference", "verify_qa", "log-backed `li-review-read`")
+                     "references/evidence.md#shared-evidence-consumer")
+        self.require(reference, "verify_profile_reference", "verify_qa",
+                     "log-backed `li-review-read`")
+        for owner in (read("skills/swarm/SKILL.md"), reference):
+            self.assertNotIn("${LINTEL_SOURCE_ROOT:-$repo}", owner)
+
+    def test_swarm_shared_acceptance_has_one_reference_owner(self):
+        main = section("skills/swarm/SKILL.md", "## Shared-evidence consumer")
+        self.assertIn("references/evidence.md#shared-evidence-consumer", main)
+        self.require(main, "Read", "before", "shared acceptance")
+        self.assertNotIn("1. Before observations", main)
+        reference = read("skills/swarm/references/evidence.md")
+        self.assertIn("## Shared-evidence consumer", reference)
+        self.assertNotIn("../SKILL.md#shared-evidence-consumer", reference)
+        method = section("skills/swarm/references/evidence.md", "## Shared-evidence consumer")
+        self.require(method, "work_context", "never `LINTEL_WORK_MAP`",
+                     "verify_profile_reference", "required_policy", "verify_qa",
+                     "log-backed `li-review-read`", "Later applicable rejection",
+                     "Missing/retyped/downgraded obligations", "same non-snapshot fields",
+                     "full coordination, charter and brief", "domain_request",
+                     "not_evaluated", "Verification-only", "real host/human corroboration",
+                     "raw base/HEAD/index/worktree", "Do not alias",
+                     "--profile-home", "--profile-packs", "--profile-pointer")
+        self.assertNotIn("arguments above", method)
+        for owner in (read("skills/swarm/SKILL.md"), reference):
+            self.assertNotIn("${LINTEL_SOURCE_ROOT:-$repo}", owner)
 
     def test_forge_method_does_not_call_diagnostics_measured_quality(self):
         self.require(read("skills/brief-forge/SKILL.md"),
@@ -334,7 +429,8 @@ steps:
 """)
         scope = self.put("jobs/example/scope.md", "depth_schema: tree\n")
         self.env["JOB_ID"] = "example"
-        script = bash_block("skills/resume/SKILL.md", "### Step 2.5 —")
+        script = bash_block("skills/resume/references/state-and-job-recovery.md",
+                            "## Tree and job resume")
         before = hashes(self.root / "jobs")
         self.assertEqual(self.bash(script + '\nprintf "%s" "$resume_target"'), "1.2.a")
         self.assertEqual(hashes(self.root / "jobs"), before)

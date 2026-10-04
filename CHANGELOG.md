@@ -5,6 +5,42 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.13.9 — unreleased
+
+### Changed
+
+- The native spec template carries a conditional material-premise/falsifier
+  record separately from its unchanged requirements table. Existing premise,
+  decision and task links are retained; a reasoned N/A does not invent another
+  assumption or interview. DRAFT-first approval and evidence boundaries remain.
+- Resume's complete swarm, ledger-integrity and tree/job recovery procedures
+  have one required reference with declared inputs and same-shell setup.
+  Map-first selection, checkpoint ownership, age warnings and blocked-step
+  behavior remain unchanged.
+- Swarm's full shared-evidence procedure now lives with its named provider
+  reference. The public run/verify contract, raw-versus-normalized snapshot
+  distinction, current profile checks and independent-review requirements remain.
+- Core selection and native dependency inventories require the recovery
+  reference, including its installed, rebased links and missing-source refusal.
+
+### Fixed
+
+- The enterprise snippet test extractor refuses to borrow a later section's
+  Bash block. Existing positive chains and owner-aware source guards are retained.
+- The hot memory index links to the current working-state owner instead of
+  duplicating a stale delivery/WIP snapshot.
+
+### Migration and limits
+
+- Update generated native resources through the existing adapter and perform
+  an explicitly reasoned target-local profile rebind for the version change
+  before new acceptance/QA. Preserve prior generations and review records.
+- No public entrypoint, phase, role, runtime schema or control is removed.
+  Native bodies remain complete canonical translations with available references,
+  not pointer-only wrappers or a supposed hard 20 KB limit.
+- Source/fixture checks are not model-efficacy or live-host enforcement evidence.
+  Other original findings and exact host-held work remain separate.
+
 ## 0.13.8 — unreleased
 
 ### Added

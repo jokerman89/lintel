@@ -38,6 +38,22 @@ its original acceptance criterion. Reference the check/procedure and expected
 result in the original leaf or existing test. Mark evidence planned/unrun until
 observed. Reuse original requirement/task IDs and links; do not create another backlog.
 
+## Riskiest premise
+
+Carry the most consequential material premise from the approved design, or link its
+existing **Conditional pivotal premise record**. Preserve the original premise or
+decision ID. A premise is not a new requirement; keep it separate from the table above.
+
+| Premise / original decision | Falsifier | Observation status | Evidence / source | Original requirement / task |
+|---|---|---|---|---|
+| `<premise or original decision link>` | `<observation that would invalidate the premise>` | `<planned/unrun/observed>` | `<evidence or original record link>` | `<original requirement/task links>` |
+
+Use observed status only for actual evidence; otherwise retain planned, unrun or
+unverified status. Missing evidence alone does not make a material premise inapplicable.
+If there is no material premise, record a reasoned `N/A`; do not invent one, add an
+intake question or re-interview already approved work. This row carries existing
+design context, not new approval or evidence.
+
 ## Constraints
 
 - Must respect: <constraints from the design doc + active pack compliance gates>

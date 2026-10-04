@@ -1453,6 +1453,13 @@ except (ValueError,OSError) as error:
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_swarm_wrapper_and_complete_source_resource_inventory(self):
+        # This checks resource closure, not Python's legacy unprefixed path limit.
+        self.target = self.base / "swr"
+        self.target.mkdir()
+        recovery = "skills/resume/references/state-and-job-recovery.md"
+        self.assertIn(recovery, adapter.SWARM_RESOURCES)
+        selections = json.loads((self.source / "lib/capability-selections.json").read_text(encoding="utf-8"))
+        self.assertIn(recovery, selections["selections"]["core"]["resources"])
         self.run_cli()
         wrapper = self.target / ".github/skills/li-swarm/SKILL.md"
         self.assertTrue(wrapper.is_file())
@@ -1466,6 +1473,21 @@ except (ValueError,OSError) as error:
             installed = f"{adapter.BUNDLE}/{relative}"
             self.assertIn(installed, inventory)
             self.assertTrue((self.target / installed).is_file(), installed)
+        self.assertEqual((self.target / adapter.BUNDLE / recovery).read_bytes(),
+                         adapter.source_bytes(self.source / recovery))
+        resume = (self.target / ".github/skills/li-resume/SKILL.md").read_text(encoding="utf-8")
+        for anchor in ("swarm-aware-committed-resume", "ledger-integrity", "tree-and-job-resume"):
+            self.assertIn(f"../../lintel/{recovery}#{anchor}", resume)
+        before = self.snapshot()
+        source_path = self.source / recovery
+        original = source_path.read_bytes()
+        try:
+            source_path.unlink()
+            refused = self.run_cli(success=False)
+            self.assertIn(f"Required source file is missing: {source_path}", refused.stderr)
+            self.assertEqual(before, self.snapshot())
+        finally:
+            source_path.write_bytes(original)
 
     def test_native_skills_and_agents_cover_every_canonical_source(self):
         self.run_cli()

@@ -297,12 +297,16 @@ class ContinuityContracts(unittest.TestCase):
         self.assertIn("key below is synthetic", examples)
     def test_resume_retains_selected_work_profile_and_job_contract(self):
         text = body("resume")
+        recovery = (ROOT / "skills/resume/references/state-and-job-recovery.md").read_text(encoding="utf-8")
         self.assertLess(text.index("First honor an operator-selected work map"), text.index("checkpoints="))
-        for contract in ("--job <id>", "--from <phase|step>", "--from <step>", "./BUILD",
-                         "LINTEL_SCOPE_PATH", "job_resume_point", "job_can_start",
+        for contract in ("--job <id>", "--from <phase|step>", "./BUILD",
+                         "LINTEL_SCOPE_PATH", "job_can_start",
                          "workflow_resume <original-cycle-id> <selected-map>",
                          "state_resume_phase", "actual latest reader", "source-byte"):
             self.assertIn(contract, text)
+        self.assertIn("references/state-and-job-recovery.md#tree-and-job-resume", text)
+        for contract in ("--from <step>", "job_resume_point", "job_can_start", "blocked_until"):
+            self.assertIn(contract, recovery)
         preferences = (ROOT / "skills/build/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("checkpoint_mode", preferences)
 
@@ -517,14 +521,18 @@ class ContinuityContracts(unittest.TestCase):
 
     def test_continuity_guidance_matches_actual_selected_work_and_age_rule(self):
         resume = body("resume")
-        self.assertIn("staleness (warn if >7 days)", resume)
-        self.assertNotIn("Ignoring stale state** (>30 days", resume)
-        self.assertNotIn("read just 00-state.md", resume)
+        recovery = (ROOT / "skills/resume/references/state-and-job-recovery.md").read_text(encoding="utf-8")
+        self.assertIn("staleness (warn if >7 days)", recovery)
+        for text in (resume, recovery):
+            self.assertNotIn("Ignoring stale state** (>30 days", text)
+            self.assertNotIn("read just 00-state.md", text)
         self.assertNotIn("li-token-watcher", body("pause"))
         self.assertIn("workflow_resume", resume)
         self.assertIn("Never choose by newest timestamp", resume)
 
     def test_resume_age_warning_does_not_request_reapproval_for_matching_identity(self):
+        recovery = (ROOT / "skills/resume/references/state-and-job-recovery.md").read_text(encoding="utf-8")
+        self.assertIn("## Ledger integrity", recovery)
         self.run_command(["git", "-C", str(self.repo), "-c", "user.name=Fixture",
                           "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false",
                           "commit", "--allow-empty", "-qm", "fixture baseline"])
@@ -537,9 +545,8 @@ class ContinuityContracts(unittest.TestCase):
         state.write_text(text, encoding="utf-8")
         before = state.read_bytes()
         self.env["LINTEL_CYCLE_ID"] = "fixture-cycle"
-        recipe = bash_block(body("resume"), "### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)")
-        prelude = ('source "$LINTEL_SOURCE_ROOT/lib/state.sh"\n'
-                   'resume_working_repo="$LINTEL_REPO_ROOT"\nSTATE_FILE="$(state_file)"\n')
+        recipe = bash_block(recovery, "## Ledger integrity")
+        prelude = bash_block(body("resume"), "### Step 1 — Locate state") + "\n"
         result = self.shell(prelude + recipe)
         self.assertIn("old observation", result.stdout)
         self.assertNotIn("Continue anyway?", result.stdout)

@@ -15,10 +15,9 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
-- **Original V2 programme remains open (2026-10-03):** current packages are uncommitted WIP.
-  Last verified main baseline supplied for this continuation is `f9796bb8` / **0.13.7**.
-  The earlier `bcd041eb` delivery covered 36 mapped leaves, not all 84 findings.
-  See [current state](working-state.md#active--original-v2-findings); no new main/SHIP acceptance is claimed.
+- **Original V2 programme remains open:** [current state](working-state.md#active--original-v2-findings)
+  owns the current delivery, remaining original clauses and selected continuation.
+  This index is navigation, not a second volatile status or acceptance record.
 - **Universal delivery supersedes the old recovery snapshot:** the
   [final delivery report](../plans/universal-implementation/reports/final.md) records PR #93 /
   `80002ed4` and 109/109 items in the final scope. **ADR-0033** removed, never accepted or

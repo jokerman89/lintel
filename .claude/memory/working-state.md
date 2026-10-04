@@ -38,6 +38,12 @@ architecture/public-surface choices, live-host evidence and outcome experiments.
 Not all are host blockers. Resume the original unclosed clauses, preserving
 their authority and evidence, rather than replaying the delivered packages.
 
+**Current continuation:** original A-07, B-09 and B-11 are being completed through
+P10 in the same work map, followed by P9 integration. The conditional premise row
+and complete recovery/evidence reference moves are implemented on the continuation
+branch; current source review and delivery are still pending. Planned 0.13.9 is
+not another main landing or a new whole-finding closure count.
+
 ## Recorded deliveries — read within their exact scope
 
 These are pointers to existing delivery records, not new acceptance or a reason

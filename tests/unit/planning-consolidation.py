@@ -404,6 +404,66 @@ class PlanningEvidenceTests(FIXTURE["Fixture"]):
                         for line in evidence_text.splitlines() if line.startswith("#")]
             self.assertIn(selected_anchor, headings)
 
+    def test_spec_carries_a_separate_material_premise_or_reasoned_na(self):
+        template = required_text(ROOT / "scaffolding/01-foundation/templates/plan/spec.template.md")
+        heading = "## Riskiest premise"
+        self.assertIn(heading, template)
+        premise = section(template, heading)
+        for term in (
+            "Conditional pivotal premise record", "not a new requirement",
+            "no material premise", "reasoned", "N/A", "do not invent",
+            "intake question", "re-interview", "planned", "unverified",
+        ):
+            self.assertIn(term, " ".join(premise.split()))
+        columns = ["Premise / original decision", "Falsifier", "Observation status",
+                   "Evidence / source", "Original requirement / task"]
+        table_header = next(line for line in premise.splitlines() if line.startswith("| Premise"))
+        self.assertEqual([cell.strip() for cell in table_header.strip("|").split("|")], columns)
+        placeholders = (
+            "`<premise or original decision link>`",
+            "`<observation that would invalidate the premise>`",
+            "`<planned/unrun/observed>`",
+            "`<evidence or original record link>`",
+            "`<original requirement/task links>`",
+        )
+        self.write("design.md", "## D014\n\nThe existing error code is a material compatibility premise.\n")
+        self.write("plan.md", "## T017\n\nVerify original R1 without changing its identity.\n")
+        for values in (
+            ("[D014](design.md#d014)", "The existing client observes a changed error code.",
+             "unrun", "[Existing premise](design.md#d014); no new observation",
+             "R1 / [T017](plan.md#t017)"),
+            ("N/A: no material premise for this bounded correction.",
+             "N/A: no assumption to invalidate.", "N/A",
+             "Existing acceptance applies; no new observation.",
+             "R1 / [T017](plan.md#t017)"),
+        ):
+            with self.subTest(premise=values[0]):
+                rendered = template
+                for placeholder, value in zip(placeholders, values):
+                    self.assertEqual(rendered.count(placeholder), 1)
+                    rendered = rendered.replace(placeholder, value)
+                self.write("spec.md", rendered)
+                actual = required_text(self.repo / "spec.md")
+                rows = [line for line in section(actual, heading).splitlines()
+                        if line.startswith("| ") and not line.startswith("| Premise")]
+                self.assertEqual(len(rows), 1)
+                self.assertEqual([cell.strip() for cell in rows[0].strip("|").split("|")], list(values))
+                requirements = section(actual, "## Requirements (traced to design)")
+                requirement_rows = [line for line in requirements.splitlines()
+                                    if re.match(r"^\| R\d+ \|", line)]
+                self.assertEqual(len(requirement_rows), 2)
+                self.assertTrue(all(len(line.strip("|").split("|")) == 6 for line in requirement_rows))
+                self.assertNotIn(values[0], requirements)
+                self.assertIn("**Status:** DRAFT", actual)
+                for link in re.findall(r"\]\(([^)]+)\)", rows[0]):
+                    path, anchor = link.split("#", 1)
+                    target = required_text(self.repo / path)
+                    self.assertIn(anchor, [line.lstrip("# ").lower() for line in target.splitlines()
+                                           if line.startswith("#")])
+        description = skill("plan").split("**spec.md** (canonical", 1)[1].split("**prompt.md**", 1)[0]
+        for term in ("Riskiest premise", "DEFINE", "no material premise"):
+            self.assertIn(term, description)
+
     def observed_inspect(self, *, status="pass", controls=None):
         self.record(status=status, controls=controls)
         self.review["skill"] = "inspect"
