@@ -7,6 +7,12 @@ operator authority. Unelaborated or decision-bound leaves are not ready for BUIL
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
 **Execution:** coordinator-owned, dependency-ordered packages; no automatic swarm.
 
+**Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
+obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
+Checked boxes cover these bounded clauses, not all clauses of each original
+finding. The original programme remains open; see
+[verified delivery](#verified-delivery-2026-10-04).
+
 ## Outcome and signals
 
 The final outcome is correction of the original findings, not the delivery of
@@ -57,7 +63,7 @@ elapsed estimates or dropping the original finding IDs.
 
 ## First ready leaf
 
-- [ ] lane-d-10 Make artifact QA report-only by default and repair only into a distinct authorized output.
+- [x] lane-d-10 Make artifact QA report-only by default and repair only into a distinct authorized output.
 
 **Files:** `skills/generate-qa/SKILL.md`, the direct `generate` caller if it
 supplies a repair default, and the existing document-generation regression harness.
@@ -69,7 +75,8 @@ rerun affected checks on the copy. An unavailable output is an error, never
 fallback to the source or current directory.
 **Verification:** discriminating source/fixture checks plus the affected existing
 document pipeline suite; source-contract checks are not model-efficacy proof.
-**Evidence:** pending. Independent package review follows the actual changes.
+**Evidence:** the source, independent review and actual delivery evidence are
+recorded in the verified-delivery section below. Original acceptance is retained.
 
 The coordinator reviewed this bounded leaf against the full original claim and
 current QA/caller sources before implementation: changing the default and copy
@@ -79,7 +86,7 @@ The package's final source and quality review remains required.
 
 ## Remaining leaf elaboration
 
-- [ ] lane-B-08 Correct the remaining checkpoint examples against the actual repository-key grammar.
+- [x] lane-B-08 Correct the remaining checkpoint examples against the actual repository-key grammar.
 
 The native pause entry and phantom-hook corrections already exist. The remaining
 source examples must include the full repository key, identify any sample key
@@ -87,17 +94,17 @@ as synthetic, and direct readers to the actual reserved path. Preserve every
 checkpoint filename/ownership rule; the helper and current resume behavior do
 not change. Verify the real helper's key and every published example.
 
-- [ ] lane-B-10 Use the shared usage/audit reader with honest manual-report and coverage boundaries.
+- [x] lane-B-10 Use the shared usage/audit reader with honest manual-report and coverage boundaries.
 
 Coordinator owns this bounded residual: retain the manual writer and report
 flags, route reads through the existing audit owner, and remove stale
 single-log/task-authority claims. Verify `UsageReportContracts` including
 actual event-reader preservation and the source-owner guard.
 
-- [ ] lane-d-04 Replace nonexistent generation share gates with actual named controls.
-- [ ] lane-d-05 Require explicit owned outputs instead of personal-home or current-directory fallbacks.
-- [ ] lane-d-06 Ship a read-only contrast measurement helper over actual observed colors.
-- [ ] lane-d-12 Make generation and design descriptions task-triggered and current.
+- [x] lane-d-04 Replace nonexistent generation share gates with actual named controls.
+- [x] lane-d-05 Require explicit owned outputs instead of personal-home or current-directory fallbacks.
+- [x] lane-d-06 Ship a read-only contrast measurement helper over actual observed colors.
+- [x] lane-d-12 Make generation and design descriptions task-triggered and current.
 
 **Generation safety owner:** one sequential implementation delegate for these
 four leaves; the coordinator retains lane-d-10 and its caller changes.
@@ -142,13 +149,13 @@ preserving the current slot and actual writer requirement. That one reference is
 an ordinary correction, not a user-imposed hold or permission to retire the skill.
 The delegate's original report is preserved; its reservation was coordinator-owned.
 
-- [ ] lane-E-04 Route planning-only operations to planning-only capability.
-- [ ] lane-E-08 Make remaining role templates obey their own evidence rules.
-- [ ] lane-E-09 State actual tool/evidence handoffs instead of unavailable operations.
-- [ ] lane-E-11 Keep persistence ownership with the authorized caller.
-- [ ] lane-E-13 Derive release notes from delivered behavior rather than invented prefix mappings.
-- [ ] F-04 Require dated primary-source applicability and a responsible owner without fabricating legal currency.
-- [ ] F-05 Share actual voice/consent guards and remove false compliance-as-voice routing.
+- [x] lane-E-04 Route planning-only operations to planning-only capability.
+- [x] lane-E-08 Make remaining role templates obey their own evidence rules.
+- [x] lane-E-09 State actual tool/evidence handoffs instead of unavailable operations.
+- [x] lane-E-11 Keep persistence ownership with the authorized caller.
+- [x] lane-E-13 Derive release notes from delivered behavior rather than invented prefix mappings.
+- [x] F-04 Require dated primary-source applicability and a responsible owner without fabricating legal currency.
+- [x] F-05 Share actual voice/consent guards and remove false compliance-as-voice routing.
 
 **Agent-correctness owner:** one sequential delegate, after generation safety
 returns. Read each full original claim and check prior V2 repairs before editing.
@@ -177,16 +184,16 @@ Already corrected clauses need evidence and no gratuitous rewrite. Preserve
 names and functional capabilities. Report separate consolidation proposals as
 still open, never as a reason to omit these compatible corrections.
 
-- [ ] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
-- [ ] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
-- [ ] lane-B-06 Describe built-in handoff checks and fixed accounting honestly.
-- [ ] lane-B-09 Make resume precedence and conditional questions consistent.
-- [ ] lane-B-11 Explain internal contract identifiers through their actual public method owners.
-- [ ] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
-- [ ] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
-- [ ] C-07 Ask for observed lesson efficacy/recurrence instead of inventing reference frequency.
-- [ ] C-08 Remove unsupported engineering preference-contract claims.
-- [ ] C-09 Put scaffold-mode acceptance reasoning with the owning scaffold method.
+- [x] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
+- [x] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
+- [x] lane-B-06 Describe built-in handoff checks and fixed accounting honestly.
+- [x] lane-B-09 Make resume precedence and conditional questions consistent.
+- [x] lane-B-11 Explain internal contract identifiers through their actual public method owners.
+- [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
+- [x] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
+- [x] C-07 Ask for observed lesson efficacy/recurrence instead of inventing reference frequency.
+- [x] C-08 Remove unsupported engineering preference-contract claims.
+- [x] C-09 Put scaffold-mode acceptance reasoning with the owning scaffold method.
 
 **Coordination-method owner:** one sequential delegate. Scope includes the
 canonical skills named by these ten claims, directly linked references,
@@ -231,13 +238,13 @@ No full-suite rerun, model experiment, global profile mutation, private-data rea
 generated reducer or ADR change by the delegate. Preserve preceding packages,
 or document exact intentional overlaps before editing a shared caller.
 
-- [ ] lane-d-03 Ship the existing PPTX notes/retention inspection as a read-only checker.
-- [ ] lane-d-07 Use one shared frontend-fragment publication procedure without canned vendor choices.
-- [ ] lane-d-08 Keep one advisory review rubric and require observations for performance claims.
-- [ ] lane-d-09 Remove nonexistent generation-resume and obsolete acceptance promises.
-- [ ] lane-d-11 Correct unproven superiority and overbroad adaptation attribution claims.
-- [ ] lane-E-14 Give documentation fidelity one shared owner consumed by BUILD, SHIP and docs front doors.
-- [ ] F-02 Use one narrative structure and one axis publication owner without duplicate default contexts.
+- [x] lane-d-03 Ship the existing PPTX notes/retention inspection as a read-only checker.
+- [x] lane-d-07 Use one shared frontend-fragment publication procedure without canned vendor choices.
+- [x] lane-d-08 Keep one advisory review rubric and require observations for performance claims.
+- [x] lane-d-09 Remove nonexistent generation-resume and obsolete acceptance promises.
+- [x] lane-d-11 Correct unproven superiority and overbroad adaptation attribution claims.
+- [x] lane-E-14 Give documentation fidelity one shared owner consumed by BUILD, SHIP and docs front doors.
+- [x] F-02 Use one narrative structure and one axis publication owner without duplicate default contexts.
 
 F-02's remaining compatible work keeps every named role. A shared narrative
 reference supplies the common arc/genre/timing questions to slide and demo views;
@@ -288,11 +295,11 @@ review/format/caller contracts and source-notice checks. Preserve preceding
 package fixes and document every intentional overlapping file. Report exact
 resource closures for central generation; independent review remains separate.
 
-- [ ] lane-B-04 Consolidate metadata-first discovery without invented routing success.
-- [ ] lane-B-05 Give role lifecycle one method owner while preserving existing entrypoints.
-- [ ] lane-B-07 Provide a concrete bounded single-hop transport for the existing URL policy.
-- [ ] C-04 Replace maintenance's duplicate or unsupported methods with actual owner routes.
-- [ ] C-06 Centralize profile/audit/doctor procedures without changing mutation authority.
+- [x] lane-B-04 Consolidate metadata-first discovery without invented routing success.
+- [x] lane-B-05 Give role lifecycle one method owner while preserving existing entrypoints.
+- [x] lane-B-07 Provide a concrete bounded single-hop transport for the existing URL policy.
+- [x] C-04 Replace maintenance's duplicate or unsupported methods with actual owner routes.
+- [x] C-06 Centralize profile/audit/doctor procedures without changing mutation authority.
 
 **Discovery/lifecycle owner:** one sequential delegate; canonical discovery,
 role/pack/audit/doctor/maintenance methods and direct references, the existing
@@ -326,16 +333,16 @@ size and timeout negatives. No real personal profile or private-role scan, no
 remote request, no global state or activation. Keep source bytes from prior
 packages outside exact documented overlaps.
 
-- [ ] lane-E-01 Configure the native reviewer profile's least-privilege tool declaration.
-- [ ] lane-E-01b Emit role-specific planner/builder/reviewer report contracts.
-- [ ] lane-E-02 Share distributed-boundary reasoning without duplicate default dispatch.
-- [ ] lane-E-03 Share data-design methods while preserving the migration planner/executor split.
-- [ ] lane-E-05 Turn redundant role procedures into compatible views of their existing owners.
-- [ ] lane-E-06 Extract the existing bisect and migration eligibility recipes into trusted helpers.
-- [ ] lane-E-10 Distinguish client/provenance metadata from observed support and license evidence.
-- [ ] lane-E-12 Share performance-evidence reasoning and avoid repeated profiling for report views.
-- [ ] F-06 Preserve actual host/attribution facts without documentary-as-runtime claims.
-- [ ] F-01 Replace arbitrary role-count floors with meaningful inventory/consumer parity.
+- [x] lane-E-01 Configure the native reviewer profile's least-privilege tool declaration.
+- [x] lane-E-01b Emit role-specific planner/builder/reviewer report contracts.
+- [x] lane-E-02 Share distributed-boundary reasoning without duplicate default dispatch.
+- [x] lane-E-03 Share data-design methods while preserving the migration planner/executor split.
+- [x] lane-E-05 Turn redundant role procedures into compatible views of their existing owners.
+- [x] lane-E-06 Extract the existing bisect and migration eligibility recipes into trusted helpers.
+- [x] lane-E-10 Distinguish client/provenance metadata from observed support and license evidence.
+- [x] lane-E-12 Share performance-evidence reasoning and avoid repeated profiling for report views.
+- [x] F-06 Preserve actual host/attribution facts without documentary-as-runtime claims.
+- [x] F-01 Replace arbitrary role-count floors with meaningful inventory/consumer parity.
 
 **Role/runtime owner:** one sequential delegate. Scope includes relevant named
 canonical roles and method references, the two extracted helpers and consumers,
@@ -377,11 +384,11 @@ allowed; source commits and changes to this worktree's hook configuration are
 not. Targeted cleanup of a test-owned temporary child is allowed; no repository,
 session, worktree or broad root deletion. No external network or model call.
 
-- [ ] lane-A-05 Preserve selected external analysis, convergence and bug/assessment authority.
-- [ ] G-01 Detect actual selected Spec Kit capability overlap without requiring extensions.
-- [ ] G-11 Correct current-facing upstream descriptions while retaining dated import/review pins.
-- [ ] ENT-02 Define concrete control ownership, negative checks and failure behavior without claiming enforcement.
-- [ ] ENT-03 Demonstrate that a loaded/pinned child pack cannot clear an omitted required control.
+- [x] lane-A-05 Preserve selected external analysis, convergence and bug/assessment authority.
+- [x] G-01 Detect actual selected Spec Kit capability overlap without requiring extensions.
+- [x] G-11 Correct current-facing upstream descriptions while retaining dated import/review pins.
+- [x] ENT-02 Define concrete control ownership, negative checks and failure behavior without claiming enforcement.
+- [x] ENT-03 Demonstrate that a loaded/pinned child pack cannot clear an omitted required control.
 
 **External authority owner:** one sequential delegate. Scope is the Spec Kit
 bridge and its direct ANALYZE/DEFINE/DIAGNOSE/FIX/REVIEW references, existing
@@ -418,9 +425,9 @@ Normal test-only Git/profile fixtures and targeted child cleanup are allowed;
 no source commits, target-profile rebind, external network or policy change.
 Keep earlier packages intact and report new resource dependencies centrally.
 
-- [ ] lane-A-06 Move optional delivery/capture and maintainer procedures behind their actual conditions.
-- [ ] lane-d-02 Remove false Visio completion/library promises while retaining the explicit unavailable-writer boundary.
-- [ ] ENT-05 Keep current working memory concise and historical detail cold without inventing learning efficacy.
+- [x] lane-A-06 Move optional delivery/capture and maintainer procedures behind their actual conditions.
+- [x] lane-d-02 Remove false Visio completion/library promises while retaining the explicit unavailable-writer boundary.
+- [x] ENT-05 Keep current working memory concise and historical detail cold without inventing learning efficacy.
 
 **Core-boundary owner:** one sequential delegate. Scope is CYCLE/CAPTURE/SHIP
 and new direct method references, the retained Visio compatibility entry and
@@ -465,7 +472,7 @@ inventory, not this first-leaf excerpt.
 
 ## Integration and review
 
-- [ ] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
+- [x] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
 
 The source product changes from 0.13.7 to 0.13.8. The explicitly reasoned
 target-local profile rebind preserves generation 1 as history and selects
@@ -495,3 +502,76 @@ invalidate affected evidence. A reviewer must not repair its own findings.
 Do not edit the byte-bound shared `todo.md` or any earlier acceptance tree.
 Link current progress from mutable working memory. No deletion of files or
 worktrees is part of proving finding closure.
+
+## Verified delivery 2026-10-04
+
+The compatible source batch was delivered by an authorized ordinary fast-forward
+from `f9796bb8b3fbcdab3e235f30401933ea1b2f3162` to
+`b2516af57244017160c499558f183f95e7a9fe5c`. GitHub main and the remote plugin
+manifest were read back at **2026-10-04T08:17:28Z**, confirming **0.13.8**.
+This records that source delivery, not a tag, deployment or whole-programme finish.
+
+The source includes non-mutating artifact QA, explicit output ownership, actual
+contrast and bounded PPTX checks, bounded URL transport, shared skill/role
+methods and their consumers, source-owned bisect/migration helpers, explicit
+global-registry selection, updater-root protection and regenerated native assets.
+The 54 P1-P8 clauses plus the reopened jobs residual were reviewed in the full
+integration; P9 records the verified source delivery rather than another finding.
+
+### Review and verification
+
+Independent source SPEC and QUALITY passed at tree
+`ec32727a6c9be75b6d6080fe5e05c9b333fc85c2`, the exact b251 committed tree.
+When the original ephemeral reviewer became unavailable, an existing independent
+reviewer assessed current evidence applicability and authored the final eight
+decisions. The earlier source judgments retain their actual author; the final
+reviewer did not claim to repeat them. The author confirmed byte-exact copies,
+actual native request/result events corroborated the invocation, and all eight
+once-writer/latest-reader/QA-SHIP gates passed before the main update.
+
+[Exact-source CI run 37181136525](https://github.com/jokerman89/lintel/actions/runs/37181136525)
+passed **23 jobs, 27 strict invocations and 600 script executions**: 200 per OS,
+with no required failures, skips or partial executions. This includes actual
+Python 3.12 PPTX and the fixed-parent migration fixture. Platform N/A counts were
+23 on Ubuntu, 23 on macOS and zero on Windows; they are not skipped scripts.
+The selected local total is **136 retained cases plus 17 fresh source-bound
+PPTX cases = 153**, not 170. The earlier unbound PPTX receipt remains history.
+Four committed native/catalog/wiki/whitespace checks also passed.
+
+Raw M2 remains **RED, 94 occurrences**, with explicit narrowly scoped acceptance
+for the reviewed source and production guards. It was not retyped GREEN.
+The final review's factual wording errata are retained alongside the original
+report. Its evidence-array clarity recommendation does not affect the shared
+consumer, which reads counts from the observation, not by summing evidence files.
+No live rendering, every-client enforcement, legal currency or model efficacy is
+inferred. The failed first CI and test-isolation incidents remain recorded;
+unobserved personal/client state is not described as restored.
+
+Private proof is retained under the coordinating session's owned runtime and
+backups, not published as raw session history. Stable content references are:
+
+| Evidence | SHA-256 |
+|---|---|
+| Hosted verified summary | `9085710c43e8d1e599f0f0d75bd6bb46399f230cba08247c23b3feaf1b74f97c` |
+| Final reviewer manifest | `6cc92f1c1bdc168aa94450a738eba60beaac3a7c4eff38b6b214420e4b2f0774` |
+| Author's faithful-copy confirmation | `5f604be50635aae94af3fb862de3200a22dd4799f8799c00f5a7c0e26849cb5c` |
+| Native host observations | `036cb2f177965cf29e08bc8e1f4fe16a78627e68a8080fd32b0054d9978915de` |
+| Actual source QA/SHIP receipt | `919047657d6ca152ab8869f2a636f4a31686eff4486fc2c12281ba5ecd0edb60` |
+| Original-finding dispositions | `9daa8dfd3225c441ca5fb0dab89e7387c5c50d330641a179b5d2380d249eff66` |
+
+### Original work still open
+
+The independent disposition inventory still has **84 original findings**:
+**36 source-complete/retained-guidance and 48 with explicit remaining clauses**.
+The checked package clauses above do not replace that inventory. In particular,
+not all remaining items are host blockers: some are unimplemented method/template
+proposals; others require public-surface/architecture decisions, primary-source
+verification, live-client evidence or separately authorized outcome experiments.
+
+Keep the exact native-hook and ADR-drafting holds untouched. No retirement,
+pack extraction, replacement of accepted planning rules or new benchmark is
+authorized by this capture. The work map and specification remain APPROVED for
+their stated compatible scope, not COMPLETE for the original programme.
+Resume from the original unclosed clauses and their full evidence, not by
+re-executing the delivered packages or reconstructing private inputs from this
+summary. The private Impact report remains a separate completed private deliverable.

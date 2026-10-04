@@ -1,6 +1,6 @@
 # Memory — current Lintel working state
 
-Updated 2026-10-03. This is a short continuity view, not task authority or release
+Updated 2026-10-04. This is a short continuity view, not task authority or release
 clearance. Read the selected work's original specification, cards and evidence.
 Durable rules remain in [lessons.md](lessons.md); calibration is in
 [personas.md](personas.md).
@@ -8,10 +8,11 @@ Durable rules remain in [lessons.md](lessons.md); calibration is in
 ## Active — original V2 findings
 
 **Status:** the original 84 findings remain a separately tracked programme.
-This 0.13.8 source revision contains the compatible correction packages on
-`jokerman-microsoft-v2-full-findings`. Source presence is not proof of review,
-SHIP or a main landing. The earlier 0.13.7 batch was a verified subset, not
-completion of Skill review v2.
+The compatible 0.13.8 source packages landed on **main** at
+`b2516af57244017160c499558f183f95e7a9fe5c`, verified remotely at
+2026-10-04T08:17:28Z. Source presence is not proof of review, SHIP or a main
+landing; this delivery has separate source review, actual gates and readback
+evidence. Neither 0.13.7 nor 0.13.8 completes all of Skill review v2.
 
 **Authority:** [work map](../plans/v2-findings/work.json),
 [specification](../plans/v2-findings/spec.md) and
@@ -21,14 +22,21 @@ coordination methods, discovery/lifecycle, external authority and conditional
 core procedures. It does not decide portfolio retirement, create a Visio writer
 or establish comparative model/native efficacy.
 
-**Starting baseline:** the main revision supplied for this continuation was
+**Historical starting baseline:** the main revision supplied for this continuation was
 `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`, version **0.13.7**.
-This working-state update performs no fresh remote/main verification.
+It was fast-forwarded normally to the verified 0.13.8 source revision above.
 
-**Closeout:** consult the original-clause dispositions and the actual candidate's
-aggregate checks, independent review and delivery evidence. Local method/fixture
-results and implementer self-review do not clear those gates. This continuity
-summary does not supply a source commit, SHIP, main or whole-programme verdict.
+**Closeout:** the [verified delivery account](../plans/v2-findings/plan.md#verified-delivery-2026-10-04)
+records the 54 compatible source clauses, jobs residual, eight independent
+acceptance records and actual QA/SHIP. Exact-source CI passed 600 scripts across
+three OSes with no required failures/skips/partials. Local method/fixture results
+and implementer self-review alone do not clear those gates.
+
+**Remaining:** 36 original findings are source-complete/retained-guidance; 48
+retain explicit clauses. These include unimplemented method/template proposals,
+architecture/public-surface choices, live-host evidence and outcome experiments.
+Not all are host blockers. Resume the original unclosed clauses, preserving
+their authority and evidence, rather than replaying the delivered packages.
 
 ## Recorded deliveries — read within their exact scope
 
