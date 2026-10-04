@@ -495,7 +495,9 @@ consumer checks and complete hosted verification of the exact candidate.
 
 Integrated review reopened the original **lane-B-02** prior-delivery residual
 (`INT-SPEC-01`). Its correction is an integration obligation, not a new task ID
-or replacement inventory: preserve the 55 mapped leaves and all 84 original IDs.
+or replacement inventory: the prior delivery had 55 mapped tasks; the current
+continuation preserves all of them and adds original A-07, for 56 task IDs and
+the unchanged 84-finding inventory.
 Repository job mutations must leave an unselected global registry/personal
 profile untouched; an explicitly selected, authorized registry retains the
 ADR-0005 pointer pattern, other scopes and legacy records. `list` remains
@@ -532,12 +534,17 @@ the bounded edits below are their implementation steps, not a second task ledger
 The existing original-finding granularity concern remains explicit, without a
 fabricated implementation-time claim. No swarm fields or new actors are selected.
 
-**A-07 files and acceptance:** `scaffolding/01-foundation/templates/plan/spec.template.md`
-and its existing planning/installed-template tests. Retain the six-column
+**A-07 files and acceptance:** `scaffolding/01-foundation/templates/plan/spec.template.md`,
+the directly coupled spec-description clause in `skills/plan/SKILL.md`, and
+existing planning/installed-template tests. Retain the six-column
 requirements table, DRAFT-first status, original acceptance links and PLAN's
 finalization ownership. Add one conditional riskiest-assumption row carrying
 the existing premise/decision link, invalidating observation, evidence state and
-original requirement/task link. If no material premise exists, state a reasoned
+original requirement/task link. Reuse DEFINE's existing `Falsifier`,
+`Observation status` and `Evidence / source` vocabulary and link the actual
+approved design's premise record, not a new parallel record vocabulary.
+PLAN's spec description must mention that conditional carry-forward. If no
+material premise exists, state a reasoned
 N/A rather than inventing an assumption, adding a question or re-interviewing
 approved work. Missing evidence stays planned/unverified. Use an actual rendered
 template fixture with a carried premise and with no material premise; neither is
@@ -553,6 +560,29 @@ seven-day warning and conditional questions in the main method. Each affected
 step must require reading its exact reference section before proceeding.
 Preserve actual Bash recipes and all branch/commit/age/blocked-leaf/flat-fallback
 behavior; adapt tests to execute the real new owner, not a copied implementation.
+
+Each reference section declares its validated inputs and producing step:
+selected-map `selected_map`/`coordination` for swarm recovery; Step 1's
+`STATE_FILE`/`resume_working_repo` for integrity; selected `JOB_ID` and optional
+scope/repository inputs for tree recovery. Keep setup and its consumer in the
+same shell rather than assuming tool calls preserve shell variables. A joined
+test must execute the actual body Step 1 followed by the reference integrity
+recipe; the existing age/branch preservation assertions remain.
+
+Retarget the trusted-source/fail-closed marker assertions and unsafe-fallback
+scan in `tests/shape/swarm-contract.sh` to cover the new reference as well as
+the retained main method. Do not remove guards to make the move green.
+`enterprise-workflow-snippets.sh` must extract from the exact new owner and
+refuse a selected section that has no Bash block of its own, rather than falling
+through to Step 7. Add that negative case while preserving all existing positive
+SCOPE/PLAN/role/BUILD extractors and their observed behavior.
+
+Execute B-09's bounded steps within the same original leaf: move the swarm block
+and its guard coverage; move ledger integrity and join its real setup/test; move
+tree/job recovery and retarget the actual job/snippet consumers; then finish
+resource closure and native regeneration. After each move, compare its preimage
+and run the directly affected snippet/shape check. These are intermediate
+checkpoints, not new IDs or an invented shorter time estimate.
 
 **B-11 files and acceptance:** `skills/swarm/SKILL.md` and its existing
 `references/evidence.md`. Move the complete shared-evidence consumer under the
@@ -586,9 +616,12 @@ Full current-head CI and independent source acceptance precede main delivery.
 
 **P9 continuation:** the next source version is 0.13.9, with all existing version
 manifests kept in sync. The new owned target has its own verified profile context;
-it does not borrow the old target's reference. Rebind only if the declared source
-version changes, with an explicit reason, retaining the old generation. Renew
-current acceptance/QA as needed; never edit old 0.13.8 records. Update the original
+it does not borrow the old target's reference. That version bump changes the
+profile compatibility input, so it requires an explicitly reasoned target-local
+rebind after the BUILD/source-version change and before final source acceptance
+or QA preparation. Retain this target's GEN1 and use the actual returned GEN2;
+it is not the other target's old GEN2. Renew current acceptance/QA as needed;
+never edit old 0.13.8 records. Update the original
 84-clause dispositions only after actual independent source review. No forecast
 of three closures is a result. Preserve all remaining architectural, empirical
 and exact host-held work.
