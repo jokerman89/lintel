@@ -75,8 +75,10 @@ for category_name in "${categories[@]}"; do
   printf 'Reading category %s: %s\n' "$category_name" "$log"
   if [ "$category_name" = usage-skill ]; then
     code=0
+    usage_options=()
+    [ -n "$category$kind$since" ] || usage_options+=(--summary-only)
     "$python" -B "$source_root/skills/audit/references/usage_stream.py" \
-      --file "$log" --limit "$limit" "${filters[@]}" || code=$?
+      --file "$log" --limit "$limit" "${filters[@]}" "${usage_options[@]}" || code=$?
     case "$code" in
       0) observed=true ;;
       3) ;;

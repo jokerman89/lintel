@@ -303,8 +303,6 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(path.read_bytes(), before)
 
     def test_streaming_summary_is_a_superset_of_the_legacy_event_summary(self):
-        legacy_keys = ("schema_version", "catalog_version", "source", "status", "records",
-                       "by_kind", "diagnostics", "evidence", "verification", "enforcement")
         valid = write(self.root / "compat/valid/usage-skill.jsonl", "\n".join([
             event("invocation", ts="2026-09-20T10:00:00Z", skill="alpha", tokens_est="2"),
             event("invocation", ts="2026-09-21T10:00:00Z", skill="beta", tokens_est="3"),
@@ -330,7 +328,7 @@ class UsageReportContracts(Sandbox):
                      "--file", path, *extra], expect=code)
                 self.assertEqual(self.tree_state(), before)
                 summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
-                for key in legacy_keys:
+                for key in legacy:
                     self.assertIn(key, summary)
                     self.assertIs(type(summary[key]), type(legacy[key]), key)
                     if key != "source":
@@ -360,6 +358,80 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_tokens_est": 1})
         self.assertEqual(summary["usage"]["diagnostics"][0]["code"], "missing_tokens_est")
         self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 1, "tokens_est": "0"}})
+
+    def test_usage_inventory_is_counts_only_without_selection(self):
+        path = write(self.root / "inventory/usage-skill.jsonl",
+              event("invocation", skill="alpha", tokens_est="1") + "\n")
+        env = dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix(),
+                   LINTEL_PYTHON=Path(PYTHON).as_posix())
+        before = self.tree_state()
+        for arguments in ((), ("--limit", "1")):
+            with self.subTest(arguments=arguments):
+                result = self.run_cmd([BASH, ROOT / "skills/audit/references/read.sh", *arguments],
+                                      env=env, expect=0)
+                self.assertEqual(self.tree_state(), before)
+                self.assertNotIn("Preview:", result.stdout)
+                self.assertNotIn("alpha", result.stdout)
+                self.assertNotIn('"fields"', result.stdout)
+                self.assertIn('"selected": 1', result.stdout)
+        result = self.read_usage(env=env)
+        self.assertIn("Preview:", result.stdout)
+        self.assertIn("alpha", result.stdout)
+        result = self.run_cmd([BASH, ROOT / "skills/audit/references/read.sh",
+                               "--kind", "invocation"], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        self.assertIn("Preview:", result.stdout)
+        self.assertIn("alpha", result.stdout)
+
+    def test_missing_trusted_reader_is_a_clean_dependency_error(self):
+        source = (ROOT / "skills/audit/references/usage_stream.py").read_text(encoding="utf-8")
+        reader = (ROOT / "bin/li-events.py").read_text(encoding="utf-8")
+        for name, files in (("missing-reader", {}),
+                            ("missing-native-path-helper", {"bin/li-events.py": reader})):
+            with self.subTest(name):
+                copy = self.root / f"copied-{name}"
+                helper = write(copy / "skills/audit/references/usage_stream.py", source)
+                for relative, text in files.items():
+                    write(copy / relative, text)
+                self.assertFalse((copy / "lib/native_paths.py").exists())
+                before = self.tree_state()
+                result = self.run_cmd([PYTHON, "-B", helper, "--file", self.root / "unused.jsonl"])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("trusted event reader", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+
+    def test_output_failure_is_not_a_source_failure_or_retried(self):
+        path = write(self.root / "output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, sys\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "class Output:\n"
+            "    def __init__(self): self.buffer = self; self.calls = 0\n"
+            "    def flush(self): pass\n"
+            "    def write(self, data):\n"
+            "        self.calls += 1\n"
+            "        raise BrokenPipeError('injected stdout failure')\n"
+            "output = Output()\n"
+            "sys.stdout = output\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "code = module.main()\n"
+            "assert output.calls == 1, output.calls\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"])
+        self.assertEqual(self.tree_state(), before)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("output", result.stderr)
+        self.assertNotIn("cannot read", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
 
     def test_high_precision_token_estimates_aggregate_exactly(self):
         fraction = "0." + "1234567890" * 6

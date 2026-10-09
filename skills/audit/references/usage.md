@@ -78,6 +78,12 @@ Short lines cut only by the remaining global scan budget are excluded with
 Unprocessed input and omitted details are explicitly incomplete; totals are
 only for processed usable rows, never a complete total after a bound or error.
 Retain selected source, window, counts and diagnostic/omission information.
+Unfiltered Audit inventory (including `--limit` alone) uses the helper's internal
+summary-only mode: counts and diagnostics, no per-skill aggregates or preview
+rows. Explicit category, kind or window selection retains bounded usage detail.
+Missing trusted-reader dependencies and failed output are reported separately
+from source-read errors; a failed stdout write is not retried or relabeled as
+an unreadable source.
 
 The route displays the top 20 skills by count with estimated token totals.
 For another authorized `--topn N` selection (1 through 50), use the same

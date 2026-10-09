@@ -132,6 +132,8 @@ def report(args, events, native_io, summary, display):
     def detail(item):
         nonlocal detail_bytes, detail_count
         detail_count += 1
+        if args.summary_only:
+            return
         size = len(json.dumps(item).encode("utf-8"))
         if len(preview) < min(args.limit, MAX_DETAILS) and detail_bytes + size <= MAX_DETAIL_BYTES:
             preview.append(item)
@@ -275,11 +277,34 @@ def report(args, events, native_io, summary, display):
     })
     if meta.get("delegated"):
         summary["delegated"] = meta["delegated"]
-    lines = [json.dumps(summary, indent=2),
-             f"Preview: at most {min(args.limit, MAX_DETAILS)} rows; bounded details, not all input."]
-    lines.extend(json.dumps(item) for item in preview)
-    emit("\n".join(lines) + "\n")
-    return 4 if diagnostic_count else 0 if counters["selected"] else 3
+    if args.summary_only:
+        del summary["usage"]
+    return preview, 4 if diagnostic_count else 0 if counters["selected"] else 3
+
+
+def warn(message):
+    """A failed diagnostic stream cannot turn an already failed operation into a traceback."""
+    try:
+        emit(message + "\n", sys.stderr)
+    except OSError:
+        return
+
+
+def output(summary, preview, code, args):
+    lines = [json.dumps(summary, indent=2)]
+    if code != 2 and not args.summary_only:
+        lines.append(f"Preview: at most {min(args.limit, MAX_DETAILS)} rows; bounded details, not all input.")
+        lines.extend(json.dumps(item) for item in preview)
+    try:
+        emit("\n".join(lines) + "\n")
+    except OSError as error:
+        warn(f"audit usage: output failed: {error}")
+        # Prevent a second flush of a broken OS pipe during interpreter shutdown.
+        if sys.stdout is sys.__stdout__:
+            with open(os.devnull, "wb") as sink:
+                os.dup2(sink.fileno(), sys.stdout.fileno())
+        return 2
+    return code
 
 
 def main():
@@ -289,31 +314,41 @@ def main():
     parser.add_argument("--since")
     parser.add_argument("--limit", type=int, default=50)
     parser.add_argument("--topn", type=int, default=20)
+    parser.add_argument("--summary-only", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.limit < 1 or not 1 <= args.topn <= MAX_DETAILS:
         parser.error("limit must be positive and topn must be between 1 and 50")
-    spec = importlib.util.spec_from_file_location("lintel_usage_events", SOURCE / "bin/li-events.py")
-    if spec is None or spec.loader is None:
-        emit("audit usage: trusted event reader unavailable\n", sys.stderr)
+    try:
+        spec = importlib.util.spec_from_file_location("lintel_usage_events", SOURCE / "bin/li-events.py")
+        if spec is None or spec.loader is None:
+            raise ImportError("loader unavailable")
+        events = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(events)
+    except (OSError, ImportError, SyntaxError) as error:
+        warn(f"audit usage: trusted event reader unavailable: {error}")
         return 2
-    events = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(events)
+    try:
+        native_io = events._load_native_io()
+    except (events.ReaderError, OSError, ImportError, SyntaxError, ValueError) as error:
+        warn(f"audit usage: trusted event reader unavailable: {error}")
+        return 2
     display = Path(os.path.abspath(args.file)).as_posix()
     summary = legacy_summary(events, display)
+    preview = []
     try:
-        return report(args, events, events._load_native_io(), summary, display)
+        preview, code = report(args, events, native_io, summary, display)
     except (events.ReaderError, OSError, ValueError, RecursionError) as error:
         if (isinstance(error, OSError) and summary["source"]["state"] == "present"
                 and summary["catalog_version"] is not None):
             # An open/read failure on a stat-able file is unreadable, exactly like li-events.read_source.
             summary["source"]["state"] = "unreadable"
             error = events.ReaderError(f"cannot read {display}: {error}")
-        emit(f"audit usage: {error}\n", sys.stderr)
+        warn(f"audit usage: {error}")
         # Matches li-events summary: a parseable error summary, never a partial row dump.
         summary["status"] = "error"
         summary["error"] = str(error)
-        emit(json.dumps(summary, indent=2) + "\n")
-        return 2
+        code = 2
+    return output(summary, preview, code, args)
 
 
 if __name__ == "__main__":
