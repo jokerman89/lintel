@@ -232,6 +232,28 @@ class OwnedLifecycleFixture(unittest.TestCase):
 
 
 class RoleHelpers(OwnedLifecycleFixture):
+    def test_duplicate_role_metadata_preserves_selected_and_shadowed_sources(self):
+        home_role = self.write("home/roles/advisor.md", self.role_text())
+        private_role = self.write("home/roles/private/advisor.md",
+                                  self.role_text("advisor", "private"))
+        before = self.snapshot()
+        before_paths = sorted(path.relative_to(self.base).as_posix()
+                              for path in self.base.rglob("*"))
+        inventory = self.helper("role-list", "--include-private")
+        rows = inventory["roles"]
+        self.assertEqual([row["role_id"] for row in rows], ["advisor", "advisor"])
+        self.assertEqual(sum(row["selected_source"] for row in rows), 1)
+        self.assertEqual(
+            {(row["origin"], Path(row["path"]), row["selected_source"]) for row in rows},
+            {("private", private_role, True), ("home", home_role, False)},
+        )
+        self.assertIsNone(inventory["profile_reference"])
+        self.assertIsNone(inventory["active_role"])
+        self.assertNotIn("not-in-light-summary", json.dumps(inventory))
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(sorted(path.relative_to(self.base).as_posix()
+                                for path in self.base.rglob("*")), before_paths)
+
     def test_private_inventory_body_consent_and_light_deep_boundaries(self):
         self.write("home/roles/advisor.md", self.role_text())
         self.write("home/roles/private/private-advisor.md", self.role_text("private-advisor", "private"))
