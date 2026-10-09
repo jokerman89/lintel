@@ -117,6 +117,11 @@ class RoleMethods(unittest.TestCase):
                 self.assertIn(clause, method + source("skills/role/SKILL.md"))
         self.assertNotIn("```bash", source("skills/role/SKILL.md"),
                          "CLI procedure must live at the shared owner")
+        for path in ("skills/role/SKILL.md", "skills/role/references/lifecycle.md"):
+            with self.subTest(public_create_invocation=path):
+                self.assertIn("/li:role --create", source(path))
+        self.assertIn("## Create (--create)", source("skills/role/references/lifecycle.md"))
+        self.assertNotIn("Create (default mode)", source("skills/role/references/lifecycle.md"))
         self.assertFalse((ROOT / "skills/role-new/SKILL.md").exists())
         self.assertFalse((ROOT / "skills/roles-list/SKILL.md").exists())
         for flag in ("--off", "--rotate", "--frame", "--deep-dive", "--audience",

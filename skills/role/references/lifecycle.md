@@ -34,9 +34,9 @@ The public entry points are:
 - One-off observation — keep in session notes; only durable patterns land in the file
 - Customer-specific PII required in the role — STOP, that's not a role file's purpose
 
-## Create (default mode)
+## Create (--create)
 
-Use an adaptive interview: reuse facts already supplied and ask only for missing
+Invoked as `/li:role --create`. Use an adaptive interview: reuse facts already supplied and ask only for missing
 decisions. The expert-content sections below are retained, but ten facts or one question
 per phase are prompts for depth, not mandatory filler. Render a reviewed draft, then
 let `bin/li-lifecycle.py role-write` own publication under the
