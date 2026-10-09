@@ -699,24 +699,26 @@ class ContextSafetyTests(unittest.TestCase):
         self.assertEqual(json.loads(budget.stdout)["admission"], "unknown")
         self.assertEqual(before, sorted(str(path) for path in self.root.rglob("*")))
 
-    def test_budget_compatibility_recipes_delegate_to_owner_and_keep_tools(self):
+    def test_budget_owner_recipe_preserves_advice_and_handoff_routes(self):
         self.budget_work_map()
-        for name, selector, args in (
-            ("perf-mode", "--advice", ["--budget", "800000", "--off"]),
-            ("handoff-size-check", "--handoff", ["--map", "work.json"]),
+        for selector, args in (
+            ("--advice", ["--budget", "800000", "--off"]),
+            ("--handoff", ["--map", "work.json"]),
         ):
             direct = self.budget_route(selector, *args)
-            alias = self.budget_recipe(name, args)
+            owner = self.budget_recipe("context-budget", [selector, *args])
             self.assertEqual(direct.returncode, 0, direct.stderr)
-            self.assertEqual(alias.returncode, 0, alias.stderr)
-            self.assertEqual(json.loads(alias.stdout), json.loads(direct.stdout))
-            refused = self.budget_recipe(name, ["--watch"])
-            self.assertNotEqual(refused.returncode, 0)
-            self.assertIn("route", refused.stderr.lower())
-            self.assertEqual(refused.stdout, "")
+            self.assertEqual(owner.returncode, 0, owner.stderr)
+            self.assertEqual(json.loads(owner.stdout), json.loads(direct.stdout))
+        for name in ("perf-mode", "handoff-size-check"):
+            self.assertFalse((SOURCE / "skills" / name / "SKILL.md").exists(), name)
         advisor = (SOURCE / "agents/engineering/ContextBudgetAdvisor.md").read_text(encoding="utf-8")
         self.assertRegex(advisor, r"(?m)^tools: Read, Grep, Glob$")
         self.assertIn("context-budget", advisor)
+        owner = (SOURCE / "skills/context-budget/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("P03/P07", owner)
+        self.assertIn("--warm-path", owner)
+        self.assertIn("--reserve", owner)
 
     def test_budget_generated_kit_contains_and_executes_the_owned_route(self):
         self.budget_work_map()
@@ -736,23 +738,23 @@ class ContextSafetyTests(unittest.TestCase):
             ".github/lintel/lib/native_paths.py",
             bundled,
             ".github/skills/li-context-budget/SKILL.md",
-            ".github/skills/li-perf-mode/SKILL.md",
-            ".github/skills/li-handoff-size-check/SKILL.md",
         }
+        self.assertNotIn(".github/skills/li-perf-mode/SKILL.md", files)
+        self.assertNotIn(".github/skills/li-handoff-size-check/SKILL.md", files)
         retained.update(path for path in files if path.startswith(".github/lintel/lib/"))
         for relative in retained:
             path = kit / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(files[relative])
         source = kit / ".github/lintel"
-        run = self.budget_recipe("perf-mode", ["--budget", "800000"],
+        run = self.budget_recipe("context-budget", ["--advice", "--budget", "800000"],
                                  source=source, native_root=kit)
         self.assertEqual(run.returncode, 0, run.stderr)
         result = json.loads(run.stdout)
         self.assertIsNone(result["capacity_tokens"])
         self.assertEqual(result["local_working_set_budget"], 800000)
         self.assertFalse(result["host_settings_changed"])
-        handoff = self.budget_recipe("handoff-size-check", ["--map", "work.json"],
+        handoff = self.budget_recipe("context-budget", ["--handoff", "--map", "work.json"],
                                      source=source, native_root=kit)
         self.assertEqual(handoff.returncode, 0, handoff.stderr)
         self.assertEqual(json.loads(handoff.stdout)["work_map"], "work.json")
@@ -796,7 +798,7 @@ class ContextSafetyTests(unittest.TestCase):
         env = dict(os.environ, LINTEL_SOURCE_ROOT=str(SOURCE), LINTEL_REPO_ROOT=str(self.root),
                    LINTEL_HOME=str(self.base / "home"), PYTHONDONTWRITEBYTECODE="1")
         for name, args in (("context-budget", ["--bytes", "400"]),
-                           ("perf-mode", ["--budget", "800000", "--cost-estimate"]),
+                           ("context-budget", ["--advice", "--budget", "800000", "--cost-estimate"]),
                            ("context-cool", ["--path", "docs/two.md"])):
             with self.subTest(name=name):
                 body = (SOURCE / "skills" / name / "SKILL.md").read_text(encoding="utf-8")

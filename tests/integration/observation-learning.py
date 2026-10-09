@@ -215,20 +215,51 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(result.returncode, 3)
         self.assertFalse(missing.parent.exists())
 
+    def test_manual_usage_writer_keeps_existing_audit_envelope(self):
+        audit_root = self.root / "audit"
+        env = dict(self.env, LINTEL_AUDIT_DIR=str(audit_root),
+                   LINTEL_OPERATOR="fixture-operator", LINTEL_CYCLE_ID="fixture-cycle")
+        self.bash(
+            'source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?\n'
+            'audit_log usage-skill invocation skill=alpha mode=fixture '
+            'tokens_est=12 cli=fixture\n',
+            env=env, expect=0,
+        )
+        path = audit_root / "usage-skill.jsonl"
+        self.assertTrue(path.is_file())
+        _, rows = self.records(path, "--category", "usage-skill", expect=0, env=env)
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["kind"], "invocation")
+        self.assertEqual(row["fields"], {
+            "skill": "alpha", "mode": "fixture", "tokens_est": "12", "cli": "fixture",
+        })
+        written = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual((written["operator"], written["cycle_id"]),
+                         ("fixture-operator", "fixture-cycle"))
+
     def test_current_observation_routes_keep_manual_modes_without_invented_overlay(self):
-        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
-        maintenance = (ROOT / "skills/maintenance/SKILL.md").read_text(encoding="utf-8")
-        for text in (usage, maintenance):
+        audit = (ROOT / "skills/audit/SKILL.md").read_text(encoding="utf-8")
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        for text in (audit, usage):
             self.assert_no_catalog_trend_consumer(text)
             self.assertIn("unobserved", text)
         for flag in ("--topn", "--days", "--tokens-by-skill"):
             self.assertIn(flag, usage)
-        self.assertIn("manual report", usage)
-        self.assertNotIn("`skills/cycle/SKILL.md` mode_envelopes", maintenance)
-        self.assertIn("/li:context-budget --advice", maintenance)
+        self.assertIn("manual", usage)
+        self.assertIn("audit_log usage-skill invocation", usage)
+        self.assertIn("--usage --report --days <N> --topn <N>", usage)
+        for route in ("--force-compact", "--monitor-paths", "--simulate-tokens", "--rust-report"):
+            self.assertIn(route, usage)
+        for owner in ("context-budget", "doctor", "audit"):
+            self.assertIn(owner, usage)
+        self.assertIn("do not authorize archiving", usage)
+        self.assertIn("never writes unless", audit)
+        for name in ("usage-log", "maintenance", "perf-mode", "handoff-size-check"):
+            self.assertFalse((ROOT / "skills" / name / "SKILL.md").exists(), name)
 
     def test_catalog_trend_guard_rejects_the_actual_prose_residual_and_flag_form(self):
-        current = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
+        current = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
         self.assert_no_catalog_trend_consumer(current)
         for residual in ("The foundation that `/li:catalog` (1.6 trends) builds on.",
                          "Use `/li:catalog --trends` for an overlay."):
@@ -238,13 +269,14 @@ class UsageReportContracts(Sandbox):
             "Explicitly join `/li:catalog --kind=all` metadata; no built-in trend overlay.")
 
     def test_usage_reader_uses_the_shared_owner_and_complete_selected_rows(self):
-        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
-        reader = usage.split("### Step 2", 1)[1].split("## Integration", 1)[0]
-        self.assertIn("../audit/references/method.md#shared-read", reader)
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        reader = usage.split("## Read reports", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("method.md#shared-read", reader)
         self.assertIn("skills/audit/references/read.sh", reader)
         self.assertIn("--category usage-skill", reader)
         self.assertIn("--since", reader)
-        self.assertIn("complete selected rows", reader)
+        self.assertIn("--limit", reader)
+        self.assertIn("aggregating all rows", reader)
         self.assertNotIn('for log in "$usage_dir"', reader)
         self.assertNotIn("audit-canonical", usage)
         method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
