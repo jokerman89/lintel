@@ -32,6 +32,7 @@ MAX_TOKEN_ABS = Decimal("1e18")
 # need at most 6 more integer digits, so 96 digits sum exactly. Inexact traps.
 EXACT = Context(prec=96, Emax=999999, Emin=-999999,
                 traps=[Inexact, Rounded, Overflow, InvalidOperation])
+DEFAULT_STREAM = object()
 
 
 def token_estimate(value):
@@ -52,9 +53,12 @@ def token_estimate(value):
     return token
 
 
-def emit(text, stream=None):
+def emit(text, stream=DEFAULT_STREAM):
     """Write UTF-8 bytes like li-events.emit, independent of the locale's text encoding."""
-    stream = stream or sys.stdout
+    if stream is DEFAULT_STREAM:
+        stream = sys.stdout
+    if stream is None:
+        raise OSError("output stream unavailable")
     buffer = getattr(stream, "buffer", None)
     if buffer is None:
         stream.write(text)
@@ -286,7 +290,7 @@ def warn(message):
     """A failed diagnostic stream cannot turn an already failed operation into a traceback."""
     try:
         emit(message + "\n", sys.stderr)
-    except OSError:
+    except (OSError, ValueError, AttributeError):
         return
 
 
@@ -297,12 +301,15 @@ def output(summary, preview, code, args):
         lines.extend(json.dumps(item) for item in preview)
     try:
         emit("\n".join(lines) + "\n")
-    except OSError as error:
+    except (OSError, ValueError, AttributeError) as error:
         warn(f"audit usage: output failed: {error}")
         # Prevent a second flush of a broken OS pipe during interpreter shutdown.
         if sys.stdout is sys.__stdout__:
-            with open(os.devnull, "wb") as sink:
-                os.dup2(sink.fileno(), sys.stdout.fileno())
+            try:
+                with open(os.devnull, "wb") as sink:
+                    os.dup2(sink.fileno(), sys.stdout.fileno())
+            except (OSError, ValueError, AttributeError) as recovery_error:
+                warn(f"audit usage: output recovery failed: {recovery_error}")
         return 2
     return code
 

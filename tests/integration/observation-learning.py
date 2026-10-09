@@ -433,6 +433,89 @@ class UsageReportContracts(Sandbox):
         self.assertNotIn("cannot read", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_unavailable_or_closed_stdout_is_a_clean_output_failure(self):
+        path = write(self.root / "unavailable-output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, io, sys\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "mode = sys.argv[3]\n"
+            "if mode == 'none':\n"
+            "    sys.stdout = None\n"
+            "else:\n"
+            "    sys.stdout = io.TextIOWrapper(io.BytesIO())\n"
+            "    sys.stdout.close()\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "sys.exit(module.main())\n")
+        before = self.tree_state()
+        for mode in ("none", "closed"):
+            with self.subTest(mode=mode):
+                result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                                      ROOT / "skills/audit/references/usage_stream.py", mode])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("output failed", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_output_recovery_and_diagnostic_stream_failures_are_contained(self):
+        path = write(self.root / "recovery-output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, io, sys\n"
+            "from unittest import mock\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "mode = sys.argv[3]\n"
+            "class Output:\n"
+            "    def __init__(self): self.buffer = self; self.calls = 0\n"
+            "    def flush(self): pass\n"
+            "    def write(self, data):\n"
+            "        self.calls += 1\n"
+            "        raise BrokenPipeError('injected stdout failure')\n"
+            "    def fileno(self): raise AttributeError('injected fileno failure')\n"
+            "output = Output()\n"
+            "sys.stdout = sys.__stdout__ = output\n"
+            "if mode == 'stderr-none': sys.stderr = None\n"
+            "if mode == 'stderr-closed':\n"
+            "    sys.stderr = io.TextIOWrapper(io.BytesIO())\n"
+            "    sys.stderr.close()\n"
+            "try:\n"
+            "    module.emit('must not fall back to stdout', None)\n"
+            "except OSError: pass\n"
+            "else: raise AssertionError('explicit None accepted')\n"
+            "assert output.calls == 0, output.calls\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "if mode == 'open':\n"
+            "    with mock.patch('builtins.open', side_effect=OSError('injected recovery open')):\n"
+            "        code = module.main()\n"
+            "elif mode == 'dup2':\n"
+            "    output.fileno = lambda: 1\n"
+            "    with mock.patch.object(module.os, 'dup2', side_effect=ValueError('injected dup2')):\n"
+            "        code = module.main()\n"
+            "else: code = module.main()\n"
+            "assert output.calls == 1, output.calls\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        for mode in ("open", "fileno", "dup2", "stderr-none", "stderr-closed"):
+            with self.subTest(mode=mode):
+                result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                                      ROOT / "skills/audit/references/usage_stream.py", mode])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                if mode.startswith("stderr-"):
+                    self.assertEqual(result.stderr, "")
+                else:
+                    self.assertIn("output failed", result.stderr)
+                    self.assertIn("output recovery failed", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
     def test_high_precision_token_estimates_aggregate_exactly(self):
         fraction = "0." + "1234567890" * 6
         path = write(self.root / "exact/usage-skill.jsonl", "\n".join([
