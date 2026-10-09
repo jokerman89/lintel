@@ -73,6 +73,18 @@ for category_name in "${categories[@]}"; do
   # Let the actual reader describe an absent file rather than manufacturing counts.
   [ -n "$log" ] || log="$first"
   printf 'Reading category %s: %s\n' "$category_name" "$log"
+  if [ "$category_name" = usage-skill ]; then
+    code=0
+    "$python" -B "$source_root/skills/audit/references/usage_stream.py" \
+      --file "$log" --limit "$limit" "${filters[@]}" || code=$?
+    case "$code" in
+      0) observed=true ;;
+      3) ;;
+      4) diagnostics=true ;;
+      *) exit "$code" ;;
+    esac
+    continue
+  fi
   code=0
   summary="$("$python" -B "$source_root/bin/li-events.py" summary \
     --file "$log" --category "$category_name" "${filters[@]}")" || code=$?

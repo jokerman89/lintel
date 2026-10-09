@@ -11,7 +11,13 @@ existing audit producer and envelope; do not append JSONL directly or add a
 second writer:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh" || exit $?
+source_root="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
+[ -n "$source_root" ] && [ -f "$source_root/bin/_audit.sh" ] || {
+  echo 'NEEDS_CONTEXT: trusted audit source root unavailable.' >&2; exit 2;
+}
+LINTEL_SOURCE_ROOT="$(cd "$source_root" && pwd -P)" || exit 2
+export LINTEL_SOURCE_ROOT
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?
 audit_log usage-skill invocation skill=cycle mode=research-dive tokens_est=3500 cli=claude-code
 ```
 
@@ -42,15 +48,36 @@ bash "${LINTEL_SOURCE_ROOT:?select trusted source}/skills/audit/references/read.
 The reader selects the current/legacy category file according to `_audit.sh`,
 names a later existing file it did not read, and reports actual summary counts
 and diagnostics. Do not glob or silently combine logs. An explicitly selected
-older file can be read with the existing
-`li-events.py records --file <path> --category usage-skill` operation; never
+older file can be read with the same bounded
+`usage_stream.py --file <path>` operation; never
 search all dated or personal logs implicitly.
 
-`--limit` caps displayed rows, not summary counts. Before aggregating all rows,
-read the summary's `records.lines`, then request at least that many rows through
-the same authorized source and window. A truncated preview or changing source is
-incomplete, not a total. Retain the selected source, window and diagnostic
-information in the report.
+For `usage-skill`, the shared route delegates to the bounded
+[streaming usage method](usage_stream.py). It reuses `li-events.py`'s catalog,
+single-line parser and classifier, never its whole-file materialization.
+`--limit` caps detailed preview before retention (at most 50 rows and 64 KiB).
+Before aggregating all rows, inspect `processing.complete` and
+`usage.aggregate_complete`; do not request the entire population as a preview.
+The scan stops at 8 MiB or 100,000 physical lines, parses at most 64 KiB per
+line, and retains at most 1,024 skill keys of at most 256 characters. Oversized
+lines are drained in bounded chunks, excluded from aggregates and diagnosed.
+Unprocessed input and omitted details are explicitly incomplete; totals are
+only for processed usable rows, never a complete total after a bound or error.
+Retain selected source, window, counts and diagnostic/omission information.
+
+The route displays the top 20 skills by count with estimated token totals.
+For another authorized `--topn N` selection (1 through 50), use the same
+streaming method with the exact selected file and computed window:
+
+```bash
+python3 -B "$LINTEL_SOURCE_ROOT/skills/audit/references/usage_stream.py" \
+  --file "$selected_usage_file" --topn "$topn" --limit 50
+```
+
+Pass any actual `--since` ISO window and `--kind` filter unchanged. The helper
+caps diagnostics at 50 entries while reporting totals by code and omitted count;
+missing/invalid estimates are diagnosed rather than fabricated. Source changes
+during a read remain a coverage limitation, not an atomic snapshot.
 
 For rows with missing or empty `fields.skill`, exclude the row from all
 per-skill counts and token aggregates; surface its selected source and line as

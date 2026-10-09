@@ -189,6 +189,116 @@ class Sandbox(unittest.TestCase):
 
 
 class UsageReportContracts(Sandbox):
+    def test_single_oversized_tail_is_incomplete_without_materializing_detail(self):
+        path = self.root / "tail-audit/usage-skill.jsonl"
+        path.parent.mkdir()
+        path.write_bytes(b"x" * 100000)
+        result = self.read_usage(env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()),
+                                 expect=4)
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertTrue(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertTrue(summary["records"]["incomplete_tail"])
+        self.assertEqual(summary["diagnostic_codes"]["incomplete_tail"], 1)
+        self.assertEqual(summary["diagnostic_codes"]["oversized_line"], 1)
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(self.usage_preview(result), [])
+
+    def test_usage_stream_counts_beyond_preview_and_preserves_window_diagnostics(self):
+        path = write(self.root / "window-audit/usage-skill.jsonl", "\n".join([
+            *[event("invocation", skill="alpha", tokens_est="2")] * 100,
+            event("invocation", ts="2020-01-01T00:00:00Z", skill="old", tokens_est="999"),
+            event("invocation", ts="", skill="undated", tokens_est="999"),
+        ]) + "\n")
+        result = self.run_cmd(
+            [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+             "--file", path, "--limit", "1", "--since", "2026-01-01"], expect=4)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["records"]["selected"], 100)
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"alpha": {"count": 100, "tokens_est": "200"}})
+        self.assertEqual(summary["diagnostic_codes"]["undated"], 1)
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertEqual(len(self.usage_preview(result)), 1)
+
+    def test_streaming_usage_topn_and_diagnostic_tail_remain_bounded_and_truthful(self):
+        path = self.root / "stream-audit/usage-skill.jsonl"
+        write(path, "\n".join([
+            event("invocation", skill="alpha", tokens_est="1.5"),
+            event("invocation", skill="alpha", tokens_est="2.5"),
+            event("invocation", skill="beta", tokens_est="10"),
+            event("invocation", skill="gamma", tokens_est="NaN"),
+            '{"kind":"invocation","kind":"invocation"}',
+            *["{not-json}"] * 60,
+        ]) + '\n{"kind":"invocation"')
+        before = self.tree_state()
+        result = self.run_cmd(
+            [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+             "--file", path, "--topn", "1", "--limit", "500"], expect=4)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 2, "tokens_est": "4.0"}})
+        self.assertEqual(summary["usage"]["skills_observed"], 3)
+        self.assertTrue(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["records"]["duplicate_key"], 1)
+        self.assertTrue(summary["records"]["incomplete_tail"])
+        self.assertEqual(summary["diagnostic_codes"]["incomplete_tail"], 1)
+        self.assertEqual(len(summary["diagnostics"]), 50)
+        self.assertGreater(summary["diagnostics_omitted"], 0)
+        self.assertLessEqual(len(self.usage_preview(result)), 50)
+        self.assertLess(len(result.stdout.encode()), 20000)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_plugin_only_manual_writer_resolves_exports_and_validates_trusted_root(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        recipe = re.search(r"```bash\n(.*?)```", usage, re.S).group(1)
+        script = write(self.root / "manual-usage.sh", recipe)
+        env = dict(self.env, CLAUDE_PLUGIN_ROOT=ROOT.as_posix(),
+                   LINTEL_AUDIT_DIR=(self.root / "plugin-audit").as_posix())
+        env.pop("LINTEL_SOURCE_ROOT")
+        self.run_cmd([BASH, script], env=env, expect=0)
+        _, rows = self.records(self.root / "plugin-audit/usage-skill.jsonl",
+                               "--category", "usage-skill", expect=0)
+        self.assertEqual(rows[0]["fields"]["skill"], "cycle")
+        before = self.tree_state()
+        refusal = self.run_cmd([BASH, script],
+                              env=dict(env, LINTEL_SOURCE_ROOT=(self.root / "missing").as_posix()),
+                              expect=2)
+        self.assertIn("NEEDS_CONTEXT", refusal.stderr)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_oversized_usage_stream_is_bounded_and_preserves_diagnostics(self):
+        path = self.root / "bounded-audit/usage-skill.jsonl"
+        path.parent.mkdir()
+        with path.open("wb") as stream:
+            stream.write((event("invocation", skill="alpha", tokens_est="12") + "\n").encode())
+            stream.write(b"{not-json}\n")
+            stream.write((event("invocation", tokens_est="100") + "\n").encode())
+            stream.write((event("invocation", skill="", tokens_est="200") + "\n").encode())
+            stream.write(b"x" * 100000 + b"\n")
+            row = (event("invocation", skill="beta", tokens_est="2") + "\n").encode()
+            for _ in range(100001):
+                stream.write(row)
+            stream.write(b'{"kind":"invocation"')
+        before = path.read_bytes()
+        result = self.read_usage("--limit", "2",
+                                 env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()),
+                                 expect=4)
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertLess(len(result.stdout.encode()), 20000)
+        self.assertLessEqual(summary["processing"]["bytes_read"], 8 * 1024 * 1024)
+        self.assertLessEqual(summary["records"]["lines"], 100000)
+        self.assertFalse(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        codes = {row["code"] for row in summary["diagnostics"]}
+        self.assertTrue({"malformed_json", "missing_skill", "oversized_line",
+                         "processing_bound"} <= codes)
+        self.assertEqual(summary["usage"]["by_skill"]["alpha"], {"count": 1, "tokens_est": "12"})
+        self.assertNotIn("", summary["usage"]["by_skill"])
+        self.assertEqual(len(self.usage_preview(result)), 2)
+        self.assertEqual(path.read_bytes(), before)
+
     def tree_state(self):
         return {path.relative_to(self.root).as_posix():
                 path.read_bytes() if path.is_file() else None
@@ -321,7 +431,7 @@ class UsageReportContracts(Sandbox):
             event("invocation", skill="", tokens_est="200"),
         ]) + "\n")
         result = self.read_usage(
-            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()))
+            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()), expect=4)
         summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
         self.assertEqual(summary["records"]["lines"], 3)
         rows = self.usage_preview(result)
