@@ -52,6 +52,12 @@ the same authorized source and window. A truncated preview or changing source is
 incomplete, not a total. Retain the selected source, window and diagnostic
 information in the report.
 
+For rows with missing or empty `fields.skill`, exclude the row from all
+per-skill counts and token aggregates; surface its selected source and line as
+incomplete input. Do not crash, invent a skill name or silently claim complete
+coverage. Keep these rows in the reader's raw summary counts and diagnostics;
+the reporting exclusion does not rewrite the log or change the shared parser.
+
 For `--report` or `--topn N`, count observed rows by their actual `fields.skill`,
 sort by count and limit the displayed result. For `--tokens-by-skill`, sum only
 numeric `fields.tokens_est` values by skill and disclose missing or malformed

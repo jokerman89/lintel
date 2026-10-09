@@ -189,6 +189,26 @@ class Sandbox(unittest.TestCase):
 
 
 class UsageReportContracts(Sandbox):
+    def tree_state(self):
+        return {path.relative_to(self.root).as_posix():
+                path.read_bytes() if path.is_file() else None
+                for path in self.root.rglob("*")}
+
+    def read_usage(self, *arguments, env=None, cwd=None, expect=0):
+        selected_env = dict(env or self.env, LINTEL_PYTHON=Path(PYTHON).as_posix())
+        before = self.tree_state()
+        result = self.run_cmd(
+            [BASH, ROOT / "skills/audit/references/read.sh",
+             "--category", "usage-skill", *arguments],
+            env=selected_env, cwd=cwd, expect=expect,
+        )
+        self.assertEqual(self.tree_state(), before)
+        return result
+
+    def usage_preview(self, result):
+        return [json.loads(line) for line in result.stdout.split("Preview:", 1)[1].splitlines()[1:]
+                if line.strip()]
+
     def assert_no_catalog_trend_consumer(self, text):
         self.assertNotIn("/li:catalog --trends", text)
         self.assertNotRegex(text, r"/li:catalog`?\s*\([^)\n]*\btrends?\b[^)]*\)")
@@ -282,6 +302,131 @@ class UsageReportContracts(Sandbox):
         method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
         self.assertIn("job records only as supplementary observations", method)
         self.assertNotIn("reads `_active.md`", method)
+
+    def test_current_audit_method_names_the_retained_usage_owner(self):
+        method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
+        opening = method.split("## What this skill does", 1)[0]
+        self.assertIn("audit's usage view", opening)
+        self.assertIn("[usage observation method](usage.md)", opening)
+        self.assertNotIn("maintenance's usage view", opening)
+
+    def test_missing_and_empty_skill_rows_are_incomplete_not_aggregate_keys(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        self.assertIn("missing or empty `fields.skill`", usage)
+        self.assertIn("exclude", usage)
+        self.assertIn("incomplete input", usage)
+        path = write(self.root / "selected-audit/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="12"),
+            event("invocation", tokens_est="100"),
+            event("invocation", skill="", tokens_est="200"),
+        ]) + "\n")
+        result = self.read_usage(
+            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()))
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertEqual(summary["records"]["lines"], 3)
+        rows = self.usage_preview(result)
+        counts, estimates, incomplete = {}, {}, []
+        for row in rows:
+            fields = row["fields"]
+            skill = fields.get("skill")
+            if not skill:
+                incomplete.append(row["line"])
+                continue
+            counts[skill] = counts.get(skill, 0) + 1
+            estimates[skill] = estimates.get(skill, 0) + int(fields["tokens_est"])
+        self.assertEqual(counts, {"alpha": 1})
+        self.assertEqual(estimates, {"alpha": 12})
+        self.assertEqual(incomplete, [2, 3])
+        self.assertNotIn("skill", rows[1]["fields"])
+        self.assertEqual(rows[2]["fields"]["skill"], "")
+
+    def test_real_usage_route_selects_current_and_legacy_operator_logs_without_writes(self):
+        # Usage remains operator-global on both layouts; a repo log is never a fallback.
+        for v5 in (True, False):
+            with self.subTest(v5=v5):
+                repo = self.make_repo("current" if v5 else "legacy", v5=v5)
+                home = self.root / ("current-home" if v5 else "legacy-home")
+                selected = write(home / "audit/usage-skill.jsonl",
+                                 event("invocation", skill="selected", tokens_est="10") + "\n")
+                write(repo / ".claude/runtime/audit/usage-skill.jsonl",
+                      event("invocation", skill="repo-decoy") + "\n")
+                write(home / "audit/usage-skill-old.jsonl",
+                      event("invocation", skill="dated-decoy") + "\n")
+                result = self.read_usage(
+                    env=dict(self.env, LINTEL_HOME=home.as_posix(),
+                             LINTEL_REPO_ROOT=repo.as_posix()), cwd=repo)
+                self.assertIn(selected.as_posix(), result.stdout.replace("\\", "/"))
+                self.assertEqual([row["fields"]["skill"] for row in self.usage_preview(result)],
+                                 ["selected"])
+                self.assertNotIn("repo-decoy", result.stdout)
+                self.assertNotIn("dated-decoy", result.stdout)
+
+    def test_real_usage_route_preserves_absent_malformed_and_argument_refusals(self):
+        audit_root = self.root / "selected-audit"
+        env = dict(self.env, LINTEL_AUDIT_DIR=audit_root.as_posix())
+        absent = self.read_usage(env=env, expect=3)
+        self.assertIn("unobserved", absent.stdout)
+        self.assertFalse(audit_root.exists())
+        write(audit_root / "usage-skill.jsonl",
+              event("invocation", skill="alpha") + "\n{not-json}\n")
+        malformed = self.read_usage("--limit", "1", env=env, expect=4)
+        self.assertIn("malformed_json", malformed.stdout)
+        self.assertIn("observed_with_diagnostics", malformed.stdout)
+        self.assertEqual(len(self.usage_preview(malformed)), 1)
+        for arguments in (("--since", "invalid"), ("--limit", "0"), ("--report",)):
+            with self.subTest(arguments=arguments):
+                refusal = self.read_usage(*arguments, env=env, expect=2)
+                self.assertTrue(product_stderr(refusal.stderr).strip())
+
+    def test_retired_path_intent_runs_doctor_owner_and_preserves_attention_and_refusals(self):
+        reference = (ROOT / "skills/doctor/references/inspection.md").read_text(encoding="utf-8")
+        section = reference.split("## Run the owned diagnostic", 1)[1].split("\n## ", 1)[0]
+        recipe = re.search(r"```bash\n(.*?)```", section, re.S).group(1)
+        script = write(self.root / "doctor-route.sh", recipe)
+        repo = self.make_repo("doctor-target")
+        env = dict(self.env, LINTEL_REPO_ROOT=repo.as_posix(),
+                   LINTEL_PYTHON=Path(PYTHON).as_posix(),
+                   LINTEL_PACKS_DIR=(ROOT / "packs").as_posix())
+        before = self.tree_state()
+        result = self.run_cmd([BASH, script, "--layers-only", "--json"],
+                              env=env, cwd=repo, expect=1)
+        report = json.loads(result.stdout)
+        self.assertEqual(Path(report["source"]), ROOT)
+        self.assertEqual(Path(report["target"]), repo)
+        self.assertEqual(report["status"], "attention")
+        self.assertTrue(report["foundation_missing"])
+        self.assertTrue(report["issues"])
+        self.assertEqual(report["host_activation"], "unverified")
+        self.assertEqual(report["hook_execution"], "unverified")
+        direct = self.run_cmd(
+            [BASH, ROOT / "bin/li-doctor", "--source", ROOT, "--target", repo, "--json"],
+            env=env, cwd=repo, expect=1)
+        self.assertEqual(json.loads(direct.stdout), report)
+        for options in (("--layers-only", "--hooks-only"), ("--monitor-paths",)):
+            refusal = self.run_cmd([BASH, script, *options], env=env, cwd=repo, expect=2)
+            self.assertEqual(refusal.stdout, "")
+            self.assertTrue(product_stderr(refusal.stderr).strip())
+        unavailable = self.run_cmd(
+            [BASH, script, "--layers-only"],
+            env=dict(env, LINTEL_SOURCE_ROOT=(self.root / "absent-source").as_posix()),
+            cwd=repo, expect=127)
+        self.assertEqual(unavailable.stdout, "")
+        self.assertTrue(product_stderr(unavailable.stderr).strip())
+        self.assertEqual(self.tree_state(), before)
+        for name in report["foundation_missing"]:
+            write(repo / name, "# Synthetic foundation\n")
+        before = self.tree_state()
+        verified = self.run_cmd([BASH, script, "--layers-only", "--json"],
+                                env=env, cwd=repo, expect=0)
+        local = json.loads(verified.stdout)
+        self.assertEqual(local["status"], "local_checks_verified")
+        self.assertEqual(local["issues"], [])
+        self.assertEqual(local["host_activation"], "unverified")
+        self.assertEqual(local["hook_execution"], "unverified")
+        self.assertEqual(self.tree_state(), before)
+
+    def test_usage_reference_has_lf_only_bytes(self):
+        self.assertNotIn(b"\r", (ROOT / "skills/audit/references/usage.md").read_bytes())
 
 
 class IsolationTests(Sandbox):

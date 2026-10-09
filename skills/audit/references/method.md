@@ -1,7 +1,8 @@
 # Audit and hook observations
 
 Audit owns this read-only procedure, shared by `audit`, `hooks-status` and
-maintenance's usage view. The existing `_audit.sh` router owns log selection;
+audit's usage view via the [usage observation method](usage.md).
+The existing `_audit.sh` router owns log selection;
 `li-events.py` owns parsing, classes, aliases, counts and diagnostics. Do not add
 another JSONL schema, telemetry service or activation policy.
 
