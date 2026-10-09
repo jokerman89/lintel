@@ -58,17 +58,15 @@ class BriefForgeBoundaryTests(unittest.TestCase):
         )
         (self.root / "packs/active-pack").write_text("synthetic\n", encoding="utf-8")
 
-    def forge(self, *, kind: str = "subagent_spawn", extra: str = "", skill: bool = False) -> subprocess.CompletedProcess[str]:
+    def forge(self, *, kind: str = "subagent_spawn", extra: str = "", internal_method: bool = False) -> subprocess.CompletedProcess[str]:
         script = (
             'source "$LINTEL_SOURCE_ROOT/lib/brief-forge.sh" || exit 1\n'
             'source "$LINTEL_SOURCE_ROOT/lib/brief-forge-evaluators.sh" || exit 1\n'
             + extra + '\nforge_handoff "$@"\n'
         )
-        if skill:
-            text = (ROOT / "skills/brief-forge/SKILL.md").read_text(encoding="utf-8")
-            start = "# lintel-test:brief-forge-call:start\n"
-            end = "# lintel-test:brief-forge-call:end"
-            script = text.split(start, 1)[1].split(end, 1)[0]
+        if internal_method:
+            method = (ROOT / "skills/brief-forge/references/handoff.md").read_text(encoding="utf-8")
+            script = method.split("```bash\n", 1)[1].split("\n```", 1)[0]
         return subprocess.run(
             [BASH, "-c", script, "brief-forge-test", kind, "swarm", "FixtureWorker", "brief", self.content.as_posix()],
             cwd=self.root, env=self.env, capture_output=True, text=True, check=False, timeout=120,
@@ -311,15 +309,29 @@ resolve_pack_field_json() {
         self.assertEqual(lookup.stdout, "")
         self.assertIn("metadata-only", lookup.stderr)
 
-    def test_skill_propagates_plugin_source_without_executing_target_code(self) -> None:
+    def test_internal_method_propagates_plugin_source_without_executing_target_code(self) -> None:
         (self.root / "lib").mkdir()
         marker = self.root / "target-executed"
         (self.root / "lib/brief-forge.sh").write_text('touch "' + marker.as_posix() + '"\n', encoding="utf-8")
         self.env["CLAUDE_PLUGIN_ROOT"] = self.env.pop("LINTEL_SOURCE_ROOT")
-        result = self.forge(skill=True)
+        result = self.forge(internal_method=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(marker.exists())
         self.assertEqual(json.loads(result.stdout)["head"]["kind"], "subagent_spawn")
+
+    def test_internal_method_is_not_a_public_skill_and_limits_builtin_score_claims(self) -> None:
+        method = ROOT / "skills/brief-forge/references/handoff.md"
+        self.assertFalse((ROOT / "skills/brief-forge/SKILL.md").exists())
+        text = method.read_text(encoding="utf-8")
+        for event in ("subagent_spawn", "phase_transition", "workflow_handoff", "cold_executor", "operator_input"):
+            with self.subTest(event=event):
+                self.assertIn(f"`{event}`", text)
+        self.assertIn("All built-in evaluators are pass/fail checks with fixed accounting values", text)
+        self.assertIn("score protocol remains for explicitly trusted", text)
+        self.assertIn("trusted custom evaluators yield a minimum advisory score of 40–59", text)
+        self.assertIn("The deny-list is not a prompt-injection", text)
+        self.assertIn("caller must read each original acceptance item", text)
+        self.assertIn("The caller still performs dispatch", text)
 
     def test_json_validator_rejects_duplicate_and_forged_nested_keys(self) -> None:
         envelope = {

@@ -1,18 +1,12 @@
----
-name: brief-forge
-layer: foundation
-description: Use when a workflow explicitly hands work across a boundary — spawning a subagent, transitioning a phase, passing to a cold executor, or taking operator input — to build a structured envelope and run the active pack's evaluators on it.
-color: cyan
-tools: Read, Write, Bash
-voice: internal
-cli_support: [claude-code, codex, copilot]
----
+# Brief Forge handoff method
 
-You are BRIEF-FORGE, the explicit handoff boundary, not an automatic dispatcher.
+This is an internal procedure, not a public workflow or automatic dispatcher. An authorized
+caller uses the complete method below to cross an explicit handoff boundary. The caller retains
+responsibility for host dispatch, permissions, dependencies, isolation and independent review.
 
 ## Activation and authority
 
-Envelope construction stays dormant until an authorized caller invokes this workflow (ADR-0008).
+Envelope construction stays dormant until an authorized caller invokes this method (ADR-0008).
 Pack `enabled: true` configures an invocation; it does not register a pre-spawn or pre-phase hook.
 No universal `brief-forge-pre-spawn` or `brief-forge-pre-phase` callback is shipped. A future callback
 needs its own authorization and observed host evidence.
@@ -23,7 +17,8 @@ reviewer acted. Swarming invokes this boundary explicitly; it does not create an
 
 ## Input and output
 
-Invoke `/li:brief-forge <kind> <from> <to> <content_type> <content_file>`.
+Call the existing helper with the five explicit positional arguments:
+`forge_handoff <kind> <from> <to> <content_type> <content_file>`.
 The source bundle and working repository are different roots. Do not execute target-supplied code.
 
 | Kind | Boundary | Neutral explicit-invocation policy |
@@ -54,7 +49,6 @@ Use this tested invocation rather than reconstructing the old shell recipe. Bind
 positional arguments from the explicit request; never evaluate an artifact as shell code.
 
 ```bash
-# lintel-test:brief-forge-call:start
 source_root="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
 [ -n "$source_root" ] && [ -f "$source_root/lib/brief-forge.sh" ] || {
   echo "NEEDS_CONTEXT: trusted Lintel source root unavailable" >&2
@@ -64,7 +58,6 @@ export LINTEL_SOURCE_ROOT="$source_root"
 export LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$PWD}"
 source "$source_root/lib/brief-forge.sh" || exit 1
 forge_handoff "$@"
-# lintel-test:brief-forge-call:end
 ```
 
 The shared helper performs the following ordered gates:
@@ -86,17 +79,21 @@ The shared helper performs the following ordered gates:
 5. Execute every configured evaluator. Nonzero exit, unavailable function, malformed result,
    hard failure or exhausted budget blocks. Results require integer `score` (0–100),
    nonnegative integer `budget_used` and string `notes`; explicit `status: FAIL` blocks.
-6. Use the minimum score, never the average. Below 40 blocks; 40–59 is explicit advisory concern
-   only after all mandatory checks passed; 60–100 is ready for the caller. A partial run is not ready.
+6. All built-in evaluators are pass/fail checks with fixed accounting values; their numeric
+   scores are not graded judgments. The existing score protocol remains for explicitly trusted
+   custom evaluators. Regardless of source, any `FAIL`, hard failure or partial run blocks before
+   score aggregation. The minimum score is used, never the average. A score below 40 blocks;
+   40–59 is an advisory concern only after all mandatory checks passed; 60–100 is ready for the
+   caller. These bands do not turn a built-in pass/fail check into a semantic quality assessment.
 7. Finalize and validate again. Write only identity/digest/outcome metadata through the existing
    unified `audit_log` router, then verify the matching record actually persisted. Its fail-open
    return code alone cannot release an envelope. Audit failure produces no receiver output.
 8. Emit the envelope. **The caller still performs dispatch.**
 
-### What the built-ins actually establish
+## What the built-ins actually establish
 
-`lib/envelope_contract.py` owns these checks; the score protocol is not a graded
-assessment of the brief's quality:
+`lib/envelope_contract.py` owns these checks; the score protocol is not a
+graded assessment of the brief's quality:
 
 | Built-in | Actual observation | Result and fixed accounting |
 |---|---|---|
@@ -122,8 +119,8 @@ failure or make a partial run releasable. No extra evaluator or model call is im
 ## Audit and recovery
 
 The audit destination remains the shared router's: explicit `LINTEL_AUDIT_DIR`, then a migrated
-working repository's `.claude/runtime/audit`, then the operator-global fallback. No destination is
-activated by this skill's presence. Tests use only temporary homes and audit directories.
+working repository's `.claude/runtime/audit`, then the operator-global fallback. No destination
+is activated by this method's presence. Tests use only temporary homes and audit directories.
 
 `brief-forge.jsonl` contains an envelope ID/digest, outcome, score and evaluator names, not the full
 brief, secret-bearing content, evaluator notes or a reversible base64 copy. Rejected inputs never
@@ -144,12 +141,12 @@ allows validated brief export and manual handoff; substantive independent review
 ## Status
 
 - **DONE:** validated envelope released to the caller; not dispatched.
-- **DONE_WITH_CONCERNS:** mandatory gates passed, minimum advisory score 40–59.
+- **DONE_WITH_CONCERNS:** mandatory gates passed and trusted custom evaluators yield a minimum advisory score of 40–59.
 - **BYPASSED (exit 3):** policy disabled or eligible source, persisted metadata, no envelope.
 - **BLOCKED:** missing policy/parser/evaluator, malformed or forbidden payload, failed evaluation,
   budget exhaustion, audit failure or absent receipt. No successful handoff.
 
 The historical A22.7 shared-consumer join and P03/P05/P07/work/domain owners are
-explained in the [named coordination contracts](../swarm/references/evidence.md).
+explained in the [named coordination contracts](../../swarm/references/evidence.md).
 Local envelope release checks do not certify a model, tenant, enterprise policy
 or genuinely independent actor, nor establish that integration card's acceptance.
