@@ -39,12 +39,14 @@
     "skills/pause",
     "skills/plan",
     "skills/scope",
+    "skills/sense/SKILL.md",
     "skills/skill-new",
     "skills/swarm",
     "skills/welcome",
     "tests/integration/catalog-installed.py",
     "tests/integration/copilot-kit.py",
-    "tests/shape/native-command-surface.py"
+    "tests/shape/native-command-surface.py",
+    "tests/unit/native-command-surface.py"
   ],
   "scope_rules": {
     "worker": "write_scope+own_report",
@@ -88,7 +90,6 @@
         "skills/catalog",
         "skills/orientator",
         "skills/skill-router",
-        "skills/sense",
         "skills/role",
         "skills/role-new",
         "skills/roles-list",

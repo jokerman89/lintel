@@ -82,10 +82,10 @@ elapsed estimates or dropping the original finding IDs.
 | P8 | Conditional core methods and usable hot memory | lane-A-06, lane-d-02, ENT-05, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
 | P10 | Complete original premise and recovery-method handoff | lane-A-07, lane-B-09, lane-B-11 | Coordinator | P3, P8 | Exact method preservation, real snippet regressions and native resource closure |
 | P11A | One budget, usage and maintenance owner | lane-B-03, lane-B-10, C-04 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Context-budget/audit behavior, migrated owner methods and refusal tests |
-| P11B | One discovery and role-lifecycle owner | lane-B-04, lane-B-05 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Catalog/SENSE and role lifecycle preservation with helper/refusal tests |
+| P11B | One discovery and role-lifecycle owner | lane-B-04, lane-B-05 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Catalog and role lifecycle preservation with read-only SENSE routing verification and helper/refusal tests |
 | P11C | One internal handoff owner | lane-B-06 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Complete internal method and unchanged forge boundary/evaluator tests |
 | P12 | Bounded native-plan comparison record | G-11 | Isolated implementer; coordinator fan-in | P7 | Exact dated pins and preservation tests without a network/current-HEAD sweep |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12 | Current local/hosted verification, independent review and actual delivery |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12 | Complete nine-entry public migration map, current local/hosted verification, independent review and actual delivery |
 
 ## First ready leaf
 
@@ -536,26 +536,41 @@ callers, plans, memory, runtime/profile/audit state, version metadata or
 integration history. The coordinator checks each exact diff, obtains package
 SPEC then QUALITY review, integrates passing lanes serially in P11A/P11B/P11C
 order, migrates shared callers and regenerates reducers only after fan-in.
+`skills/sense/SKILL.md` is read-only for P11B: its routing library, high-risk
+confirmation and decision audit remain worker-verified, while the exact current
+`/li:skill-router` help example is a coordinator-owned fan-in edit.
 P3/P5's accepted method bodies are the preimages, not evidence of this further
 change. Prior checkbox reopenings retain their original IDs.
 
 | Original ID | Former entries | Single owner and required preservation |
 |---|---|---|
 | lane-B-03 | `perf-mode`, `handoff-size-check` | `context-budget --advice` and `--handoff`; preserve the existing executable route, numeric advice flags, mapped/legacy plan selection, observation provenance, advisory unknowns and the caller's skip flags. |
-| lane-B-04 | `orientator`, `skill-router` | `catalog` and its existing intent reference. Preserve metadata-first narrowing, explicit workflow choices and actual native discovery. SENSE still directly owns the unchanged routing library, high-risk confirmation, verified profile and decision audit. |
+| lane-B-04 | `orientator`, `skill-router` | `catalog` and its existing intent reference. Preserve metadata-first narrowing, explicit workflow choices and actual native discovery. SENSE still directly owns the unchanged routing library, high-risk confirmation, verified profile and decision audit; the coordinator migrates only its public help example after fan-in. |
 | lane-B-05 | `role-new`, `roles-list` | `role --create`, `--update [id]` and `--list [--include-private]`, alongside unchanged activation/off/rotation/frame/deep-dive/audience actions. Preserve the complete lifecycle reference, private metadata/body consent, reviewed digests, conflict-safe publication and no implicit activation/sync. |
 | lane-B-06 | `brief-forge` | Internal `skills/brief-forge/references/handoff.md` using the unchanged `forge_handoff` helper. Preserve all five kinds, structured inputs, actual schema/evaluator/accounting/audit gates, exit 3 and caller-owned dispatch. No reduced recipe or documentary semantic-score claim. |
 | lane-B-10 | `usage-log` | Audit-owned `references/usage.md` and the existing audit reader/writer. Audit remains read-only by default; `--usage` selects the former report flags. Explicitly requested manual recording uses the existing producer method, never automatic telemetry or a second writer/schema. |
 | C-04 | `maintenance` | Existing context-budget advice/selected-input estimates, doctor path inspection and audit usage views. Migrate the four former mode intentions and flags in one documented mapping; no compaction, watcher, token predictor, cleanup or healthy-empty claim. |
 
-**Edit boundary:** these nine canonical entry files, the existing receiving
-skills/references and direct callers; relevant catalog metadata, selection and
-adapter resource closure; public migration/concept documentation; focused
-source/helper/installed tests. Move complete procedures with corrected relative
-links rather than silently trimming safeguards. All source generators/reducers
-remain coordinator-owned. Never edit generated wrappers, catalogs or wiki by
-hand. Preserve the existing helper APIs, audit categories, saved records and
-private profile/role stores.
+**Edit boundary:** worker lanes own the nine canonical entry files, their
+declared receiving skills/references and focused tests only. Current cross-owner
+callers, including `skills/sense/SKILL.md:352`, catalog metadata, adapter
+resource closure, public migration/concept documentation and shared
+source/helper/installed tests are coordinator-owned fan-in. Move complete
+procedures with corrected relative links rather than silently trimming
+safeguards. All source generators/reducers remain coordinator-owned. Never edit
+generated wrappers, catalogs or wiki by hand. Preserve the existing helper
+APIs, audit categories, saved records and private profile/role stores.
+
+**Required public migration map:** the coordinator must update
+`docs/migrations/2026-09-25-native-workflows.md` with a complete replacement row
+for each of the nine former public identities: `perf-mode`,
+`handoff-size-check`, `orientator`, `skill-router`, `role-new`, `roles-list`,
+`brief-forge`, `usage-log` and `maintenance`. Every row names the retained
+owner/internal route, maps the former flags or invocation shape, and states the
+preserved behavior or boundary. `tests/unit/native-command-surface.py` must
+machine-check exact nine-name coverage and replacement ownership, while
+`tests/shape/native-command-surface.py` must accept those names only as typed
+former-entry migration/history data and reject them as current callable routes.
 
 **Callable versus historical names:** current callers move to the receiving
 owner or required internal reference. Former names are migration/history data,
@@ -572,8 +587,10 @@ on those concepts in prose or an arbitrary skill-count target.
   forwarding, malformed/missing selection refusals and unknown observations
   still behave identically. No old wrapper is needed by PLAN/CAPTURE.
 - Discovery ownership (B-04): catalog and welcome consume the existing intent method; SENSE's direct
-  mechanical route and high-risk branch remain byte-preserved. Neither removed
-  public name is needed for a caller or presented as a live escalation.
+  mechanical route, high-risk branch and audit behavior remain unchanged. The
+  coordinator migrates its one public help example after lane fan-in. Neither
+  removed public name is needed for a current caller or presented as a live
+  escalation.
 - Role ownership (B-05): the role owner's action table and required lifecycle support every
   create/list/update/activate action. Execute the existing real helper fixtures
   for private consent, duplicate/shadowed metadata, digest conflicts, safe
@@ -597,6 +614,10 @@ observation and native-route suites instead of introducing another tool.
 Then run the actual affected helper suites, command-surface checks, source
 catalog/wiki regeneration checks, and BOTH `copilot-kit` and
 `catalog-installed` integration consumers for changed resource closure.
+The native command-surface unit check must prove that the public migration
+guide covers all nine former names, their flags/invocation shapes and exact
+replacement owners; a permitted documentation edit without complete coverage
+does not pass.
 Keep the installed-snapshot run free of source/runtime mutations; its log lives
 outside that source. Isolate fixture HOME/TEMP and preflight command resolution.
 Only actual command results count; source guards do not establish live-host or

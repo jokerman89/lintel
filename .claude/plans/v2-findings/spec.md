@@ -76,6 +76,14 @@ ADR-0034. Complete native resource closure and caller migration are acceptance,
 not follow-up work. The original 84 requirements and earlier accepted clauses
 remain unchanged.
 
+P11B treats `skills/sense/SKILL.md` as read-only. It verifies the retained
+routing library, high-risk confirmation and decision audit, while the
+coordinator owns the exact current `/li:skill-router` help-example migration
+after producer fan-in. The coordinator must also publish all nine former
+identities, invocation/flag mappings and replacement owners in
+`docs/migrations/2026-09-25-native-workflows.md`; exact coverage is verified by
+the native command-surface unit and shape checks.
+
 This authorizes no role/domain capability removal, default-pack change, phase
 change, learning activation or revision of ADR-0026. Current inventory and
 actual helper/refusal tests establish this source consolidation; they cannot

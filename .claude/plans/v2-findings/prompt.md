@@ -76,6 +76,10 @@ are the only authority for parallel topology and write scopes. Use separate
 Git worktrees, validate attributable diffs, review every package, then integrate
 them serially. Workers never write shared callers, generated output,
 plan/runtime state, commits or release evidence.
+P11B reads but does not edit `skills/sense/SKILL.md`; the coordinator migrates
+its exact `/li:skill-router` help example during fan-in. Before P9 acceptance,
+update `docs/migrations/2026-09-25-native-workflows.md` with a machine-checked
+replacement/flag map for all nine retired public identities.
 
 ## Constraints
 

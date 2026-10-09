@@ -15,6 +15,9 @@ cross-owner callers, generated reducers, version/release files, commits and
 integration. A worker owns only its declared `write_scope` plus its own report.
 An independent reviewer owns only the lane review and canonical P05 decision.
 Workers never review their own work or edit another lane.
+For P11B, `skills/sense/SKILL.md` is a coordinator-owned current caller:
+the worker verifies its retained routing behavior read-only, and the coordinator
+migrates the exact public help example after fan-in.
 
 ## Scheduling
 

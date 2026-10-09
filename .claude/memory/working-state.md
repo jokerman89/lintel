@@ -53,7 +53,10 @@ the delivered source packages.
 B-03/B-04/B-05/B-06/B-10/C-04 and G-11. The revised fourteen-package plan is
 machine-`APPROVED` under the operator's explicit parallel-execution authority so
 the content-bound review contract can inspect it. That status is not BUILD
-clearance: P11A/P11B/P11C/P12 remain held until current independent plan review
+clearance. R4 SPEC passed, but QUALITY returned three P2 corrections: reissue
+the stale QA status against the approved topology, make SENSE's exact current
+caller coordinator-owned, and require a complete public nine-name migration
+map. P11A/P11B/P11C/P12 remain held until the corrected independent plan review
 passes and the coordinator supplies the exact reviewed base/brief. Their
 committed scopes are disjoint with coordinator-only fan-in. Pre-review
 uncommitted changes on the isolated budget and Brief Forge branches are
