@@ -1394,7 +1394,11 @@ plan had independent review.
 
 **Rule:** Before changing the tasks, packages, execution mode, scope or
 coordination of an approved map, set its machine status to `DRAFT` in the same
-planning change and stop all writers. Plan-UI acceptance is not package BUILD
-clearance. Re-establish `APPROVED` only after the exact revised artifacts and
-topology have current review; quarantine attributable early work without
-committing, discarding or counting it as acceptance.
+planning change and stop all writers. Re-establish `APPROVED` only after the
+exact revised artifacts are committed and current operator authority covers
+that topology; Lintel's content-bound review helper requires the selected map
+to be approved. Treat map approval, plan-UI acceptance and independent review
+as separate facts: none alone is package BUILD clearance. Dispatch only after
+the coordinator verifies all required gates and supplies the reviewed base and
+brief. Quarantine attributable early work without committing, discarding or
+counting it as acceptance.
