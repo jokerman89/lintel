@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal
 import json
 import os
 from pathlib import Path
@@ -359,6 +360,68 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_tokens_est": 1})
         self.assertEqual(summary["usage"]["diagnostics"][0]["code"], "missing_tokens_est")
         self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 1, "tokens_est": "0"}})
+
+    def test_high_precision_token_estimates_aggregate_exactly(self):
+        fraction = "0." + "1234567890" * 6
+        path = write(self.root / "exact/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="0.12345678901234567890123456789"),
+            event("invocation", skill="alpha", tokens_est="1e18"),
+            event("invocation", skill="beta", tokens_est=fraction),
+            event("invocation", skill="beta", tokens_est="1E-64"),
+            event("invocation", skill="gamma", tokens_est="-1e18"),
+            event("invocation", skill="gamma", tokens_est="1e18"),
+        ]) + "\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path, "--topn", "3"], expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertTrue(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["diagnostic_count"], 0)
+        by_skill = summary["usage"]["by_skill"]
+        self.assertEqual(by_skill["alpha"]["tokens_est"],
+                         "1000000000000000000.12345678901234567890123456789")
+        self.assertEqual(by_skill["beta"]["tokens_est"], fraction + "0001")
+        self.assertEqual(Decimal(by_skill["gamma"]["tokens_est"]), 0)
+
+    def test_token_estimate_scale_exponent_and_magnitude_bounds_are_explicit(self):
+        rejected = ["1E-65", "0." + "1" * 58 + "E-7", "1e19", "1.000000000000000001e18",
+                    "-1.1e18", "0E+19", "1e+999999999999", "Infinity", "sNaN"]
+        path = write(self.root / "bounds/usage-skill.jsonl", "\n".join(
+            [event("invocation", skill="alpha", tokens_est="5")] +
+            [event("invocation", skill="alpha", tokens_est=value) for value in rejected]) + "\n")
+        _, legacy = self.summary(path, "--category", "usage-skill", expect=0)
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=0)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["diagnostics"]),
+                         (legacy["status"], legacy["diagnostics"]))
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"invalid_tokens_est": len(rejected)})
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"alpha": {"count": 1 + len(rejected), "tokens_est": "5"}})
+
+    def test_documented_topn_route_honors_lintel_python_without_python3(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        routes = [block for block in re.findall(r"```bash\n(.*?)```", usage, re.S)
+                  if "usage_stream.py" in block and "--topn" in block]
+        self.assertEqual(len(routes), 1)
+        self.assertNotRegex(routes[0], r"(^|\s)python3\s")
+        path = write(self.root / "route-audit/usage-skill.jsonl", "\n".join(
+            [event("invocation", skill="alpha", tokens_est="2")] * 3 +
+            [event("invocation", skill="beta", tokens_est="1")]) + "\n")
+        empty_bin = self.root / "no-python-bin"
+        empty_bin.mkdir()
+        script = write(self.root / "topn-route.sh", routes[0])
+        env = dict(self.env, PATH=empty_bin.as_posix(), LINTEL_PYTHON=Path(PYTHON).as_posix(),
+                   LINTEL_SOURCE_ROOT=ROOT.as_posix(), selected_usage_file=path.as_posix(),
+                   topn="1")
+        self.run_cmd([BASH, "-c", "command -v python3"], env=env, expect=1)
+        before = self.tree_state()
+        result = self.run_cmd([BASH, script], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 3, "tokens_est": "6"}})
 
     def test_injected_open_failure_is_unreadable_like_the_legacy_reader(self):
         path = write(self.root / "compat/open-fails/usage-skill.jsonl",

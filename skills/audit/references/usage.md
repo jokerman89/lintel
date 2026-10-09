@@ -82,13 +82,18 @@ For another authorized `--topn N` selection (1 through 50), use the same
 streaming method with the exact selected file and computed window:
 
 ```bash
-python3 -B "$LINTEL_SOURCE_ROOT/skills/audit/references/usage_stream.py" \
+"${LINTEL_PYTHON:-python3}" -B "$LINTEL_SOURCE_ROOT/skills/audit/references/usage_stream.py" \
   --file "$selected_usage_file" --topn "$topn" --limit 50
 ```
 
 Pass any actual `--since` ISO window and `--kind` filter unchanged. The helper
 caps diagnostics at 50 entries while reporting totals by code and omitted count;
-missing/invalid estimates are diagnosed rather than fabricated. Source changes
+missing/invalid estimates are diagnosed rather than fabricated. An accepted
+`tokens_est` is a finite decimal string of at most 64 characters, at most 64
+fractional places, a decimal exponent of at most 18 and an absolute value of at
+most 1e18; per-skill totals are summed exactly in a local 96-digit context that
+traps any rounding. Any other value is a usage-only `invalid_tokens_est`
+diagnostic and makes the aggregate incomplete. Source changes
 during a read remain a coverage limitation, not an atomic snapshot.
 
 For rows with missing or empty `fields.skill`, exclude the row from all

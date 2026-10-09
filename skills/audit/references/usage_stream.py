@@ -10,7 +10,8 @@ import sys
 sys.dont_write_bytecode = True
 
 import argparse
-from decimal import Decimal, InvalidOperation
+from decimal import (Context, Decimal, DecimalException, Inexact, InvalidOperation, Overflow,
+                     Rounded, localcontext)
 import importlib.util
 import json
 import os
@@ -23,6 +24,31 @@ MAX_LINE = 64 * 1024
 MAX_SKILLS = 1024
 MAX_DETAILS = 50
 MAX_DETAIL_BYTES = 64 * 1024
+MAX_TOKEN_CHARS = 64
+MAX_TOKEN_SCALE = 64
+MAX_TOKEN_ABS = Decimal("1e18")
+# Accepted values have <=19 integer and <=64 fractional digits; 100000 of them
+# need at most 6 more integer digits, so 96 digits sum exactly. Inexact traps.
+EXACT = Context(prec=96, Emax=999999, Emin=-999999,
+                traps=[Inexact, Rounded, Overflow, InvalidOperation])
+
+
+def token_estimate(value):
+    """Return an exactly representable bounded estimate, or None when outside the domain."""
+    if not isinstance(value, str) or len(value) > MAX_TOKEN_CHARS:
+        return None
+    try:
+        token = Decimal(value)
+    except (DecimalException, ValueError):
+        return None
+    if not token.is_finite():
+        return None
+    exponent = token.as_tuple().exponent
+    if exponent < -MAX_TOKEN_SCALE or exponent > 18:
+        return None
+    if token.copy_abs() > MAX_TOKEN_ABS:
+        return None
+    return token
 
 
 def legacy_summary(events, display):
@@ -179,14 +205,11 @@ def report(args, events, native_io, summary, display):
                 aggregate["count"] += 1
                 value = fields.get("tokens_est")
                 if value is not None:
-                    try:
-                        if len(value) > 64:
-                            raise InvalidOperation
-                        token = Decimal(value)
-                        if not token.is_finite() or abs(token) > Decimal("1e18"):
-                            raise InvalidOperation
-                        aggregate["tokens_est"] += token
-                    except InvalidOperation:
+                    token = token_estimate(value)
+                    if token is not None:
+                        with localcontext(EXACT):
+                            aggregate["tokens_est"] += token
+                    else:
                         diagnose(number, "invalid_tokens_est", "token estimate is not bounded numeric input", True)
                         aggregate_complete = False
                 else:
