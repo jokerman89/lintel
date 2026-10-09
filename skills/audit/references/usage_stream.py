@@ -64,15 +64,25 @@ def report(args, events, native_io, summary, display):
     counters = {"lines": 0, "valid": 0, "selected": 0, "malformed": 0,
                 "duplicate_key": 0, "unknown_kind": 0, "undated": 0, "incomplete_tail": False}
     diagnostics, preview, skills, diagnostic_codes, by_kind = [], [], {}, {}, {}
+    usage_diagnostics, usage_codes = [], {}
+    usage_count = 0
     diagnostic_count = bytes_read = detail_bytes = detail_count = 0
     complete = True
     aggregate_complete = True
     oversized_detail = False
 
-    def diagnose(line, code, detail):
-        nonlocal diagnostic_count, aggregate_complete
-        diagnostic_count += 1
+    def diagnose(line, code, detail, usage=False):
+        nonlocal diagnostic_count, aggregate_complete, usage_count
         aggregate_complete = False
+        if usage:
+            # Usage-only findings stay additive: they never alter legacy diagnostics, status or exit.
+            usage_count += 1
+            usage_codes[code] = usage_codes.get(code, 0) + 1
+            item = {"line": line, "code": code, "detail": detail[:512]}
+            if len(usage_diagnostics) < MAX_DETAILS:
+                usage_diagnostics.append(item)
+            return item
+        diagnostic_count += 1
         diagnostic_codes[code] = diagnostic_codes.get(code, 0) + 1
         item = {"line": line, "code": code, "detail": detail[:512]}
         if len(diagnostics) < MAX_DETAILS:
@@ -158,11 +168,11 @@ def report(args, events, native_io, summary, display):
                 fields = row["fields"] or {}
                 skill = fields.get("skill")
                 if not skill:
-                    diagnose(number, "missing_skill", "missing or empty fields.skill; excluded from aggregates")
+                    diagnose(number, "missing_skill", "missing or empty fields.skill; excluded from aggregates", True)
                     aggregate_complete = False
                     continue
                 if len(skill) > 256 or (skill not in skills and len(skills) == MAX_SKILLS):
-                    diagnose(number, "skill_bound", "skill length/cardinality bound; aggregates incomplete")
+                    diagnose(number, "skill_bound", "skill length/cardinality bound; aggregates incomplete", True)
                     aggregate_complete = False
                     continue
                 aggregate = skills.setdefault(skill, {"count": 0, "tokens_est": Decimal(0)})
@@ -177,10 +187,10 @@ def report(args, events, native_io, summary, display):
                             raise InvalidOperation
                         aggregate["tokens_est"] += token
                     except InvalidOperation:
-                        diagnose(number, "invalid_tokens_est", "token estimate is not bounded numeric input")
+                        diagnose(number, "invalid_tokens_est", "token estimate is not bounded numeric input", True)
                         aggregate_complete = False
                 else:
-                    diagnose(number, "missing_tokens_est", "token estimate not observed; totals incomplete")
+                    diagnose(number, "missing_tokens_est", "token estimate not observed; totals incomplete", True)
                     aggregate_complete = False
             final = path.stat()
             if (initial.st_size, initial.st_mtime_ns) != (final.st_size, final.st_mtime_ns):
@@ -204,7 +214,10 @@ def report(args, events, native_io, summary, display):
         "usage": {"aggregate_complete": complete and aggregate_complete and bool(counters["selected"]),
                   "by_skill": {skill: {"count": skills[skill]["count"],
                                       "tokens_est": str(skills[skill]["tokens_est"])} for skill in top},
-                  "skills_observed": len(skills), "topn": args.topn},
+                  "skills_observed": len(skills), "topn": args.topn,
+                  "diagnostic_count": usage_count, "diagnostic_codes": usage_codes,
+                  "diagnostics_omitted": usage_count - len(usage_diagnostics),
+                  "diagnostics": usage_diagnostics},
     })
     if meta.get("delegated"):
         summary["delegated"] = meta["delegated"]
@@ -236,6 +249,11 @@ def main():
     try:
         return report(args, events, events._load_native_io(), summary, display)
     except (events.ReaderError, OSError, ValueError, RecursionError) as error:
+        if (isinstance(error, OSError) and summary["source"]["state"] == "present"
+                and summary["catalog_version"] is not None):
+            # An open/read failure on a stat-able file is unreadable, exactly like li-events.read_source.
+            summary["source"]["state"] = "unreadable"
+            error = events.ReaderError(f"cannot read {display}: {error}")
         print(f"audit usage: {error}", file=sys.stderr)
         # Matches li-events summary: a parseable error summary, never a partial row dump.
         summary["status"] = "error"

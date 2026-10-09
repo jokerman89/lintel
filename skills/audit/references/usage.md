@@ -60,7 +60,13 @@ meaning (`source:{path,state}`, `by_kind`, `evidence`, `verification`,
 `enforcement` and absent/unreadable/invalid-window error summaries) and adds
 `processing`, `usage`, diagnostic counts/codes and the bounded preview.
 Only `diagnostics` detail is capped at 50 entries; `diagnostic_count` and
-`diagnostics_omitted` keep the totals.
+`diagnostics_omitted` keep the totals. Top-level `diagnostics`, `status` and
+the exit code follow the legacy parser semantics exactly: a valid record
+without optional `tokens_est` stays `observed`/exit 0. Usage-only findings
+(`missing_skill`, `skill_bound`, `missing_tokens_est`, `invalid_tokens_est`)
+are additive under `usage.diagnostics`/`usage.diagnostic_codes` and set
+`usage.aggregate_complete` to false. A file that exists but cannot be opened or
+read is `source.state: unreadable` with a `cannot read …` error summary, exit 2.
 `--limit` caps detailed preview before retention (at most 50 rows and 64 KiB).
 Before aggregating all rows, inspect `processing.complete` and
 `usage.aggregate_complete`; do not request the entire population as a preview.

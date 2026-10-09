@@ -292,8 +292,10 @@ class UsageReportContracts(Sandbox):
         self.assertFalse(summary["processing"]["complete"])
         self.assertTrue(summary["processing"]["detail_incomplete"])
         codes = {row["code"] for row in summary["diagnostics"]}
-        self.assertTrue({"malformed_json", "missing_skill", "oversized_line",
-                         "processing_bound"} <= codes)
+        self.assertTrue({"malformed_json", "oversized_line", "processing_bound"} <= codes)
+        self.assertNotIn("missing_skill", codes)
+        self.assertEqual(summary["usage"]["diagnostic_codes"]["missing_skill"], 2)
+        self.assertFalse(summary["usage"]["aggregate_complete"])
         self.assertEqual(summary["usage"]["by_skill"]["alpha"], {"count": 1, "tokens_est": "12"})
         self.assertNotIn("", summary["usage"]["by_skill"])
         self.assertEqual(len(self.usage_preview(result)), 2)
@@ -339,6 +341,52 @@ class UsageReportContracts(Sandbox):
         self.assertFalse(absent.parent.exists())
         _, legacy = self.summary(valid, "--category", "usage-skill", expect=0)
         self.assertEqual(legacy["by_kind"]["invocation"]["count"], 2)
+
+    def test_valid_record_without_token_estimate_keeps_legacy_status_and_exit(self):
+        path = write(self.root / "compat/no-tokens/usage-skill.jsonl",
+                     event("invocation", ts="2026-09-20T10:00:00Z", skill="alpha") + "\n")
+        before = self.tree_state()
+        _, legacy = self.summary(path, "--category", "usage-skill", expect=0)
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        for key in ("status", "diagnostics", "records", "by_kind"):
+            self.assertEqual(summary[key], legacy[key], key)
+        self.assertEqual((summary["status"], summary["diagnostics"], summary["diagnostic_count"]),
+                         ("observed", [], 0))
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_tokens_est": 1})
+        self.assertEqual(summary["usage"]["diagnostics"][0]["code"], "missing_tokens_est")
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 1, "tokens_est": "0"}})
+
+    def test_injected_open_failure_is_unreadable_like_the_legacy_reader(self):
+        path = write(self.root / "compat/open-fails/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, pathlib, sys\n"
+            "target = pathlib.Path(sys.argv[1]).name\n"
+            "real = pathlib.Path.open\n"
+            "def failing(self, *a, **k):\n"
+            "    if pathlib.Path(self).name == target:\n"
+            "        raise PermissionError(13, \"injected open failure\")\n"
+            "    return real(self, *a, **k)\n"
+            "pathlib.Path.open = failing\n"
+            "spec = importlib.util.spec_from_file_location(\"usage_stream\", sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "sys.argv = [\"usage_stream.py\", \"--file\", sys.argv[1]]\n"
+            "sys.exit(module.main())\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"], expect=2)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout)
+        self.assertEqual(summary["status"], "error")
+        self.assertEqual(summary["source"]["state"], "unreadable")
+        self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
+        self.assertIn("injected open failure", summary["error"])
+        self.assertEqual(summary["records"]["lines"], 0)
 
     def tree_state(self):
         return {path.relative_to(self.root).as_posix():
@@ -472,9 +520,12 @@ class UsageReportContracts(Sandbox):
             event("invocation", skill="", tokens_est="200"),
         ]) + "\n")
         result = self.read_usage(
-            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()), expect=4)
+            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()), expect=0)
         summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
         self.assertEqual(summary["records"]["lines"], 3)
+        self.assertEqual((summary["status"], summary["diagnostics"]), ("observed", []))
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_skill": 2})
+        self.assertFalse(summary["usage"]["aggregate_complete"])
         rows = self.usage_preview(result)
         counts, estimates, incomplete = {}, {}, []
         for row in rows:
