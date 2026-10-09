@@ -105,4 +105,9 @@ Superpowers and gstack revisions already present in original G-02/G-03/G-06/G-07
 evidence. Preserve the existing 2026-05-26 registry review, 2026-09-20 comparison,
 2026-09-28 addendum, current-facing URL/count corrections and import-provenance
 records. No network/current-HEAD sweep, new import revision, benchmark or
-upstream currency claim is authorized.
+upstream currency claim is authorized. The new entry uses `reviewed: 2026-09-28`
+for the retained Skill review V2 review date and `recorded: 2026-10-09` for this
+repository record. Neither is an upstream verification or commit date. Its
+review-summary path, exact G-02/G-03/G-06/G-07/G-11 source set, three revisions
+and original revision-pinned URLs are machine-checked without adding or changing
+`last_verified`.

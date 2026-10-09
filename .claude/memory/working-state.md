@@ -53,11 +53,14 @@ the delivered source packages.
 B-03/B-04/B-05/B-06/B-10/C-04 and G-11. The revised fourteen-package plan is
 machine-`APPROVED` under the operator's explicit parallel-execution authority so
 the content-bound review contract can inspect it. That status is not BUILD
-clearance. R4 SPEC passed, but QUALITY returned three P2 corrections: reissue
-the stale QA status against the approved topology, make SENSE's exact current
-caller coordinator-owned, and require a complete public nine-name migration
-map. P11A/P11B/P11C/P12 remain held until the corrected independent plan review
-passes and the coordinator supplies the exact reviewed base/brief. Their
+clearance. R5 resolved all three R4 P2s and SPEC passed, but QUALITY found one
+bounded P12 P2: the plan named revisions and dates without defining the date
+values or their authority. The corrected plan now fixes `reviewed: 2026-09-28`
+as the retained V2 review date and `recorded: 2026-10-09` as the repository
+record date, explicitly not upstream verification or commit dates, and binds the
+original source findings and pinned URLs. P11A/P11B/P11C/P12 remain held until a
+fresh independent plan review passes and the coordinator supplies the exact
+reviewed base/brief. Their
 committed scopes are disjoint with coordinator-only fan-in. Pre-review
 uncommitted changes on the isolated budget and Brief Forge branches are
 quarantined, not accepted evidence; do not commit, discard or integrate them

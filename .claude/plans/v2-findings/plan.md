@@ -457,6 +457,17 @@ new comparison, import revision or present-tense upstream claim. P12 is an
 independent wave-1 worktree lane and the coordinator integrates it after
 P11A/P11B/P11C.
 
+**P12 date semantics:** append one separate `method_comparison_addenda` entry
+whose `reviewed: 2026-09-28` names the retained Skill review V2 review date and
+whose `recorded: 2026-10-09` names the date this pointer is recorded in the
+repository. Neither field is an upstream verification date or commit date, and
+the new entry must not add or change `last_verified`. Bind the entry to
+`.claude/engineering/audits/2026-09-28-skill-review-v2-summary.md` and exact
+`source_findings: [G-02, G-03, G-06, G-07, G-11]`. Machine-check those date
+semantics, the three exact revisions and their original revision-pinned URLs.
+The Superpowers 2026-09-25 release context remains only the original G-03
+narrative; it is not a shared date for the three pointers.
+
 Enterprise guidance distinguishes model instruction, invoked helper validation
 and actual host/CI enforcement. For each selected required control, identify its
 responsible owner, actual mechanism, negative test, evidence and failure action.

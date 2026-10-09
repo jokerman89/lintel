@@ -80,6 +80,9 @@ P11B reads but does not edit `skills/sense/SKILL.md`; the coordinator migrates
 its exact `/li:skill-router` help example during fan-in. Before P9 acceptance,
 update `docs/migrations/2026-09-25-native-workflows.md` with a machine-checked
 replacement/flag map for all nine retired public identities.
+P12 records the retained review date (`2026-09-28`) separately from the
+repository record date (`2026-10-09`); neither is upstream verification. Bind
+the exact five source findings, three revisions and their original pinned URLs.
 
 ## Constraints
 
