@@ -1,7 +1,9 @@
 {
   "schema_version": 1,
   "workflow": "lintel",
-  "status": "APPROVED",
+  "status": "DRAFT",
+  "execution_mode": "swarm",
+  "coordination": ".claude/plans/v2-findings/swarm/coordination.json",
   "spec": ".claude/plans/v2-findings/spec.md",
   "plan": ".claude/plans/v2-findings/plan.md",
   "tasks": ".claude/plans/v2-findings/plan.md",

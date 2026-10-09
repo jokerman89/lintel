@@ -1381,3 +1381,20 @@ owned stub in that same shell/environment and fail closed on mismatch. Give
 fixtures complete synthetic home/config/data roots and Git ancestry ceilings.
 A selected source with an invalid `.git` directory must not discover and update
 an ancestor repository; establish exact working-root identity before fetch/pull.
+
+## L-066 - Revoke machine approval before revising an approved plan
+
+**Date:** 2026-10-09
+
+**Context:** The V2 continuation still had `work.json` status `APPROVED` while
+its sequential plan was being replaced by a committed Swarm topology. Child
+sessions could therefore treat local plan-UI acceptance or the old machine
+status as BUILD clearance and begin isolated edits before the revised central
+plan had independent review.
+
+**Rule:** Before changing the tasks, packages, execution mode, scope or
+coordination of an approved map, set its machine status to `DRAFT` in the same
+planning change and stop all writers. Plan-UI acceptance is not package BUILD
+clearance. Re-establish `APPROVED` only after the exact revised artifacts and
+topology have current review; quarantine attributable early work without
+committing, discarding or counting it as acceptance.

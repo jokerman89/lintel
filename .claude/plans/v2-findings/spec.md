@@ -67,8 +67,9 @@ BUILD; absent or drifted required policy is not a neutral success.
 
 ## Compatible owner consolidation
 
-P11's [preservation map](plan.md#single-owner-continuation-2026-10-08) is the
-explicit scoped decision for B-03/B-04/B-05/B-06/B-10/C-04. Retain all existing
+P11A/P11B/P11C's
+[preservation map](plan.md#single-owner-continuation-2026-10-08) is the explicit
+scoped decision for B-03/B-04/B-05/B-06/B-10/C-04. Retain all existing
 providers, methods, flags, data and permission boundaries while replacing the
 nine redundant public fronts with their already-established owners under
 ADR-0034. Complete native resource closure and caller migration are acceptance,
@@ -79,4 +80,21 @@ This authorizes no role/domain capability removal, default-pack change, phase
 change, learning activation or revision of ADR-0026. Current inventory and
 actual helper/refusal tests establish this source consolidation; they cannot
 establish comparative model benefit, live host enforcement or an unperformed
-experiment. P11 is a ready batch, not a new endpoint for the original task.
+experiment. The three packages are one ready fan-out/fan-in batch, not a new
+endpoint for the original task.
+
+The explicit execution profile is
+[`swarm/coordination.json`](swarm/coordination.json). Concurrent writers require
+the four declared Git worktrees, disjoint scopes and attributable diffs. The
+coordinator alone owns shared callers, generated reducers, plan/runtime state,
+commits, integration and release evidence. If those conditions fail, the same
+briefs run sequentially without changing acceptance.
+
+## Bounded upstream-record completion
+
+P12 reopens only G-11's missing dated native-plan pointer. Use the exact Codex,
+Superpowers and gstack revisions already present in original G-02/G-03/G-06/G-07
+evidence. Preserve the existing 2026-05-26 registry review, 2026-09-20 comparison,
+2026-09-28 addendum, current-facing URL/count corrections and import-provenance
+records. No network/current-HEAD sweep, new import revision, benchmark or
+upstream currency claim is authorized.

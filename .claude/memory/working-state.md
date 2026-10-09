@@ -1,6 +1,6 @@
 # Memory — current Lintel working state
 
-Updated 2026-10-08. This is a short continuity view, not task authority or release
+Updated 2026-10-09. This is a short continuity view, not task authority or release
 clearance. Read the selected work's original specification, cards and evidence.
 Durable rules remain in [lessons.md](lessons.md); calibration is in
 [personas.md](personas.md).
@@ -48,6 +48,14 @@ continuation; the other 81 were preserved, not re-reviewed. Remaining public
 portfolio/role/phase choices, empirical comparisons and exact host holds need
 their own authority/evidence. Do not turn that into a blanket blocker or replay
 the delivered source packages.
+
+**Current ready batch:** exact reconciliation found seven compatible residuals:
+B-03/B-04/B-05/B-06/B-10/C-04 and G-11. The work map is deliberately `DRAFT`
+while the revised fourteen-package plan receives current independent review.
+P11A/P11B/P11C/P12 have committed disjoint worktree briefs and coordinator-only
+fan-in. Pre-review uncommitted changes on the isolated budget and Brief Forge
+branches are quarantined, not accepted evidence; do not commit, discard or
+integrate them before reconciling them against the reviewed base and brief.
 
 **Execution limit:** use LF recipe files through `bin/li-run`, as the native
 caller specifies. The retained P3 records that Windows `bash -c` transport can

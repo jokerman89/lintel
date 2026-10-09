@@ -7,7 +7,10 @@ this approval is not a claim that review or implementation has passed.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
-**Execution:** coordinator-owned, dependency-ordered packages; no automatic swarm.
+**Execution:** coordinator-owned, dependency-ordered packages. The 2026-10-09
+ready continuation opts into the committed four-lane Swarm profile at
+[swarm/coordination.json](swarm/coordination.json); shared fan-in remains
+coordinator-owned and sequential.
 **Continuation baseline:** `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
@@ -23,7 +26,8 @@ without changing IDs or rewriting the prior P3 review. The current map retains
 56 task IDs across ten packages; their completed checkboxes described that
 elaborated scope, not completion of all 84 findings. The new continuation
 elaborates original B-03, reopens the outstanding public-front clauses of
-B-04/B-05/B-06/B-10/C-04, and reopens integration: 57 IDs in eleven packages.
+B-04/B-05/B-06/B-10/C-04 and the bounded G-11 record residual, and reopens
+integration: 57 IDs in fourteen packages.
 Previously accepted source clauses and review records remain history. See the
 [current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
@@ -57,7 +61,10 @@ new architecture or permission decisions.
 
 These group the elaborated compatible task clauses, not all recommendations
 listed above. The coordinator owns the integrated result and all shared files;
-implementation delegates ran sequentially with attributable preimages.
+earlier implementation delegates ran sequentially with attributable preimages.
+P11A/P11B/P11C/P12 now use disjoint Git worktrees with committed briefs,
+reports and review slots; the coordinator integrates accepted changes serially
+and retains every shared reducer and release file.
 Original finding cards are not represented as measured 2-5 minute work. Their
 bounded source/test substeps and actual command evidence are retained per package.
 The coordinator records that granularity concern explicitly instead of inventing
@@ -71,11 +78,14 @@ elapsed estimates or dropping the original finding IDs.
 | P4 | Shared document/design fidelity | lane-d-03, lane-d-07, lane-d-08, lane-d-09, lane-d-11, lane-E-14, F-02 | Coordinator | P1 | Real checker/emitter negatives and source preservation |
 | P5 | Shared discovery/lifecycle observations | lane-B-07, C-06 | Coordinator | P3 | Real transport, reader and retained-interface tests |
 | P6 | Preserved role/runtime capabilities | lane-E-01, lane-E-01b, lane-E-02, lane-E-03, lane-E-05, lane-E-06, lane-E-10, lane-E-12, F-06 | Coordinator | P2, P4, P5 | Actual configuration/helper tests and inventory parity |
-| P7 | Original external authority and required controls | lane-A-05, G-01, G-11, ENT-02, ENT-03 | Coordinator | P6 | Real map/profile/evidence refusal and preservation tests |
+| P7 | Original external authority and required controls | lane-A-05, G-01, ENT-02, ENT-03 | Coordinator | P6 | Real map/profile/evidence refusal and preservation tests |
 | P8 | Conditional core methods and usable hot memory | lane-A-06, lane-d-02, ENT-05, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
 | P10 | Complete original premise and recovery-method handoff | lane-A-07, lane-B-09, lane-B-11 | Coordinator | P3, P8 | Exact method preservation, real snippet regressions and native resource closure |
-| P11 | One public owner for each retained utility method | lane-B-03, lane-B-04, lane-B-05, lane-B-06, lane-B-10, C-04 | Coordinator | P3, P5, P8, P10 | Single-owner discovery, preserved helper behavior, migrated callers and owned update/refusal tests |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11 | Current local/hosted verification, independent review and actual delivery |
+| P11A | One budget, usage and maintenance owner | lane-B-03, lane-B-10, C-04 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Context-budget/audit behavior, migrated owner methods and refusal tests |
+| P11B | One discovery and role-lifecycle owner | lane-B-04, lane-B-05 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Catalog/SENSE and role lifecycle preservation with helper/refusal tests |
+| P11C | One internal handoff owner | lane-B-06 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Complete internal method and unchanged forge boundary/evaluator tests |
+| P12 | Bounded native-plan comparison record | G-11 | Isolated implementer; coordinator fan-in | P7 | Exact dated pins and preservation tests without a network/current-HEAD sweep |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12 | Current local/hosted verification, independent review and actual delivery |
 
 ## First ready leaf
 
@@ -103,10 +113,11 @@ The package's final source and quality review remains required.
 ## Remaining leaf elaboration
 
 The method-only boundaries in the earlier elaborations below describe the
-0.13.8 implementation and remain applicable outside the exact P11 extension.
-P11 now supplies the preservation/migration decision for nine redundant public
-entries; it does not authorize role retirement, portfolio extraction, new hooks
-or changes to accepted phase/leaf policy.
+0.13.8 implementation and remain applicable outside the exact P11A/P11B/P11C
+extension. Those three packages together supply the preservation/migration
+decision for nine redundant public entries; they do not authorize role
+retirement, portfolio extraction, new hooks or changes to accepted phase/leaf
+policy.
 
 - [x] lane-B-08 Correct the remaining checkpoint examples against the actual repository-key grammar.
 
@@ -122,7 +133,7 @@ Coordinator owns this bounded residual: retain the manual writer and report
 flags, route reads through the existing audit owner, and remove stale
 single-log/task-authority claims. Verify `UsageReportContracts` including
 actual event-reader preservation and the source-owner guard.
-The source-method clause was delivered in 0.13.8. P11 below owns the remaining
+The source-method clause was delivered in 0.13.8. P11A below owns the remaining
 entry migration; reopening this ID does not erase that evidence.
 
 - [x] lane-d-04 Replace nonexistent generation share gates with actual named controls.
@@ -410,7 +421,7 @@ session, worktree or broad root deletion. No external network or model call.
 
 - [x] lane-A-05 Preserve selected external analysis, convergence and bug/assessment authority.
 - [x] G-01 Detect actual selected Spec Kit capability overlap without requiring extensions.
-- [x] G-11 Correct current-facing upstream descriptions while retaining dated import/review pins.
+- [ ] G-11 Complete the remaining dated native-plan comparison pointer without rewriting retained pins.
 - [x] ENT-02 Define concrete control ownership, negative checks and failure behavior without claiming enforcement.
 - [x] ENT-03 Demonstrate that a loaded/pinned child pack cannot clear an omitted required control.
 
@@ -433,6 +444,18 @@ Preserve the old method/import pins and dates. Add only source-grounded dated
 comparison pointers and correct current-facing descriptions/URLs from retained
 evidence; no fresh upstream review, imported revision or outcome superiority is
 claimed. Native planning overlap does not remove existing evidence guarantees.
+
+**P12 bounded residual:** the current-facing URL/count corrections and Spec Kit,
+GSD and ECC addendum already landed and remain unchanged. The only reopened
+clause is a dated pointer to the exact native-plan revisions already cited by
+original G-02/G-03/G-06/G-07. P12 owns only
+`install/upstream-sources.yaml`,
+`tests/unit/external-authority-methods.py` and its Swarm report. Preserve
+`last_full_review`, the 2026-09-20 comparison, every old revision, design-dna
+import provenance and the no-current-inventory wording. No network, HEAD lookup,
+new comparison, import revision or present-tense upstream claim. P12 is an
+independent wave-1 worktree lane and the coordinator integrates it after
+P11A/P11B/P11C.
 
 Enterprise guidance distinguishes model instruction, invoked helper validation
 and actual host/CI enforcement. For each selected required control, identify its
@@ -505,16 +528,23 @@ engine, mandatory alias layer or removal quota.
 
 - [ ] lane-B-03 Finish context-budget ownership of advice and handoff sizing.
 
-**P11 owner and order:** coordinator, sequentially B-03, B-04, B-05, B-06,
-B-10, C-04. P3/P5's accepted method bodies are the preimages, not evidence of
-this further change. Prior checkbox reopenings retain their original IDs.
+**P11 ownership and order:** three isolated wave-1 lanes implement P11A
+(B-03, B-10, C-04), P11B (B-04, B-05) and P11C (B-06) concurrently from the
+same reviewed base. Their source/test scopes are disjoint and attributable to
+separate Git worktrees. No lane writes generated output, current cross-owner
+callers, plans, memory, runtime/profile/audit state, version metadata or
+integration history. The coordinator checks each exact diff, obtains package
+SPEC then QUALITY review, integrates passing lanes serially in P11A/P11B/P11C
+order, migrates shared callers and regenerates reducers only after fan-in.
+P3/P5's accepted method bodies are the preimages, not evidence of this further
+change. Prior checkbox reopenings retain their original IDs.
 
 | Original ID | Former entries | Single owner and required preservation |
 |---|---|---|
 | lane-B-03 | `perf-mode`, `handoff-size-check` | `context-budget --advice` and `--handoff`; preserve the existing executable route, numeric advice flags, mapped/legacy plan selection, observation provenance, advisory unknowns and the caller's skip flags. |
 | lane-B-04 | `orientator`, `skill-router` | `catalog` and its existing intent reference. Preserve metadata-first narrowing, explicit workflow choices and actual native discovery. SENSE still directly owns the unchanged routing library, high-risk confirmation, verified profile and decision audit. |
 | lane-B-05 | `role-new`, `roles-list` | `role --create`, `--update [id]` and `--list [--include-private]`, alongside unchanged activation/off/rotation/frame/deep-dive/audience actions. Preserve the complete lifecycle reference, private metadata/body consent, reviewed digests, conflict-safe publication and no implicit activation/sync. |
-| lane-B-06 | `brief-forge` | Internal `skills/cycle/references/handoff.md` using the unchanged `forge_handoff` helper. Preserve all five kinds, structured inputs, actual schema/evaluator/accounting/audit gates, exit 3 and caller-owned dispatch. No reduced recipe or documentary semantic-score claim. |
+| lane-B-06 | `brief-forge` | Internal `skills/brief-forge/references/handoff.md` using the unchanged `forge_handoff` helper. Preserve all five kinds, structured inputs, actual schema/evaluator/accounting/audit gates, exit 3 and caller-owned dispatch. No reduced recipe or documentary semantic-score claim. |
 | lane-B-10 | `usage-log` | Audit-owned `references/usage.md` and the existing audit reader/writer. Audit remains read-only by default; `--usage` selects the former report flags. Explicitly requested manual recording uses the existing producer method, never automatic telemetry or a second writer/schema. |
 | C-04 | `maintenance` | Existing context-budget advice/selected-input estimates, doctor path inspection and audit usage views. Migrate the four former mode intentions and flags in one documented mapping; no compaction, watcher, token predictor, cleanup or healthy-empty claim. |
 
@@ -572,20 +602,24 @@ outside that source. Isolate fixture HOME/TEMP and preflight command resolution.
 Only actual command results count; source guards do not establish live-host or
 model efficacy.
 
-**Plan signals and review:** six original finding IDs in P11 plus reopened P9
-integration; 57 mapped IDs total, eleven packages, no additional writer/swarm.
-Phases remain PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE. Work spans several existing
-owners, so use the existing XL scope; token estimate remains explicitly
-uncalibrated and measured elapsed/usage unknown. The compatibility map and
-observable acceptance require current independent engineering/developer-
-experience plan review before BUILD; rendered design is not applicable.
-No required review, profile or source/QA gate is waived.
+**Plan signals and review:** six original finding IDs across P11A/P11B/P11C,
+the bounded G-11 residual in P12 and reopened P9 integration; 57 mapped IDs
+total, fourteen packages. The explicit Swarm coordination/charter and four lane
+briefs are committed under `swarm/`; max parallelism is four, isolation is Git
+worktree, and shared reducers remain coordinator-only. Phases remain
+PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE. Work spans several existing owners, so
+use the existing XL scope; token estimate remains explicitly uncalibrated and
+measured elapsed/usage unknown. The compatibility map and observable acceptance
+require current independent engineering/developer-experience plan review before
+BUILD; rendered design is not applicable. No required review, profile or
+source/QA gate is waived.
 
 **Other original residuals:** separately reconcile the prior 45 clauses with the
 full original findings and adjudications. Independent reconciliation may
 identify more ready implementation or an overstated residual; it does not
 authorize changing an accepted decision or closing a missing experiment by
-assertion. Add the next ready original IDs here rather than ending at P11.
+assertion. Add the next ready original IDs here rather than ending at
+P11A/P11B/P11C/P12.
 The exact native-hook/ADR holds remain excluded; continue unrelated work.
 
 ## Integration and review
@@ -621,8 +655,8 @@ invalidate affected evidence. A reviewer must not repair its own findings.
 
 Do not edit the byte-bound shared `todo.md` or any earlier acceptance tree.
 Link current progress from mutable working memory. No deletion of evidence or worktrees is part of proving finding closure.
-P11's exact redundant canonical/native entries are the sole source deletions
-authorized by its preservation map.
+P11A/P11B/P11C's exact redundant canonical/native entries are the sole source
+deletions authorized by their shared preservation map.
 
 ## Original method proposals continuation
 

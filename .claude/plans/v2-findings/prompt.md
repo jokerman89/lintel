@@ -53,20 +53,29 @@ The original streams are parked and their retained commits already landed;
 there is no missing PR to merge. The coordinator now uses its explicitly owned
 current checkout rather than the obsolete 0.13.3 source it had loaded.
 
-P11 in the original plan supplies a concrete preservation/migration map for
-six original findings and nine redundant public fronts. It preserves the
+P11A/P11B/P11C in the original plan supply a concrete
+preservation/migration map for six original findings and nine redundant public
+fronts. They preserve the
 actual context, discovery, role, handoff and audit methods, helpers, data and
 controls. Read that complete acceptance and edit boundary. B-03 is newly
-elaborated; the other five original IDs and V2-INTEGRATION are reopened only
-for their outstanding clauses. There are 57 mapped IDs in eleven packages.
+elaborated; the other five original IDs, bounded G-11 residual and
+V2-INTEGRATION are reopened only for their outstanding clauses. There are 57
+mapped IDs in fourteen packages.
 Prior package reviews remain historical, not acceptance of these new changes.
 
 Obtain the current independent plan gate, implement the ready package and its
 real discriminating tests, then current source/integration acceptance. Keep
 the installed-snapshot verification free of concurrent source/runtime writes.
 Use only this target's fresh profile. Independently reconcile the other
-original residuals and continue the next ready work; do not stop after P11 or
-turn ordinary unplanned work into a blanket architectural blocker.
+original residuals and continue the next ready work; do not stop after the
+P11A/P11B/P11C/P12 fan-in or turn ordinary unplanned work into a blanket
+architectural blocker.
+
+The committed Swarm charter, coordination and four lane briefs under `swarm/`
+are the only authority for parallel topology and write scopes. Use separate
+Git worktrees, validate attributable diffs, review every package, then integrate
+them serially. Workers never write shared callers, generated output,
+plan/runtime state, commits or release evidence.
 
 ## Constraints
 
