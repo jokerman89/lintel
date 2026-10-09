@@ -92,6 +92,25 @@ def source_state(native_io, path):
         return "unreadable", None, str(error)
 
 
+def open_regular(path, named):
+    """Open without blocking on a swapped-in FIFO/device; validate the descriptor before reading."""
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    fd = os.open(path, os.O_RDONLY | nonblock | getattr(os, "O_BINARY", 0)
+                 | getattr(os, "O_NOCTTY", 0))
+    stream = None
+    try:
+        initial = os.fstat(fd)
+        if (stat.S_ISREG(initial.st_mode)
+                and (named.st_dev, named.st_ino) == (initial.st_dev, initial.st_ino)):
+            if nonblock:
+                os.set_blocking(fd, True)
+            stream = os.fdopen(fd, "rb")
+    finally:
+        if stream is None:
+            os.close(fd)
+    return stream, initial
+
+
 def report(args, events, native_io, summary, display):
     since = None
     if args.since is not None:
@@ -145,12 +164,11 @@ def report(args, events, native_io, summary, display):
 
     if state == "present":
         named = path.stat()
-        with path.open("rb") as stream:
-            initial = os.fstat(stream.fileno())
-            if (not stat.S_ISREG(initial.st_mode)
-                    or (named.st_dev, named.st_ino) != (initial.st_dev, initial.st_ino)):
-                summary["source"]["state"] = "unreadable"
-                raise events.ReaderError(f"cannot read {display}: opened source identity changed")
+        stream, initial = open_regular(path, named)
+        if stream is None:
+            summary["source"]["state"] = "unreadable"
+            raise events.ReaderError(f"cannot read {display}: opened source identity changed")
+        with stream:
             while True:
                 remaining = MAX_BYTES - bytes_read
                 if remaining == 0 or counters["lines"] == MAX_LINES:

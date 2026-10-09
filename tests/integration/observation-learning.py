@@ -615,9 +615,10 @@ class UsageReportContracts(Sandbox):
             "import importlib.util, os, pathlib, sys, types\n"
             "target, other = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])\n"
             "mode, helper = sys.argv[3:5]\n"
-            "real_open, real_stat = pathlib.Path.open, pathlib.Path.stat\n"
+            "real_open, real_fdopen, real_stat = os.open, os.fdopen, pathlib.Path.stat\n"
             "real_fstat = os.fstat\n"
             "changed = False\n"
+            "selected = set()\n"
             "class Stream:\n"
             "    def __init__(self, stream): self.stream = stream\n"
             "    def __enter__(self): return self\n"
@@ -629,10 +630,15 @@ class UsageReportContracts(Sandbox):
             "        raw = self.stream.readline(*args)\n"
             "        changed = True\n"
             "        return raw\n"
-            "def opening(self, *a, **k):\n"
-            "    if self.name == target.name:\n"
-            "        return Stream(real_open(other if mode == 'open' else self, *a, **k))\n"
-            "    return real_open(self, *a, **k)\n"
+            "def opening(name, *a, **k):\n"
+            "    if pathlib.Path(os.fspath(name)).name == target.name:\n"
+            "        fd = real_open(other if mode == 'open' else name, *a, **k)\n"
+            "        selected.add(fd)\n"
+            "        return fd\n"
+            "    return real_open(name, *a, **k)\n"
+            "def fdopening(fd, *a, **k):\n"
+            "    stream = real_fdopen(fd, *a, **k)\n"
+            "    return Stream(stream) if fd in selected else stream\n"
             "def stating(self, *a, **k):\n"
             "    value = real_stat(self, *a, **k)\n"
             "    if self.name == target.name and changed and mode == 'replace':\n"
@@ -648,8 +654,8 @@ class UsageReportContracts(Sandbox):
             "        attrs['st_mtime_ns'] += 1\n"
             "        return types.SimpleNamespace(**attrs)\n"
             "    return value\n"
-            "os.fstat = fstat\n"
-            "pathlib.Path.open, pathlib.Path.stat = opening, stating\n"
+            "os.fstat, os.open, os.fdopen = fstat, opening, fdopening\n"
+            "pathlib.Path.stat = stating\n"
             "spec = importlib.util.spec_from_file_location('usage_stream', helper)\n"
             "module = importlib.util.module_from_spec(spec)\n"
             "spec.loader.exec_module(module)\n"
@@ -761,14 +767,14 @@ class UsageReportContracts(Sandbox):
         path = write(self.root / "compat/open-fails/usage-skill.jsonl",
                      event("invocation", skill="alpha", tokens_est="1") + "\n")
         harness = (
-            "import importlib.util, pathlib, sys\n"
+            "import importlib.util, os, pathlib, sys\n"
             "target = pathlib.Path(sys.argv[1]).name\n"
-            "real = pathlib.Path.open\n"
-            "def failing(self, *a, **k):\n"
-            "    if pathlib.Path(self).name == target:\n"
+            "real = os.open\n"
+            "def failing(name, *a, **k):\n"
+            "    if pathlib.Path(os.fspath(name)).name == target:\n"
             "        raise PermissionError(13, \"injected open failure\")\n"
-            "    return real(self, *a, **k)\n"
-            "pathlib.Path.open = failing\n"
+            "    return real(name, *a, **k)\n"
+            "os.open = failing\n"
             "spec = importlib.util.spec_from_file_location(\"usage_stream\", sys.argv[2])\n"
             "module = importlib.util.module_from_spec(spec)\n"
             "spec.loader.exec_module(module)\n"
@@ -784,6 +790,99 @@ class UsageReportContracts(Sandbox):
         self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
         self.assertIn("injected open failure", summary["error"])
         self.assertEqual(summary["records"]["lines"], 0)
+
+    def test_swapped_in_non_regular_source_is_rejected_before_any_blocking_read(self):
+        path = write(self.root / "fifo-swap/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, json, os, pathlib, stat, sys, types\n"
+            "target = pathlib.Path(sys.argv[1]).name\n"
+            "real_open, real_fstat, real_fdopen = os.open, os.fstat, os.fdopen\n"
+            "opened, wrapped = [], []\n"
+            "def opening(name, flags, *a, **k):\n"
+            "    fd = real_open(name, flags, *a, **k)\n"
+            "    if pathlib.Path(os.fspath(name)).name == target:\n"
+            "        opened.append((fd, flags))\n"
+            "    return fd\n"
+            "def fstat(fd):\n"
+            "    value = real_fstat(fd)\n"
+            "    if any(fd == item for item, _ in opened):\n"
+            "        attrs = {key: getattr(value, key) for key in dir(value) if key.startswith('st_')}\n"
+            "        attrs['st_mode'] = stat.S_IFIFO | 0o600\n"
+            "        return types.SimpleNamespace(**attrs)\n"
+            "    return value\n"
+            "def fdopening(fd, *a, **k):\n"
+            "    wrapped.append(fd)\n"
+            "    return real_fdopen(fd, *a, **k)\n"
+            "os.open, os.fstat, os.fdopen = opening, fstat, fdopening\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "code = module.main()\n"
+            "closed = []\n"
+            "for fd, _ in opened:\n"
+            "    try:\n"
+            "        real_fstat(fd)\n"
+            "        closed.append(False)\n"
+            "    except OSError:\n"
+            "        closed.append(True)\n"
+            "nonblock = getattr(os, 'O_NONBLOCK', 0)\n"
+            "probe = {'opened': len(opened), 'closed': closed,\n"
+            "         'nonblocking': [flags & nonblock == nonblock for _, flags in opened],\n"
+            "         'wrapped': [fd for fd in wrapped if any(fd == item for item, _ in opened)]}\n"
+            "sys.stderr.write('PROBE ' + json.dumps(probe) + '\\n')\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"], expect=2)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        probe = json.loads(result.stderr.split("PROBE ", 1)[1].splitlines()[0])
+        self.assertEqual(probe, {"opened": 1, "closed": [True], "nonblocking": [True],
+                                 "wrapped": []})
+        summary = json.loads(result.stdout)
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("error", "unreadable"))
+        self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
+        self.assertEqual(summary["records"]["lines"], 0)
+
+    @unittest.skipUnless(hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"),
+                         "POSIX FIFOs are unavailable on this host")
+    def test_real_fifo_swapped_after_path_validation_does_not_block(self):
+        with tempfile.TemporaryDirectory() as folder:
+            decoy = write(Path(folder) / "decoy.jsonl",
+                          event("invocation", skill="alpha", tokens_est="1") + "\n")
+            fifo = Path(folder) / "usage-skill.jsonl"
+            os.mkfifo(fifo)
+            harness = (
+                "import importlib.util, pathlib, sys\n"
+                "target, decoy = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])\n"
+                "real_stat = pathlib.Path.stat\n"
+                "def stating(self, *a, **k):\n"
+                "    if self.name == target.name:\n"
+                "        return real_stat(decoy, *a, **k)\n"
+                "    return real_stat(self, *a, **k)\n"
+                "pathlib.Path.stat = stating\n"
+                "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[3])\n"
+                "module = importlib.util.module_from_spec(spec)\n"
+                "spec.loader.exec_module(module)\n"
+                "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+                "sys.exit(module.main())\n")
+            before = self.tree_state()
+            try:
+                result = subprocess.run(
+                    [PYTHON, "-B", "-c", harness, str(fifo), str(decoy),
+                     str(ROOT / "skills/audit/references/usage_stream.py")],
+                    cwd=str(self.root), env=self.env, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace", timeout=30)
+            except subprocess.TimeoutExpired:
+                self.fail("usage_stream blocked opening a swapped-in FIFO")
+            self.assertEqual(self.tree_state(), before)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["source"]["state"], "unreadable")
+            self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
 
     def tree_state(self):
         return {path.relative_to(self.root).as_posix():
