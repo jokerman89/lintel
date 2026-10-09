@@ -1,11 +1,20 @@
 # Memory — current Lintel working state
 
-Updated 2026-10-04. This is a short continuity view, not task authority or release
+Updated 2026-10-08. This is a short continuity view, not task authority or release
 clearance. Read the selected work's original specification, cards and evidence.
 Durable rules remain in [lessons.md](lessons.md); calibration is in
 [personas.md](personas.md).
 
 ## Active — original V2 findings
+
+**Resumed 2026-10-08:** the operator again requested the complete original
+outcome. Live inspection found the original streams parked, not awaiting
+questions or carrying an unmerged PR; their heads are already main ancestors.
+The coordinator's stale 0.13.3 checkout was advanced normally to current main
+`99d47150` on an owned continuation branch. Old worktrees and evidence remain.
+The 45 prior remaining clauses are under original-ID reconciliation and
+dependency-ordered planning; they are not one blanket blocked portfolio.
+No new finding closure or source acceptance is claimed by this recovery note.
 
 **Status:** the original 84 findings remain a separately tracked programme.
 The latest compatible source continuation landed on **main** as **0.13.9** at

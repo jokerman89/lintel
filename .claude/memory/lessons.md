@@ -696,6 +696,20 @@ work. Neither a green release nor an unrelated refusal blocks ready corrections.
 Before stopping, enumerate every remaining finding with its specific reason and
 next action instead of placing unrelated work under one "portfolio" label.
 
+**Amended 2026-10-08 (parked streams and stale coordinator source):** The operator
+again requested completion after the streams had been parked. Their accepted
+commits were already on main, but the coordinator's own checkout still loaded
+0.13.3 workflows while main was 0.13.9. The remaining 45 clauses had no active
+execution assignment, even though the previous delivery was correctly verified.
+
+Before resuming, reconcile live session gates, exact branch ancestry, uncommitted
+artifacts and the coordinator's loaded source with current main. Preserve old
+worktrees and evidence; update only the explicitly owned clean checkout. Give
+every original unresolved clause an executable next action or a precise remaining
+decision, observation or host boundary. A parked owner or a recommendation not
+yet elaborated into a card is not itself a blocker. Do not stop the whole outcome
+at a successful sub-release or leave stale task labels as the next session's truth.
+
 ## L-030 — Adding a client adapter must preserve Universal product identity
 
 **Date:** 2026-09-20

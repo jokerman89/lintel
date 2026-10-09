@@ -3,7 +3,8 @@
 **Status:** APPROVED for concrete corrections compatible with the constraints below.
 Architectural alternatives and experiments remain unapproved until specifically resolved.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
-with working repository changes, not another report or a selected-subset closeout.
+with working repository changes, renewed on 2026-10-08, not another report or a
+selected-subset closeout.
 **Plan:** [plan.md](plan.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
@@ -63,3 +64,19 @@ Use a fresh, explicit context for this owned target and its bundled neutral pack
 No private pack, customer data, live infrastructure or company policy is selected.
 The actual profile reference and policy result are recorded at runtime before
 BUILD; absent or drifted required policy is not a neutral success.
+
+## Compatible owner consolidation
+
+P11's [preservation map](plan.md#single-owner-continuation-2026-10-08) is the
+explicit scoped decision for B-03/B-04/B-05/B-06/B-10/C-04. Retain all existing
+providers, methods, flags, data and permission boundaries while replacing the
+nine redundant public fronts with their already-established owners under
+ADR-0034. Complete native resource closure and caller migration are acceptance,
+not follow-up work. The original 84 requirements and earlier accepted clauses
+remain unchanged.
+
+This authorizes no role/domain capability removal, default-pack change, phase
+change, learning activation or revision of ADR-0026. Current inventory and
+actual helper/refusal tests establish this source consolidation; they cannot
+establish comparative model benefit, live host enforcement or an unperformed
+experiment. P11 is a ready batch, not a new endpoint for the original task.

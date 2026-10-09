@@ -1,14 +1,14 @@
 # Plan: complete the original V2 findings
 
-**Status:** APPROVED for the three-clause continuation's scope under existing
-operator authority. The previously delivered scope and its approval remain
+**Status:** APPROVED for the compatible source continuation's scope under the
+operator's renewed 2026-10-08 completion instruction. The previously delivered scope and its approval remain
 historical facts. BUILD still requires the current independent plan-review gate;
 this approval is not a claim that review or implementation has passed.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
 **Execution:** coordinator-owned, dependency-ordered packages; no automatic swarm.
-**Continuation baseline:** `19fd4dccc44c1d7de37f5e89afca7e3c69361435` (0.13.8).
+**Continuation baseline:** `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
 obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
@@ -16,12 +16,15 @@ Checked boxes cover these bounded clauses, not all clauses of each original
 finding. The original programme remains open; see
 [verified delivery](#verified-delivery-2026-10-04).
 
-The remaining inventory was not treated as a blanket blocker. Original
+In the previous continuation, original
 `lane-A-07`, `lane-B-09` and `lane-B-11` were completed through P10 and landed
 with P9's verified 0.13.9 source delivery. B-09/B-11 moved from P3 into P10
 without changing IDs or rewriting the prior P3 review. The current map retains
-56 original task IDs across ten packages; their checkboxes describe the
-elaborated scope, not completion of all 84 findings. See the
+56 task IDs across ten packages; their completed checkboxes described that
+elaborated scope, not completion of all 84 findings. The new continuation
+elaborates original B-03, reopens the outstanding public-front clauses of
+B-04/B-05/B-06/B-10/C-04, and reopens integration: 57 IDs in eleven packages.
+Previously accepted source clauses and review records remain history. See the
 [current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
 ## Outcome and signals
@@ -64,14 +67,15 @@ elapsed estimates or dropping the original finding IDs.
 |---|---|---|---|---|---|
 | P1 | Artifact input/output and inspection safety | lane-d-10, lane-d-04, lane-d-05, lane-d-06, lane-d-12 | Coordinator | none | Original source/fixture and numerical contrast criteria |
 | P2 | Evidence-correct agent methods and callers | lane-E-04, lane-E-08, lane-E-09, lane-E-11, lane-E-13, F-04, F-05 | Coordinator | none | Actual role/caller and preservation checks |
-| P3 | Consistent coordination methods | lane-A-01, lane-A-02, lane-B-06, lane-B-08, lane-B-12, C-02, C-07, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
+| P3 | Consistent coordination methods | lane-A-01, lane-A-02, lane-B-08, lane-B-12, C-02, C-07, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
 | P4 | Shared document/design fidelity | lane-d-03, lane-d-07, lane-d-08, lane-d-09, lane-d-11, lane-E-14, F-02 | Coordinator | P1 | Real checker/emitter negatives and source preservation |
-| P5 | Shared discovery/lifecycle observations | lane-B-04, lane-B-05, lane-B-07, lane-B-10, C-04, C-06 | Coordinator | P3 | Real transport, reader and retained-interface tests |
+| P5 | Shared discovery/lifecycle observations | lane-B-07, C-06 | Coordinator | P3 | Real transport, reader and retained-interface tests |
 | P6 | Preserved role/runtime capabilities | lane-E-01, lane-E-01b, lane-E-02, lane-E-03, lane-E-05, lane-E-06, lane-E-10, lane-E-12, F-06 | Coordinator | P2, P4, P5 | Actual configuration/helper tests and inventory parity |
 | P7 | Original external authority and required controls | lane-A-05, G-01, G-11, ENT-02, ENT-03 | Coordinator | P6 | Real map/profile/evidence refusal and preservation tests |
 | P8 | Conditional core methods and usable hot memory | lane-A-06, lane-d-02, ENT-05, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
 | P10 | Complete original premise and recovery-method handoff | lane-A-07, lane-B-09, lane-B-11 | Coordinator | P3, P8 | Exact method preservation, real snippet regressions and native resource closure |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10 | Current local/hosted verification, independent review and actual delivery |
+| P11 | One public owner for each retained utility method | lane-B-03, lane-B-04, lane-B-05, lane-B-06, lane-B-10, C-04 | Coordinator | P3, P5, P8, P10 | Single-owner discovery, preserved helper behavior, migrated callers and owned update/refusal tests |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11 | Current local/hosted verification, independent review and actual delivery |
 
 ## First ready leaf
 
@@ -98,6 +102,12 @@ The package's final source and quality review remains required.
 
 ## Remaining leaf elaboration
 
+The method-only boundaries in the earlier elaborations below describe the
+0.13.8 implementation and remain applicable outside the exact P11 extension.
+P11 now supplies the preservation/migration decision for nine redundant public
+entries; it does not authorize role retirement, portfolio extraction, new hooks
+or changes to accepted phase/leaf policy.
+
 - [x] lane-B-08 Correct the remaining checkpoint examples against the actual repository-key grammar.
 
 The native pause entry and phantom-hook corrections already exist. The remaining
@@ -106,12 +116,14 @@ as synthetic, and direct readers to the actual reserved path. Preserve every
 checkpoint filename/ownership rule; the helper and current resume behavior do
 not change. Verify the real helper's key and every published example.
 
-- [x] lane-B-10 Use the shared usage/audit reader with honest manual-report and coverage boundaries.
+- [ ] lane-B-10 Finish the shared usage/audit ownership by migrating the redundant public front.
 
 Coordinator owns this bounded residual: retain the manual writer and report
 flags, route reads through the existing audit owner, and remove stale
 single-log/task-authority claims. Verify `UsageReportContracts` including
 actual event-reader preservation and the source-owner guard.
+The source-method clause was delivered in 0.13.8. P11 below owns the remaining
+entry migration; reopening this ID does not erase that evidence.
 
 - [x] lane-d-04 Replace nonexistent generation share gates with actual named controls.
 - [x] lane-d-05 Require explicit owned outputs instead of personal-home or current-directory fallbacks.
@@ -198,7 +210,7 @@ still open, never as a reason to omit these compatible corrections.
 
 - [x] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
 - [x] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
-- [x] lane-B-06 Describe built-in handoff checks and fixed accounting honestly.
+- [ ] lane-B-06 Keep the actual handoff controls as an internal method rather than a redundant public skill.
 - [x] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
 - [x] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
 - [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
@@ -307,10 +319,10 @@ review/format/caller contracts and source-notice checks. Preserve preceding
 package fixes and document every intentional overlapping file. Report exact
 resource closures for central generation; independent review remains separate.
 
-- [x] lane-B-04 Consolidate metadata-first discovery without invented routing success.
-- [x] lane-B-05 Give role lifecycle one method owner while preserving existing entrypoints.
+- [ ] lane-B-04 Complete catalog-owned discovery by migrating the redundant routing entrypoints.
+- [ ] lane-B-05 Expose create, update, list and activation through the single role owner.
 - [x] lane-B-07 Provide a concrete bounded single-hop transport for the existing URL policy.
-- [x] C-04 Replace maintenance's duplicate or unsupported methods with actual owner routes.
+- [ ] C-04 Finish maintenance consolidation by migrating its redundant public front.
 - [x] C-06 Centralize profile/audit/doctor procedures without changing mutation authority.
 
 **Discovery/lifecycle owner:** one sequential delegate; canonical discovery,
@@ -482,9 +494,103 @@ do not label an entire finding fixed because one sentence or one branch changed.
 Task counts and package coverage are checked against the complete original
 inventory, not this first-leaf excerpt.
 
+## Single-owner continuation 2026-10-08
+
+The renewed original-outcome request authorizes completion of compatible
+consolidations, not just another method-only patch. ADR-0034 already establishes
+capability-preserving consolidation. Choose the existing owner and remove its
+redundant public wrapper only after all actual behavior, arguments and callers
+are accounted for. This is the missing implementation decision, not a new
+engine, mandatory alias layer or removal quota.
+
+- [ ] lane-B-03 Finish context-budget ownership of advice and handoff sizing.
+
+**P11 owner and order:** coordinator, sequentially B-03, B-04, B-05, B-06,
+B-10, C-04. P3/P5's accepted method bodies are the preimages, not evidence of
+this further change. Prior checkbox reopenings retain their original IDs.
+
+| Original ID | Former entries | Single owner and required preservation |
+|---|---|---|
+| lane-B-03 | `perf-mode`, `handoff-size-check` | `context-budget --advice` and `--handoff`; preserve the existing executable route, numeric advice flags, mapped/legacy plan selection, observation provenance, advisory unknowns and the caller's skip flags. |
+| lane-B-04 | `orientator`, `skill-router` | `catalog` and its existing intent reference. Preserve metadata-first narrowing, explicit workflow choices and actual native discovery. SENSE still directly owns the unchanged routing library, high-risk confirmation, verified profile and decision audit. |
+| lane-B-05 | `role-new`, `roles-list` | `role --create`, `--update [id]` and `--list [--include-private]`, alongside unchanged activation/off/rotation/frame/deep-dive/audience actions. Preserve the complete lifecycle reference, private metadata/body consent, reviewed digests, conflict-safe publication and no implicit activation/sync. |
+| lane-B-06 | `brief-forge` | Internal `skills/cycle/references/handoff.md` using the unchanged `forge_handoff` helper. Preserve all five kinds, structured inputs, actual schema/evaluator/accounting/audit gates, exit 3 and caller-owned dispatch. No reduced recipe or documentary semantic-score claim. |
+| lane-B-10 | `usage-log` | Audit-owned `references/usage.md` and the existing audit reader/writer. Audit remains read-only by default; `--usage` selects the former report flags. Explicitly requested manual recording uses the existing producer method, never automatic telemetry or a second writer/schema. |
+| C-04 | `maintenance` | Existing context-budget advice/selected-input estimates, doctor path inspection and audit usage views. Migrate the four former mode intentions and flags in one documented mapping; no compaction, watcher, token predictor, cleanup or healthy-empty claim. |
+
+**Edit boundary:** these nine canonical entry files, the existing receiving
+skills/references and direct callers; relevant catalog metadata, selection and
+adapter resource closure; public migration/concept documentation; focused
+source/helper/installed tests. Move complete procedures with corrected relative
+links rather than silently trimming safeguards. All source generators/reducers
+remain coordinator-owned. Never edit generated wrappers, catalogs or wiki by
+hand. Preserve the existing helper APIs, audit categories, saved records and
+private profile/role stores.
+
+**Callable versus historical names:** current callers move to the receiving
+owner or required internal reference. Former names are migration/history data,
+not promised executable aliases. Preserve old source-pinned reviews and records;
+if the current-surface scanner reports a historical reference, bind the exact
+unchanged historical field/path/count instead of rewriting a verdict or
+exempting an entire directory. Retained library/category names are not obsolete
+commands. Check retired entries by actual catalog/native inventory, not a ban
+on those concepts in prose or an arbitrary skill-count target.
+
+**Observable acceptance per original ID:**
+
+- Budget ownership (B-03): actual catalog discovery offers one budget owner; its existing argument
+  forwarding, malformed/missing selection refusals and unknown observations
+  still behave identically. No old wrapper is needed by PLAN/CAPTURE.
+- Discovery ownership (B-04): catalog and welcome consume the existing intent method; SENSE's direct
+  mechanical route and high-risk branch remain byte-preserved. Neither removed
+  public name is needed for a caller or presented as a live escalation.
+- Role ownership (B-05): the role owner's action table and required lifecycle support every
+  create/list/update/activate action. Execute the existing real helper fixtures
+  for private consent, duplicate/shadowed metadata, digest conflicts, safe
+  rotation and state preservation. Source instructions are not proof of model
+  adherence or another client's tool enforcement.
+- Handoff ownership (B-06): execute the actual reference-owned handoff recipe under neutral and
+  custom evaluator fixtures, retaining forbidden/malformed input, failed
+  evaluator, missing pointer, budget and audit failure negatives. Exported
+  envelopes and helper signatures stay unchanged; no envelope implies dispatch.
+- Usage ownership (B-10): execute actual audit-reader fixtures over owned current/legacy/empty/
+  malformed logs, retain report flags and manual writer shape, and prove the
+  report path writes no log/state. Missing records remain unobserved, not disuse.
+- Maintenance intentions (C-04): every former intention has an explicit current owner with its supported
+  arguments and error/result distinctions. Owner execution uses the same
+  B-03/B-10/doctor fixtures, without a second parser or unsupported helper flag.
+
+**Verification:** begin with discriminating pre-change failures for the
+nine redundant catalog/native entries and missing receiving actions. Extend the
+existing discovery/lifecycle, coordination, context-safety, Brief Forge,
+observation and native-route suites instead of introducing another tool.
+Then run the actual affected helper suites, command-surface checks, source
+catalog/wiki regeneration checks, and BOTH `copilot-kit` and
+`catalog-installed` integration consumers for changed resource closure.
+Keep the installed-snapshot run free of source/runtime mutations; its log lives
+outside that source. Isolate fixture HOME/TEMP and preflight command resolution.
+Only actual command results count; source guards do not establish live-host or
+model efficacy.
+
+**Plan signals and review:** six original finding IDs in P11 plus reopened P9
+integration; 57 mapped IDs total, eleven packages, no additional writer/swarm.
+Phases remain PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE. Work spans several existing
+owners, so use the existing XL scope; token estimate remains explicitly
+uncalibrated and measured elapsed/usage unknown. The compatibility map and
+observable acceptance require current independent engineering/developer-
+experience plan review before BUILD; rendered design is not applicable.
+No required review, profile or source/QA gate is waived.
+
+**Other original residuals:** separately reconcile the prior 45 clauses with the
+full original findings and adjudications. Independent reconciliation may
+identify more ready implementation or an overstated residual; it does not
+authorize changing an accepted decision or closing a missing experiment by
+assertion. Add the next ready original IDs here rather than ending at P11.
+The exact native-hook/ADR holds remain excluded; continue unrelated work.
+
 ## Integration and review
 
-- [x] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
+- [ ] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
 
 The completed source delivery changed 0.13.7 to 0.13.8. Its explicitly reasoned
 target-local profile rebind preserves generation 1 as history and selects
@@ -514,8 +620,9 @@ tests, then the required complete joined verification. New selected-input change
 invalidate affected evidence. A reviewer must not repair its own findings.
 
 Do not edit the byte-bound shared `todo.md` or any earlier acceptance tree.
-Link current progress from mutable working memory. No deletion of files or
-worktrees is part of proving finding closure.
+Link current progress from mutable working memory. No deletion of evidence or worktrees is part of proving finding closure.
+P11's exact redundant canonical/native entries are the sole source deletions
+authorized by its preservation map.
 
 ## Original method proposals continuation
 

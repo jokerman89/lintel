@@ -2,7 +2,7 @@
 
 **Status:** APPROVED original mapped work; the 0.13.9 three-clause source
 continuation and its integration are delivered. The original programme remains
-open; do not replay a completed source scope.
+open and was explicitly resumed on 2026-10-08; do not replay a completed source scope.
 **Work map:** [work.json](work.json).
 
 ## Context
@@ -45,6 +45,28 @@ Use the actual current target's profile, never another tree's reference. Run
 the shell recipes from LF files through `bin/li-run`, as the native caller
 requires; Windows command-string `-c` transport is not the validated route.
 Further original closure needs its own actual source or outcome evidence.
+
+## Active owner consolidation
+
+Continue from main `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
+The original streams are parked and their retained commits already landed;
+there is no missing PR to merge. The coordinator now uses its explicitly owned
+current checkout rather than the obsolete 0.13.3 source it had loaded.
+
+P11 in the original plan supplies a concrete preservation/migration map for
+six original findings and nine redundant public fronts. It preserves the
+actual context, discovery, role, handoff and audit methods, helpers, data and
+controls. Read that complete acceptance and edit boundary. B-03 is newly
+elaborated; the other five original IDs and V2-INTEGRATION are reopened only
+for their outstanding clauses. There are 57 mapped IDs in eleven packages.
+Prior package reviews remain historical, not acceptance of these new changes.
+
+Obtain the current independent plan gate, implement the ready package and its
+real discriminating tests, then current source/integration acceptance. Keep
+the installed-snapshot verification free of concurrent source/runtime writes.
+Use only this target's fresh profile. Independently reconcile the other
+original residuals and continue the next ready work; do not stop after P11 or
+turn ordinary unplanned work into a blanket architectural blocker.
 
 ## Constraints
 
