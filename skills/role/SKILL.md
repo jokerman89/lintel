@@ -3,7 +3,7 @@ name: role
 layer: foundation
 description: Use to create, update, list, activate or deactivate a working role; swap mid-session, apply its lens to an artifact, or load its full definition on demand. Reach for it when work would benefit from a specific role's perspective; one role is active at a time.
 color: cyan
-tools: Read, Bash, Edit, Grep, Glob
+tools: Read, Write, Bash, Edit, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex, copilot]
 ---

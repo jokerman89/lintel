@@ -101,6 +101,9 @@ class RoleMethods(unittest.TestCase):
         method = linked_method(
             self, "skills/role/SKILL.md", "skills/role/references/lifecycle.md",
         )
+        header = source("skills/role/SKILL.md").split("---", 2)[1]
+        tools = re.search(r"^tools: (.+)$", header, re.MULTILINE).group(1).split(", ")
+        self.assertIn("Write", tools, "the receiving create owner must retain draft-writing capability")
         for clause in (
             "role-list", "role-show", "role-set", "role-off", "role-write",
             "persona-sources", "--include-private", "--allow-private",
@@ -177,7 +180,9 @@ class OwnedLifecycleFixture(unittest.TestCase):
     """Use actual CLI readers/writers, but never create or rebind a profile context."""
 
     def setUp(self):
-        self.base = Path(tempfile.mkdtemp(prefix="discovery-lifecycle-", dir=os.environ["TEMP"])).resolve()
+        temporary = tempfile.TemporaryDirectory(prefix="discovery-lifecycle-", dir=os.environ["TEMP"])
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name).resolve()
         self.repo, self.home = self.base / "repo", self.base / "home"
         self.repo.mkdir()
         self.home.mkdir()
@@ -191,10 +196,8 @@ class OwnedLifecycleFixture(unittest.TestCase):
         ]
 
     def tearDown(self):
-        # Retain the exact small fixture for inspection; no tree deletion is needed.
         self.assertFalse(list(self.base.rglob("current-profile.json")))
         self.assertFalse(list(self.base.rglob("selected.json")))
-        print(f"Retained owned fixture: {self.base}")
 
     def helper(self, *arguments, expected=0):
         result = subprocess.run(
