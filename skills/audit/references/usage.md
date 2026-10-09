@@ -73,6 +73,8 @@ Before aggregating all rows, inspect `processing.complete` and
 The scan stops at 8 MiB or 100,000 physical lines, parses at most 64 KiB per
 line, and retains at most 1,024 skill keys of at most 256 characters. Oversized
 lines are drained in bounded chunks, excluded from aggregates and diagnosed.
+Short lines cut only by the remaining global scan budget are excluded with
+`processing_bound`, not `oversized_line`.
 Unprocessed input and omitted details are explicitly incomplete; totals are
 only for processed usable rows, never a complete total after a bound or error.
 Retain selected source, window, counts and diagnostic/omission information.
@@ -90,11 +92,18 @@ Pass any actual `--since` ISO window and `--kind` filter unchanged. The helper
 caps diagnostics at 50 entries while reporting totals by code and omitted count;
 missing/invalid estimates are diagnosed rather than fabricated. An accepted
 `tokens_est` is a finite decimal string of at most 64 characters, at most 64
-fractional places, a decimal exponent of at most 18 and an absolute value of at
-most 1e18; per-skill totals are summed exactly in a local 96-digit context that
-traps any rounding. Any other value is a usage-only `invalid_tokens_est`
+fractional places, a decimal exponent of at most 18 and a value from 0 through
+1e18 inclusive. Estimates are usage magnitudes, not signed adjustments;
+negative values cannot cancel observed usage. Per-skill totals are summed exactly
+in a local 96-digit context that traps any rounding. Any other value is a usage-only `invalid_tokens_est`
 diagnostic and makes the aggregate incomplete. Source changes
-during a read remain a coverage limitation, not an atomic snapshot.
+during a read remain a coverage limitation, not an atomic snapshot. The opened
+regular-file descriptor must match the pre-open pathname identity; a mismatch
+is refused as unreadable before reading. Descriptor size/time changes or a later
+pathname identity mismatch yield `source_changed` and incomplete aggregates.
+Structured JSON uses ASCII escaping (including lone surrogates), preserving
+parsed values; stdout and stderr are emitted as UTF-8 bytes independent of the
+locale, with unencodable diagnostic characters escaped.
 
 For rows with missing or empty `fields.skill`, exclude the row from all
 per-skill counts and token aggregates; surface its selected source and line as

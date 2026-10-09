@@ -16,6 +16,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import stat
 
 SOURCE = Path(__file__).resolve().parents[3]
 MAX_BYTES = 8 * 1024 * 1024
@@ -46,7 +47,7 @@ def token_estimate(value):
     exponent = token.as_tuple().exponent
     if exponent < -MAX_TOKEN_SCALE or exponent > 18:
         return None
-    if token.copy_abs() > MAX_TOKEN_ABS:
+    if token < 0 or token > MAX_TOKEN_ABS:
         return None
     return token
 
@@ -60,7 +61,7 @@ def emit(text, stream=None):
         stream.flush()
         return
     stream.flush()
-    buffer.write(text.encode("utf-8"))
+    buffer.write(text.encode("utf-8", errors="backslashreplace"))
     buffer.flush()
 
 
@@ -137,12 +138,17 @@ def report(args, events, native_io, summary, display):
             detail_bytes += size
 
     if state == "present":
+        named = path.stat()
         with path.open("rb") as stream:
-            initial = path.stat()
+            initial = os.fstat(stream.fileno())
+            if (not stat.S_ISREG(initial.st_mode)
+                    or (named.st_dev, named.st_ino) != (initial.st_dev, initial.st_ino)):
+                summary["source"]["state"] = "unreadable"
+                raise events.ReaderError(f"cannot read {display}: opened source identity changed")
             while True:
                 remaining = MAX_BYTES - bytes_read
                 if remaining == 0 or counters["lines"] == MAX_LINES:
-                    if stream.tell() < path.stat().st_size:
+                    if stream.tell() < os.fstat(stream.fileno()).st_size:
                         complete = False
                         diagnose(counters["lines"], "processing_bound",
                                  "scan bound reached; remaining input and totals are incomplete")
@@ -153,8 +159,13 @@ def report(args, events, native_io, summary, display):
                 bytes_read += len(raw)
                 counters["lines"] += 1
                 number = counters["lines"]
-                if len(raw) > MAX_LINE or (not raw.endswith(b"\n") and bytes_read == MAX_BYTES
-                                          and stream.tell() < path.stat().st_size):
+                if (len(raw) <= MAX_LINE and not raw.endswith(b"\n") and bytes_read == MAX_BYTES
+                        and stream.tell() < os.fstat(stream.fileno()).st_size):
+                    complete = False
+                    diagnose(number, "processing_bound",
+                             "scan budget truncated this line; remaining input and totals are incomplete")
+                    break
+                if len(raw) > MAX_LINE:
                     diagnose(number, "oversized_line", "line exceeds bounded parser input; not materialized")
                     aggregate_complete = False
                     oversized_detail = True
@@ -164,7 +175,7 @@ def report(args, events, native_io, summary, display):
                         if not raw:
                             break
                         bytes_read += len(raw)
-                    if not raw.endswith(b"\n") and stream.tell() == path.stat().st_size:
+                    if not raw.endswith(b"\n") and stream.tell() == os.fstat(stream.fileno()).st_size:
                         counters["incomplete_tail"] = True
                         diagnose(number, "incomplete_tail", "oversized final line has no terminating newline")
                     continue
@@ -228,8 +239,15 @@ def report(args, events, native_io, summary, display):
                 else:
                     diagnose(number, "missing_tokens_est", "token estimate not observed; totals incomplete", True)
                     aggregate_complete = False
-            final = path.stat()
-            if (initial.st_size, initial.st_mtime_ns) != (final.st_size, final.st_mtime_ns):
+            final = os.fstat(stream.fileno())
+            try:
+                named_final = path.stat()
+                path_changed = ((final.st_dev, final.st_ino)
+                                != (named_final.st_dev, named_final.st_ino))
+            except OSError:
+                path_changed = True
+            if (path_changed or (initial.st_size, initial.st_mtime_ns, initial.st_ctime_ns)
+                    != (final.st_size, final.st_mtime_ns, final.st_ctime_ns)):
                 complete = False
                 diagnose(counters["lines"], "source_changed",
                          "source changed during scan; observations are not an atomic snapshot")
@@ -257,7 +275,7 @@ def report(args, events, native_io, summary, display):
     })
     if meta.get("delegated"):
         summary["delegated"] = meta["delegated"]
-    lines = [json.dumps(summary, indent=2, ensure_ascii=False),
+    lines = [json.dumps(summary, indent=2),
              f"Preview: at most {min(args.limit, MAX_DETAILS)} rows; bounded details, not all input."]
     lines.extend(json.dumps(item) for item in preview)
     emit("\n".join(lines) + "\n")
@@ -294,7 +312,7 @@ def main():
         # Matches li-events summary: a parseable error summary, never a partial row dump.
         summary["status"] = "error"
         summary["error"] = str(error)
-        emit(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        emit(json.dumps(summary, indent=2) + "\n")
         return 2
 
 
