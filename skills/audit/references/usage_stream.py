@@ -51,6 +51,19 @@ def token_estimate(value):
     return token
 
 
+def emit(text, stream=None):
+    """Write UTF-8 bytes like li-events.emit, independent of the locale's text encoding."""
+    stream = stream or sys.stdout
+    buffer = getattr(stream, "buffer", None)
+    if buffer is None:
+        stream.write(text)
+        stream.flush()
+        return
+    stream.flush()
+    buffer.write(text.encode("utf-8"))
+    buffer.flush()
+
+
 def legacy_summary(events, display):
     """The li-events.py summary contract; streaming fields are added beside it, never instead."""
     return {"schema_version": events.SCHEMA_VERSION, "catalog_version": None,
@@ -244,10 +257,10 @@ def report(args, events, native_io, summary, display):
     })
     if meta.get("delegated"):
         summary["delegated"] = meta["delegated"]
-    print(json.dumps(summary, indent=2, ensure_ascii=False))
-    print(f"Preview: at most {min(args.limit, MAX_DETAILS)} rows; bounded details, not all input.")
-    for item in preview:
-        print(json.dumps(item))
+    lines = [json.dumps(summary, indent=2, ensure_ascii=False),
+             f"Preview: at most {min(args.limit, MAX_DETAILS)} rows; bounded details, not all input."]
+    lines.extend(json.dumps(item) for item in preview)
+    emit("\n".join(lines) + "\n")
     return 4 if diagnostic_count else 0 if counters["selected"] else 3
 
 
@@ -263,7 +276,7 @@ def main():
         parser.error("limit must be positive and topn must be between 1 and 50")
     spec = importlib.util.spec_from_file_location("lintel_usage_events", SOURCE / "bin/li-events.py")
     if spec is None or spec.loader is None:
-        print("audit usage: trusted event reader unavailable", file=sys.stderr)
+        emit("audit usage: trusted event reader unavailable\n", sys.stderr)
         return 2
     events = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(events)
@@ -277,11 +290,11 @@ def main():
             # An open/read failure on a stat-able file is unreadable, exactly like li-events.read_source.
             summary["source"]["state"] = "unreadable"
             error = events.ReaderError(f"cannot read {display}: {error}")
-        print(f"audit usage: {error}", file=sys.stderr)
+        emit(f"audit usage: {error}\n", sys.stderr)
         # Matches li-events summary: a parseable error summary, never a partial row dump.
         summary["status"] = "error"
         summary["error"] = str(error)
-        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        emit(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
         return 2
 
 

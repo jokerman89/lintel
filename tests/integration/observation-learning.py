@@ -423,6 +423,49 @@ class UsageReportContracts(Sandbox):
         summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
         self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 3, "tokens_est": "6"}})
 
+    def test_usage_stream_emits_utf8_bytes_under_an_ascii_locale(self):
+        env = dict(self.env, PYTHONIOENCODING="ascii:strict")
+        path = write(self.root / "ascii-locale/usage-skill.jsonl",
+                     event("invocation", skill="\u6280\u80fd", tokens_est="1") + "\n")
+        self.assertTrue(path.read_bytes().isascii())
+        self.assertIn(b"\\u6280\\u80fd", path.read_bytes())
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["diagnostics"]), ("observed", []))
+        self.assertTrue(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"\u6280\u80fd": {"count": 1, "tokens_est": "1"}})
+        preview = self.usage_preview(result)
+        self.assertEqual(preview[0]["fields"]["skill"], "\u6280\u80fd")
+
+        absent = self.root / "\u7f3a\u5931/usage-skill.jsonl"
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", absent], env=env, expect=3)
+        self.assertNotIn("Traceback", result.stderr)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("unobserved", "absent"))
+        self.assertEqual(summary["source"]["path"], Path(os.path.abspath(absent)).as_posix())
+
+        folder = self.root / "\u76ee\u5f55"
+        folder.mkdir()
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", folder], env=env, expect=2)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertIn("audit usage: cannot read", result.stderr)
+        self.assertIn("\u76ee\u5f55", result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("error", "unreadable"))
+        self.assertEqual(summary["source"]["path"], Path(os.path.abspath(folder)).as_posix())
+        self.assertIn("\u76ee\u5f55", summary["error"])
+        _, legacy = self.summary(folder, expect=2)
+        self.assertEqual(summary, legacy)
+
     def test_injected_open_failure_is_unreadable_like_the_legacy_reader(self):
         path = write(self.root / "compat/open-fails/usage-skill.jsonl",
                      event("invocation", skill="alpha", tokens_est="1") + "\n")
