@@ -55,6 +55,12 @@ search all dated or personal logs implicitly.
 For `usage-skill`, the shared route delegates to the bounded
 [streaming usage method](usage_stream.py). It reuses `li-events.py`'s catalog,
 single-line parser and classifier, never its whole-file materialization.
+Its JSON keeps every `li-events.py summary` key with the same type and
+meaning (`source:{path,state}`, `by_kind`, `evidence`, `verification`,
+`enforcement` and absent/unreadable/invalid-window error summaries) and adds
+`processing`, `usage`, diagnostic counts/codes and the bounded preview.
+Only `diagnostics` detail is capped at 50 entries; `diagnostic_count` and
+`diagnostics_omitted` keep the totals.
 `--limit` caps detailed preview before retention (at most 50 rows and 64 KiB).
 Before aggregating all rows, inspect `processing.complete` and
 `usage.aggregate_complete`; do not request the entire population as a preview.

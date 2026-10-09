@@ -299,6 +299,47 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(len(self.usage_preview(result)), 2)
         self.assertEqual(path.read_bytes(), before)
 
+    def test_streaming_summary_is_a_superset_of_the_legacy_event_summary(self):
+        legacy_keys = ("schema_version", "catalog_version", "source", "status", "records",
+                       "by_kind", "diagnostics", "evidence", "verification", "enforcement")
+        valid = write(self.root / "compat/valid/usage-skill.jsonl", "\n".join([
+            event("invocation", ts="2026-09-20T10:00:00Z", skill="alpha", tokens_est="2"),
+            event("invocation", ts="2026-09-21T10:00:00Z", skill="beta", tokens_est="3"),
+        ]) + "\n")
+        noisy = write(self.root / "compat/noisy/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="2"),
+            "{not-json}",
+            '{"kind":"invocation","kind":"invocation"}',
+            event("invocation", ts="", skill="undated", tokens_est="1"),
+        ]) + "\n")
+        absent = self.root / "compat/absent/usage-skill.jsonl"
+        directory = self.root / "compat/directory/usage-skill.jsonl"
+        directory.mkdir(parents=True)
+        cases = (("valid", valid, (), 0), ("diagnostic", noisy, ("--since", "2026-01-01"), 4),
+                 ("absent", absent, (), 3), ("unreadable", directory, (), 2),
+                 ("invalid-window", valid, ("--since", "yesterday"), 2))
+        for name, path, extra, code in cases:
+            with self.subTest(name=name):
+                before = self.tree_state()
+                _, legacy = self.summary(path, "--category", "usage-skill", *extra, expect=code)
+                result = self.run_cmd(
+                    [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                     "--file", path, *extra], expect=code)
+                self.assertEqual(self.tree_state(), before)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                for key in legacy_keys:
+                    self.assertIn(key, summary)
+                    self.assertIs(type(summary[key]), type(legacy[key]), key)
+                    if key != "source":
+                        self.assertEqual(summary[key], legacy[key], key)
+                self.assertEqual(summary["source"]["state"], legacy["source"]["state"])
+                self.assertTrue(same_path(summary["source"]["path"], legacy["source"]["path"]))
+                self.assertTrue(same_path(summary["source"]["path"], path))
+                self.assertEqual(("error" in summary), ("error" in legacy))
+        self.assertFalse(absent.parent.exists())
+        _, legacy = self.summary(valid, "--category", "usage-skill", expect=0)
+        self.assertEqual(legacy["by_kind"]["invocation"]["count"], 2)
+
     def tree_state(self):
         return {path.relative_to(self.root).as_posix():
                 path.read_bytes() if path.is_file() else None
