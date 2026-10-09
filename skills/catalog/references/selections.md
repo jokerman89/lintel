@@ -186,9 +186,9 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json \
 There is no conditional-dependency language. Standalone Word/PDF/XLSX require neither
 the common pipeline nor unrelated formats. A source/resource in closure is not a request
 to read its whole body; choose the actual method/role first. Filters change displayed
-entries, not the closure or policy. For example, `--name=skill-router` can validly return no
-entry inside a frontend projection while ordinary `--json --name=skill-router`
-still resolves `skill:skill-router`.
+entries, not the closure or policy. For example, `--name=catalog` can validly return no
+entry inside a frontend projection while ordinary `--json --name=catalog`
+still resolves `skill:catalog`.
 
 Design resources explicitly enumerate the existing scripts, six contract/token
 references, bundled profile and 35 corpus CSV files. Both actual design adaptation

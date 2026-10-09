@@ -1,29 +1,30 @@
 ---
 name: role
 layer: foundation
-description: Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its lens to an artifact, or load its full definition on demand. Reach for it when work would benefit from a specific role's perspective; one role is active at a time.
+description: Use to create, update, list, activate or deactivate a working role; swap mid-session, apply its lens to an artifact, or load its full definition on demand. Reach for it when work would benefit from a specific role's perspective; one role is active at a time.
 color: cyan
-tools: Read, Bash, Edit, Grep, Glob
+tools: Read, Write, Bash, Edit, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex, copilot]
 ---
 
-The role skill owns the [shared role lifecycle](references/lifecycle.md) used by
-this entry, `role-new` and `roles-list`. Read its selected procedure before acting.
+This is the single public entry point for role lifecycle operations. Read the selected
+procedure in the [shared role lifecycle](references/lifecycle.md) before acting.
 
 ## Actions
 
 | Invocation | Does |
 |---|---|
 | `/li:role <role-id>` | Activate — light load (~500 tokens), sets `role_active` in profile |
+| `/li:role --create` | Create — guided interview and reviewed role-file publication |
+| `/li:role --update [id]` | Update — targeted, sensitivity-aware change guarded by the reviewed digest; defaults to the active role |
+| `/li:role --list [--include-private]` | List — metadata-only inventory; private metadata requires explicit consent |
 | `/li:role --off` | Deactivate — clears overlay, voice tier reverts to mode/profile default |
 | `/li:role --rotate <role-id>` | One validated set; failure retains the previous selection |
 | `/li:role --frame <artifact>` | Apply the active role's outcome-lens to an artifact |
 | `/li:role --deep-dive [role-id]` | Load the FULL role file (~2-3k tokens) on demand |
 | `/li:role --audience [name]` | List or load an explicitly selected audience persona for this conversation without changing role/profile state |
 | `/li:role --clear-audience` | Stop applying the audience overlay to future responses; persisted data and prior conversation remain |
-
-Create or evolve role files with `/li:role-new` (and `/li:role-new --update <id>`); discover them with `/li:roles-list`.
 
 ## Method and authority
 

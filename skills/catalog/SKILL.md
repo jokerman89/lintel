@@ -27,7 +27,7 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=agent --query="$keyword"
-python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=skill-router
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=catalog
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=skill --category=engineering
@@ -73,10 +73,11 @@ be read through a permitted file tool. Neither fallback activates a workflow.
 ## Match intent
 
 For free-text intent, follow [intent narrowing](references/intent.md), the sole owner
-of the metadata-first shortlist and selected-body checks. `skill-router`, `orientator`
-and `welcome` retain their public names and delegate here. SENSE retains its actual
-mechanical navigation/high-risk confirmation, not a competing discovery method.
-No ranking engine, model selection policy or measured success rate is introduced.
+of the metadata-first shortlist and selected-body checks. Welcome uses this same
+discovery method; SENSE retains its separate mechanical navigation and pack-configured
+high-risk confirmation. Native host discovery remains distinct from this source
+metadata method. No ranking engine, model selection policy or measured success rate
+is introduced.
 
 ## Select a capability without changing installation
 
