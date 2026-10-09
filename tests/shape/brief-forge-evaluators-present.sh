@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # tests/shape/brief-forge-evaluators-present.sh
-# Asserts (v4.0 Phase 3): brief-forge skill exists + lib exists + 5 evaluators
-# declared + evaluators framework dispatches via run_evaluator.
+# Asserts the internal Brief Forge method and its unchanged evaluator boundary.
 # tag: shape v4.0
 
 set -uo pipefail
@@ -13,11 +12,16 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/shape/brief-forge-evaluators-present.sh"
 echo "==============================================="
 
-# Skill
-if [ -f "$REPO_ROOT/skills/brief-forge/SKILL.md" ]; then
-  pass "skills/brief-forge/SKILL.md present"
+# Public skill retired; internal method retained.
+if [ ! -e "$REPO_ROOT/skills/brief-forge/SKILL.md" ]; then
+  pass "public brief-forge skill retired"
 else
-  fail "skills/brief-forge/SKILL.md MISSING"
+  fail "public brief-forge skill still present"
+fi
+if [ -f "$REPO_ROOT/skills/brief-forge/references/handoff.md" ]; then
+  pass "internal handoff method present"
+else
+  fail "internal handoff method MISSING"
 fi
 
 # Libraries
@@ -55,12 +59,26 @@ for fn in forge_envelope_head forge_envelope_body forge_envelope_tail generate_e
   fi
 done
 
-# 5 hand-off events documented in skill
+# Five hand-off kinds documented in the internal method.
 for event in subagent_spawn phase_transition workflow_handoff cold_executor operator_input; do
-  if grep -q "$event" "$REPO_ROOT/skills/brief-forge/SKILL.md" 2>/dev/null; then
-    pass "skill documents hand-off event '$event'"
+  if grep -q "\`$event\`" "$REPO_ROOT/skills/brief-forge/references/handoff.md" 2>/dev/null; then
+    pass "internal method documents hand-off kind '$event'"
   else
-    fail "skill missing hand-off event '$event'"
+    fail "internal method missing hand-off kind '$event'"
+  fi
+done
+
+for claim in \
+  "All built-in evaluators are pass/fail checks with fixed accounting values" \
+  "score protocol remains for explicitly trusted" \
+  "trusted custom evaluators yield a minimum advisory score of 40–59" \
+  "The deny-list is not a prompt-injection" \
+  "caller must read each original acceptance item" \
+  "The caller still performs dispatch"; do
+  if grep -qF "$claim" "$REPO_ROOT/skills/brief-forge/references/handoff.md"; then
+    pass "internal method states: $claim"
+  else
+    fail "internal method missing: $claim"
   fi
 done
 
