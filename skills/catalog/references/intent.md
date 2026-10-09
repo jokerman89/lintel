@@ -1,9 +1,9 @@
 # Intent narrowing
 
-Catalog owns this metadata-first method. `skill-router`, `orientator`, `welcome`
-and SENSE's discovery follow-up delegate here; none owns a second selection recipe.
-This produces a shortlist, not execution, a model policy or a replacement for native
-host discovery. SENSE separately owns its existing pack-configured high-risk control.
+Catalog owns this metadata-first method. Welcome uses it for discovery; no separate
+public routing method owns a competing shortlist. This produces a shortlist, not
+execution, a model policy or a replacement for native host discovery. SENSE separately
+owns its existing pack-configured high-risk control and mechanical navigation route.
 
 ## When to use
 

@@ -3,7 +3,7 @@
 # implements: ADR-0029, ADR-0034
 # intent: .claude/plans/v2-findings/spec.md
 # constraints: local source/helper checks; no network, model, profile binding or publication
-# last_intent_review: 2026-10-03
+# last_intent_review: 2026-10-09
 """Regressions for the retained discovery and lifecycle front doors."""
 import hashlib
 import json
@@ -37,7 +37,7 @@ def linked_method(case, caller, owner):
 class DiscoveryMethods(unittest.TestCase):
     def test_catalog_is_the_single_intent_method_owner(self):
         owner = "skills/catalog/references/intent.md"
-        for name in ("catalog", "skill-router", "orientator", "welcome", "sense"):
+        for name in ("catalog", "welcome", "sense"):
             with self.subTest(name=name):
                 method = linked_method(self, f"skills/{name}/SKILL.md", owner)
                 for required in ("at most three", "literal", "source_root", "unavailable",
@@ -45,23 +45,22 @@ class DiscoveryMethods(unittest.TestCase):
                     self.assertIn(required, method)
                 self.assertNotIn("- For agent selection", method)
                 self.assertIn("shortlist agent metadata", method)
-        for name in ("skill-router", "orientator", "welcome"):
-            text = source(f"skills/{name}/SKILL.md")
-            self.assertNotIn('li-catalog.py" --json --query', text)
-            self.assertNotIn("Shortlist at most three skills", text)
+        for retired in ("skill-router", "orientator"):
+            with self.subTest(retired=retired):
+                self.assertFalse((ROOT / f"skills/{retired}/SKILL.md").exists())
+                self.assertNotIn(retired, source(owner))
 
     def test_orientation_keeps_sense_control_not_an_escalation_claim(self):
-        orientation = source("skills/orientator/SKILL.md")
-        self.assertNotIn("80%", orientation)
-        self.assertNotIn("invoke_llm_orientation", orientation)
-        self.assertNotIn("escalated=", orientation)
-        self.assertIn("SENSE", orientation)
-        self.assertIn("high-risk", orientation)
-        self.assertIn("host", orientation)
+        self.assertFalse((ROOT / "skills/orientator/SKILL.md").exists())
         sense = source("skills/sense/SKILL.md")
         for operation in ("verify_profile_context", "classify_intent", "assess_risk",
                           "audit_log orientator-decisions", "high-risk always confirms"):
             self.assertIn(operation, sense)
+        self.assertIn(
+            'source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/orientator-routing.sh"',
+            sense,
+        )
+        self.assertIn("does not invoke the public `orientator` wrapper", sense)
 
     def query(self, *arguments, expected=0):
         catalog = ROOT / "skills/CATALOG.md"
@@ -89,28 +88,25 @@ class DiscoveryMethods(unittest.TestCase):
 
 
 class RoleMethods(unittest.TestCase):
-    def test_all_role_front_doors_share_one_complete_lifecycle(self):
-        for name in ("role", "role-new", "roles-list"):
-            with self.subTest(name=name):
-                method = linked_method(
-                    self, f"skills/{name}/SKILL.md", "skills/role/references/lifecycle.md",
-                )
-                for clause in (
-                    "role-list", "role-show", "role-set", "role-off", "role-write",
-                    "persona-sources", "--include-private", "--allow-private",
-                    "--expected-sha256", "--audience", "--frame", "--deep-dive",
-                    "COLD KNOWLEDGE", "DECISION CRITERIA", "OUTCOME LENS",
-                    "SENSITIVE CONTEXT", "previous preference", "malformed",
-                    "synchronization", "current conversation",
-                ):
-                    self.assertIn(clause, method)
-                self.assertNotIn("```bash", source(f"skills/{name}/SKILL.md"),
-                                 "CLI procedure must live at the shared owner")
-
-    def test_original_names_and_flag_sets_are_retained(self):
-        self.assertIn("name: role-new\n", source("skills/role-new/SKILL.md"))
-        self.assertIn("--update", source("skills/role-new/SKILL.md"))
-        self.assertIn("name: roles-list\n", source("skills/roles-list/SKILL.md"))
+    def test_role_is_the_single_complete_lifecycle_front_door(self):
+        method = linked_method(
+            self, "skills/role/SKILL.md", "skills/role/references/lifecycle.md",
+        )
+        for clause in (
+            "role-list", "role-show", "role-set", "role-off", "role-write",
+            "persona-sources", "--include-private", "--allow-private",
+            "--expected-sha256", "--create", "--update [id]", "--list [--include-private]",
+            "--audience", "--frame", "--deep-dive", "COLD KNOWLEDGE",
+            "DECISION CRITERIA", "OUTCOME LENS", "SENSITIVE CONTEXT",
+            "previous preference", "malformed", "synchronization",
+            "current conversation", "private metadata",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, method + source("skills/role/SKILL.md"))
+        self.assertNotIn("```bash", source("skills/role/SKILL.md"),
+                         "CLI procedure must live at the shared owner")
+        self.assertFalse((ROOT / "skills/role-new/SKILL.md").exists())
+        self.assertFalse((ROOT / "skills/roles-list/SKILL.md").exists())
         for flag in ("--off", "--rotate", "--frame", "--deep-dive", "--audience",
                      "--clear-audience"):
             self.assertIn(flag, source("skills/role/SKILL.md"))
