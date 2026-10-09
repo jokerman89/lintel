@@ -40,9 +40,14 @@ class DiscoveryMethods(unittest.TestCase):
         for name in ("catalog", "welcome", "sense"):
             with self.subTest(name=name):
                 method = linked_method(self, f"skills/{name}/SKILL.md", owner)
+                normalized = " ".join(method.split())
                 for required in ("at most three", "literal", "source_root", "unavailable",
                                  "not a new routing engine", "customer data"):
                     self.assertIn(required, method)
+                self.assertIn("An explicit workflow is already selected", normalized)
+                self.assertIn("request supplies `--mode` or `--from`", normalized)
+                self.assertIn("retain the selected work map and current phase", normalized)
+                self.assertIn("Do not infer a new task from the tail of a state file", normalized)
                 self.assertNotIn("- For agent selection", method)
                 self.assertIn("shortlist agent metadata", method)
         for retired in ("skill-router", "orientator"):
@@ -78,6 +83,10 @@ class DiscoveryMethods(unittest.TestCase):
         self.assertFalse(result["executed"])
         self.assertTrue(result["entries"])
         self.assertTrue(all(entry["maturity"] == "unknown" for entry in result["entries"]))
+        for operation in ("create", "update", "list", "activate", "deactivate"):
+            with self.subTest(operation=operation):
+                matches = self.query("--kind=skill", "--query=" + operation)["entries"]
+                self.assertIn("skill:role", [entry["id"] for entry in matches])
         for literal in ("$(touch forbidden-marker)", "[$.*]", "--check"):
             with self.subTest(literal=literal):
                 self.assertEqual(self.query("--query=" + literal)["entries"], [])
