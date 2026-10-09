@@ -78,8 +78,13 @@ class ExternalAuthorityMethods(unittest.TestCase):
 
     def test_old_method_pins_and_import_provenance_remain_dated(self):
         registry = yaml.safe_load(text("install/upstream-sources.yaml"))
+        self.assertEqual(registry["version"], 1)
         self.assertEqual(registry["last_full_review"], date(2026, 5, 26))
         comparison = registry["method_comparisons"]
+        self.assertEqual(comparison["scope"],
+                         "Selected read-only comparison, not import provenance or an executed benchmark.")
+        self.assertEqual(comparison["evidence"],
+                         ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md")
         self.assertEqual(comparison["checked"], date(2026, 9, 20))
         self.assertEqual({key: comparison[key] for key in ("gstack", "superpowers", "gsd-core", "ecc")}, {
             "gstack": "a6b3a57512ca6d5c6aa5b68f74f736195021f96e",
@@ -93,6 +98,78 @@ class ExternalAuthorityMethods(unittest.TestCase):
         self.assertNotIn("skills/design-dna/scripts/validate_design.py", corpus["local_paths"])
         self.assertTrue((ROOT / corpus["notice"]).is_file())
         self.assertTrue((ROOT / corpus["attribution"]).is_file())
+
+    def test_native_plan_addendum_has_exact_original_pins_and_record_dates(self):
+        document = text("install/upstream-sources.yaml")
+        registry = yaml.safe_load(document)
+        findings = ["G-02", "G-03", "G-06", "G-07", "G-11"]
+        entries = [entry for entry in registry["method_comparison_addenda"]
+                   if entry["source_findings"] == findings]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0], {
+            "reviewed": date(2026, 9, 28),
+            "recorded": date(2026, 10, 9),
+            "review_summary": ".claude/engineering/audits/2026-09-28-skill-review-v2-summary.md",
+            "source_findings": findings,
+            "codex": {
+                "revision": "1b1835f751ebdc0cfc50b3fe55d4571dbb294563",
+                "plan_template": "https://github.com/openai/codex/blob/"
+                                 "1b1835f751ebdc0cfc50b3fe55d4571dbb294563/"
+                                 "codex-rs/collaboration-mode-templates/templates/plan.md#L41-L94",
+            },
+            "superpowers": {
+                "revision": "8ca22dba9a94f28898bbce59f2537ff4d87c747d",
+                "writing_plans": "https://github.com/obra/superpowers/blob/"
+                                 "8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/writing-plans/SKILL.md#L10",
+                "depth_selection": "https://github.com/obra/superpowers/blob/"
+                                   "8ca22dba9a94f28898bbce59f2537ff4d87c747d/"
+                                   "skills/brainstorming/SKILL.md#L58-L108",
+            },
+            "gstack": {
+                "revision": "01593aa67c94780528e8f5121e47362502410ced",
+                "preferences": "https://github.com/garrytan/gstack/blob/"
+                               "01593aa67c94780528e8f5121e47362502410ced/plan-tune/SKILL.md.tmpl#L340-L357",
+                "safety": "https://github.com/garrytan/gstack/blob/"
+                          "01593aa67c94780528e8f5121e47362502410ced/plan-tune/SKILL.md.tmpl#L645-L653",
+            },
+        })
+        self.assertIn("retained Skill review V2 review date", document)
+        self.assertIn("repository record date", document)
+        self.assertIn("Neither is an upstream verification or commit date", document)
+        self.assertIn("no fresh study, import update, current inventory or native/model execution", document)
+
+    def test_previous_comparison_addendum_is_preserved(self):
+        registry = yaml.safe_load(text("install/upstream-sources.yaml"))
+        entries = [entry for entry in registry["method_comparison_addenda"]
+                   if entry["source_findings"] == ["G-01", "G-11"]]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0], {
+            "reviewed": date(2026, 9, 28),
+            "recorded": date(2026, 10, 3),
+            "review_summary": ".claude/engineering/audits/2026-09-28-skill-review-v2-summary.md",
+            "source_findings": ["G-01", "G-11"],
+            "spec-kit": {
+                "revision": "c00dc0551583428a10a94443c58c6a41e5e0138c",
+                "commands": "https://github.com/github/spec-kit/tree/"
+                            "c00dc0551583428a10a94443c58c6a41e5e0138c/templates/commands",
+                "workflows": "https://github.com/github/spec-kit/blob/"
+                             "c00dc0551583428a10a94443c58c6a41e5e0138c/docs/reference/workflows.md",
+                "extensions": "https://github.com/github/spec-kit/tree/"
+                              "c00dc0551583428a10a94443c58c6a41e5e0138c/extensions",
+            },
+            "gsd-redirect": {
+                "revision": "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815",
+                "reference": "https://github.com/gsd-build/get-shit-done/blob/"
+                             "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815/README.md",
+                "repository_reference": "https://github.com/open-gsd/gsd-core",
+            },
+            "ecc": {
+                "revision": "d3b8a3e908904e242ed2dbe66af62cca71131419",
+                "reference": "https://github.com/affaan-m/ECC/tree/"
+                             "d3b8a3e908904e242ed2dbe66af62cca71131419/skills",
+                "note": "Dated listing pointer only; no current inventory count or import revision is asserted.",
+            },
+        })
 
     def test_current_facing_references_do_not_invent_new_counts_or_imports(self):
         registry = yaml.safe_load(text("install/upstream-sources.yaml"))
