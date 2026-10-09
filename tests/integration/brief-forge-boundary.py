@@ -67,6 +67,10 @@ class BriefForgeBoundaryTests(unittest.TestCase):
         if internal_method:
             method = (ROOT / "skills/brief-forge/references/handoff.md").read_text(encoding="utf-8")
             script = method.split("```bash\n", 1)[1].split("\n```", 1)[0]
+            if extra:
+                source = 'source "$source_root/lib/brief-forge.sh" || exit 1'
+                self.assertEqual(script.count(source), 1)
+                script = script.replace(source, source + "\n" + extra, 1)
         return subprocess.run(
             [BASH, "-c", script, "brief-forge-test", kind, "swarm", "FixtureWorker", "brief", self.content.as_posix()],
             cwd=self.root, env=self.env, capture_output=True, text=True, check=False, timeout=120,
@@ -190,12 +194,18 @@ class BriefForgeBoundaryTests(unittest.TestCase):
         for score, status, expected in ((39, "PASS", 1), (100, "FAIL", 1), (40, "PASS", 0)):
             with self.subTest(score=score, status=status):
                 payload = json.dumps({"score": score, "budget_used": 1, "notes": "synthetic advice", "status": status})
-                result = self.forge(extra="evaluator_fixture() { printf '%s' '" + payload + "'; }")
+                result = self.forge(
+                    extra="evaluator_fixture() { printf '%s' '" + payload + "'; }",
+                    internal_method=True,
+                )
                 self.assertEqual(result.returncode, expected, result.stderr)
+                self.assertNotIn("unknown evaluator", result.stderr)
                 if expected:
                     self.assertEqual(result.stdout, "")
                 else:
-                    self.assertEqual(json.loads(result.stdout)["tail"]["completeness_score"], 40)
+                    tail = json.loads(result.stdout)["tail"]
+                    self.assertEqual(tail["completeness_score"], 40)
+                    self.assertIn("fixture", tail["evaluators_run"])
 
     def test_yaml_malformed_types_aliases_and_tags_fail_without_echo(self) -> None:
         marker = "YAML-FORBIDDEN-FIXTURE"
