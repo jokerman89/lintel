@@ -51,3 +51,29 @@ clearance.
 Version 0.13.8 is the implementation candidate. This record does not assert a
 published release, successful future CI or completion of held/decision-bound
 original recommendations. The native-hook/ADR-drafting refusals are not retried.
+
+## Compatible owner continuation, 2026-10-16
+
+The original P11A/P11B/P11C/P12 preservation map now implements ADR-0034's
+single-owner direction. Its seven original residuals retain their IDs. Nine
+redundant public fronts move to context-budget, catalog, role, audit or the
+complete internal handoff reference. Version 0.14.0 distinguishes this public
+command migration from the earlier method-only patches.
+
+All former arguments and boundaries have explicit migration rows. Shared callers,
+native resource closure, catalogs and source/installed checks change together.
+Existing helper APIs, role inventory, persisted records, profile/QA contracts and
+core phases are unchanged. The route guard admits exact historical observations,
+not callable aliases; byte-bound source and earlier review records remain intact.
+
+The strict runner classifies only canonical opposite-platform unittest reasons as
+N/A, with known executed-test counts. Genuine missing dependencies, all-skipped
+entries and mixed/unknown skip reasons still prevent strict acceptance. POSIX FIFO
+execution must come from POSIX evidence, never a Windows N/A label.
+
+The current continuation recovers original commits and an attributable coordinator
+patch, not a synthetic verification commit's unrelated line-ending changes. Prior
+worktrees, failed/interrupted logs and private reports remain preserved. A managed
+consumer uses its ordinary conflict-safe update; a version-bound profile needs the
+existing explicit rebind. No new dependency, automatic telemetry or live-host
+guarantee is introduced. Current source review and exact-head checks remain required.

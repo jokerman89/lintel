@@ -760,6 +760,53 @@ class ContextSafetyTests(unittest.TestCase):
         self.assertEqual(json.loads(handoff.stdout)["work_map"], "work.json")
         self.assertFalse(json.loads(handoff.stdout)["release_clearance"])
 
+    def test_context_engine_verifier_requires_current_owners_not_retired_fronts(self):
+        source = self.base / "verify source"
+        for relative in ("install/verify.sh", "lib/frontmatter.sh"):
+            destination = source / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(SOURCE / relative, destination)
+        required = {
+            ".claude/engineering/design-archive/CONTEXT-ENGINE.md": "CONTEXT-ENGINE.md missing",
+            "skills/context-budget/SKILL.md": "skill missing: context-budget",
+            "skills/context-warm/SKILL.md": "skill missing: context-warm",
+            "agents/engineering/ContextBudgetAdvisor.md": "agent missing: ContextBudgetAdvisor",
+        }
+        for relative in required:
+            path = source / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"# Synthetic presence fixture\n")
+        home = self.base / "verifier home"
+        home.mkdir()
+        env = dict(os.environ, HOME=str(home), USERPROFILE=str(home),
+                   LINTEL_HOME=str(home / ".lintel"))
+
+        def verify():
+            return subprocess.run([BASH, "--noprofile", "--norc", str(source / "install/verify.sh"),
+                                   "--context-engine"], cwd=self.base, env=env,
+                                  capture_output=True, text=True, encoding="utf-8", timeout=30)
+
+        result = verify()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        skill_files = {path.relative_to(source).as_posix() for path in source.rglob("SKILL.md")}
+        self.assertNotIn("skills/perf-mode/SKILL.md", skill_files)
+        for relative, diagnostic in required.items():
+            path = source / relative
+            original = path.read_bytes()
+            path.unlink()
+            refused = verify()
+            self.assertNotEqual(refused.returncode, 0, relative)
+            self.assertIn(diagnostic, refused.stdout)
+            path.write_bytes(original)
+        for name in ("context-budget", "context-warm"):
+            current = source / "skills" / name / "SKILL.md"
+            legacy = source / "scaffolding/01-foundation/skills" / name / "SKILL.md"
+            legacy.parent.mkdir(parents=True, exist_ok=True)
+            current.rename(legacy)
+        result = verify()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(list(home.iterdir()), [])
+
     def test_markdown_yaml_and_unknown_adr_metadata_remain_visible(self):
         adrs = self.root / "decisions"
         adrs.mkdir()

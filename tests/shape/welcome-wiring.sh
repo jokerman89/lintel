@@ -28,6 +28,17 @@ grep -q 'cli-tiers' "$W"               && pass "reads the cli-tiers single sourc
 grep -q 'cli_tier_field' "$W"          && pass "uses the cli_tier_field lookup (no hardcoded tier)"      || fail "must use cli_tier_field"
 grep -q '/li:cycle --dry-run' "$W"     && pass "demo via /li:cycle --dry-run (no first-run mutation)"    || fail "must use /li:cycle --dry-run"
 
+for consumer in "$W" ".github/skills/li-welcome/SKILL.md"; do
+  [ -f "$consumer" ] || { fail "$consumer missing"; continue; }
+  grep -qF 'catalog/references/intent.md' "$consumer" \
+    && pass "$consumer delegates to catalog intent" || fail "$consumer: catalog intent link missing"
+  if grep -qF 'skill-router' "$consumer"; then
+    fail "$consumer names retired skill-router in current guidance"
+  else
+    pass "$consumer uses current discovery ownership"
+  fi
+done
+
 grep -qiE 'only on claude code|claude-code-only|fires only on claude|claude code mechanism' "$W" \
   && pass "states hooks are Claude-Code-only (honest degradation)" || fail "must state the hooks-Claude-only honesty"
 

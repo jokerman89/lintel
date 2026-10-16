@@ -3,11 +3,13 @@
 # implements: ADR-0028
 # intent: .claude/plans/legacy-cleanup/spec.md
 # constraints: read-only current-tree check; historical records and notices are not routing
-# last_intent_review: 2026-09-25
+# last_intent_review: 2026-10-09
 """Check current workflow identities and literal local references, without executing them."""
 from __future__ import annotations
 
 import argparse
+from bisect import bisect_right
+import ast
 from dataclasses import asdict, dataclass
 from functools import lru_cache
 import importlib.util
@@ -53,6 +55,67 @@ tq-chaos-plan tq-contract-test-design tq-coverage-audit tq-flaky-quarantine
 tq-perf-budget-spec tq-regression-suite tq-test-pyramid-review
 freeze unfreeze benchmark context-tokenwatch
 """.split())
+FORMER_PUBLIC_ENTRIES = frozenset("""
+perf-mode handoff-size-check orientator skill-router role-new roles-list
+brief-forge usage-log maintenance
+""".split())
+FORMER_INTERNAL_PATHS = {
+    "brief-forge": frozenset({"/references/handoff.md"}),
+}
+
+
+def is_retired_identity(name: str) -> bool:
+    identity = name.casefold()
+    return identity in RETIRED_COMMANDS or identity in FORMER_PUBLIC_ENTRIES
+
+
+def negative_test_route_assertion(line: str, start: int, test_code: bool) -> bool:
+    if not test_code:
+        return False
+    for match in re.finditer(r"""\[\s*!\s*-e\s+(?P<operand>["'][^"'\n]+["'])\s*\]""", line):
+        operand = match["operand"][1:-1]
+        if (re.fullmatch(r"\$(?:REPO_ROOT|SOURCE_ROOT)/[\w./-]+", operand)
+                and match.start("operand") < start < match.end("operand")):
+            return True
+    source = line.lstrip()
+    position = len(source[:start - (len(line) - len(source))].encode("utf-8"))
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return False
+
+    def literal_contains(node: ast.AST) -> bool:
+        return (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                and node.col_offset <= position < node.end_col_offset)
+
+    def path_operand(node: ast.AST) -> bool:
+        if isinstance(node, ast.Name):
+            return node.id in {"ROOT", "REPO_ROOT", "SOURCE_ROOT"}
+        if isinstance(node, ast.Constant):
+            return isinstance(node.value, str)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            return path_operand(node.left) and path_operand(node.right)
+        return False
+
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name) and node.func.value.id == "self"
+                and node.args):
+            operand = node.args[0]
+            if node.func.attr == "assertNotIn" and literal_contains(operand):
+                return True
+            if (node.func.attr == "assertFalse" and isinstance(operand, ast.Call)
+                    and not operand.args and not operand.keywords
+                    and isinstance(operand.func, ast.Attribute) and operand.func.attr == "exists"
+                    and path_operand(operand.func.value)
+                    and any(literal_contains(item) for item in ast.walk(operand.func.value))):
+                return True
+        if (isinstance(node, ast.Assert) and isinstance(node.test, ast.Compare)
+                and len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.NotIn)
+                and literal_contains(node.test.left)):
+            return True
+    return False
+
 
 # Exceptions are exact files or typed evidence fields, never archival directories.
 # The CLI reports every applied exception; none is a claim of review clearance.
@@ -64,10 +127,10 @@ SOURCE_EXCEPTIONS = {
     "skills/design-dna/LICENSES/Apache-2.0-anthropic.txt": "Required license for the retained profile adaptation.",
 }
 # Dated internal records that name former workflows as original observations are declared by
-# exact path, rationale and exact observation count in HISTORICAL_REGISTER, optionally bounded by
+# exact path, raw file digest, rationale and exact observation count in HISTORICAL_REGISTER, optionally bounded by
 # one exact starting heading and one exact (excluded) ending heading. Their reference findings are
 # reported as HISTORICAL observations by path and line, never silently dropped; a count mismatch
-# fails, so a new reference cannot hide inside a declared record. Entries are refused outside
+# fails; the raw digest also rejects a same-count replacement or changed framing. Entries are refused outside
 # these record trees, so they cannot hide a current skill, documentation, decision, memory or
 # root-file route.
 HISTORICAL_REGISTER = ".claude/plans/legacy-cleanup/historical-records.json"
@@ -182,6 +245,13 @@ FORMER_HEADERS = frozenset({
 COMPARISON_DIR = "presentations/tech-shots-2026-09-25/comparison"
 COMPARISON_INPUT = "with-lintel/workflow-context.md"
 COMPARISON_REVISION = "275a35447c4ad271e05816ade43ac48f1acec24f"
+FROZEN_SOURCE_MANIFESTS = {
+    "presentations/tech-shots-2026-09-25/verification/cycle-routes-source-manifest.json": {
+        "sha256": "4f3380e7f19841eafeacd14394d0683814f495894813ab1336bc9bdeb3f25f0c",
+        "fields": {"skills/orientator/SKILL.md": 2},
+        "reason": "Exact source pointers in the preserved 2026-09-20 presentation input manifest; not current routes.",
+    },
+}
 
 
 @dataclass(frozen=True, order=True)
@@ -190,6 +260,35 @@ class Finding:
     line: int
     code: str
     message: str
+
+
+def frozen_manifest_observations(path: Path, relative: str, text: str) -> tuple[str, list[dict], str | None]:
+    declaration = FROZEN_SOURCE_MANIFESTS.get(relative)
+    if declaration is None:
+        return text, [], None
+    try:
+        raw = path.read_bytes()
+    except OSError as error:
+        return text, [], f"Cannot read preserved manifest bytes: {type(error).__name__}"
+    if hashlib.sha256(raw).hexdigest() != declaration["sha256"]:
+        return text, [], "Preserved manifest bytes changed; old source pointers are no longer bound."
+    for value, expected_count in declaration["fields"].items():
+        if text.count(value) != expected_count:
+            return text, [], f"Preserved manifest field count changed: {value}"
+    observations = []
+    lines = text.splitlines(keepends=True)
+    for line_number, line in enumerate(lines, 1):
+        for value in declaration["fields"]:
+            count = line.count(value)
+            for _ in range(count):
+                observations.append({
+                    "path": relative, "line": line_number, "field": value,
+                    "category": "frozen source manifest field",
+                    "reason": declaration["reason"], "classification": "HISTORICAL",
+                })
+            line = line.replace(value, " " * len(value))
+        lines[line_number - 1] = line
+    return "".join(lines), observations, None
 
 
 def frontmatter(text: str) -> list[str]:
@@ -852,7 +951,7 @@ def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
 
 def has_reference(text: str) -> bool:
     text = re.sub(r"\\+", "/", text)
-    return text.strip(" \t\r\n'\"").casefold() in RETIRED_COMMANDS or any(pattern.search(text) for pattern in (
+    return is_retired_identity(text.strip(" \t\r\n'\"")) or any(pattern.search(text) for pattern in (
         EXPLICIT_COMMAND, NATIVE_COMMAND, BARE_COMMAND, NAMED_SKILL, SKILL_FIELD,
         DISTINCTIVE_COMMAND, SKILL_PATH, LINK,
     ))
@@ -1491,16 +1590,18 @@ def historical_records(root: Path) -> tuple[dict[str, tuple[int, int, str, int]]
         errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register", message))
 
     for index, entry in enumerate(entries, 1):
-        if not isinstance(entry, dict) or set(entry) - {"path", "reason", "count", "from_heading", "to_heading"}:
+        if not isinstance(entry, dict) or set(entry) - {"path", "sha256", "reason", "count", "from_heading", "to_heading"}:
             refuse(f"Record {index} has unknown or malformed fields.")
             continue
         relative, reason, count = entry.get("path"), entry.get("reason"), entry.get("count")
+        digest = entry.get("sha256")
         headings = [entry.get(key) for key in ("from_heading", "to_heading")]
         if (not isinstance(relative, str) or not isinstance(reason, str) or not reason.strip()
+                or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)
                 or not isinstance(count, int) or isinstance(count, bool) or count < 1
                 or any(item is not None and (not isinstance(item, str) or not item.startswith("#"))
                        for item in headings)):
-            refuse(f"Record {index} needs an exact path, a rationale, a positive count and optional Markdown headings.")
+            refuse(f"Record {index} needs an exact path, a raw SHA-256, a rationale, a positive count and optional Markdown headings.")
             continue
         if (not relative.startswith(HISTORICAL_ROOTS) or "\\" in relative
                 or any(part in {"", ".", ".."} for part in relative.split("/"))):
@@ -1513,7 +1614,15 @@ def historical_records(root: Path) -> tuple[dict[str, tuple[int, int, str, int]]
         if not path.is_file():
             refuse(f"Missing record: {relative}")
             continue
-        lines = path.read_text(encoding="utf-8-sig").splitlines()
+        try:
+            raw = path.read_bytes()
+            lines = raw.decode("utf-8-sig").splitlines()
+        except (OSError, UnicodeError) as error:
+            refuse(f"Unreadable record {relative}: {error}")
+            continue
+        if hashlib.sha256(raw).hexdigest() != digest:
+            refuse(f"Historical record raw bytes changed; needs a new independent decision: {relative}")
+            continue
         bounds = [1, len(lines)]
         for position, heading in enumerate(headings):
             if heading is None:
@@ -1561,17 +1670,17 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         else:
             names.add(values[0])
         if check != "names":
-            if path.parent.name.casefold() in RETIRED_COMMANDS:
+            if is_retired_identity(path.parent.name):
                 add(relative, 1, "retired-entry", "Retired canonical workflow is still discoverable.")
             for line, alias in declared_aliases(header):
                 identity = alias.removeprefix("li-").casefold()
-                if identity in RETIRED_COMMANDS:
+                if is_retired_identity(identity):
                     add(relative, line, "retired-alias", f"Retired alias is still declared: {alias}")
     if check == "names":
         return sorted(findings)
 
     def command(relative: str, line: int, name: str, fixture_literal: bool = False) -> None:
-        if name.casefold() in RETIRED_COMMANDS:
+        if is_retired_identity(name):
             add(relative, line, "retired-command", f"Retired workflow reference: {name}")
         elif name == "generate-X":
             exemptions.append({"path": relative, "line": line, "field": "format placeholder: generate-X",
@@ -1605,6 +1714,10 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         except (OSError, UnicodeError) as error:
             add(relative, 1, "read-error", f"Cannot inspect text: {type(error).__name__}")
             continue
+        text, manifest_observations, manifest_error = frozen_manifest_observations(path, relative, text)
+        exemptions.extend(manifest_observations)
+        if manifest_error:
+            add(relative, 1, "frozen-manifest-binding", manifest_error)
         if relative == f"{COMPARISON_DIR}/results.json":
             try:
                 record, _ = json_locations(text)
@@ -1613,10 +1726,12 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
             else:
                 recorded_comparison_input = comparison_input(record)
         if path.name == "SKILL.md" and path.parent.name.startswith("li-"):
-            if path.parent.name[3:].casefold() in RETIRED_COMMANDS:
+            if is_retired_identity(path.parent.name[3:]):
                 add(relative, 1, "retired-entry", "Retired native wrapper is still discoverable.")
         test_code = relative.startswith("tests/") and path.suffix in {".py", ".sh", ".ps1"}
-        former_column = False
+        former_column: int | None = None
+        table_width = 0
+        in_table = False
         observation_errors: list[tuple[int, str]] = []
         try:
             raw_exact = relative not in SOURCE_REVISION_FIELDS or path.read_bytes() == text.encode("utf-8")
@@ -1628,28 +1743,58 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         for line, reason in observation_errors:
             add(relative, line, "observation-parse-error", reason)
         python_lines = python_fence_lines(text) if path.suffix in {".md", ".template"} else set()
+        migration_lines: set[int] = set()
+        if path.suffix == ".md" or path.name.endswith(".md.template"):
+            boundaries = observation_support("markdown_source").classify_markdown(text)
+            migration_lines = {index for index, boundary in enumerate(boundaries.lines, 1)
+                               if boundary.kind == "prose" and not boundary.container_ids}
+            starts = [boundary.start for boundary in boundaries.lines]
+            for region in boundaries.regions:
+                if region.kind in {"html_tag", "raw_html_body", "comment", "opaque", "unknown"}:
+                    first = bisect_right(starts, region.span.start)
+                    last = bisect_right(starts, max(region.span.start, region.span.end - 1))
+                    migration_lines.difference_update(range(first, last + 1))
         for number, original in enumerate(routed, 1):
             line = URL.sub("", original).replace("\\|", "\x00").replace("\\", "/")
-            if line.lstrip().startswith("|"):
+            if number in migration_lines and line.lstrip().startswith("|"):
                 columns = line.split("|")
-                first = columns[1].strip().casefold()
-                if first in FORMER_HEADERS:
-                    former_column = True
-                if former_column:
-                    if first and first not in FORMER_HEADERS and not re.fullmatch(r"[- :]+", first):
-                        exemptions.append({"path": relative, "line": number, "field": "migration table, former-entry column",
+                is_header = not in_table
+                if is_header:
+                    delimiter = routed[number].strip() if number < len(routed) else ""
+                    headers = [cell.strip().casefold() for cell in columns[1:-1]]
+                    marked = [index + 1 for index, header in enumerate(headers) if header in FORMER_HEADERS]
+                    if (line.rstrip().endswith("|")
+                            and number + 1 in migration_lines
+                            and re.fullmatch(r"\|(?:\s*:?-{3,}:?\s*\|)+", delimiter)
+                            and len(delimiter.split("|")) == len(columns)
+                            and len(marked) == 1):
+                        former_column = marked[0]
+                        table_width = len(columns)
+                in_table = True
+                if not line.rstrip().endswith("|") or len(columns) != table_width:
+                    former_column = None
+                if former_column is not None and not is_header:
+                    former_cell = columns[former_column].strip().casefold()
+                    if former_cell and not re.fullmatch(r"[- :]+", former_cell):
+                        exemptions.append({"path": relative, "line": number,
+                                           "field": "migration table, former-entry column",
                                            "category": "retired-name mapping",
-                                           "reason": "The replacement column and all prose remain checked."})
-                    line = "|" + " " * len(columns[1]) + "|" + "|".join(columns[2:])
+                                           "reason": "Only this typed former-entry cell in ordinary Markdown prose is exempt; executable contexts and replacement cells remain checked."})
+                    columns[former_column] = " " * len(columns[former_column])
+                    line = "|".join(columns)
             else:
-                former_column = False
+                former_column = None
+                table_width = 0
+                in_table = False
             for match in EXPLICIT_COMMAND.finditer(line):
-                command(relative, number, match["name"], fixture_literal=test_code)
+                if not negative_test_route_assertion(line, match.start(), test_code):
+                    command(relative, number, match["name"], fixture_literal=test_code)
             for match in NATIVE_COMMAND.finditer(line):
                 name = match["name"]
                 # Bare li-* names can also be utilities or downstream examples.
                 # Validate unknown workflows only in an explicit workflow namespace.
-                if name.casefold() in RETIRED_COMMANDS:
+                if (is_retired_identity(name)
+                        and not negative_test_route_assertion(line, match.start(), test_code)):
                     utilities = [root / "bin" / ("li-" + name + suffix)
                                  for suffix in ("", ".py", ".sh", ".ps1")]
                     if any(item.is_file() for item in utilities):
@@ -1662,11 +1807,13 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                 name = match["name"].casefold()
                 action = re.search(r"\b(?:run|invoke|use|command|workflow|skill)\b",
                                    line[:match.start()], re.I)
-                if action and name in RETIRED_COMMANDS and name not in HOST_SLASH_COMMANDS:
+                if (action and is_retired_identity(name) and name not in HOST_SLASH_COMMANDS
+                        and not negative_test_route_assertion(line, match.start(), test_code)):
                     command(relative, number, name)
             for match in NAMED_SKILL.finditer(line):
                 name = match["before"] or match["after"]
-                if name.casefold() in RETIRED_COMMANDS:
+                if (is_retired_identity(name)
+                        and not negative_test_route_assertion(line, match.start(), test_code)):
                     command(relative, number, name)
             for match in SKILL_FIELD.finditer(line):
                 if ((path.suffix == ".py" or number in python_lines)
@@ -1676,7 +1823,8 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                                        "field": match[0].strip(), "category": "Python annotation",
                                        "reason": "An unquoted Python type annotation is not a literal workflow identity."})
                     continue
-                command(relative, number, match["name"], fixture_literal=test_code)
+                if not negative_test_route_assertion(line, match.start(), test_code):
+                    command(relative, number, match["name"], fixture_literal=test_code)
             if (path.suffix in {".md", ".template"}
                     or (path.suffix in {".json", ".yaml", ".yml", ".toml"}
                         and re.search(r"\b(?:description|workflow|skill|method)\b", line, re.I))):
@@ -1688,14 +1836,19 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                     continue
                 name = match["name"]
                 identity = name.removeprefix("li:").removeprefix("li-") if match["prefix"] != "skills/" else name.removeprefix("li:")
-                if identity.casefold() in RETIRED_COMMANDS:
+                internal_reference = (
+                    match["prefix"] == "skills/"
+                    and match["tail"].casefold() in FORMER_INTERNAL_PATHS.get(identity.casefold(), ())
+                )
+                if (is_retired_identity(identity) and not internal_reference
+                        and not negative_test_route_assertion(line, match.start(), test_code)):
                     command(relative, number, identity)
                 if any(link.start(1) <= match.start() < link.end(1) for link in links):
                     continue
-                if not match["tail"] and identity not in names and identity not in RETIRED_COMMANDS:
+                if not match["tail"] and identity not in names and not is_retired_identity(identity):
                     continue
                 target = unquote(match[0].rstrip("."))
-                if not Path(target).suffix and identity not in names and identity not in RETIRED_COMMANDS:
+                if not Path(target).suffix and identity not in names and not is_retired_identity(identity):
                     continue  # Prose such as skills/agents/hooks is a list, not a workflow path.
                 if not match["tail"]:
                     target += "/SKILL.md"
@@ -1705,9 +1858,10 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                                        "reason": "No literal source-root consumer on this line; fixture paths need not exist in the source tree. Retired identities still fail."})
                     continue
                 if not (root / target).exists():
-                    if (test_code and path.suffix == ".py"
-                            and re.search(r"\bself\.assertFalse\s*\(", line[:match.start()])
-                            and re.search(r"\.exists\(\)\s*\)", line[match.end():])):
+                    if (test_code and negative_test_route_assertion(line, match.start(), test_code)
+                            and (path.suffix != ".py"
+                                 or re.search(r"\.exists\(\)\s*\)", line[match.end():])
+                                 or re.search(r"\[\s*!\s*-e\b", line))):
                         exemptions.append({"path": relative, "line": number,
                                            "field": target, "category": "negative absence assertion",
                                            "reason": "This assertion requires the resource to remain absent; positive imports/selections still require it."})

@@ -718,7 +718,7 @@
     "usage-skill": {
       "kinds": {
         "invocation": {
-          "producers": ["instruction-only:skills/usage-log/SKILL.md"],
+          "producers": ["instruction-only:skills/audit/references/usage.md"],
           "records_when": ["always"],
           "fields": ["skill", "mode", "tokens_est", "cli"],
           "aliases": {},

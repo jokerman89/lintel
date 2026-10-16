@@ -349,7 +349,7 @@ Next options:
   • /li:cycle [--mode <preset>]   — full cycle from here
   • /li:<phase>                    — jump to specific phase
   • /li:resume                     — pick up where we left off
-  • /li:skill-router "<intent>"    — semantic router if unsure
+  • /li:catalog "<intent>"         — narrow a free-text request to relevant methods
 ```
 
 ## Reusable patterns

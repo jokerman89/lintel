@@ -5,16 +5,15 @@ CI checks this file for drift; edit the source SKILL.md to change a description.
 
 Use `/li:<name>` in a Lintel plugin, or ask Copilot to run the named Lintel skill.
 
-Total skills: 97
+Total skills: 88
 
-## foundation layer (97 skills)
+## foundation layer (88 skills)
 
 | Skill | Description |
 |---|---|
 | [`/li:adr-new`](adr-new/SKILL.md) | Use when a non-trivial decision needs recording to bootstrap a new Architecture Decision Record from the template, aski… |
 | [`/li:analyze`](analyze/SKILL.md) | Use to check that PLAN and BUILD still match the approved DEFINE design — run when a plan was revised or a build deviat… |
 | [`/li:audit`](audit/SKILL.md) | Use to read selected audit records and diagnostics, including hook or usage observations, without inferring execution f… |
-| [`/li:brief-forge`](brief-forge/SKILL.md) | Use when a workflow explicitly hands work across a boundary — spawning a subagent, transitioning a phase, passing to a … |
 | [`/li:build`](build/SKILL.md) | Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while revie… |
 | [`/li:capture`](capture/SKILL.md) | Use after SHIP, at the end of a task, to make what was learned durable — updates lessons, drafts an ADR for any non-tri… |
 | [`/li:catalog`](catalog/SKILL.md) | Use to discover Lintel skills and agents by intent, name, purpose, category, voice or declared client support, or regen… |
@@ -60,7 +59,6 @@ Total skills: 97
 | [`/li:generate-word`](generate-word/SKILL.md) | Use to create an editable Word document from selected source material through available native tools or a declared libr… |
 | [`/li:generate-write`](generate-write/SKILL.md) | Use when a presentation or document outline needs full section content and speaker notes in the selected voice. |
 | [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | Use to create an editable workbook from selected source data through available native tools, with formula, recalculatio… |
-| [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Use for the retained handoff-budget entry point; delegates selected artifacts and supplied observations to context-budg… |
 | [`/li:hooks-status`](hooks-status/SKILL.md) | Use to inspect recorded hook outcomes, overrides or unobserved hooks through the shared audit reader; absence is not an… |
 | [`/li:inspect`](inspect/SKILL.md) | Use to inspect a selected plan or repository through engineering, design and developer-experience lenses. Preserve orig… |
 | [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
@@ -68,26 +66,21 @@ Total skills: 97
 | [`/li:lessons-add`](lessons-add/SKILL.md) | Use after a correction, insight, or recurring pattern worth remembering to record it as a lesson the next session will … |
 | [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote one ID-managed project lesson into an explicitly named Lintel work tree's scaffolding baseline, with recorded p… |
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task for keyword-ranked lessons, the complete index or an exact lesson ID, without changing the … |
-| [`/li:maintenance`](maintenance/SKILL.md) | Use for on-demand storage/context guidance, scoped path diagnostics and labeled usage estimates without treating partia… |
 | [`/li:mars`](mars/SKILL.md) | Use when a problem, plan, spec, implementation or review deserves a deliberate multi-model adversarial second look — ru… |
 | [`/li:migrations`](migrations/SKILL.md) | Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical rec… |
-| [`/li:orientator`](orientator/SKILL.md) | Use for entry-time method guidance through catalog, preserving SENSE's existing pack navigation and high-risk confirmat… |
 | [`/li:pack-create`](pack-create/SKILL.md) | Use to create a blank, inherited, or cloned Lintel pack and validate it before activation. |
 | [`/li:pack-list`](pack-list/SKILL.md) | List configured-store, repository and installed-source packs with resolver precedence, validation results and the actua… |
 | [`/li:pack-switch`](pack-switch/SKILL.md) | Use to explicitly switch the effective pack through the structured profile lifecycle, preserving required policy, confi… |
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
 | [`/li:pattern`](pattern/SKILL.md) | Use when recurring expectations (deployment baselines, dashboard behavior, document structure, visual language) should … |
 | [`/li:pause`](pause/SKILL.md) | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
-| [`/li:perf-mode`](perf-mode/SKILL.md) | Use for the retained resource-advice entry point on heavy work; delegates to context-budget without changing model capa… |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
 | [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |
 | [`/li:research`](research/SKILL.md) | Use when the operator wants to understand a domain, codebase or option space before committing to implementation. Runs … |
 | [`/li:resume`](resume/SKILL.md) | Use when returning in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint … |
 | [`/li:review`](review/SKILL.md) | Use after BUILD, before SHIP, to adversarially review what was built — checks spec compliance, code quality, the active… |
-| [`/li:role`](role/SKILL.md) | Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its… |
-| [`/li:role-new`](role-new/SKILL.md) | Use to create a durable role through a guided interview or update its expertise with a reviewed-digest, sensitivity-awa… |
-| [`/li:roles-list`](roles-list/SKILL.md) | Use to list configured role metadata and the current selection, with explicit consent before including private roles. |
+| [`/li:role`](role/SKILL.md) | Use to create, update, list, activate or deactivate a working role; swap mid-session, apply its lens to an artifact, or… |
 | [`/li:safe-install`](safe-install/SKILL.md) | Protect explicitly owned installation files with verified snapshots and conflict-preserving restore; announce recovery … |
 | [`/li:sc`](sc/SKILL.md) | Use for security and compliance depth — threat models, auth flows, secret management, dependency-security audits, compl… |
 | [`/li:scaffold`](scaffold/SKILL.md) | Use to initialize or inspect repository foundations through the owned scaffold helper, preserving existing instructions… |
@@ -97,14 +90,12 @@ Total skills: 97
 | [`/li:sense`](sense/SKILL.md) | Use at the very start of a task to read the situation before deciding how to work — detects operator intent, the active… |
 | [`/li:ship`](ship/SKILL.md) | Use after REVIEW passes, when reviewed work is ready to land, to open a PR, deploy, or hand off to a customer — runs th… |
 | [`/li:skill-new`](skill-new/SKILL.md) | Use to turn an authorized recurring task or pattern into a new Lintel skill draft using the existing scaffold and front… |
-| [`/li:skill-router`](skill-router/SKILL.md) | Use to find a relevant Lintel method from free-text intent through catalog's metadata-first shortlist. |
 | [`/li:spec-kit`](spec-kit/SKILL.md) | Use when a repository has GitHub Spec Kit artifacts and needs Lintel planning, build-card execution, review or session … |
 | [`/li:status`](status/SKILL.md) | Use when inspecting selected work, recorded cycle state and supplementary job observations read-only; this does not run… |
 | [`/li:swarm`](swarm/SKILL.md) | Use when an approved plan has multiple dependency-independent work domains and the operator wants coordinated multi-age… |
 | [`/li:ta`](ta/SKILL.md) | Use for technical-architecture depth — service boundaries, API contracts, dependency graphs, scaling plans, complexity … |
 | [`/li:tq`](tq/SKILL.md) | Use for testing and QA-strategy depth — test-pyramid review, coverage audits, contract-test design, regression suites, … |
 | [`/li:uniformity`](uniformity/SKILL.md) | Use in a Lintel contributor source checkout or CI to inspect the uniformity floor and recorded matrix; missing trusted … |
-| [`/li:usage-log`](usage-log/SKILL.md) | Use to record an explicitly requested invocation or inspect authorized usage records through the shared audit reader; m… |
 | [`/li:verify`](verify/SKILL.md) | Use to check whether a change works without changing it. Runs applicable tests or document checks, reports failures and… |
 | [`/li:web-session`](web-session/SKILL.md) | Use to browse, extract pages, open an owned browser or validate user-managed sign-in through an actual provider with ex… |
 | [`/li:welcome`](welcome/SKILL.md) | Use on first run to choose a useful task, inspect the actual client surface and take a proportionate plan, build, revie… |

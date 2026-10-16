@@ -1,13 +1,200 @@
 {
   "schema_version": 1,
-  "description": "Exact internal records whose former workflow references are reported as HISTORICAL observations by tests/shape/native-command-surface.py. Each count is exact: a new reference in a declared record fails. Current routes elsewhere still fail.",
+  "description": "Exact internal records whose former workflow references are reported as HISTORICAL observations by tests/shape/native-command-surface.py. Raw SHA-256 binds the whole containing file, including framing, and each count is exact: any byte change or new reference needs a new independent decision. Current routes elsewhere still fail. These bindings are classification inputs, not evidence of release clearance.",
   "records": [
     {
       "path": ".claude/plans/universal-implementation/reports/P08.md",
       "count": 1,
       "from_heading": "### Proposed bounded original-proof execution, not yet released or run",
       "to_heading": "### Limits, prevention and frozen handoff",
-      "reason": "Proposed A10.3 paired case in the P08 report: the former office-hours entry names the comparison input of a case that was never run, and A10.3 was later closed through F06 (plan.md, packages/P08.md), so the proposal cannot be released. Span reviewers rejected it as an original observation (set03-span-154); it is declared as a non-live proposal because the report is context-bound (remaining-source-record-28) and cannot be edited. Not a current route (ADR-0034). Override accepted by the independent spec review of 0cd1dbd8; path, headings, count, reason or P08 bytes changing needs a new independent decision."
+      "reason": "Proposed A10.3 paired case in the P08 report: the former office-hours entry names the comparison input of a case that was never run, and A10.3 was later closed through F06 (plan.md, packages/P08.md), so the proposal cannot be released. Span reviewers rejected it as an original observation (set03-span-154); it is declared as a non-live proposal because the report is context-bound (remaining-source-record-28) and cannot be edited. Not a current route (ADR-0034). Override accepted by the independent spec review of 0cd1dbd8; path, headings, count, reason or P08 bytes changing needs a new independent decision.",
+      "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673"
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md",
+      "count": 1,
+      "reason": "Dated launch-readiness audit preserves a route reference from the audited source state; it is not a current command declaration.",
+      "sha256": "d2d1c9714893bd537bc83c0c2513d6520bde02fc7253ff59620b3d5aa03cb2c4"
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/swarm.md",
+      "count": 4,
+      "reason": "Dated independent review retains exact source paths and route names cited for that reviewed revision; it is not current routing.",
+      "sha256": "bc74a96cbf19b38c6d809e2f15677a4306be534eb43c0174a8f9fafead1962c8"
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/swarm-preservation.md",
+      "count": 2,
+      "reason": "Dated preservation record identifies the original public source path while documenting its retirement; it does not retain that route.",
+      "sha256": "fca29f8b1c925a8e8695d281eea6121441a799f7917144f4cadea4a818317041"
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+      "count": 7,
+      "reason": "Completed five-lens audit preserves source paths and named observations from its reviewed tree; these are not current route instructions.",
+      "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e"
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "count": 4,
+      "reason": "Dated harness-state audit records what was present in its source revision; references are evidence, not callable routes.",
+      "sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b"
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-phase3-nav-forge-wiki.md",
+      "count": 4,
+      "reason": "Dated evolution entry records the original navigation and handoff design references; the current owner routes are defined elsewhere.",
+      "sha256": "3a3af6f43ed75f91ca522cd8c6e4e62b1d02b206aff7468bb99c48cd3d09c434"
+    },
+    {
+      "path": ".claude/plans/context-budget-consolidation/plan.md",
+      "count": 4,
+      "reason": "Completed consolidation plan preserves the former budget entry paths and identities as the subject of its migration.",
+      "sha256": "b38ec5f92ac9b050d4b19ed6375700d8bc690735d9f4ec09d04389d6a26591f2"
+    },
+    {
+      "path": ".claude/plans/swarming-work/swarm/reports/BC5.md",
+      "count": 4,
+      "reason": "Committed BC5 report preserves source paths and original method names from its completed swarm attempt; it is not an active handoff recipe.",
+      "sha256": "41435f797acad4ff2d35bf95100237566d1c050f611f25d54af47a3ffd6e90cc"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/a13-contract.md",
+      "count": 2,
+      "reason": "Accepted A13 contract records the earlier usage-log producer contract as source-era evidence, not as a live public route.",
+      "sha256": "df25c601b654aa7d9dee0e707d38a31fe38108d260b4d1845bfca8a0116e26c3"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P03.md",
+      "count": 2,
+      "reason": "Completed P03 package contract preserves the original budget entry as an input to its replacement work.",
+      "sha256": "cf7a721672c18933218f1876b8233079af50ff59a88bc81cec793eae79bdc4da"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P04.md",
+      "count": 2,
+      "reason": "Completed P04 package contract preserves the original handoff method path as historical scope, not a current public route.",
+      "sha256": "b1c4ad7e7bd75109b68230e1f8536f3433794d89ca2d94fb8d3235f780c06b74"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/plan.md",
+      "count": 2,
+      "reason": "Completed universal-implementation plan preserves original budget references from its accepted source revision.",
+      "sha256": "195b8485e9e9ce0925dfb3a5758ba703afa6c2d93f87d47f3a4dba16943e4e52"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P03.md",
+      "count": 1,
+      "reason": "P03 report records the historical budget workflow identifier as evidence from that completed package.",
+      "sha256": "08d312bc368689099b80e3d15fcee12096debc5101d7bda57f360aeec330ef7c"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P04-preservation.md",
+      "count": 2,
+      "reason": "P04 preservation report retains its exact original handoff-method reference as historical source evidence.",
+      "sha256": "9dba6f413b93a0f0226dc06f0cb6b9d941788af5fc865408ef1fa18dbc93c328"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P04.md",
+      "count": 4,
+      "reason": "Completed P04 report records original handoff-method paths and names from its reviewed source tree.",
+      "sha256": "3e8ec82fe1f68995dcd7148e9c1b3f2b8c790ce080ccf29f445b5f340232469c"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P07.md",
+      "count": 2,
+      "reason": "P07 report preserves a source-era handoff-method reference in its package evidence.",
+      "sha256": "11f4edf4959aae0cf939660de65a502520dc51460276c618ea8111c425d48e53"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P13.md",
+      "count": 4,
+      "reason": "P13 report preserves the retired discovery route path and identity as its original reviewed input.",
+      "sha256": "1a4f251c25621e6632f48796e15ccc7eef5d9d5b98987357502ad8f2be5fd7fe"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P04-component.md",
+      "count": 2,
+      "reason": "Independent P04 component review cites the original handoff method from the reviewed revision, not a current invocation.",
+      "sha256": "02227654d5ca356272c82f5692cb74d6872f829228e913aef076cf4b849abacc"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P04-recheck.md",
+      "count": 2,
+      "reason": "P04 recheck preserves the reviewed source path and method identity as historical review evidence.",
+      "sha256": "90cc6487135f90e48c609abdcf0b5dbf6802d2e2440c4f5b91ecd034436633f7"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P09-content-4a9b946.md",
+      "count": 2,
+      "reason": "Independent P09 content review records the budget route as a source reference from its bounded review.",
+      "sha256": "e0699052f3de1936ecaef5125d5984b2493fabd2234540b0d0c1b94183814e9d"
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-discovery-final-b1d4caf.md",
+      "count": 2,
+      "reason": "Independent P13 review retains the former discovery source path and identity as reviewed evidence.",
+      "sha256": "695e934d0b393e1c8c3a34644db0bb67964344d62830527de40f7c071fb3de58"
+    },
+    {
+      "path": ".claude/plans/v2-findings/plan.md",
+      "count": 1,
+      "reason": "The approved V2 plan names the former identity as the object of its retirement acceptance criteria, not as an invocation. The 2026-10-16 recovery framing adds no former callable reference.",
+      "sha256": "befeb57785ae3db5b47f8271fa6298c3f19cd3007ba92f0a5760c81f599e3e0d"
+    },
+    {
+      "path": ".claude/plans/v2-findings/prompt.md",
+      "count": 1,
+      "reason": "The approved V2 executor prompt names the former identity as migration evidence, not a current route. The 2026-10-16 recovery framing adds no former callable reference.",
+      "sha256": "b999f924822fca175fd23fa8cc9214d6b3b668fdf83f90ec00979e7bf83f7261"
+    },
+    {
+      "path": ".claude/plans/v2-findings/spec.md",
+      "count": 1,
+      "reason": "The approved V2 specification names the former identity as the target of replacement, not a current route.",
+      "sha256": "f2c9e61d0689269391ebb1328399eaa8c817031e88c72826faa2c0b78c744d30"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/briefs/P11A.md",
+      "count": 8,
+      "reason": "P11A's committed brief pins its historical source paths and former report names for lane scope; these are not current product calls.",
+      "sha256": "e19493f4890961857a78fccf1dc18f932c8aec690261aab8982f320b610026ae"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/briefs/P11B.md",
+      "count": 8,
+      "reason": "P11B's committed brief pins its historical discovery and role source paths for lane scope; these are not current product calls.",
+      "sha256": "8d5aeb4e7ba5db841b85a42d8003779f8e5f6d57523e24483532b7e3ae7b9003"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/briefs/P11C.md",
+      "count": 4,
+      "reason": "P11C's committed brief identifies the original internal handoff-method path as migration scope, not a public invocation.",
+      "sha256": "ebb97fd451b8f77ecc6427da9dc95f52ec3fe86d71dd36a71156f4a171dfb98b"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/briefs/P12.md",
+      "count": 1,
+      "reason": "P12's committed brief names the historical plan-tuning identity as a preservation boundary, not an active route.",
+      "sha256": "0ed9b1e8686477cf69598e9daf382ac0e5c69ebdc1b8c42fe00cdb0a769b51d3"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/reports/P11A.md",
+      "count": 8,
+      "reason": "P11A's bound lane report preserves source paths and identifiers from its reviewed baseline as evidence, not callable routes.",
+      "sha256": "0c01eca5e4fab5aa02de41c3589f1e859d8fd497685f7eac35d33b4f119d90d9"
+    },
+    {
+      "path": ".claude/plans/v2-findings/swarm/reports/P11C.md",
+      "count": 5,
+      "reason": "P11C's bound lane report records original method paths and names in its exact migration evidence.",
+      "sha256": "65212ce212d6a9beb1e1f495d04edab2172611b33e5bb752c15f2831a1ac0970"
+    },
+    {
+      "path": ".claude/plans/v2-routine-corrections/plan.md",
+      "count": 4,
+      "reason": "The committed routine-corrections plan names the retired audit and maintenance entries as its source scope, not current calls.",
+      "sha256": "0d84264b940854508ce93dc67a1e5e3a2ddb2aade7fe45d80685b15245bbae00"
     }
   ]
 }

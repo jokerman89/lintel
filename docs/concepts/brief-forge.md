@@ -1,11 +1,12 @@
 # Brief Forge — explicit hand-off gate
 
 **Last updated:** 2026-09-20
-**Status:** Shipped helper and skill contract; activation is explicit
+**Status:** Shipped helper and internal handoff method; public skill is retired
 
 Brief Forge gives a workflow boundary a consistent envelope, evaluator result and audit trail. It is
-not a universal host interceptor: a source workflow must invoke `/li:brief-forge` or execute the
-documented helper sequence. Lintel does not register pre-spawn or pre-phase Brief Forge hooks.
+not a public workflow or universal host interceptor: an authorized source workflow must execute
+the trusted helper sequence in the internal handoff method. Lintel does not register pre-spawn or
+pre-phase Brief Forge hooks.
 
 This distinction matters. Pack policy configures what an invocation does; the presence of policy in
 `pack.yaml` does not prove that a hand-off was forged.
@@ -23,14 +24,14 @@ scope-routed audit record. Workflows that do not invoke it must describe that de
 
 ## Activation reality
 
-Brief Forge runs in two supported ways:
-
-- a workflow explicitly invokes `/li:brief-forge <kind> <from> <to> <content_type> <content_file>`;
-- a workflow calls `forge_handoff` from the trusted `lib/brief-forge.sh` bundle.
+Brief Forge has one supported execution path: a workflow follows
+[`skills/brief-forge/references/handoff.md`](../../skills/brief-forge/references/handoff.md),
+sources `forge_handoff` from the trusted `lib/brief-forge.sh` bundle and invokes it with the
+explicit handoff arguments. The former public entry is retired.
 
 The Swarm profile requires an explicit Brief Forge boundary before a lane is dispatched. If a host
-cannot invoke the skill, the coordinator records that limitation. A missing mandatory evaluator or
-failed gate blocks the affected handoff; it is not converted into unaudited success.
+cannot execute the internal method, the coordinator records that limitation. A missing mandatory
+evaluator or failed gate blocks the affected handoff; it is not converted into unaudited success.
 
 There is no registered `brief-forge-pre-spawn` or `brief-forge-pre-phase` hook in the shipped hook
 bundle. A future host callback remains inactive until its registration and firing are verified on

@@ -695,7 +695,7 @@ method exists. Live actions and external distribution retain their explicit auth
 - `/li:pause` — save compatible session context for `/li:resume --from <checkpoint>`
 - `/li:capture --retrospective` — what worked, friction and next-time adjustments
 - `cold-executor-handoff` — original proposed step; CAPTURE reaffirms the handoff produced by PLAN without inventing another command or backlog.
-- `/li:role-new --update <id>` — current route for an explicitly authorized, sensitivity-aware role update; the proposed `role-debrief` is not a standalone skill.
+- `/li:role --update <id>` — current route for an explicitly authorized, sensitivity-aware role update; the proposed `role-debrief` is not a standalone skill.
 - Historical profile-update proposal — no current write or policy authority follows from this record
 
 **Agents:**
@@ -947,9 +947,9 @@ Current invocation menu; the role-file specimen above remains the original propo
 /li:role --frame <artifact-path> # apply the actually loaded role's lens
 /li:role --rotate <new-role-id> # validate the new role before changing selection
 /li:role --off                  # deactivate; does not erase prior conversation
-/li:roles-list                  # list available roles + last-updated
-/li:role-new <id>               # scaffold new role from template
-/li:role-new --update <id>      # authorized, sensitivity-aware update of an existing role
+/li:role --list                 # list available roles + last-updated
+/li:role --create <id>          # scaffold new role from template
+/li:role --update <id>          # authorized, sensitivity-aware update of an existing role
 ```
 
 ### 4.4 — Session start awareness (lightweight)
@@ -966,7 +966,7 @@ This is the LIGHTWEIGHT principle — role aware doesn't mean role-heavy.
 
 - Private roles (customer-specific) live ONLY in `~/.lintel/roles/private/`, gitignored
 - `no-customer-data-in-role-file` hook blocks committing roles with customer-PII patterns
-- `/li:role-new --update <id>` is the current update route; inspect the proposed change under its actual sensitivity and ownership checks, not an assumed hook
+- `/li:role --update <id>` is the current update route; inspect the proposed change under its actual sensitivity and ownership checks, not an assumed hook
 - Sync via `bin/li-roles-sync` to operator's private GitHub repo, NOT public Lintel marketplace
 - Public roles (`Field CTO generic`, `Compliance Officer generic`) MIT-licensed, shippable
 

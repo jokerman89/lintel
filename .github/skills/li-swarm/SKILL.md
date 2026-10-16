@@ -151,7 +151,9 @@ scopes and coordinator protections.
    returns to PLAN to correct/re-map the topology. Never dispatch from `wave` alone. Then invoke
    `li-swarm.py brief --task <package-id>` to adapt the complete Markdown into structured JSON with
    work/package/leaf/scope/acceptance references and the unabridged original as data. Pass that
-   payload to `/li-brief-forge subagent_spawn swarm <role> brief <payload-path>`. The exported source
+   payload by following the complete internal handoff method in
+   `skills/brief-forge/references/handoff.md`, then call
+   `forge_handoff subagent_spawn swarm <role> brief <payload-path>`. The exported source
    root applies transitively. JSON/Markdown forging is standard-library-only; optional legacy YAML
    needs its declared parser. Disabled/eligible bypass returns 3 with no envelope. Missing required
    policy, evaluator, parser or audit evidence blocks; it is not an unaudited success.
@@ -316,8 +318,8 @@ lane briefs/reports/reviews, `lib/cli-tiers.yaml`, active pack policy, and Git a
 execution, workers write only their declared scopes/reports and reviewers only their reviews. The
 coordinator alone writes shared plan/runtime state, reducers, commits, and integration history.
 
-**Calls:** `bin/li-work-artifacts.py`, `bin/li-swarm.py`, `/li-brief-forge`, `/li-build`, and
-`/li-review`.
+**Calls:** `bin/li-work-artifacts.py`, `bin/li-swarm.py`,
+`skills/brief-forge/references/handoff.md`, `lib/brief-forge.sh`, `/li-build`, and `/li-review`.
 
 ## Anti-patterns
 

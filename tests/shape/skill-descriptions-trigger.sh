@@ -19,7 +19,7 @@ echo "========================================="
 
 # Current workflows retaining the trigger-form contract after consolidation.
 MIGRATED="sense scope define discover plan build review ship capture cycle resume jobs status \
-analyze brief-forge fix code-review verify diagnose cross-check lessons-add lessons-surface adr-new \
+analyze fix code-review verify diagnose cross-check lessons-add lessons-surface adr-new \
 pause context-warm inspect skill-new generate-docs web-session \
 ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate mars pattern \
 design-dna frontend-design frontend-design-review frontend-motion frontend-shader frontend-style-extract \

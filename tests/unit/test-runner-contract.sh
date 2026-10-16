@@ -171,8 +171,7 @@ printf 'echo "  SKIP: unavailable dependency"\n' > "$SHARD_TMP/tests/unit/b.sh"
 expect_shard 0 "unit/a.sh unit/c.sh unit/e.sh " --shard 1/2 --require-all
 expect_shard 1 "unit/b.sh unit/d.sh " --shard 2/2 --require-all
 
-# Platform applicability: off Windows, windows-only unittest skips are N/A only when every skip
-# carries the canonical reason and something ran; on Windows, and for any other reason, they refuse.
+# Platform applicability requires canonical opposite-platform reasons and known executed tests.
 NA_TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP" "$SHARD_TMP" "$NA_TMP"' EXIT
 mkdir -p "$NA_TMP/tests/runner" "$NA_TMP/tests/unit"
@@ -186,7 +185,8 @@ na_fixture() {
     body+="echo \"test_s$skips (m.C.test_s$skips) ... skipped '$reason'\""$'\n'
     skips=$((skips + 1)); ran=$((ran + 1))
   done <<< "$reasons"
-  body+="echo \"Ran $ran tests in 0.001s\""$'\n'"echo \"OK (skipped=$skips)\""$'\n'
+  if [ "${2:-}" != "unknown" ]; then body+="echo \"Ran $ran tests in 0.001s\""$'\n'; fi
+  body+="echo \"OK (skipped=$skips)\""$'\n'
   printf '%s' "$body" > "$NA_TMP/tests/unit/fixture.sh"
 }
 expect_na() {
@@ -212,6 +212,32 @@ na_fixture $'platform: windows-only; native long path' none
 expect_na Linux 1 "Skip:   1" --require-all
 na_fixture $'Platform: windows-only; wrong case\nplatform:windows-only; no space'
 expect_na Linux 1 "Partial: 1 " --require-all
+
+na_fixture $'platform: posix-only; real FIFO'
+expect_na MINGW64_NT-10.0 0 "N/A: 1 posix-only unittest assertions" --require-all
+expect_na MSYS_NT-10.0 0 "N/A:     1 (posix-only unittest assertions" --require-all
+expect_na Linux 1 "Partial: 1 " --require-all
+na_fixture $'platform: posix-only; real FIFO\nmissing required tool'
+expect_na MINGW64_NT-10.0 1 "Partial: 1 " --require-all
+na_fixture $'platform: posix-only; real FIFO' none
+expect_na MINGW64_NT-10.0 1 "Skip:   1" --require-all
+na_fixture $'Platform: posix-only; wrong case\nplatform:posix-only; no space'
+expect_na MINGW64_NT-10.0 1 "Partial: 1 " --require-all
+na_fixture $'platform: posix-onlyish; not a platform label'
+expect_na MINGW64_NT-10.0 1 "Partial: 1 " --require-all
+na_fixture $'platform: posix-only; real FIFO' unknown
+expect_na MINGW64_NT-10.0 1 "Partial: 1 " --require-all
+na_fixture $'platform: windows-only; native path' unknown
+expect_na Linux 1 "Partial: 1 " --require-all
+
+na_fixture 'platform: posix-only; real FIFO'
+printf 'echo "SKIP: missing required tool"\n' >> "$NA_TMP/tests/unit/fixture.sh"
+expect_na MINGW64_NT-10.0 1 "Partial: 1 " --require-all
+expect_na MINGW64_NT-10.0 0 "SKIP: missing required tool"
+na_fixture 'platform: windows-only; native path'
+printf 'printf "\\033[33m  SKIP: missing required tool\\033[0m\\n"\n' >> "$NA_TMP/tests/unit/fixture.sh"
+expect_na Linux 1 "Partial: 1 " --require-all
+expect_na Linux 0 "SKIP: missing required tool"
 
 # Weighted shards (ADR-0041): "# SHARD-WEIGHT: <seconds>" in the leading comment block selects a
 # deterministic longest-first partition in which unweighted files count 60 s. A scope with no
@@ -320,6 +346,6 @@ done
 echo 'PASS: runner rejects invalid input, empty suites, exact tag misses, shell/framework skips, and failed tests'
 echo 'PASS: runner shards are deterministic, disjoint, complete, strict and fail closed when malformed or empty'
 echo 'PASS: weighted shards are longest-first, deterministic, disjoint and complete; no weights keeps modulo; malformed headers refuse'
-echo 'PASS: windows-only unittest skips are N/A only off Windows and only when every skip is so marked'
+echo 'PASS: platform-specific unittest skips are N/A only on the opposite platform and only when every skip is so marked'
 echo 'PASS: runner preserves literal Windows paths and backslash diagnostics'
 echo 'PASS: actual manifest and hook guards report unavailable tools and block strict acceptance'

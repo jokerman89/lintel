@@ -35,9 +35,9 @@ different host-reported capacity and preloaded instructions.
 
 ## Select one route
 
-This is the single owner of budget observation, resource advice and selected-work
-handoff sizing. The retained `perf-mode` and `handoff-size-check` names delegate
-here; ordinary PLAN/CAPTURE work calls this owner directly, without a new subagent.
+This is the single public owner of budget observation, resource advice and
+selected-work handoff sizing. PLAN/CAPTURE call it directly, without a compatibility
+wrapper or new subagent.
 
 | Leading selector | Method | Provider |
 |---|---|---|
@@ -130,13 +130,16 @@ Supply `--map <work.json>` explicitly or retain `LINTEL_WORK_MAP` from the verif
 lifecycle. Before policy consumption, verify that lifecycle's saved profile through
 `workflow_resume`; never bootstrap, rebind or adopt another work context to estimate
 a handoff. Missing required policy stays blocked, not a neutral fallback.
+For historical P03/P07 and related identifiers, use the
+[named coordination contracts](../../../skills/swarm/references/evidence.md): owned context
+admission and the verified content-bound profile, not another budgeting procedure.
 
 The selected reader counts distinct map/spec/plan/tasks/prompt/constitution files
 once. Preserve the original work, package and leaf identities. Add literal
 `--warm-path` values from the actual bounded P03 selection. Warming omitted means
 `not-supplied`, not a verified zero-byte workload. Use the observation flags above
-only with their actual provenance. Repository and budget view cannot be replaced
-by caller flags.
+only with their actual provenance, including any explicit `--reserve`. Repository
+and budget view cannot be replaced by caller flags.
 
 Do not infer newest work, sibling files, a second task list or available capacity.
 Preserve `--skip-handoff-size-check` / `SKIP_HANDOFF_SIZE_CHECK=1` in PLAN/CAPTURE:
@@ -174,7 +177,7 @@ Missing spec/handoff/warming stays incomplete. Never guess siblings, fabricate a
 map, silently drop `--plan`, or report that the routing reference executed this
 manual step. A denied selection or required limit remains a refusal.
 
-## Local thresholds and compatibility
+## Local thresholds
 
 `mode_envelopes` remain optional **local advisory workload thresholds**, not client limits
 or automatically installed settings. Retain the historical examples for existing plans:
@@ -194,6 +197,12 @@ An operator may choose lower local warnings; a local threshold can never raise a
 limit. A policy-mandated admission bound stays mandatory and must name its policy source.
 Synthetic vs real warming describes provenance only: **both** spend tokens when sent.
 There is no synthetic-brief exemption.
+
+The former `perf-mode` advice and `handoff-size-check` handoff routes are now
+`--advice` and `--handoff` on this owner. Keep their numeric advice options
+(`--budget`, `--ceiling`, `--decay-policy`, `--cost-estimate`, `--off`), observation
+provenance, explicit mapped or legacy-plan selection, and caller skip semantics here.
+No second public route or helper is required.
 
 ## Watch mode (`--watch`)
 

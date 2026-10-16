@@ -69,7 +69,7 @@ workflow was tested in that host because its source is bundled.
 
 Delegate to catalog's [intent narrowing](../../../skills/catalog/references/intent.md), including
 its metadata query, selected-body checks, explicit capability selections and failure
-behavior. This is the same method as `skill-router`, not another onboarding recipe.
+behavior. Catalog owns this method; onboarding does not add another routing recipe.
 Carry the task and actual host observations from steps 1–2 unchanged. Orientation
 creates no work map, profile, cycle, draft or registration.
 

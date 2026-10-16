@@ -493,7 +493,7 @@ class CatalogMetadata(unittest.TestCase):
 
     def test_selected_callers_use_one_query_before_loading_bodies(self):
         owner = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
-        for name in ("catalog", "skill-router"):
+        for name in ("catalog", "welcome"):
             caller = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             expected_link = "references/intent.md" if name == "catalog" else "../catalog/references/intent.md"
             self.assertIn(f"]({expected_link})", caller)
@@ -503,10 +503,8 @@ class CatalogMetadata(unittest.TestCase):
             self.assertIn("selected", body)
             self.assertIn("LINTEL_SOURCE_ROOT", body)
         catalog_body = (ROOT / "skills" / "catalog" / "SKILL.md").read_text()
-        router = (ROOT / "skills" / "skill-router" / "SKILL.md").read_text()
         self.assertNotIn('Glob `"$root"/', catalog_body)
-        self.assertNotIn("Read all `skills/*/SKILL.md`", router)
-        self.assertNotIn("~/.lintel/telemetry/", router)
+        self.assertNotIn("Read all `skills/*/SKILL.md`", catalog_body)
 
     def agent(self, folder, name, aliases=()):
         return self.write(f"agents/{folder}/role.md", (

@@ -224,9 +224,12 @@ class Sources(unittest.TestCase):
             self.assertTrue((ROOT / path).is_file(), path)
         self.require(reference, "context_id", "generation", "digest", "required_policy",
                      "immutable QA", "corroboration", "not a duplicate pipeline")
-        for name in ("swarm", "resume", "brief-forge", "handoff-size-check"):
+        for name in ("swarm", "resume", "context-budget"):
             text = read(f"skills/{name}/SKILL.md")
             self.assertIn("references/evidence.md", text)
+        handoff = read("skills/brief-forge/references/handoff.md")
+        self.assertIn("lib/brief-forge.sh", handoff)
+        self.assertFalse((ROOT / "skills/brief-forge/SKILL.md").exists())
         self.require(read("skills/swarm/SKILL.md"), "## Shared-evidence consumer",
                      "references/evidence.md#shared-evidence-consumer")
         self.require(reference, "verify_profile_reference", "verify_qa",
@@ -256,7 +259,7 @@ class Sources(unittest.TestCase):
             self.assertNotIn("${LINTEL_SOURCE_ROOT:-$repo}", owner)
 
     def test_forge_method_does_not_call_diagnostics_measured_quality(self):
-        self.require(read("skills/brief-forge/SKILL.md"),
+        self.require(read("skills/brief-forge/references/handoff.md"),
                      "70 with FAIL", "not measured", "fixed", "not graded readiness",
                      "remote pointers", "Structural completeness", "custom evaluators",
                      "testable", "audit receipt", "baseline security check cannot be disabled")

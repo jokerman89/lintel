@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/unit/brief-forge-evaluator-runs.sh
 # Asserts: all three built-in evaluators execute, return well-formed JSON,
-# identify documented failure patterns, and the skill's three-level hand-off
+# identify documented failure patterns, and the internal method's three-level hand-off
 # policy resolver reaches both default-enabled and fail-closed paths.
 # tag: v4.0 phase-3 brief-forge
 
@@ -9,7 +9,7 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVALS="$REPO_ROOT/lib/brief-forge-evaluators.sh"
 FORGE="$REPO_ROOT/lib/brief-forge.sh"
-SKILL="$REPO_ROOT/skills/brief-forge/SKILL.md"
+METHOD="$REPO_ROOT/skills/brief-forge/references/handoff.md"
 FAILED=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAILED=1; }
@@ -17,7 +17,7 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/brief-forge-evaluator-runs.sh"
 echo "=========================================="
 
-for f in "$EVALS" "$FORGE" "$SKILL"; do
+for f in "$EVALS" "$FORGE" "$METHOD"; do
   [ -f "$f" ] || { fail "$f MISSING"; exit 1; }
 done
 
@@ -143,8 +143,8 @@ fi
 echo ""
 echo "[4] Nested hand-off policy → default enabled; unknown evaluator blocks"
 
-# The skill now invokes the same library functions instead of duplicating a recipe.
-grep -q 'forge_handoff "$@"' "$SKILL" || { fail "skill does not invoke the shared release gate"; exit 1; }
+# The internal method invokes the same library functions instead of duplicating a recipe.
+grep -q 'forge_handoff "$@"' "$METHOD" || { fail "method does not invoke the shared release gate"; exit 1; }
 
 kind=subagent_spawn
 from=plan

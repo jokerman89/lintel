@@ -243,7 +243,7 @@ class PlanningSourceTests(unittest.TestCase):
         self.assertEqual(owner.count(call), 1)
         for field in event["fields"]:
             self.assertIn(field + "=", example)
-        self.assertNotIn(call, skill("handoff-size-check"))
+        self.assertFalse((ROOT / "skills/handoff-size-check/SKILL.md").exists())
         route = required_text(ROOT / "skills/context-budget/references/route.sh")
         self.assertNotIn("audit_log", route)
 

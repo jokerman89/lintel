@@ -530,6 +530,18 @@ inventory, not this first-leaf excerpt.
 
 ## Single-owner continuation 2026-10-08
 
+**Recovery 2026-10-16:** the current operator requested completion and push.
+The coordinator recovered the four integrated lanes at `63b6fcd0` onto
+`jokerman-microsoft-repository-completion`, then preserved the prior coordinator's
+exact uncommitted fan-in without changing its worktree. The unpublished `e615a286`
+verification trial is evidence only; its unrelated raw line-ending changes are
+not part of this delivery. The same original IDs and acceptance below remain.
+Execution is now serial coordinator fan-in, not another dispatch of finished lanes.
+The new command-surface version is 0.14.0; no release tag, production action,
+default-branch push or removal of retained worktrees is authorized by this recovery.
+Current independent review, frozen-tree verification and feature-branch publication
+remain required. Historical reviews and interrupted checks are not promoted to PASS.
+
 The renewed original-outcome request authorizes completion of compatible
 consolidations, not just another method-only patch. ADR-0034 already establishes
 capability-preserving consolidation. Choose the existing owner and remove its

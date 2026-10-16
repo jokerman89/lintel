@@ -847,7 +847,7 @@ class ShellStepRunner(Fixture):
 
 
 class WorkflowSourceExamples(unittest.TestCase):
-    SKILLS = ("review", "ship", "usage-log", "frontend-style-extract")
+    SKILLS = ("review", "ship", "audit", "frontend-style-extract")
     HELPERS = ("bin/_audit.sh", "lib/state.sh", "lib/pack-resolver.sh",
                "lib/orientator-routing.sh", "lib/cycle-footer.sh")
 
@@ -881,17 +881,28 @@ class WorkflowSourceExamples(unittest.TestCase):
             LINTEL_HOME=(self.home / ".lintel").as_posix(),
         )
 
-    def blocks(self, skill: str) -> list[str]:
-        text = (ROOT / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+    def blocks(self, skill: str, document: str = "SKILL.md") -> list[str]:
+        text = (ROOT / "skills" / skill / document).read_text(encoding="utf-8")
         return re.findall(r"```bash[^\n]*\n(.*?)\n```", text, re.DOTALL)
 
     def required_sources(self) -> list[tuple[str, str]]:
         commands = []
         for skill in self.SKILLS:
-            for block in self.blocks(skill):
+            document = "references/usage.md" if skill == "audit" else "SKILL.md"
+            for block in self.blocks(skill, document):
                 lines = [line.strip() for line in block.splitlines()]
                 sources = [line for line in lines if line.startswith('source "$LINTEL_SOURCE_ROOT/')]
                 if not sources:
+                    continue
+                if skill == "audit":
+                    self.assertEqual(sources, ['source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?'])
+                    self.assertEqual(
+                        [line for line in lines if line.startswith("source_root=")],
+                        ['source_root="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"'],
+                    )
+                    self.assertEqual(lines.count("export LINTEL_SOURCE_ROOT"), 1)
+                    source_index = lines.index(sources[0])
+                    commands.append((skill, "\n".join(block.splitlines()[:source_index + 1])))
                     continue
                 bindings = [line for line in lines if line.startswith("export LINTEL_SOURCE_ROOT=")]
                 self.assertEqual(len(bindings), 1, skill)
@@ -899,9 +910,9 @@ class WorkflowSourceExamples(unittest.TestCase):
         self.assertEqual({skill for skill, _ in commands}, set(self.SKILLS))
         return commands
 
-    def test_orientator_uses_the_explicit_catalog_owner_without_target_fallback(self) -> None:
-        caller = (ROOT / "skills/orientator/SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("](../catalog/references/intent.md)", caller)
+    def test_catalog_uses_its_owned_intent_method_without_target_fallback(self) -> None:
+        caller = (ROOT / "skills/catalog/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("references/intent.md", caller)
         owner = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
         blocks = [block for block in re.findall(r"^[ \t]*```bash[^\n]*\n(.*?)^[ \t]*```[ \t]*$",
                                                 owner, re.DOTALL | re.MULTILINE)
@@ -961,7 +972,16 @@ class WorkflowSourceExamples(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertTrue(result.stdout.startswith("plugin:"), result.stdout)
-                self.assertIn("selected:" + self.plugin.as_posix(), result.stdout)
+                selected_root = self.plugin.as_posix()
+                if skill == "audit":
+                    canonical = self.run_shell(
+                        'cd "$CLAUDE_PLUGIN_ROOT" && pwd -P',
+                        CLAUDE_PLUGIN_ROOT=self.plugin.as_posix(),
+                    )
+                    self.assertEqual(canonical.returncode, 0, canonical.stderr)
+                    selected_root = canonical.stdout.strip()
+                    self.assertTrue(selected_root, "Bash canonical plugin root must be nonempty")
+                self.assertIn("selected:" + selected_root, result.stdout)
 
     def test_required_helpers_refuse_missing_trusted_binding(self) -> None:
         for skill, command in self.required_sources():

@@ -926,6 +926,221 @@ class CommandSurfaceTests(unittest.TestCase):
                     findings = self.findings(f"Use {prefix}{name}.\n")
                     self.assertTrue(any(item.code == "retired-command" for item in findings), findings)
 
+    def test_migrated_public_entries_are_rejected_as_routes(self):
+        for name in sorted(guard.FORMER_PUBLIC_ENTRIES):
+            for prefix in ("/li:", "/li-", "skill:"):
+                with self.subTest(name=name, prefix=prefix):
+                    findings = self.findings(f"Use {prefix}{name}.\n")
+                    self.assertTrue(any(item.code == "retired-command" for item in findings), findings)
+
+            canonical = self.skill(name)
+            findings = guard.scan(self.root)
+            self.assertTrue(any(item.path == canonical.relative_to(self.root).as_posix()
+                                and item.code == "retired-entry" for item in findings), findings)
+            canonical.unlink()
+
+            native = self.write(f".github/skills/li-{name}/SKILL.md",
+                                f"---\nname: li-{name}\ndescription: Retired entry.\n---\n")
+            findings = guard.scan(self.root)
+            self.assertTrue(any(item.path == native.relative_to(self.root).as_posix()
+                                and item.code == "retired-entry" for item in findings), findings)
+            native.unlink()
+
+    def test_migrated_names_are_accepted_only_in_the_former_entry_column(self):
+        owners = {
+            "perf-mode": "/li:context-budget --advice",
+            "handoff-size-check": "/li:context-budget --handoff",
+            "orientator": "/li:catalog via skills/catalog/references/intent.md",
+            "skill-router": "/li:catalog via skills/catalog/references/intent.md",
+            "role-new": "/li:role --create and --update",
+            "roles-list": "/li:role --list",
+            "brief-forge": "skills/brief-forge/references/handoff.md",
+            "usage-log": "/li:audit --usage",
+            "maintenance": "/li:doctor and /li:context-budget and /li:audit",
+        }
+        for owner in ("context-budget", "catalog", "role", "audit", "doctor"):
+            self.skill(owner)
+        self.write("skills/catalog/references/intent.md", "# Intent narrowing\n")
+        self.write("skills/brief-forge/references/handoff.md", "# Internal handoff method\n")
+        rows = "| Former entries | Current route |\n|---|---|\n"
+        rows += "".join(f"| `{name}` | {route} |\n" for name, route in owners.items())
+        self.assertEqual(self.findings(rows, "docs/migrations/commands.md"), [])
+        self.assertTrue(self.findings(
+            rows.replace("/li:context-budget --advice", "/li:perf-mode --advice"),
+            "docs/migrations/commands.md"))
+
+    def test_negative_route_assertions_are_not_callable_routes(self):
+        shell = ('if [ ! -e "$REPO_ROOT/skills/skill-router/SKILL.md" ]; then\n'
+                 '  pass "former public skill absent"\nfi\n')
+        self.assertEqual(self.findings(shell, "tests/shape/retired-route.sh"), [])
+        positive_shell = 'test -e "$REPO_ROOT/skills/skill-router/SKILL.md"\n'
+        self.assertTrue(self.findings(positive_shell, "tests/shape/retired-route.sh"))
+        (self.root / "tests/shape/retired-route.sh").unlink()
+        self.assertEqual(self.findings(
+            'assert "/li:brief-forge" not in skill_body\n', "tests/unit/retired-route.py"), [])
+        self.assertTrue(self.findings(
+            'assert "/li:brief-forge" in skill_body\n', "tests/unit/retired-route.py"))
+
+    def test_negative_assertions_do_not_hide_executed_retired_routes(self):
+        path = "tests/unit/retired-route.py"
+        for source in (
+            'self.assertFalse(dispatch("/li:brief-forge"))\n',
+            'self.assertNotIn("/li:brief-forge", routes); dispatch("/li:brief-forge")\n',
+            'self.assertFalse(dispatch(ROOT / "skills/brief-forge/SKILL.md").exists())\n',
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(any(item.code == "retired-command"
+                                    for item in self.findings(source, path)))
+
+    def test_table_data_cannot_retype_a_current_route_column(self):
+        path = "docs/migrations/commands.md"
+        for text in (
+            "| Status | Current route |\n|---|---|\n"
+            "| pending | Former entry |\n| ready | /li:brief-forge |\n",
+            "| Former entry | Current route |\n"
+            "| /li:brief-forge | /li:verify |\n",
+            "| Status | Former entry |\n|---|---|\n"
+            "| pending | old |\n| ready | /li:brief-forge | extra |\n",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(any(item.code == "retired-command"
+                                    for item in self.findings(text, path)))
+
+    def test_migration_tables_do_not_hide_executable_contexts(self):
+        self.skill("audit")
+        rows = ('| Current route | Former entry |\n|---|---|\n'
+                '| /li:audit | {dispatch("/li:maintenance")} |\n')
+        python_source = 'rendered = f"""\n' + rows + '"""\n'
+        javascript_source = "const rendered = `\n" + rows.replace("{dispatch", "${dispatch") + "`;\n"
+        cases = {
+            "tests/unit/current-route.py": python_source,
+            "tests/unit/current-route.sh": 'rendered="\n' + rows.replace(
+                '{dispatch("/li:maintenance")}', '$(dispatch "/li:maintenance")') + '"\n',
+            "lib/current-route.js": javascript_source,
+            "docs/current-route.md": "```python\n" + python_source + "```\n",
+            "docs/indented-route.md": "\n".join("    " + line for line in python_source.splitlines()) + "\n",
+            "docs/html-route.md": "<script>\n" + javascript_source + "</script>\n",
+            "docs/inline-html-route.md": rows.replace(
+                '{dispatch("/li:maintenance")}', '<script>dispatch("/li:maintenance")</script>'),
+            "scaffolding/current-route.py.template": python_source,
+        }
+        for path, source in cases.items():
+            with self.subTest(path=path):
+                findings, observations = self.observations(source, path)
+                self.assertTrue(any(item.path == path and item.code == "retired-command"
+                                    for item in findings), findings)
+                self.assertFalse(any(item["path"] == path
+                                     and item["field"] == "migration table, former-entry column"
+                                     for item in observations), observations)
+            (self.root / path).unlink()
+        ordinary = '| Current route | Former entry |\n|---|---|\n| /li:audit | `maintenance` |\n'
+        self.assertEqual(self.findings(ordinary, "docs/migrations/ordinary.md"), [])
+        self.assertEqual(self.findings(ordinary, "scaffolding/guide.md.template"), [])
+        quoted_html = rows.replace('{dispatch("/li:maintenance")}',
+                                   '`<script>dispatch("/li:maintenance")</script>`')
+        self.assertEqual(self.findings(quoted_html, "docs/migrations/quoted-html.md"), [])
+
+    def test_frozen_manifest_observations_bind_exact_bytes_and_fields(self):
+        relative = "presentations/tech-shots-2026-09-25/verification/cycle-routes-source-manifest.json"
+        value = "skills/orientator/SKILL.md"
+        content = '{"path":"' + value + '"}\n'
+        path = self.write(relative, content)
+        declaration = {
+            "sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+            "fields": {value: 1},
+            "reason": "Preserved fixture source path, not a current route.",
+        }
+        with mock.patch.dict(guard.FROZEN_SOURCE_MANIFESTS, {relative: declaration}, clear=True):
+            scrubbed, observations, error = guard.frozen_manifest_observations(path, relative, content)
+            self.assertIsNone(error)
+            self.assertNotIn(value, scrubbed)
+            self.assertEqual(len(observations), 1)
+            self.assertEqual(observations[0]["classification"], "HISTORICAL")
+            changed = content.replace("path", "route")
+            path.write_text(changed, encoding="utf-8", newline="")
+            _, observations, error = guard.frozen_manifest_observations(path, relative, changed)
+            self.assertEqual(observations, [])
+            self.assertIn("bytes changed", error)
+            self.assertIsNotNone(error)
+
+    def test_public_migration_guide_covers_exact_entries_owners_and_shapes(self):
+        expected = {
+            "perf-mode": (
+                ("/li:context-budget --advice",),
+                ("--budget", "--ceiling", "--decay-policy", "--cost-estimate", "--off",
+                 "observed values", "cannot raise a host limit"),
+            ),
+            "handoff-size-check": (
+                ("/li:context-budget --handoff",),
+                ("--map", "--warm-path", "--capacity", "--capacity-source", "--used",
+                 "--usage-source", "--usage-kind", "--reserve",
+                 "LINTEL_WORK_MAP", "--plan", "selected artifacts"),
+            ),
+            "orientator": (
+                ("/li:catalog", "skills/catalog/references/intent.md", "SENSE"),
+                ("--mode", "--from", "metadata-first", "high-risk confirmation", "decision audit"),
+            ),
+            "skill-router": (
+                ("/li:catalog", "skills/catalog/references/intent.md"),
+                ("free-text", "native discovery", "no second routing algorithm", "dispatch"),
+            ),
+            "role-new": (
+                ("/li:role --create", "/li:role --update [id]"),
+                ("sensitivity checks", "reviewed digests", "conflict-safe publication",
+                 "implicit activation"),
+            ),
+            "roles-list": (
+                ("/li:role --list", "--include-private"),
+                ("metadata-only", "explicit consent", "does not change the active role"),
+            ),
+            "brief-forge": (
+                ("skills/brief-forge/references/handoff.md", "forge_handoff"),
+                ("<kind> <from> <to> <content_type> <content_file>", "five kinds",
+                 "audit gates", "exit 3", "caller-owned dispatch"),
+            ),
+            "usage-log": (
+                ("/li:audit --usage",),
+                ("--report", "--days <N>", "--topn <N>", "--tokens-by-skill",
+                 "manual recording", "no automatic invocation telemetry", "unobserved"),
+            ),
+            "maintenance": (
+                ("/li:context-budget", "/li:doctor --layers-only", "/li:audit --usage"),
+                ("--force-compact", "--monitor-paths", "--simulate-tokens <workflow>",
+                 "--rust-report", "--bytes <N>", "--map <work.json>",
+                 "none compacts", "authorizes cleanup"),
+            ),
+        }
+        guide = (ROOT / "docs" / "migrations" / "2026-09-25-native-workflows.md").read_text(
+            encoding="utf-8")
+        in_replacements = False
+        rows = {}
+        for line in guide.splitlines():
+            if line.strip() == "## Capability replacements":
+                in_replacements = True
+                continue
+            if in_replacements and line.startswith("## "):
+                break
+            if not in_replacements or not line.startswith("|"):
+                continue
+            cells = line.split("|", 3)
+            if len(cells) < 4:
+                continue
+            former_names = re.findall(r"`([^`]+)`", cells[1])
+            for name in former_names:
+                if name in expected:
+                    rows.setdefault(name, []).append((former_names, cells[2]))
+
+        self.assertEqual(set(rows), set(expected))
+        for name, (owners, required) in expected.items():
+            with self.subTest(name=name):
+                self.assertEqual(len(rows[name]), 1)
+                former_names, replacement = rows[name][0]
+                self.assertEqual(former_names, [name])
+                for owner in owners:
+                    self.assertIn(owner.casefold(), replacement.casefold())
+                for detail in required:
+                    self.assertIn(detail.casefold(), replacement.casefold())
+
     def test_native_and_bare_slash_retired_invocations_are_rejected(self):
         for spelling in ("`li-qa`", "`/qa --json`", "`/codex`", "the `codex` skill"):
             with self.subTest(spelling=spelling):
@@ -1341,7 +1556,14 @@ class CommandSurfaceTests(unittest.TestCase):
                 self.assertTrue(self.findings("Use /li:qa.\n", path))
 
     def historical_register(self, records):
-        self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 1, "records": records}))
+        bound = []
+        for record in records:
+            entry = dict(record)
+            path = self.root / entry.get("path", "")
+            if path.is_file():
+                entry.setdefault("sha256", hashlib.sha256(path.read_bytes()).hexdigest())
+            bound.append(entry)
+        self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 1, "records": bound}))
 
     def register_codes(self):
         return {item.code for item in guard.scan(self.root)}
@@ -1357,6 +1579,22 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertEqual({item["field"].split(":")[0] for item in observed}, {"retired-command", "missing-path"})
         self.assertTrue(all(item["reason"] == "Dated audit narrative." for item in observed))
 
+    def test_same_count_replacement_cannot_reuse_historical_content_binding(self):
+        path = ".claude/engineering/audits/old.md"
+        original = "# Old audit\nThe recorded comparison used /li:qa.\n"
+        for replacement in (
+                "# Old audit\nRun /li:qa now as the current workflow.\n",
+                "# Current invocation menu\nThe recorded comparison used /li:qa.\n"):
+            with self.subTest(replacement=replacement):
+                self.write(path, original)
+                self.historical_register([{"path": path, "count": 1, "reason": "Dated comparison input."}])
+                self.assertEqual(guard.scan(self.root), [])
+                self.write(path, replacement)
+                findings = guard.scan(self.root)
+                self.assertIn("historical-register", {item.code for item in findings})
+                self.assertTrue(any(item.path == path and item.code == "retired-command"
+                                    for item in findings))
+
     def test_new_reference_in_a_declared_record_fails_the_exact_count(self):
         path = ".claude/plans/old/plan.md"
         self.write(path, "Use /li:qa.\n")
@@ -1364,11 +1602,28 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertEqual(guard.scan(self.root), [])
         self.write(path, "Use /li:qa.\n## Current\nRun /li:office-hours now.\n")
         findings = guard.scan(self.root)
-        self.assertIn("historical-record-count", {item.code for item in findings})
+        self.assertIn("historical-register", {item.code for item in findings})
         self.assertEqual({(item.path, item.code) for item in findings if item.path == path},
                          {(path, "retired-command")})
+        self.historical_register([{"path": path, "count": 1, "reason": "Completed plan."}])
+        self.assertIn("historical-record-count", self.register_codes())
         self.write(path, "Use /li:verify.\n")
+        self.historical_register([{"path": path, "count": 1, "reason": "Completed plan."}])
         self.assertEqual(self.register_codes(), {"historical-record-count"})
+
+    def test_historical_register_requires_an_exact_raw_digest(self):
+        path = ".claude/engineering/audits/old.md"
+        self.write(path, "# Old audit\nThe original comparison used /li:qa.\n")
+        for digest in (None, "", "A" * 64, "0" * 63, "0" * 64, 123):
+            with self.subTest(digest=digest):
+                entry = {"path": path, "count": 1, "reason": "Original comparison input."}
+                if digest is not None:
+                    entry["sha256"] = digest
+                self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 1, "records": [entry]}))
+                findings = guard.scan(self.root)
+                self.assertIn("historical-register", {item.code for item in findings})
+                self.assertTrue(any(item.path == path and item.code == "retired-command"
+                                    for item in findings))
 
     def test_historical_record_headings_bound_the_declared_range(self):
         path = ".claude/plans/todo.md"
@@ -1538,6 +1793,12 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(self.findings(
             "| Former entries | Current route |\n|---|---|\n"
             "| `qa-only` | `/li:qa --scope one\\|two` |\n", path))
+        self.assertEqual(self.findings(
+            "| Lane | Former entries | Current route |\n|---|---|---|\n"
+            "| P9 | `skill-router` | `/li:verify` |\n", path), [])
+        self.assertTrue(self.findings(
+            "| Lane | Former entries | Current route |\n|---|---|---|\n"
+            "| P9 | `skill-router` | `/li:skill-router` |\n", path))
 
     def test_required_skill_tree_cannot_be_missing_or_empty(self):
         for path in (self.root / "skills").glob("*/SKILL.md"):

@@ -5,6 +5,15 @@ continuation and its integration are delivered. The original programme remains
 open and was explicitly resumed on 2026-10-08; do not replay a completed source scope.
 **Work map:** [work.json](work.json).
 
+**Current recovery, 2026-10-16:** use
+`jokerman-microsoft-repository-completion`. It preserves the original integrated
+lanes at `63b6fcd0` and the prior coordinator's caller/generated/migration repairs.
+Version 0.14.0 identifies the nine-entry command-surface change. Finish current
+source review and frozen-tree verification, then the explicitly requested feature
+branch push and pull request. No prior trial, old PASS or interrupted full suite
+is new acceptance. The original 84-finding programme and exact holds stay distinct;
+default-branch mutation still needs its own current authorization.
+
 ## Context
 
 The operator has repeatedly requested working fixes for all Skill review v2

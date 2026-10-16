@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/unit/closeout-additions-present.sh
 #
-# Verifies v3.6 closeout additions: handoff-size-check (3.2) +
+# Verifies v3.6 closeout additions: handoff sizing owner (3.2) +
 # agent-dispatch-rules doc (2.4) + the layer-model L-trio reflection (M-3) +
 # memory.md M-1 reviewer-concerns tracking.
 # tag: v3.6 closeout
@@ -17,23 +17,24 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/closeout-additions-present.sh"
 echo "========================================"
 
-# 3.2: handoff-size-check skill
-HSC="$REPO_ROOT/skills/handoff-size-check/SKILL.md"
-if [ -f "$HSC" ]; then
-  name=$(grep '^name:' "$HSC" | head -1 | awk '{print $2}')
-  if [ "$name" = "handoff-size-check" ]; then
-    pass "handoff-size-check skill present"
+# 3.2: handoff sizing belongs to context-budget
+CTXBUDGET="$REPO_ROOT/skills/context-budget/SKILL.md"
+if [ -f "$CTXBUDGET" ]; then
+  name=$(grep '^name:' "$CTXBUDGET" | head -1 | awk '{print $2}')
+  if [ "$name" = "context-budget" ]; then
+    pass "context-budget owns budget and handoff routes"
   else
-    fail "handoff-size-check frontmatter mismatch"
+    fail "context-budget frontmatter mismatch"
   fi
-  if grep -q '/li:context-budget --handoff' "$HSC" &&
-     grep -q 'required bound' "$HSC"; then
-    pass "handoff-size-check delegates while preserving required bounds"
+  if grep -q -- '--handoff' "$CTXBUDGET" &&
+     grep -q -- '--skip-handoff-size-check' "$CTXBUDGET" &&
+     grep -q 'required bound' "$CTXBUDGET"; then
+    pass "context-budget preserves explicit handoff sizing bounds"
   else
-    fail "handoff-size-check lost its owner or required-bound contract"
+    fail "context-budget lost its handoff route or required-bound contract"
   fi
 else
-  fail "handoff-size-check SKILL.md missing"
+  fail "context-budget SKILL.md missing"
 fi
 
 # 2.4: agent-dispatch-rules concept doc

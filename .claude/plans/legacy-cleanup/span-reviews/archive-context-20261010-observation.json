@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "host",
+  "source": "Copilot App cross-session reply observed by coordinator; semantic actor observation only, not a strict P05 host receipt or host independence guarantee",
+  "reference": "ghapp://sessions/4b1139a4-a87b-40a6-bfaf-1328a0fbe679; session-state e660a0eb-fb1e-4741-9593-88db867fc5b1; source_tool_call_id call_qNfMnf1RR7GzF2cq0b9Q4JnZ",
+  "record_digest": "a3d4934f514ec297ad613d8ed5d52af2bf9f24a5e2fde683f45d0b838298b23b",
+  "attempt_id": "archive-span-context-20261010-r1",
+  "builder": {
+    "context": "archive-span-context-20261010-r1",
+    "id": "copilot-session:9854860c-9038-488a-b7b6-1b14150fbaa6"
+  },
+  "reviewer": {
+    "id": "copilot-project-session:4b1139a4-a87b-40a6-bfaf-1328a0fbe679",
+    "context": "copilot-session:e660a0eb-fb1e-4741-9593-88db867fc5b1"
+  }
+}

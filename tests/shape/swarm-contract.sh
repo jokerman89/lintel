@@ -26,12 +26,14 @@ for marker in (
     "execution_mode: \"swarm\"",
     "evidence/topology candidate frontier",
     "Never dispatch from `wave` alone",
-    "/li:brief-forge",
+    "skills/brief-forge/references/handoff.md",
+    "forge_handoff subagent_spawn",
     "sequenced",
     "no-subagent",
     "integrated REVIEW",
 ):
     assert marker in skill_body, f"swarm skill missing contract marker: {marker}"
+assert "/li:brief-forge" not in skill_body, "swarm must not invoke the retired public Brief Forge skill"
 
 workflow_markers = {
     "skills/plan/SKILL.md": ("Step 6a", "operator opts in", "li-swarm.py"),

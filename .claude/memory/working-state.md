@@ -1,116 +1,95 @@
 # Memory — current Lintel working state
 
-Updated 2026-10-09. This is a short continuity view, not task authority or release
-clearance. Read the selected work's original specification, cards and evidence.
-Durable rules remain in [lessons.md](lessons.md); calibration is in
-[personas.md](personas.md).
-
-## Active — original V2 findings
-
-**Resumed 2026-10-08:** the operator again requested the complete original
-outcome. Live inspection found the original streams parked, not awaiting
-questions or carrying an unmerged PR; their heads are already main ancestors.
-The coordinator's stale 0.13.3 checkout was advanced normally to current main
-`99d47150` on an owned continuation branch. Old worktrees and evidence remain.
-The 45 prior remaining clauses are under original-ID reconciliation and
-dependency-ordered planning; they are not one blanket blocked portfolio.
-No new finding closure or source acceptance is claimed by this recovery note.
-
-**Status:** the original 84 findings remain a separately tracked programme.
-The latest compatible source continuation landed on **main** as **0.13.9** at
-`8c04c7f665068b8822090a0a6254330b55dede50`, verified remotely at
-2026-10-04T18:28:29Z. Separate independent source review, actual QA/SHIP gates and
-exact-head CI precede that readback. Source presence is not proof of review or
-acceptance, and this delivery does not complete all of Skill review v2.
-
-**Authority:** [work map](../plans/v2-findings/work.json),
+Updated 2026-10-16. Continuity only, not authority or release clearance.
+Read [original work map](../plans/v2-findings/work.json),
 [specification](../plans/v2-findings/spec.md) and
-[original cards](../plans/v2-findings/plan.md). Preserve every original ID and
-earlier package fix. The source covers artifact safety/fidelity, agent and
-coordination methods, discovery/lifecycle, external authority and conditional
-core procedures. It does not decide portfolio retirement, create a Visio writer
-or establish comparative model/native efficacy.
+[original cards](../plans/v2-findings/plan.md). Preserve all original IDs.
+Durable rules remain in [lessons.md](lessons.md).
 
-**Historical starting baseline:** the main revision supplied for this continuation was
-`f9796bb8b3fbcdab3e235f30401933ea1b2f3162`, version **0.13.7**.
-It was fast-forwarded normally through the 0.13.8 source delivery at `b2516af5`
-and its capture at `19fd4dcc`, then the verified 0.13.9 source above.
+## Active coordinator fan-in
 
-**Closeout:** the [current delivery account](../plans/v2-findings/plan.md#verified-method-continuation-delivery-2026-10-04)
-records the three original source closures and their current independent
-acceptance. CI 37217388629 passed 600 scripts across three OSes with no required
-failures/skips/partials; 114 local methods, all 43 shape checks and native checks also
-passed. These observations are not one combined count or model-efficacy evidence.
+Branch `jokerman-microsoft-repository-completion` resumes the original work after
+the current operator requested completion and push. The four producer lanes at
+`63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's attributable
+caller/generated/migration patch are preserved. Original worktrees are untouched;
+neither branch cleanup nor default-branch mutation is part of this continuation.
+Version 0.14.0 marks the public command migration; current source review and
+publication remain pending.
 
-**Remaining:** 39 original findings are source-complete/retained-guidance; 45
-retain explicit clauses. Only A-07/B-09/B-11 changed disposition in this
-continuation; the other 81 were preserved, not re-reviewed. Remaining public
-portfolio/role/phase choices, empirical comparisons and exact host holds need
-their own authority/evidence. Do not turn that into a blanket blocker or replay
-the delivered source packages.
+Nine retired public identities map to complete current owners/internal methods.
+The route guard binds 33 historical containing files by raw SHA-256 plus exact
+counts. Earlier tests and two narrow archive decisions remain dated evidence;
+original declarations and set06 records are untouched.
+Do not edit byte-bound shared todo or rewrite historical reviews.
 
-**Current ready batch:** exact reconciliation found seven compatible residuals:
-B-03/B-04/B-05/B-06/B-10/C-04 and G-11. The revised fourteen-package plan is
-machine-`APPROVED` under the operator's explicit parallel-execution authority so
-the content-bound review contract can inspect it. That status is not BUILD
-clearance. R5 resolved all three R4 P2s and SPEC passed, but QUALITY found one
-bounded P12 P2: the plan named revisions and dates without defining the date
-values or their authority. The corrected plan now fixes `reviewed: 2026-09-28`
-as the retained V2 review date and `recorded: 2026-10-09` as the repository
-record date, explicitly not upstream verification or commit dates, and binds the
-original source findings and pinned URLs. P11A/P11B/P11C/P12 remain held until a
-fresh independent plan review passes and the coordinator supplies the exact
-reviewed base/brief. Their
-committed scopes are disjoint with coordinator-only fan-in. Pre-review
-uncommitted changes on the isolated budget and Brief Forge branches are
-quarantined, not accepted evidence; do not commit, discard or integrate them
-before reconciling them against the reviewed base and brief.
+Prior r6 source reviews and all earlier failed/stale attempts remain historical,
+not acceptance of this new checkout/version. Current independent source review
+and exact committed-tree checks are required before publication. Scanner
+input-size/fan-out remains a recorded P3 advisory, not a reproduced failure.
 
-**Execution limit:** use LF recipe files through `bin/li-run`, as the native
-caller specifies. The retained P3 records that Windows `bash -c` transport can
-reinterpret backslashes; that route and live-host enforcement are not claimed.
+The earlier exact-tree trial reached 197/200 passes, with three failures; its
+next attempt was interrupted. Neither is a release PASS. The new verification
+parent uses explicit short owned home/temp roots, excludes inherited credentials
+and Git configuration injections, and has the declared jq/YAML dependencies.
+Current checks passed the repaired runner contract, all 115 route-guard units,
+the affected discovery/role/upstream/usage checks and strict shape 43/43 with no
+failures, skips or partials. Usage has one explicitly POSIX-only FIFO case that
+was not executed on Windows. The initial missing-interpreter-entrypoint failures
+and actual red counterexamples remain in session evidence, not relabeled.
+The unpublished `e615a286` trial's unrelated raw line-ending changes are not
+imported into the product.
 
-## Recorded deliveries — read within their exact scope
+The first independent source review found stale current-document bindings,
+Cursor version drift, mixed skip-accounting and executable-table masking, plus
+a stale inventory count. Candidate repairs preserve old records and add actual
+negative regressions, including inline executable HTML versus quoted inert HTML.
+The exact archived report has a narrow byte-preserving Git attribute. Fresh
+source SPEC/QUALITY, installed consumers and hosted CI remain separate gates.
+The incremental source SPEC recheck subsequently passed all seven source clauses.
+Both installed optional-family closure cases passed against the frozen candidate;
+the final isolated whitespace check separately detected CRLF in the edited
+attributes file. That file now pins its own LF check-in policy; the archived
+report keeps its exact bytes. Quality and exact-head hosted checks remain open.
+The quality review then identified a malformed DISCOVER producer and missing
+usage name/cardinality boundary regressions. The corrected recipe releases the
+existing JSON envelope for selected inputs and preserves refusal/bypass paths;
+new tests cover 256/257-character names and 1,024/1,025 distinct keys with
+continued known-key aggregation and unchanged inputs. A fresh review is pending.
 
-These are pointers to existing delivery records, not new acceptance or a reason
-to re-execute finished batches:
+Old lane records do not close the changed aggregate. Current integrated review,
+profile-bound QA and hosted checks remain separate requirements; historical
+coordination/runtime references are not transferred to this checkout.
 
-- **V2 method corrections, 0.13.7:** the earlier `bcd041eb` batch covered 36
-  mapped leaves. Its maps and delivery evidence remain in the
-  [preserved delivery account](working-state-history-2026-10-03.md#delivered---v2-method-corrections-2026-09-30).
-- **Universal implementation:** the [final report](../plans/universal-implementation/reports/final.md)
-  records PR #93 / `80002ed4` and 109/109 items in its final authorized scope.
-  [ADR-0033](../decisions/0033-remove-document-format-acceptance-and-pdf-reader.md)
-  removed A15.1–A15.4 and the PDF reader; those format requirements were never
-  accepted or waived. The old 79/113 recovery note is historical, not current
-  programme status, and the final count is not all-client or model efficacy.
-- **Native client parity:** the [PR-1a delivery record](../plans/native-client-parity/review.md#final-review-and-delivery-pr-1a-2026-09-29)
-  covers only `394ed0b8` / 0.13.0. It does not close native hooks, shared leaves,
-  whole-increment review or the unauthorized other-client increment.
-- **Reusable patterns and Adaptive review:** use their
-  [delivery handoff](../plans/reusable-patterns/handoff.md) and
-  [delivery record](../plans/adaptive-review/handoff.md#delivered-on-2026-09-29)
-  for the recorded 0.13.1/0.13.2 scopes and retained limitations.
-- **Other programmes:** consult the original
-  [cleanup integration record](../plans/legacy-cleanup/integration-state.md) and
-  [review-remediation map](../plans/review-remediation/work.json). No unrelated
-  programme is declared complete from an old headline in memory.
+## Original programme and recorded delivery
 
-## Holds and evidence boundaries
+The original 84 findings remain a separately tracked programme: prior accounting
+is 39 source-complete/retained-guidance and 45 with explicit remaining clauses.
+Source presence is not proof of review or acceptance. Do not replay delivered
+packages or infer programme completion from local lane PASS.
 
-The two exact native-hook and ADR-drafting HOST refusals remain untouched.
-Do not retry, reword, reassign or infer new permission from this note. They do
-not prevent independent authorized corrections. Real writers, live targets,
-publication, profile changes and new experiments retain their own authority.
-Missing required evidence remains open; source checks are not native execution.
+The resumed original baseline `f9796bb8` / 0.13.7 advanced through 0.13.8 and
+the recorded 0.13.9 source delivery at `8c04c7f6`, remotely verified
+2026-10-04T18:28:29Z. The
+[scoped delivery account](../plans/v2-findings/plan.md#verified-method-continuation-delivery-2026-10-04)
+retains actual independent acceptance and CI evidence. Current continuation
+preserves the original-ID batch B-03/B-04/B-05/B-06/B-10/C-04/G-11.
 
-## Cold history
+Other completed scopes have their own records:
+[Universal final report](../plans/universal-implementation/reports/final.md),
+[native parity review](../plans/native-client-parity/review.md),
+[pattern handoff](../plans/reusable-patterns/handoff.md) and
+[adaptive delivery](../plans/adaptive-review/handoff.md).
+These do not close held hooks, empirical comparisons or other portfolios.
 
-[Working-state history through 2026-10-03](working-state-history-2026-10-03.md)
-preserves the former 1,086-line working state byte-for-byte, including the existing
-WIP entry. It stays in this folder so its relative links keep their base.
-The archive is cold repository history, **not live instructions**, current status
-or standing authorization. No private runtime/session history was copied.
+## Holds and cold history
 
-This is retrieval clarity, **not measured compounding**. No lesson/pattern was
-automatically promoted, no learning engine was added and no efficacy is inferred.
+Exact native-hook and ADR-drafting HOST refusals remain untouched: do not retry,
+reword or reassign them. They do not block independently authorized corrections.
+Production, private publication, profile changes and experiments retain their
+own authority; source checks are not native enforcement or model efficacy.
+
+[History through 2026-10-03](working-state-history-2026-10-03.md) and
+[prior 2026-10-10 continuity](working-state-history-2026-10-10.md) preserve their
+complete prior text in this folder so relative links retain their base.
+Cold history is not live instructions or standing authorization. No private
+runtime/session history is copied. Retrieval clarity is not measured compounding.

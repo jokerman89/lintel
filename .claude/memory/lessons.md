@@ -567,8 +567,8 @@ Related: [[L-023]] the reader half of the same lesson.
 would have fixed the past and left the future broken: `skills/ship/SKILL.md` **instructs** every
 pull request to carry an `AI-assisted` provenance block and a generated-by trailer, so the very next
 `/li:ship` would have reintroduced exactly what the rewrite removed. The same shape appeared twice
-more in the same cycle — a Swedish phrase in `skills/perf-mode`'s frontmatter propagating verbatim
-into the generated public catalog, and `bin/li-wiki-gen` hardcoding a stale version heading and an
+more in the same cycle — a Swedish phrase in the then-current budget skill's frontmatter propagating
+verbatim into the generated public catalog, and `bin/li-wiki-gen` hardcoding a stale version heading and an
 11-of-25 subset of the concept list into every regeneration.
 
 **How to apply:**

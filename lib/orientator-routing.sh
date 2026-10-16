@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# lib/orientator-routing.sh — mechanical routing helpers for skills/orientator
+# lib/orientator-routing.sh — mechanical routing helpers for SENSE
 # component: orientator-routing
 # implements: ADR-0028
 # intent: docs/concepts/orientator.md
 # constraints: none; recommendations do not execute workflows
 # last_intent_review: 2026-09-22
 #
-# Sourced by skills/orientator/SKILL.md. Provides:
+# Sourced by skills/sense/SKILL.md. Provides:
 #   classify_intent <prompt>        → intent enum
 #   match_workflow <intent> <default> [namespace] → workflow string
 #   assess_risk <workflow> <high_risk_csv> → risk enum

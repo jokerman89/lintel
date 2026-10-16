@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -206,6 +207,83 @@ class BriefForgeBoundaryTests(unittest.TestCase):
                     tail = json.loads(result.stdout)["tail"]
                     self.assertEqual(tail["completeness_score"], 40)
                     self.assertIn("fixture", tail["evaluators_run"])
+
+    def test_missing_pointer_blocks_through_reference_method(self) -> None:
+        self.policy("  on_subagent_spawn:\n    enabled: true\n    evaluators: [stale]\n  budget_tokens: 5000\n")
+        content = json.loads(self.content.read_text(encoding="utf-8"))
+        payload = {"content": content, "context_pointers": ["missing.txt"]}
+        self.content.write_text(json.dumps(payload), encoding="utf-8")
+
+        result = self.forge(internal_method=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("Evaluator failed; no envelope was released", result.stderr)
+        self.assertIn("BLOCKED - release_failed", result.stderr)
+        audit = self.audit_text()
+        self.assertIn("brief_forge_blocked", audit)
+        self.assertIn('"reason":"release_failed"', audit)
+        self.assertNotIn("brief_forge_emitted", audit)
+
+    def test_discover_recipe_uses_selected_inputs_and_preserves_refusals(self) -> None:
+        source = (ROOT / "skills/discover/SKILL.md").read_text(encoding="utf-8")
+        section = source.split("### Step 6b", 1)[1].split("### Step 7", 1)[0]
+        recipe = re.search(r"```bash\n(.*?)\n```", section, re.S).group(1)
+        script = self.root / "discover synthesis.sh"
+        script.write_bytes(('synth_task="$1"\nshift\nsynth_inputs=("$@")\n' + recipe).encode("utf-8"))
+        temporary = self.root / "handoff temporary files"
+        temporary.mkdir()
+        selected = "selected facts 'quoted'.md"
+        (self.root / selected).write_text("# Selected fixture findings\n", encoding="utf-8")
+        original_inputs = {name: (self.root / name).read_bytes() for name in ("spec.md", selected)}
+        env = dict(self.env, TMPDIR=temporary.as_posix(), TMP=temporary.as_posix(),
+                   TEMP=temporary.as_posix(), LINTEL_PYTHON=Path(sys.executable).as_posix())
+
+        def run(paths, *, actual_env=None, selected_script=script):
+            return subprocess.run(
+                [BASH, "--noprofile", "--norc", str(selected_script),
+                 "Synthesize the explicitly selected fixture findings.", *paths],
+                cwd=self.root, env=actual_env or env, capture_output=True,
+                text=True, encoding="utf-8", timeout=120)
+
+        for pointers in (["spec.md", selected], []):
+            result = run(pointers)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            envelope = json.loads(result.stdout)
+            self.assertEqual(envelope["body"]["context_pointers"], pointers)
+            self.assertEqual(envelope["body"]["content"]["task"],
+                             "Synthesize the explicitly selected fixture findings.")
+            self.assertIn("state of the art + gaps + recommendations",
+                          envelope["body"]["content"]["constraints"])
+            self.assertEqual(envelope["body"]["content"]["acceptance"],
+                             ["structured brief with state-of-the-art, gaps, recommendations, citations"])
+            self.assertEqual(envelope["head"]["from"], "discover")
+            self.assertEqual(envelope["head"]["to"], "ResearchSynthesizer")
+            self.assertEqual(list(temporary.iterdir()), [])
+        missing = run(["missing-selected.md"])
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertEqual(missing.stdout, "")
+        self.assertIn("BLOCKED", missing.stderr)
+        self.assertEqual(list(temporary.iterdir()), [])
+        unselected = self.root / "unselected synthesis.sh"
+        unselected.write_bytes(('synth_task="$1"\n' + recipe).encode("utf-8"))
+        refused = run([], selected_script=unselected)
+        self.assertNotEqual(refused.returncode, 0)
+        self.assertEqual(refused.stdout, "")
+        self.assertIn("NEEDS_CONTEXT", refused.stderr)
+        invalid_source = run(["spec.md"], actual_env=dict(
+            env, LINTEL_SOURCE_ROOT=(self.root / "missing-source").as_posix(),
+            CLAUDE_PLUGIN_ROOT=ROOT.as_posix()))
+        self.assertNotEqual(invalid_source.returncode, 0)
+        self.assertEqual(invalid_source.stdout, "")
+        self.assertIn("NEEDS_CONTEXT", invalid_source.stderr)
+        self.assertEqual(list(temporary.iterdir()), [])
+        self.policy("  on_subagent_spawn:\n    enabled: false\n    evaluators: []\n")
+        disabled = run(["spec.md"])
+        self.assertEqual(disabled.returncode, 3, disabled.stderr)
+        self.assertEqual(disabled.stdout, "")
+        self.assertEqual(list(temporary.iterdir()), [])
+        self.assertEqual({name: (self.root / name).read_bytes() for name in original_inputs},
+                         original_inputs)
 
     def test_yaml_malformed_types_aliases_and_tags_fail_without_echo(self) -> None:
         marker = "YAML-FORBIDDEN-FIXTURE"

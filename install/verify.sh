@@ -209,7 +209,7 @@ cmd_context_engine() {
   [ -n "$ROOT_DOC" ] && ok "CONTEXT-ENGINE.md present ($ROOT_DOC)" || { fail "CONTEXT-ENGINE.md missing"; EXIT_CODE=1; }
 
   # skills at repo root skills/<name>/SKILL.md
-  for skill in context-budget context-warm perf-mode; do
+  for skill in context-budget context-warm; do
     found=""
     for path in \
       "$REPO_ROOT/skills/$skill/SKILL.md" \
@@ -218,9 +218,6 @@ cmd_context_engine() {
     done
     [ -n "$found" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
   done
-
-  # (context-budgetwatch removed 2026-06-10 — consolidated into context-budget --watch;
-  #  the old name resolves via config/aliases.yaml until 2026-09-10)
 
   # ContextBudgetAdvisor at agents/engineering/
   if [ -f "$REPO_ROOT/agents/engineering/ContextBudgetAdvisor.md" ]; then
@@ -542,7 +539,7 @@ Subcommands:
   --counts         summary counts (default)
   --tier-stamps    check agent tier-stamping
   --portability    (v2) CLI-SUPPORT-V2-SCHEMA + li-cli-fingerprint
-  --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
+  --context-engine CONTEXT-ENGINE.md + context-budget/context-warm + ContextBudgetAdvisor
   --plugin-manifests       (v3) validate JSON + presence of per-CLI plugin manifests
   --agents-categorized     (v3) verify all agents have category frontmatter
   --scaffolding-coherence  verify foundation templates present (v5 .claude/ layout)

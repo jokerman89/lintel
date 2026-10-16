@@ -190,6 +190,66 @@ class Sandbox(unittest.TestCase):
 
 
 class UsageReportContracts(Sandbox):
+    def test_skill_name_length_bound_preserves_counts_and_existing_aggregates(self):
+        for character in ("s", "\u03b1"):
+            for length in (256, 257):
+                with self.subTest(character=character, length=length):
+                    name = character * length
+                    path = write(self.root / "name-bound/usage-skill.jsonl", "\n".join([
+                        event("invocation", skill="alpha", tokens_est="1"),
+                        event("invocation", skill=name, tokens_est="2"),
+                        event("invocation", skill="alpha", tokens_est="3"),
+                    ]) + "\n")
+                    before = self.tree_state()
+                    result = self.run_cmd(
+                        [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                         "--file", path, "--limit", "1"], expect=0)
+                    summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                    self.assertEqual(summary["records"]["lines"], 3)
+                    self.assertEqual(summary["records"]["valid"], 3)
+                    self.assertEqual(summary["records"]["selected"], 3)
+                    self.assertTrue(summary["processing"]["complete"])
+                    self.assertEqual(summary["diagnostic_count"], 0)
+                    usage = summary["usage"]
+                    self.assertEqual(usage["by_skill"]["alpha"], {"count": 2, "tokens_est": "4"})
+                    self.assertEqual(usage["aggregate_complete"], length == 256)
+                    self.assertEqual(usage["skills_observed"], 2 if length == 256 else 1)
+                    if length == 256:
+                        self.assertEqual(usage["by_skill"][name], {"count": 1, "tokens_est": "2"})
+                        self.assertEqual(usage["diagnostic_count"], 0)
+                    else:
+                        self.assertNotIn(name, usage["by_skill"])
+                        self.assertEqual(usage["diagnostic_count"], 1)
+                        self.assertEqual(usage["diagnostic_codes"], {"skill_bound": 1})
+                    self.assertEqual(self.tree_state(), before)
+
+    def test_skill_cardinality_bound_keeps_admitted_keys_and_raw_counts(self):
+        for count in (1024, 1025):
+            with self.subTest(count=count):
+                rows = [event("invocation", skill=f"skill-{index:04d}", tokens_est="1")
+                        for index in range(count)]
+                rows.extend([event("invocation", skill="skill-0000", tokens_est="2"),
+                             event("invocation", skill="skill-0000", tokens_est="3")])
+                path = write(self.root / "key-bound/usage-skill.jsonl", "\n".join(rows) + "\n")
+                before = self.tree_state()
+                result = self.run_cmd(
+                    [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                     "--file", path, "--topn", "1", "--limit", "1"], expect=0)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                self.assertEqual(summary["records"]["lines"], count + 2)
+                self.assertEqual(summary["records"]["valid"], count + 2)
+                self.assertEqual(summary["records"]["selected"], count + 2)
+                self.assertTrue(summary["processing"]["complete"])
+                self.assertEqual(summary["diagnostic_count"], 0)
+                usage = summary["usage"]
+                self.assertEqual(usage["skills_observed"], 1024)
+                self.assertEqual(usage["aggregate_complete"], count == 1024)
+                self.assertEqual(usage["by_skill"], {"skill-0000": {"count": 3, "tokens_est": "6"}})
+                self.assertEqual(usage["diagnostic_count"], count - 1024)
+                self.assertEqual(usage["diagnostic_codes"],
+                                 {} if count == 1024 else {"skill_bound": 1})
+                self.assertEqual(self.tree_state(), before)
+
     def test_single_oversized_tail_is_incomplete_without_materializing_detail(self):
         path = self.root / "tail-audit/usage-skill.jsonl"
         path.parent.mkdir()
@@ -847,7 +907,7 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(summary["records"]["lines"], 0)
 
     @unittest.skipUnless(hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"),
-                         "POSIX FIFOs are unavailable on this host")
+                         "platform: posix-only; real FIFO requires mkfifo and O_NONBLOCK")
     def test_real_fifo_swapped_after_path_validation_does_not_block(self):
         with tempfile.TemporaryDirectory() as folder:
             decoy = write(Path(folder) / "decoy.jsonl",

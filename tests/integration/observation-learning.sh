@@ -9,4 +9,4 @@
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PYTHONDONTWRITEBYTECODE=1 "${LINTEL_PYTHON:-python3}" \
-  "$root/tests/integration/observation-learning.py" --root "$root" "$@"
+  "$root/tests/integration/observation-learning.py" --root "$root" -v "$@"

@@ -55,11 +55,17 @@ It works as follows:
     be System32's WSL launcher.
   - Where `python3` is missing, use `python`, the same fallback the wrappers use.
 
-A unittest skip whose reason begins `platform: windows-only` marks a Windows-native assertion.
-Off Windows, the runner reports such skips as `N/A`, not as partial coverage, but only when every
-skip in the entry carries that reason and at least one test in it ran. On Windows the same skips
-count as partial, so strict mode refuses them. Any other skip reason keeps refusing strict
-acceptance. Keep the reason free of apostrophes: unittest then prints it in double quotes, which
+A unittest skip whose reason begins `platform: windows-only` marks a Windows-native assertion;
+`platform: posix-only` marks a POSIX-native assertion such as a real FIFO. On the opposite
+platform, the runner reports these skips as `N/A`, not executed coverage, but only when every
+skip in the entry carries the applicable reason and at least one test in it ran. On the
+assertion's own platform the same skips count as partial, so strict mode refuses them.
+Both platforms still require their own strict CI execution; a Windows N/A result does not
+verify FIFO behavior. Any other skip reason keeps refusing strict acceptance. The unittest
+N/A classification never hides a separate shell `SKIP:` line: mixed output remains partial
+and fails strict acceptance even when every unittest skip targets the other platform. The unittest
+entry must emit verbose per-test skip reasons. Keep reasons free of apostrophes: unittest prints
+those reasons in double quotes, which
 the runner does not recognize, so the skip refuses fail-closed.
 
 The full developer suite needs Bash 4+ because several existing routing tests and developer

@@ -192,8 +192,8 @@ Validation: report the actual exact-file check; method not executed by this exam
 Description: "Summarize explicitly supplied commits and approved issue data."
 Draft preserves input citations and separates completed work from blockers.
 No network query or customer-data export follows from authoring the draft.
-> /li:skill-new --name skill-router --dir drafts/skill-router
-COLLISION: skill:skill-router is already canonical. No file written.
+> /li:skill-new --name catalog --dir drafts/catalog
+COLLISION: skill:catalog is already canonical. No file written.
 ```
 
 Aliases collide only when they are actually declared by the selected source.
