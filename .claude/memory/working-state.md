@@ -8,15 +8,12 @@ Durable rules remain in [lessons.md](lessons.md).
 
 ## Active coordinator fan-in
 
-Branch `jokerman-microsoft-repository-completion` resumes the original work after
-the current operator requested completion and push. The four producer lanes at
-`63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's attributable
-caller/generated/migration patch are preserved. Original worktrees are untouched;
-neither branch cleanup nor default-branch mutation is part of this continuation.
-The reviewed source checkpoint is
-`2065603f3c3161c836c8d53276b9dd0e6a46cc0d`, version **0.14.0**. This is a
-feature-branch candidate, not a main-branch delivery, release tag or completed
-84-finding programme.
+Branch `jokerman-microsoft-repository-completion` preserves the four producer
+lanes at `63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's
+caller/generated/migration patch. Reviewed source checkpoint
+`2065603f3c3161c836c8d53276b9dd0e6a46cc0d` is a **0.14.0** feature-branch
+candidate, not main delivery, a release tag or programme completion.
+Original worktrees are untouched; branch cleanup is not part of this continuation.
 
 Nine retired public identities map to complete current owners/internal methods.
 The route guard binds 33 historical containing files by raw SHA-256 plus exact
@@ -31,26 +28,19 @@ advisory; no exhaustion failure was reproduced. The exact selected source was
 verified unchanged before committing. Earlier r6, failed and stale observations
 remain history, not substituted clearance.
 
-The earlier exact-tree trial reached 197/200 passes, with three failures; its
-next attempt was interrupted. Neither is a release PASS. The new verification
-parent uses explicit short owned home/temp roots, excludes inherited credentials
-and Git configuration injections, and has the declared jq/YAML dependencies.
-Current checks passed the repaired runner contract, all 115 route-guard units,
-the affected discovery/role/upstream/usage checks and committed-tree shape
-43/43 with no failures, skips or partials. Usage has one explicitly POSIX-only FIFO case that
-was not executed on Windows. The initial missing-interpreter-entrypoint failures
-and actual red counterexamples remain in session evidence, not relabeled.
-The unpublished `e615a286` trial's unrelated raw line-ending changes are not
-imported into the product.
+Verification uses short owned home/temp roots, excludes inherited credentials
+and Git configuration injections, and supplies declared dependencies.
+The runner, 115 route-guard units, affected owner checks and committed shape
+43/43 passed. The POSIX-only FIFO case was not executed on Windows.
+Failed/interrupted trials and actual red cases remain failures, not release
+evidence. The unpublished `e615a286` trial's unrelated raw line-ending changes
+were not imported.
 
-Source review drove real repairs to metadata/version parity, mixed skip
-accounting, executable-table masking, the install diagnostic and DISCOVER's
-producer schema. Actual red/green cases retain the rejected results.
-The archive report keeps its exact bytes; the attributes file pins its own LF
-policy. The 18-method Forge suite exercises the real DISCOVER recipe, including
-selected quoted paths, missing input, explicit no-file research, cleanup and
-bypass. Two usage cases check 256/257-character names and 1,024/1,025 keys without
-losing raw counts, admitted-key aggregation or input bytes.
+Review-driven repairs cover metadata/version parity, skip accounting, executable
+table masking, install diagnostics and DISCOVER's producer. The archive keeps
+exact bytes and attributes pin LF. All 18 Forge methods pass, including real
+selected-input, refusal, cleanup and bypass cases. Usage tests cover 256/257-character
+names and 1,024/1,025 keys without losing raw counts, admitted keys or input bytes.
 
 Both installed optional-family closure cases, native consistency and cached
 whitespace passed together on frozen r4. Later r5 caller changes have their own
