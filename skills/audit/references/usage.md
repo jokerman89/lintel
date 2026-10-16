@@ -67,6 +67,8 @@ without optional `tokens_est` stays `observed`/exit 0. Usage-only findings
 are additive under `usage.diagnostics`/`usage.diagnostic_codes` and set
 `usage.aggregate_complete` to false. A file that exists but cannot be opened or
 read is `source.state: unreadable` with a `cannot read …` error summary, exit 2.
+Paths containing a NUL are also unreadable (exit 2), not absent input, even when
+the host's existence check would return false for that invalid path.
 `--limit` caps detailed preview before retention (at most 50 rows and 64 KiB).
 Before aggregating all rows, inspect `processing.complete` and
 `usage.aggregate_complete`; do not request the entire population as a preview.

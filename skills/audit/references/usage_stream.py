@@ -2,7 +2,7 @@
 # implements: ADR-0008, ADR-0034
 # intent: skills/audit/references/usage.md
 # constraints: read-only explicit source; reuse event parser; bounded scan, rows and aggregates
-# last_intent_review: 2026-10-09
+# last_intent_review: 2026-10-16
 """Bound usage reporting without replacing the shared event schema or classifier."""
 from __future__ import annotations
 
@@ -80,8 +80,11 @@ def legacy_summary(events, display):
 
 
 def source_state(native_io, path):
-    """Classify the named source like li-events.read_source without reading its bytes."""
+    """Classify the named source without reading its bytes."""
     try:
+        # exists() can hide an invalid NUL path as an ordinary missing file.
+        if "\0" in os.fspath(path):
+            raise ValueError("source path contains a null byte")
         target = native_io(path)
         if not target.exists():
             return "absent", target, None

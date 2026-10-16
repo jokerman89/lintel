@@ -615,6 +615,19 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(summary["usage"]["diagnostic_codes"], {"invalid_tokens_est": 2})
         self.assertFalse(summary["usage"]["aggregate_complete"])
 
+    def test_null_byte_source_is_unreadable_before_native_path_probe(self):
+        helper = runpy.run_path(str(ROOT / "skills/audit/references/usage_stream.py"))
+        before = self.tree_state()
+        for name in ("invalid\0path", "invalid\ud800x\udfff\0"):
+            with self.subTest(path=ascii(name)):
+                native_io = mock.Mock(side_effect=lambda value: value)
+                state, target, problem = helper["source_state"](native_io, Path(name))
+                self.assertEqual(state, "unreadable")
+                self.assertIsNone(target)
+                self.assertIn("null byte", problem)
+                native_io.assert_not_called()
+        self.assertEqual(self.tree_state(), before)
+
     def test_lone_surrogates_are_parseable_under_strict_ascii_stdout(self):
         for skill in ("\ud800", "\udfff"):
             with self.subTest(skill=ascii(skill)):

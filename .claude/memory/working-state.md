@@ -21,7 +21,7 @@ counts. Earlier tests and two narrow archive decisions remain dated evidence;
 original declarations and set06 records are untouched.
 Do not edit byte-bound shared todo or rewrite historical reviews.
 
-Current independent SPEC and QUALITY r5 passed their actual shared packet
+Independent source SPEC and QUALITY r5 passed their actual shared packet
 checks: all seven original source clauses and all 26 quality questions are
 covered, with no open P1/P2 findings. One scanner input-size/fan-out P3 remains
 advisory; no exhaustion failure was reproduced. The exact selected source was
@@ -46,6 +46,11 @@ Both installed optional-family closure cases, native consistency and cached
 whitespace passed together on frozen r4. Later r5 caller changes have their own
 producer regressions and regenerated checks; the r4 runs are not called r5 runs.
 The committed source checkpoint also passed native/catalog/wiki checks.
+
+CI follow-up repaired the hot-state budget and NUL-path admission, with inline
+review and red/green regressions. First run 38959091020 remains failed. The branch
+is pushed; native draft-PR creation is blocked by Enterprise Managed User 403.
+Hosted acceptance must still be checked for the exact proposed head.
 
 The full-range mechanical M2 inventory is **RED, 13 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches

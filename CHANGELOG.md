@@ -22,6 +22,7 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 - Usage reporting preserves exact counts, estimates and malformed/empty distinctions
   while bounding reads and refusing non-regular or replaced inputs and output errors.
+  NUL-containing source paths are unreadable errors on every host, not absent input.
 - The current-command guard distinguishes actual invocations from typed migration
   data and binds historical exceptions to exact file bytes as well as counts.
 - Strict test accounting recognizes explicitly opposite-platform assertions only
