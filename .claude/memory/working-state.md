@@ -13,8 +13,10 @@ the current operator requested completion and push. The four producer lanes at
 `63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's attributable
 caller/generated/migration patch are preserved. Original worktrees are untouched;
 neither branch cleanup nor default-branch mutation is part of this continuation.
-Version 0.14.0 marks the public command migration; current source review and
-publication remain pending.
+The reviewed source checkpoint is
+`2065603f3c3161c836c8d53276b9dd0e6a46cc0d`, version **0.14.0**. This is a
+feature-branch candidate, not a main-branch delivery, release tag or completed
+84-finding programme.
 
 Nine retired public identities map to complete current owners/internal methods.
 The route guard binds 33 historical containing files by raw SHA-256 plus exact
@@ -22,43 +24,50 @@ counts. Earlier tests and two narrow archive decisions remain dated evidence;
 original declarations and set06 records are untouched.
 Do not edit byte-bound shared todo or rewrite historical reviews.
 
-Prior r6 source reviews and all earlier failed/stale attempts remain historical,
-not acceptance of this new checkout/version. Current independent source review
-and exact committed-tree checks are required before publication. Scanner
-input-size/fan-out remains a recorded P3 advisory, not a reproduced failure.
+Current independent SPEC and QUALITY r5 passed their actual shared packet
+checks: all seven original source clauses and all 26 quality questions are
+covered, with no open P1/P2 findings. One scanner input-size/fan-out P3 remains
+advisory; no exhaustion failure was reproduced. The exact selected source was
+verified unchanged before committing. Earlier r6, failed and stale observations
+remain history, not substituted clearance.
 
 The earlier exact-tree trial reached 197/200 passes, with three failures; its
 next attempt was interrupted. Neither is a release PASS. The new verification
 parent uses explicit short owned home/temp roots, excludes inherited credentials
 and Git configuration injections, and has the declared jq/YAML dependencies.
 Current checks passed the repaired runner contract, all 115 route-guard units,
-the affected discovery/role/upstream/usage checks and strict shape 43/43 with no
-failures, skips or partials. Usage has one explicitly POSIX-only FIFO case that
+the affected discovery/role/upstream/usage checks and committed-tree shape
+43/43 with no failures, skips or partials. Usage has one explicitly POSIX-only FIFO case that
 was not executed on Windows. The initial missing-interpreter-entrypoint failures
 and actual red counterexamples remain in session evidence, not relabeled.
 The unpublished `e615a286` trial's unrelated raw line-ending changes are not
 imported into the product.
 
-The first independent source review found stale current-document bindings,
-Cursor version drift, mixed skip-accounting and executable-table masking, plus
-a stale inventory count. Candidate repairs preserve old records and add actual
-negative regressions, including inline executable HTML versus quoted inert HTML.
-The exact archived report has a narrow byte-preserving Git attribute. Fresh
-source SPEC/QUALITY, installed consumers and hosted CI remain separate gates.
-The incremental source SPEC recheck subsequently passed all seven source clauses.
-Both installed optional-family closure cases passed against the frozen candidate;
-the final isolated whitespace check separately detected CRLF in the edited
-attributes file. That file now pins its own LF check-in policy; the archived
-report keeps its exact bytes. Quality and exact-head hosted checks remain open.
-The quality review then identified a malformed DISCOVER producer and missing
-usage name/cardinality boundary regressions. The corrected recipe releases the
-existing JSON envelope for selected inputs and preserves refusal/bypass paths;
-new tests cover 256/257-character names and 1,024/1,025 distinct keys with
-continued known-key aggregation and unchanged inputs. A fresh review is pending.
+Source review drove real repairs to metadata/version parity, mixed skip
+accounting, executable-table masking, the install diagnostic and DISCOVER's
+producer schema. Actual red/green cases retain the rejected results.
+The archive report keeps its exact bytes; the attributes file pins its own LF
+policy. The 18-method Forge suite exercises the real DISCOVER recipe, including
+selected quoted paths, missing input, explicit no-file research, cleanup and
+bypass. Two usage cases check 256/257-character names and 1,024/1,025 keys without
+losing raw counts, admitted-key aggregation or input bytes.
 
-Old lane records do not close the changed aggregate. Current integrated review,
-profile-bound QA and hosted checks remain separate requirements; historical
-coordination/runtime references are not transferred to this checkout.
+Both installed optional-family closure cases, native consistency and cached
+whitespace passed together on frozen r4. Later r5 caller changes have their own
+producer regressions and regenerated checks; the r4 runs are not called r5 runs.
+The committed source checkpoint also passed native/catalog/wiki checks.
+
+The full-range mechanical M2 inventory is **RED, 13 flags** across its four
+questions: entry removals, one method move, description/default-pattern matches
+and one shared-helper change. This is an impact inventory, not thirteen
+demonstrated bugs or a green compatibility claim. The original preservation map
+and migration document explain the intentional changes; the result is retained.
+
+Old lane records do not close the changed aggregate. Inspect hosted checks for
+the exact proposed head and reconcile the original shared swarm/P05 acceptance
+before main delivery; no previous target's profile/runtime references transfer.
+The next action is current-head CI and maintainer/formal acceptance, not a replay
+of the implemented producer lanes. No release clearance is asserted here.
 
 ## Original programme and recorded delivery
 
