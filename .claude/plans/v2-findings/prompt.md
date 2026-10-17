@@ -1,8 +1,9 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** DRAFT for the 2026-10-17 original-residual extension. Compatible
-implementation authority is retained, but no writer starts before the committed
-scope and current plan-review gates are ready. Earlier deliveries remain history.
+**Status:** APPROVED scope for the 2026-10-17 compatible original-residual extension.
+Draft `3b97eedd8abd94ee89860e8b6c2d15c3a6228d72` preceded restored approval.
+No writer starts before the current independent plan-review gate passes;
+scope approval alone is not BUILD clearance. Earlier deliveries remain history.
 **Work map:** [work.json](work.json).
 
 **Current recovery, 2026-10-17:** use

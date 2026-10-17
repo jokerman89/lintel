@@ -1,11 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** DRAFT for the 2026-10-17 original-residual extension. The operator's
-renewed completion instruction covers compatible corrections, not new architectural
-or empirical choices. Machine approval is revoked while these artifacts change.
-Earlier scope approval and delivered evidence remain historical facts. Restore
-APPROVED only for the committed authorized scope, then obtain the current
-independent plan-review gate before BUILD. No writer starts from this draft.
+**Status:** APPROVED scope for the 2026-10-17 compatible original-residual extension,
+under the operator's renewed completion instruction. The exact draft was committed
+at `3b97eedd8abd94ee89860e8b6c2d15c3a6228d72` before restoring machine approval.
+This does not authorize architectural/empirical changes or establish review.
+The current independent plan-review gate must pass before BUILD; scope approval
+alone is not writer clearance. Earlier delivered evidence remains historical.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.

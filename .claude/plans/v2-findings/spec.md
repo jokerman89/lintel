@@ -1,8 +1,8 @@
 # Spec: complete the original V2 findings
 
-**Status:** DRAFT for the 2026-10-17 residual-extension review. Existing authority
-for concrete compatible corrections is retained; machine approval is revoked while
-the plan changes. Architectural alternatives and experiments remain unapproved.
+**Status:** APPROVED scope for the 2026-10-17 compatible residual extension.
+Existing implementation authority is retained; current independent plan review
+remains required. Architectural alternatives and experiments remain unapproved.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
 with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.
