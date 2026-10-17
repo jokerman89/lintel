@@ -1,9 +1,10 @@
 # Spec: complete the original V2 findings
 
-**Status:** APPROVED for concrete corrections compatible with the constraints below.
-Architectural alternatives and experiments remain unapproved until specifically resolved.
+**Status:** DRAFT for the 2026-10-17 residual-extension review. Existing authority
+for concrete compatible corrections is retained; machine approval is revoked while
+the plan changes. Architectural alternatives and experiments remain unapproved.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
-with working repository changes, renewed on 2026-10-08, not another report or a
+with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.
 **Plan:** [plan.md](plan.md).
 **Work map:** [work.json](work.json).
@@ -111,3 +112,23 @@ repository record. Neither is an upstream verification or commit date. Its
 review-summary path, exact G-02/G-03/G-06/G-07/G-11 source set, three revisions
 and original revision-pinned URLs are machine-checked without adding or changing
 `last_verified`.
+
+## Post-fan-in source residuals
+
+P13-P16 in the original plan elaborate the independently identified compatible
+residuals of lane-A-01/A-02/A-06, lane-E-05/E-14, lane-d-03, F-05, C-07,
+G-03/G-07 and ENT-01/ENT-05/ENT-06. The current task source remains `plan.md`;
+no replacement findings inventory or competing task authority is created.
+
+Correct actual planning/drafting templates and their consumers, CAPTURE's
+reaffirmation caller, promotion-evidence prose and undated-observation wording.
+Curate only the selected project rule/recurrence through existing conditional
+updates, preserving all prior text and unrelated blocks. Acceptance remains
+per original clause, with real source negatives and affected helper checks.
+
+This changes no phase, leaf-duration policy, role/tool inventory, pack inheritance,
+schema, automatic learning/telemetry or host permission. No held ADR/native-hook
+operation, external communication, promotion destination, new benchmark or
+unprovided upstream source is authorized. The original four-lane source history
+and final integrated review/QA/SHIP requirements remain; green c4032c3f CI is a
+baseline observation, not clearance for the new result or the whole programme.

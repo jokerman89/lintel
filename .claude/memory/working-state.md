@@ -1,6 +1,6 @@
 # Memory — current Lintel working state
 
-Updated 2026-10-16. Continuity only, not authority or release clearance.
+Updated 2026-10-17. Continuity only, not authority or release clearance.
 Read [original work map](../plans/v2-findings/work.json),
 [specification](../plans/v2-findings/spec.md) and
 [original cards](../plans/v2-findings/plan.md). Preserve all original IDs.
@@ -47,10 +47,10 @@ whitespace passed together on frozen r4. Later r5 caller changes have their own
 producer regressions and regenerated checks; the r4 runs are not called r5 runs.
 The committed source checkpoint also passed native/catalog/wiki checks.
 
-CI follow-up repaired the hot-state budget and NUL-path admission, with inline
-review and red/green regressions. First run 38959091020 remains failed. The branch
-is pushed; native draft-PR creation is blocked by Enterprise Managed User 403.
-Hosted acceptance must still be checked for the exact proposed head.
+CI follow-up repaired the hot-state budget and NUL-path admission with actual
+red/green regressions. Run 38970268976 passed all 23 jobs at pushed `c4032c3f`;
+the first failed run remains history. Native draft-PR creation still returns
+Enterprise Managed User 403; no alternate publication channel is authorized.
 
 The full-range mechanical M2 inventory is **RED, 13 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches
@@ -61,8 +61,8 @@ and migration document explain the intentional changes; the result is retained.
 Old lane records do not close the changed aggregate. Inspect hosted checks for
 the exact proposed head and reconcile the original shared swarm/P05 acceptance
 before main delivery; no previous target's profile/runtime references transfer.
-The next action is current-head CI and maintainer/formal acceptance, not a replay
-of the implemented producer lanes. No release clearance is asserted here.
+All 45 prior residuals were independently reconciled; P13-P16 cover thirteen ready
+original IDs. Their scope is DRAFT pending current plan review, not BUILD clearance.
 
 ## Original programme and recorded delivery
 

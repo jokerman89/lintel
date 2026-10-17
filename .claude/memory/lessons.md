@@ -710,6 +710,17 @@ decision, observation or host boundary. A parked owner or a recommendation not
 yet elaborated into a card is not itself a blocker. Do not stop the whole outcome
 at a successful sub-release or leave stale task labels as the next session's truth.
 
+**Amended 2026-10-17 (green CI is not residual reconciliation):** The coordinator
+pushed the compatible owner integration with all 23 hosted jobs passing, then
+stopped while the original plan still required reconciliation of the other
+findings. The operator again requested completion rather than a partial handoff.
+
+After a verified batch, recover the exact original inputs and examine each
+remaining claim before deciding that no further source work is ready. A failed
+PR operation blocks that publication path, not unrelated authorized corrections.
+Preserve its refusal; do not change channels, waive held work or use a successful
+subset to justify a task-complete signal.
+
 ## L-030 — Adding a client adapter must preserve Universal product identity
 
 **Date:** 2026-09-20

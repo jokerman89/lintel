@@ -1,18 +1,19 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** APPROVED original mapped work; the 0.13.9 three-clause source
-continuation and its integration are delivered. The original programme remains
-open and was explicitly resumed on 2026-10-08; do not replay a completed source scope.
+**Status:** DRAFT for the 2026-10-17 original-residual extension. Compatible
+implementation authority is retained, but no writer starts before the committed
+scope and current plan-review gates are ready. Earlier deliveries remain history.
 **Work map:** [work.json](work.json).
 
-**Current recovery, 2026-10-16:** use
+**Current recovery, 2026-10-17:** use
 `jokerman-microsoft-repository-completion`. It preserves the original integrated
 lanes at `63b6fcd0` and the prior coordinator's caller/generated/migration repairs.
-Version 0.14.0 identifies the nine-entry command-surface change. Finish current
-source review and frozen-tree verification, then the explicitly requested feature
-branch push and pull request. No prior trial, old PASS or interrupted full suite
-is new acceptance. The original 84-finding programme and exact holds stay distinct;
-default-branch mutation still needs its own current authorization.
+Version 0.14.0 identifies the nine-entry command-surface change. Its source and CI
+repairs are pushed at `c4032c3f204e76ddb90f7f06351a35bd3d45274e`; hosted run
+38970268976 passed all 23 jobs. Native PR creation still fails with EMU 403 and no
+PR exists; do not substitute another channel. Continue P13-P16 below, not another
+implementation of the producer lanes. Old review/CI is not acceptance of new
+changes. Default-branch mutation still needs its own current authorization.
 
 ## Context
 
@@ -33,8 +34,11 @@ Input digests are in the spec. Private originals are retained by the coordinatin
 session; request the selected unchanged source when needed, never reconstruct it
 from a memory summary or publish raw private reports.
 
-The current disposition is 39 source-complete/retained-guidance findings and 45
-with remaining clauses. The plan's checked boxes cover its elaborated compatible
+The historical disposition is 39 source-complete/retained-guidance findings and 45
+with remaining clauses. A fresh independent reconciliation of all 45 identified
+six further source-satisfied residuals and thirteen original IDs with ready
+compatible work; other rows retain specific decisions, observations and holds.
+The plan's checked boxes cover its elaborated compatible
 clauses and source delivery, not closure of all 84 findings. Preserve the exact
 remaining clauses; distinguish unimplemented proposals from genuine authority,
 host and evidence boundaries rather than calling every open item a blocker.
@@ -55,12 +59,13 @@ the shell recipes from LF files through `bin/li-run`, as the native caller
 requires; Windows command-string `-c` transport is not the validated route.
 Further original closure needs its own actual source or outcome evidence.
 
-## Active owner consolidation
+## Implemented owner-consolidation scope
 
-Continue from main `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
-The original streams are parked and their retained commits already landed;
-there is no missing PR to merge. The coordinator now uses its explicitly owned
-current checkout rather than the obsolete 0.13.3 source it had loaded.
+The batch started from main `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
+The pre-batch streams are parked and their retained commits already landed.
+That older integration does not imply a PR or main delivery for the current
+candidate. Continue in the explicitly owned current checkout, not the obsolete
+0.13.3 source or any retained worktree.
 
 P11A/P11B/P11C in the original plan supply a concrete
 preservation/migration map for six original findings and nine redundant public
@@ -72,8 +77,8 @@ V2-INTEGRATION are reopened only for their outstanding clauses. There are 57
 mapped IDs in fourteen packages.
 Prior package reviews remain historical, not acceptance of these new changes.
 
-Obtain the current independent plan gate, implement the ready package and its
-real discriminating tests, then current source/integration acceptance. Keep
+These producer changes are now integrated; preserve their source and obtain
+current aggregate acceptance without replaying their implementation. Keep
 the installed-snapshot verification free of concurrent source/runtime writes.
 Use only this target's fresh profile. Independently reconcile the other
 original residuals and continue the next ready work; do not stop after the
@@ -92,6 +97,30 @@ replacement/flag map for all nine retired public identities.
 P12 records the retained review date (`2026-09-28`) separately from the
 repository record date (`2026-10-09`); neither is upstream verification. Bind
 the exact five source findings, three revisions and their original pinned URLs.
+
+## Next ready original work
+
+Read the complete P13-P16 clauses in the same plan and their original source
+requirements. There are now 61 mapped IDs in eighteen packages; four additional
+original IDs are elaborated and nine prior IDs reopen only their residual clauses.
+Earlier bounded acceptance and the complete private original inventory remain.
+
+The coordinator executes these shared-owner packages serially; no new worker
+lane or concurrent write scope is introduced. P13 aligns the actual plan template,
+SENSE and two concept consumers with accepted advisory/decision-complete planning.
+P14 fixes CAPTURE's cold-trio caller, promotion-evidence prose and a stale maintainer
+count. P15 makes five retained drafting-role templates conditional on real facts
+and marks the Word note's missing observation identity unknown. P16 uses existing
+conditional updates to distinguish the L-050 rule and L-062 recurrence without
+deleting history, adding duplicates or claiming prevention.
+
+Commit the exact authorized planning extension before restoring machine approval,
+then obtain the current independent plan-review gate before source work. The
+approval flag alone is not BUILD clearance. Use original IDs, explicit package
+preimages, red/green regressions and independent SPEC then QUALITY. Keep the
+accepted short-leaf and nine-phase contracts. Preserve all named roles/tools and
+helper/provenance schemas. Remaining architectural, empirical, source and exact
+host requirements are separate; a blocked PR does not block these corrections.
 
 ## Constraints
 

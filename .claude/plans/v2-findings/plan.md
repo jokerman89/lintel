@@ -1,9 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** APPROVED for the compatible source continuation's scope under the
-operator's renewed 2026-10-08 completion instruction. The previously delivered scope and its approval remain
-historical facts. BUILD still requires the current independent plan-review gate;
-this approval is not a claim that review or implementation has passed.
+**Status:** DRAFT for the 2026-10-17 original-residual extension. The operator's
+renewed completion instruction covers compatible corrections, not new architectural
+or empirical choices. Machine approval is revoked while these artifacts change.
+Earlier scope approval and delivered evidence remain historical facts. Restore
+APPROVED only for the committed authorized scope, then obtain the current
+independent plan-review gate before BUILD. No writer starts from this draft.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
@@ -12,6 +14,8 @@ ready continuation opts into the committed four-lane Swarm profile at
 [swarm/coordination.json](swarm/coordination.json); shared fan-in remains
 coordinator-owned and sequential.
 **Continuation baseline:** `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
+**Residual baseline:** `c4032c3f204e76ddb90f7f06351a35bd3d45274e` (0.14.0
+feature branch; hosted run 38970268976 passed 23 jobs, not main delivery).
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
 obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
@@ -27,7 +31,8 @@ without changing IDs or rewriting the prior P3 review. The current map retains
 elaborated scope, not completion of all 84 findings. The new continuation
 elaborates original B-03, reopens the outstanding public-front clauses of
 B-04/B-05/B-06/B-10/C-04 and the bounded G-11 record residual, and reopens
-integration: 57 IDs in fourteen packages.
+integration: 57 IDs in fourteen packages. The 2026-10-17 extension below retains
+those IDs and elaborates four more original IDs: 61 IDs in eighteen packages.
 Previously accepted source clauses and review records remain history. See the
 [current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
@@ -73,19 +78,23 @@ elapsed estimates or dropping the original finding IDs.
 | Package ID | Outcome | Leaf IDs (dependency order) | Owner | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
 | P1 | Artifact input/output and inspection safety | lane-d-10, lane-d-04, lane-d-05, lane-d-06, lane-d-12 | Coordinator | none | Original source/fixture and numerical contrast criteria |
-| P2 | Evidence-correct agent methods and callers | lane-E-04, lane-E-08, lane-E-09, lane-E-11, lane-E-13, F-04, F-05 | Coordinator | none | Actual role/caller and preservation checks |
-| P3 | Consistent coordination methods | lane-A-01, lane-A-02, lane-B-08, lane-B-12, C-02, C-07, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
-| P4 | Shared document/design fidelity | lane-d-03, lane-d-07, lane-d-08, lane-d-09, lane-d-11, lane-E-14, F-02 | Coordinator | P1 | Real checker/emitter negatives and source preservation |
+| P2 | Evidence-correct agent methods and callers | lane-E-04, lane-E-08, lane-E-09, lane-E-11, lane-E-13, F-04 | Coordinator | none | Actual role/caller and preservation checks |
+| P3 | Consistent coordination methods | lane-B-08, lane-B-12, C-02, C-08, C-09 | Coordinator | P2 | Signal, lifecycle, warning and unchanged-control tests |
+| P4 | Shared document/design fidelity | lane-d-07, lane-d-08, lane-d-09, lane-d-11, F-02 | Coordinator | P1 | Real checker/emitter negatives and source preservation |
 | P5 | Shared discovery/lifecycle observations | lane-B-07, C-06 | Coordinator | P3 | Real transport, reader and retained-interface tests |
-| P6 | Preserved role/runtime capabilities | lane-E-01, lane-E-01b, lane-E-02, lane-E-03, lane-E-05, lane-E-06, lane-E-10, lane-E-12, F-06 | Coordinator | P2, P4, P5 | Actual configuration/helper tests and inventory parity |
+| P6 | Preserved role/runtime capabilities | lane-E-01, lane-E-01b, lane-E-02, lane-E-03, lane-E-06, lane-E-10, lane-E-12, F-06 | Coordinator | P2, P4, P5 | Actual configuration/helper tests and inventory parity |
 | P7 | Original external authority and required controls | lane-A-05, G-01, ENT-02, ENT-03 | Coordinator | P6 | Real map/profile/evidence refusal and preservation tests |
-| P8 | Conditional core methods and usable hot memory | lane-A-06, lane-d-02, ENT-05, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
+| P8 | Conditional core methods and usable hot memory | lane-d-02, F-01 | Coordinator | P3, P4, P5, P6, P7 | Full procedure/history equality and current caller checks |
 | P10 | Complete original premise and recovery-method handoff | lane-A-07, lane-B-09, lane-B-11 | Coordinator | P3, P8 | Exact method preservation, real snippet regressions and native resource closure |
 | P11A | One budget, usage and maintenance owner | lane-B-03, lane-B-10, C-04 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Context-budget/audit behavior, migrated owner methods and refusal tests |
 | P11B | One discovery and role-lifecycle owner | lane-B-04, lane-B-05 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Catalog and role lifecycle preservation with read-only SENSE routing verification and helper/refusal tests |
 | P11C | One internal handoff owner | lane-B-06 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Complete internal method and unchanged forge boundary/evaluator tests |
 | P12 | Bounded native-plan comparison record | G-11 | Isolated implementer; coordinator fan-in | P7 | Exact dated pins and preservation tests without a network/current-HEAD sweep |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12 | Complete nine-entry public migration map, current local/hosted verification, independent review and actual delivery |
+| P13 | Planning consumers obey the accepted advisory method | lane-A-01, lane-A-02, G-03, G-07, ENT-06, ENT-01 | Coordinator | P3, P10 | Actual template/consumer negatives, retained task/phase/approval contracts and honest value claims |
+| P14 | Correct capture ownership and complete promotion evidence | lane-E-05, lane-E-14, ENT-05, lane-A-06 | Coordinator | P4, P8 | Reaffirm-only capture, complete evidence prose, unchanged helper/gate contracts |
+| P15 | Retained drafting templates preserve supplied facts and unknowns | F-05, lane-d-03 | Coordinator | P2, P4 | Actual outline/report-skeleton negatives and explicit undated-observation limits |
+| P16 | Curate the selected path-safety rule and recurrence without losing history | C-07 | Coordinator | P14 | Existing conditional update operations, exact preservation of other blocks and attributed benefit/recurrence limits |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12, P13, P14, P15, P16 | Complete original-clause accounting, current local/hosted verification, independent review and actual authorized delivery |
 
 ## First ready leaf
 
@@ -114,7 +123,7 @@ The package's final source and quality review remains required.
 
 The method-only boundaries in the earlier elaborations below describe the
 0.13.8 implementation and remain applicable outside the exact P11A/P11B/P11C
-extension. Those three packages together supply the preservation/migration
+and P13-P16 extensions. The three owner-consolidation packages supply the preservation/migration
 decision for nine redundant public entries; they do not authorize role
 retirement, portfolio extraction, new hooks or changes to accepted phase/leaf
 policy.
@@ -190,7 +199,7 @@ The delegate's original report is preserved; its reservation was coordinator-own
 - [x] lane-E-11 Keep persistence ownership with the authorized caller.
 - [x] lane-E-13 Derive release notes from delivered behavior rather than invented prefix mappings.
 - [x] F-04 Require dated primary-source applicability and a responsible owner without fabricating legal currency.
-- [x] F-05 Share actual voice/consent guards and remove false compliance-as-voice routing.
+- [ ] F-05 Make the retained drafting templates obey their existing fact, consent and voice guards.
 
 **Agent-correctness owner:** one sequential delegate, after generation safety
 returns. Read each full original claim and check prior V2 repairs before editing.
@@ -219,14 +228,14 @@ Already corrected clauses need evidence and no gratuitous rewrite. Preserve
 names and functional capabilities. Report separate consolidation proposals as
 still open, never as a reason to omit these compatible corrections.
 
-- [x] lane-A-01 Base sizing/ambiguity judgments on actual work, with lexical estimates as hints.
-- [x] lane-A-02 Remove repeated approval and default complete-code prescriptions while retaining accepted leaf constraints.
+- [ ] lane-A-01 Finish advisory sizing/ambiguity semantics in the actual template and SENSE consumers.
+- [ ] lane-A-02 Remove the remaining full-code template default while retaining accepted leaf constraints.
 - [ ] lane-B-06 Keep the actual handoff controls as an internal method rather than a redundant public skill.
 - [x] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
 - [x] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
 - [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
 - [x] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
-- [x] C-07 Ask for observed lesson efficacy/recurrence instead of inventing reference frequency.
+- [ ] C-07 Curate the selected existing rule/recurrence through conditional updates without claiming prevention.
 - [x] C-08 Remove unsupported engineering preference-contract claims.
 - [x] C-09 Put scaffold-mode acceptance reasoning with the owning scaffold method.
 
@@ -273,12 +282,12 @@ No full-suite rerun, model experiment, global profile mutation, private-data rea
 generated reducer or ADR change by the delegate. Preserve preceding packages,
 or document exact intentional overlaps before editing a shared caller.
 
-- [x] lane-d-03 Ship the existing PPTX notes/retention inspection as a read-only checker.
+- [ ] lane-d-03 Retain the delivered checker and make the Word note's missing observation identity explicit.
 - [x] lane-d-07 Use one shared frontend-fragment publication procedure without canned vendor choices.
 - [x] lane-d-08 Keep one advisory review rubric and require observations for performance claims.
 - [x] lane-d-09 Remove nonexistent generation-resume and obsolete acceptance promises.
 - [x] lane-d-11 Correct unproven superiority and overbroad adaptation attribution claims.
-- [x] lane-E-14 Give documentation fidelity one shared owner consumed by BUILD, SHIP and docs front doors.
+- [ ] lane-E-14 Finish CAPTURE's use of its reaffirmation owner without retiring documentation capability.
 - [x] F-02 Use one narrative structure and one axis publication owner without duplicate default contexts.
 
 F-02's remaining compatible work keeps every named role. A shared narrative
@@ -372,7 +381,7 @@ packages outside exact documented overlaps.
 - [x] lane-E-01b Emit role-specific planner/builder/reviewer report contracts.
 - [x] lane-E-02 Share distributed-boundary reasoning without duplicate default dispatch.
 - [x] lane-E-03 Share data-design methods while preserving the migration planner/executor split.
-- [x] lane-E-05 Turn redundant role procedures into compatible views of their existing owners.
+- [ ] lane-E-05 Repair the remaining cold-trio caller while preserving the delivered role methods.
 - [x] lane-E-06 Extract the existing bisect and migration eligibility recipes into trusted helpers.
 - [x] lane-E-10 Distinguish client/provenance metadata from observed support and license evidence.
 - [x] lane-E-12 Share performance-evidence reasoning and avoid repeated profiling for report views.
@@ -483,9 +492,9 @@ Normal test-only Git/profile fixtures and targeted child cleanup are allowed;
 no source commits, target-profile rebind, external network or policy change.
 Keep earlier packages intact and report new resource dependencies centrally.
 
-- [x] lane-A-06 Move optional delivery/capture and maintainer procedures behind their actual conditions.
+- [ ] lane-A-06 Remove the stale current shape-suite count while preserving conditional maintainer procedures.
 - [x] lane-d-02 Remove false Visio completion/library promises while retaining the explicit unavailable-writer boundary.
-- [x] ENT-05 Keep current working memory concise and historical detail cold without inventing learning efficacy.
+- [ ] ENT-05 Complete the existing promotion evidence record without a new schema or efficacy claim.
 
 **Core-boundary owner:** one sequential delegate. Scope is CYCLE/CAPTURE/SHIP
 and new direct method references, the retained Visio compatibility entry and
@@ -665,6 +674,156 @@ authorize changing an accepted decision or closing a missing experiment by
 assertion. Add the next ready original IDs here rather than ending at
 P11A/P11B/P11C/P12.
 The exact native-hook/ADR holds remain excluded; continue unrelated work.
+
+## Original-residual continuation 2026-10-17
+
+The operator again required completion after the verified owner-integration
+milestone. The coordinator recovered the exact three original inputs and the
+historical 84-row disposition in place and verified their hashes before and after
+an independent read. No original was copied into this repository. The complete
+read-only report is retained privately; its actual transport SHA-256 is
+`ae36384b660f8b5962e2c184b60405f7c8d835a648a7672d523084227cd93205`.
+The reviewer's unavailable checksum operation is explicit: input admission was
+coordinator-observed; claim-to-source inspection was independent.
+
+The report accounts for all 45 historical residuals and retains the other 39
+rows as prior accepted scope, not as newly reviewed findings. B-03/B-04/B-06/B-10,
+C-04 and G-11 now have source-satisfied residuals. B-05's owner migration is
+satisfied, but optional-pack placement remains a separate decision. These source
+judgments and the green integration CI do not close P9's current acceptance or
+the original programme. Do not replay the implemented producer lanes.
+
+P13-P16 cover thirteen original IDs with ready compatible corrections. Nine
+existing IDs are reopened only for their newly specified residuals, retaining
+their previous delivered clauses and evidence. G-03/G-07/ENT-06/ENT-01 are newly
+elaborated, not newly invented findings. Current package membership above is
+exclusive; the dated earlier delivery/review accounts remain unchanged.
+
+The coordinator executes these packages serially in its existing shared-owner
+surface. Their oracle files overlap; no new worker lane or parallel write scope
+is introduced. The original four-lane topology and its acceptance obligations
+remain retained. Source selection, ordinary commits and final reducer generation
+remain coordinator-owned. Independent package SPEC then QUALITY and final
+integrated acceptance are still required.
+
+### Planning consumers and truthful value claims (P13)
+
+- [ ] G-03 Finish decision-complete planning defaults without changing accepted timed leaves.
+- [ ] G-07 Align hierarchy consumers with observable boundaries, not lexical certainty.
+- [ ] ENT-06 Preserve original IDs, interfaces and verification while making depth evidence-driven.
+- [ ] ENT-01 Qualify the planner's comparative-value goal as unmeasured rather than closed.
+
+**Also covers:** the reopened lane-A-01 and lane-A-02 above.
+**Requirements:** SOURCE, TRUTH, METHOD; the original claims and ADR-0026.
+**Files:** `scaffolding/01-foundation/templates/plan/plan.template.md`,
+`skills/sense/SKILL.md` Step 0e only, `docs/enterprise-profile-value.md`,
+`docs/concepts/planner-as-module.md`, `tests/unit/coordination-methods.py`,
+`tests/shape/scope-phase-present.sh`.
+**Acceptance:** the actual template defaults to decisions, interfaces, acceptance
+and verification; complete implementation code is not required. Excerpts remain
+available when necessary to pin a contract. Size associations are advisory in
+every selected consumer. A settled request with an XL lexical hint does not
+require a new question or deeper hierarchy; lexical `no` cannot settle an actual
+unanswered requirement. Retain all flat/phased/tree markers, original task IDs,
+package ownership, nine phases, one scope approval and the accepted short-leaf
+rule. The quoted comparative-value aspiration is not presented as a proven result.
+**Verification:** extend the existing coordination source fixtures to inspect the
+real template and SENSE paragraph, including pre-change negatives; run
+`bash tests/unit/coordination-methods.sh` and
+`bash tests/shape/scope-phase-present.sh`. These are documentary contract checks,
+not a model-following experiment. Keep estimator APIs, profile/high-risk routing,
+calibration activation and question-preference storage unchanged.
+
+### Capture ownership and promotion evidence (P14)
+
+**Original IDs:** lane-E-05, lane-E-14, ENT-05, lane-A-06.
+**Requirements:** SOURCE, TRUTH, METHOD; existing BUILD fidelity and CAPTURE ownership.
+**Files:** `skills/capture/SKILL.md`,
+`skills/lessons-add/references/benefit.md`, `skills/lessons-promote/SKILL.md`,
+`skills/cycle/references/maintainer.md`, `tests/unit/fidelity-methods.py`,
+`tests/unit/coordination-methods.py`, `tests/unit/core-boundary-methods.py`.
+**Acceptance:** CAPTURE uses its existing mapped reaffirmation procedure, does not
+regenerate the trio or recommend DocWriter merely to synthesize it, and preserves
+all original map roles, IDs, statuses and approval. DocWriter and generate-docs
+remain available. A promotion body carries applicability, source-safe provenance,
+counterexample, accountable owner, actual evaluation evidence or explicit unknowns,
+and a supersession path in the existing prose record. Unsupported promotion stays
+deferred; no helper success proves benefit or compounding. No new schema, scanner,
+automatic learner, global store, publication or activation is introduced. Replace
+the stale M3 count with accurate suite wording while retaining the full M1-M4
+procedures and actual runner invocation.
+**Verification:** extend the actual CAPTURE/promotion/maintainer source fixtures
+with missing-record and wrong-caller negatives; run
+`bash tests/unit/fidelity-methods.sh`,
+`bash tests/unit/coordination-methods.sh` and
+`bash tests/unit/core-boundary-methods.sh`. Keep promotion serialization, conditional
+writes, source-label privacy and provenance-comment grammar unchanged.
+**Exact exclusions:** no ADR-drafting step, ADRDrafter, held native-hook workflow,
+role retirement, archive rewrite or scaffold-baseline promotion is executed.
+
+### Conditional drafting templates and observation provenance (P15)
+
+**Original IDs:** F-05 and lane-d-03.
+**Requirements:** SOURCE, OWNERSHIP, TRUTH; existing role factual/consent guards.
+**Files:** `agents/communication/BlogPostDrafter.md`,
+`EmailCustomerDrafter.md`, `LinkedInPostDrafter.md` in that directory;
+`agents/customer/ExecutiveBriefingDrafter.md`, `ProposalDrafter.md`;
+`skills/generate-word/references/native-word.md`,
+`tests/behavior/agent_contract_scenarios.py`, `tests/unit/fidelity-methods.py`.
+**Acceptance:** actual outlines and report skeletons make story beats, humility,
+CTA, deadlines, metrics, ask count and phases conditional on the supplied brief
+and evidence. A POV without measured results or a retrospective mistake, an email
+with two related required decisions but no deadline, a post without a CTA and a
+sparse proposal retain those facts/unknowns instead of inventing missing content.
+Keep customer copy separate from internal review; retain named roles/tools, RFP
+coverage, independent critics and actual voice/consent gates. Word's observation
+date/build remain explicitly unknown unless a selected real receipt establishes
+them; do not stamp the current implementation date as a host observation.
+**Verification:** add negatives on the real outline/report-template sections, not
+only introductory guard sentences; run
+`bash tests/behavior/agent-contract-scenarios.sh` and
+`bash tests/unit/fidelity-methods.sh`. These fixtures inspect source contracts,
+not model outcomes or a rendered Word artifact. No sending, publishing, host
+experiment, writer installation or portfolio extraction is authorized.
+
+### Selected project-lesson curation (P16)
+
+**Original ID:** C-07. **Requirements:** SOURCE, METHOD, TRUTH.
+**Files:** the L-050 and L-062 blocks in `.claude/memory/lessons.md` only;
+read-only use of the existing lesson helpers and observation fixtures.
+**Acceptance:** read both complete blocks, keep the root-authorization rule's
+canonical owner distinct from the dated recurrence, and preserve the additional
+out-of-scope-artifact warning. Use the existing conditional update operation;
+do not force a supersession, allocate another duplicate or delete either history.
+Preserve the earlier text, all IDs, unrelated blocks and the current L-029 amendment.
+Record only the actual observed application: an owned profile-local sibling temp
+root resolved the MSYS alias fixture failure and the unchanged memory tests passed.
+Keep that bounded application distinct from a demonstrated prevention/efficacy claim.
+No operator-global store or promotion is selected.
+**Verification:** capture an attributable preimage; inspect the proposed safe body
+text; run the existing helper under explicit repository/profile/audit roots; read
+both results back and compare untouched blocks byte-for-byte. Run
+`bash tests/integration/observation-learning.sh` and
+`bash tests/unit/memory-v2.sh` for the existing update/preservation contracts. Content-safety
+assessment is model-only unless an actual required control runs; do not fabricate
+a scanner receipt.
+
+**Plan signals:** 61 original task IDs in eighteen packages; thirteen IDs in
+this coordinator extension. Keep the existing XL programme scope and phases
+PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE. The actual `scale_token_estimate XL` read
+returned `120000 uncalibrated 0`: one uncalibrated whole-cycle prior with zero
+matching measured cycles, never a per-leaf multiplier or a price/runway claim.
+Actual usage, cost and elapsed effort remain unmeasured. There is no rendered design surface or
+new architectural decision. Engineering and developer-experience review must
+cover the committed extension and its original constraints before execution.
+
+**Other residuals remain specific:** optional capability/pack migrations require
+preserved owners/interfaces and a real selection; ADR-0026 and intake/preference
+changes need their actual decisions; model/client/value observations need selected
+authorized evidence; G-12 lacks its identified primary source; the exact native-hook
+and ADR-drafting holds are not retried. None is a reason to omit P13-P16. After
+their implementation, reconcile the original rows again before claiming SOURCE
+or COMPLETE; do not convert unknown observations into accepted results.
 
 ## Integration and review
 

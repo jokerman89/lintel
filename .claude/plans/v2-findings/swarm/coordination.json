@@ -3,7 +3,7 @@
   "initiative": "v2-findings",
   "work_map": ".claude/plans/v2-findings/work.json",
   "charter": ".claude/plans/v2-findings/swarm/charter.md",
-  "integration_branch": "jokerman-microsoft-v2-completion-20261008",
+  "integration_branch": "jokerman-microsoft-repository-completion",
   "max_parallel": 4,
   "coordinator_paths": [
     ".claude/plans/v2-findings/plan.md",
@@ -12,6 +12,7 @@
     ".claude/plans/v2-findings/work.json",
     ".claude/plans/v2-findings/swarm/charter.md",
     ".claude/plans/v2-findings/swarm/coordination.json",
+    ".claude/plans/legacy-cleanup/historical-records.json",
     ".claude/memory",
     ".claude/engineering/evolution",
     ".github",
@@ -36,6 +37,9 @@
     "skills/define",
     "skills/discover",
     "skills/frontend-motion",
+    "skills/generate-word/references/native-word.md",
+    "skills/lessons-add/references/benefit.md",
+    "skills/lessons-promote",
     "skills/pause",
     "skills/plan",
     "skills/scope",
@@ -46,7 +50,12 @@
     "tests/integration/catalog-installed.py",
     "tests/integration/copilot-kit.py",
     "tests/shape/native-command-surface.py",
-    "tests/unit/native-command-surface.py"
+    "tests/shape/scope-phase-present.sh",
+    "tests/behavior/agent_contract_scenarios.py",
+    "tests/unit/native-command-surface.py",
+    "tests/unit/coordination-methods.py",
+    "tests/unit/core-boundary-methods.py",
+    "tests/unit/fidelity-methods.py"
   ],
   "scope_rules": {
     "worker": "write_scope+own_report",

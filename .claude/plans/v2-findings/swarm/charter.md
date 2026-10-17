@@ -37,6 +37,21 @@ catalog/wiki/native generation, versioning and P9 run only after that fan-in.
 - Regenerate shared outputs only after all producer lanes are integrated.
 - Run final integrated REVIEW, profile-bound QA and full verification on one head.
 
+## Coordinator residual continuation 2026-10-17
+
+The original four producer lanes are integrated in the recovered feature branch.
+Their source, reports and prior observations remain retained, not replayed or
+silently rebound. The active integration branch is now
+`jokerman-microsoft-repository-completion`; this is recovery of the same work,
+not authority to change the old worktree or publish to main.
+
+P13-P16 in the original plan are coordinator-owned follow-ups on shared templates,
+callers, documentation and overlapping oracle files. Execute them sequentially
+under the coordinator's exclusive write ownership; they are not new worker lanes.
+The original four-lane topology, isolation and acceptance requirements remain.
+New source changes need current package and final integrated review/QA; historical
+lane or green baseline results do not supply that acceptance.
+
 ## Conflict and recovery
 
 An out-of-scope path, overlapping write, missing worktree attribution or review
