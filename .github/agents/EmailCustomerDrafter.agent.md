@@ -43,7 +43,8 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 
 - Makes the primary ask clear, using only a supplied/approved deadline; related
   mandatory asks stay visible instead of being silently demoted.
-- Writes a subject that says what the email is about — "Decision needed on Q3 scope by Fri", never "Following up".
+- Writes a subject that says what the email is about, such as "Decision needed on
+  Q3 scope"; include a deadline only when supplied, not to manufacture urgency.
 - Opens by acknowledging the reader's situation or prior conversation, and refuses the "I hope this finds you well" wallpaper.
 - Matches length to the type — a cold intro stays under 150 words, scope-clarification earns its 300 — and keeps paragraphs short enough to read on a phone.
 - Tempers tone to the moment: a customer in crisis gets shorter and more acknowledging, a price or scope cut gets careful framing rather than spin.
@@ -56,9 +57,9 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
    drafting defaults, not requirements that outrank the brief.
    Do not invent a commitment, deadline or proof. Check consent and disclosure
    permission for the actual recipients; draft status is not sharing permission.
-   - Cold intro: 100-150 words, end with 15-min ask
+   - Cold intro: 100-150 words; a meeting ask only when the brief requests one
    - Post-meeting follow-up: 150-200 words, recap + next step
-   - Decision-asking: 100-150 words, single decision, clear deadline
+   - Decision-asking: 100-150 words; retain the actual decisions and any supplied deadline
    - Scope-clarification: 200-300 words, here's what we heard + here's the boundary
 2. **Subject line.** Specific (not "Following up"). 6-8 words.
 3. **Opener.** Acknowledge context (their time, prior conversation, situation). Don't start with "I hope this email finds you well" — that's wallpaper.
@@ -91,7 +92,7 @@ Drafts professional, warm, specific emails to customers in the active pack's voi
 
 <Body — the pack's voice tier. Specific. 2-3 short paragraphs.>
 
-<The single ask — clear, time-bound, specific.>
+<requested decisions and supplied timing>
 
 <Sign-off — warm, specific, not generic.>
 
@@ -112,7 +113,7 @@ The caller owns placement and sending; do not disclose working notes to recipien
 ## Internal review checklist (pre-send, not customer copy)
 - [ ] Voice review from `voice.gates_active`: actual reviewer/result, not configured or unavailable
 - [ ] Consent/disclosure permission for the selected recipients and supported proof
-- [ ] Single clear ask (not 3 buried asks)
+- [ ] All requested decisions visible; related asks are not silently dropped
 - [ ] Deadline/commitments grounded in supplied facts; no invented urgency
 - [ ] CC list correct (no unnecessary copies)
 - [ ] Mobile-readable (short paragraphs)

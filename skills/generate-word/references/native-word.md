@@ -4,6 +4,18 @@ This is an observed Copilot Word-canvas procedure, not a universal Office API.
 Discover the current schema and permissions first. It is an alternative to the
 existing declared Node-library route, not a requirement to install Node.
 
+## Observation identity
+
+**Observation date:** unknown. **Client/build:** unknown. No selected receipt
+establishes those details for the originating observation described here.
+The file's editing date is not an observation timestamp. Treat the procedure as
+an undated source note, not proof of the current host's capabilities.
+
+For a new authorized authoring run, retain its actual receipt, observation date
+and client/build when available; otherwise preserve the corresponding unknown.
+Discover the current schema and permissions rather than filling these gaps from
+the implementation date or another session's behavior.
+
 ## Create and compose
 
 1. Call `list_canvas_capabilities` with `canvasId: "word"`. Check that create/open,

@@ -89,7 +89,7 @@ is not a valid feed post merely because it fits a word-count template.
 
 [Body — paragraphs separated by blank lines for readability on LinkedIn]
 
-[Closing — call to action or question]
+[Closing appropriate to the brief; CTA or question only when requested]
 
 [Hashtags on own line: #tag1 #tag2 #tag3]
 

@@ -287,6 +287,17 @@ class FidelityMethods(unittest.TestCase):
                          "map's original `prompt`", "DRAFT", "preserving IDs"):
             self.assertIn(retained, handoff)
 
+    def test_word_observation_identity_requires_an_actual_receipt(self):
+        source = text("skills/generate-word/references/native-word.md")
+        identity = source.split("## Create and compose", 1)[0]
+        for required in ("**Observation date:** unknown", "**Client/build:** unknown",
+                         "selected receipt", "not an observation timestamp"):
+            self.assertIn(required, identity)
+        for retained in ("list_canvas_capabilities", "expectedVersion", "advisory",
+                         "not a stale-write rejection guarantee", "does **not** expose",
+                         "page-render", "P05/P07"):
+            self.assertIn(retained, source)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

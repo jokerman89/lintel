@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: agent-contract-scenarios
 # implements: ADR-0028
-# intent: .claude/plans/universal-implementation/packages/P09.md
+# intent: .claude/plans/v2-findings/plan.md
 # constraints: documentary checks and synthetic arithmetic only; no host/model execution
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-10-17
 
 """Check retained role documents and worked examples, not live agent behavior."""
 
@@ -259,6 +259,87 @@ class RenderedRoleContracts(unittest.TestCase):
         for value in values.values():
             self.assertIn(value, rendered)
         return rendered
+
+    def test_blog_pov_without_results_humility_or_cta(self):
+        path = "agents/communication/BlogPostDrafter.md"
+        template = self.report_template(path)
+        body = "<format-appropriate body sections>"
+        ending = "<ending supported by the brief; CTA only when requested>"
+        rendered = self.assert_rendered_fields(template, {
+            body: "## Trade-offs\nA supplied POV argument and its stated limitations.",
+            ending: "The trade-off remains explicit.",
+        })
+        for forced in ("## What the data showed", "## What we'd do differently", "## What to do next"):
+            self.assertNotIn(forced, rendered)
+        story = self.assert_rendered_fields(template, {
+            body: "## Reported result\nFixture evidence: 4.2 s to 1.1 s p95.\n## Lesson\nA supplied retrospective.",
+            ending: "Read the supplied method note.",
+        })
+        self.assertIn("4.2 s to 1.1 s p95", story)
+        workflow = read(path).split("## Workflow", 1)[1].split("## Report format", 1)[0]
+        self.assertIn("POV", workflow)
+        self.assertIn("only when supported", workflow)
+        with self.assertRaises(AssertionError):
+            self.assert_rendered_fields(template.replace(body, ""), {body: "A supplied POV."})
+
+    def test_email_preserves_two_decisions_without_a_deadline(self):
+        path = "agents/communication/EmailCustomerDrafter.md"
+        template = self.report_template(path)
+        asks = "- Confirm the interface owner.\n- Confirm the related review scope."
+        rendered = self.assert_rendered_fields(template, {
+            "<requested decisions and supplied timing>": asks,
+        })
+        self.assertEqual(rendered.count("Confirm"), 2)
+        self.assertNotIn("The single ask", rendered)
+        self.assertNotIn("Single clear ask", rendered)
+        self.assertNotIn("by Friday", rendered)
+        workflow = read(path).split("## Workflow", 1)[1].split("## Report format", 1)[0]
+        self.assertNotIn("single decision, clear deadline", workflow)
+        self.assertNotIn("end with 15-min ask", workflow)
+
+    def test_social_post_can_end_without_a_cta(self):
+        template = self.report_template("agents/communication/LinkedInPostDrafter.md")
+        rendered = self.assert_rendered_fields(template, {
+            "[Closing appropriate to the brief; CTA or question only when requested]":
+                "That is the limit of the supplied observation.",
+        })
+        self.assertNotIn("[Closing — call to action or question]", rendered)
+        self.assertIn("That is the limit of the supplied observation.", rendered)
+
+    def test_executive_brief_preserves_unknowns_and_related_asks(self):
+        path = "agents/customer/ExecutiveBriefingDrafter.md"
+        template = self.report_template(path)
+        rendered = self.assert_rendered_fields(template, {
+            "<supported outcome or proposed target; metrics and timing unknown if not supplied>":
+                "Proposed scope review; outcome metrics unknown; timing unknown.",
+            "<supplied proof or an explicit evidence gap>": "No measured result was supplied.",
+            "<actual requested decisions; retain related asks and supplied timing>":
+                "- Confirm the scope.\n- Confirm its accountable owner.",
+        })
+        self.assertEqual(rendered.count("Confirm"), 2)
+        self.assertIn("metrics unknown; timing unknown", rendered)
+        workflow = read(path).split("## Workflow", 1)[1].split("## Report format", 1)[0]
+        self.assertNotIn("**Proof:** 1-2", workflow)
+        self.assertNotIn("(measurable, time-bound)", workflow)
+
+    def test_proposal_preserves_sparse_scope_and_unknown_timing(self):
+        template = self.report_template("agents/customer/ProposalDrafter.md")
+        rendered = self.assert_rendered_fields(template, {
+            "<supported in-scope items>": "- Document the selected boundary.",
+            "<explicit out-of-scope items>": "- Implementation is not requested.",
+            "<supported deliverable rows>": "| 1 | Scope note | doc | Acceptance remains open |",
+            "<supported timeline rows; unknown dates and owners stay explicit>":
+                "| Scope review | unknown | Scope note | unassigned |",
+            "<supplied total duration or unknown>": "unknown",
+            "<supported success criteria or open acceptance questions>": "- Acceptance criteria need confirmation.",
+            "<actual assumptions and unresolved questions>": "- Delivery timing is unknown.",
+            "<requested customer inputs; no fixed count>": "- Confirm the scope boundary.",
+        })
+        self.assertIn("Total duration: unknown", rendered)
+        self.assertIn("Implementation is not requested", rendered)
+        self.assertNotIn("<use case 3>", rendered)
+        self.assertNotIn("<criteria 3", rendered)
+        self.assertNotRegex(rendered, r"(?m)^\| (Discovery|Design|Build|Validate|Handoff) \|")
 
     def test_dependency_template_retains_contrary_exposure_and_policy_cases(self):
         template = self.report_template("agents/security/DependencyAuditor.md")
