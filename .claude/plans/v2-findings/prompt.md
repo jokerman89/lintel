@@ -1,8 +1,8 @@
 # Cold-executor prompt: complete the original V2 findings
 
 **Status:** APPROVED compatible scope after draft `35a35163` under the operator's
-existing completion instruction. P17/P18 source work still awaits the current
-independent plan-review gate. Preserve earlier source acceptance and failed
+existing completion instruction. P13-P18's scoped source and review/QA gates
+are complete; P9 aggregate evidence and delivery remain. Preserve earlier and failed
 decisions; no granularity, architecture, experiment or new permission is granted.
 **Work map:** [work.json](work.json).
 
@@ -12,10 +12,12 @@ lanes at `63b6fcd0` and the prior coordinator's caller/generated/migration repai
 Version 0.14.0 identifies the nine-entry command-surface change. Its source and CI
 repairs are retained at `c4032c3f`; that CI passed 23 jobs. P13-P16 subsequently
 passed their actual source review/QA gates at `e93a8f01`, `d40b67c0`,
-`1df0c427` and `1d46b104`. The first two are pushed; the latter two are local.
+`1df0c427` and `1d46b104`. P17/P18 followed at `a4ade9ca`, now pushed with those
+checkpoints. P18's separately reviewed Q-01 oracle repair is at `8e5588f5`;
+its missing-policy mutant is detected and all 34 real workflow methods pass.
 P13-only CI 38997973152 passed all 23 jobs, not the later aggregate.
 Native PR creation still fails with EMU 403 and no PR exists; do not substitute
-another channel. Continue the two remaining clauses and P9 below, not another
+another channel. Continue P9 below, not another
 producer implementation. Default-branch mutation needs its own authorization.
 
 ## Context
@@ -44,7 +46,10 @@ compatible work. After those source corrections, the independent current
 accounting has 47 source/guidance-closed and 37 open rows. It carries prior
 acceptance honestly, adds two adjudicated source/guidance closures and identifies
 G-03's proportion check and ENT-05's learned-pattern evidence as further ready
-clauses. Other rows retain specific decisions, observations and holds.
+clauses. Their implemented P17/P18 continuation satisfies those source omissions;
+only those two rows were updated and the other 82 were carried unchanged. Both
+whole findings remain open, so the counts stay 47/37; no further ready compatible
+source clause was identified. Other rows retain specific decisions, observations and holds.
 The plan's checked boxes cover its elaborated compatible
 clauses and source delivery, not closure of all 84 findings. Preserve the exact
 remaining clauses; distinguish unimplemented proposals from genuine authority,
@@ -105,7 +110,7 @@ P12 records the retained review date (`2026-09-28`) separately from the
 repository record date (`2026-10-09`); neither is upstream verification. Bind
 the exact five source findings, three revisions and their original pinned URLs.
 
-## Completed bounded P13-P16 source and next original work
+## Completed bounded P13-P18 source and current acceptance work
 
 Retain the completed P13-P16 clauses and their original source requirements.
 There were 66 mapped task IDs in eighteen packages: four more
@@ -147,13 +152,38 @@ coverage, real current checks and independent shared P05 acceptance remain.
 Do not fabricate new source changes, commits or ancestry merely to make a gate
 green. Read the plan's current evidence-renewal section before proceeding.
 
-Commit the exact authorized planning amendment before restoring machine approval,
-then obtain the current independent plan-review gate before source work. The
-approval flag alone is not BUILD clearance. Use original IDs, explicit package
-preimages, red/green regressions and independent SPEC then QUALITY. Keep the
+The exact planning amendment, independent plan review, source work and its
+SPEC/QUALITY/QA gates are recorded; do not replay them from the approval flag.
+Use original IDs, explicit source identities and actual independent review when
+renewing the stale aggregate evidence. Keep the
 accepted short-leaf and nine-phase contracts. Preserve all named roles/tools and
 helper/provenance schemas. Remaining architectural, empirical, source and exact
 host requirements are separate; a blocked PR does not block these corrections.
+
+## Future-operator recap
+
+The original work map still selects `execution_mode: swarm` and
+`swarm/coordination.json`. The current host supplies native subagents, but this
+coordinator implemented P13-P18 serially; no concurrent-writer claim is made.
+Original producer Git results and their separate worktree attribution are retained.
+The recovery does not establish the prior workers' simultaneous execution.
+Deterministic fan-in remains P11A, P11B, P11C, P12, then coordinator-owned reducers.
+
+The old four lane reports/reviews stay untouched. New `*-current-20261017.md`
+slots are selected for actual current observations and reviews; their existence
+or a local snapshot alone will not close a lane. Full current P05 source/deletion
+coverage, immutable QA and native review corroboration are still required.
+The final integrated review is separate from those lane decisions and remains
+pending with installed consumers and exact-head CI. Runtime loss is not a
+reason to erase source, replay completed producers or fabricate new attribution.
+
+The nine former public entrypoints have the preserved option/method mappings in
+`docs/migrations/2026-09-25-native-workflows.md`. Regenerate/update managed native
+resources through the existing adapter; never recreate executable aliases.
+Keep existing target profile generations and require a reasoned explicit rebind
+when applicable. No new runtime/schema, automatic learner, host hook or policy
+authority is introduced by P13-P18. M2's full-range RED impact inventory and
+the PR/native-hook/ADR holds remain explicit, not converted to green by capture.
 
 ## Constraints
 

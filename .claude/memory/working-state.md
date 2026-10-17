@@ -10,19 +10,20 @@ Durable rules remain in [lessons.md](lessons.md).
 
 Branch `jokerman-microsoft-repository-completion` preserves the four producer
 lanes at `63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's
-caller/generated/migration patch. Reviewed P13-P16 source checkpoints are
-`e93a8f01`, `d40b67c0`, `1df0c427` and `1d46b104`, still a **0.14.0**
+caller/generated/migration patch. Reviewed P13-P18 source checkpoints include
+`e93a8f01`, `d40b67c0`, `1df0c427`, `1d46b104`, `a4ade9ca` and `8e5588f5`, still a **0.14.0**
 feature-branch candidate, not main delivery, a tag or programme completion.
 Original worktrees are untouched; branch cleanup is not part of this continuation.
 
 Nine retired public identities map to complete current owners/internal methods.
-The route guard binds 33 historical containing files by raw SHA-256 plus exact
+The route guard binds historical containing files by raw SHA-256 plus exact
 counts. Earlier tests and two narrow archive decisions remain dated evidence;
 original declarations and set06 records are untouched.
 Do not edit byte-bound shared todo or rewrite historical reviews.
 
 Earlier integration SPEC/QUALITY r5 passed seven clauses and 26 questions.
-P13-P16 then passed their own staged reviews, actual QA and shared gates.
+P13-P18 then passed their own staged reviews, actual QA and shared gates.
+P18 Q-01 now checks returned clauses; the same faulty return is detected and 34 real tests pass.
 One earlier scanner input-size/fan-out P3 remains advisory; no exhaustion failure
 was reproduced. Failed/stale observations remain history, not current clearance.
 
@@ -47,8 +48,8 @@ The committed source checkpoint also passed native/catalog/wiki checks.
 
 CI follow-up repaired the hot-state budget and NUL-path admission with actual
 red/green evidence. Runs 38970268976 (`c4032c3f`) and 38997973152 (`e93a8f01`)
-passed all 23 jobs. P13/P14 are pushed; P15/P16 are local commits, not yet covered
-by current-head CI. Native PR creation still returns EMU 403; no alternate channel.
+passed all 23 jobs. Source through `a4ade9ca` is pushed; `8e5588f5` is later local
+work, not yet covered by current-head CI. Native PR creation remains EMU 403; no alternate channel.
 
 The full-range mechanical M2 inventory is **RED, 13 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches
@@ -59,15 +60,16 @@ and migration document explain the intentional changes; the result is retained.
 The real Swarm close gate rejects four stale acceptance bindings and changed
 P11A/P11C results. P11B source matches its old result without that commit being an
 ancestor; do not invent ancestry or rebind old PASS. P9 needs new current evidence.
-The post-source review found two further ready clauses: G-03's proportion check
-and ENT-05's learned-pattern promotion evidence. Their same IDs move to P17/P18.
-Scope approval is restored after the committed draft; current plan review must pass before BUILD.
+G-03's proportion check and ENT-05's learned-pattern evidence are now implemented
+through P17/P18. All three plan gates passed before that source work.
+P9 must renew current acceptance without replaying producers or changing old reports.
 
 ## Original programme and recorded delivery
 
 Current accounting covers the original 84 findings: 47 source/guidance-closed,
 37 open, including 39 historical accepted and six prior source-satisfied rows.
-Thirteen affected IDs were reassessed; two close within their adjudicated scope.
+The latest continuation updates only G-03/ENT-05 and carries the other 82 rows.
+Both whole findings remain open; no further ready compatible source clause was identified.
 Source presence is not proof of review. Decisions, observations and holds remain.
 
 The resumed original baseline `f9796bb8` / 0.13.7 advanced through 0.13.8 and

@@ -2,9 +2,9 @@
 
 **Status:** APPROVED compatible scope after draft
 `35a3516317916a076fb933cfc61622663d95cf2f`. The operator's original completion
-instruction covers these two remaining source clauses and P9 evidence renewal.
-This scope flag is not BUILD clearance: current independent plan review must
-pass first. P13-P16 and failed/r2 records retain their earlier scope; no
+instruction covers the completed source clauses and P9 evidence renewal.
+The three current plan gates and P13-P18's scoped source gates passed before
+their recorded commits. Earlier and failed/r2 records retain their own scope; no
 leaf-policy, architecture, experiment or new permission is approved here.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
@@ -16,11 +16,13 @@ coordinator-owned and sequential.
 **Continuation baseline:** `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
 **Residual baseline:** `c4032c3f204e76ddb90f7f06351a35bd3d45274e` (0.14.0
 feature branch; hosted run 38970268976 passed 23 jobs, not main delivery).
-**Current source baseline:** `1d46b104082df92ccbff8dfe4af84548611ac72c`.
-P13-P16 are implemented and source-reviewed for their bounded clauses. P13/P14
-are pushed; P15/P16 are local commits. P13-only CI at `e93a8f01` passed 23 jobs.
-The post-source original inventory is 47 source/guidance-closed and 37 open,
-with two further compatible source clauses below; no programme closure is claimed.
+**Current source baseline:** `8e5588f5c38248dcaebcb7ca194479bf161ff172`.
+P13-P18 are implemented and source-reviewed for their bounded clauses. The branch
+is pushed through `a4ade9ca`; the focused P18 oracle repair is a later local commit.
+P13-only CI at `e93a8f01` passed 23 jobs, not the current aggregate.
+The original inventory remains 47 source/guidance-closed and 37 open. The latest
+two-row continuation identifies no further ready compatible source clause;
+original evidence/architecture/host obligations and P9 remain open.
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
 obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
@@ -973,7 +975,7 @@ reasoning is not a new prerequisite for its completed curation.
 
 ### Proportion and transcript self-check (P17)
 
-- [ ] G-03 Complete the original proportion/transcript check while retaining decision-complete defaults and accepted leaves.
+- [x] G-03 Complete the original proportion/transcript check while retaining decision-complete defaults and accepted leaves.
 
 #### G-03: Check whether a selected plan has become an implementation transcript
 
@@ -997,7 +999,7 @@ model-following or comparative productivity evidence.
 
 ### Learned-pattern promotion evidence (P18)
 
-- [ ] ENT-05 Complete promotion evidence for learned patterns through the existing method and record fields.
+- [x] ENT-05 Complete promotion evidence for learned patterns through the existing method and record fields.
 
 #### ENT-05: Extend learned-improvement evidence without replacing policy authority
 
@@ -1034,6 +1036,35 @@ whole programme, not once per new task or a sufficient-budget claim. Runtime,
 model usage and cost remain unmeasured. No rendered/design surface is changed.
 Current independent engineering/devex and staged plan review are required;
 the operator's existing completion authority needs no repeated approval question.
+
+### Verified P17/P18 source and bounded original accounting
+
+The three staged plan decisions were consumed through their real latest-reader
+and same-context QA gates before BUILD. P17/P18 source was then independently
+reviewed in SPEC followed by QUALITY, with separate package bindings and controls,
+and committed at `a4ade9ca0adc27a680da39a3428ac2624471127c`.
+Actual checks were 35 coordination methods, 34 pattern-workflow methods and one
+shared native consistency run covering 163 managed files. All required checks
+passed; no live-model, policy-authority or productivity result was inferred.
+
+P18's nonblocking Q-01 exposed an input-alias oracle instead of a returned-clause
+assertion. The actual old test missed a deliberately faulty mixed-pattern return;
+the repaired assertion detected that same fault, and the real parser still passed
+all 34 methods. Focused independent SPEC/QUALITY and current P05/QA passed before
+the repair commit `8e5588f5c38248dcaebcb7ca194479bf161ff172`. The original advisory
+and both review generations remain intact. P17 needed no source replay.
+
+The same original-inventory reviewer updated only G-03 and ENT-05. Both source
+omissions are satisfied, but both whole findings remain open for their specific
+ADR/comparison or outcome-evidence clauses. The other 82 rows are carried, not
+newly reassessed: still 84 unique original IDs, 47 closed, 37 open and no further
+identified ready compatible source clause. The reviewer could not compute the
+baseline JSON digest; the coordinator separately observed and admitted
+`98dfd0ab2ecd2fedf2e8cf2121e4c3365801107183ffff38b50503320de2dce9`,
+preserving the raw response's honest null hash rather than relabeling it.
+The raw delta digest is
+`b9b89a79cf63495b03519a7af663586f06e961ac15fe9e4bf0596a5be83eab62`.
+These private records are retained in place; no original input is copied to Git.
 
 ## Integration and review
 

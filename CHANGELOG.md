@@ -17,6 +17,16 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   maps all nine former names and invocation shapes; they are not executable aliases.
 - Record the original revision-pinned native-plan comparison without claiming a
   new upstream review, live-client execution or comparative model benefit.
+- Keep planning depth advisory and check implementation narration qualitatively
+  through the existing engineering inspection and PLAN self-check. Preserve
+  indispensable decisions, algorithms and verification even in long plans.
+- Reaffirm CAPTURE's original mapped handoff instead of generating another trio.
+  Lesson and learned-pattern promotion reuse source-safe evidence, explicit
+  uncertainty and existing ownership/lifecycle fields; policy authority does not
+  depend on a productivity experiment.
+- Make five drafting-role outlines conditional on supplied facts and real asks,
+  without mandatory narrative beats, invented metrics, deadlines or phase quotas.
+  Missing Word observation date/client identity remains explicitly unknown.
 
 ### Fixed
 
@@ -33,13 +43,15 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   selected inputs, literal argument preservation and explicit missing-input refusal.
   Usage regressions cover exact name-length and aggregate-key bounds without
   dropping raw counts or previously admitted keys.
+- Pattern capture distinguishes source kind from confidence. Its mixed-policy
+  regression checks the parser's returned clauses, not aliased input data.
 
 ### Migration and limits
 
 - Update managed native resources with the existing adapter. Local edits remain
   conflicts, and existing profile references require an explicitly reasoned rebind
   after the product-version change. No personal configuration is migrated implicitly.
-- This is the compatible P11/P12 integration, not completion of all 84 original V2
+- This is the compatible P11-P18 source continuation, not completion of all 84 original V2
   findings. Architecture choices, empirical evidence and exact host-held work retain
   their existing requirements. No role, core phase, policy gate or PDF reader is added
   or removed by this continuation.

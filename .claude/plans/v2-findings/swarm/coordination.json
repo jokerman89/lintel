@@ -82,13 +82,13 @@
         "tests/integration/observation-learning.py"
       ],
       "brief": ".claude/plans/v2-findings/swarm/briefs/P11A.md",
-      "report": ".claude/plans/v2-findings/swarm/reports/P11A.md",
-      "review": ".claude/plans/v2-findings/swarm/reviews/P11A.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11A-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11A-current-20261017.md",
       "shared_evidence": {
-        "context": ".claude/runtime/swarm/v2-findings/P11A/context.json",
-        "review": ".claude/runtime/reviews/v2-findings-P11A.json",
-        "qa": ".claude/runtime/swarm/v2-findings/P11A/qa.json",
-        "corroboration": ".claude/runtime/swarm/v2-findings/P11A/corroboration.json",
+        "context": ".claude/runtime/review/v2-P9-renewal/P11A.context.json",
+        "review": ".claude/runtime/reviews/v2-P11A-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11A.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11A.corroboration.json",
         "domain_request": null,
         "review_skill": "review"
       }
@@ -108,13 +108,13 @@
         "tests/unit/discovery-lifecycle-methods.py"
       ],
       "brief": ".claude/plans/v2-findings/swarm/briefs/P11B.md",
-      "report": ".claude/plans/v2-findings/swarm/reports/P11B.md",
-      "review": ".claude/plans/v2-findings/swarm/reviews/P11B.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11B-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11B-current-20261017.md",
       "shared_evidence": {
-        "context": ".claude/runtime/swarm/v2-findings/P11B/context.json",
-        "review": ".claude/runtime/reviews/v2-findings-P11B.json",
-        "qa": ".claude/runtime/swarm/v2-findings/P11B/qa.json",
-        "corroboration": ".claude/runtime/swarm/v2-findings/P11B/corroboration.json",
+        "context": ".claude/runtime/review/v2-P9-renewal/P11B.context.json",
+        "review": ".claude/runtime/reviews/v2-P11B-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11B.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11B.corroboration.json",
         "domain_request": null,
         "review_skill": "review"
       }
@@ -130,13 +130,13 @@
         "tests/shape/brief-forge-evaluators-present.sh"
       ],
       "brief": ".claude/plans/v2-findings/swarm/briefs/P11C.md",
-      "report": ".claude/plans/v2-findings/swarm/reports/P11C.md",
-      "review": ".claude/plans/v2-findings/swarm/reviews/P11C.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11C-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11C-current-20261017.md",
       "shared_evidence": {
-        "context": ".claude/runtime/swarm/v2-findings/P11C/context.json",
-        "review": ".claude/runtime/reviews/v2-findings-P11C.json",
-        "qa": ".claude/runtime/swarm/v2-findings/P11C/qa.json",
-        "corroboration": ".claude/runtime/swarm/v2-findings/P11C/corroboration.json",
+        "context": ".claude/runtime/review/v2-P9-renewal/P11C.context.json",
+        "review": ".claude/runtime/reviews/v2-P11C-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11C.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11C.corroboration.json",
         "domain_request": null,
         "review_skill": "review"
       }
@@ -151,13 +151,13 @@
         "tests/unit/external-authority-methods.py"
       ],
       "brief": ".claude/plans/v2-findings/swarm/briefs/P12.md",
-      "report": ".claude/plans/v2-findings/swarm/reports/P12.md",
-      "review": ".claude/plans/v2-findings/swarm/reviews/P12.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P12-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P12-current-20261017.md",
       "shared_evidence": {
-        "context": ".claude/runtime/swarm/v2-findings/P12/context.json",
-        "review": ".claude/runtime/reviews/v2-findings-P12.json",
-        "qa": ".claude/runtime/swarm/v2-findings/P12/qa.json",
-        "corroboration": ".claude/runtime/swarm/v2-findings/P12/corroboration.json",
+        "context": ".claude/runtime/review/v2-P9-renewal/P12.context.json",
+        "review": ".claude/runtime/reviews/v2-P12-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P12.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P12.corroboration.json",
         "domain_request": null,
         "review_skill": "review"
       }
