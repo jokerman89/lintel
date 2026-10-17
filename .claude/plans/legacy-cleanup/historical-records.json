@@ -140,19 +140,19 @@
       "path": ".claude/plans/v2-findings/plan.md",
       "count": 1,
       "reason": "The V2 plan retains the former identity as the object of its retirement acceptance criteria, not as an invocation. The 2026-10-17 residual extension adds no former callable reference.",
-      "sha256": "43fbd5484bab5b71d8315f30ec517cdfc7db859af91077a86a8804392569cfdc"
+      "sha256": "2d8fddf4b8d8629afc6e2b3ea3f7f048eae8daae193726b68f98e1a6cb3a5828"
     },
     {
       "path": ".claude/plans/v2-findings/prompt.md",
       "count": 1,
       "reason": "The V2 executor prompt retains the former identity as migration evidence, not a current route. The 2026-10-17 residual extension adds no former callable reference.",
-      "sha256": "c7f4d9a343f21c27d9f8c1da4eabc4fcfb607c7b52f565e7d80cf7e2d753db70"
+      "sha256": "36867f175bc98d1c955213ad63d468c0d60e0b69520cd59fe5bbbab714a9cf13"
     },
     {
       "path": ".claude/plans/v2-findings/spec.md",
       "count": 1,
       "reason": "The V2 specification retains the former identity as the target of replacement, not a current route. The 2026-10-17 residual extension preserves that classification.",
-      "sha256": "c0fda6c2cc8d9723cccf05e8e4e723a5039303bd8f791002ace472b454e7d07e"
+      "sha256": "d36b2e6d05220e51efee1291336dcd7559729ed768e7ac1a6ee108f49f7c5dd2"
     },
     {
       "path": ".claude/plans/v2-findings/swarm/briefs/P11A.md",

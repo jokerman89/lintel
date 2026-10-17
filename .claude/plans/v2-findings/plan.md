@@ -1,11 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** APPROVED scope for the 2026-10-17 compatible original-residual extension,
-under the operator's renewed completion instruction. The exact draft was committed
-at `3b97eedd8abd94ee89860e8b6c2d15c3a6228d72` before restoring machine approval.
-This does not authorize architectural/empirical changes or establish review.
-The current independent plan-review gate must pass before BUILD; scope approval
-alone is not writer clearance. Earlier delivered evidence remains historical.
+**Status:** DRAFT while repairing the blocking SPEC inspection of
+`4b359136ed35dfc4b37d026231420384db523210`. Machine approval is revoked before
+changing the F-05 decomposition and C-07 evidence input. The operator's compatible
+scope authority remains; no oversized-leaf exception, architecture change or
+empirical permission is inferred. Commit the exact revision before restoring
+scope approval and obtaining current independent review. BUILD remains blocked.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
@@ -32,7 +32,9 @@ elaborated scope, not completion of all 84 findings. The new continuation
 elaborates original B-03, reopens the outstanding public-front clauses of
 B-04/B-05/B-06/B-10/C-04 and the bounded G-11 record residual, and reopens
 integration: 57 IDs in fourteen packages. The 2026-10-17 extension below retains
-those IDs and elaborates four more original IDs: 61 IDs in eighteen packages.
+those IDs and elaborates four more original finding IDs, then adds five bounded
+F-05 implementation children: 66 mapped task IDs in eighteen packages. The
+original 84-finding inventory is unchanged.
 Previously accepted source clauses and review records remain history. See the
 [current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
@@ -92,7 +94,7 @@ elapsed estimates or dropping the original finding IDs.
 | P12 | Bounded native-plan comparison record | G-11 | Isolated implementer; coordinator fan-in | P7 | Exact dated pins and preservation tests without a network/current-HEAD sweep |
 | P13 | Planning consumers obey the accepted advisory method | lane-A-01, lane-A-02, G-03, G-07, ENT-06, ENT-01 | Coordinator | P3, P10 | Actual template/consumer negatives, retained task/phase/approval contracts and honest value claims |
 | P14 | Correct capture ownership and complete promotion evidence | lane-E-05, lane-E-14, ENT-05, lane-A-06 | Coordinator | P4, P8 | Reaffirm-only capture, complete evidence prose, unchanged helper/gate contracts |
-| P15 | Retained drafting templates preserve supplied facts and unknowns | F-05, lane-d-03 | Coordinator | P2, P4 | Actual outline/report-skeleton negatives and explicit undated-observation limits |
+| P15 | Retained drafting templates preserve supplied facts and unknowns | F-05.a, F-05.b, F-05.c, F-05.d, F-05.e, lane-d-03 | Coordinator | P2, P4 | Per-medium source negatives, original F-05 parent-checkpoint verification and explicit undated-observation limits |
 | P16 | Curate the selected path-safety rule and recurrence without losing history | C-07 | Coordinator | P14 | Existing conditional update operations, exact preservation of other blocks and attributed benefit/recurrence limits |
 | P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12, P13, P14, P15, P16 | Complete original-clause accounting, current local/hosted verification, independent review and actual authorized delivery |
 
@@ -199,7 +201,7 @@ The delegate's original report is preserved; its reservation was coordinator-own
 - [x] lane-E-11 Keep persistence ownership with the authorized caller.
 - [x] lane-E-13 Derive release notes from delivered behavior rather than invented prefix mappings.
 - [x] F-04 Require dated primary-source applicability and a responsible owner without fabricating legal currency.
-- [ ] F-05 Make the retained drafting templates obey their existing fact, consent and voice guards.
+- [ ] F-05 Verify the joined drafting-template correction after its five bounded implementation children.
 
 **Agent-correctness owner:** one sequential delegate, after generation safety
 returns. Read each full original claim and check prior V2 repairs before editing.
@@ -693,11 +695,13 @@ satisfied, but optional-pack placement remains a separate decision. These source
 judgments and the green integration CI do not close P9's current acceptance or
 the original programme. Do not replay the implemented producer lanes.
 
-P13-P16 cover thirteen original IDs with ready compatible corrections. Nine
-existing IDs are reopened only for their newly specified residuals, retaining
-their previous delivered clauses and evidence. G-03/G-07/ENT-06/ENT-01 are newly
-elaborated, not newly invented findings. Current package membership above is
-exclusive; the dated earlier delivery/review accounts remain unchanged.
+P13-P16 cover thirteen original findings with ready compatible corrections.
+Nine existing IDs reopen only their specified residuals, retaining prior delivered
+clauses and evidence. G-03/G-07/ENT-06/ENT-01 are newly elaborated original findings.
+F-05 retains its original identity as a parent verification checkpoint and maps to five
+bounded implementation children F-05.a through F-05.e; these are execution tasks,
+not additional findings. Current package membership is exclusive. The dated
+earlier delivery/review accounts remain unchanged.
 
 The coordinator executes these packages serially in its existing shared-owner
 surface. Their oracle files overlap; no new worker lane or parallel write scope
@@ -786,6 +790,85 @@ only introductory guard sentences; run
 not model outcomes or a rendered Word artifact. No sending, publishing, host
 experiment, writer installation or portfolio extraction is authorized.
 
+The five medium-specific corrections are distinct implementation tasks. Each
+changes one retained role's actual outline/report contract and its focused source
+fixture; the shared package reviews their integration once. There is no claimed
+duration measurement or oversized-leaf exception. All five trace to the unchanged
+original F-05 claim; lane-d-03 remains the separate Word provenance correction.
+
+- [ ] F-05.a Make the BlogPostDrafter outline conditional on actual story evidence.
+- [ ] F-05.b Preserve the EmailCustomerDrafter brief's real decisions and timing.
+- [ ] F-05.c Keep LinkedInPostDrafter's closing action optional when not requested.
+- [ ] F-05.d Preserve unknowns and actual asks in ExecutiveBriefingDrafter's template.
+- [ ] F-05.e Preserve actual scope and unknown timing in ProposalDrafter's template.
+
+#### F-05: Verify the original joined drafting contract
+
+**Result kind:** verification-only
+**Dependencies:** F-05.a, F-05.b, F-05.c, F-05.d, F-05.e
+**Owner:** Coordinator. **Original requirement:** F-05.
+**Acceptance:** verify that the five completed children together retain the
+original factual, consent, voice and internal/customer separation duties.
+No child or medium is silently dropped, and no role/tool inventory changes.
+This task performs no second template implementation.
+**Verification:** inspect the joined diff and the five source-fixture outcomes,
+then run `bash tests/behavior/agent-contract-scenarios.sh`. Per-child source
+evidence remains attributable; this joined check is not a model experiment.
+
+#### F-05.a: Correct the retained blog template
+
+**Files:** `agents/communication/BlogPostDrafter.md`,
+`tests/behavior/agent_contract_scenarios.py`.
+**Owner:** Coordinator. **Original requirement:** F-05. **Dependencies:** none
+**Acceptance:** the actual outline/report skeleton does not require a humility
+episode, measured result or CTA for a POV brief that supplies none. Retain supplied
+facts, configured voice, source/consent requirements and internal review separation.
+**Verification:** add a documentary negative for that sparse POV against the
+actual template section; run it through the existing agent-contract wrapper.
+
+#### F-05.b: Correct the retained email template
+
+**Files:** `agents/communication/EmailCustomerDrafter.md`,
+`tests/behavior/agent_contract_scenarios.py`.
+**Owner:** Coordinator. **Original requirement:** F-05. **Dependencies:** none
+**Acceptance:** two related required decisions survive the template, without a
+fabricated deadline or mandatory single-ask reduction. Retain real commitments,
+consent, voice and the distinction between customer copy and internal checks.
+**Verification:** add the two-decision/no-deadline documentary countercase and
+run it through the existing agent-contract wrapper.
+
+#### F-05.c: Correct the retained social-post template
+
+**Files:** `agents/communication/LinkedInPostDrafter.md`,
+`tests/behavior/agent_contract_scenarios.py`.
+**Owner:** Coordinator. **Original requirement:** F-05. **Dependencies:** none
+**Acceptance:** a post with no requested CTA has a valid ending in the actual
+report skeleton; retain selected length/voice, supplied facts and consent.
+**Verification:** add the no-CTA source-template countercase and run it through
+the existing agent-contract wrapper.
+
+#### F-05.d: Correct the retained executive-brief template
+
+**Files:** `agents/customer/ExecutiveBriefingDrafter.md`,
+`tests/behavior/agent_contract_scenarios.py`.
+**Owner:** Coordinator. **Original requirement:** F-05. **Dependencies:** none
+**Acceptance:** the sparse-brief template preserves unknown metrics/timing and
+the supplied number of decisions rather than inventing ROI, urgency or an ask
+quota. Retain source fidelity, actual options/risks and internal review separation.
+**Verification:** add the sparse executive-brief source countercase and run it
+through the existing agent-contract wrapper.
+
+#### F-05.e: Correct the retained proposal template
+
+**Files:** `agents/customer/ProposalDrafter.md`,
+`tests/behavior/agent_contract_scenarios.py`.
+**Owner:** Coordinator. **Original requirement:** F-05. **Dependencies:** none
+**Acceptance:** actual deliverables and unresolved dates survive without
+mandatory invented phases, quotas or commitments. Preserve explicit scope,
+assumptions, consent and configured voice requirements.
+**Verification:** add the sparse-scope/unknown-timing source countercase and run
+it through the existing agent-contract wrapper.
+
 ### Selected project-lesson curation (P16)
 
 **Original ID:** C-07. **Requirements:** SOURCE, METHOD, TRUTH.
@@ -800,6 +883,23 @@ Record only the actual observed application: an owned profile-local sibling temp
 root resolved the MSYS alias fixture failure and the unchanged memory tests passed.
 Keep that bounded application distinct from a demonstrated prevention/efficacy claim.
 No operator-global store or promotion is selected.
+**Admitted prior application:** coordinator-observed on **2026-10-17**, with
+product/helper/test source at `c4032c3f`; only the two continuity documents had
+unrelated edits. The originating session retains these unchanged receipts:
+
+| Receipt | Actual command/result | Receipt SHA-256 |
+|---|---|---|
+| `continuation-memory-check-01` | `bash tests/unit/core-boundary-methods.sh` passed 22 methods; `bash tests/unit/memory-v2.sh` failed two path-spelling comparisons and the batch exited 1; the later surface check was not run. | `c0371fb2604e23979ad17e7e50b116c75d01e63c280c960c06e8586f3c24797e` |
+| `continuation-memory-check-02` | The unchanged core/memory commands passed (22 methods and `ALL PASS`); `bash tests/shape/native-command-surface.sh` then passed with zero findings; the batch exited 0. | `614acef9b5577fa24931a60dcf215408c2f3a72f228d022426c1e64a453d4465` |
+
+Only the private validation recipe changed: it selected an already-owned
+user-profile sibling temp root outside the inherited MSYS `/tmp` mapping,
+checked native containment and parent/child path agreement, and preserved the
+existing mapping/backing directory. No product/test repair, drive-root directory
+or cleanup was involved. This is an explicitly attributed coordinator observation,
+not reviewer execution, prevention evidence or a latency comparison. Raw private
+paths/logs are not published. A cold executor may request these exact receipts
+by their IDs/hashes; unavailable evidence remains unverified, not reconstructed.
 **Verification:** capture an attributable preimage; inspect the proposed safe body
 text; run the existing helper under explicit repository/profile/audit roots; read
 both results back and compare untouched blocks byte-for-byte. Run
@@ -808,8 +908,10 @@ both results back and compare untouched blocks byte-for-byte. Run
 assessment is model-only unless an actual required control runs; do not fabricate
 a scanner receipt.
 
-**Plan signals:** 61 original task IDs in eighteen packages; thirteen IDs in
-this coordinator extension. Keep the existing XL programme scope and phases
+**Plan signals:** 66 mapped task IDs in eighteen packages: sixty original finding
+IDs, the retained integration ID and five F-05 implementation children. The
+extension covers thirteen original findings through eighteen selected tasks.
+Keep the existing XL programme scope and phases
 PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE. The actual `scale_token_estimate XL` read
 returned `120000 uncalibrated 0`: one uncalibrated whole-cycle prior with zero
 matching measured cycles, never a per-leaf multiplier or a price/runway claim.

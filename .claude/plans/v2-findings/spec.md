@@ -1,8 +1,8 @@
 # Spec: complete the original V2 findings
 
-**Status:** APPROVED scope for the 2026-10-17 compatible residual extension.
-Existing implementation authority is retained; current independent plan review
-remains required. Architectural alternatives and experiments remain unapproved.
+**Status:** DRAFT while correcting the blocking 2026-10-17 plan inspection.
+Compatible scope authority is retained, but machine approval is revoked during
+revision. Architectural alternatives and experiments remain unapproved.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
 with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.
@@ -119,6 +119,9 @@ P13-P16 in the original plan elaborate the independently identified compatible
 residuals of lane-A-01/A-02/A-06, lane-E-05/E-14, lane-d-03, F-05, C-07,
 G-03/G-07 and ENT-01/ENT-05/ENT-06. The current task source remains `plan.md`;
 no replacement findings inventory or competing task authority is created.
+F-05 retains its original identity and full acceptance as the parent verification
+checkpoint of five explicitly mapped implementation children; the original inventory
+still contains 84 findings, not five new requirements.
 
 Correct actual planning/drafting templates and their consumers, CAPTURE's
 reaffirmation caller, promotion-evidence prose and undated-observation wording.

@@ -1,9 +1,9 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** APPROVED scope for the 2026-10-17 compatible original-residual extension.
-Draft `3b97eedd8abd94ee89860e8b6c2d15c3a6228d72` preceded restored approval.
-No writer starts before the current independent plan-review gate passes;
-scope approval alone is not BUILD clearance. Earlier deliveries remain history.
+**Status:** DRAFT while repairing SPEC-01/SPEC-02 from the independent plan review.
+Retain the actual failed/unverified decisions; no writer starts before the revised
+scope is committed, approval restored and current review gates passed.
+Compatible authority remains, but no granularity exception is inferred.
 **Work map:** [work.json](work.json).
 
 **Current recovery, 2026-10-17:** use
@@ -102,9 +102,16 @@ the exact five source findings, three revisions and their original pinned URLs.
 ## Next ready original work
 
 Read the complete P13-P16 clauses in the same plan and their original source
-requirements. There are now 61 mapped IDs in eighteen packages; four additional
-original IDs are elaborated and nine prior IDs reopen only their residual clauses.
+requirements. There are now 66 mapped task IDs in eighteen packages: four more
+original finding IDs are elaborated and five bounded F-05 implementation children
+are added without replacing F-05 or its full original acceptance.
 Earlier bounded acceptance and the complete private original inventory remain.
+
+F-05 is the parent verification checkpoint after F-05.a through F-05.e, one template and
+focused source fixture per medium. Do not replace that decomposition with an
+unapproved duration exception. P16 now names the actual dated failed/successful
+MSYS validation receipts and an explicitly attributed, source-safe coordinator
+observation; a future rerun is not evidence that the historical event occurred.
 
 The coordinator executes these shared-owner packages serially; no new worker
 lane or concurrent write scope is introduced. P13 aligns the actual plan template,
