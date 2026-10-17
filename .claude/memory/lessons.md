@@ -1093,7 +1093,6 @@ deleted its own spill file. Its scope was narrower, but the list of matched path
   and receipts first, and label any repeat as a new observation.
 
 ## L-050 - Do not create drive-root directories without authorization
-
 **Date:** 2026-09-24
 
 **Context:** A P09 installed-consumer test refused its own fixture because paths under
@@ -1108,6 +1107,29 @@ drive-root path. When a path budget cannot be met there, record the environment
 refusal honestly. Rely on independent evidence that ran inside its own authorized
 short workspace, or route the rerun to that owner. Do not create drive mappings or
 other system-level paths as a workaround.
+
+**Curation, 2026-10-17:** L-050 remains the canonical root-authorization rule.
+L-062 retains the dated recurrence and its additional warning to preserve an
+out-of-scope artifact until recovery or cleanup is separately authorized. Neither
+record is superseded or deleted by this clarification.
+
+**Observed application, 2026-10-17:** The repository-completion coordinator selected
+an already-owned user-profile sibling temp root outside the inherited MSYS `/tmp`
+mapping, verified native containment and parent/child path agreement, and preserved
+the mapping and its backing directory. Only the private verification recipe
+changed; product/helper/test source remained at `c4032c3f`.
+`continuation-memory-check-01` had two memory-fixture path-spelling failures;
+`continuation-memory-check-02` then reported memory `ALL PASS`, 22 passing core
+methods and zero native-surface findings. The failed receipt remains failed.
+
+**Evidence and limits:** Those retained receipt SHA-256s are respectively
+`c0371fb2604e23979ad17e7e50b116c75d01e63c280c960c06e8586f3c24797e` and
+`614acef9b5577fa24931a60dcf215408c2f3a72f228d022426c1e64a453d4465`.
+This is one attributed application of the rule, not independent execution,
+demonstrated prevention, broad efficacy, restored client-state proof or a latency
+comparison. No drive-root directory, cleanup or global promotion was involved.
+If the exact receipts are unavailable, their execution remains unverified rather
+than reconstructed from this lesson.
 
 ## L-051 - Isolate diagnostic probe parents, not only their roots
 **Date:** 2026-09-24
@@ -1317,7 +1339,6 @@ suddenly reports many findings, first look for a broken binding that silently di
 classifications. Record a correction as a new commit, not a reset or amend.
 
 ## L-062 - Recurrence of L-050: a short synthetic root is still no license for a drive root
-
 **Date:** 2026-09-28
 
 **Context:** A Windows installed-consumer test failed its own 235-character path budget under a
@@ -1330,6 +1351,19 @@ recovery decision.
 profile or an already-authorized workspace. When a budget still cannot be met there, record the
 refusal honestly and ask, rather than choosing a system-level location. Never plan cleanup of an
 unauthorized path without authorization; preserve it and report it.
+
+**Curation, 2026-10-17:** This block is the dated recurrence of the canonical rule
+in L-050, not a second competing rule or a resolved recovery record. Its additional
+artifact-preservation warning remains applicable. The original account and ID
+remain intact; this update neither authorizes cleanup nor changes an artifact's
+recovery status.
+
+**Later application and limits:** L-050 now records the coordinator-observed
+2026-10-17 MSYS fixture recovery and the exact retained receipts. That narrower
+application did not create a drive-root directory or alter the existing mapping.
+It does not undo this recurrence or establish general prevention. Broader benefit
+and recurrence rates remain unknown; no reference count, automatic promotion or
+new lesson ID is inferred.
 
 ## L-063 - Keep supplemental and artifact observations out of feature acceptance
 
