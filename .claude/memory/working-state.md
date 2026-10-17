@@ -62,7 +62,7 @@ Old lane records do not close the changed aggregate. Inspect hosted checks for
 the exact proposed head and reconcile the original shared swarm/P05 acceptance
 before main delivery; no previous target's profile/runtime references transfer.
 All 45 prior residuals were independently reconciled; P13-P16 cover thirteen ready
-original IDs. Plan SPEC remains blocked pending F-05/C-07 repair review; the map is DRAFT.
+original IDs. Revised scope is approved, but F-05/C-07 repair review still blocks BUILD.
 
 ## Original programme and recorded delivery
 

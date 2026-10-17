@@ -1,9 +1,9 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** DRAFT while repairing SPEC-01/SPEC-02 from the independent plan review.
-Retain the actual failed/unverified decisions; no writer starts before the revised
-scope is committed, approval restored and current review gates passed.
-Compatible authority remains, but no granularity exception is inferred.
+**Status:** APPROVED compatible scope after repair draft
+`33b7db18526880c6f1b82613ced0ae8eae85349a`. Retain the actual failed/unverified
+r2 decisions; no writer starts before current review accepts the revised selection.
+No granularity exception or additional architecture/experiment is approved.
 **Work map:** [work.json](work.json).
 
 **Current recovery, 2026-10-17:** use

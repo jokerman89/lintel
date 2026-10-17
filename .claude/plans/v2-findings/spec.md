@@ -1,8 +1,8 @@
 # Spec: complete the original V2 findings
 
-**Status:** DRAFT while correcting the blocking 2026-10-17 plan inspection.
-Compatible scope authority is retained, but machine approval is revoked during
-revision. Architectural alternatives and experiments remain unapproved.
+**Status:** APPROVED compatible scope after the SPEC-repair draft was committed.
+Current independent review remains required; no granularity exception,
+architectural alternative or experiment is approved by this status.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
 with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.

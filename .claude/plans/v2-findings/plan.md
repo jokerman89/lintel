@@ -1,11 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** DRAFT while repairing the blocking SPEC inspection of
-`4b359136ed35dfc4b37d026231420384db523210`. Machine approval is revoked before
-changing the F-05 decomposition and C-07 evidence input. The operator's compatible
-scope authority remains; no oversized-leaf exception, architecture change or
-empirical permission is inferred. Commit the exact revision before restoring
-scope approval and obtaining current independent review. BUILD remains blocked.
+**Status:** APPROVED scope after committing the SPEC-repair draft at
+`33b7db18526880c6f1b82613ced0ae8eae85349a`. The operator's compatible authority
+covers the same original clauses and their bounded decomposition, not an
+oversized-leaf exception, architecture change or empirical permission.
+The actual blocking r2 decisions remain history and current independent review
+must accept the revised selection before BUILD. Scope approval is not clearance.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
