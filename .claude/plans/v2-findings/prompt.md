@@ -1,20 +1,22 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** APPROVED compatible scope after repair draft
-`33b7db18526880c6f1b82613ced0ae8eae85349a`. Retain the actual failed/unverified
-r2 decisions; no writer starts before current review accepts the revised selection.
-No granularity exception or additional architecture/experiment is approved.
+**Status:** DRAFT post-source completeness amendment. Existing completion
+authority is retained, but P17/P18 source work awaits current independent plan
+review. Preserve earlier source acceptance and failed decisions at their actual
+scope; no granularity, architecture, experiment or permission change is selected.
 **Work map:** [work.json](work.json).
 
 **Current recovery, 2026-10-17:** use
 `jokerman-microsoft-repository-completion`. It preserves the original integrated
 lanes at `63b6fcd0` and the prior coordinator's caller/generated/migration repairs.
 Version 0.14.0 identifies the nine-entry command-surface change. Its source and CI
-repairs are pushed at `c4032c3f204e76ddb90f7f06351a35bd3d45274e`; hosted run
-38970268976 passed all 23 jobs. Native PR creation still fails with EMU 403 and no
-PR exists; do not substitute another channel. Continue P13-P16 below, not another
-implementation of the producer lanes. Old review/CI is not acceptance of new
-changes. Default-branch mutation still needs its own current authorization.
+repairs are retained at `c4032c3f`; that CI passed 23 jobs. P13-P16 subsequently
+passed their actual source review/QA gates at `e93a8f01`, `d40b67c0`,
+`1df0c427` and `1d46b104`. The first two are pushed; the latter two are local.
+P13-only CI 38997973152 passed all 23 jobs, not the later aggregate.
+Native PR creation still fails with EMU 403 and no PR exists; do not substitute
+another channel. Continue the two remaining clauses and P9 below, not another
+producer implementation. Default-branch mutation needs its own authorization.
 
 ## Context
 
@@ -38,7 +40,11 @@ from a memory summary or publish raw private reports.
 The historical disposition is 39 source-complete/retained-guidance findings and 45
 with remaining clauses. A fresh independent reconciliation of all 45 identified
 six further source-satisfied residuals and thirteen original IDs with ready
-compatible work; other rows retain specific decisions, observations and holds.
+compatible work. After those source corrections, the independent current
+accounting has 47 source/guidance-closed and 37 open rows. It carries prior
+acceptance honestly, adds two adjudicated source/guidance closures and identifies
+G-03's proportion check and ENT-05's learned-pattern evidence as further ready
+clauses. Other rows retain specific decisions, observations and holds.
 The plan's checked boxes cover its elaborated compatible
 clauses and source delivery, not closure of all 84 findings. Preserve the exact
 remaining clauses; distinguish unimplemented proposals from genuine authority,
@@ -99,13 +105,16 @@ P12 records the retained review date (`2026-09-28`) separately from the
 repository record date (`2026-10-09`); neither is upstream verification. Bind
 the exact five source findings, three revisions and their original pinned URLs.
 
-## Next ready original work
+## Completed bounded P13-P16 source and next original work
 
-Read the complete P13-P16 clauses in the same plan and their original source
-requirements. There are now 66 mapped task IDs in eighteen packages: four more
+Retain the completed P13-P16 clauses and their original source requirements.
+There were 66 mapped task IDs in eighteen packages: four more
 original finding IDs are elaborated and five bounded F-05 implementation children
 are added without replacing F-05 or its full original acceptance.
 Earlier bounded acceptance and the complete private original inventory remain.
+Current regrouping moves the same G-03/ENT-05 IDs into P17/P18 for their remaining
+clauses: still 66 nodes and 65 package leaves, now twenty packages. Do not rename
+findings, add another backlog or replay completed source changes.
 
 F-05 is the parent verification checkpoint after F-05.a through F-05.e, one template and
 focused source fixture per medium. Do not replace that decomposition with an
@@ -122,7 +131,23 @@ and marks the Word note's missing observation identity unknown. P16 uses existin
 conditional updates to distinguish the L-050 rule and L-062 recurrence without
 deleting history, adding duplicates or claiming prevention.
 
-Commit the exact authorized planning extension before restoring machine approval,
+P17 makes the existing engineering inspection own one qualitative
+proportion/transcript criterion and has PLAN apply it in its existing self-check.
+Necessary decisions, interfaces, specification values, algorithms and acceptance
+remain; there is no numeric ratio, new gate or leaf-policy change.
+P18 carries learned-pattern improvement evidence through the existing pattern
+capture/approval guidance and schema. Reuse the six-part method, preserve actual
+source-kind/confidence meanings and never condition explicit policy authority
+on a productivity experiment. Neither source change runs a pattern operation.
+
+P9 must renew four stale lane acceptance records in new slots, preserving old
+reports and real Git/source provenance. Current-file observations are not Git
+diff or isolation proof and cannot close a lane alone; full scoped/deletion
+coverage, real current checks and independent shared P05 acceptance remain.
+Do not fabricate new source changes, commits or ancestry merely to make a gate
+green. Read the plan's current evidence-renewal section before proceeding.
+
+Commit the exact authorized planning amendment before restoring machine approval,
 then obtain the current independent plan-review gate before source work. The
 approval flag alone is not BUILD clearance. Use original IDs, explicit package
 preimages, red/green regressions and independent SPEC then QUALITY. Keep the

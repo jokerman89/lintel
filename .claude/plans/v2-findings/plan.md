@@ -1,11 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** APPROVED scope after committing the SPEC-repair draft at
-`33b7db18526880c6f1b82613ced0ae8eae85349a`. The operator's compatible authority
-covers the same original clauses and their bounded decomposition, not an
-oversized-leaf exception, architecture change or empirical permission.
-The actual blocking r2 decisions remain history and current independent review
-must accept the revised selection before BUILD. Scope approval is not clearance.
+**Status:** DRAFT post-source completeness amendment. The operator's original
+completion authority remains; this draft does not clear its new source work.
+P13-P16's bounded source reviews and earlier failed/r2 records remain history,
+not acceptance of the two further clauses or renewed aggregate evidence.
+Commit this amendment and obtain its actual independent plan-review gate before
+BUILD. No leaf-policy, architecture, experiment or permission change is selected.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
@@ -16,6 +16,11 @@ coordinator-owned and sequential.
 **Continuation baseline:** `99d471506d985105f2eb4b27f78960fdd845a663` (0.13.9).
 **Residual baseline:** `c4032c3f204e76ddb90f7f06351a35bd3d45274e` (0.14.0
 feature branch; hosted run 38970268976 passed 23 jobs, not main delivery).
+**Current source baseline:** `1d46b104082df92ccbff8dfe4af84548611ac72c`.
+P13-P16 are implemented and source-reviewed for their bounded clauses. P13/P14
+are pushed; P15/P16 are local commits. P13-only CI at `e93a8f01` passed 23 jobs.
+The post-source original inventory is 47 source/guidance-closed and 37 open,
+with two further compatible source clauses below; no programme closure is claimed.
 
 **Captured delivery:** the elaborated P1-P8 clauses and P9 source-delivery
 obligation landed in 0.13.8 at `b2516af57244017160c499558f183f95e7a9fe5c`.
@@ -34,7 +39,10 @@ B-04/B-05/B-06/B-10/C-04 and the bounded G-11 record residual, and reopens
 integration: 57 IDs in fourteen packages. The 2026-10-17 extension below retains
 those IDs and elaborates four more original finding IDs, then adds five bounded
 F-05 implementation children: 66 mapped task IDs in eighteen packages. The
-original 84-finding inventory is unchanged.
+original 84-finding inventory is unchanged. The post-source amendment moves the
+same original G-03 and ENT-05 IDs to P17/P18 for their remaining clauses:
+66 task nodes and 65 package leaves now form twenty packages. No finding or
+implementation-child ID is added by that regrouping.
 Previously accepted source clauses and review records remain history. See the
 [current delivery record](#verified-method-continuation-delivery-2026-10-04).
 
@@ -92,11 +100,13 @@ elapsed estimates or dropping the original finding IDs.
 | P11B | One discovery and role-lifecycle owner | lane-B-04, lane-B-05 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Catalog and role lifecycle preservation with read-only SENSE routing verification and helper/refusal tests |
 | P11C | One internal handoff owner | lane-B-06 | Isolated implementer; coordinator fan-in | P3, P5, P8, P10 | Complete internal method and unchanged forge boundary/evaluator tests |
 | P12 | Bounded native-plan comparison record | G-11 | Isolated implementer; coordinator fan-in | P7 | Exact dated pins and preservation tests without a network/current-HEAD sweep |
-| P13 | Planning consumers obey the accepted advisory method | lane-A-01, lane-A-02, G-03, G-07, ENT-06, ENT-01 | Coordinator | P3, P10 | Actual template/consumer negatives, retained task/phase/approval contracts and honest value claims |
-| P14 | Correct capture ownership and complete promotion evidence | lane-E-05, lane-E-14, ENT-05, lane-A-06 | Coordinator | P4, P8 | Reaffirm-only capture, complete evidence prose, unchanged helper/gate contracts |
+| P13 | Planning consumers obey the accepted advisory method | lane-A-01, lane-A-02, G-07, ENT-06, ENT-01 | Coordinator | P3, P10 | Actual template/consumer negatives, retained task/phase/approval contracts and honest value claims |
+| P14 | Correct capture ownership and maintainer wording | lane-E-05, lane-E-14, lane-A-06 | Coordinator | P4, P8 | Reaffirm-only capture, unchanged helper/gate contracts and accurate suite wording |
 | P15 | Retained drafting templates preserve supplied facts and unknowns | F-05.a, F-05.b, F-05.c, F-05.d, F-05.e, lane-d-03 | Coordinator | P2, P4 | Per-medium source negatives, original F-05 parent-checkpoint verification and explicit undated-observation limits |
 | P16 | Curate the selected path-safety rule and recurrence without losing history | C-07 | Coordinator | P14 | Existing conditional update operations, exact preservation of other blocks and attributed benefit/recurrence limits |
-| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12, P13, P14, P15, P16 | Complete original-clause accounting, current local/hosted verification, independent review and actual authorized delivery |
+| P17 | Plans expose decisions rather than unnecessary implementation transcripts | G-03 | Coordinator | P13 | One qualitative criterion, two consumers, documentary negatives and preserved necessary detail |
+| P18 | Learned-pattern promotion retains evidence without displacing policy authority | ENT-05 | Coordinator | P14 | Existing prose/record fields, learned-versus-policy cases and unchanged runtime/lifecycle |
+| P9 | Verified generated and delivered aggregate | V2-INTEGRATION | Coordinator | P1, P2, P3, P4, P5, P6, P7, P8, P10, P11A, P11B, P11C, P12, P13, P14, P15, P16, P17, P18 | Complete original-clause accounting, current local/hosted verification, independent review and actual authorized delivery |
 
 ## First ready leaf
 
@@ -201,7 +211,7 @@ The delegate's original report is preserved; its reservation was coordinator-own
 - [x] lane-E-11 Keep persistence ownership with the authorized caller.
 - [x] lane-E-13 Derive release notes from delivered behavior rather than invented prefix mappings.
 - [x] F-04 Require dated primary-source applicability and a responsible owner without fabricating legal currency.
-- [ ] F-05 Verify the joined drafting-template correction after its five bounded implementation children.
+- [x] F-05 Verify the joined drafting-template correction after its five bounded implementation children.
 
 **Agent-correctness owner:** one sequential delegate, after generation safety
 returns. Read each full original claim and check prior V2 repairs before editing.
@@ -230,14 +240,14 @@ Already corrected clauses need evidence and no gratuitous rewrite. Preserve
 names and functional capabilities. Report separate consolidation proposals as
 still open, never as a reason to omit these compatible corrections.
 
-- [ ] lane-A-01 Finish advisory sizing/ambiguity semantics in the actual template and SENSE consumers.
-- [ ] lane-A-02 Remove the remaining full-code template default while retaining accepted leaf constraints.
+- [x] lane-A-01 Finish advisory sizing/ambiguity semantics in the actual template and SENSE consumers.
+- [x] lane-A-02 Remove the remaining full-code template default while retaining accepted leaf constraints.
 - [ ] lane-B-06 Keep the actual handoff controls as an internal method rather than a redundant public skill.
 - [x] lane-B-09 Preserve corrected resume precedence and finish reference-owned job, tree, swarm and ledger recovery.
 - [x] lane-B-11 Preserve named contract owners and move Swarm's shared-evidence consumer into its reference.
 - [x] lane-B-12 Render MARS offers from the observed roster, with host-specific mechanics in references.
 - [x] C-02 Label optional domain-hook heuristics accurately and remove unsupported override advice.
-- [ ] C-07 Curate the selected existing rule/recurrence through conditional updates without claiming prevention.
+- [x] C-07 Curate the selected existing rule/recurrence through conditional updates without claiming prevention.
 - [x] C-08 Remove unsupported engineering preference-contract claims.
 - [x] C-09 Put scaffold-mode acceptance reasoning with the owning scaffold method.
 
@@ -284,12 +294,12 @@ No full-suite rerun, model experiment, global profile mutation, private-data rea
 generated reducer or ADR change by the delegate. Preserve preceding packages,
 or document exact intentional overlaps before editing a shared caller.
 
-- [ ] lane-d-03 Retain the delivered checker and make the Word note's missing observation identity explicit.
+- [x] lane-d-03 Retain the delivered checker and make the Word note's missing observation identity explicit.
 - [x] lane-d-07 Use one shared frontend-fragment publication procedure without canned vendor choices.
 - [x] lane-d-08 Keep one advisory review rubric and require observations for performance claims.
 - [x] lane-d-09 Remove nonexistent generation-resume and obsolete acceptance promises.
 - [x] lane-d-11 Correct unproven superiority and overbroad adaptation attribution claims.
-- [ ] lane-E-14 Finish CAPTURE's use of its reaffirmation owner without retiring documentation capability.
+- [x] lane-E-14 Finish CAPTURE's use of its reaffirmation owner without retiring documentation capability.
 - [x] F-02 Use one narrative structure and one axis publication owner without duplicate default contexts.
 
 F-02's remaining compatible work keeps every named role. A shared narrative
@@ -383,7 +393,7 @@ packages outside exact documented overlaps.
 - [x] lane-E-01b Emit role-specific planner/builder/reviewer report contracts.
 - [x] lane-E-02 Share distributed-boundary reasoning without duplicate default dispatch.
 - [x] lane-E-03 Share data-design methods while preserving the migration planner/executor split.
-- [ ] lane-E-05 Repair the remaining cold-trio caller while preserving the delivered role methods.
+- [x] lane-E-05 Repair the remaining cold-trio caller while preserving the delivered role methods.
 - [x] lane-E-06 Extract the existing bisect and migration eligibility recipes into trusted helpers.
 - [x] lane-E-10 Distinguish client/provenance metadata from observed support and license evidence.
 - [x] lane-E-12 Share performance-evidence reasoning and avoid repeated profiling for report views.
@@ -494,9 +504,10 @@ Normal test-only Git/profile fixtures and targeted child cleanup are allowed;
 no source commits, target-profile rebind, external network or policy change.
 Keep earlier packages intact and report new resource dependencies centrally.
 
-- [ ] lane-A-06 Remove the stale current shape-suite count while preserving conditional maintainer procedures.
+- [x] lane-A-06 Remove the stale current shape-suite count while preserving conditional maintainer procedures.
 - [x] lane-d-02 Remove false Visio completion/library promises while retaining the explicit unavailable-writer boundary.
-- [ ] ENT-05 Complete the existing promotion evidence record without a new schema or efficacy claim.
+ENT-05's delivered lesson-promotion clause remains evidence; its remaining
+learned-pattern clause is the same original task in P18 below.
 
 **Core-boundary owner:** one sequential delegate. Scope is CYCLE/CAPTURE/SHIP
 and new direct method references, the retained Visio compatibility entry and
@@ -712,10 +723,13 @@ integrated acceptance are still required.
 
 ### Planning consumers and truthful value claims (P13)
 
-- [ ] G-03 Finish decision-complete planning defaults without changing accepted timed leaves.
-- [ ] G-07 Align hierarchy consumers with observable boundaries, not lexical certainty.
-- [ ] ENT-06 Preserve original IDs, interfaces and verification while making depth evidence-driven.
-- [ ] ENT-01 Qualify the planner's comparative-value goal as unmeasured rather than closed.
+- [x] G-07 Align hierarchy consumers with observable boundaries, not lexical certainty.
+- [x] ENT-06 Preserve original IDs, interfaces and verification while making depth evidence-driven.
+- [x] ENT-01 Qualify the planner's comparative-value goal as unmeasured rather than closed.
+
+The first P13 checkpoint also completed G-03's decision-complete template clause.
+That original ID now belongs to P17 for the additionally identified proportion
+check. Its earlier source/review evidence remains dated P13 evidence, not rewritten.
 
 **Also covers:** the reopened lane-A-01 and lane-A-02 above.
 **Requirements:** SOURCE, TRUTH, METHOD; the original claims and ADR-0026.
@@ -740,7 +754,10 @@ calibration activation and question-preference storage unchanged.
 
 ### Capture ownership and promotion evidence (P14)
 
-**Original IDs:** lane-E-05, lane-E-14, ENT-05, lane-A-06.
+**Current IDs:** lane-E-05, lane-E-14, lane-A-06. The first P14 checkpoint also
+completed ENT-05's lesson-promotion evidence clause; that original ID now belongs
+to P18 for the learned-pattern remainder. The delivered scope below and its actual
+source/review records remain history, not a claim that P14 covered all of ENT-05.
 **Requirements:** SOURCE, TRUTH, METHOD; existing BUILD fidelity and CAPTURE ownership.
 **Files:** `skills/capture/SKILL.md`,
 `skills/lessons-add/references/benefit.md`, `skills/lessons-promote/SKILL.md`,
@@ -796,11 +813,11 @@ fixture; the shared package reviews their integration once. There is no claimed
 duration measurement or oversized-leaf exception. All five trace to the unchanged
 original F-05 claim; lane-d-03 remains the separate Word provenance correction.
 
-- [ ] F-05.a Make the BlogPostDrafter outline conditional on actual story evidence.
-- [ ] F-05.b Preserve the EmailCustomerDrafter brief's real decisions and timing.
-- [ ] F-05.c Keep LinkedInPostDrafter's closing action optional when not requested.
-- [ ] F-05.d Preserve unknowns and actual asks in ExecutiveBriefingDrafter's template.
-- [ ] F-05.e Preserve actual scope and unknown timing in ProposalDrafter's template.
+- [x] F-05.a Make the BlogPostDrafter outline conditional on actual story evidence.
+- [x] F-05.b Preserve the EmailCustomerDrafter brief's real decisions and timing.
+- [x] F-05.c Keep LinkedInPostDrafter's closing action optional when not requested.
+- [x] F-05.d Preserve unknowns and actual asks in ExecutiveBriefingDrafter's template.
+- [x] F-05.e Preserve actual scope and unknown timing in ProposalDrafter's template.
 
 #### F-05: Verify the original joined drafting contract
 
@@ -927,6 +944,97 @@ and ADR-drafting holds are not retried. None is a reason to omit P13-P16. After
 their implementation, reconcile the original rows again before claiming SOURCE
 or COMPLETE; do not convert unknown observations into accepted results.
 
+## Post-source original-clause completeness amendment
+
+The independent post-source reconciliation read the same admitted originals in
+place and reassessed the thirteen affected findings. Its complete response is
+retained privately with SHA-256
+`ba4a6659dab2e11a672875c437b4233ba377a71ce7f700ca22d026222fb486ef`.
+The coordinator executed exact 84-ID parity, boolean/remaining-clause and count
+checks and rehashed the four original inputs afterward: unchanged. The derived
+47/37 accounting carries 39 historical accepted and six prior source-satisfied
+rows, adds two adjudicated source/guidance closures, and does not re-audit all
+84 or imply empirical benefit, approval or programme completion.
+
+The first P13-P16 source deliveries are `e93a8f01`, `d40b67c0`, `1df0c427`
+and `1d46b104`. Actual independent SPEC then QUALITY, exact observed capture,
+latest-reader and QA gates passed for each bounded package. Relevant executed
+checks were 31 coordination methods for P13; 19 fidelity/33 coordination/23 core
+methods for P14; 27 scenario/20 fidelity/20 retained-role methods for P15; and
+10 selected lesson/update methods plus 16 memory assertions for P16. Native
+consistency remained 163 files. These are their actual observations, not new
+executions or final aggregate acceptance.
+
+G-03 and ENT-05 each contain one more compatible source clause. Move those same
+original IDs from P13/P14 to P17/P18; their already implemented clauses remain
+accepted baseline input. All other original task IDs and the F-05 parent/children
+remain. P16 used the delivered lesson method at `d40b67c0`; the added pattern
+reasoning is not a new prerequisite for its completed curation.
+
+### Proportion and transcript self-check (P17)
+
+- [ ] G-03 Complete the original proportion/transcript check while retaining decision-complete defaults and accepted leaves.
+
+#### G-03: Check whether a selected plan has become an implementation transcript
+
+**Owner:** Coordinator. **Requirements:** SOURCE, TRUTH, METHOD.
+**Dependencies:** lane-A-02
+**Files:** `skills/inspect/SKILL.md`, `skills/plan/SKILL.md`,
+`tests/unit/coordination-methods.py`; corresponding native wrappers are generated.
+**Acceptance:** add one qualitative criterion to the existing engineering plan
+inspection and have PLAN apply that same criterion during its existing draft
+self-check. Distinguish unnecessary implementation narration/duplicated bodies
+from necessary decisions, interfaces, specification values, non-obvious algorithm
+contracts and acceptance/verification detail. Preserve the latter even in a long
+plan. Record concrete evidence and a retain/trim rationale in the existing
+inspection, without a new rubric, schema, workflow invocation, numerical
+line/token ratio, pause, approval or timed-leaf change.
+**Verification:** extend actual source fixtures with missing-method/caller
+negatives and two documented countercases: gratuitous implementation narration
+versus indispensable algorithm/contract detail. Run
+`bash tests/unit/coordination-methods.sh`; fixture/template observations are not
+model-following or comparative productivity evidence.
+
+### Learned-pattern promotion evidence (P18)
+
+- [ ] ENT-05 Complete promotion evidence for learned patterns through the existing method and record fields.
+
+#### ENT-05: Extend learned-improvement evidence without replacing policy authority
+
+**Owner:** Coordinator. **Requirements:** SOURCE, TRUTH, METHOD.
+**Dependencies:** lane-E-14
+**Files:** `skills/pattern/references/consumer-contract.md`,
+`skills/pattern/SKILL.md`, `tests/integration/pattern-workflows.py`; native pattern
+resources are generated. The existing lesson-evidence owner is read-only.
+**Acceptance:** the existing capture/approval procedure consumes the six-part
+promotion-evidence method for learned improvement claims. Carry applicability,
+source-safe provenance, counterexample, accountable owner, actual evaluation or
+explicit unknowns, and a supersession path in existing `guidance`, source and
+approval-reference material. Reuse `owner`, `applies_to` and the existing
+version/lifecycle operations; add no schema, runtime, automatic learner or new
+authority. Clarify existing source-kind versus confidence fields where needed;
+do not add an `inferred` source kind.
+Unsupported learned-improvement claims remain draft/deferred or explicitly
+unverified for the responsible review; neither helper success nor repeated
+reference demonstrates benefit. An explicitly approved organizational-policy
+pattern is not conditional on a productivity experiment. Keep policy authority
+and learned benefit separate in mixed patterns, preserving every mandatory
+policy clause and all existing approval, pin, lock and disclosure boundaries.
+**Verification:** add actual method/caller negatives and existing-schema cases
+for an uncertain learned improvement and an approved policy without measured
+productivity. Run `bash tests/integration/pattern-workflows.sh`; all mutations
+in that suite remain owned synthetic fixtures. No actual pattern is captured,
+approved, rebound, promoted or exported by this source correction.
+
+**Amended signals:** 66 original mapped nodes, 65 package leaves, twenty packages;
+two remaining bounded source tasks plus the existing P9 acceptance obligation.
+The same XL programme and PLAN/BUILD/REVIEW/VERIFY/SHIP/CAPTURE phases remain.
+Actual `scale_token_estimate XL` returned `120000 uncalibrated 0`, once for the
+whole programme, not once per new task or a sufficient-budget claim. Runtime,
+model usage and cost remain unmeasured. No rendered/design surface is changed.
+Current independent engineering/devex and staged plan review are required;
+the operator's existing completion authority needs no repeated approval question.
+
 ## Integration and review
 
 - [ ] V2-INTEGRATION Verify the joined original-clause result, generated resources and actual delivery without closing unresolved original findings.
@@ -962,6 +1070,43 @@ Do not edit the byte-bound shared `todo.md` or any earlier acceptance tree.
 Link current progress from mutable working memory. No deletion of evidence or worktrees is part of proving finding closure.
 P11A/P11B/P11C's exact redundant canonical/native entries are the sole source
 deletions authorized by their shared preservation map.
+
+### Current aggregate evidence renewal
+
+The actual close preflight rejects all four old reports' acceptance bindings;
+P11A also has four later scoped files and P11C one later fixture. P11B/P12 scoped
+source still matches their old results. P11B's recorded result is not an ancestor
+of this integration branch; source equivalence is observed, not invented ancestry.
+These are P9 renewal obligations, not new findings or permission to replay
+implemented producers, alter old reports/reviews or substitute new hashes in them.
+
+After P17/P18 and coordinated capture are final, retain old artifacts unchanged
+and select new report/review/shared-evidence slots for the same four lanes.
+The coordinator records new current-source observations and their actual checks,
+with its own actor/worktree provenance, never impersonating a new execution by
+the old workers. Retain real original Git results and the exact later coordinator
+repair deltas as attributable history, including the observed P11B distinction.
+
+Use the existing local snapshot modes honestly: a current-file snapshot proves
+current content, not a fresh Git diff, deletion or native isolation. It cannot by
+itself close a lane. Full current P05 raw base/HEAD/index/worktree selection must
+cover every declared scope, former tracked descendants/deletions, the complete
+coordination/charter/brief and exact new local report/review. Retain actual
+Git-backed change and negative deletion evidence as required current QA, not
+fabricated changed filenames, commits or branches. If that evidence cannot
+faithfully establish the original task, leave the precise attribution gap open
+rather than weakening the helper or source contract.
+
+Obtain applicable independent SPEC then QUALITY covering every original member
+and bind the actual returned local reviews/canonical decisions. Reuse only
+demonstrably unchanged observations with their original provenance; renew
+affected checks and keep mandatory inventories/profile/policy unchanged.
+Consume all four real shared gates with explicit verified profile locations.
+Then run final integrated REVIEW, both `copilot-kit` and `catalog-installed`
+consumers on a frozen source/runtime, and complete current-head CI. No local
+snapshot, earlier package PASS, older CI or arbitrary content score substitutes.
+Native PR EMU 403 and exact native-hook/ADR holds remain; no alternate channel,
+main push, release, deployment or destructive cleanup is authorized.
 
 ## Original method proposals continuation
 

@@ -52,6 +52,14 @@ The original four-lane topology, isolation and acceptance requirements remain.
 New source changes need current package and final integrated review/QA; historical
 lane or green baseline results do not supply that acceptance.
 
+The post-source original-ID reconciliation retains two further source clauses,
+G-03 and ENT-05, in coordinator-only P17/P18. This changes no original lane,
+parallel write scope or producer assignment. Their completed P13/P14 clauses
+remain evidence. P9 renews stale acceptance in new records, retaining original
+Git attribution and actual coordinator repair provenance; a current-file local
+observation is not Git/isolation proof and never replaces full current shared
+P05 review/QA or final integrated review. No fabricated change or ancestry is allowed.
+
 ## Conflict and recovery
 
 An out-of-scope path, overlapping write, missing worktree attribution or review

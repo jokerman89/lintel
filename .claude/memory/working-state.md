@@ -10,9 +10,9 @@ Durable rules remain in [lessons.md](lessons.md).
 
 Branch `jokerman-microsoft-repository-completion` preserves the four producer
 lanes at `63b6fcd068fbae18deac1e76d92fbdcb9050a20e` and the prior coordinator's
-caller/generated/migration patch. Reviewed source checkpoint
-`2065603f3c3161c836c8d53276b9dd0e6a46cc0d` is a **0.14.0** feature-branch
-candidate, not main delivery, a release tag or programme completion.
+caller/generated/migration patch. Reviewed P13-P16 source checkpoints are
+`e93a8f01`, `d40b67c0`, `1df0c427` and `1d46b104`, still a **0.14.0**
+feature-branch candidate, not main delivery, a tag or programme completion.
 Original worktrees are untouched; branch cleanup is not part of this continuation.
 
 Nine retired public identities map to complete current owners/internal methods.
@@ -21,12 +21,10 @@ counts. Earlier tests and two narrow archive decisions remain dated evidence;
 original declarations and set06 records are untouched.
 Do not edit byte-bound shared todo or rewrite historical reviews.
 
-Independent source SPEC and QUALITY r5 passed their actual shared packet
-checks: all seven original source clauses and all 26 quality questions are
-covered, with no open P1/P2 findings. One scanner input-size/fan-out P3 remains
-advisory; no exhaustion failure was reproduced. The exact selected source was
-verified unchanged before committing. Earlier r6, failed and stale observations
-remain history, not substituted clearance.
+Earlier integration SPEC/QUALITY r5 passed seven clauses and 26 questions.
+P13-P16 then passed their own staged reviews, actual QA and shared gates.
+One earlier scanner input-size/fan-out P3 remains advisory; no exhaustion failure
+was reproduced. Failed/stale observations remain history, not current clearance.
 
 Verification uses short owned home/temp roots, excludes inherited credentials
 and Git configuration injections, and supplies declared dependencies.
@@ -48,9 +46,9 @@ producer regressions and regenerated checks; the r4 runs are not called r5 runs.
 The committed source checkpoint also passed native/catalog/wiki checks.
 
 CI follow-up repaired the hot-state budget and NUL-path admission with actual
-red/green regressions. Run 38970268976 passed all 23 jobs at pushed `c4032c3f`;
-the first failed run remains history. Native draft-PR creation still returns
-Enterprise Managed User 403; no alternate publication channel is authorized.
+red/green evidence. Runs 38970268976 (`c4032c3f`) and 38997973152 (`e93a8f01`)
+passed all 23 jobs. P13/P14 are pushed; P15/P16 are local commits, not yet covered
+by current-head CI. Native PR creation still returns EMU 403; no alternate channel.
 
 The full-range mechanical M2 inventory is **RED, 13 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches
@@ -58,18 +56,19 @@ and one shared-helper change. This is an impact inventory, not thirteen
 demonstrated bugs or a green compatibility claim. The original preservation map
 and migration document explain the intentional changes; the result is retained.
 
-Old lane records do not close the changed aggregate. Inspect hosted checks for
-the exact proposed head and reconcile the original shared swarm/P05 acceptance
-before main delivery; no previous target's profile/runtime references transfer.
-All 45 prior residuals were independently reconciled; P13-P16 cover thirteen ready
-original IDs. Revised scope is approved, but F-05/C-07 repair review still blocks BUILD.
+The real Swarm close gate rejects four stale acceptance bindings and changed
+P11A/P11C results. P11B source matches its old result without that commit being an
+ancestor; do not invent ancestry or rebind old PASS. P9 needs new current evidence.
+The post-source review found two further ready clauses: G-03's proportion check
+and ENT-05's learned-pattern promotion evidence. Their same IDs move to P17/P18.
+The amended map is DRAFT pending current plan review; do not replay P13-P16.
 
 ## Original programme and recorded delivery
 
-The original 84 findings remain a separately tracked programme: prior accounting
-is 39 source-complete/retained-guidance and 45 with explicit remaining clauses.
-Source presence is not proof of review or acceptance. Do not replay delivered
-packages or infer programme completion from local lane PASS.
+Current accounting covers the original 84 findings: 47 source/guidance-closed,
+37 open, including 39 historical accepted and six prior source-satisfied rows.
+Thirteen affected IDs were reassessed; two close within their adjudicated scope.
+Source presence is not proof of review. Decisions, observations and holds remain.
 
 The resumed original baseline `f9796bb8` / 0.13.7 advanced through 0.13.8 and
 the recorded 0.13.9 source delivery at `8c04c7f6`, remotely verified

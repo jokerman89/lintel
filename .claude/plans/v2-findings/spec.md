@@ -1,8 +1,9 @@
 # Spec: complete the original V2 findings
 
-**Status:** APPROVED compatible scope after the SPEC-repair draft was committed.
-Current independent review remains required; no granularity exception,
-architectural alternative or experiment is approved by this status.
+**Status:** DRAFT post-source completeness amendment for original G-03, ENT-05
+and P9 acceptance renewal. Existing compatible completion authority remains;
+new source work awaits the amended plan's independent review. Prior package
+acceptance is retained for its actual scope, not silently extended.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
 with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.
@@ -135,3 +136,22 @@ operation, external communication, promotion destination, new benchmark or
 unprovided upstream source is authorized. The original four-lane source history
 and final integrated review/QA/SHIP requirements remain; green c4032c3f CI is a
 baseline observation, not clearance for the new result or the whole programme.
+
+## Remaining compatible clauses after source reconciliation
+
+The current original-ID accounting is 47 source/guidance-closed and 37 open,
+with two additional concrete clauses under the same original G-03 and ENT-05.
+P17 adds a qualitative plan-proportion/transcript check through the existing
+planning/inspection owners. It retains indispensable algorithm and contract
+detail and changes no numerical limit, approval, phase or accepted short leaf.
+P18 extends the existing six-part promotion-evidence duty to learned patterns
+using their existing guidance/source/approval fields. Explicit organizational
+policy authority does not depend on a productivity experiment; unknown learning
+benefit never supplies approval. No schema, runtime or pattern operation is added.
+
+The same original task IDs move to those follow-up packages without changing the
+84-finding inventory; previous P13/P14 source clauses remain dated evidence.
+P9 renews stale lane/report/acceptance bindings through new actual observations,
+independent review and full raw P05 coverage. Historical records are not edited
+into current PASS, and no synthetic commit or reduced evidence substitutes for
+real attribution. Final integrated/current-head and publication boundaries remain.
