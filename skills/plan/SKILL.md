@@ -125,6 +125,12 @@ Draft the tasks below from the approved design and current code, then invoke
 For an explicitly unmapped design, pass its exact path until the native DRAFT
 map exists. PLAN owns task writing; inspect reports findings and proposals.
 
+During the draft self-check, apply the same criterion as the engineering lens's
+[plan proportion check](../inspect/SKILL.md#plan-proportion-check). Keep necessary
+detail and replace gratuitous implementation narration with its decision/contract
+and source reference. This is reuse within drafting and the existing inspection,
+not another workflow invocation or approval.
+
 Output: task list with for each task:
 - Task ID
 - Title (verb + object)

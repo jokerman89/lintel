@@ -150,6 +150,31 @@ class Sources(unittest.TestCase):
         self.require(detail.lower(), "decisions", "interfaces", "code excerpts only",
                      "specific contract", "not a full implementation")
 
+    def test_plan_proportion_has_one_owner_and_actual_draft_caller(self):
+        owner = read("skills/inspect/SKILL.md")
+        self.assertIn("#### Plan proportion check", owner)
+        method = section("skills/inspect/SKILL.md", "#### Plan proportion check")
+        self.require(method, "implementation transcript", "decisions", "interfaces",
+                     "specification values", "non-obvious algorithm contracts",
+                     "acceptance", "verification", "retain/trim rationale",
+                     "existing inspection report", "no fixed line/token ratio")
+        caller = section("skills/plan/SKILL.md", "### Step 2")
+        self.require(caller, "../inspect/SKILL.md#plan-proportion-check",
+                     "draft self-check", "same criterion", "not another workflow",
+                     "necessary detail")
+
+    def test_plan_proportion_keeps_indispensable_detail_in_long_plans(self):
+        owner = read("skills/inspect/SKILL.md")
+        self.assertIn("#### Plan proportion check", owner)
+        method = section("skills/inspect/SKILL.md", "#### Plan proportion check")
+        narration, contract = method.split("**Implementation narration:**", 1)[1].split(
+            "**Necessary contract:**", 1)
+        self.require(narration, "existing helper body", "without a new contract",
+                     "Replace", "reference", "observable acceptance")
+        self.require(contract, "retry algorithm", "revision comparison",
+                     "bounded retry rule", "failure outcome", "Retain",
+                     "verification even if the plan is long")
+
     def test_sense_scale_hints_preserve_settled_and_unresolved_decisions(self):
         preread = section("skills/sense/SKILL.md", "### Step 0e")
         for forbidden in ("SCOPE will ask one clarifying question",

@@ -131,11 +131,15 @@ digests, and no silent change to active work.
    an interview. Record each one as a source with its `kind`, `root`, `section`, `observed_at`,
    `confidence` and reuse limits. A URL is provenance, not a fetch instruction.
 2. Separate what the operator confirmed from what you observed or inferred. Confirmed sources are
-   `operator-statement` or `approved-standard` with confidence `confirmed`. Observed or inferred
-   ones are `observation` or `inferred`. Observations become `default` or `recommendation`
-   clauses unless the operator confirms a `must`.
+   `operator-statement` or `approved-standard` with confidence `confirmed`. Observations use
+   kind `observation` and their actual confidence: `confirmed` when evidenced, otherwise
+   `inferred` or `unknown`. Inferred confidence is not a source kind. Observations become
+   `default` or `recommendation` clauses unless the operator confirms a `must`.
 3. Write a narrow selector from evidenced facts. An empty selector means "everywhere" and must be
    deliberate. Give each clause a `verify` statement that a reviewer can actually check.
+   For learned improvement claims, apply the
+   [promotion-evidence reasoning](references/consumer-contract.md#learned-improvement-promotion)
+   before capture/approval; keep policy authority separate from claimed benefit.
 4. Capture the pattern as a draft, and show the operator its clauses and provenance. Approve only
    after review, with a new version and an approval reference. Approval records provenance; it
    does not prove the approver's authority.

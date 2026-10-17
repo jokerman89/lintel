@@ -3,7 +3,7 @@
 # implements: ADR-0038, ADR-0028
 # intent: .claude/plans/reusable-patterns/plan.md
 # constraints: synthetic temporary roots only; real resolver/CLI/launcher/adapter processes; a missing command fails, never mocked
-# last_intent_review: 2026-09-28
+# last_intent_review: 2026-10-17
 """V09: real helper outputs reach work IDs, continuation and review; missing evidence fails.
 
 Each class maps to a workflow-lane leaf. The phase skills link one consumer contract; these
@@ -103,6 +103,19 @@ class ConsumerContractTests(unittest.TestCase):
             text = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("../pattern/references/consumer-contract.md", text, name)
             self.assertNotRegex(text, r"(?i)def resolve|selection_digest\s*=\s*sha|sha256\(.*selection", name)
+
+    def test_learned_promotion_reuses_evidence_without_conditioning_policy_on_benefit(self):
+        text = CONTRACT.read_text(encoding="utf-8")
+        self.assertIn("### Learned-improvement promotion", text)
+        method = " ".join(text.split("### Learned-improvement promotion", 1)[1].split(
+            "\n## ", 1)[0].split())
+        for term in ("../../lessons-add/references/benefit.md#promotion-evidence",
+                     "learned improvement claims", "`owner`", "`applies_to`", "`guidance`",
+                     "source-safe provenance", "counterexample", "evaluation", "supersession",
+                     "draft/deferred", "unverified", "no new fields",
+                     "policy does not require a productivity experiment",
+                     "mixed patterns", "mandatory policy clauses"):
+            self.assertIn(term, method)
 
     def test_every_failure_branch_through_the_real_cli(self):
         ws = Workspace(self)
@@ -397,6 +410,54 @@ class ReviewTests(unittest.TestCase):
 
 class CaptureTests(unittest.TestCase):
     """4.2.c: capture proposes drafts; cold handoff reconstructs from explicit artifacts."""
+
+    def test_capture_calls_promotion_reasoning_and_distinguishes_kind_from_confidence(self):
+        text = (ROOT / "skills/pattern/SKILL.md").read_text(encoding="utf-8")
+        capture = " ".join(text.split("## Capture procedure", 1)[1].split("\n## ", 1)[0].split())
+        for term in ("references/consumer-contract.md#learned-improvement-promotion",
+                     "before capture/approval", "kind `observation`", "confidence",
+                     "`inferred` or `unknown`", "not a source kind"):
+            self.assertIn(term, capture)
+        self.assertNotIn("ones are `observation` or `inferred`", capture)
+
+    def test_learned_unknowns_and_approved_policy_use_the_unchanged_schema(self):
+        observation = {
+            "kind": "observation", "root": "statement", "ref": "Synthetic workflow observation",
+            "section": "", "observed_at": NOW.isoformat(), "confidence": "unknown",
+            "reuse": "synthetic test only",
+        }
+        learned = make_pattern(
+            "example.learned", status="draft", applies_to=DASHBOARD, sources=[observation],
+            requirements=[clause("TRY", "recommendation")],
+            guidance="Applicability: dashboard fixture only. Counterexample: not yet observed. "
+                     "Evaluation: benefit unknown, defer promotion. Supersession: owner reviews "
+                     "contrary evidence through an explicit update.",
+        )
+        before = json.dumps(learned, sort_keys=True)
+        parsed = p.parse_pattern(learned)
+        self.assertEqual((parsed.status, parsed.approval), ("draft", None))
+        self.assertEqual(parsed.sources[0].confidence, "unknown")
+        self.assertEqual(parsed.guidance, learned["guidance"])
+        self.assertEqual(json.dumps(learned, sort_keys=True), before)
+
+        policy = make_pattern(
+            "example.policy", applies_to=DASHBOARD,
+            sources=[dict(observation, kind="approved-standard", confidence="confirmed",
+                          ref="Explicit synthetic policy decision")],
+            requirements=[clause("POLICY", "must")],
+            guidance="Policy authority is explicit; no productivity claim or experiment.",
+        )
+        approved = p.parse_pattern(policy)
+        self.assertEqual(approved.status, "approved")
+        self.assertEqual(approved.approval.reference, policy["approval"]["reference"])
+        mixed = dict(policy, sources=policy["sources"] + learned["sources"],
+                     requirements=policy["requirements"] + learned["requirements"],
+                     guidance=policy["guidance"] + " Learned benefit remains unverified.")
+        self.assertEqual(p.parse_pattern(mixed).status, "approved")
+        self.assertEqual(mixed["requirements"][0], policy["requirements"][0])
+        with self.assertRaises(p.PatternError) as raised:
+            p.parse_pattern(dict(learned, sources=[dict(observation, kind="inferred")]))
+        self.assertEqual(raised.exception.code, "invalid_schema")
 
     def test_capture_proposes_a_draft_that_never_applies(self):
         ws = Workspace(self)

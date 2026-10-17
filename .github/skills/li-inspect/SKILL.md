@@ -148,6 +148,23 @@ Required engineering report content:
 Complexity counts are prompts to inspect simpler alternatives, not automatic
 scope-reduction gates or permission to weaken an approved large initiative.
 
+#### Plan proportion check
+
+Qualitatively check whether the plan has become an implementation transcript:
+line-by-line narration or duplicated bodies that add no decision or contract.
+Retain necessary decisions, interfaces, specification values, non-obvious algorithm
+contracts and acceptance/verification detail, even in a long plan. There is
+no fixed line/token ratio or length limit. Cite the affected passages and a
+retain/trim rationale in the existing inspection report; this is part of the
+engineering lens, not another rubric, approval or timed-leaf check.
+
+- **Implementation narration:** a task repeats an existing helper body line by
+  line without a new contract. Replace the duplicated body with a reference, the
+  changed decisions/interfaces and observable acceptance.
+- **Necessary contract:** a retry algorithm needs the precise revision comparison,
+  bounded retry rule and failure outcome to avoid overwriting concurrent changes.
+  Retain that algorithm contract and verification even if the plan is long.
+
 ### Design lens
 
 Apply when the selected plan or repository has a rendered/interactive surface.
