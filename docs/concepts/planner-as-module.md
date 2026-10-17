@@ -1,6 +1,6 @@
 # Planner-as-module — plan is a callable sub-workflow
 
-**Last updated:** 2026-09-08 (short leaves, bounded work packages)
+**Last updated:** 2026-10-17 (source methods versus unmeasured comparative value)
 **Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/inspect/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
 
 > Invocation: commands use the Claude plugin form `/li:<skill>`. GitHub Copilot gets a native `li-<skill>` skill for every workflow. The other repository adapters (Claude Code, Codex and Cursor) expose the installed core workflows as `li-<skill>`; for any other skill there, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
@@ -150,12 +150,15 @@ Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn
 
 ## What this closes
 
-| Operator goal | Solved by |
+The source methods below implement structural contracts, not evidence that plans
+are better than an alternative. Comparative quality remains an outcome question.
+
+| Operator goal | Implemented method or remaining evidence |
 |---|---|
 | "The magic sauce: a planner that breaks things down right" | 2.3 granularity hard check |
 | "Clear hand-off between when plans are written and what is expected" | 2.2 trio born together |
 | "Plan phase as a module, usable by the whole workflow or parts of it" | 2.4 module-callable |
-| "Our planner phase with everything it entails — industry best" | 2.1 + 2.2 + 2.3 + 2.4 together |
+| "Our planner phase with everything it entails — industry best" | Unmeasured aspiration; 2.1–2.4 do not establish it. Requires a separately authorized matched comparison. |
 
 ## What this explicitly does NOT do
 

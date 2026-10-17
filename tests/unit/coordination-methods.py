@@ -3,7 +3,7 @@
 # implements: ADR-0008, ADR-0026, ADR-0029, ADR-0034, ADR-0036
 # intent: skills/scope/references/method.md
 # constraints: local source/data checks; no models, network, profile binding or cleanup
-# last_intent_review: 2026-10-03
+# last_intent_review: 2026-10-17
 """Actual helper regressions plus documentary guards, not agent-efficacy evidence."""
 from __future__ import annotations
 
@@ -130,6 +130,56 @@ class Sources(unittest.TestCase):
         self.require(cycle, "Do not re-present unchanged signals", "never makes, repeats")
         self.require(read("skills/inspect/SKILL.md"), "Granularity hard check", "2-5 minutes")
         self.require(read("skills/build/SKILL.md"), "2–5 minute", "independent review")
+
+    def test_actual_plan_template_keeps_size_priors_advisory(self):
+        template = read("scaffolding/01-foundation/templates/plan/plan.template.md")
+        self.require(template, "advisory priors, not mandatory depth rules",
+                     "owners and interfaces", "uncertainty", "rollback",
+                     "Preserve original IDs", "2-5 min")
+        for marker in ("depth_schema: flat", "depth_schema: phased", "depth_schema: tree"):
+            self.assertIn(marker, template)
+        for field in ("**Owner and edit boundary:**", "**Requirements:**",
+                      "**Dependencies:**", "**Acceptance:**", "**Verification:**",
+                      "**Evidence:**"):
+            self.assertIn(field, template)
+
+    def test_actual_plan_template_does_not_prescribe_full_implementation(self):
+        detail = read("scaffolding/01-foundation/templates/plan/plan.template.md").split(
+            "## Per-task detail", 1)[1]
+        self.assertNotIn("Complete code or detailed spec", detail)
+        self.require(detail.lower(), "decisions", "interfaces", "code excerpts only",
+                     "specific contract", "not a full implementation")
+
+    def test_sense_scale_hints_preserve_settled_and_unresolved_decisions(self):
+        preread = section("skills/sense/SKILL.md", "### Step 0e")
+        for forbidden in ("SCOPE will ask one clarifying question",
+                          "PLAN will use a deeper", "complete and correct",
+                          "a question is pending"):
+            self.assertNotIn(forbidden, preread)
+        self.require(preread, "../scope/references/method.md", "advisory",
+                     "existing answers", "settled", "unresolved", "material",
+                     "`scale_amb=no`", "not proof", "never pauses")
+        self.assertEqual(
+            bash_block("skills/sense/SKILL.md", "### Step 0e"),
+            'source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/scale-estimator.sh"\n'
+            '\nscale_size=$(classify_size "$prompt_text")\n'
+            'scale_amb=$(scale_ambiguous "$prompt_text")\n'
+            'depth_schema=$(size_to_depth_schema "$scale_size")',
+        )
+
+    def test_enterprise_planning_guidance_keeps_depth_advisory(self):
+        enterprise = section("docs/enterprise-profile-value.md",
+                             "## Keep planning proportional")
+        self.assertNotIn("Use flat plans for XS/S work, phases for M", enterprise)
+        self.require(enterprise, "advisory", "owners and interfaces", "uncertainty",
+                     "rollback", "2–5 minute", "whole cycle")
+
+    def test_planner_concept_does_not_close_unmeasured_value(self):
+        concept = read("docs/concepts/planner-as-module.md")
+        goal_rows = [line for line in concept.splitlines()
+                     if line.startswith("|") and "industry best" in line]
+        self.assertEqual(len(goal_rows), 1)
+        self.require(goal_rows[0].lower(), "unmeasured", "comparison")
 
     def test_resume_table_does_not_replace_modes_or_evidence(self):
         text = read("skills/resume/SKILL.md")

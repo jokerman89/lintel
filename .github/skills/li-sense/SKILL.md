@@ -195,7 +195,11 @@ Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode 
 
 ### Step 0e — Scale pre-read (Slice 2 — design §3.2)
 
-> **Slice 2 change:** the substantive scale **gate** (the clarifying ask_user + route-override + `scope.md` emit) has been **promoted to the first-class SCOPE phase** (`skills/scope/SKILL.md`), which runs between SENSE and DEFINE. SENSE step 0e is now a **light pre-read**: it surfaces the size in the SENSE report so the operator sees it early, and **delegates the gate + `scope.md` to SCOPE**. This keeps SENSE read-only and light (it never pauses), and gives the gate a testable home that can grow without bloating SENSE.
+SENSE supplies a light, read-only pre-read. The first-class SCOPE phase remains
+between SENSE and DEFINE and owns actual interpretation, any unresolved material
+question, supported route decision and `scope.md` output. Follow the shared
+[scale interpretation method](../../../skills/scope/references/method.md); lexical labels are
+advisory inputs, not completed scope decisions. SENSE never pauses here.
 
 Runs **after** step 0d (so the orientator's route is available to surface alongside size). Mechanical only — no question is ever asked here.
 
@@ -209,19 +213,31 @@ depth_schema=$(size_to_depth_schema "$scale_size")
 
 **What SENSE does (pre-read only):**
 
-- Surface `scale_size` + `depth_schema` in the SENSE report (Step 7 output) so the operator sees the request's size before committing to a phase.
-- If `scale_amb=yes`, surface a one-line **flag** — "scale is bimodal; SCOPE will ask one clarifying question" — but **do not ask it here.** SENSE never pauses.
-- If `scale_size` ∈ {L, XL}, note that PLAN will use a deeper `depth_schema`.
+- Surface `scale_size`, `scale_amb` and `depth_schema` as lexical hints in the
+  SENSE report, retaining their actual helper provenance.
+- `scale_amb=yes` flags a possible alternative reading; it does not require a
+  question when existing answers or selected requirements have settled the work.
+- `scale_amb=no` is not proof that material uncertainty is absent. A keyword miss
+  cannot settle an unanswered requirement in another domain.
+- L/XL labels and the suggested `depth_schema` do not force deeper hierarchy.
+  SCOPE and PLAN choose from actual owners, interfaces and rollback boundaries,
+  preserving original IDs and authority.
 
 **What SENSE delegates to SCOPE (does NOT do here):**
 
-- the clarifying gate (the ask_user that disambiguates a bimodal reading),
-- the orientator route-override (`deploy→ship` → full cycle from DEFINE),
+- a clarifying question only for an unresolved choice that materially changes
+  work, authority or verification after existing context is considered,
+- any supported orientator route-override (`deploy→ship` → full cycle from DEFINE),
 - emitting `scope.md`.
 
-**Standalone SENSE still works.** When SENSE is run on its own (no SCOPE follows), the mechanical `scale_size` / `depth_schema` in the report are complete and correct — just un-disambiguated. The bimodal flag tells the operator a question is pending; running `/li-scope` (or `/li-cycle`) resolves it. SENSE never blocks on scale.
+**Standalone SENSE still works.** Without a following SCOPE phase, report the
+same advisory hints and any known uncertainty, not a completed interpretation or
+a promise of a later question. Running `/li-scope` (or `/li-cycle`) can perform
+that work-based interpretation when requested. SENSE never blocks on scale.
 
-`depth_schema` flows downstream to PLAN: `flat` → flat task list, `phased` → phases + tasks, `tree` → phase→task→subtask (Slice 2). Time estimates stay out unless the operator asks (`--with-time`).
+The proposed `depth_schema` flows to PLAN for reconciliation with the approved
+design: `flat` → flat task list, `phased` → phases + tasks, `tree` →
+phase→task→subtask. Time estimates stay out unless requested (`--with-time`).
 
 ### Step 1 — Read configuration
 

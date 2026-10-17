@@ -60,6 +60,14 @@ if [ -f "$PLAN_TPL" ]; then
     grep -q "$marker" "$PLAN_TPL" && pass "plan.template.md has marker '$marker'" \
                                   || fail "plan.template.md missing marker '$marker'"
   done
+  grep -qF "advisory priors, not mandatory depth rules" "$PLAN_TPL" \
+    && pass "template keeps size associations advisory" \
+    || fail "template treats size associations as mandatory"
+  if grep -qF "Complete code or detailed spec" "$PLAN_TPL"; then
+    fail "template still prescribes full implementation code by default"
+  else
+    pass "template does not prescribe full implementation code"
+  fi
 fi
 
 # ─── S3: plan references tree + templates; cycle inserts SCOPE ────────────────
