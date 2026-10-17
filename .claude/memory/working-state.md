@@ -48,18 +48,18 @@ The committed source checkpoint also passed native/catalog/wiki checks.
 
 CI follow-up repaired the hot-state budget and NUL-path admission with actual
 red/green evidence. Runs 38970268976 (`c4032c3f`) and 38997973152 (`e93a8f01`)
-passed all 23 jobs. Source through `a4ade9ca` is pushed; `8e5588f5` is later local
-work, not yet covered by current-head CI. Native PR creation remains EMU 403; no alternate channel.
+passed all 23 jobs. Source through `8e5588f5` is pushed; later capture/lane records
+are not covered by current-head CI. Native PR creation remains EMU 403; no alternate channel.
 
-The full-range mechanical M2 inventory is **RED, 13 flags** across its four
+The current full-range mechanical M2 inventory is **RED, 15 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches
-and one shared-helper change. This is an impact inventory, not thirteen
-demonstrated bugs or a green compatibility claim. The original preservation map
-and migration document explain the intentional changes; the result is retained.
+and one shared-helper change. This is an impact inventory, not fifteen
+demonstrated bugs or a green compatibility claim. The earlier 13-flag result is retained.
+M2 override is pending: the requested operator input was unavailable, not approval.
 
-The real Swarm close gate rejects four stale acceptance bindings and changed
-P11A/P11C results. P11B source matches its old result without that commit being an
-ancestor; do not invent ancestry or rebind old PASS. P9 needs new current evidence.
+The four new lane records passed seven-leaf SPEC, QUALITY and all local gates;
+two P3 advisories remain. Raw P05/deletion evidence preserves original attribution
+and B's non-ancestry. Shared-gate consumption and final integrated review remain.
 G-03's proportion check and ENT-05's learned-pattern evidence are now implemented
 through P17/P18. All three plan gates passed before that source work.
 P9 must renew current acceptance without replaying producers or changing old reports.
