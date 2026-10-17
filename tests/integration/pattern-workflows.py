@@ -453,8 +453,9 @@ class CaptureTests(unittest.TestCase):
         mixed = dict(policy, sources=policy["sources"] + learned["sources"],
                      requirements=policy["requirements"] + learned["requirements"],
                      guidance=policy["guidance"] + " Learned benefit remains unverified.")
-        self.assertEqual(p.parse_pattern(mixed).status, "approved")
-        self.assertEqual(mixed["requirements"][0], policy["requirements"][0])
+        parsed_mixed = p.parse_pattern(mixed)
+        self.assertEqual(parsed_mixed.status, "approved")
+        self.assertEqual(parsed_mixed.requirements, approved.requirements + parsed.requirements)
         with self.assertRaises(p.PatternError) as raised:
             p.parse_pattern(dict(learned, sources=[dict(observation, kind="inferred")]))
         self.assertEqual(raised.exception.code, "invalid_schema")
