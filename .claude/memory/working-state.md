@@ -48,8 +48,8 @@ The committed source checkpoint also passed native/catalog/wiki checks.
 
 CI follow-up repaired the hot-state budget and NUL-path admission with actual
 red/green evidence. Runs 38970268976 (`c4032c3f`) and 38997973152 (`e93a8f01`)
-passed all 23 jobs. Source through `8e5588f5` is pushed; later capture/lane records
-are not covered by current-head CI. Native PR creation remains EMU 403; no alternate channel.
+passed all 23 jobs. Later captures require exact-head CI, not these baseline runs.
+Source through `8e5588f5` is pushed; native PR remains EMU 403, with no alternate channel.
 
 The current full-range mechanical M2 inventory is **RED, 15 flags** across its four
 questions: entry removals, one method move, description/default-pattern matches
@@ -57,9 +57,9 @@ and one shared-helper change. This is an impact inventory, not fifteen
 demonstrated bugs or a green compatibility claim. The earlier 13-flag result is retained.
 M2 override is pending: the requested operator input was unavailable, not approval.
 
-The four new lane records passed seven-leaf SPEC, QUALITY and all local gates;
+The four new lane records passed seven-leaf SPEC, QUALITY and all local/shared gates;
 two P3 advisories remain. Raw P05/deletion evidence preserves original attribution
-and B's non-ancestry. Shared-gate consumption and final integrated review remain.
+and B's non-ancestry. Final integrated review and exact-head checks remain separate.
 G-03's proportion check and ENT-05's learned-pattern evidence are now implemented
 through P17/P18. All three plan gates passed before that source work.
 P9 must renew current acceptance without replaying producers or changing old reports.
