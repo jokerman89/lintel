@@ -61,7 +61,7 @@ P11A/P11C results. P11B source matches its old result without that commit being 
 ancestor; do not invent ancestry or rebind old PASS. P9 needs new current evidence.
 The post-source review found two further ready clauses: G-03's proportion check
 and ENT-05's learned-pattern promotion evidence. Their same IDs move to P17/P18.
-The amended map is DRAFT pending current plan review; do not replay P13-P16.
+Scope approval is restored after the committed draft; current plan review must pass before BUILD.
 
 ## Original programme and recorded delivery
 

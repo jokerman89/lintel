@@ -1,9 +1,9 @@
 # Spec: complete the original V2 findings
 
-**Status:** DRAFT post-source completeness amendment for original G-03, ENT-05
-and P9 acceptance renewal. Existing compatible completion authority remains;
-new source work awaits the amended plan's independent review. Prior package
-acceptance is retained for its actual scope, not silently extended.
+**Status:** APPROVED compatible scope after committed draft `35a35163`, retaining
+the operator's original completion authority for G-03, ENT-05 and P9 renewal.
+New source work still awaits the current independent plan-review gate.
+Prior package acceptance is retained for its actual scope, not extended.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
 with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
 selected-subset closeout.

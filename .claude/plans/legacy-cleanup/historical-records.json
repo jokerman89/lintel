@@ -140,19 +140,19 @@
       "path": ".claude/plans/v2-findings/plan.md",
       "count": 1,
       "reason": "The V2 plan retains the former identity as the object of its retirement acceptance criteria, not as an invocation. The 2026-10-17 post-source completeness amendment adds no former callable reference.",
-      "sha256": "d030b09feacb692afa8637d7d8f861191f976fca32d286107cd27a8c9e76f218"
+      "sha256": "44f1e3ab06dd5abc7e071bdc6d69ca686d3e60e41469f7dfae58bb4372762e1e"
     },
     {
       "path": ".claude/plans/v2-findings/prompt.md",
       "count": 1,
       "reason": "The V2 executor prompt retains the former identity as migration evidence, not a current route. The 2026-10-17 post-source completeness amendment adds no former callable reference.",
-      "sha256": "f20ed46c0092ee17232d9774ba081353701ccaa781c979e699b32db546d0cd4d"
+      "sha256": "8293e93c49a28083fda6e1f28c28d98449f7dabb7664b167cbc148cbb250a020"
     },
     {
       "path": ".claude/plans/v2-findings/spec.md",
       "count": 1,
       "reason": "The V2 specification retains the former identity as the target of replacement, not a current route. The 2026-10-17 post-source completeness amendment preserves that classification.",
-      "sha256": "74888f0737f0c94d248fc05593c16f858059959e98dfbf529d7f3feeba0351ca"
+      "sha256": "662b21d37a59411ea5ad223fa8e67f5dc8105273f32385db093bece8c31ceba1"
     },
     {
       "path": ".claude/plans/v2-findings/swarm/briefs/P11A.md",

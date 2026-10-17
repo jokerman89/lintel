@@ -1,9 +1,9 @@
 # Cold-executor prompt: complete the original V2 findings
 
-**Status:** DRAFT post-source completeness amendment. Existing completion
-authority is retained, but P17/P18 source work awaits current independent plan
-review. Preserve earlier source acceptance and failed decisions at their actual
-scope; no granularity, architecture, experiment or permission change is selected.
+**Status:** APPROVED compatible scope after draft `35a35163` under the operator's
+existing completion instruction. P17/P18 source work still awaits the current
+independent plan-review gate. Preserve earlier source acceptance and failed
+decisions; no granularity, architecture, experiment or new permission is granted.
 **Work map:** [work.json](work.json).
 
 **Current recovery, 2026-10-17:** use

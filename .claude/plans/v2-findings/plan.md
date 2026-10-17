@@ -1,11 +1,11 @@
 # Plan: complete the original V2 findings
 
-**Status:** DRAFT post-source completeness amendment. The operator's original
-completion authority remains; this draft does not clear its new source work.
-P13-P16's bounded source reviews and earlier failed/r2 records remain history,
-not acceptance of the two further clauses or renewed aggregate evidence.
-Commit this amendment and obtain its actual independent plan-review gate before
-BUILD. No leaf-policy, architecture, experiment or permission change is selected.
+**Status:** APPROVED compatible scope after draft
+`35a3516317916a076fb933cfc61622663d95cf2f`. The operator's original completion
+instruction covers these two remaining source clauses and P9 evidence renewal.
+This scope flag is not BUILD clearance: current independent plan review must
+pass first. P13-P16 and failed/r2 records retain their earlier scope; no
+leaf-policy, architecture, experiment or new permission is approved here.
 **Spec:** [spec.md](spec.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
