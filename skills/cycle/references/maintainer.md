@@ -22,7 +22,7 @@ Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across fo
 Output: `.claude/engineering/compat-audits/<date>-<slug>.md`. RED requires explicit override.
 
 **M3 — Shape-tests** (in REVIEW)
-Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
+Run `bash tests/runner/run-all.sh --shape-only`. The shape suite asserts structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
 
 **M4 — Future-operator clarity** (in CAPTURE)
 CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/migrations/_INDEX.md` if any migration ships.

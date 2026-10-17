@@ -262,7 +262,7 @@ The following familiar names describe roles, not a second native backlog.
 
 **Why moved to PLAN:** standalone `/li-plan <design.md>` (workflow_root post-v3.8) needs to produce the complete trio at PLAN-time. CAPTURE-only generation broke that — operator running PLAN solo got 2/3 of a handoff. Trio born together fixes this.
 
-ask_user: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
+ask_user: "Want to dogfood the handoff? Spawn a fresh subagent with all selected mapped artifacts and verify it can describe what was built." (Optional verification against the reaffirmed handoff; retain a separate mapped task source and non-sibling paths.)
 
 **Handoff-size check (advisory).** Invoke `/li-context-budget --handoff --map <same map>`
 with explicitly selected P03 warming inputs. It measures the actual distinct
@@ -463,7 +463,8 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - **ADRDrafter** (engineering/) — primary, ADR drafting
 - **ChangelogMaintainer** (engineering/) — optional format-specific view of Step 8b;
   use the same method in the current context, not a second default release-summary pass
-- **DocWriter** (engineering/) — synthesize cold-executor trio prose
+- **Cold-executor handoff** — use the existing [mapped reaffirmation](#step-6--cold-executor-handoff-trio-reaffirm-v38-feature-22) in this CAPTURE context, not a new document-generation pass.
+- **DocWriter** (engineering/) — available for a separately requested source-grounded document, as is `/li-generate-docs`; neither regenerates the mapped trio for CAPTURE.
 - The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) — if any CAPTURE artifact ships outside (rare)
 
 ## Anti-patterns

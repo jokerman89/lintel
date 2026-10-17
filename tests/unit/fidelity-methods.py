@@ -3,8 +3,8 @@
 # implements: ADR-0017, ADR-0028, ADR-0033
 # intent: .claude/plans/v2-findings/plan.md
 # constraints: source/caller contracts plus real advisory/P05 helper cases; no model efficacy
-# last_intent_review: 2026-10-03
-"""Focused contracts for the six fidelity leaves; no rendering or legal conclusions."""
+# last_intent_review: 2026-10-17
+"""Focused source and caller fidelity contracts; no rendering or legal conclusions."""
 from copy import deepcopy
 from pathlib import Path
 import re
@@ -262,6 +262,30 @@ class FidelityMethods(unittest.TestCase):
         self.assertIn("DRAFT", generated)
         self.assertIn("read it back", generated)
         self.assertIn("mandatory document check", text("skills/ship/SKILL.md"))
+
+    def test_capture_recommends_mapped_reaffirmation_not_trio_synthesis(self):
+        source = text("skills/capture/SKILL.md")
+        recommendations = source.split("## Recommended agents", 1)[1].split("## Anti-patterns", 1)[0]
+
+        def check(value):
+            self.assertIn("#step-6--cold-executor-handoff-trio", value)
+            self.assertNotIn("synthesize cold-executor trio prose", value)
+            self.assertIn("separately requested", value)
+
+        check(recommendations)
+        with self.assertRaises(AssertionError):
+            check(recommendations + "\n- DocWriter: synthesize cold-executor trio prose")
+        self.assertTrue((ROOT / "agents/engineering/DocWriter.md").is_file())
+        self.assertTrue((ROOT / "skills/generate-docs/SKILL.md").is_file())
+
+    def test_capture_handoff_preserves_the_selected_task_role(self):
+        source = text("skills/capture/SKILL.md")
+        handoff = source.split("### Step 6 — Cold-executor", 1)[1].split("### Step 6a", 1)[0]
+        self.assertNotIn("ONLY these 3 files", handoff)
+        self.assertIn("all selected mapped artifacts", handoff)
+        for retained in ("Mapped `spec` reaffirm", "Mapped `tasks` reaffirm", "mapped `plan`",
+                         "map's original `prompt`", "DRAFT", "preserving IDs"):
+            self.assertIn(retained, handoff)
 
 
 if __name__ == "__main__":

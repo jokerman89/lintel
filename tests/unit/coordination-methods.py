@@ -341,6 +341,35 @@ class Sources(unittest.TestCase):
         self.require(read("skills/lessons-add/SKILL.md"), "held lock", "exit 9",
                      "Content-safety", "mandatory evidence blocks")
 
+    def test_promotion_body_retains_the_complete_evidence_record(self):
+        path = "skills/lessons-add/references/benefit.md"
+        self.assertIn("## Promotion evidence", read(path))
+        body = section(path, "## Promotion evidence")
+        fields = ("Applicability", "Source-safe provenance", "Counterexample",
+                  "Accountable owner", "Evaluation", "Supersession path")
+
+        def check(value):
+            self.require(value, *(f"**{field}:**" for field in fields),
+                         "unknown", "defer", "Rule / Why / How to apply", "not proof")
+
+        check(body)
+        for field in fields:
+            with self.subTest(missing=field), self.assertRaises(AssertionError):
+                check(body.replace(f"**{field}:**", "", 1))
+
+    def test_promotion_defers_missing_support_without_changing_serialization(self):
+        source = read("skills/lessons-promote/SKILL.md")
+        workflow = section("skills/lessons-promote/SKILL.md", "## Workflow")
+        self.require(workflow, "references/benefit.md#promotion-evidence", "all six",
+                     "defer before Step 5", "unknown", "existing prose body")
+        self.require(source, "not proof of benefit", "explicit destination",
+                     "No schema", "--source-label", "--generalized-file",
+                     "--commit --expect-branch", "conditional-write conflict")
+        marker = ("<!-- lintel-promotion: source_label=<label>; source_id=L-NNN; "
+                  "source_commit=<sha|unrecorded>; promoted_on=<YYYY-MM-DD> -->")
+        self.assertEqual(source.count(marker), 1)
+        self.assertNotIn("Promoted lessons reach every future engagement", source)
+
     def test_preference_hints_are_not_schema_and_callers_keep_controls(self):
         for module in ("ta", "da", "sc", "dh", "tq"):
             text = read(f"skills/{module}/SKILL.md")

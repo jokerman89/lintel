@@ -3,7 +3,7 @@
 # implements: ADR-0006, ADR-0007, ADR-0028, ADR-0029, ADR-0033
 # intent: .claude/plans/v2-findings/plan.md
 # constraints: source/caller/history contracts only; no model, writer, communication or promotion
-# last_intent_review: 2026-10-03
+# last_intent_review: 2026-10-17
 """Guard conditional method ownership; passing prose checks is not host efficacy."""
 from pathlib import Path
 import os
@@ -145,6 +145,12 @@ class CoreBoundaryMethods(unittest.TestCase):
         self.require(cycle, "cap_soft: 600k", "cap_hard: 900k",
                      "gates_active: [M1_structure_impact, M2_compatibility_audit, M3_shape_tests, M4_future_operator_clarity]",
                      "detection: auto-detected by SENSE Step 0c", "operator can override")
+
+    def test_a06_maintainer_uses_the_shape_suite_not_a_stale_count(self):
+        method = read(MAINTAINER)
+        self.assertNotRegex(method, r"\b\d+ shape-tests\b")
+        self.require(method, "shape suite", "bash tests/runner/run-all.sh --shape-only",
+                     "structural invariants", "tests/shape/_README.md", "Any FAIL blocks SHIP")
 
     def test_a06_swarm_m4_is_conditional_without_weakening_swarm_evidence(self):
         capture = read("skills/capture/SKILL.md")

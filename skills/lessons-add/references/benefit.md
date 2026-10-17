@@ -26,3 +26,29 @@ or the authorized capture report. No schema, reference counter, efficacy score,
 automatic calibration or automatic promotion is added. Promotion additionally needs
 observed applicability beyond this repository and an explicit destination/consent;
 unknown benefit is a reason to defer, not manufacture evidence.
+
+## Promotion evidence
+
+Before promoting, carry the following in the existing Rule / Why / How to apply
+prose body, not new machine fields:
+
+- **Applicability:** the observed conditions and scope in which the rule helps,
+  including boundaries where it does not apply.
+- **Source-safe provenance:** a dated reference to the actual correction and later
+  application, using only an explicitly allowed source label and disclosure-safe
+  identifiers. Do not copy private paths, customer details or raw logs.
+- **Counterexample:** a supported contrary case or concrete limit to the rule.
+  Label a proposed falsifying check as proposed; missing observations stay unknown.
+- **Accountable owner:** the confirmed role or owner responsible for reviewing and
+  maintaining the generalized rule. An unassigned owner stays unknown.
+- **Evaluation:** the actual application, decision and observed outcome with its
+  evidence and limitations. Preserve failures, recurrence and unknowns; helper
+  success is not proof of benefit, prevention or compounding.
+- **Supersession path:** how that owner will update or supersede the rule when
+  evidence contradicts it, retaining known lesson IDs and history through the
+  existing operations. Do not allocate a future destination ID in advance.
+
+If required support or ownership is missing, or benefit is unknown, keep the
+candidate local and defer promotion. Stating unknowns does not supply the missing
+support. Review the generalized text before the conditional write; destination
+consent remains separate from evidence that the rule is useful.
