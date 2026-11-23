@@ -10,6 +10,7 @@ by explicit file read if it is not discovered by your host.
 
 ## Selected surfaces
 
+- `copilot-app`: native-format files at `.github/skills/li-*/SKILL.md`.
 - `copilot-cli`: native-format files at `.github/skills/li-*/SKILL.md`.
 
 This is a repository-local source bundle and manual entry, not a plugin activation API.

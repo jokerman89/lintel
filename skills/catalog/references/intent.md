@@ -1,9 +1,9 @@
 # Intent narrowing
 
-Catalog owns this metadata-first method. `skill-router`, `orientator`, `welcome`
-and SENSE's discovery follow-up delegate here; none owns a second selection recipe.
-This produces a shortlist, not execution, a model policy or a replacement for native
-host discovery. SENSE separately owns its existing pack-configured high-risk control.
+Catalog owns this metadata-first method. Welcome uses it for discovery; no separate
+public routing method owns a competing shortlist. This produces a shortlist, not
+execution, a model policy or a replacement for native host discovery. SENSE separately
+owns its existing pack-configured high-risk control and mechanical navigation route.
 
 ## When to use
 
@@ -14,6 +14,8 @@ host discovery. SENSE separately owns its existing pack-configured high-risk con
 ## When NOT to use
 
 - Operator already knows the skill — wastes a turn
+- An explicit workflow is already selected, or the request supplies `--mode` or
+  `--from`; preserve that choice instead of narrowing intent to another workflow.
 - To select or activate a runtime actor: this method can shortlist agent metadata,
   but the actual delegation binding and authority belong to the host.
 
@@ -22,6 +24,8 @@ host discovery. SENSE separately owns its existing pack-configured high-risk con
 1. **Read operator intent.** Use the supplied request. Ask only for a missing decision
    through the current host's available question tool; conversation is a fallback only
    when there is no question tool, never when permission was denied.
+   During mid-cycle work, retain the selected work map and current phase. Do not infer
+   a new task from the tail of a state file.
 
 2. **Query compact metadata first.** Resolve `LINTEL_SOURCE_ROOT` from the loaded trusted
    adapter or explicitly selected Lintel source, separately from the working project.

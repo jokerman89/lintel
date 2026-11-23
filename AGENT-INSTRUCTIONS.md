@@ -223,7 +223,7 @@ Expert personas as lightweight session context layers. Voice + outcome-lens + de
 
 **Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — a field-facing pack might ship `field-cto`, `solution-architect`, `engineering-manager`.
 
-**Private roles:** Operator can scaffold custom roles via `/li:role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
+**Private roles:** Operator can create custom roles via `/li:role --create` and list them with `/li:role --list`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
 
 **Session-start awareness (lightweight):** SENSE reads `~/.lintel/profile.yaml` `role_active` field; if set, loads role IDENTITY + VOICE summary (~500 tokens). Full deep-dive only on operator command.
 

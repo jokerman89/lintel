@@ -5,6 +5,57 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.14.0 — unreleased
+
+### Changed
+
+- Consolidate nine redundant public entrypoints into the existing budget, catalog,
+  role and audit owners, plus the internal Brief Forge handoff method. Preserve
+  their useful options, stored data, explicit-consent boundaries and helper APIs.
+- Update current callers, installed resource closure and generated native discovery
+  together. The [migration guide](docs/migrations/2026-09-25-native-workflows.md)
+  maps all nine former names and invocation shapes; they are not executable aliases.
+- Record the original revision-pinned native-plan comparison without claiming a
+  new upstream review, live-client execution or comparative model benefit.
+- Keep planning depth advisory and check implementation narration qualitatively
+  through the existing engineering inspection and PLAN self-check. Preserve
+  indispensable decisions, algorithms and verification even in long plans.
+- Reaffirm CAPTURE's original mapped handoff instead of generating another trio.
+  Lesson and learned-pattern promotion reuse source-safe evidence, explicit
+  uncertainty and existing ownership/lifecycle fields; policy authority does not
+  depend on a productivity experiment.
+- Make five drafting-role outlines conditional on supplied facts and real asks,
+  without mandatory narrative beats, invented metrics, deadlines or phase quotas.
+  Missing Word observation date/client identity remains explicitly unknown.
+
+### Fixed
+
+- Usage reporting preserves exact counts, estimates and malformed/empty distinctions
+  while bounding reads and refusing non-regular or replaced inputs and output errors.
+  NUL-containing source paths are unreadable errors on every host, not absent input.
+- The current-command guard distinguishes actual invocations from typed migration
+  data and binds historical exceptions to exact file bytes as well as counts.
+- Strict test accounting recognizes explicitly opposite-platform assertions only
+  when other tests actually ran; missing tools and unknown coverage still fail.
+- Installation verification checks the retained context-budget and context-warm
+  owners, not a retired advice wrapper, while retaining missing-owner failures.
+- DISCOVER's synthesis handoff uses the retained envelope schema with actual
+  selected inputs, literal argument preservation and explicit missing-input refusal.
+  Usage regressions cover exact name-length and aggregate-key bounds without
+  dropping raw counts or previously admitted keys.
+- Pattern capture distinguishes source kind from confidence. Its mixed-policy
+  regression checks the parser's returned clauses, not aliased input data.
+
+### Migration and limits
+
+- Update managed native resources with the existing adapter. Local edits remain
+  conflicts, and existing profile references require an explicitly reasoned rebind
+  after the product-version change. No personal configuration is migrated implicitly.
+- This is the compatible P11-P18 source continuation, not completion of all 84 original V2
+  findings. Architecture choices, empirical evidence and exact host-held work retain
+  their existing requirements. No role, core phase, policy gate or PDF reader is added
+  or removed by this continuation.
+
 ## 0.13.9 — unreleased
 
 ### Changed

@@ -1,7 +1,8 @@
 # Audit and hook observations
 
 Audit owns this read-only procedure, shared by `audit`, `hooks-status` and
-maintenance's usage view. The existing `_audit.sh` router owns log selection;
+audit's usage view via the [usage observation method](usage.md).
+The existing `_audit.sh` router owns log selection;
 `li-events.py` owns parsing, classes, aliases, counts and diagnostics. Do not add
 another JSONL schema, telemetry service or activation policy.
 
@@ -59,6 +60,10 @@ arguments and uncomputable windows stop instead of dropping a filter.
 It returns the actual `summary` JSON and, for filtered requests, a bounded preview of
 `records`. `--limit` limits only displayed rows; all diagnostics and counts remain in
 the summary. A truncated preview is not a complete population for manual aggregation.
+The `usage-skill` category instead uses the [bounded usage method](usage.md#read-reports):
+it reuses the event parser one line at a time, caps processing and retained details,
+computes aggregates without materializing all rows, and reports incomplete coverage
+and omitted diagnostics explicitly. Do not bypass those bounds by requesting all rows.
 If rows change between the two reads, report that limitation rather than claiming an
 atomic snapshot. Use the selected source/time and retain all reader exits:
 

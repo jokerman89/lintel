@@ -217,7 +217,7 @@ class CopilotKit(unittest.TestCase):
             self.assertFalse(value["executed"])
             self.assertNotIn("## Behavioral traits", result.stdout)
             if "--name=skill-router" in arguments:
-                self.assertEqual([item["id"] for item in value["entries"]], ["skill:skill-router"])
+                self.assertEqual(value["entries"], [])
             else:
                 self.assertEqual({item["id"] for item in value["entries"]}, {
                     "agent:DemoNarrativeArc", "agent:DemoNarratorJunior",
@@ -1562,6 +1562,13 @@ except (ValueError,OSError) as error:
                     if relative == "lib/cli-tiers.yaml":
                         self.assertIn("ERROR:", result.stderr)
                         self.assertIn("cli-tiers.yaml", result.stderr)
+                    elif relative == "skills/brief-forge/references/handoff.md":
+                        self.assertEqual(
+                            result.stderr,
+                            "ERROR: Missing bundled source target: "
+                            "docs/migrations/2026-09-25-native-workflows.md -> "
+                            f"../../{relative}\n",
+                        )
                     else:
                         self.assertIn(f"Required source file is missing: {path}", result.stderr)
                     self.assertEqual(before, self.snapshot())
@@ -1626,10 +1633,10 @@ except (ValueError,OSError) as error:
                 inventory = json.loads(original)
                 self.assertIn(f"{adapter.BUNDLE}/{relative}", inventory["files"])
                 del inventory["files"][f"{adapter.BUNDLE}/{relative}"]
-                manifest_path.write_text(json.dumps(inventory), encoding="utf-8")
-                path.unlink()
-                before = self.snapshot()
                 try:
+                    manifest_path.write_text(json.dumps(inventory), encoding="utf-8")
+                    path.unlink()
+                    before = self.snapshot()
                     result = self.run_cli("check", source=bundle,
                                           script=bundle / "bin/li-copilot.py", success=False)
                     self.assertIn(f"Required source file is missing: {path}", result.stderr)

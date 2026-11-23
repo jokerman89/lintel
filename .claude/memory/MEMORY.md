@@ -15,7 +15,7 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
-- **Original V2 programme remains open:** [current state](working-state.md#active--original-v2-findings)
+- **Original V2 programme remains open:** [current state](working-state.md#active-coordinator-fan-in)
   owns the current delivery, remaining original clauses and selected continuation.
   This index is navigation, not a second volatile status or acceptance record.
 - **Universal delivery supersedes the old recovery snapshot:** the

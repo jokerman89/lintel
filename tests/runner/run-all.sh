@@ -66,11 +66,13 @@ total=0
 partial=0
 discovered=0
 not_applicable=0
+platform_label="windows-only"
 # Git Bash, MSYS and Cygwin report their Windows host through uname; everything else is not Windows.
 case "$(uname -s 2>/dev/null || true)" in
   MINGW*|MSYS*|CYGWIN*) ON_WINDOWS=1 ;;
   *) ON_WINDOWS=0 ;;
 esac
+[ "$ON_WINDOWS" -eq 0 ] || platform_label="posix-only"
 
 declare -a FAIL_LOG
 declare -a DISCOVERED=()
@@ -201,21 +203,26 @@ while [ "$position" -lt "$discovered" ]; do
     # The test template's skip() prints a color code before "SKIP", so the
     # line starts with an ANSI escape — strip them or every skip counts as a pass.
     plain_output=$(printf '%s\n' "$output" | sed "s/${ESC}\[[0-9;]*m//g")
+    shell_skips=$(printf '%s\n' "$plain_output" | grep -E '^[[:space:]]*SKIP([ :]|$)' || true)
     framework_skips=$(printf '%s\n' "$plain_output" | sed -n 's/^OK (skipped=\([1-9][0-9]*\)).*/\1/p')
     if [ -n "$framework_skips" ]; then
       framework_total=$(printf '%s\n' "$plain_output" | sed -n 's/^Ran \([0-9][0-9]*\) test.*/\1/p')
-      # Off Windows, a unittest skip whose reason starts "platform: windows-only" is not applicable,
-      # not missing coverage: the Windows jobs run those methods strictly. It counts only when every
-      # skip in the entry carries that reason and something else ran; on Windows it stays partial.
+      # Only skips explicitly targeting the other platform are N/A; every
+      # skip must match and something else must have executed.
       platform_skips=0
       if [ "$ON_WINDOWS" -eq 0 ]; then
-        platform_skips=$(printf '%s\n' "$plain_output" | grep -cE "\.\.\. skipped 'platform: windows-only" || true)
+        platform_skips=$(printf '%s\n' "$plain_output" | grep -cE "\.\.\. skipped 'platform: windows-only(;|')" || true)
+      else
+        platform_skips=$(printf '%s\n' "$plain_output" | grep -cE "\.\.\. skipped 'platform: posix-only(;|')" || true)
       fi
       if [ "$platform_skips" -gt 0 ] && [ "$platform_skips" = "$framework_skips" ] \
-          && [ "$framework_total" != "$framework_skips" ]; then
+          && [[ "$framework_total" =~ ^[0-9]+$ ]] && [ "$framework_total" -gt "$framework_skips" ]; then
         passed=$((passed + 1))
         not_applicable=$((not_applicable + platform_skips))
-        printf 'N/A: %s windows-only unittest assertions in %s\n' "$platform_skips" "$test_file"
+        printf 'N/A: %s %s unittest assertions in %s\n' "$platform_skips" "$platform_label" "$test_file"
+        if [ -n "$shell_skips" ]; then
+          partial=$((partial + 1))
+        fi
       elif [ "$framework_total" = "$framework_skips" ]; then
         skipped=$((skipped + 1))
         printf 'SKIP: %s unittest assertions in %s\n' "$framework_skips" "$test_file"
@@ -224,14 +231,15 @@ while [ "$position" -lt "$discovered" ]; do
         partial=$((partial + 1))
         printf 'SKIP: %s unittest assertions in %s\n' "$framework_skips" "$test_file"
       fi
-    elif printf '%s\n' "$plain_output" | grep -qE '^[[:space:]]*SKIP([ :]|$)'; then
+      [ -z "$shell_skips" ] || printf '%s\n' "$shell_skips"
+    elif [ -n "$shell_skips" ]; then
       if printf '%s\n' "$plain_output" | grep -qE '^[[:space:]]*PASS([ :]|$)'; then
         passed=$((passed + 1))
         partial=$((partial + 1))
       else
         skipped=$((skipped + 1))
       fi
-      printf '%s\n' "$plain_output" | grep -E '^[[:space:]]*SKIP([ :]|$)'
+      printf '%s\n' "$shell_skips"
     else
       passed=$((passed + 1))
     fi
@@ -257,7 +265,7 @@ printf "${c_yellow}Skip:   %d${c_reset}\n" "$skipped"
 printf "${c_red}Fail:   %d${c_reset}\n" "$failed"
 printf "Partial: %d (passed tests with skipped assertions)\n" "$partial"
 if [ "$not_applicable" -gt 0 ]; then
-  printf "N/A:     %d (windows-only unittest assertions, not applicable on this host)\n" "$not_applicable"
+  printf "N/A:     %d (%s unittest assertions, not applicable on this host)\n" "$not_applicable" "$platform_label"
 fi
 
 if [ "$failed" -gt 0 ]; then

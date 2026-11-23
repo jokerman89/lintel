@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/shape/orientator-decisions-audited.sh
-# Asserts: retained orientator delegates discovery; SENSE owns actual routing and audit.
+# Asserts: catalog owns intent narrowing; SENSE owns actual routing and audit.
 # tag: shape v4.0
 
 set -uo pipefail
@@ -12,11 +12,11 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/shape/orientator-decisions-audited.sh"
 echo "============================================="
 
-# Skill exists
-if [ -f "$REPO_ROOT/skills/orientator/SKILL.md" ]; then
-  pass "skills/orientator/SKILL.md present"
+# SENSE owns the current route
+if [ -f "$REPO_ROOT/skills/sense/SKILL.md" ]; then
+  pass "skills/sense/SKILL.md present"
 else
-  fail "skills/orientator/SKILL.md MISSING"
+  fail "skills/sense/SKILL.md MISSING"
 fi
 
 # Routing lib exists
@@ -35,11 +35,11 @@ for fn in classify_intent match_workflow assess_risk score_confidence check_esca
   fi
 done
 
-# SENSE invokes orientator (Step 0d)
-if grep -qE "Step 0d.*[Oo]rientator|orientator-routing\.sh" "$REPO_ROOT/skills/sense/SKILL.md" 2>/dev/null; then
-  pass "SENSE Step 0d invokes orientator"
+# SENSE invokes the routing helper directly
+if grep -q "orientator-routing\.sh" "$REPO_ROOT/skills/sense/SKILL.md" 2>/dev/null; then
+  pass "SENSE invokes the current routing helper"
 else
-  fail "SENSE does not document orientator invocation at Step 0d"
+  fail "SENSE does not document its routing helper"
 fi
 
 # SENSE owns the real producer, not the discovery wrapper.
@@ -48,7 +48,7 @@ if grep -qE "audit_log orientator-decisions orientator_decision" "$REPO_ROOT/ski
 else
   fail "SENSE is missing the orientation audit producer"
 fi
-for skill in catalog skill-router orientator welcome sense; do
+for skill in catalog welcome; do
   if grep -q 'references/intent.md' "$REPO_ROOT/skills/$skill/SKILL.md"; then
     pass "$skill delegates metadata intent narrowing to catalog"
   else

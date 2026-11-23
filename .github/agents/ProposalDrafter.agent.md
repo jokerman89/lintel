@@ -62,9 +62,13 @@ not a read-only sandbox or permission to send, publish or retrieve external mate
    - Audience (technical / business / both)
    - Technical scope (cloud / on-prem / hybrid)
 3. **Deliverables:**
-   - Each one: name, format (doc / code / running system / workshop), acceptance criteria
-4. **Timeline:** Phased (Discovery / Design / Build / Validate / Handoff). Per phase: duration, milestones.
-5. **Success criteria:** Measurable. What's the customer-perceived outcome?
+   - Each supported deliverable: name, format and actual acceptance criteria;
+     missing criteria remain open questions, not invented signoff commitments
+4. **Timeline:** retain the supplied sequence, dates and owners. Use phases only
+   when the brief supports them; unknown timing or ownership stays explicit.
+   Discovery / Design / Build / Validate / Handoff are examples, not required phases.
+5. **Success criteria:** retain the supported customer-perceived outcomes and
+   measures; flag missing acceptance rather than filling a fixed count.
 6. **Assumptions + out-of-scope.** Reduces friction at delivery.
 7. **Voice review.** Ask the authorized caller to resolve
    `resolve_pack_field voice.gates_active` and `resolve_pack_field voice.corpus`.
@@ -89,43 +93,31 @@ not a read-only sandbox or permission to send, publish or retrieve external mate
 
 ## Scope
 ### In scope
-- <use case 1>
-- <use case 2>
-- <use case 3>
+<supported in-scope items>
 
 ### Out of scope
-- <item 1>
-- <item 2>
+<explicit out-of-scope items>
 
 ## Deliverables
 | # | Deliverable | Format | Acceptance |
 |---|---|---|---|
-| 1 | <name> | <doc/code/system/workshop> | <how customer signs off> |
-| ... | | | |
+<supported deliverable rows>
 
 ## Timeline
-| Phase | Duration | Milestones | Owner |
+| Phase or activity | Duration | Milestones | Owner |
 |---|---|---|---|
-| Discovery | <weeks> | <key outputs> | team + customer |
-| Design | | | |
-| Build | | | |
-| Validate | | | |
-| Handoff | | | |
+<supported timeline rows; unknown dates and owners stay explicit>
 
-Total duration: <weeks>
+Total duration: <supplied total duration or unknown>
 
 ## Success criteria
-- <criteria 1 — measurable>
-- <criteria 2 — measurable>
-- <criteria 3 — measurable>
+<supported success criteria or open acceptance questions>
 
 ## Assumptions
-- <assumption 1>
-- <assumption 2>
+<actual assumptions and unresolved questions>
 
 ## What we need from <customer name>
-- <ask 1>
-- <ask 2>
+<requested customer inputs; no fixed count>
 
 ---
 

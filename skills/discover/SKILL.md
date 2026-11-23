@@ -138,23 +138,55 @@ Output recommended agents organized by category. PLAN uses this to know which su
 
 When invoked in research-dive mode (via `/li:cycle --from SENSE --to DISCOVER`) or when the work spans many sources, use an available, authorized `ResearchSynthesizer` role to aggregate the codebase map, ADRs, lessons and dependencies into a structured brief. Without real delegation, synthesize serially and label that limitation:
 
-```bash
-synth_brief=$(mktemp)
-cat > "$synth_brief" <<EOF
-task: Synthesize discover findings into a structured research brief
-context_pointers:
-  - codebase map (Step 1 output)
-  - relevant ADRs (Step 2 output)
-  - applicable lessons (Step 3 output)
-  - flagged dependencies (Step 4 output)
-constraints:
-  - state of the art + gaps + recommendations
-  - cite sources (file paths, ADR-IDs, lesson titles)
-acceptance:
-  - structured brief with state-of-the-art, gaps, recommendations, citations
-EOF
+In the same Bash step, supply `synth_task` with the actual research question and
+gathered findings, and declare the indexed `synth_inputs` array with the exact
+P03-admitted file paths selected above. Use an explicit `synth_inputs=()` only
+when no file input applies. Step labels are not file pointers; do not invent
+paths for findings that exist only in conversation. The envelope is data for
+the caller's separate dispatch, not evidence that an agent ran.
 
-/li:brief-forge subagent_spawn discover ResearchSynthesizer brief "$synth_brief"
+```bash
+(
+source_root="${LINTEL_SOURCE_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
+[ -n "$source_root" ] && [ -f "$source_root/lib/brief-forge.sh" ] || {
+  echo "NEEDS_CONTEXT: trusted Lintel source root unavailable" >&2
+  exit 1
+}
+if [ -z "${synth_task:-}" ] ||
+   ! synth_declaration=$(declare -p synth_inputs 2>/dev/null) ||
+   [[ ! "$synth_declaration" =~ ^declare\ -[^[:space:]]*a[^[:space:]]*\ synth_inputs= ]]; then
+  echo "NEEDS_CONTEXT: supply the synthesis task and explicit input array" >&2
+  exit 1
+fi
+export LINTEL_SOURCE_ROOT="$source_root"
+export LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$PWD}"
+source "$source_root/lib/brief-forge.sh" || exit 1
+synth_python="${LINTEL_PYTHON:-}"
+if [ -z "$synth_python" ]; then
+  synth_python=$(command -v python3 || command -v python) || {
+    echo "NEEDS_CONTEXT: Python 3.9+ is required for the synthesis brief" >&2
+    exit 1
+  }
+fi
+synth_brief=$(mktemp) || exit 1
+trap 'rm -f -- "$synth_brief"' EXIT
+"$synth_python" -I -B - "$synth_brief" "$synth_task" ${synth_inputs[@]+"${synth_inputs[@]}"} <<'PY' || exit $?
+import json
+import sys
+
+with open(sys.argv[1], "w", encoding="utf-8", newline="\n") as stream:
+    json.dump({
+        "content": {
+            "task": sys.argv[2],
+            "constraints": ["state of the art + gaps + recommendations",
+                            "cite selected file paths, ADR IDs and lesson titles"],
+            "acceptance": ["structured brief with state-of-the-art, gaps, recommendations, citations"],
+        },
+        "context_pointers": sys.argv[3:],
+    }, stream)
+PY
+forge_handoff subagent_spawn discover ResearchSynthesizer brief "$synth_brief"
+)
 ```
 
 ### Step 7 — Context warmup hint (operator opt-in)

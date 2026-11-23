@@ -1,10 +1,11 @@
 # Role lifecycle
 
-`role` owns this one procedure for `role`, `role-new` and `roles-list`. Public names
-and flags remain unchanged; these are not new helper subcommands. Use the existing
-`bin/li-lifecycle` / `bin/li-lifecycle.py` and [configured lifecycle roots](../../../docs/lifecycle.md).
-Root flags precede the subcommand; use the explicitly selected source and working
-repository, never another checkout or guessed personal store.
+`role` owns this complete procedure for create, update, list and the existing role
+operations. The public operation flags do not add helper subcommands: continue using
+the existing `bin/li-lifecycle` / `bin/li-lifecycle.py` and [configured lifecycle
+roots](../../../docs/lifecycle.md). Root flags precede the subcommand; use the
+explicitly selected source and working repository, never another checkout or guessed
+personal store.
 
 Listing/showing/persona discovery are read-only. Create/update publish only a reviewed
 role file; set/off change only the selected working-role preference. Framing and audience
@@ -14,10 +15,10 @@ not permission to invent a role or scan a private store.
 
 ## Create and update entrypoints
 
-Two modes:
+The public entry points are:
 
-- `/li:role-new` — guided interview, renders a new role file
-- `/li:role-new --update <id>` — targeted update to an existing role (defaults to the active role)
+- `/li:role --create` — guided interview, renders a new role file
+- `/li:role --update [id]` — targeted update to an existing role; an omitted ID defaults to the active role
 
 ## When to use
 
@@ -33,9 +34,9 @@ Two modes:
 - One-off observation — keep in session notes; only durable patterns land in the file
 - Customer-specific PII required in the role — STOP, that's not a role file's purpose
 
-## Create (default mode)
+## Create (--create)
 
-Use an adaptive interview: reuse facts already supplied and ask only for missing
+Invoked as `/li:role --create`. Use an adaptive interview: reuse facts already supplied and ask only for missing
 decisions. The expert-content sections below are retained, but ten facts or one question
 per phase are prompts for depth, not mandatory filler. Render a reviewed draft, then
 let `bin/li-lifecycle.py role-write` own publication under the
@@ -158,7 +159,7 @@ private paths or content to committed/shared evidence.
 
 ## --update <id> — evolve an existing role
 
-Targeted edits, not rewrites (wholesale rewrite = re-scaffold via create mode). Sensitivity-aware: private role updates never leak to a public marketplace. Target defaults to the active role (`role_active` in `~/.lintel/profile.yaml`); if none specified and none active, list roles via `/li:roles-list`.
+Targeted edits, not rewrites (wholesale rewrite = re-scaffold via create mode). Sensitivity-aware: private role updates never leak to a public marketplace. Target defaults to the active role (`role_active` in `~/.lintel/profile.yaml`); if none is specified and none is active, use `/li:role --list` to show available metadata and stop for an explicit target.
 
 1. **Locate metadata**, then obtain private-body consent before `role-show <id> --deep
    --allow-private` when applicable. Use the resolution below; no implicit private read.
@@ -189,7 +190,7 @@ If the operator is unsure an update is durable: capture it as PROVISIONAL with a
 
 ## List
 
-`/li:roles-list` uses metadata only:
+`/li:role --list` uses metadata only:
 
 ```bash
 bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
@@ -205,7 +206,8 @@ Render the returned `role_id`, `display_name`, `scope`, `audience`, `voice_tier`
 `sensitivity`, `last_updated` when present, origin, selected source and actual active
 role. Mark missing metadata unknown rather than guessing. Show all rows, paginating a
 large list explicitly. A matching phase/audience may justify a suggestion, never activation.
-Link the existing activate, deep-dive and create entrypoints.
+Link the existing activate and deep-dive actions; create and update remain available
+through `/li:role --create` and `/li:role --update [id]`.
 
 Listing never binds a profile, changes preferences or writes a ledger/audit event.
 A null reference means an unbound read; malformed metadata/preferences and profile drift

@@ -1,0 +1,159 @@
+{
+  "schema_version": 2,
+  "skill": "review",
+  "status": "unverified",
+  "timestamp": "2026-10-10T13:47:45.879993+00:00",
+  "reason": "New exact-context historical semantic decision only. Actor report is actually observed; strict P05 receipt, host-level independence and integrated/release clearance are not established. Original set06 evidence is preserved.",
+  "context": {
+    "attempt_id": "archive-span-context-20261010-r1",
+    "builder": {
+      "context": "archive-span-context-20261010-r1",
+      "id": "copilot-session:9854860c-9038-488a-b7b6-1b14150fbaa6"
+    },
+    "independence_required": true,
+    "profile": null,
+    "purpose": "verification_only",
+    "qa_requirements": [
+      {
+        "applicability": "applicable",
+        "id": "historical-spans",
+        "kind": "check",
+        "policy": {
+          "actor": null,
+          "applicability": "Only the exact two unchanged historical excerpts in their current surrounding source; not release, implementation or host-runtime approval.",
+          "effective_date": null,
+          "jurisdiction": null,
+          "source": ".claude/plans/legacy-cleanup/spec.md",
+          "version": "2026-09-25"
+        },
+        "requirement": "mandatory"
+      }
+    ],
+    "required_controls": [
+      "historical-spans"
+    ],
+    "required_policy": {
+      "applicability": "not_applicable",
+      "required": false,
+      "source": null,
+      "status": "not_required",
+      "version": null
+    },
+    "schema_version": 2,
+    "snapshot": {
+      "base": "63b6fcd068fbae18deac1e76d92fbdcb9050a20e",
+      "entries": [
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "de8a9acc3135640be98fe6b28716c2b6f405a2a55cd2b91fba09e4d0c39271f3"
+          },
+          "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fb7315faf06ab6a2d3b4aa14548f2e43cb486f6e9c0e2c69f179b3148ad6ea65"
+          }
+        }
+      ],
+      "head": "63b6fcd068fbae18deac1e76d92fbdcb9050a20e",
+      "record_path": ".claude/runtime/reviews/archive-span-context-20261010.json",
+      "result_digest": "af83727cd8167f9037d2df969a3af1abbaf7baae4b9ef67198beac505f6b9f69",
+      "selection": [
+        ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md"
+      ]
+    },
+    "work": {
+      "acceptance_digest": "ddd6639e4042dfad41072466077ec9c01866ef5d85b4d7625eb0dddf798a041b",
+      "acceptance_manifest": [
+        {
+          "end": null,
+          "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+          "sha256": "fb7315faf06ab6a2d3b4aa14548f2e43cb486f6e9c0e2c69f179b3148ad6ea65",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/residuals.md",
+          "sha256": "dc74653b6b2aa4818d42f0fba3c2169e1fd9a6ee688d23617ee953f9b7a55139",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/spec.md",
+          "sha256": "784fc37543854985199b8aad171406ae33737fefa7486cc7fc643e720e6fda2d",
+          "start": null
+        }
+      ],
+      "acceptance_paths": [
+        ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+        ".claude/plans/legacy-cleanup/residuals.md",
+        ".claude/plans/legacy-cleanup/spec.md"
+      ],
+      "leaf_ids": [
+        "set03-span-065",
+        "set03-span-066"
+      ],
+      "map_digest": null,
+      "package_id": "archive-span-context",
+      "work_map": null
+    }
+  },
+  "reviewer": {
+    "id": "copilot-project-session:4b1139a4-a87b-40a6-bfaf-1328a0fbe679",
+    "context": "copilot-session:e660a0eb-fb1e-4741-9593-88db867fc5b1"
+  },
+  "provenance": "declared",
+  "controls": [
+    {
+      "applicability": "applicable",
+      "id": "historical-spans",
+      "kind": "check",
+      "policy": {
+        "actor": null,
+        "applicability": "Only the exact two unchanged historical excerpts in their current surrounding source; not release, implementation or host-runtime approval.",
+        "effective_date": null,
+        "jurisdiction": null,
+        "source": ".claude/plans/legacy-cleanup/spec.md",
+        "version": "2026-09-25"
+      },
+      "requirement": "mandatory",
+      "status": "pass",
+      "reason": "Actual new reviewer independently ACCEPTED both exact unchanged historical excerpts in updated containing source and independently verified raw/canonical digests. Only this semantic control passes; overall host independence and release remain unverified.",
+      "evidence": [
+        ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-report.md"
+      ],
+      "observation": {
+        "span_declarations": [
+          "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
+          "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b"
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "set03-span-065": [
+      "historical-spans"
+    ],
+    "set03-span-066": [
+      "historical-spans"
+    ]
+  },
+  "evidence": [
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-report.md",
+      "sha256": "49c82edcf17e84ddd40c92991f759490a5987b6ee19eb6d2893a8b20181ecff4"
+    }
+  ]
+}

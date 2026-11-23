@@ -51,7 +51,7 @@ Canonical skills live at `skills/<name>/SKILL.md`, one source for every client. 
 form depends on the adapter: `/li:<name>` in the Claude plugin, a complete generated `li-<name>`
 skill for every canonical skill on GitHub Copilot, generated `li-<name>` wrappers for the core
 workflows where another [client adapter](client-adapters.md) has a documented discovery root
-(other skills are read from their canonical file), or an explicit file handoff through the Universal adapter. The tree holds 96 skill entries (directories with a
+(other skills are read from their canonical file), or an explicit file handoff through the Universal adapter. The tree holds 88 skill entries (directories with a
 `SKILL.md`; `python bin/li-catalog.py --check` verifies the generated catalog against them).
 They fall into clusters:
 
@@ -85,6 +85,10 @@ to current methods and explains non-destructive updates. A few boundaries matter
   so produced text, pages and rendering stay unverified unless an authorized inspection
   operation is available. The former standalone PDF-rendering entry is folded into
   `generate-pdf`, which now carries its print options.
+- Budget advice and handoff sizing have one `context-budget` owner; discovery belongs
+  to `catalog`, role creation/listing to `role`, and usage reporting to `audit --usage`.
+  Brief Forge remains an internal handoff method, not an independently callable skill.
+  The migration guide maps every retired entry and its former arguments to these owners.
 
 ### `agents/` — delegated roles
 

@@ -1,227 +1,46 @@
-# Orientator — lightweight workflow routing at SENSE
+# Intent navigation in SENSE and catalog
 
-**Last updated:** 2026-09-20 (operation/subject boundary)
-**Status:** Concept doc — referenced by `skills/orientator/SKILL.md`, `lib/orientator-routing.sh`, `skills/sense/SKILL.md` (Step 0d)
+**Last updated:** 2026-10-09
+**Status:** Current implementation boundary
 
-> Invocation: commands use the Claude plugin form `/li:<skill>`. GitHub Copilot gets a native `li-<skill>` skill for every workflow. The other repository adapters (Claude Code, Codex and Cursor) expose the installed core workflows as `li-<skill>`; for any other skill there, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
+Lintel has two related but distinct paths for choosing a method. SENSE performs its
+existing cycle-entry recommendation; catalog supports operator-requested discovery.
+Neither path turns a recommendation into host discovery, permission, or execution.
 
-> The operator types a prompt. Sometimes it's "fix the broken button" — obviously a hotfix. Sometimes it's "what should I do?" — genuinely ambiguous. The orientator is the **mechanical-first router** that turns prompts into workflow recommendations, escalates to LLM only when mechanical confidence falls below the pack's threshold, and writes every decision to an audit log the operator can inspect.
+## SENSE routing
 
-## The problem
+When the operator has not already selected `--mode` or `--from`, SENSE uses the
+trusted `lib/orientator-routing.sh` helper. It verifies profile context, classifies
+the requested operation, resolves the pack's default and high-risk workflow policy,
+and records the resulting intent, workflow, risk and confidence through the shared
+audit writer. The heuristic confidence is not measured accuracy.
 
-Pre-v4.0 routing happened three ways:
-- Operator typed `/li:cycle --mode hotfix` (explicit, always works)
-- Operator typed `/li:cycle --mode auto` and SENSE used a hardcoded intent classifier
-- Operator typed something ambiguous and got the default cycle with all 8 phases
+SENSE surfaces the recommendation in its report. A configured auto-mode may proceed
+only within its existing eligibility rules; high-risk work still requires explicit
+confirmation. Low confidence calls for operator judgment or a missing-decision
+question. `invoke_llm_orientation` remains a dormant stub, not a model invocation or
+evidence of escalation.
 
-Three failure modes:
+The helper is an internal SENSE dependency, not a separate discoverable workflow.
+See [SENSE Step 0d](../../skills/sense/SKILL.md#step-0d--orientator-invocation-v40-phase-3)
+and the [routing helper](../../lib/orientator-routing.sh).
 
-1. **No pack-awareness.** The hardcoded classifier couldn't honor pack-specific routing (a customer-engagement pack wants different defaults from a hotfix-heavy internal-tool pack).
-2. **All-or-nothing LLM.** Either the LLM ran every time (expensive) or never (no escalation when needed).
-3. **No audit.** Routing decisions were ephemeral. Operators couldn't see what classifier produced what recommendation — no feedback loop.
+## Operator-requested discovery
 
-The orientator fixes all three by being a **lightweight agent invoked at SENSE that reads pack policy + applies mechanical heuristics + escalates to LLM only when mechanical confidence is low + audits every decision**.
+For free-text method discovery, use `/li:catalog` and follow its
+[intent narrowing method](../../skills/catalog/references/intent.md). It builds a
+metadata-first shortlist, checks only selected method bodies, and reports fit,
+alternatives and limitations. It does not execute a method or dispatch an agent.
 
-## The model
+Native host discovery and permission are separate facts. A catalog entry or source
+file does not prove that a workflow is installed, callable or authorized on the
+current client.
 
-```
-Operator prompt
-       │
-       ▼
-SENSE Step 0d invokes orientator
-       │
-       ▼
-lib/orientator-routing.sh::classify_intent
-       │  (mechanical keyword + path heuristics)
-       ▼
-match_workflow(intent, pack.navigation.default_workflow)
-       │
-       ▼
-assess_risk(workflow, pack.navigation.high_risk_workflows)
-       │
-       ▼
-score_confidence(intent, workflow)
-       │
-       ▼
-check_escalation_threshold(confidence, pack.navigation.escalation_threshold)
-       │  yes → invoke_llm_orientation (v4.0 stub; Phase 4 wires real subagent)
-       │  no  → use mechanical result
-       ▼
-Decision:
-       │  auto_start (low-risk + high-confidence + pack auto_mode_eligible)
-       │  confirm_with_operator (high-risk OR low-confidence)
-       │  surface_and_wait (default)
-       ▼
-Audit to .claude/runtime/audit/orientator-decisions.jsonl
-       │
-       ▼
-SENSE report surfaces recommendation
-```
+## Boundaries
 
-Three layers of decision: mechanical classify → pack-policy lookup → escalation gate.
-
-## Pack-configurable parameters
-
-All four parameters live in `pack.yaml.navigation.*`:
-
-| Field | Type | Default | What it controls |
-|---|---|---|---|
-| `default_workflow` | string | `cycle` | Workflow for generic build or unclear intent |
-| `high_risk_workflows` | list[string] | `[cycle, plan, ship]` | Workflows that always require confirm |
-| `orientator_budget_tokens` | int | 2000 | LLM budget cap when escalating |
-| `orientator_max_output_tokens` | int | 200 | LLM output cap |
-| `escalation_threshold` | enum | medium | When to escalate (never / low / medium / high) |
-| `auto_mode_eligible` | bool | false | Master gate for auto-start of low-risk + high-confidence |
-
-Per design doc §1.4: the tweak from operator's spec is that all four parameters are pack-overridable. A research-heavy pack might want `escalation_threshold: low` (escalate often, intent is harder to detect). A hotfix-heavy pack might want `escalation_threshold: high` (rarely escalate, intents are usually clear).
-
-## Mechanical-first routing
-
-`classify_intent` distinguishes the requested operation from its subject before using
-symptom-only fallback. For example, "review the release plan" recommends review,
-"research deployment options only" recommends research, and "fix review comments"
-still recommends a fix. A negated operation is skipped rather than treated as permission.
-
-The nine results are `build`, `fix`, `review`, `research`, `ship`, `deploy`,
-`scaffold`, `resume` and `unclear`. Existing English and Swedish operation names remain
-available. Empty, unrecognized or only-negated requests return `unclear`; that low-confidence
-result requires scope judgment before a default workflow is executed.
-
-This is a deterministic heuristic, not general language understanding or an authorization
-mechanism. The host must reconcile compound requests, read-only constraints and existing
-user authority before acting. The operation-boundary and mechanical-routing tests exercise
-both read-only negative cases and preserved direct mutation requests without executing them.
-
-## Mapping intent → workflow
-
-| Intent | Workflow |
-|---|---|
-| build | Configured pack default; `/li:cycle` for the neutral pack |
-| fix | `/li:cycle --mode hotfix` |
-| review | `/li:review` |
-| research | `/li:cycle --mode research-dive` |
-| ship | `/li:cycle --from SHIP` |
-| deploy | `/li:cycle --from SHIP`, subject to SCOPE's existing route override and deployment authorization |
-| scaffold | `bin/li-scaffold init` |
-| resume | `/li:resume` |
-| unclear | `<pack.navigation.default_workflow>` |
-
-Bare extension defaults are qualified using the active pack's namespace. Already qualified
-commands keep their namespace. Explicit fix/review/research/ship/scaffold/resume intents keep
-their canonical operations. A recommendation declares intent; the host must still discover
-the requested installed workflow before execution.
-
-The mapping is hardcoded in `lib/orientator-routing.sh::match_workflow`. Operators wanting to override per-pack add a `pack.yaml.navigation.intent_overrides:` block (Phase 4 enhancement; v4.0 ships with the hardcoded mapping).
-
-## Risk assessment
-
-`assess_risk` returns `low | medium | high`:
-
-- **high** — workflow is in pack's `high_risk_workflows` CSV (default: cycle, plan, ship)
-- **medium** — `--mode hotfix` (touches code without full review)
-- **low** — `--mode research-dive` (read-only)
-- **medium** — default
-
-Risk determines whether the operator gets auto-start or confirm-pause.
-
-## Confidence scoring
-
-`score_confidence` returns `low | medium | high`:
-
-- **high** — explicit keyword match (intent ∈ {build, fix, review, research, ship, scaffold, resume})
-- **low** — intent is `unclear` (defaulted to pack workflow)
-- **medium** — anything else (currently unreachable; reserved for future heuristics)
-
-Confidence determines whether escalation fires.
-
-## Escalation threshold
-
-`check_escalation_threshold(confidence, threshold)` returns `yes` if confidence < threshold:
-
-| confidence \ threshold | never | low | medium | high |
-|---|---|---|---|---|
-| **low** | no | no | yes | yes |
-| **medium** | no | no | no | yes |
-| **high** | no | no | no | no |
-
-At `escalation_threshold: medium` (default): low confidence escalates, medium and high don't.
-
-## Auto-mode decision
-
-Per design doc §1.4 auto-mode level (b):
-- Low-risk workflows + high confidence + pack `auto_mode_eligible: true` → **auto_start**
-- High-risk workflows OR low confidence → **confirm_with_operator**
-- Otherwise → **surface_and_wait** (default; operator decides)
-
-Even with auto-mode active, the operator can interrupt at any phase boundary.
-
-## v4.0 LLM stub
-
-`invoke_llm_orientation` is a stub in v4.0 that returns `{source: mechanical, budget_used: 0, recommendation: <default_workflow>}`. This keeps v4.0 ship cost-bounded and deterministic.
-
-Phase 4 will wire a real subagent (probably `OrientatorAgent` with budget-bounded prompt, parsing a structured JSON output). The interface stays the same so the SENSE integration doesn't change.
-
-## Audit trail
-
-Every routing decision writes to `.claude/runtime/audit/orientator-decisions.jsonl`:
-
-```jsonl
-{"ts":"2026-05-29T15:00:00Z","kind":"orientator_decision","intent":"fix","workflow":"/li:cycle --mode hotfix","risk":"medium","confidence":"high","decision":"confirm_with_operator","budget_used":0,"escalated":false,"operator":"<operator>"}
-```
-
-Operators inspect via `bin/li-doctor --orientator-stats` (Phase 4 tool) or by grepping the audit log directly. The audit is the feedback loop — if the orientator consistently misroutes a particular prompt pattern, the operator surfaces it as a bug and the routing heuristics get tightened.
-
-## Integration with SENSE
-
-SENSE Step 0d runs orientator after Step 0c (meta-infra detection) and before Step 1 (read configuration). Why Step 0d:
-- After 0c so meta-infra cycles get the recommendation in the SENSE report
-- Before Step 1 because the orientator's recommendation influences which workflow context to load
-
-The orientator's output surfaces in the SENSE report (Step 7) as a routing recommendation block:
-
-```
-ORIENTATOR
-==========
-Recommended:  /li:cycle --mode hotfix
-Intent:       fix       (high confidence, mechanical)
-Risk:         medium
-Decision:     confirm_with_operator
-```
-
-## When NOT to invoke
-
-- Operator already typed an explicit `--mode <preset>` — orientator skipped
-- Operator already typed `--from <phase>` — orientator skipped
-- Mid-cycle (orientator is for cycle entry, not phase transitions)
-- Pack has no `navigation` block (validation should reject the pack first)
-
-## Anti-patterns
-
-- **LLM-first routing** — mechanical first; LLM only on escalation. Per design doc §1.4: "Mechanical-first, LLM on escalation"
-- **Ignoring pack policy** — `default_workflow`, `high_risk_workflows`, `escalation_threshold`, `auto_mode_eligible` all come from pack
-- **Auto-starting high-risk workflows** — even with `auto_mode_eligible: true`, high-risk requires explicit confirm
-- **Skipping the audit** — every routing decision goes to the JSONL audit. No audit = no feedback loop = drift over time
-- **Hardcoding keywords** — keyword list lives in `lib/orientator-routing.sh::classify_intent` so it's editable in one place
-
-## Integration points
-
-**Reads:**
-- Operator's last message (passed in by SENSE)
-- `lib/pack-resolver.sh` for pack policy
-- `.claude/runtime/state/00-state.md` (optional — for resume detection)
-
-**Writes:**
-- `.claude/runtime/audit/orientator-decisions.jsonl`
-- stdout (recommendation block surfaced in SENSE report)
-
-**Public functions in lib/orientator-routing.sh:**
-- `classify_intent <prompt>` → intent enum
-- `match_workflow <intent> <default>` → workflow string
-- `assess_risk <workflow> <high_risk_csv>` → risk enum
-- `score_confidence <intent> <workflow>` → confidence enum
-- `check_escalation_threshold <confidence> <threshold>` → yes|no
-- `invoke_llm_orientation <prompt> <default> <budget>` → JSON (v4.0 stub)
-
-**Tested by:**
-- `tests/unit/orientator-mechanical-routing.sh`
-- `tests/shape/orientator-decisions-audited.sh`
+- An explicit operator-selected method takes precedence over recommendations.
+- SENSE's verified profile, pack policy, high-risk confirmation and audit behavior
+  remain the navigation control; catalog does not replace them.
+- Recommendations do not add authority, waive mandatory review, or establish that
+  any subsequent operation ran.
+- Missing profile or required policy is a blocker, not a successful default route.

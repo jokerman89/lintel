@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal
 import json
 import os
 from pathlib import Path
@@ -189,6 +190,793 @@ class Sandbox(unittest.TestCase):
 
 
 class UsageReportContracts(Sandbox):
+    def test_skill_name_length_bound_preserves_counts_and_existing_aggregates(self):
+        for character in ("s", "\u03b1"):
+            for length in (256, 257):
+                with self.subTest(character=character, length=length):
+                    name = character * length
+                    path = write(self.root / "name-bound/usage-skill.jsonl", "\n".join([
+                        event("invocation", skill="alpha", tokens_est="1"),
+                        event("invocation", skill=name, tokens_est="2"),
+                        event("invocation", skill="alpha", tokens_est="3"),
+                    ]) + "\n")
+                    before = self.tree_state()
+                    result = self.run_cmd(
+                        [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                         "--file", path, "--limit", "1"], expect=0)
+                    summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                    self.assertEqual(summary["records"]["lines"], 3)
+                    self.assertEqual(summary["records"]["valid"], 3)
+                    self.assertEqual(summary["records"]["selected"], 3)
+                    self.assertTrue(summary["processing"]["complete"])
+                    self.assertEqual(summary["diagnostic_count"], 0)
+                    usage = summary["usage"]
+                    self.assertEqual(usage["by_skill"]["alpha"], {"count": 2, "tokens_est": "4"})
+                    self.assertEqual(usage["aggregate_complete"], length == 256)
+                    self.assertEqual(usage["skills_observed"], 2 if length == 256 else 1)
+                    if length == 256:
+                        self.assertEqual(usage["by_skill"][name], {"count": 1, "tokens_est": "2"})
+                        self.assertEqual(usage["diagnostic_count"], 0)
+                    else:
+                        self.assertNotIn(name, usage["by_skill"])
+                        self.assertEqual(usage["diagnostic_count"], 1)
+                        self.assertEqual(usage["diagnostic_codes"], {"skill_bound": 1})
+                    self.assertEqual(self.tree_state(), before)
+
+    def test_skill_cardinality_bound_keeps_admitted_keys_and_raw_counts(self):
+        for count in (1024, 1025):
+            with self.subTest(count=count):
+                rows = [event("invocation", skill=f"skill-{index:04d}", tokens_est="1")
+                        for index in range(count)]
+                rows.extend([event("invocation", skill="skill-0000", tokens_est="2"),
+                             event("invocation", skill="skill-0000", tokens_est="3")])
+                path = write(self.root / "key-bound/usage-skill.jsonl", "\n".join(rows) + "\n")
+                before = self.tree_state()
+                result = self.run_cmd(
+                    [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                     "--file", path, "--topn", "1", "--limit", "1"], expect=0)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                self.assertEqual(summary["records"]["lines"], count + 2)
+                self.assertEqual(summary["records"]["valid"], count + 2)
+                self.assertEqual(summary["records"]["selected"], count + 2)
+                self.assertTrue(summary["processing"]["complete"])
+                self.assertEqual(summary["diagnostic_count"], 0)
+                usage = summary["usage"]
+                self.assertEqual(usage["skills_observed"], 1024)
+                self.assertEqual(usage["aggregate_complete"], count == 1024)
+                self.assertEqual(usage["by_skill"], {"skill-0000": {"count": 3, "tokens_est": "6"}})
+                self.assertEqual(usage["diagnostic_count"], count - 1024)
+                self.assertEqual(usage["diagnostic_codes"],
+                                 {} if count == 1024 else {"skill_bound": 1})
+                self.assertEqual(self.tree_state(), before)
+
+    def test_single_oversized_tail_is_incomplete_without_materializing_detail(self):
+        path = self.root / "tail-audit/usage-skill.jsonl"
+        path.parent.mkdir()
+        path.write_bytes(b"x" * 100000)
+        result = self.read_usage(env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()),
+                                 expect=4)
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertTrue(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertTrue(summary["records"]["incomplete_tail"])
+        self.assertEqual(summary["diagnostic_codes"]["incomplete_tail"], 1)
+        self.assertEqual(summary["diagnostic_codes"]["oversized_line"], 1)
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(self.usage_preview(result), [])
+
+    def test_usage_stream_counts_beyond_preview_and_preserves_window_diagnostics(self):
+        path = write(self.root / "window-audit/usage-skill.jsonl", "\n".join([
+            *[event("invocation", skill="alpha", tokens_est="2")] * 100,
+            event("invocation", ts="2020-01-01T00:00:00Z", skill="old", tokens_est="999"),
+            event("invocation", ts="", skill="undated", tokens_est="999"),
+        ]) + "\n")
+        result = self.run_cmd(
+            [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+             "--file", path, "--limit", "1", "--since", "2026-01-01"], expect=4)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["records"]["selected"], 100)
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"alpha": {"count": 100, "tokens_est": "200"}})
+        self.assertEqual(summary["diagnostic_codes"]["undated"], 1)
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertEqual(len(self.usage_preview(result)), 1)
+
+    def test_streaming_usage_topn_and_diagnostic_tail_remain_bounded_and_truthful(self):
+        path = self.root / "stream-audit/usage-skill.jsonl"
+        write(path, "\n".join([
+            event("invocation", skill="alpha", tokens_est="1.5"),
+            event("invocation", skill="alpha", tokens_est="2.5"),
+            event("invocation", skill="beta", tokens_est="10"),
+            event("invocation", skill="gamma", tokens_est="NaN"),
+            '{"kind":"invocation","kind":"invocation"}',
+            *["{not-json}"] * 60,
+        ]) + '\n{"kind":"invocation"')
+        before = self.tree_state()
+        result = self.run_cmd(
+            [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+             "--file", path, "--topn", "1", "--limit", "500"], expect=4)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 2, "tokens_est": "4.0"}})
+        self.assertEqual(summary["usage"]["skills_observed"], 3)
+        self.assertTrue(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["records"]["duplicate_key"], 1)
+        self.assertTrue(summary["records"]["incomplete_tail"])
+        self.assertEqual(summary["diagnostic_codes"]["incomplete_tail"], 1)
+        self.assertEqual(len(summary["diagnostics"]), 50)
+        self.assertGreater(summary["diagnostics_omitted"], 0)
+        self.assertLessEqual(len(self.usage_preview(result)), 50)
+        self.assertLess(len(result.stdout.encode()), 20000)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_plugin_only_manual_writer_resolves_exports_and_validates_trusted_root(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        recipe = re.search(r"```bash\n(.*?)```", usage, re.S).group(1)
+        script = write(self.root / "manual-usage.sh", recipe)
+        env = dict(self.env, CLAUDE_PLUGIN_ROOT=ROOT.as_posix(),
+                   LINTEL_AUDIT_DIR=(self.root / "plugin-audit").as_posix())
+        env.pop("LINTEL_SOURCE_ROOT")
+        self.run_cmd([BASH, script], env=env, expect=0)
+        _, rows = self.records(self.root / "plugin-audit/usage-skill.jsonl",
+                               "--category", "usage-skill", expect=0)
+        self.assertEqual(rows[0]["fields"]["skill"], "cycle")
+        before = self.tree_state()
+        refusal = self.run_cmd([BASH, script],
+                              env=dict(env, LINTEL_SOURCE_ROOT=(self.root / "missing").as_posix()),
+                              expect=2)
+        self.assertIn("NEEDS_CONTEXT", refusal.stderr)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_oversized_usage_stream_is_bounded_and_preserves_diagnostics(self):
+        path = self.root / "bounded-audit/usage-skill.jsonl"
+        path.parent.mkdir()
+        with path.open("wb") as stream:
+            stream.write((event("invocation", skill="alpha", tokens_est="12") + "\n").encode())
+            stream.write(b"{not-json}\n")
+            stream.write((event("invocation", tokens_est="100") + "\n").encode())
+            stream.write((event("invocation", skill="", tokens_est="200") + "\n").encode())
+            stream.write(b"x" * 100000 + b"\n")
+            row = (event("invocation", skill="beta", tokens_est="2") + "\n").encode()
+            for _ in range(100001):
+                stream.write(row)
+            stream.write(b'{"kind":"invocation"')
+        before = path.read_bytes()
+        result = self.read_usage("--limit", "2",
+                                 env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()),
+                                 expect=4)
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertLess(len(result.stdout.encode()), 20000)
+        self.assertLessEqual(summary["processing"]["bytes_read"], 8 * 1024 * 1024)
+        self.assertLessEqual(summary["records"]["lines"], 100000)
+        self.assertFalse(summary["processing"]["complete"])
+        self.assertTrue(summary["processing"]["detail_incomplete"])
+        codes = {row["code"] for row in summary["diagnostics"]}
+        self.assertTrue({"malformed_json", "oversized_line", "processing_bound"} <= codes)
+        self.assertNotIn("missing_skill", codes)
+        self.assertEqual(summary["usage"]["diagnostic_codes"]["missing_skill"], 2)
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["by_skill"]["alpha"], {"count": 1, "tokens_est": "12"})
+        self.assertNotIn("", summary["usage"]["by_skill"])
+        self.assertEqual(len(self.usage_preview(result)), 2)
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_streaming_summary_is_a_superset_of_the_legacy_event_summary(self):
+        valid = write(self.root / "compat/valid/usage-skill.jsonl", "\n".join([
+            event("invocation", ts="2026-09-20T10:00:00Z", skill="alpha", tokens_est="2"),
+            event("invocation", ts="2026-09-21T10:00:00Z", skill="beta", tokens_est="3"),
+        ]) + "\n")
+        noisy = write(self.root / "compat/noisy/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="2"),
+            "{not-json}",
+            '{"kind":"invocation","kind":"invocation"}',
+            event("invocation", ts="", skill="undated", tokens_est="1"),
+        ]) + "\n")
+        absent = self.root / "compat/absent/usage-skill.jsonl"
+        directory = self.root / "compat/directory/usage-skill.jsonl"
+        directory.mkdir(parents=True)
+        cases = (("valid", valid, (), 0), ("diagnostic", noisy, ("--since", "2026-01-01"), 4),
+                 ("absent", absent, (), 3), ("unreadable", directory, (), 2),
+                 ("invalid-window", valid, ("--since", "yesterday"), 2))
+        for name, path, extra, code in cases:
+            with self.subTest(name=name):
+                before = self.tree_state()
+                _, legacy = self.summary(path, "--category", "usage-skill", *extra, expect=code)
+                result = self.run_cmd(
+                    [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                     "--file", path, *extra], expect=code)
+                self.assertEqual(self.tree_state(), before)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                for key in legacy:
+                    self.assertIn(key, summary)
+                    self.assertIs(type(summary[key]), type(legacy[key]), key)
+                    if key != "source":
+                        self.assertEqual(summary[key], legacy[key], key)
+                self.assertEqual(summary["source"]["state"], legacy["source"]["state"])
+                self.assertTrue(same_path(summary["source"]["path"], legacy["source"]["path"]))
+                self.assertTrue(same_path(summary["source"]["path"], path))
+                self.assertEqual(("error" in summary), ("error" in legacy))
+        self.assertFalse(absent.parent.exists())
+        _, legacy = self.summary(valid, "--category", "usage-skill", expect=0)
+        self.assertEqual(legacy["by_kind"]["invocation"]["count"], 2)
+
+    def test_valid_record_without_token_estimate_keeps_legacy_status_and_exit(self):
+        path = write(self.root / "compat/no-tokens/usage-skill.jsonl",
+                     event("invocation", ts="2026-09-20T10:00:00Z", skill="alpha") + "\n")
+        before = self.tree_state()
+        _, legacy = self.summary(path, "--category", "usage-skill", expect=0)
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        for key in ("status", "diagnostics", "records", "by_kind"):
+            self.assertEqual(summary[key], legacy[key], key)
+        self.assertEqual((summary["status"], summary["diagnostics"], summary["diagnostic_count"]),
+                         ("observed", [], 0))
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_tokens_est": 1})
+        self.assertEqual(summary["usage"]["diagnostics"][0]["code"], "missing_tokens_est")
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 1, "tokens_est": "0"}})
+
+    def test_usage_inventory_is_counts_only_without_selection(self):
+        path = write(self.root / "inventory/usage-skill.jsonl",
+              event("invocation", skill="alpha", tokens_est="1") + "\n")
+        env = dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix(),
+                   LINTEL_PYTHON=Path(PYTHON).as_posix())
+        before = self.tree_state()
+        for arguments in ((), ("--limit", "1")):
+            with self.subTest(arguments=arguments):
+                result = self.run_cmd([BASH, ROOT / "skills/audit/references/read.sh", *arguments],
+                                      env=env, expect=0)
+                self.assertEqual(self.tree_state(), before)
+                self.assertNotIn("Preview:", result.stdout)
+                self.assertNotIn("alpha", result.stdout)
+                self.assertNotIn('"fields"', result.stdout)
+                self.assertIn('"selected": 1', result.stdout)
+        result = self.read_usage(env=env)
+        self.assertIn("Preview:", result.stdout)
+        self.assertIn("alpha", result.stdout)
+        result = self.run_cmd([BASH, ROOT / "skills/audit/references/read.sh",
+                               "--kind", "invocation"], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        self.assertIn("Preview:", result.stdout)
+        self.assertIn("alpha", result.stdout)
+
+    def test_missing_trusted_reader_is_a_clean_dependency_error(self):
+        source = (ROOT / "skills/audit/references/usage_stream.py").read_text(encoding="utf-8")
+        reader = (ROOT / "bin/li-events.py").read_text(encoding="utf-8")
+        for name, files in (("missing-reader", {}),
+                            ("missing-native-path-helper", {"bin/li-events.py": reader})):
+            with self.subTest(name):
+                copy = self.root / f"copied-{name}"
+                helper = write(copy / "skills/audit/references/usage_stream.py", source)
+                for relative, text in files.items():
+                    write(copy / relative, text)
+                self.assertFalse((copy / "lib/native_paths.py").exists())
+                before = self.tree_state()
+                result = self.run_cmd([PYTHON, "-B", helper, "--file", self.root / "unused.jsonl"])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("trusted event reader", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+
+    def test_output_failure_is_not_a_source_failure_or_retried(self):
+        path = write(self.root / "output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, sys\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "class Output:\n"
+            "    def __init__(self): self.buffer = self; self.calls = 0\n"
+            "    def flush(self): pass\n"
+            "    def write(self, data):\n"
+            "        self.calls += 1\n"
+            "        raise BrokenPipeError('injected stdout failure')\n"
+            "output = Output()\n"
+            "sys.stdout = output\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "code = module.main()\n"
+            "assert output.calls == 1, output.calls\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"])
+        self.assertEqual(self.tree_state(), before)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("output", result.stderr)
+        self.assertNotIn("cannot read", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_unavailable_or_closed_stdout_is_a_clean_output_failure(self):
+        path = write(self.root / "unavailable-output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, io, sys\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "mode = sys.argv[3]\n"
+            "if mode == 'none':\n"
+            "    sys.stdout = None\n"
+            "else:\n"
+            "    sys.stdout = io.TextIOWrapper(io.BytesIO())\n"
+            "    sys.stdout.close()\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "sys.exit(module.main())\n")
+        before = self.tree_state()
+        for mode in ("none", "closed"):
+            with self.subTest(mode=mode):
+                result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                                      ROOT / "skills/audit/references/usage_stream.py", mode])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("output failed", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_output_recovery_and_diagnostic_stream_failures_are_contained(self):
+        path = write(self.root / "recovery-output/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, io, sys\n"
+            "from unittest import mock\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "mode = sys.argv[3]\n"
+            "class Output:\n"
+            "    def __init__(self): self.buffer = self; self.calls = 0\n"
+            "    def flush(self): pass\n"
+            "    def write(self, data):\n"
+            "        self.calls += 1\n"
+            "        raise BrokenPipeError('injected stdout failure')\n"
+            "    def fileno(self): raise AttributeError('injected fileno failure')\n"
+            "output = Output()\n"
+            "sys.stdout = sys.__stdout__ = output\n"
+            "if mode == 'stderr-none': sys.stderr = None\n"
+            "if mode == 'stderr-closed':\n"
+            "    sys.stderr = io.TextIOWrapper(io.BytesIO())\n"
+            "    sys.stderr.close()\n"
+            "try:\n"
+            "    module.emit('must not fall back to stdout', None)\n"
+            "except OSError: pass\n"
+            "else: raise AssertionError('explicit None accepted')\n"
+            "assert output.calls == 0, output.calls\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "if mode == 'open':\n"
+            "    with mock.patch('builtins.open', side_effect=OSError('injected recovery open')):\n"
+            "        code = module.main()\n"
+            "elif mode == 'dup2':\n"
+            "    output.fileno = lambda: 1\n"
+            "    with mock.patch.object(module.os, 'dup2', side_effect=ValueError('injected dup2')):\n"
+            "        code = module.main()\n"
+            "else: code = module.main()\n"
+            "assert output.calls == 1, output.calls\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        for mode in ("open", "fileno", "dup2", "stderr-none", "stderr-closed"):
+            with self.subTest(mode=mode):
+                result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                                      ROOT / "skills/audit/references/usage_stream.py", mode])
+                self.assertEqual(self.tree_state(), before)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                if mode.startswith("stderr-"):
+                    self.assertEqual(result.stderr, "")
+                else:
+                    self.assertIn("output failed", result.stderr)
+                    self.assertIn("output recovery failed", result.stderr)
+                self.assertNotIn("cannot read", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_high_precision_token_estimates_aggregate_exactly(self):
+        fraction = "0." + "1234567890" * 6
+        path = write(self.root / "exact/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="0.12345678901234567890123456789"),
+            event("invocation", skill="alpha", tokens_est="1e18"),
+            event("invocation", skill="beta", tokens_est=fraction),
+            event("invocation", skill="beta", tokens_est="1E-64"),
+            event("invocation", skill="gamma", tokens_est="0"),
+            event("invocation", skill="gamma", tokens_est="1e18"),
+        ]) + "\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path, "--topn", "3"], expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertTrue(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["diagnostic_count"], 0)
+        by_skill = summary["usage"]["by_skill"]
+        self.assertEqual(by_skill["alpha"]["tokens_est"],
+                         "1000000000000000000.12345678901234567890123456789")
+        self.assertEqual(by_skill["beta"]["tokens_est"], fraction + "0001")
+        self.assertEqual(Decimal(by_skill["gamma"]["tokens_est"]), Decimal("1e18"))
+
+    def test_negative_token_estimates_cannot_cancel_usage_magnitudes(self):
+        path = write(self.root / "negative/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="2"),
+            event("invocation", skill="alpha", tokens_est="-1"),
+            event("invocation", skill="alpha", tokens_est="-1e18"),
+        ]) + "\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["diagnostics"]), ("observed", []))
+        self.assertEqual(summary["usage"]["by_skill"]["alpha"], {"count": 3, "tokens_est": "2"})
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"invalid_tokens_est": 2})
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+
+    def test_null_byte_source_is_unreadable_before_native_path_probe(self):
+        helper = runpy.run_path(str(ROOT / "skills/audit/references/usage_stream.py"))
+        before = self.tree_state()
+        for name in ("invalid\0path", "invalid\ud800x\udfff\0"):
+            with self.subTest(path=ascii(name)):
+                native_io = mock.Mock(side_effect=lambda value: value)
+                state, target, problem = helper["source_state"](native_io, Path(name))
+                self.assertEqual(state, "unreadable")
+                self.assertIsNone(target)
+                self.assertIn("null byte", problem)
+                native_io.assert_not_called()
+        self.assertEqual(self.tree_state(), before)
+
+    def test_lone_surrogates_are_parseable_under_strict_ascii_stdout(self):
+        for skill in ("\ud800", "\udfff"):
+            with self.subTest(skill=ascii(skill)):
+                path = write(self.root / "surrogate/usage-skill.jsonl",
+                             event("invocation", skill=skill, tokens_est="1") + "\n")
+                before = self.tree_state()
+                result = self.run_cmd(
+                    [PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py", "--file", path],
+                    env=dict(self.env, PYTHONIOENCODING="ascii:strict"), expect=0)
+                self.assertEqual(self.tree_state(), before)
+                self.assertNotIn("Traceback", result.stderr)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                self.assertEqual(summary["usage"]["by_skill"][skill], {"count": 1, "tokens_est": "1"})
+                self.assertTrue(summary["usage"]["aggregate_complete"])
+                self.assertEqual(self.usage_preview(result)[0]["fields"]["skill"], skill)
+        harness = (
+            "import runpy, sys\n"
+            "helper = sys.argv[1]\n"
+            "sys.argv = ['usage_stream.py', '--file', 'invalid\\ud800x\\udfff\\0']\n"
+            "runpy.run_path(helper, run_name='__main__')\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness,
+                               ROOT / "skills/audit/references/usage_stream.py"],
+                              env=dict(self.env, PYTHONIOENCODING="ascii:strict"), expect=2)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertIn("audit usage: cannot read", result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual(summary["source"]["state"], "unreadable")
+        self.assertIn("\ud800x\udfff", summary["source"]["path"])
+
+    def test_short_line_straddling_global_budget_is_not_oversized(self):
+        maximum = 8 * 1024 * 1024
+        row = event("invocation", skill="alpha", tokens_est="1").encode("ascii") + b"\n"
+        count, leftover = divmod(maximum - 10, len(row))
+        path = self.root / "boundary/usage-skill.jsonl"
+        path.parent.mkdir()
+        # Whitespace padding is valid JSON and keeps every physical line under 64 KiB.
+        path.write_bytes(row * (count - 1) + row[:-1] + b" " * leftover + b"\n" + row)
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=4)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["processing"]["bytes_read"], maximum)
+        self.assertEqual(summary["diagnostic_codes"], {"processing_bound": 1})
+        self.assertEqual(summary["records"]["selected"], count)
+        self.assertEqual(summary["records"]["lines"], count + 1)
+        self.assertFalse(summary["processing"]["complete"])
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+
+    def test_descriptor_identity_rejects_mismatched_open_and_detects_path_replacement(self):
+        path = write(self.root / "identity/usage-skill.jsonl",
+                     event("invocation", skill="original", tokens_est="1") + "\n")
+        other = write(self.root / "identity/other.jsonl",
+                      event("invocation", skill="redirect", tokens_est="9") + "\n")
+        harness = (
+            "import importlib.util, os, pathlib, sys, types\n"
+            "target, other = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])\n"
+            "mode, helper = sys.argv[3:5]\n"
+            "real_open, real_fdopen, real_stat = os.open, os.fdopen, pathlib.Path.stat\n"
+            "real_fstat = os.fstat\n"
+            "changed = False\n"
+            "selected = set()\n"
+            "class Stream:\n"
+            "    def __init__(self, stream): self.stream = stream\n"
+            "    def __enter__(self): return self\n"
+            "    def __exit__(self, *args): self.stream.close()\n"
+            "    def fileno(self): return self.stream.fileno()\n"
+            "    def tell(self): return self.stream.tell()\n"
+            "    def readline(self, *args):\n"
+            "        global changed\n"
+            "        raw = self.stream.readline(*args)\n"
+            "        changed = True\n"
+            "        return raw\n"
+            "def opening(name, *a, **k):\n"
+            "    if pathlib.Path(os.fspath(name)).name == target.name:\n"
+            "        fd = real_open(other if mode == 'open' else name, *a, **k)\n"
+            "        selected.add(fd)\n"
+            "        return fd\n"
+            "    return real_open(name, *a, **k)\n"
+            "def fdopening(fd, *a, **k):\n"
+            "    stream = real_fdopen(fd, *a, **k)\n"
+            "    return Stream(stream) if fd in selected else stream\n"
+            "def stating(self, *a, **k):\n"
+            "    value = real_stat(self, *a, **k)\n"
+            "    if self.name == target.name and changed and mode == 'replace':\n"
+            "        attrs = {key: getattr(value, key) for key in dir(value) if key.startswith('st_')}\n"
+            "        replacement = real_stat(other)\n"
+            "        attrs.update(st_dev=replacement.st_dev, st_ino=replacement.st_ino)\n"
+            "        return types.SimpleNamespace(**attrs)\n"
+            "    return value\n"
+            "def fstat(fd):\n"
+            "    value = real_fstat(fd)\n"
+            "    if changed and mode == 'inplace':\n"
+            "        attrs = {key: getattr(value, key) for key in dir(value) if key.startswith('st_')}\n"
+            "        attrs['st_mtime_ns'] += 1\n"
+            "        return types.SimpleNamespace(**attrs)\n"
+            "    return value\n"
+            "os.fstat, os.open, os.fdopen = fstat, opening, fdopening\n"
+            "pathlib.Path.stat = stating\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', helper)\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "sys.argv = ['usage_stream.py', '--file', str(target)]\n"
+            "sys.exit(module.main())\n")
+        before = self.tree_state()
+        for mode, expected in (("open", 2), ("replace", 4), ("inplace", 4)):
+            with self.subTest(mode=mode):
+                result = self.run_cmd(
+                    [PYTHON, "-B", "-c", harness, path, other, mode,
+                     ROOT / "skills/audit/references/usage_stream.py"], expect=expected)
+                self.assertEqual(self.tree_state(), before)
+                self.assertNotIn("Traceback", result.stderr)
+                summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+                if mode == "open":
+                    self.assertEqual(summary["source"]["state"], "unreadable")
+                    self.assertEqual(summary["records"]["selected"], 0)
+                    self.assertIn("cannot read", summary["error"])
+                else:
+                    self.assertEqual(summary["diagnostic_codes"], {"source_changed": 1})
+                    self.assertFalse(summary["processing"]["complete"])
+                    self.assertFalse(summary["usage"]["aggregate_complete"])
+                    self.assertEqual(summary["usage"]["by_skill"],
+                                     {"original": {"count": 1, "tokens_est": "1"}})
+
+    def test_token_estimate_scale_exponent_and_magnitude_bounds_are_explicit(self):
+        rejected = ["1E-65", "0." + "1" * 58 + "E-7", "1e19", "1.000000000000000001e18",
+                    "-1.1e18", "0E+19", "1e+999999999999", "Infinity", "sNaN"]
+        path = write(self.root / "bounds/usage-skill.jsonl", "\n".join(
+            [event("invocation", skill="alpha", tokens_est="5")] +
+            [event("invocation", skill="alpha", tokens_est=value) for value in rejected]) + "\n")
+        _, legacy = self.summary(path, "--category", "usage-skill", expect=0)
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], expect=0)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["diagnostics"]),
+                         (legacy["status"], legacy["diagnostics"]))
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"invalid_tokens_est": len(rejected)})
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"alpha": {"count": 1 + len(rejected), "tokens_est": "5"}})
+
+    def test_documented_topn_route_honors_lintel_python_without_python3(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        routes = [block for block in re.findall(r"```bash\n(.*?)```", usage, re.S)
+                  if "usage_stream.py" in block and "--topn" in block]
+        self.assertEqual(len(routes), 1)
+        self.assertNotRegex(routes[0], r"(^|\s)python3\s")
+        path = write(self.root / "route-audit/usage-skill.jsonl", "\n".join(
+            [event("invocation", skill="alpha", tokens_est="2")] * 3 +
+            [event("invocation", skill="beta", tokens_est="1")]) + "\n")
+        empty_bin = self.root / "no-python-bin"
+        empty_bin.mkdir()
+        script = write(self.root / "topn-route.sh", routes[0])
+        env = dict(self.env, PATH=empty_bin.as_posix(), LINTEL_PYTHON=Path(PYTHON).as_posix(),
+                   LINTEL_SOURCE_ROOT=ROOT.as_posix(), selected_usage_file=path.as_posix(),
+                   topn="1")
+        self.run_cmd([BASH, "-c", "command -v python3"], env=env, expect=1)
+        before = self.tree_state()
+        result = self.run_cmd([BASH, script], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual(summary["usage"]["by_skill"], {"alpha": {"count": 3, "tokens_est": "6"}})
+
+    def test_usage_stream_emits_utf8_bytes_under_an_ascii_locale(self):
+        env = dict(self.env, PYTHONIOENCODING="ascii:strict")
+        path = write(self.root / "ascii-locale/usage-skill.jsonl",
+                     event("invocation", skill="\u6280\u80fd", tokens_est="1") + "\n")
+        self.assertTrue(path.read_bytes().isascii())
+        self.assertIn(b"\\u6280\\u80fd", path.read_bytes())
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", path], env=env, expect=0)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["diagnostics"]), ("observed", []))
+        self.assertTrue(summary["usage"]["aggregate_complete"])
+        self.assertEqual(summary["usage"]["by_skill"],
+                         {"\u6280\u80fd": {"count": 1, "tokens_est": "1"}})
+        preview = self.usage_preview(result)
+        self.assertEqual(preview[0]["fields"]["skill"], "\u6280\u80fd")
+
+        absent = self.root / "\u7f3a\u5931/usage-skill.jsonl"
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", absent], env=env, expect=3)
+        self.assertNotIn("Traceback", result.stderr)
+        summary = json.loads(result.stdout.split("\nPreview:", 1)[0])
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("unobserved", "absent"))
+        self.assertEqual(summary["source"]["path"], Path(os.path.abspath(absent)).as_posix())
+
+        folder = self.root / "\u76ee\u5f55"
+        folder.mkdir()
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", ROOT / "skills/audit/references/usage_stream.py",
+                               "--file", folder], env=env, expect=2)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertIn("audit usage: cannot read", result.stderr)
+        self.assertIn("\u76ee\u5f55", result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("error", "unreadable"))
+        self.assertEqual(summary["source"]["path"], Path(os.path.abspath(folder)).as_posix())
+        self.assertIn("\u76ee\u5f55", summary["error"])
+        _, legacy = self.summary(folder, expect=2)
+        self.assertEqual(summary, legacy)
+
+    def test_injected_open_failure_is_unreadable_like_the_legacy_reader(self):
+        path = write(self.root / "compat/open-fails/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, os, pathlib, sys\n"
+            "target = pathlib.Path(sys.argv[1]).name\n"
+            "real = os.open\n"
+            "def failing(name, *a, **k):\n"
+            "    if pathlib.Path(os.fspath(name)).name == target:\n"
+            "        raise PermissionError(13, \"injected open failure\")\n"
+            "    return real(name, *a, **k)\n"
+            "os.open = failing\n"
+            "spec = importlib.util.spec_from_file_location(\"usage_stream\", sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "sys.argv = [\"usage_stream.py\", \"--file\", sys.argv[1]]\n"
+            "sys.exit(module.main())\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"], expect=2)
+        self.assertEqual(self.tree_state(), before)
+        summary = json.loads(result.stdout)
+        self.assertEqual(summary["status"], "error")
+        self.assertEqual(summary["source"]["state"], "unreadable")
+        self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
+        self.assertIn("injected open failure", summary["error"])
+        self.assertEqual(summary["records"]["lines"], 0)
+
+    def test_swapped_in_non_regular_source_is_rejected_before_any_blocking_read(self):
+        path = write(self.root / "fifo-swap/usage-skill.jsonl",
+                     event("invocation", skill="alpha", tokens_est="1") + "\n")
+        harness = (
+            "import importlib.util, json, os, pathlib, stat, sys, types\n"
+            "target = pathlib.Path(sys.argv[1]).name\n"
+            "real_open, real_fstat, real_fdopen = os.open, os.fstat, os.fdopen\n"
+            "opened, wrapped = [], []\n"
+            "def opening(name, flags, *a, **k):\n"
+            "    fd = real_open(name, flags, *a, **k)\n"
+            "    if pathlib.Path(os.fspath(name)).name == target:\n"
+            "        opened.append((fd, flags))\n"
+            "    return fd\n"
+            "def fstat(fd):\n"
+            "    value = real_fstat(fd)\n"
+            "    if any(fd == item for item, _ in opened):\n"
+            "        attrs = {key: getattr(value, key) for key in dir(value) if key.startswith('st_')}\n"
+            "        attrs['st_mode'] = stat.S_IFIFO | 0o600\n"
+            "        return types.SimpleNamespace(**attrs)\n"
+            "    return value\n"
+            "def fdopening(fd, *a, **k):\n"
+            "    wrapped.append(fd)\n"
+            "    return real_fdopen(fd, *a, **k)\n"
+            "os.open, os.fstat, os.fdopen = opening, fstat, fdopening\n"
+            "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[2])\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+            "code = module.main()\n"
+            "closed = []\n"
+            "for fd, _ in opened:\n"
+            "    try:\n"
+            "        real_fstat(fd)\n"
+            "        closed.append(False)\n"
+            "    except OSError:\n"
+            "        closed.append(True)\n"
+            "nonblock = getattr(os, 'O_NONBLOCK', 0)\n"
+            "probe = {'opened': len(opened), 'closed': closed,\n"
+            "         'nonblocking': [flags & nonblock == nonblock for _, flags in opened],\n"
+            "         'wrapped': [fd for fd in wrapped if any(fd == item for item, _ in opened)]}\n"
+            "sys.stderr.write('PROBE ' + json.dumps(probe) + '\\n')\n"
+            "sys.exit(code)\n")
+        before = self.tree_state()
+        result = self.run_cmd([PYTHON, "-B", "-c", harness, path,
+                               ROOT / "skills/audit/references/usage_stream.py"], expect=2)
+        self.assertEqual(self.tree_state(), before)
+        self.assertNotIn("Traceback", result.stderr)
+        probe = json.loads(result.stderr.split("PROBE ", 1)[1].splitlines()[0])
+        self.assertEqual(probe, {"opened": 1, "closed": [True], "nonblocking": [True],
+                                 "wrapped": []})
+        summary = json.loads(result.stdout)
+        self.assertEqual((summary["status"], summary["source"]["state"]), ("error", "unreadable"))
+        self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
+        self.assertEqual(summary["records"]["lines"], 0)
+
+    @unittest.skipUnless(hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"),
+                         "platform: posix-only; real FIFO requires mkfifo and O_NONBLOCK")
+    def test_real_fifo_swapped_after_path_validation_does_not_block(self):
+        with tempfile.TemporaryDirectory() as folder:
+            decoy = write(Path(folder) / "decoy.jsonl",
+                          event("invocation", skill="alpha", tokens_est="1") + "\n")
+            fifo = Path(folder) / "usage-skill.jsonl"
+            os.mkfifo(fifo)
+            harness = (
+                "import importlib.util, pathlib, sys\n"
+                "target, decoy = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])\n"
+                "real_stat = pathlib.Path.stat\n"
+                "def stating(self, *a, **k):\n"
+                "    if self.name == target.name:\n"
+                "        return real_stat(decoy, *a, **k)\n"
+                "    return real_stat(self, *a, **k)\n"
+                "pathlib.Path.stat = stating\n"
+                "spec = importlib.util.spec_from_file_location('usage_stream', sys.argv[3])\n"
+                "module = importlib.util.module_from_spec(spec)\n"
+                "spec.loader.exec_module(module)\n"
+                "sys.argv = ['usage_stream.py', '--file', sys.argv[1]]\n"
+                "sys.exit(module.main())\n")
+            before = self.tree_state()
+            try:
+                result = subprocess.run(
+                    [PYTHON, "-B", "-c", harness, str(fifo), str(decoy),
+                     str(ROOT / "skills/audit/references/usage_stream.py")],
+                    cwd=str(self.root), env=self.env, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace", timeout=30)
+            except subprocess.TimeoutExpired:
+                self.fail("usage_stream blocked opening a swapped-in FIFO")
+            self.assertEqual(self.tree_state(), before)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["source"]["state"], "unreadable")
+            self.assertTrue(summary["error"].startswith("cannot read "), summary["error"])
+
+    def tree_state(self):
+        return {path.relative_to(self.root).as_posix():
+                path.read_bytes() if path.is_file() else None
+                for path in self.root.rglob("*")}
+
+    def read_usage(self, *arguments, env=None, cwd=None, expect=0):
+        selected_env = dict(env or self.env, LINTEL_PYTHON=Path(PYTHON).as_posix())
+        before = self.tree_state()
+        result = self.run_cmd(
+            [BASH, ROOT / "skills/audit/references/read.sh",
+             "--category", "usage-skill", *arguments],
+            env=selected_env, cwd=cwd, expect=expect,
+        )
+        self.assertEqual(self.tree_state(), before)
+        return result
+
+    def usage_preview(self, result):
+        return [json.loads(line) for line in result.stdout.split("Preview:", 1)[1].splitlines()[1:]
+                if line.strip()]
+
     def assert_no_catalog_trend_consumer(self, text):
         self.assertNotIn("/li:catalog --trends", text)
         self.assertNotRegex(text, r"/li:catalog`?\s*\([^)\n]*\btrends?\b[^)]*\)")
@@ -215,20 +1003,51 @@ class UsageReportContracts(Sandbox):
         self.assertEqual(result.returncode, 3)
         self.assertFalse(missing.parent.exists())
 
+    def test_manual_usage_writer_keeps_existing_audit_envelope(self):
+        audit_root = self.root / "audit"
+        env = dict(self.env, LINTEL_AUDIT_DIR=str(audit_root),
+                   LINTEL_OPERATOR="fixture-operator", LINTEL_CYCLE_ID="fixture-cycle")
+        self.bash(
+            'source "$LINTEL_SOURCE_ROOT/bin/_audit.sh" || exit $?\n'
+            'audit_log usage-skill invocation skill=alpha mode=fixture '
+            'tokens_est=12 cli=fixture\n',
+            env=env, expect=0,
+        )
+        path = audit_root / "usage-skill.jsonl"
+        self.assertTrue(path.is_file())
+        _, rows = self.records(path, "--category", "usage-skill", expect=0, env=env)
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["kind"], "invocation")
+        self.assertEqual(row["fields"], {
+            "skill": "alpha", "mode": "fixture", "tokens_est": "12", "cli": "fixture",
+        })
+        written = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual((written["operator"], written["cycle_id"]),
+                         ("fixture-operator", "fixture-cycle"))
+
     def test_current_observation_routes_keep_manual_modes_without_invented_overlay(self):
-        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
-        maintenance = (ROOT / "skills/maintenance/SKILL.md").read_text(encoding="utf-8")
-        for text in (usage, maintenance):
+        audit = (ROOT / "skills/audit/SKILL.md").read_text(encoding="utf-8")
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        for text in (audit, usage):
             self.assert_no_catalog_trend_consumer(text)
             self.assertIn("unobserved", text)
         for flag in ("--topn", "--days", "--tokens-by-skill"):
             self.assertIn(flag, usage)
-        self.assertIn("manual report", usage)
-        self.assertNotIn("`skills/cycle/SKILL.md` mode_envelopes", maintenance)
-        self.assertIn("/li:context-budget --advice", maintenance)
+        self.assertIn("manual", usage)
+        self.assertIn("audit_log usage-skill invocation", usage)
+        self.assertIn("--usage --report --days <N> --topn <N>", usage)
+        for route in ("--force-compact", "--monitor-paths", "--simulate-tokens", "--rust-report"):
+            self.assertIn(route, usage)
+        for owner in ("context-budget", "doctor", "audit"):
+            self.assertIn(owner, usage)
+        self.assertIn("do not authorize archiving", usage)
+        self.assertIn("never writes unless", audit)
+        for name in ("usage-log", "maintenance", "perf-mode", "handoff-size-check"):
+            self.assertFalse((ROOT / "skills" / name / "SKILL.md").exists(), name)
 
     def test_catalog_trend_guard_rejects_the_actual_prose_residual_and_flag_form(self):
-        current = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
+        current = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
         self.assert_no_catalog_trend_consumer(current)
         for residual in ("The foundation that `/li:catalog` (1.6 trends) builds on.",
                          "Use `/li:catalog --trends` for an overlay."):
@@ -238,18 +1057,147 @@ class UsageReportContracts(Sandbox):
             "Explicitly join `/li:catalog --kind=all` metadata; no built-in trend overlay.")
 
     def test_usage_reader_uses_the_shared_owner_and_complete_selected_rows(self):
-        usage = (ROOT / "skills/usage-log/SKILL.md").read_text(encoding="utf-8")
-        reader = usage.split("### Step 2", 1)[1].split("## Integration", 1)[0]
-        self.assertIn("../audit/references/method.md#shared-read", reader)
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        reader = usage.split("## Read reports", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("method.md#shared-read", reader)
         self.assertIn("skills/audit/references/read.sh", reader)
         self.assertIn("--category usage-skill", reader)
         self.assertIn("--since", reader)
-        self.assertIn("complete selected rows", reader)
+        self.assertIn("--limit", reader)
+        self.assertIn("aggregating all rows", reader)
         self.assertNotIn('for log in "$usage_dir"', reader)
         self.assertNotIn("audit-canonical", usage)
         method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
         self.assertIn("job records only as supplementary observations", method)
         self.assertNotIn("reads `_active.md`", method)
+
+    def test_current_audit_method_names_the_retained_usage_owner(self):
+        method = (ROOT / "skills/audit/references/method.md").read_text(encoding="utf-8")
+        opening = method.split("## What this skill does", 1)[0]
+        self.assertIn("audit's usage view", opening)
+        self.assertIn("[usage observation method](usage.md)", opening)
+        self.assertNotIn("maintenance's usage view", opening)
+
+    def test_missing_and_empty_skill_rows_are_incomplete_not_aggregate_keys(self):
+        usage = (ROOT / "skills/audit/references/usage.md").read_text(encoding="utf-8")
+        self.assertIn("missing or empty `fields.skill`", usage)
+        self.assertIn("exclude", usage)
+        self.assertIn("incomplete input", usage)
+        path = write(self.root / "selected-audit/usage-skill.jsonl", "\n".join([
+            event("invocation", skill="alpha", tokens_est="12"),
+            event("invocation", tokens_est="100"),
+            event("invocation", skill="", tokens_est="200"),
+        ]) + "\n")
+        result = self.read_usage(
+            "--limit", "3", env=dict(self.env, LINTEL_AUDIT_DIR=path.parent.as_posix()), expect=0)
+        summary = json.loads(result.stdout.split("\n", 1)[1].split("\nPreview:", 1)[0])
+        self.assertEqual(summary["records"]["lines"], 3)
+        self.assertEqual((summary["status"], summary["diagnostics"]), ("observed", []))
+        self.assertEqual(summary["usage"]["diagnostic_codes"], {"missing_skill": 2})
+        self.assertFalse(summary["usage"]["aggregate_complete"])
+        rows = self.usage_preview(result)
+        counts, estimates, incomplete = {}, {}, []
+        for row in rows:
+            fields = row["fields"]
+            skill = fields.get("skill")
+            if not skill:
+                incomplete.append(row["line"])
+                continue
+            counts[skill] = counts.get(skill, 0) + 1
+            estimates[skill] = estimates.get(skill, 0) + int(fields["tokens_est"])
+        self.assertEqual(counts, {"alpha": 1})
+        self.assertEqual(estimates, {"alpha": 12})
+        self.assertEqual(incomplete, [2, 3])
+        self.assertNotIn("skill", rows[1]["fields"])
+        self.assertEqual(rows[2]["fields"]["skill"], "")
+
+    def test_real_usage_route_selects_current_and_legacy_operator_logs_without_writes(self):
+        # Usage remains operator-global on both layouts; a repo log is never a fallback.
+        for v5 in (True, False):
+            with self.subTest(v5=v5):
+                repo = self.make_repo("current" if v5 else "legacy", v5=v5)
+                home = self.root / ("current-home" if v5 else "legacy-home")
+                selected = write(home / "audit/usage-skill.jsonl",
+                                 event("invocation", skill="selected", tokens_est="10") + "\n")
+                write(repo / ".claude/runtime/audit/usage-skill.jsonl",
+                      event("invocation", skill="repo-decoy") + "\n")
+                write(home / "audit/usage-skill-old.jsonl",
+                      event("invocation", skill="dated-decoy") + "\n")
+                result = self.read_usage(
+                    env=dict(self.env, LINTEL_HOME=home.as_posix(),
+                             LINTEL_REPO_ROOT=repo.as_posix()), cwd=repo)
+                self.assertIn(selected.as_posix(), result.stdout.replace("\\", "/"))
+                self.assertEqual([row["fields"]["skill"] for row in self.usage_preview(result)],
+                                 ["selected"])
+                self.assertNotIn("repo-decoy", result.stdout)
+                self.assertNotIn("dated-decoy", result.stdout)
+
+    def test_real_usage_route_preserves_absent_malformed_and_argument_refusals(self):
+        audit_root = self.root / "selected-audit"
+        env = dict(self.env, LINTEL_AUDIT_DIR=audit_root.as_posix())
+        absent = self.read_usage(env=env, expect=3)
+        self.assertIn("unobserved", absent.stdout)
+        self.assertFalse(audit_root.exists())
+        write(audit_root / "usage-skill.jsonl",
+              event("invocation", skill="alpha") + "\n{not-json}\n")
+        malformed = self.read_usage("--limit", "1", env=env, expect=4)
+        self.assertIn("malformed_json", malformed.stdout)
+        self.assertIn("observed_with_diagnostics", malformed.stdout)
+        self.assertEqual(len(self.usage_preview(malformed)), 1)
+        for arguments in (("--since", "invalid"), ("--limit", "0"), ("--report",)):
+            with self.subTest(arguments=arguments):
+                refusal = self.read_usage(*arguments, env=env, expect=2)
+                self.assertTrue(product_stderr(refusal.stderr).strip())
+
+    def test_retired_path_intent_runs_doctor_owner_and_preserves_attention_and_refusals(self):
+        reference = (ROOT / "skills/doctor/references/inspection.md").read_text(encoding="utf-8")
+        section = reference.split("## Run the owned diagnostic", 1)[1].split("\n## ", 1)[0]
+        recipe = re.search(r"```bash\n(.*?)```", section, re.S).group(1)
+        script = write(self.root / "doctor-route.sh", recipe)
+        repo = self.make_repo("doctor-target")
+        env = dict(self.env, LINTEL_REPO_ROOT=repo.as_posix(),
+                   LINTEL_PYTHON=Path(PYTHON).as_posix(),
+                   LINTEL_PACKS_DIR=(ROOT / "packs").as_posix())
+        before = self.tree_state()
+        result = self.run_cmd([BASH, script, "--layers-only", "--json"],
+                              env=env, cwd=repo, expect=1)
+        report = json.loads(result.stdout)
+        self.assertEqual(Path(report["source"]), ROOT)
+        self.assertEqual(Path(report["target"]), repo)
+        self.assertEqual(report["status"], "attention")
+        self.assertTrue(report["foundation_missing"])
+        self.assertTrue(report["issues"])
+        self.assertEqual(report["host_activation"], "unverified")
+        self.assertEqual(report["hook_execution"], "unverified")
+        direct = self.run_cmd(
+            [BASH, ROOT / "bin/li-doctor", "--source", ROOT, "--target", repo, "--json"],
+            env=env, cwd=repo, expect=1)
+        self.assertEqual(json.loads(direct.stdout), report)
+        for options in (("--layers-only", "--hooks-only"), ("--monitor-paths",)):
+            refusal = self.run_cmd([BASH, script, *options], env=env, cwd=repo, expect=2)
+            self.assertEqual(refusal.stdout, "")
+            self.assertTrue(product_stderr(refusal.stderr).strip())
+        unavailable = self.run_cmd(
+            [BASH, script, "--layers-only"],
+            env=dict(env, LINTEL_SOURCE_ROOT=(self.root / "absent-source").as_posix()),
+            cwd=repo, expect=127)
+        self.assertEqual(unavailable.stdout, "")
+        self.assertTrue(product_stderr(unavailable.stderr).strip())
+        self.assertEqual(self.tree_state(), before)
+        for name in report["foundation_missing"]:
+            write(repo / name, "# Synthetic foundation\n")
+        before = self.tree_state()
+        verified = self.run_cmd([BASH, script, "--layers-only", "--json"],
+                                env=env, cwd=repo, expect=0)
+        local = json.loads(verified.stdout)
+        self.assertEqual(local["status"], "local_checks_verified")
+        self.assertEqual(local["issues"], [])
+        self.assertEqual(local["host_activation"], "unverified")
+        self.assertEqual(local["hook_execution"], "unverified")
+        self.assertEqual(self.tree_state(), before)
+
+    def test_usage_reference_has_lf_only_bytes(self):
+        self.assertNotIn(b"\r", (ROOT / "skills/audit/references/usage.md").read_bytes())
 
 
 class IsolationTests(Sandbox):

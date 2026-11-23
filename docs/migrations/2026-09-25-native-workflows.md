@@ -21,6 +21,9 @@ wrapper when discovered, or read the canonical skill from the trusted source bun
 The notation is the Claude Code plugin form; on Copilot, Codex, Cursor or
 another client, use that host's discovered wrapper or the Universal adapter's explicit file read.
 An installed file is not evidence of native discovery or a completed client test.
+The command-surface guard treats a former-entry cell as migration data only in
+ordinary Markdown prose. A table-shaped string in executable source, a fenced
+example or an HTML block does not hide a current invocation.
 
 ## Capability replacements
 
@@ -49,6 +52,15 @@ An installed file is not evidence of native discovery or a completed client test
 | `plan-and-build`, `review-and-ship` | `/li:cycle --from PLAN --to BUILD` or `--from REVIEW --to CAPTURE`. Preserve continuity and phase gates. `/li:research` stays as a native shortcut for `/li:cycle --mode research-dive` (SENSE, DEFINE, DISCOVER; no BUILD or SHIP). |
 | `help`, `v4-migrate` | `/li:catalog` or `/li:welcome` for navigation; `/li:migrations` for historical inspection and explicitly authorized apply/rebind guidance. |
 | `personas-rotate` | `/li:role --audience [name]` and `--clear-audience`, using configured persona sources. This is a conversation overlay, not a change to the persistent working role. |
+| `perf-mode` | `/li:context-budget --advice` retains numeric `--budget`, `--ceiling`, `--decay-policy`, `--cost-estimate` and `--off` advice options. Capacity and usage still require observed values and sources; advice cannot raise a host limit or change the conversation. |
+| `handoff-size-check` | `/li:context-budget --handoff` retains explicit `--map`, `--warm-path`, `--capacity`/`--capacity-source`, `--used`/`--usage-source`, `--usage-kind` and `--reserve` observations, plus the existing `LINTEL_WORK_MAP` and legacy positional/`--plan` selection forms. Estimates stay tied to selected artifacts; they do not claim workflow cost or load unselected material. |
+| `orientator` | `/li:catalog` and [intent narrowing](../../skills/catalog/references/intent.md) replace the free-text prompt entry and its optional `--mode`/`--from` selection shape. Discovery returns a metadata-first recommendation with alternatives and limitations; it does not run the selection. SENSE retains direct routing, verified-profile checks, high-risk confirmation and decision audit. |
+| `skill-router` | `/li:catalog` and [intent narrowing](../../skills/catalog/references/intent.md) own free-text method discovery. A named method goes directly to its owner; native discovery and permissions are checked on the actual host. No second routing algorithm, model call or dispatch is added. |
+| `role-new` | `/li:role --create` and `/li:role --update [id]` retain creation and targeted-update shapes through the shared lifecycle. Preserve sensitivity checks, reviewed digests, conflict-safe publication and the rule against implicit activation or synchronization. |
+| `roles-list` | `/li:role --list [--include-private]` retains metadata-only listing; private metadata requires explicit consent, and reading a role body remains a separate action. Listing does not change the active role or profile. |
+| `brief-forge` | The caller uses the internal [`handoff.md`](../../skills/brief-forge/references/handoff.md) method and `forge_handoff <kind> <from> <to> <content_type> <content_file>`, not a public command. Preserve all five kinds, schema/evaluator/accounting/audit gates, exit 3 for bypass, and caller-owned dispatch. |
+| `usage-log` | `/li:audit --usage` retains `--report`, `--days <N>`, `--topn <N>` and `--tokens-by-skill`. Manual recording remains an explicit request through the existing usage observation method; there is no automatic invocation telemetry. Missing rows remain unobserved, not disuse. |
+| `maintenance` | Map `--force-compact` to `/li:context-budget --advice`, `--monitor-paths` to `/li:doctor --layers-only`, `--simulate-tokens <workflow>` to an observed `--bytes <N>` selection or `/li:context-budget --handoff --map <work.json>`, and `--rust-report` to `/li:audit --usage`. These routes preserve advisory, inspection and read-only boundaries; none compacts, starts a watcher/predictor or authorizes cleanup. |
 
 The PDF writer and all direct print options now belong to `/li:generate-pdf`:
 input/output, A4/letter/custom paper, portrait/landscape, header/footer, print CSS and

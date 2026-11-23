@@ -51,9 +51,9 @@ for f in "${WR_SKILLS[@]}"; do
   fi
 done
 
-# Brief Forge itself + envelope tools must exist
-if [ ! -f "$REPO_ROOT/skills/brief-forge/SKILL.md" ]; then
-  fail "skills/brief-forge MISSING"
+# Brief Forge's internal method + envelope tools must exist
+if [ ! -f "$REPO_ROOT/skills/brief-forge/references/handoff.md" ]; then
+  fail "skills/brief-forge/references/handoff.md MISSING"
 fi
 
 if [ ! -f "$REPO_ROOT/lib/envelope-schema.yaml" ]; then

@@ -294,6 +294,32 @@ over, approve or re-bind existing patterns. Provenance labels written into a dra
 original location of a legacy visual pattern) are https URLs or portable relative vault labels,
 never absolute, drive, UNC or home paths; the adapter refuses those.
 
+### Learned-improvement promotion
+
+For learned improvement claims, apply the shared six-part
+[promotion evidence](../../lessons-add/references/benefit.md#promotion-evidence)
+before proposing promotion or reasoning about approval. Use the existing pattern
+record and reviewed references, with no new fields or runtime:
+
+- `owner` and `applies_to` carry the accountable owner and evidenced applicability;
+  unknown ownership or scope stays explicit rather than being invented.
+- `sources` carry dated, source-safe provenance and actual confidence/reuse limits.
+  Use disclosure-safe references, not private paths or copied source bodies.
+- `guidance` carries the counterexample, actual evaluation or explicit unknowns,
+  limitations and supersession path. Link supporting evidence from the reviewed
+  approval reference; retain existing IDs, versions and pins through the ordinary
+  `update` and lifecycle operations, never automatic promotion or silent rebinding.
+
+Missing support, ownership or demonstrated benefit keeps the learned candidate
+draft/deferred and its benefit claims unverified. Stating unknowns, repeated
+references or successful helper checks does not establish improvement.
+
+An explicitly approved organizational policy does not require a productivity experiment.
+Establish its authority, scope and approval separately from any learned benefit.
+For mixed patterns, apply the evidence method to the learned claims without weakening
+mandatory policy clauses or treating their authority as evidence of efficacy.
+All existing review, explicit approval, disclosure, lock and lifecycle boundaries remain.
+
 ## Assets
 
 `asset_refs(report_or_lock, kind=..., phase=..., domain=...)` returns metadata references with

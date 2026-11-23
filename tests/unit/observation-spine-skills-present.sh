@@ -2,7 +2,7 @@
 # tests/unit/observation-spine-skills-present.sh
 #
 # Verifies v3.6 cohort 2 observation-spine skills are present + valid frontmatter.
-# Cohort 2 ships: usage-log + hooks-status + lessons-surface + catalog (foundation layer).
+# Current owners: audit + hooks-status + lessons-surface + catalog (foundation layer).
 # tag: v3.6 cohort-2 observation-spine
 
 set -uo pipefail
@@ -17,7 +17,7 @@ echo "tests/unit/observation-spine-skills-present.sh"
 echo "=============================================="
 
 # 4 observation-spine skills
-OBSERVATION_SKILLS=(usage-log hooks-status lessons-surface catalog)
+OBSERVATION_SKILLS=(audit hooks-status lessons-surface catalog)
 for skill in "${OBSERVATION_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"
   if [ -f "$f" ]; then

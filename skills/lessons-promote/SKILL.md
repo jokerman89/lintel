@@ -29,12 +29,16 @@ recipe in this skill.
    explicit `--source <file>`. List candidates with `lessons_index` from `lib/memory.sh`, then
    choose one `L-NNN`; interactive use lists every lesson by ID, never only the first 30.
    Apply the [benefit and recurrence method](../lessons-add/references/benefit.md):
-   explain observed application, outcome and generalizability. Unknown benefit or
-   unresolved repeat failures stay visible and can defer promotion; no automated
-   reference counter or success score exists.
+   explain observed application, outcome and generalizability. If benefit is unknown,
+   required support is missing or repeat failures remain unresolved, defer before Step 5;
+   no automated reference counter or success score supplies that evidence.
 2. **Generalize the lesson.** Strip repo-specific paths, file names, project nouns and anything
    sensitive. Write the generalized text with exactly one level-two heading; the bin rewrites that
-   heading to the destination's next ID.
+   heading to the destination's next ID. Preserve all six parts of the
+   [promotion evidence](../lessons-add/references/benefit.md#promotion-evidence) in the
+   existing prose body, with actual observations and explicit unknowns. Review that
+   body before writing; missing support remains deferred. No schema, helper
+   serialization or provenance-comment grammar change is implied.
 3. **Choose the destination explicitly.** `--lintel-dir <work tree>` or `LINTEL_DIR`; a linked
    worktree is fine. The file `scaffolding/01-foundation/.claude/memory/lessons.md` must exist
    there. There is no default destination.
@@ -56,6 +60,8 @@ recipe in this skill.
    8 a commit precondition; 9 a conditional-write conflict; 10 a failed commit whose bytes were
    restored; 11 a commit that was left in place because verification failed — follow the printed
    remedy, never reset automatically. The operator pushes and opens a pull request when ready.
+   A successful write is not proof of benefit or compounding; report only the
+   operation and evidence actually observed.
 
 ## Provenance
 
@@ -93,6 +99,7 @@ Next (not run):
 
 ## Why this matters
 
-Session-harness compounds value when lessons travel across sessions and repos. Per-repo lessons stop at repo boundary. Promoted lessons reach every future engagement.
-
-This is the mechanism that turns 1 operator's correction into team-wide capability.
+Promotion makes a selected lesson available in an explicit destination's baseline.
+Other repositories receive it only through their authorized installation or update.
+Whether the rule improves later work remains an observed outcome to evaluate, not
+a result established by copying it or by a successful helper exit.

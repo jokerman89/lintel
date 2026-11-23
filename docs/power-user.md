@@ -51,7 +51,7 @@ capacity or usage stays unknown rather than being reconstructed from a history l
 
 Use `/li:context-budget --handoff --map <work.json>` for the selected original
 artifacts and optional literal warming inputs. PLAN and CAPTURE call it directly.
-`/li:handoff-size-check` remains a compatibility name for this same method.
+The retired handoff-size entry has no executable compatibility alias.
 
 `/li:context-budget --watch --budget <yaml> --mode soft|hard|both` retains the
 instruction-driven threshold check, not a background watcher. Read the selected
@@ -70,8 +70,7 @@ session, `/li:resume --from <checkpoint>`, then warm back only what you still ne
 ### Resource advice
 
 `/li:context-budget --advice --budget <N> --ceiling <N>` advises on the working set
-and checkpoint strategy; `/li:perf-mode` retains the same flags as a compatibility
-entry point. Here `--budget` is numeric, unlike watch's configuration path.
+and checkpoint strategy. Here `--budget` is numeric, unlike watch's configuration path.
 `--decay-policy`, `--cost-estimate` and `--off` remain advice only. They do not raise
 the host's limit, activate a model window, remove conversation or invent prices.
 Ordinary budgeting does not spawn an advisor agent.
@@ -130,8 +129,8 @@ including deactivation. Roles resolve from the active pack's role directory firs
 `~/.lintel/roles/private/`, then `~/.lintel/roles/`. A role marked `sensitivity: private` prompts
 before activating and keeps its notes in repo runtime state rather than exporting them.
 
-**The neutral default pack ships no roles**, and Lintel ships none of its own. `/li:roles-list` on a
-fresh install is empty. Write your own with `/li:role-new`, or install a pack that carries a set.
+**The neutral default pack ships no roles**, and Lintel ships none of its own. `/li:role --list` on a
+fresh install is empty. Write your own with `/li:role --create`, or install a pack that carries a set.
 
 ---
 
@@ -242,9 +241,9 @@ the host enforced the block. Every block you override is recorded with the reaso
 
 Two caveats. First, `.claude/runtime/` is gitignored — the trail is local to your machine, and it is
 not a shared or tamper-evident compliance record. Treat it as a debugging and reconstruction aid.
-Second, `/li:usage-log` has a writer mode but **no automatic trigger**: nothing records skill
-invocations for you, because the wrapper hook it was designed around was never built. Its reports
-cover only what you logged by hand.
+Second, `/li:audit --usage` is a manually requested report view with **no automatic trigger**.
+Explicit manual recording remains separate; nothing records skill invocations for you. Reports
+cover only the rows that were actually logged.
 
 ---
 
@@ -293,7 +292,8 @@ Naming these is cheaper than you discovering them:
 - **Job auto-spawn is dormant.** `/li:jobs` and `/li:status` read a store nothing populates automatically yet.
 - **Context budget numbers are estimates**, summed from an event log rather than read from the CLI.
 - **Cooling cannot actually shrink the window.** Only a save, restart and restore round trip does.
-- **`/li:usage-log` has no automatic trigger.** What it reports is what you logged by hand.
+- **`/li:audit --usage` has no automatic trigger.** Reports describe recorded rows only; missing
+  records are unobserved, not evidence of disuse.
 - **`/li:code-freeze` is advisory metadata.** Nothing enforces it: no skill refuses a matching write on its own, and the filesystem does not block one. Honoring it is cooperative.
 - **The default pack ships no roles.** The role machinery works; the content is yours to write.
 - **The audit trail is local and gitignored.** It is not a shared compliance artifact.

@@ -119,9 +119,9 @@ its old `cli_support` says `full`. Maturity and actual execution require separat
 
 Catalog can list skill and agent metadata without reading any body. Its
 [intent-narrowing method](intent.md) owns the shortlist and selected-body checks;
-skill-router, orientator and welcome delegate rather than choosing another method.
-Native host discovery and permission remain separate from metadata or a recommendation.
-Listing or recommendation never invokes the selected workflow.
+Welcome uses that method rather than choosing another shortlist. Native host discovery
+and permission remain separate from metadata or a recommendation. Listing or
+recommendation never invokes the selected workflow.
 
 The complete requested-kind inventory and alias/registry inputs are validated before
 filtering. A malformed source cannot disappear behind a no-match query. A valid no-match

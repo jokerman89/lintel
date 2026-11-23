@@ -1,0 +1,36 @@
+{
+  "kind": "coordinator-m2-disposition",
+  "source_report": ".claude/engineering/compat-audits/2026-10-17-repository-completion-p9.md",
+  "source_head": "d950e7584620e87711d1eacb134a07551a071661",
+  "comparison_base": "99d471506d985105f2eb4b27f78960fdd845a663",
+  "raw_verdict": "RED",
+  "raw_flag_count": 15,
+  "interpretation": [
+    {
+      "scope": "Eight removed public entrypoints and one internal-method move",
+      "evidence": ".claude/plans/v2-findings/plan.md; docs/migrations/2026-09-25-native-workflows.md",
+      "meaning": "Intentional command-surface migration under the original preservation map; not executable aliases or a promise of zero migration."
+    },
+    {
+      "scope": "Role description and Write tool declaration, counted by Q1 and Q3",
+      "evidence": "Actual baseline-to-head diff of skills/role/SKILL.md",
+      "meaning": "The retained role owner now advertises the transferred create/update/list operations. The declaration is not proof of host permission or activation."
+    },
+    {
+      "scope": "DISCOVER task/context/constraint/acceptance text and SENSE design text",
+      "evidence": "Actual baseline-to-head diffs of skills/discover/SKILL.md and skills/sense/SKILL.md",
+      "meaning": "The mechanical matcher also finds body text that resembles YAML keys; these matches are not themselves frontmatter-contract or default-value defects."
+    },
+    {
+      "scope": "lib/orientator-routing.sh",
+      "evidence": "Actual baseline-to-head diff changes only comments naming its SENSE caller",
+      "meaning": "No helper signature or executable routing statement changes in this hunk."
+    }
+  ],
+  "operator_question_asked": true,
+  "operator_response": "The user is not available to respond and will review your work later. Work autonomously and make good decisions.",
+  "operator_response_classification": "Input unavailable; no explicit answer approving the bounded M2 override",
+  "override_granted": false,
+  "status": "pending-explicit-override",
+  "limits": "The raw RED report stays unchanged. This analysis does not turn flags into proven bugs, infer an override from silence, waive review or CI, authorize main delivery, bypass native PR EMU 403, or retry the exact native-hook/ADR holds."
+}

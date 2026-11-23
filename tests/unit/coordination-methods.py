@@ -3,7 +3,7 @@
 # implements: ADR-0008, ADR-0026, ADR-0029, ADR-0034, ADR-0036
 # intent: skills/scope/references/method.md
 # constraints: local source/data checks; no models, network, profile binding or cleanup
-# last_intent_review: 2026-10-03
+# last_intent_review: 2026-10-17
 """Actual helper regressions plus documentary guards, not agent-efficacy evidence."""
 from __future__ import annotations
 
@@ -131,6 +131,81 @@ class Sources(unittest.TestCase):
         self.require(read("skills/inspect/SKILL.md"), "Granularity hard check", "2-5 minutes")
         self.require(read("skills/build/SKILL.md"), "2–5 minute", "independent review")
 
+    def test_actual_plan_template_keeps_size_priors_advisory(self):
+        template = read("scaffolding/01-foundation/templates/plan/plan.template.md")
+        self.require(template, "advisory priors, not mandatory depth rules",
+                     "owners and interfaces", "uncertainty", "rollback",
+                     "Preserve original IDs", "2-5 min")
+        for marker in ("depth_schema: flat", "depth_schema: phased", "depth_schema: tree"):
+            self.assertIn(marker, template)
+        for field in ("**Owner and edit boundary:**", "**Requirements:**",
+                      "**Dependencies:**", "**Acceptance:**", "**Verification:**",
+                      "**Evidence:**"):
+            self.assertIn(field, template)
+
+    def test_actual_plan_template_does_not_prescribe_full_implementation(self):
+        detail = read("scaffolding/01-foundation/templates/plan/plan.template.md").split(
+            "## Per-task detail", 1)[1]
+        self.assertNotIn("Complete code or detailed spec", detail)
+        self.require(detail.lower(), "decisions", "interfaces", "code excerpts only",
+                     "specific contract", "not a full implementation")
+
+    def test_plan_proportion_has_one_owner_and_actual_draft_caller(self):
+        owner = read("skills/inspect/SKILL.md")
+        self.assertIn("#### Plan proportion check", owner)
+        method = section("skills/inspect/SKILL.md", "#### Plan proportion check")
+        self.require(method, "implementation transcript", "decisions", "interfaces",
+                     "specification values", "non-obvious algorithm contracts",
+                     "acceptance", "verification", "retain/trim rationale",
+                     "existing inspection report", "no fixed line/token ratio")
+        caller = section("skills/plan/SKILL.md", "### Step 2")
+        self.require(caller, "../inspect/SKILL.md#plan-proportion-check",
+                     "draft self-check", "same criterion", "not another workflow",
+                     "necessary detail")
+
+    def test_plan_proportion_keeps_indispensable_detail_in_long_plans(self):
+        owner = read("skills/inspect/SKILL.md")
+        self.assertIn("#### Plan proportion check", owner)
+        method = section("skills/inspect/SKILL.md", "#### Plan proportion check")
+        narration, contract = method.split("**Implementation narration:**", 1)[1].split(
+            "**Necessary contract:**", 1)
+        self.require(narration, "existing helper body", "without a new contract",
+                     "Replace", "reference", "observable acceptance")
+        self.require(contract, "retry algorithm", "revision comparison",
+                     "bounded retry rule", "failure outcome", "Retain",
+                     "verification even if the plan is long")
+
+    def test_sense_scale_hints_preserve_settled_and_unresolved_decisions(self):
+        preread = section("skills/sense/SKILL.md", "### Step 0e")
+        for forbidden in ("SCOPE will ask one clarifying question",
+                          "PLAN will use a deeper", "complete and correct",
+                          "a question is pending"):
+            self.assertNotIn(forbidden, preread)
+        self.require(preread, "../scope/references/method.md", "advisory",
+                     "existing answers", "settled", "unresolved", "material",
+                     "`scale_amb=no`", "not proof", "never pauses")
+        self.assertEqual(
+            bash_block("skills/sense/SKILL.md", "### Step 0e"),
+            'source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/scale-estimator.sh"\n'
+            '\nscale_size=$(classify_size "$prompt_text")\n'
+            'scale_amb=$(scale_ambiguous "$prompt_text")\n'
+            'depth_schema=$(size_to_depth_schema "$scale_size")',
+        )
+
+    def test_enterprise_planning_guidance_keeps_depth_advisory(self):
+        enterprise = section("docs/enterprise-profile-value.md",
+                             "## Keep planning proportional")
+        self.assertNotIn("Use flat plans for XS/S work, phases for M", enterprise)
+        self.require(enterprise, "advisory", "owners and interfaces", "uncertainty",
+                     "rollback", "2–5 minute", "whole cycle")
+
+    def test_planner_concept_does_not_close_unmeasured_value(self):
+        concept = read("docs/concepts/planner-as-module.md")
+        goal_rows = [line for line in concept.splitlines()
+                     if line.startswith("|") and "industry best" in line]
+        self.assertEqual(len(goal_rows), 1)
+        self.require(goal_rows[0].lower(), "unmeasured", "comparison")
+
     def test_resume_table_does_not_replace_modes_or_evidence(self):
         text = read("skills/resume/SKILL.md")
         self.require(text, "Resume decision table (map first)", "No committed selection",
@@ -224,9 +299,12 @@ class Sources(unittest.TestCase):
             self.assertTrue((ROOT / path).is_file(), path)
         self.require(reference, "context_id", "generation", "digest", "required_policy",
                      "immutable QA", "corroboration", "not a duplicate pipeline")
-        for name in ("swarm", "resume", "brief-forge", "handoff-size-check"):
+        for name in ("swarm", "resume", "context-budget"):
             text = read(f"skills/{name}/SKILL.md")
             self.assertIn("references/evidence.md", text)
+        handoff = read("skills/brief-forge/references/handoff.md")
+        self.assertIn("lib/brief-forge.sh", handoff)
+        self.assertFalse((ROOT / "skills/brief-forge/SKILL.md").exists())
         self.require(read("skills/swarm/SKILL.md"), "## Shared-evidence consumer",
                      "references/evidence.md#shared-evidence-consumer")
         self.require(reference, "verify_profile_reference", "verify_qa",
@@ -256,7 +334,7 @@ class Sources(unittest.TestCase):
             self.assertNotIn("${LINTEL_SOURCE_ROOT:-$repo}", owner)
 
     def test_forge_method_does_not_call_diagnostics_measured_quality(self):
-        self.require(read("skills/brief-forge/SKILL.md"),
+        self.require(read("skills/brief-forge/references/handoff.md"),
                      "70 with FAIL", "not measured", "fixed", "not graded readiness",
                      "remote pointers", "Structural completeness", "custom evaluators",
                      "testable", "audit receipt", "baseline security check cannot be disabled")
@@ -287,6 +365,35 @@ class Sources(unittest.TestCase):
             self.assertNotIn("frequency-of-reference", text)
         self.require(read("skills/lessons-add/SKILL.md"), "held lock", "exit 9",
                      "Content-safety", "mandatory evidence blocks")
+
+    def test_promotion_body_retains_the_complete_evidence_record(self):
+        path = "skills/lessons-add/references/benefit.md"
+        self.assertIn("## Promotion evidence", read(path))
+        body = section(path, "## Promotion evidence")
+        fields = ("Applicability", "Source-safe provenance", "Counterexample",
+                  "Accountable owner", "Evaluation", "Supersession path")
+
+        def check(value):
+            self.require(value, *(f"**{field}:**" for field in fields),
+                         "unknown", "defer", "Rule / Why / How to apply", "not proof")
+
+        check(body)
+        for field in fields:
+            with self.subTest(missing=field), self.assertRaises(AssertionError):
+                check(body.replace(f"**{field}:**", "", 1))
+
+    def test_promotion_defers_missing_support_without_changing_serialization(self):
+        source = read("skills/lessons-promote/SKILL.md")
+        workflow = section("skills/lessons-promote/SKILL.md", "## Workflow")
+        self.require(workflow, "references/benefit.md#promotion-evidence", "all six",
+                     "defer before Step 5", "unknown", "existing prose body")
+        self.require(source, "not proof of benefit", "explicit destination",
+                     "No schema", "--source-label", "--generalized-file",
+                     "--commit --expect-branch", "conditional-write conflict")
+        marker = ("<!-- lintel-promotion: source_label=<label>; source_id=L-NNN; "
+                  "source_commit=<sha|unrecorded>; promoted_on=<YYYY-MM-DD> -->")
+        self.assertEqual(source.count(marker), 1)
+        self.assertNotIn("Promoted lessons reach every future engagement", source)
 
     def test_preference_hints_are_not_schema_and_callers_keep_controls(self):
         for module in ("ta", "da", "sc", "dh", "tq"):

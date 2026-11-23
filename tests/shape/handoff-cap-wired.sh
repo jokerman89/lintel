@@ -29,7 +29,6 @@ echo "================================="
 PLAN="$REPO_ROOT/skills/plan/SKILL.md"
 CAPTURE="$REPO_ROOT/skills/capture/SKILL.md"
 BUILD="$REPO_ROOT/skills/build/SKILL.md"
-HSC="$REPO_ROOT/skills/handoff-size-check/SKILL.md"
 CTXBUDGET="$REPO_ROOT/skills/context-budget/SKILL.md"
 DISPATCH="$REPO_ROOT/docs/concepts/agent-dispatch-rules.md"
 
@@ -75,24 +74,13 @@ fi
 
 # ─── W3: the cap mechanism the calls resolve to still exists ─────────────────
 echo ""
-echo "[W3] the cap mechanism exists (calls resolve to something real)"
-if [ -f "$HSC" ]; then
-  pass "skills/handoff-size-check/SKILL.md exists"
-  if grep -q '/li:context-budget --handoff' "$HSC" &&
-     grep -q 'context-budget/references/route.sh' "$HSC" && grep -q 'unknown' "$HSC"; then
-    pass "retained handoff name delegates to the budget owner with unknown capacity"
-  else
-    fail "handoff compatibility lost its owned route or unknown boundary"
-  fi
-else
-  fail "skills/handoff-size-check/SKILL.md MISSING (calls would dangle)"
-fi
+echo "[W3] the budget owner exists (calls resolve to its selected-work reader)"
 if [ -f "$CTXBUDGET" ]; then
   if grep -q 'context_budget' "$CTXBUDGET" && grep -q -- '--capacity-source' "$CTXBUDGET" &&
      grep -q 'li-work-artifacts.py --view budget' "$CTXBUDGET" &&
      grep -q 'unknown' "$CTXBUDGET" &&
      [ -f "$REPO_ROOT/skills/context-budget/references/route.sh" ]; then
-    pass "context-budget carries actual helper, observation source and unknown capacity"
+    pass "context-budget carries its actual helper, observation source and unknown capacity"
   else
     fail "context-budget lost the accepted P03 observation contract"
   fi

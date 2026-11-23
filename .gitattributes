@@ -1,6 +1,7 @@
 # Files read by the byte-bound command-surface guard check out with LF on every host, so a
 # Windows clone with core.autocrlf=true sees the same bytes, spans and counts as CI (ADR-0034).
 # Later exact-path lines, including the -text evidence bytes, override these defaults.
+.gitattributes text eol=lf
 *.md text eol=lf
 *.json text eol=lf
 *.yaml text eol=lf
@@ -38,7 +39,8 @@ install/directories.txt text eol=lf
 .claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md text eol=lf
 .claude/plans/universal-implementation/reports/P13-skills-preservation.md text eol=lf
 
-# Preserve portable evidence bytes; these JSON files remain parsed and scanned.
+# Preserve portable evidence bytes; these records remain parsed and scanned.
+.claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-report.md -text whitespace=trailing-space,space-before-tab,cr-at-eol
 .claude/plans/legacy-cleanup/span-reviews/set01-spec-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
 .claude/plans/legacy-cleanup/span-reviews/set01-quality-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
 .claude/plans/legacy-cleanup/span-reviews/set01-decision.json -text whitespace=trailing-space,space-before-tab,cr-at-eol

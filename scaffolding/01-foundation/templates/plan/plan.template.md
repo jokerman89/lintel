@@ -3,8 +3,12 @@
   Source of truth for PLAN's plan.md (skills/plan/SKILL.md Step 11 references this file).
   Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.3
 
-  This template is DEPTH-SCHEMA PARAMETRIC. PLAN reads `depth_schema` from scope.md
-  (emitted by the SCOPE phase) and renders ONE of the three marked sections below:
+  This template is DEPTH-SCHEMA PARAMETRIC. PLAN reconciles the `depth_schema`
+  proposal from scope.md with the approved design, then renders ONE marked section.
+  The size associations are advisory priors, not mandatory depth rules.
+  Choose the simplest sufficient shape from actual owners and interfaces,
+  uncertainty and rollback boundaries. Preserve original IDs and settled authority;
+  record why the selected shape fits, including any departure from the lexical hint.
 
     <!-- depth_schema: flat   -->   XS / S  → flat task list           (IDs: T1, T2, …)
     <!-- depth_schema: phased -->   M       → phases → tasks            (IDs: 1, 1.1 / 2, 2.1)
@@ -70,7 +74,7 @@ state that here and omit the table. Do not invent policy for the neutral baselin
 ---
 
 <!-- ============================================================= -->
-<!-- depth_schema: flat   (XS / S — today's shape)                 -->
+<!-- depth_schema: flat   (XS / S advisory prior — task list)      -->
 <!-- ============================================================= -->
 ## Task list
 
@@ -80,7 +84,7 @@ state that here and omit the table. Do not invent policy for the neutral baselin
 | T2 | <verb + object> | <paths> | T1 | <owner> | <estimate> |
 
 <!-- ============================================================= -->
-<!-- depth_schema: phased   (M — phases → tasks)                   -->
+<!-- depth_schema: phased   (M advisory prior — phases → tasks)    -->
 <!-- ============================================================= -->
 ## Phase 1 — <name>   [milestone: <pass criterion>]
 
@@ -96,7 +100,7 @@ state that here and omit the table. Do not invent policy for the neutral baselin
 | 2.1 | <verb + object> | <paths> | 1.2 | <owner> | <estimate> |
 
 <!-- ============================================================= -->
-<!-- depth_schema: tree   (L / XL — phases → tasks → subtasks)     -->
+<!-- depth_schema: tree   (L / XL advisory prior — nested tasks)   -->
 <!-- numbering: 1 / 1.1 / 1.1.a ; leaf = subtask ; + milestones    -->
 <!-- ============================================================= -->
 ## Phase 1 — <name>   [milestone-checkpoint: <pass criterion the operator/jobs can resume to>]
@@ -138,6 +142,8 @@ state that here and omit the table. Do not invent policy for the neutral baselin
 **Evidence:** <test result/log/report location; pending until verified>
 **Estimated tokens:** <N>
 
-[Complete code or detailed spec here — the implementer reads this verbatim.]
+[Implementation notes: decisions, interfaces and data contracts needed by this leaf.
+Include code excerpts only when they pin a specific contract, not a full implementation
+by default. Acceptance and verification above define the observable result.]
 
 ### <next leaf>: ...

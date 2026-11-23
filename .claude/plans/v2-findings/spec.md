@@ -1,9 +1,12 @@
 # Spec: complete the original V2 findings
 
-**Status:** APPROVED for concrete corrections compatible with the constraints below.
-Architectural alternatives and experiments remain unapproved until specifically resolved.
+**Status:** APPROVED compatible scope after committed draft `35a35163`, retaining
+the operator's original completion authority for G-03, ENT-05 and P9 renewal.
+New source work still awaits the current independent plan-review gate.
+Prior package acceptance is retained for its actual scope, not extended.
 **Authority:** the operator's 2026-10-03 instruction to finish the original findings
-with working repository changes, not another report or a selected-subset closeout.
+with working repository changes, renewed on 2026-10-08 and 2026-10-17, not another report or a
+selected-subset closeout.
 **Plan:** [plan.md](plan.md).
 **Work map:** [work.json](work.json).
 **Base:** `f9796bb8b3fbcdab3e235f30401933ea1b2f3162`.
@@ -63,3 +66,92 @@ Use a fresh, explicit context for this owned target and its bundled neutral pack
 No private pack, customer data, live infrastructure or company policy is selected.
 The actual profile reference and policy result are recorded at runtime before
 BUILD; absent or drifted required policy is not a neutral success.
+
+## Compatible owner consolidation
+
+P11A/P11B/P11C's
+[preservation map](plan.md#single-owner-continuation-2026-10-08) is the explicit
+scoped decision for B-03/B-04/B-05/B-06/B-10/C-04. Retain all existing
+providers, methods, flags, data and permission boundaries while replacing the
+nine redundant public fronts with their already-established owners under
+ADR-0034. Complete native resource closure and caller migration are acceptance,
+not follow-up work. The original 84 requirements and earlier accepted clauses
+remain unchanged.
+
+P11B treats `skills/sense/SKILL.md` as read-only. It verifies the retained
+routing library, high-risk confirmation and decision audit, while the
+coordinator owns the exact current `/li:skill-router` help-example migration
+after producer fan-in. The coordinator must also publish all nine former
+identities, invocation/flag mappings and replacement owners in
+`docs/migrations/2026-09-25-native-workflows.md`; exact coverage is verified by
+the native command-surface unit and shape checks.
+
+This authorizes no role/domain capability removal, default-pack change, phase
+change, learning activation or revision of ADR-0026. Current inventory and
+actual helper/refusal tests establish this source consolidation; they cannot
+establish comparative model benefit, live host enforcement or an unperformed
+experiment. The three packages are one ready fan-out/fan-in batch, not a new
+endpoint for the original task.
+
+The explicit execution profile is
+[`swarm/coordination.json`](swarm/coordination.json). Concurrent writers require
+the four declared Git worktrees, disjoint scopes and attributable diffs. The
+coordinator alone owns shared callers, generated reducers, plan/runtime state,
+commits, integration and release evidence. If those conditions fail, the same
+briefs run sequentially without changing acceptance.
+
+## Bounded upstream-record completion
+
+P12 reopens only G-11's missing dated native-plan pointer. Use the exact Codex,
+Superpowers and gstack revisions already present in original G-02/G-03/G-06/G-07
+evidence. Preserve the existing 2026-05-26 registry review, 2026-09-20 comparison,
+2026-09-28 addendum, current-facing URL/count corrections and import-provenance
+records. No network/current-HEAD sweep, new import revision, benchmark or
+upstream currency claim is authorized. The new entry uses `reviewed: 2026-09-28`
+for the retained Skill review V2 review date and `recorded: 2026-10-09` for this
+repository record. Neither is an upstream verification or commit date. Its
+review-summary path, exact G-02/G-03/G-06/G-07/G-11 source set, three revisions
+and original revision-pinned URLs are machine-checked without adding or changing
+`last_verified`.
+
+## Post-fan-in source residuals
+
+P13-P16 in the original plan elaborate the independently identified compatible
+residuals of lane-A-01/A-02/A-06, lane-E-05/E-14, lane-d-03, F-05, C-07,
+G-03/G-07 and ENT-01/ENT-05/ENT-06. The current task source remains `plan.md`;
+no replacement findings inventory or competing task authority is created.
+F-05 retains its original identity and full acceptance as the parent verification
+checkpoint of five explicitly mapped implementation children; the original inventory
+still contains 84 findings, not five new requirements.
+
+Correct actual planning/drafting templates and their consumers, CAPTURE's
+reaffirmation caller, promotion-evidence prose and undated-observation wording.
+Curate only the selected project rule/recurrence through existing conditional
+updates, preserving all prior text and unrelated blocks. Acceptance remains
+per original clause, with real source negatives and affected helper checks.
+
+This changes no phase, leaf-duration policy, role/tool inventory, pack inheritance,
+schema, automatic learning/telemetry or host permission. No held ADR/native-hook
+operation, external communication, promotion destination, new benchmark or
+unprovided upstream source is authorized. The original four-lane source history
+and final integrated review/QA/SHIP requirements remain; green c4032c3f CI is a
+baseline observation, not clearance for the new result or the whole programme.
+
+## Remaining compatible clauses after source reconciliation
+
+The current original-ID accounting is 47 source/guidance-closed and 37 open,
+with two additional concrete clauses under the same original G-03 and ENT-05.
+P17 adds a qualitative plan-proportion/transcript check through the existing
+planning/inspection owners. It retains indispensable algorithm and contract
+detail and changes no numerical limit, approval, phase or accepted short leaf.
+P18 extends the existing six-part promotion-evidence duty to learned patterns
+using their existing guidance/source/approval fields. Explicit organizational
+policy authority does not depend on a productivity experiment; unknown learning
+benefit never supplies approval. No schema, runtime or pattern operation is added.
+
+The same original task IDs move to those follow-up packages without changing the
+84-finding inventory; previous P13/P14 source clauses remain dated evidence.
+P9 renews stale lane/report/acceptance bindings through new actual observations,
+independent review and full raw P05 coverage. Historical records are not edited
+into current PASS, and no synthetic commit or reduced evidence substitutes for
+real attribution. Final integrated/current-head and publication boundaries remain.

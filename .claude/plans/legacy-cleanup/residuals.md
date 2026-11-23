@@ -2889,8 +2889,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:887-940 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
       "declaration_digest": "0425b34d04968d6f3bbaf4c3eca133d05b06e3f23e90d6da228dcb7fd3cdbd9b",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-observation.json"
     },
     {
       "id": "set03-span-007",
@@ -2941,8 +2941,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
       "source_evidence": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md:223-247 at 5f086471069fddf9926acf4c7d0176f98b35946b; source sha256 d4fc3fbe3cd6b43de9324ec08c445e431089c54d6e03aacc5a6cfd1169aaa826",
       "declaration_digest": "25def4e53684d613b02e5173319c46e3b865dd8abec0ec65dc503f4d8f3a4395",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set06-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set06-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/archive-context-20261010-observation.json"
     },
     {
       "id": "set03-span-029",

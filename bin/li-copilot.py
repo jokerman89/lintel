@@ -161,7 +161,7 @@ SWARM_RESOURCES = (
     "skills/swarm/SKILL.md",
     "skills/swarm/references/evidence.md",
     "skills/resume/references/state-and-job-recovery.md",
-    "skills/brief-forge/SKILL.md",
+    "skills/brief-forge/references/handoff.md",
     "bin/li-swarm",
     "bin/li-swarm.py",
     "bin/li-work-artifacts.py",

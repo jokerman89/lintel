@@ -3,7 +3,7 @@
 # implements: ADR-0029, ADR-0034
 # intent: .claude/plans/v2-findings/spec.md
 # constraints: local source/helper checks; no network, model, profile binding or publication
-# last_intent_review: 2026-10-03
+# last_intent_review: 2026-10-09
 """Regressions for the retained discovery and lifecycle front doors."""
 import hashlib
 import json
@@ -37,31 +37,35 @@ def linked_method(case, caller, owner):
 class DiscoveryMethods(unittest.TestCase):
     def test_catalog_is_the_single_intent_method_owner(self):
         owner = "skills/catalog/references/intent.md"
-        for name in ("catalog", "skill-router", "orientator", "welcome", "sense"):
+        for name in ("catalog", "welcome", "sense"):
             with self.subTest(name=name):
                 method = linked_method(self, f"skills/{name}/SKILL.md", owner)
+                normalized = " ".join(method.split())
                 for required in ("at most three", "literal", "source_root", "unavailable",
                                  "not a new routing engine", "customer data"):
                     self.assertIn(required, method)
+                self.assertIn("An explicit workflow is already selected", normalized)
+                self.assertIn("request supplies `--mode` or `--from`", normalized)
+                self.assertIn("retain the selected work map and current phase", normalized)
+                self.assertIn("Do not infer a new task from the tail of a state file", normalized)
                 self.assertNotIn("- For agent selection", method)
                 self.assertIn("shortlist agent metadata", method)
-        for name in ("skill-router", "orientator", "welcome"):
-            text = source(f"skills/{name}/SKILL.md")
-            self.assertNotIn('li-catalog.py" --json --query', text)
-            self.assertNotIn("Shortlist at most three skills", text)
+        for retired in ("skill-router", "orientator"):
+            with self.subTest(retired=retired):
+                self.assertFalse((ROOT / f"skills/{retired}/SKILL.md").exists())
+                self.assertNotIn(retired, source(owner))
 
     def test_orientation_keeps_sense_control_not_an_escalation_claim(self):
-        orientation = source("skills/orientator/SKILL.md")
-        self.assertNotIn("80%", orientation)
-        self.assertNotIn("invoke_llm_orientation", orientation)
-        self.assertNotIn("escalated=", orientation)
-        self.assertIn("SENSE", orientation)
-        self.assertIn("high-risk", orientation)
-        self.assertIn("host", orientation)
+        self.assertFalse((ROOT / "skills/orientator/SKILL.md").exists())
         sense = source("skills/sense/SKILL.md")
         for operation in ("verify_profile_context", "classify_intent", "assess_risk",
                           "audit_log orientator-decisions", "high-risk always confirms"):
             self.assertIn(operation, sense)
+        self.assertIn(
+            'source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/orientator-routing.sh"',
+            sense,
+        )
+        self.assertIn("does not invoke the public `orientator` wrapper", sense)
 
     def query(self, *arguments, expected=0):
         catalog = ROOT / "skills/CATALOG.md"
@@ -79,6 +83,10 @@ class DiscoveryMethods(unittest.TestCase):
         self.assertFalse(result["executed"])
         self.assertTrue(result["entries"])
         self.assertTrue(all(entry["maturity"] == "unknown" for entry in result["entries"]))
+        for operation in ("create", "update", "list", "activate", "deactivate"):
+            with self.subTest(operation=operation):
+                matches = self.query("--kind=skill", "--query=" + operation)["entries"]
+                self.assertIn("skill:role", [entry["id"] for entry in matches])
         for literal in ("$(touch forbidden-marker)", "[$.*]", "--check"):
             with self.subTest(literal=literal):
                 self.assertEqual(self.query("--query=" + literal)["entries"], [])
@@ -89,28 +97,33 @@ class DiscoveryMethods(unittest.TestCase):
 
 
 class RoleMethods(unittest.TestCase):
-    def test_all_role_front_doors_share_one_complete_lifecycle(self):
-        for name in ("role", "role-new", "roles-list"):
-            with self.subTest(name=name):
-                method = linked_method(
-                    self, f"skills/{name}/SKILL.md", "skills/role/references/lifecycle.md",
-                )
-                for clause in (
-                    "role-list", "role-show", "role-set", "role-off", "role-write",
-                    "persona-sources", "--include-private", "--allow-private",
-                    "--expected-sha256", "--audience", "--frame", "--deep-dive",
-                    "COLD KNOWLEDGE", "DECISION CRITERIA", "OUTCOME LENS",
-                    "SENSITIVE CONTEXT", "previous preference", "malformed",
-                    "synchronization", "current conversation",
-                ):
-                    self.assertIn(clause, method)
-                self.assertNotIn("```bash", source(f"skills/{name}/SKILL.md"),
-                                 "CLI procedure must live at the shared owner")
-
-    def test_original_names_and_flag_sets_are_retained(self):
-        self.assertIn("name: role-new\n", source("skills/role-new/SKILL.md"))
-        self.assertIn("--update", source("skills/role-new/SKILL.md"))
-        self.assertIn("name: roles-list\n", source("skills/roles-list/SKILL.md"))
+    def test_role_is_the_single_complete_lifecycle_front_door(self):
+        method = linked_method(
+            self, "skills/role/SKILL.md", "skills/role/references/lifecycle.md",
+        )
+        header = source("skills/role/SKILL.md").split("---", 2)[1]
+        tools = re.search(r"^tools: (.+)$", header, re.MULTILINE).group(1).split(", ")
+        self.assertIn("Write", tools, "the receiving create owner must retain draft-writing capability")
+        for clause in (
+            "role-list", "role-show", "role-set", "role-off", "role-write",
+            "persona-sources", "--include-private", "--allow-private",
+            "--expected-sha256", "--create", "--update [id]", "--list [--include-private]",
+            "--audience", "--frame", "--deep-dive", "COLD KNOWLEDGE",
+            "DECISION CRITERIA", "OUTCOME LENS", "SENSITIVE CONTEXT",
+            "previous preference", "malformed", "synchronization",
+            "current conversation", "private metadata",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, method + source("skills/role/SKILL.md"))
+        self.assertNotIn("```bash", source("skills/role/SKILL.md"),
+                         "CLI procedure must live at the shared owner")
+        for path in ("skills/role/SKILL.md", "skills/role/references/lifecycle.md"):
+            with self.subTest(public_create_invocation=path):
+                self.assertIn("/li:role --create", source(path))
+        self.assertIn("## Create (--create)", source("skills/role/references/lifecycle.md"))
+        self.assertNotIn("Create (default mode)", source("skills/role/references/lifecycle.md"))
+        self.assertFalse((ROOT / "skills/role-new/SKILL.md").exists())
+        self.assertFalse((ROOT / "skills/roles-list/SKILL.md").exists())
         for flag in ("--off", "--rotate", "--frame", "--deep-dive", "--audience",
                      "--clear-audience"):
             self.assertIn(flag, source("skills/role/SKILL.md"))
@@ -155,24 +168,27 @@ class LifecycleOwnerMethods(unittest.TestCase):
                               "host", "pack-switch/references/lifecycle.md"):
                     self.assertIn(token, method)
 
-    def test_maintenance_retains_four_flags_and_only_real_owner_routes(self):
-        text = source("skills/maintenance/SKILL.md")
-        for name in ("context-budget", "doctor", "audit"):
-            self.assertIn(f"../{name}/", text)
+    def test_retired_maintenance_routes_have_one_documented_existing_owner(self):
+        text = source("skills/audit/references/usage.md")
+        self.assertIn("The former `maintenance` public front is retired.", text)
+        for route in ("../../context-budget/SKILL.md", "../../doctor/SKILL.md", "../SKILL.md"):
+            self.assertIn(route, text)
         for flag in ("--force-compact", "--monitor-paths", "--simulate-tokens", "--rust-report"):
             self.assertIn(flag, text)
         for stale in ("mode_envelopes", "--trends", "load-bearing_paths:",
                       "scale_token_estimate", "keep recent state for 30 days minimum"):
             self.assertNotIn(stale, text)
         self.assertIn("unobserved", text)
-        self.assertIn("No implicit cleanup", text)
+        self.assertIn("not compatibility aliases", text)
 
 
 class OwnedLifecycleFixture(unittest.TestCase):
     """Use actual CLI readers/writers, but never create or rebind a profile context."""
 
     def setUp(self):
-        self.base = Path(tempfile.mkdtemp(prefix="discovery-lifecycle-", dir=os.environ["TEMP"])).resolve()
+        temporary = tempfile.TemporaryDirectory(prefix="discovery-lifecycle-", dir=os.environ["TEMP"])
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name).resolve()
         self.repo, self.home = self.base / "repo", self.base / "home"
         self.repo.mkdir()
         self.home.mkdir()
@@ -186,10 +202,8 @@ class OwnedLifecycleFixture(unittest.TestCase):
         ]
 
     def tearDown(self):
-        # Retain the exact small fixture for inspection; no tree deletion is needed.
         self.assertFalse(list(self.base.rglob("current-profile.json")))
         self.assertFalse(list(self.base.rglob("selected.json")))
-        print(f"Retained owned fixture: {self.base}")
 
     def helper(self, *arguments, expected=0):
         result = subprocess.run(
@@ -227,6 +241,28 @@ class OwnedLifecycleFixture(unittest.TestCase):
 
 
 class RoleHelpers(OwnedLifecycleFixture):
+    def test_duplicate_role_metadata_preserves_selected_and_shadowed_sources(self):
+        home_role = self.write("home/roles/advisor.md", self.role_text())
+        private_role = self.write("home/roles/private/advisor.md",
+                                  self.role_text("advisor", "private"))
+        before = self.snapshot()
+        before_paths = sorted(path.relative_to(self.base).as_posix()
+                              for path in self.base.rglob("*"))
+        inventory = self.helper("role-list", "--include-private")
+        rows = inventory["roles"]
+        self.assertEqual([row["role_id"] for row in rows], ["advisor", "advisor"])
+        self.assertEqual(sum(row["selected_source"] for row in rows), 1)
+        self.assertEqual(
+            {(row["origin"], Path(row["path"]), row["selected_source"]) for row in rows},
+            {("private", private_role, True), ("home", home_role, False)},
+        )
+        self.assertIsNone(inventory["profile_reference"])
+        self.assertIsNone(inventory["active_role"])
+        self.assertNotIn("not-in-light-summary", json.dumps(inventory))
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(sorted(path.relative_to(self.base).as_posix()
+                                for path in self.base.rglob("*")), before_paths)
+
     def test_private_inventory_body_consent_and_light_deep_boundaries(self):
         self.write("home/roles/advisor.md", self.role_text())
         self.write("home/roles/private/private-advisor.md", self.role_text("private-advisor", "private"))

@@ -247,10 +247,10 @@ state_append BUILD "$fixture_status" next=REVIEW "cycle_id=$fixture_cycle"
         return source
 
     def test_discovery_callers_expose_real_selection_and_literal_operations(self):
-        for name in ("catalog", "skill-router", "welcome", "status"):
+        for name in ("catalog", "welcome", "status"):
             with self.subTest(name=name):
                 text = body(name)
-                if name in ("skill-router", "welcome"):
+                if name == "welcome":
                     self.assertIn("../catalog/references/intent.md", text)
                     text = (ROOT / "skills/catalog/references/intent.md").read_text(encoding="utf-8")
                 self.assertIn("li-catalog.py", text)
@@ -268,7 +268,7 @@ state_append BUILD "$fixture_status" next=REVIEW "cycle_id=$fixture_cycle"
             value = json.loads(result.stdout)
             self.assertFalse(value["executed"])
             if query == "skill-router":
-                self.assertIn("skill:skill-router", [entry["id"] for entry in value["entries"]])
+                self.assertEqual(value["entries"], [])
         self.assertFalse((self.repo / ".claude/runtime").exists())
 
     def test_selection_caller_uses_installed_operation_not_a_new_router(self):
@@ -588,7 +588,7 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
 
     def test_skill_new_checks_literal_aliases_before_any_draft_write(self):
         self.env["draft_relative"] = "drafts/new/SKILL.md"
-        for name in ("skill-router", "SKILL-ROUTER", "MATCH", "$(touch author-marker)", "../escape", ""):
+        for name in ("catalog", "CATALOG", "$(touch author-marker)", "../escape", ""):
             self.env["skill_name"] = name
             before = tree_snapshot(self.base)
             result = self.shell(block("skill-new", "### Check name and destination"))

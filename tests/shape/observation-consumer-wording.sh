@@ -38,7 +38,7 @@ echo "tests/shape/observation-consumer-wording.sh"
 echo "==========================================="
 
 VERDICT='\bdead\b|active-vs-dead|never[- ]invoked|nothing (ran|has been|was) (run|logged|audit-logged|recorded)|nothing ran'
-for skill in hooks-status audit usage-log capture maintenance; do
+for skill in hooks-status audit capture context-budget doctor; do
   file="$REPO_ROOT/skills/$skill/SKILL.md"
   if [ ! -f "$file" ]; then
     fail "$skill: SKILL.md missing"
@@ -57,6 +57,15 @@ for skill in hooks-status audit usage-log capture maintenance; do
       audit|hooks-status)
         section="$section"$'\n'"$(cat "$REPO_ROOT/skills/audit/references/method.md")" ;;
     esac
+    case "$skill" in
+      audit) reference="$REPO_ROOT/skills/audit/references/usage.md" ;;
+      doctor) reference="$REPO_ROOT/skills/doctor/references/inspection.md" ;;
+      *) reference="" ;;
+    esac
+    if [ -n "$reference" ]; then
+      [ -f "$reference" ] || { fail "$skill: observation reference missing"; continue; }
+      section="$section"$'\n'"$(cat "$reference")"
+    fi
   fi
   # A historical CAPTURE note outside the retained retrospective is not its verdict.
   hits="$(printf '%s\n' "$section" | sed -E 's/not evidence that nothing ran//g' | grep -niE "$VERDICT" || true)"

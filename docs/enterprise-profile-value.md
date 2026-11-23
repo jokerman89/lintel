@@ -97,9 +97,12 @@ bash tests/integration/enterprise-workflow-snippets.sh
 
 ## Keep planning proportional and measure its benefit
 
-Use flat plans for XS/S work, phases for M and milestone trees for L/XL. Leaf cards need
-an owner/edit boundary, requirement IDs, dependencies, observable acceptance and a concrete
-verification method. Decompose at a meaningful boundary; splitting a command into several
+Treat flat/XS-S, phased/M and tree/L-XL associations as advisory priors, not a
+size-selected hierarchy. Use the [shared scale method](../skills/scope/references/method.md)
+to choose from actual owners and interfaces, uncertainty and rollback boundaries;
+preserve original IDs and settled authority. Leaf cards need an owner/edit boundary,
+requirement IDs, dependencies, observable acceptance and a concrete verification
+method. Decompose at a meaningful boundary; splitting a command into several
 administrative cards adds no deliverable. The approved hybrid model keeps 2–5 minute leaves,
 while one owner executes a bounded package and two review stages cover all member leaves
 and their integration (ADR-0026). Assess review depth from the whole package's risk.

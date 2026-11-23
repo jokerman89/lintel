@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "initiative": "v2-findings",
+  "work_map": ".claude/plans/v2-findings/work.json",
+  "charter": ".claude/plans/v2-findings/swarm/charter.md",
+  "integration_branch": "jokerman-microsoft-repository-completion",
+  "max_parallel": 4,
+  "coordinator_paths": [
+    ".claude/plans/v2-findings/plan.md",
+    ".claude/plans/v2-findings/spec.md",
+    ".claude/plans/v2-findings/prompt.md",
+    ".claude/plans/v2-findings/work.json",
+    ".claude/plans/v2-findings/swarm/charter.md",
+    ".claude/plans/v2-findings/swarm/coordination.json",
+    ".claude/plans/legacy-cleanup/historical-records.json",
+    ".claude/memory",
+    ".claude/engineering/evolution",
+    ".github",
+    "agents",
+    "bin",
+    "docs",
+    "install/layer-config.yaml.example",
+    "install/verify.sh",
+    "lib",
+    "packs",
+    "presentations",
+    "scaffolding",
+    "CHANGELOG.md",
+    "AGENT-INSTRUCTIONS.md",
+    "CLAUDE.md",
+    "skills/CATALOG.md",
+    "skills/build",
+    "skills/capture",
+    "skills/clean",
+    "skills/cycle",
+    "skills/da",
+    "skills/define",
+    "skills/discover",
+    "skills/frontend-motion",
+    "skills/generate-word/references/native-word.md",
+    "skills/inspect",
+    "skills/lessons-add/references/benefit.md",
+    "skills/lessons-promote",
+    "skills/pause",
+    "skills/pattern",
+    "skills/plan",
+    "skills/scope",
+    "skills/sense/SKILL.md",
+    "skills/skill-new",
+    "skills/swarm",
+    "skills/welcome",
+    "tests/integration/catalog-installed.py",
+    "tests/integration/copilot-kit.py",
+    "tests/integration/pattern-workflows.py",
+    "tests/shape/native-command-surface.py",
+    "tests/shape/scope-phase-present.sh",
+    "tests/behavior/agent_contract_scenarios.py",
+    "tests/unit/native-command-surface.py",
+    "tests/unit/coordination-methods.py",
+    "tests/unit/core-boundary-methods.py",
+    "tests/unit/fidelity-methods.py"
+  ],
+  "scope_rules": {
+    "worker": "write_scope+own_report",
+    "reviewer": "own_review",
+    "reducers": "coordinator-only"
+  },
+  "lanes": [
+    {
+      "task_id": "P11A",
+      "wave": 1,
+      "role": "Implementer",
+      "isolation": "git-worktree",
+      "write_scope": [
+        "skills/context-budget",
+        "skills/perf-mode",
+        "skills/handoff-size-check",
+        "skills/audit",
+        "skills/usage-log",
+        "skills/maintenance",
+        "tests/unit/context-safety.py",
+        "tests/integration/observation-learning.py"
+      ],
+      "brief": ".claude/plans/v2-findings/swarm/briefs/P11A.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11A-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11A-current-20261017.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/review/v2-P9-renewal/P11A.context.json",
+        "review": ".claude/runtime/reviews/v2-P11A-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11A.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11A.corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
+    },
+    {
+      "task_id": "P11B",
+      "wave": 1,
+      "role": "Implementer",
+      "isolation": "git-worktree",
+      "write_scope": [
+        "skills/catalog",
+        "skills/orientator",
+        "skills/skill-router",
+        "skills/role",
+        "skills/role-new",
+        "skills/roles-list",
+        "tests/unit/discovery-lifecycle-methods.py"
+      ],
+      "brief": ".claude/plans/v2-findings/swarm/briefs/P11B.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11B-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11B-current-20261017.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/review/v2-P9-renewal/P11B.context.json",
+        "review": ".claude/runtime/reviews/v2-P11B-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11B.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11B.corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
+    },
+    {
+      "task_id": "P11C",
+      "wave": 1,
+      "role": "Implementer",
+      "isolation": "git-worktree",
+      "write_scope": [
+        "skills/brief-forge",
+        "tests/integration/brief-forge-boundary.py",
+        "tests/shape/brief-forge-evaluators-present.sh"
+      ],
+      "brief": ".claude/plans/v2-findings/swarm/briefs/P11C.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P11C-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P11C-current-20261017.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/review/v2-P9-renewal/P11C.context.json",
+        "review": ".claude/runtime/reviews/v2-P11C-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P11C.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P11C.corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
+    },
+    {
+      "task_id": "P12",
+      "wave": 1,
+      "role": "Implementer",
+      "isolation": "git-worktree",
+      "write_scope": [
+        "install/upstream-sources.yaml",
+        "tests/unit/external-authority-methods.py"
+      ],
+      "brief": ".claude/plans/v2-findings/swarm/briefs/P12.md",
+      "report": ".claude/plans/v2-findings/swarm/reports/P12-current-20261017.md",
+      "review": ".claude/plans/v2-findings/swarm/reviews/P12-current-20261017.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/review/v2-P9-renewal/P12.context.json",
+        "review": ".claude/runtime/reviews/v2-P12-current-20261017.json",
+        "qa": ".claude/runtime/review/v2-P9-renewal/P12.qa.json",
+        "corroboration": ".claude/runtime/review/v2-P9-renewal/P12.corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
+    }
+  ]
+}

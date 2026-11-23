@@ -567,8 +567,8 @@ Related: [[L-023]] the reader half of the same lesson.
 would have fixed the past and left the future broken: `skills/ship/SKILL.md` **instructs** every
 pull request to carry an `AI-assisted` provenance block and a generated-by trailer, so the very next
 `/li:ship` would have reintroduced exactly what the rewrite removed. The same shape appeared twice
-more in the same cycle — a Swedish phrase in `skills/perf-mode`'s frontmatter propagating verbatim
-into the generated public catalog, and `bin/li-wiki-gen` hardcoding a stale version heading and an
+more in the same cycle — a Swedish phrase in the then-current budget skill's frontmatter propagating
+verbatim into the generated public catalog, and `bin/li-wiki-gen` hardcoding a stale version heading and an
 11-of-25 subset of the concept list into every regeneration.
 
 **How to apply:**
@@ -695,6 +695,31 @@ an ordinary implementation choice, and scope a host refusal to the exact blocked
 work. Neither a green release nor an unrelated refusal blocks ready corrections.
 Before stopping, enumerate every remaining finding with its specific reason and
 next action instead of placing unrelated work under one "portfolio" label.
+
+**Amended 2026-10-08 (parked streams and stale coordinator source):** The operator
+again requested completion after the streams had been parked. Their accepted
+commits were already on main, but the coordinator's own checkout still loaded
+0.13.3 workflows while main was 0.13.9. The remaining 45 clauses had no active
+execution assignment, even though the previous delivery was correctly verified.
+
+Before resuming, reconcile live session gates, exact branch ancestry, uncommitted
+artifacts and the coordinator's loaded source with current main. Preserve old
+worktrees and evidence; update only the explicitly owned clean checkout. Give
+every original unresolved clause an executable next action or a precise remaining
+decision, observation or host boundary. A parked owner or a recommendation not
+yet elaborated into a card is not itself a blocker. Do not stop the whole outcome
+at a successful sub-release or leave stale task labels as the next session's truth.
+
+**Amended 2026-10-17 (green CI is not residual reconciliation):** The coordinator
+pushed the compatible owner integration with all 23 hosted jobs passing, then
+stopped while the original plan still required reconciliation of the other
+findings. The operator again requested completion rather than a partial handoff.
+
+After a verified batch, recover the exact original inputs and examine each
+remaining claim before deciding that no further source work is ready. A failed
+PR operation blocks that publication path, not unrelated authorized corrections.
+Preserve its refusal; do not change channels, waive held work or use a successful
+subset to justify a task-complete signal.
 
 ## L-030 — Adding a client adapter must preserve Universal product identity
 
@@ -1068,7 +1093,6 @@ deleted its own spill file. Its scope was narrower, but the list of matched path
   and receipts first, and label any repeat as a new observation.
 
 ## L-050 - Do not create drive-root directories without authorization
-
 **Date:** 2026-09-24
 
 **Context:** A P09 installed-consumer test refused its own fixture because paths under
@@ -1083,6 +1107,29 @@ drive-root path. When a path budget cannot be met there, record the environment
 refusal honestly. Rely on independent evidence that ran inside its own authorized
 short workspace, or route the rerun to that owner. Do not create drive mappings or
 other system-level paths as a workaround.
+
+**Curation, 2026-10-17:** L-050 remains the canonical root-authorization rule.
+L-062 retains the dated recurrence and its additional warning to preserve an
+out-of-scope artifact until recovery or cleanup is separately authorized. Neither
+record is superseded or deleted by this clarification.
+
+**Observed application, 2026-10-17:** The repository-completion coordinator selected
+an already-owned user-profile sibling temp root outside the inherited MSYS `/tmp`
+mapping, verified native containment and parent/child path agreement, and preserved
+the mapping and its backing directory. Only the private verification recipe
+changed; product/helper/test source remained at `c4032c3f`.
+`continuation-memory-check-01` had two memory-fixture path-spelling failures;
+`continuation-memory-check-02` then reported memory `ALL PASS`, 22 passing core
+methods and zero native-surface findings. The failed receipt remains failed.
+
+**Evidence and limits:** Those retained receipt SHA-256s are respectively
+`c0371fb2604e23979ad17e7e50b116c75d01e63c280c960c06e8586f3c24797e` and
+`614acef9b5577fa24931a60dcf215408c2f3a72f228d022426c1e64a453d4465`.
+This is one attributed application of the rule, not independent execution,
+demonstrated prevention, broad efficacy, restored client-state proof or a latency
+comparison. No drive-root directory, cleanup or global promotion was involved.
+If the exact receipts are unavailable, their execution remains unverified rather
+than reconstructed from this lesson.
 
 ## L-051 - Isolate diagnostic probe parents, not only their roots
 **Date:** 2026-09-24
@@ -1292,7 +1339,6 @@ suddenly reports many findings, first look for a broken binding that silently di
 classifications. Record a correction as a new commit, not a reset or amend.
 
 ## L-062 - Recurrence of L-050: a short synthetic root is still no license for a drive root
-
 **Date:** 2026-09-28
 
 **Context:** A Windows installed-consumer test failed its own 235-character path budget under a
@@ -1305,6 +1351,19 @@ recovery decision.
 profile or an already-authorized workspace. When a budget still cannot be met there, record the
 refusal honestly and ask, rather than choosing a system-level location. Never plan cleanup of an
 unauthorized path without authorization; preserve it and report it.
+
+**Curation, 2026-10-17:** This block is the dated recurrence of the canonical rule
+in L-050, not a second competing rule or a resolved recovery record. Its additional
+artifact-preservation warning remains applicable. The original account and ID
+remain intact; this update neither authorizes cleanup nor changes an artifact's
+recovery status.
+
+**Later application and limits:** L-050 now records the coordinator-observed
+2026-10-17 MSYS fixture recovery and the exact retained receipts. That narrower
+application did not create a drive-root directory or alter the existing mapping.
+It does not undo this recurrence or establish general prevention. Broader benefit
+and recurrence rates remain unknown; no reference count, automatic promotion or
+new lesson ID is inferred.
 
 ## L-063 - Keep supplemental and artifact observations out of feature acceptance
 
@@ -1367,3 +1426,24 @@ owned stub in that same shell/environment and fail closed on mismatch. Give
 fixtures complete synthetic home/config/data roots and Git ancestry ceilings.
 A selected source with an invalid `.git` directory must not discover and update
 an ancestor repository; establish exact working-root identity before fetch/pull.
+
+## L-066 - Revoke machine approval before revising an approved plan
+
+**Date:** 2026-10-09
+
+**Context:** The V2 continuation still had `work.json` status `APPROVED` while
+its sequential plan was being replaced by a committed Swarm topology. Child
+sessions could therefore treat local plan-UI acceptance or the old machine
+status as BUILD clearance and begin isolated edits before the revised central
+plan had independent review.
+
+**Rule:** Before changing the tasks, packages, execution mode, scope or
+coordination of an approved map, set its machine status to `DRAFT` in the same
+planning change and stop all writers. Re-establish `APPROVED` only after the
+exact revised artifacts are committed and current operator authority covers
+that topology; Lintel's content-bound review helper requires the selected map
+to be approved. Treat map approval, plan-UI acceptance and independent review
+as separate facts: none alone is package BUILD clearance. Dispatch only after
+the coordinator verifies all required gates and supplies the reviewed base and
+brief. Quarantine attributable early work without committing, discarding or
+counting it as acceptance.

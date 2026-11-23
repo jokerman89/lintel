@@ -210,3 +210,21 @@ method_comparison_addenda:
       revision: d3b8a3e908904e242ed2dbe66af62cca71131419
       reference: https://github.com/affaan-m/ECC/tree/d3b8a3e908904e242ed2dbe66af62cca71131419/skills
       note: "Dated listing pointer only; no current inventory count or import revision is asserted."
+  # reviewed: retained Skill review V2 review date; recorded: repository record date.
+  # Neither is an upstream verification or commit date. Original pointers only:
+  # no fresh study, import update, current inventory or native/model execution.
+  - reviewed: 2026-09-28
+    recorded: 2026-10-09
+    review_summary: .claude/engineering/audits/2026-09-28-skill-review-v2-summary.md
+    source_findings: [G-02, G-03, G-06, G-07, G-11]
+    codex:
+      revision: 1b1835f751ebdc0cfc50b3fe55d4571dbb294563
+      plan_template: https://github.com/openai/codex/blob/1b1835f751ebdc0cfc50b3fe55d4571dbb294563/codex-rs/collaboration-mode-templates/templates/plan.md#L41-L94
+    superpowers:
+      revision: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
+      writing_plans: https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/writing-plans/SKILL.md#L10
+      depth_selection: https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/brainstorming/SKILL.md#L58-L108
+    gstack:
+      revision: 01593aa67c94780528e8f5121e47362502410ced
+      preferences: https://github.com/garrytan/gstack/blob/01593aa67c94780528e8f5121e47362502410ced/plan-tune/SKILL.md.tmpl#L340-L357
+      safety: https://github.com/garrytan/gstack/blob/01593aa67c94780528e8f5121e47362502410ced/plan-tune/SKILL.md.tmpl#L645-L653
